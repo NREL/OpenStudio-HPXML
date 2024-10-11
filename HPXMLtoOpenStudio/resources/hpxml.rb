@@ -4146,6 +4146,20 @@ class HPXML < Object
              :framing_size]                   # [String] FloorJoists/Size
     attr_accessor(*ATTRS)
 
+    # Returns the same wall specified in other places.
+    #
+    # @return [<HPXML::Wall>] Wall object linked by sameas attribute
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
+
+    # Returns if the wall is fully described. A wall can use sameas attribute to point to another wall with full description.
+    #
+    # @return [Boolean] True if the wall is fully described
+    def is_fully_described
+      return !@area.nil?
+    end
+
     # Returns the space that the rim joist is attached to.
     #
     # @return [HPXML::Space] Space object
@@ -4387,6 +4401,20 @@ class HPXML < Object
              :insulation_continuous_r_value]  # [Double] Insulation/Layer[InstallationType="continuous"]/NominalRValue (F-ft2-hr/Btu)
     attr_accessor(*ATTRS)
 
+    # Returns the same wall specified in other places.
+    #
+    # @return [<HPXML::Wall>] Wall object linked by sameas attribute
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
+
+    # Returns if the wall is fully described. A wall can use sameas attribute to point to another wall with full description.
+    #
+    # @return [Boolean] True if the wall is fully described
+    def is_fully_described
+      return !@area.nil?
+    end
+
     # Returns all windows for this wall.
     #
     # @return [Array<HPXML::Window>] List of window objects
@@ -4499,7 +4527,9 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      begin; net_area; rescue StandardError => e; errors << e.message; end
+      if is_fully_described
+        begin; net_area; rescue StandardError => e; errors << e.message; end
+      end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
@@ -4687,6 +4717,20 @@ class HPXML < Object
              :insulation_interior_distance_to_bottom] # [Double] Insulation/Layer[InstallationType="continuous - interior"]/DistanceToBottomOfInsulation (ft)
     attr_accessor(*ATTRS)
 
+    # Returns the same foundation wall specified in other places.
+    #
+    # @return [<HPXML::FoundationWall>] Foundation Wall object linked by sameas attribute
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
+
+    # Returns if the foundation wall is fully described. A foundation wall can use sameas attribute to point to another foundation wall with full description.
+    #
+    # @return [Boolean] True if the foundation wall is fully described
+    def is_fully_described
+      return !@height.nil?
+    end
+
     # Returns all windows for this foundation wall.
     #
     # @return [Array<HPXML::Window>] List of window objects
@@ -4850,7 +4894,9 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      begin; net_area; rescue StandardError => e; errors << e.message; end
+      if is_fully_described
+        begin; net_area; rescue StandardError => e; errors << e.message; end
+      end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
@@ -5017,6 +5063,20 @@ class HPXML < Object
              :insulation_continuous_r_value]  # [Double] Insulation/Layer[InstallationType="continuous"]/NominalRValue (F-ft2-hr/Btu)
     attr_accessor(*ATTRS)
 
+    # Returns the same floor specified in other places.
+    #
+    # @return [<HPXML::Floor>] Floor object linked by sameas attribute
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
+
+    # Returns if the floor is fully described. A floor can use sameas attribute to point to another floor with full description.
+    #
+    # @return [Boolean] True if the floor is fully described
+    def is_fully_described
+      return !@area.nil?
+    end
+
     # Returns all skylights for this floor.
     #
     # @return [Array<HPXML::Skylight>] List of skylight objects
@@ -5148,7 +5208,9 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      begin; net_area; rescue StandardError => e; errors << e.message; end
+      if is_fully_described
+        begin; net_area; rescue StandardError => e; errors << e.message; end
+      end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
@@ -11370,6 +11432,31 @@ class HPXML < Object
   # @return [String] The element IDREF attribute
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
+  end
+
+  # Gets the sameas obj (from another Building) with the specified sameas_id.
+  #
+  # @param parent [Oga::XML::Element] The parent HPXML element
+  # @param sameas_id [String]  The element sameas attribute
+  # @return [Oga::XML::Element] The element that sameas attribute associated with
+  def self.get_sameas_obj(hpxml, sameas_id)
+    hpxml.buildings.each do |building|
+      building.class::CLASS_ATTRS.each do |attr|
+        building_child = building.send(attr)
+        next unless building_child.is_a? HPXML::BaseArrayElement
+
+        building_child.each do |obj|
+          next unless obj.id == sameas_id
+
+          return obj
+        end
+      end
+    end
+    if not sameas_id.nil?
+      fail "Sameas object '#{sameas_id}' not found."
+    end
+
+    return
   end
 
   # Checks whether a given date is valid (e.g., Sep 31 is invalid).

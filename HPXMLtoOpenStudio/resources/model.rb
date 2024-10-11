@@ -812,13 +812,11 @@ module Model
       next unless hpxml_sameas_id.is_initialized
 
       hpxml_sameas_id = hpxml_sameas_id.to_s
-      adjacent_surface = model_objects.find { |obj| obj.to_Surface.is_initialized && obj.to_Surface.get.additionalProperties.getFeatureAsString('HPXMLID').is_initialized && obj.to_Surface.get.additionalProperties.getFeatureAsString('HPXMLID').to_s == hpxml_sameas_id }.to_Surface.get
+      adjacent_space = model_objects.find { |obj| obj.to_Space.is_initialized && obj.to_Space.get.additionalProperties.getFeatureAsString('adjacentSurfaceIDs').is_initialized && (obj.to_Space.get.additionalProperties.getFeatureAsString('adjacentSurfaceIDs').to_s.split(', ').include? hpxml_sameas_id) }.to_Space.get
 
       next if surface.adjacentSurface.is_initialized
 
-      surface.setAdjacentSurface(adjacent_surface)
-      # Need to set the same construction to make OS working
-      adjacent_surface.setConstruction(surface.construction.get)
+      surface.createAdjacentSurface(adjacent_space)
     end
   end
 

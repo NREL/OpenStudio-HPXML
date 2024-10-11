@@ -138,6 +138,18 @@ module Geometry
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.walls.each do |wall|
+      if not wall.is_fully_described
+        # Store wall id in the space to process later
+        space = get_interior_space(model, spaces, wall.interior_adjacent_to, hpxml_bldg)
+        adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
+        if adjacent_surface_ids.is_initialized
+          adjacent_surface_ids_new = [adjacent_surface_ids, wall.id].join(', ')
+          space.additionalProperties.setFeature('adjacentSurfaceIDs', adjacent_surface_ids_new)
+        else
+          space.additionalProperties.setFeature('adjacentSurfaceIDs', wall.id)
+        end
+        next
+      end
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if wall.azimuth.nil?
@@ -303,6 +315,18 @@ module Geometry
     walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.floors.each do |floor|
+      if not floor.is_fully_described
+        # Store floor id in the space to process later
+        space = get_interior_space(model, spaces, floor.interior_adjacent_to, hpxml_bldg)
+        adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
+        if adjacent_surface_ids.is_initialized
+          adjacent_surface_ids_new = [adjacent_surface_ids, floor.id].join(', ')
+          space.additionalProperties.setFeature('adjacentSurfaceIDs', adjacent_surface_ids_new)
+        else
+          space.additionalProperties.setFeature('adjacentSurfaceIDs', floor.id)
+        end
+        next
+      end
       next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       area = floor.net_area
@@ -449,6 +473,18 @@ module Geometry
       int_fnd_walls.each do |fnd_wall|
         next unless fnd_wall.is_interior
 
+        if not fnd_wall.is_fully_described
+          # Store fnd_wall id in the space to process later
+          space = get_interior_space(model, spaces, fnd_wall.interior_adjacent_to, hpxml_bldg)
+          adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
+          if adjacent_surface_ids.is_initialized
+            adjacent_surface_ids_new = [adjacent_surface_ids, fnd_wall.id].join(', ')
+            space.additionalProperties.setFeature('adjacentSurfaceIDs', adjacent_surface_ids_new)
+          else
+            space.additionalProperties.setFeature('adjacentSurfaceIDs', fnd_wall.id)
+          end
+          next
+        end
         ag_height = fnd_wall.height - fnd_wall.depth_below_grade
         ag_net_area = fnd_wall.net_area * ag_height / fnd_wall.height
         next if ag_net_area < 1.0
@@ -1702,13 +1738,24 @@ module Geometry
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.set_surface_interior(model, spaces, surface, hpxml_surface, hpxml_bldg)
-    interior_adjacent_to = hpxml_surface.interior_adjacent_to
+    surface.setSpace(get_interior_space(model, spaces, hpxml_surface.interior_adjacent_to, hpxml_bldg))
+  end
+
+  # Return the OpenStudio Space based on the adjacent interior location of an HPXML Surface.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @param interior_adjacent_to [String] HPXML interior location
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [OpenStudio::Model::Space] the OpenStudio::Model::Space object based on the interior location
+  def self.get_interior_space(model, spaces, interior_adjacent_to, hpxml_bldg)
     if HPXML::conditioned_below_grade_locations.include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg))
+      return create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
     else
-      surface.setSpace(create_or_get_space(model, spaces, interior_adjacent_to, hpxml_bldg))
+      return create_or_get_space(model, spaces, interior_adjacent_to, hpxml_bldg)
     end
   end
 
@@ -1718,6 +1765,7 @@ module Geometry
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to

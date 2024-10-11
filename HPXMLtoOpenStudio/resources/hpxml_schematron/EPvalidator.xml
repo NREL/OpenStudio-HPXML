@@ -677,7 +677,7 @@
   
   <sch:pattern>
     <sch:title>[RimJoist]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist[not(h:SystemIdentifier/@sameas)]'><!-- See [AdjacentRimJoist]-->
       <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert>
       <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'outside' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
@@ -694,8 +694,19 @@
   </sch:pattern>
 
   <sch:pattern>
+    <sch:title>[AdjacentRimJoist]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist[h:SystemIdentifier/@sameas]'> <!-- Fixme: Hope there's a way to differentiate the fully described sameas so that the normal wall input checks can retain-->
+      <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert> <!-- See [FloorType=AdjacentToOther] -->
+      <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:InteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: InteriorAdjacentTo</sch:assert>
+      <sch:assert role='ERROR' test='h:InteriorAdjacentTo[text()="conditioned space" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage"] or not(h:InteriorAdjacentTo)'>Expected InteriorAdjacentTo to be 'conditioned space' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage'</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  
+  <sch:pattern>
     <sch:title>[Wall]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall[not(h:SystemIdentifier/@sameas)]'><!-- See [AdjacentWall]-->
       <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert>
       <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'outside' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
@@ -717,6 +728,17 @@
   </sch:pattern>
 
   <sch:pattern>
+    <sch:title>[AdjacentWall]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall[h:SystemIdentifier/@sameas]'> <!-- Fixme: Hope there's a way to differentiate the fully described sameas so that the normal wall input checks can retain-->
+      <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert> <!-- See [FloorType=AdjacentToOther] -->
+      <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:InteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: InteriorAdjacentTo</sch:assert>
+      <sch:assert role='ERROR' test='h:InteriorAdjacentTo[text()="conditioned space" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage"] or not(h:InteriorAdjacentTo)'>Expected InteriorAdjacentTo to be 'conditioned space' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage'</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
     <sch:title>[Wall_RadiantBarrier]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall[h:RadiantBarrier="true"]'>
       <sch:assert role='ERROR' test='count(h:RadiantBarrierGrade) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RadiantBarrierGrade</sch:assert>
@@ -725,7 +747,7 @@
 
   <sch:pattern>
     <sch:title>[FoundationWall]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall[not(h:SystemIdentifier/@sameas)]'><!-- See [AdjacentFoundationWall]-->
       <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert>
       <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="ground" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'ground' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
@@ -753,6 +775,17 @@
   </sch:pattern>
 
   <sch:pattern>
+    <sch:title>[AdjacentFoundationWall]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall[h:SystemIdentifier/@sameas]'> <!-- Fixme: Hope there's a way to differentiate the fully described sameas so that the normal foundation wall input checks can retain-->
+      <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert> <!-- See [FloorType=AdjacentToOther] -->
+      <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:InteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: InteriorAdjacentTo</sch:assert>
+      <sch:assert role='ERROR' test='h:InteriorAdjacentTo[text()="conditioned space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage"] or not(h:InteriorAdjacentTo)'>Expected InteriorAdjacentTo to be 'conditioned space' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage'</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  
+  <sch:pattern>
     <sch:title>[FoundationWallInsulationLayer]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation/h:Layer[h:InstallationType="continuous - exterior" or h:InstallationType="continuous - interior"]'>
       <sch:assert role='ERROR' test='count(h:NominalRValue) = 1'>Expected 1 element(s) for xpath: NominalRValue</sch:assert>
@@ -768,7 +801,7 @@
 
   <sch:pattern>
     <sch:title>[Floor]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Floors/h:Floor'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Floors/h:Floor[not(h:SystemIdentifier/@sameas)]'> <!-- See [AdjacentFloor]-->
       <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert> <!-- See [FloorType=AdjacentToOther] -->
       <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space" or text()="manufactured home underbelly"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'outside' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' or 'manufactured home underbelly'</sch:assert>
@@ -783,6 +816,17 @@
       <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
       <!-- Moved/deprecated extension/OtherSpaceAboveOrBelow input; see https://github.com/NREL/OpenStudio-HPXML/pull/1203 -->
       <sch:assert role='ERROR' test='count(h:extension/h:OtherSpaceAboveOrBelow) = 0'>extension/OtherSpaceAboveOrBelow has been replaced by FloorOrCeiling</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[AdjacentFloor]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Floors/h:Floor[h:SystemIdentifier/@sameas]'> <!-- Fixme: Hope there's a way to differentiate the fully described sameas so that the normal floor input checks can retain-->
+      <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert> <!-- See [FloorType=AdjacentToOther] -->
+      <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:InteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: InteriorAdjacentTo</sch:assert>
+      <sch:assert role='ERROR' test='h:InteriorAdjacentTo[text()="conditioned space" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage"] or not(h:InteriorAdjacentTo)'>Expected InteriorAdjacentTo to be 'conditioned space' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -2824,7 +2868,7 @@
     <sch:title>[AdjacentSurfaces=ConditionedSpace]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure[*/*[h:InteriorAdjacentTo="conditioned space"]]'>
       <sch:assert role='ERROR' test='count(h:Roofs/h:Roof[h:InteriorAdjacentTo="conditioned space"]) + count(h:Floors/h:Floor[h:InteriorAdjacentTo="conditioned space" and (h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]) &gt;= 1'>There must be at least one ceiling or roof adjacent to conditioned space.</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Walls/h:Wall[h:InteriorAdjacentTo="conditioned space" and h:ExteriorAdjacentTo="outside"]) &gt;= 1'>There must be at least one exterior wall adjacent to conditioned space.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Walls/h:Wall[h:InteriorAdjacentTo="conditioned space" and h:ExteriorAdjacentTo="outside"]) &gt;= 1'>There must be at least one exterior wall adjacent to conditioned space.</sch:assert> <!-- FIXME: Should we relax this restriction for internal zones? -->
       <sch:assert role='ERROR' test='count(h:Slabs/h:Slab[contains(h:InteriorAdjacentTo, "conditioned")]) + count(h:Floors/h:Floor[h:InteriorAdjacentTo="conditioned space" and not(h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]) &gt;= 1'>There must be at least one floor or slab adjacent to conditioned space.</sch:assert>
     </sch:rule>
   </sch:pattern>
