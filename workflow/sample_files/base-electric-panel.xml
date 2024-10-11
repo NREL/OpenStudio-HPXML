@@ -447,7 +447,7 @@
                   <Addition>true</Addition>
                 </PanelLoad>
                 <PanelLoad>
-                  <Type>Water Heater</Type>
+                  <Type>Hot Water</Type>
                   <Watts>4500.0</Watts>
                   <Voltage>120</Voltage>
                   <Addition>false</Addition>

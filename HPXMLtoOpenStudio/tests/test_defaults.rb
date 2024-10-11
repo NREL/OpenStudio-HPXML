@@ -3483,6 +3483,53 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_pv_system_values(default_hpxml_bldg, 0.96, 0.198, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
   end
 
+  def test_electric_panels
+    # Test inputs not overridden by defaults
+    hpxml, hpxml_bldg = _create_hpxml('base-electric-panel.xml')
+    hpxml_bldg.electric_panels[0].voltage = HPXML::ElectricPanelVoltage120
+    hpxml_bldg.electric_panels[0].max_current_rating = 200.0
+    panel_loads = hpxml_bldg.electric_panels[0].panel_loads
+    htg_load = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
+    htg_load.watts = 1000
+    htg_load.voltage = HPXML::ElectricPanelVoltage120
+    htg_load.addition = true
+    clg_load = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }
+    clg_load.watts = 2000
+    clg_load.voltage = HPXML::ElectricPanelVoltage120
+    clg_load.addition = true
+    hw_load = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeWaterHeater }
+    hw_load.watts = 3000
+    hw_load.voltage = HPXML::ElectricPanelVoltage120
+    hw_load.addition = true
+    cd_load = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeClothesDryer }
+    cd_load.watts = 4000
+    cd_load.voltage = HPXML::ElectricPanelVoltage120
+    cd_load.addition = true
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage120, 200.0)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 1000, HPXML::ElectricPanelVoltage120, true)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2000, HPXML::ElectricPanelVoltage120, true)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 3000, HPXML::ElectricPanelVoltage120, true)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 4000, HPXML::ElectricPanelVoltage120, true)
+
+    # Test defaults
+    hpxml_bldg.electric_panels[0].voltage = nil
+    hpxml_bldg.electric_panels[0].max_current_rating = nil
+    hpxml_bldg.electric_panels[0].panel_loads.each do |panel_load|
+      panel_load.watts = nil
+      panel_load.voltage = nil
+      panel_load.addition = nil
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage240, 150.0)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 1525.82, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 4981.34, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 4500, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760, HPXML::ElectricPanelVoltage120, false)
+  end
+
   def test_batteries
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-pv-battery.xml')
@@ -5625,6 +5672,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.inverters.each do |inv|
       assert_equal(interver_efficiency, inv.inverter_efficiency)
     end
+  end
+
+  def _test_default_electric_panel_values(hpxml_bldg, voltage, max_current_rating)
+    electric_panel = hpxml_bldg.electric_panels[0]
+    assert_equal(voltage, electric_panel.voltage)
+    assert_equal(max_current_rating, electric_panel.max_current_rating)
+  end
+
+  def _test_default_panel_load_values(hpxml_bldg, type, watts, voltage, addition)
+    panel_loads = hpxml_bldg.electric_panels[0].panel_loads
+    pl = panel_loads.find { |pl| pl.type == type }
+
+    assert_in_epsilon(watts, pl.watts, 0.01)
+    assert_equal(voltage, pl.voltage)
+    assert_equal(addition, pl.addition)
   end
 
   def _test_default_battery_values(battery, nominal_capacity_kwh, nominal_capacity_ah, usable_capacity_kwh, usable_capacity_ah,

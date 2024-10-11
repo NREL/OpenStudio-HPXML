@@ -99,6 +99,9 @@ module Defaults
     # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
 
+    # Default electric panels has to be after sizing to have autosized capacity information
+    apply_electric_panels(hpxml_bldg, unit_num)
+
     cleanup_zones_spaces(hpxml_bldg)
 
     return all_zone_loads, all_space_loads
@@ -3098,6 +3101,73 @@ module Defaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::ElectricPanel objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param unit_num [Integer] Dwelling unit number
+  # @return [nil]
+  def self.apply_electric_panels(hpxml_bldg, unit_num)
+    default_values = get_electric_panel_values(hpxml_bldg)
+    if hpxml_bldg.electric_panels.empty?
+      if not unit_num.nil?
+        panel_id = "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}_#{unit_num}"
+      else
+        panel_id = "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}"
+      end
+      hpxml_bldg.electric_panels.add(id: panel_id)
+    end
+
+    hpxml_bldg.electric_panels.each do |electric_panel|
+      if electric_panel.voltage.nil?
+        electric_panel.voltage = default_values[:panel_voltage]
+        electric_panel.voltage_isdefaulted = true
+      end
+      if electric_panel.max_current_rating.nil?
+        electric_panel.max_current_rating = default_values[:max_current_rating]
+        electric_panel.max_current_rating_isdefaulted = true
+      end
+
+      if electric_panel.panel_loads.empty?
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating)
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling)
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater)
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer)
+      end
+
+      electric_panel.panel_loads.each do |panel_load|
+        if panel_load.type == HPXML::ElectricPanelLoadTypeHeating
+          if panel_load.watts.nil?
+            panel_load.watts = default_values[:heating_watts]
+            panel_load.watts_isdefaulted = true
+          end
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeCooling
+          if panel_load.watts.nil?
+            panel_load.watts = default_values[:cooling_watts]
+            panel_load.watts_isdefaulted = true
+          end
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeWaterHeater
+          if panel_load.watts.nil?
+            panel_load.watts = default_values[:water_heater_watts]
+            panel_load.watts_isdefaulted = true
+          end
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeClothesDryer
+          if panel_load.watts.nil?
+            panel_load.watts = default_values[:clothes_dryer_watts]
+            panel_load.watts_isdefaulted = true
+          end
+        end
+        if panel_load.voltage.nil?
+          panel_load.voltage = default_values[:load_voltage]
+          panel_load.voltage_isdefaulted = true
+        end
+        if panel_load.addition.nil?
+          panel_load.addition = default_values[:load_addition]
+          panel_load.addition_isdefaulted = true
+        end
+      end
+    end
+  end
+
   # Assigns default values for omitted optional inputs in the HPXML::Generator objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -5513,6 +5583,46 @@ module Defaults
       months[m] = 1
     end
     return months
+  end
+
+  # Get default voltage and max current rating.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Hash] Map of electric panel properties to default values
+  def self.get_electric_panel_values(hpxml_bldg)
+    max_heating_capacity = 0.0
+    max_backup_heating_capacity = 0.0
+    max_cooling_capacity = 0.0
+
+    (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).each do |heating_system|
+      next if heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
+
+      max_heating_capacity = [max_heating_capacity, heating_system.heating_capacity].max
+      if heating_system.is_a? HPXML::HeatPump
+        max_backup_heating_capacity = [max_backup_heating_capacity, heating_system.backup_heating_capacity].max
+      end
+    end
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |cooling_system|
+      next if cooling_system.cooling_system_fuel != HPXML::FuelTypeElectricity
+
+      max_cooling_capacity = [max_cooling_capacity, cooling_system.cooling_capacity].max
+    end
+
+    # Using regression
+    heating_watts = 230.0 * (0.626 * UnitConversions.convert(max_heating_capacity, 'btu/hr', 'kbtu/hr') + 1.634)
+    heating_handler_watts = 230.0 * [0.111 * UnitConversions.convert(max_heating_capacity, 'btu/hr', 'kbtu/hr') + 2.22, 5].max
+    backup_heating_watts = UnitConversions.convert(max_backup_heating_capacity, 'btu/hr', 'kbtu/hr') * 293.07
+    cooling_watts = 230.0 * (0.626 * UnitConversions.convert(max_cooling_capacity, 'btu/hr', 'kbtu/hr') + 1.634)
+    cooling_handler_watts = 230.0 * [0.111 * UnitConversions.convert(max_cooling_capacity, 'btu/hr', 'kbtu/hr') + 2.22, 5].max
+
+    return { panel_voltage: HPXML::ElectricPanelVoltage240,
+             max_current_rating: 150.0,
+             heating_watts: heating_watts + heating_handler_watts + backup_heating_watts,
+             cooling_watts: cooling_watts + cooling_handler_watts,
+             water_heater_watts: 4500,
+             clothes_dryer_watts: 5760,
+             load_voltage: HPXML::ElectricPanelVoltage120,
+             load_addition: false }
   end
 
   # Get default location, lifetime model, nominal capacity/voltage, round trip efficiency, and usable fraction for a battery.
