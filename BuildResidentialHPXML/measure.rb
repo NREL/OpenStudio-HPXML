@@ -2627,34 +2627,34 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_service_voltage', electric_panel_voltage_choices, false)
     arg.setDisplayName('Electric Panel: Service Voltage')
-    arg.setDescription('TODO')
+    arg.setDescription("The service voltage of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('V')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_service_rating', false)
     arg.setDisplayName('Electric Panel: Service Rating')
-    arg.setDescription('TODO')
+    arg.setDescription("The service rating of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('A')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_types', false)
     arg.setDisplayName('Electric Panel: Load Types')
-    arg.setDescription('TODO')
+    arg.setDescription("Specified the panel load types. Possible load types are: #{HPXML::ElectricPanelLoadTypeHeating}, #{HPXML::ElectricPanelLoadTypeCooling}, #{HPXML::ElectricPanelLoadTypeWaterHeater}, #{HPXML::ElectricPanelLoadTypeClothesDryer}. If multiple loads, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_watts', false)
     arg.setDisplayName('Electric Panel: Load Watts')
-    arg.setDescription('TODO')
+    arg.setDescription("Specifies the panel load watts. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_voltages', false)
     arg.setDisplayName('Electric Panel: Load Voltages')
-    arg.setDescription('TODO')
+    arg.setDescription("Specifies the panel load voltages. Possible load voltages are: #{HPXML::ElectricPanelVoltage120}, #{HPXML::ElectricPanelVoltage240}. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_additions', false)
     arg.setDisplayName('Electric Panel: Load Additions')
-    arg.setDescription('TODO')
+    arg.setDescription("Specifies whether the panel loads are additions. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     battery_location_choices = OpenStudio::StringVector.new

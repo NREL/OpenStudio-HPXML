@@ -4410,7 +4410,7 @@ Maximum power output of the second PV system. For a shared system, this is the t
 
 **Electric Panel: Service Voltage**
 
-TODO
+The service voltage of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
 - **Name:** ``electric_panel_service_voltage``
 - **Type:** ``Choice``
@@ -4423,7 +4423,7 @@ TODO
 
 **Electric Panel: Service Rating**
 
-TODO
+The service rating of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
 - **Name:** ``electric_panel_service_rating``
 - **Type:** ``Double``
@@ -4436,7 +4436,7 @@ TODO
 
 **Electric Panel: Load Types**
 
-TODO
+Specified the panel load types. Possible load types are: Heating, Cooling, Hot Water, Clothes Dryer. If multiple loads, use a comma-separated list.
 
 - **Name:** ``electric_panel_load_types``
 - **Type:** ``String``
@@ -4447,7 +4447,7 @@ TODO
 
 **Electric Panel: Load Watts**
 
-TODO
+Specifies the panel load watts. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_watts``
 - **Type:** ``String``
@@ -4458,7 +4458,7 @@ TODO
 
 **Electric Panel: Load Voltages**
 
-TODO
+Specifies the panel load voltages. Possible load voltages are: 120, 240. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_voltages``
 - **Type:** ``String``
@@ -4469,7 +4469,7 @@ TODO
 
 **Electric Panel: Load Additions**
 
-TODO
+Specifies whether the panel loads are additions. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_additions``
 - **Type:** ``String``
