@@ -1855,7 +1855,8 @@ module Geometry
     sch = Model.add_schedule_constant(
       model,
       name: location,
-      value: nil
+      value: nil,
+      limits: EPlus::ScheduleTypeLimitsTemperature
     )
     sch.additionalProperties.setFeature('ObjectType', location)
 
@@ -1891,11 +1892,6 @@ module Geometry
         space_values[:temp_min] = default_htg_sp # F
       end
     end
-
-    # Schedule type limits compatible
-    schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
-    schedule_type_limits.setUnitType('Temperature')
-    sch.setScheduleTypeLimits(schedule_type_limits)
 
     # Sensors
     if space_values[:indoor_weight] > 0
