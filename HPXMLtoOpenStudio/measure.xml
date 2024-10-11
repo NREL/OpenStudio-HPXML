@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c80e402f-4c82-4eae-9336-698bde0e09c3</version_id>
-  <version_modified>2024-10-11T18:59:49Z</version_modified>
+  <version_id>72c688f5-e64c-48f3-b1e4-062d4e53586c</version_id>
+  <version_modified>2024-10-11T22:49:23Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -357,7 +357,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AF9C179B</checksum>
+      <checksum>10F59ACC</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CEDAF4B3</checksum>
+      <checksum>96EEE054</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -405,7 +405,7 @@
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E8D2508C</checksum>
+      <checksum>9B17C563</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -441,7 +441,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ABD35A7F</checksum>
+      <checksum>2DCA8614</checksum>
     </file>
     <file>
       <filename>model.rb</filename>
@@ -639,19 +639,13 @@
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D1BB113E</checksum>
+      <checksum>DA4456A1</checksum>
     </file>
     <file>
       <filename>xmlvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>93120E27</checksum>
-    </file>
-    <file>
-      <filename>in.schedules.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C8EBFF38</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
