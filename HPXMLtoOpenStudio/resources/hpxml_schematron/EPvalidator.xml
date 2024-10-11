@@ -264,7 +264,7 @@
       <sch:assert role='ERROR' test='count(h:Systems/h:WaterHeating/h:WaterFixture) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/WaterHeating/WaterFixture</sch:assert> <!-- See [WaterFixture] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:SolarThermal/h:SolarThermalSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/SolarThermal/SolarThermalSystem</sch:assert> <!-- See [SolarThermalSystem] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:Photovoltaics/h:PVSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/Photovoltaics/PVSystem</sch:assert> <!-- See [PVSystem] -->
-      <sch:assert role='ERROR' test='count(h:Systems/h:ElectricPanels/h:ElectricPanel) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/ElectricPanels/ElectricPanel</sch:assert> <!-- See [ElectricPanel] -->
+      <sch:assert role='ERROR' test='count(h:Systems/h:ElectricPanels/h:ElectricPanel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/ElectricPanels/ElectricPanel</sch:assert> <!-- See [ElectricPanel] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:Batteries/h:Battery) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/Batteries/Battery</sch:assert> <!-- See [Battery] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:extension/h:Generators/h:Generator) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/extension/Generators/Generator</sch:assert> <!-- See [Generator] -->
       <sch:assert role='ERROR' test='count(h:Appliances/h:ClothesWasher) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Appliances/ClothesWasher</sch:assert> <!-- See [ClothesWasher] -->
@@ -2405,8 +2405,29 @@
   <sch:pattern>
     <sch:title>[ElectricPanel]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:ElectricPanels/h:ElectricPanel'>
-      <sch:assert role='ERROR' test='count(h:Voltage) = 1'>Expected 1 element(s) for xpath: Voltage</sch:assert>
-      <sch:assert role='ERROR' test='count(h:MaxCurrentRating) = 1'>Expected 1 element(s) for xpath: MaxCurrentRating</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Voltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Voltage</sch:assert>
+      <sch:assert role='ERROR' test='h:Voltage[text()="120" or text()="240"] or not(h:Voltage)'>Expected Voltage to be '120' or '240'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:MaxCurrentRating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MaxCurrentRating</sch:assert>
+      <sch:assert role='ERROR' test='count(h:PanelLoads) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PanelLoads</sch:assert> <!-- See [PanelLoads]-->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[PanelLoads]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:ElectricPanels/*/extension/h:PanelLoads'>
+      <sch:assert role='ERROR' test='count(h:PanelLoad) &gt;= 1'>Expected 1 or more element(s) for xpath: PanelLoad</sch:assert>  <!-- See [PanelLoad] -->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[PanelLoad]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:ElectricPanels/*/extension/*/h:PanelLoad'>
+      <sch:assert role='ERROR' test='count(h:Type[text()="Heating" or text()="Cooling" or text()="Hot Water" or text()="Clothes Dryer"]) = 1'>Expected 1 element(s) for xpath: Type[text()="Heating" or text()="Cooling" or text()="Hot Water" or text()="Clothes Dryer"]</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Watts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Watts</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Voltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Voltage</sch:assert>
+      <sch:assert role='ERROR' test='h:Voltage[text()="120" or text()="240"] or not(h:Voltage)'>Expected Voltage to be '120' or '240'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Addition) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Addition</sch:assert>
+      <sch:assert role='ERROR' test='h:Addition[text()="false" or text()="true"]'>Expected Addition to be 'false' or 'true'</sch:assert>
     </sch:rule>
   </sch:pattern>
 
