@@ -5611,7 +5611,7 @@ module Defaults
       next if !is_hp && heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
 
       max_heating_capacity = [max_heating_capacity, heating_system.heating_capacity].max
-      if is_hp
+      if is_hp && !heating_system.backup_heating_capacity.nil?
         max_backup_heating_capacity = [max_backup_heating_capacity, heating_system.backup_heating_capacity].max
       end
     end
