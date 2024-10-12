@@ -4146,16 +4146,16 @@ class HPXML < Object
              :framing_size]                   # [String] FloorJoists/Size
     attr_accessor(*ATTRS)
 
-    # Returns the same wall specified in other places.
+    # Returns the same rim joist specified in other places.
     #
-    # @return [<HPXML::Wall>] Wall object linked by sameas attribute
+    # @return [<HPXML::RimJoist>] RimJoist object linked by sameas attribute
     def sameas
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
     end
 
-    # Returns if the wall is fully described. A wall can use sameas attribute to point to another wall with full description.
+    # Returns if the rim joist is fully described. A wall can use sameas attribute to point to another rim joist with full description.
     #
-    # @return [Boolean] True if the wall is fully described
+    # @return [Boolean] True if the rim joist is fully described
     def is_fully_described
       return !@area.nil?
     end
@@ -4719,7 +4719,7 @@ class HPXML < Object
 
     # Returns the same foundation wall specified in other places.
     #
-    # @return [<HPXML::FoundationWall>] Foundation Wall object linked by sameas attribute
+    # @return [<HPXML::FoundationWall>] FoundationWall object linked by sameas attribute
     def sameas
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
     end
