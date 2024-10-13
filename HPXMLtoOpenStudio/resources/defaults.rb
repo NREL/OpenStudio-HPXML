@@ -1967,6 +1967,7 @@ module Defaults
       next if heat_pump.backup_type.nil?
       next unless heat_pump.backup_heating_lockout_temp.nil?
       next unless heat_pump.backup_heating_switchover_temp.nil?
+      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
 
       if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
         hp_backup_fuel = heat_pump.backup_heating_fuel
@@ -2276,6 +2277,8 @@ module Defaults
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
+        HVAC.set_heat_pump_temperatures(heat_pump, runner)
+
         if heat_pump.geothermal_loop.nil?
           if not unit_num.nil?
             loop_id = "GeothermalLoop#{hpxml_bldg.geothermal_loops.size + 1}_#{unit_num}"

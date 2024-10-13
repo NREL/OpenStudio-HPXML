@@ -4627,11 +4627,14 @@ module HVAC
     control_zone.setSequentialCoolingFractionSchedule(hvac_object, cooling_sch)
 
     if (not heating_system.nil?) && (heating_system.is_a? HPXML::HeatingSystem) && heating_system.is_heat_pump_backup_system
+      max_heating_temp = heating_system.primary_heat_pump.additional_properties.supp_max_temp
+      if max_heating_temp.nil?
+        return
+      end
+
       # Backup system for a heat pump, and heat pump has been set with
       # backup heating switchover temperature or backup heating lockout temperature.
       # Use EMS to prevent operation of this system above the specified temperature.
-
-      max_heating_temp = heating_system.primary_heat_pump.additional_properties.supp_max_temp
 
       # Sensor
       tout_db_sensor = Model.add_ems_sensor(
