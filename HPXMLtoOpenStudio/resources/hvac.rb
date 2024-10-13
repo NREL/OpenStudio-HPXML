@@ -4627,11 +4627,14 @@ module HVAC
     control_zone.setSequentialCoolingFractionSchedule(hvac_object, cooling_sch)
 
     if (not heating_system.nil?) && (heating_system.is_a? HPXML::HeatingSystem) && heating_system.is_heat_pump_backup_system
+      max_heating_temp = heating_system.primary_heat_pump.additional_properties.supp_max_temp
+      if max_heating_temp.nil?
+        return
+      end
+
       # Backup system for a heat pump, and heat pump has been set with
       # backup heating switchover temperature or backup heating lockout temperature.
       # Use EMS to prevent operation of this system above the specified temperature.
-
-      max_heating_temp = heating_system.primary_heat_pump.additional_properties.supp_max_temp
 
       # Sensor
       tout_db_sensor = Model.add_ems_sensor(
@@ -5349,14 +5352,14 @@ module HVAC
           cooling_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         end
         hpxml_bldg.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
-        if hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+        if hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.count { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) } == 0
           # Assign zero supply leakage
           hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                           duct_leakage_units: HPXML::UnitsCFM25,
                                                                           duct_leakage_value: 0,
                                                                           duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
         end
-        if hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.select { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) }.size == 0
+        if hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.count { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) } == 0
           # Assign zero return leakage
           hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                           duct_leakage_units: HPXML::UnitsCFM25,
