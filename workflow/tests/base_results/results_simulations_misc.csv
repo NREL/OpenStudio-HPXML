@@ -276,6 +276,8 @@ base-hvac-furnace-oil-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2041.7,1806.9
 base-hvac-furnace-propane-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2041.7,1806.9,2041.7,23.792,0.0,0.0
 base-hvac-furnace-wood-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2041.7,1806.9,2041.7,23.792,0.0,0.0
 base-hvac-furnace-x3-dse.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2039.7,3123.6,3123.6,16.915,12.045,0.0
+base-hvac-ground-to-air-heat-pump-backup-integrated.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,3510.9,2951.6,3510.9,22.82,16.32,0.0
+base-hvac-ground-to-air-heat-pump-backup-stove.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,3576.9,2853.7,3576.9,23.534,16.515,0.0
 base-hvac-ground-to-air-heat-pump-cooling-only.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.5,2872.5,2872.5,0.0,16.053,0.0
 base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,3465.0,2806.3,3465.0,23.78,16.291,0.0
 base-hvac-ground-to-air-heat-pump-heating-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,3488.6,1806.9,3488.6,22.653,0.0,0.0
