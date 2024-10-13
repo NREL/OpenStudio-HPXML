@@ -2513,6 +2513,19 @@
     "hvac_control_heating_weekend_setpoint": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-heating-only.csv"
   },
+  "sample_files/base-hvac-furnace-gas-plus-air-to-air-heat-pump-cooling.xml": {
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
+    "heat_pump_type": "air-to-air",
+    "heat_pump_heating_efficiency": 7.7,
+    "heat_pump_cooling_efficiency": 13,
+    "heat_pump_cooling_compressor_type": "single stage",
+    "heat_pump_cooling_sensible_heat_fraction": 0.73,
+    "heat_pump_heating_capacity": 36000,
+    "heat_pump_heating_capacity_retention_fraction": 0.6,
+    "heat_pump_heating_capacity_retention_temp": 17.0,
+    "heat_pump_cooling_capacity": 36000,
+    "heat_pump_fraction_cool_load_served": 1
+  },
   "sample_files/base-hvac-furnace-gas-room-ac.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "cooling_system_type": "room air conditioner",
