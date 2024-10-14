@@ -3184,9 +3184,9 @@ module Defaults
 
       # TODO
       loads = PanelLoadValues.new
-      loads.LoadBased_CapacityW = 1
+      loads.LoadBased_CapacityW = 1.0
       loads.LoadBased_CapacityA = 2
-      loads.MeterBased_CapacityW = 3
+      loads.MeterBased_CapacityW = 3.0
       loads.MeterBased_CapacityA = 4
 
       # Assign panel loads and capacities to HPXML objects for output
