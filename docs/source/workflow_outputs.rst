@@ -424,37 +424,37 @@ Resilience outputs are listed below.
          The entire electric load is treated as a "critical load" that would be supported during an outage.
          Resilience hours are set to 0 for any timestep where the battery is not charged, even if there is sufficient PV to power the building.
 
-Electric Panel Capacities
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Electric Panel
+~~~~~~~~~~~~~~
 
-Electric panel loads and calculated capacities are listed below.
-Loads and capacities can also be found in the ``in.xml`` file.
+Electric panel loads, capacities, and breaker spaces are listed below.
+Individual loads, load-based capacities, and breaker spaces can also be found in the ``in.xml`` file.
 
   ====================================================  ====================
   Type                                                  Notes
   ====================================================  ====================
-  Electric Panel: Load: Heating (W)
-  Electric Panel: Load: Cooling (W)
-  Electric Panel: Load: Hot Water (W)
-  Electric Panel: Load: Clothes Dryer (W)
-  Electric Panel: Load: Dishwasher (W)
-  Electric Panel: Load: Range/Oven (W)
-  Electric Panel: Load: Permanent Spa Heater (W)
-  Electric Panel: Load: Permanent Spa Pump (W)
-  Electric Panel: Load: Pool Heater (W)
-  Electric Panel: Load: Pool Pump (W)
-  Electric Panel: Load: Well Pump (W)
-  Electric Panel: Load: Electric Vehicle Charging (W)
-  Electric Panel: Load: Lighting (W)
-  Electric Panel: Load: Other (W)
-  Electric Panel: Capacity: Load-Based (W)              220.83
-  Electric Panel: Capacity: Load-Based (A)              220.83
-  Electric Panel: Constraint: Load-Based (A)            220.83
-  Electric Panel: Capacity: Meter-Based (W)             220.87
-  Electric Panel: Capacity: Meter-Based (A)             220.87
-  Electric Panel: Constraint: Meter-Based (A)           220.87
-  Electric Panel: Breaker Space: HVAC (#)
-  Electric Panel: Breaker Space: Whole Panel (#)
+  Electric Panel Load: Heating (W)
+  Electric Panel Load: Cooling (W)
+  Electric Panel Load: Hot Water (W)
+  Electric Panel Load: Clothes Dryer (W)
+  Electric Panel Load: Dishwasher (W)
+  Electric Panel Load: Range/Oven (W)
+  Electric Panel Load: Permanent Spa Heater (W)
+  Electric Panel Load: Permanent Spa Pump (W)
+  Electric Panel Load: Pool Heater (W)
+  Electric Panel Load: Pool Pump (W)
+  Electric Panel Load: Well Pump (W)
+  Electric Panel Load: Electric Vehicle Charging (W)
+  Electric Panel Load: Lighting (W)
+  Electric Panel Load: Other (W)
+  Electric Panel Capacity: Load-Based Total (W)         220.83
+  Electric Panel Capacity: Load-Based Total (A)         220.83
+  Electric Panel Capacity: Load-Based Constraint (A)    220.83
+  Electric Panel Capacity: Meter-Based Total (W)        220.87
+  Electric Panel Capacity: Meter-Based Total (A)        220.87
+  Electric Panel Capacity: Meter-Based Constraint (A)   220.87
+  Electric Panel Breaker Space: Total Count (#)
+  Electric Panel Breaker Space: HVAC Count (#)
   ====================================================  ====================
 
 HVAC Capacities

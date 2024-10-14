@@ -996,6 +996,31 @@ module Outputs
     return htg_cap, clg_cap, hp_backup_cap
   end
 
+  # TODO
+  def self.get_total_panel_loads(hpxml_bldg)
+    htg, clg, hw, cd, ltg, kit, lnd = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    hpxml_bldg.electric_panels.each do |electric_panel|
+      electric_panel.panel_loads.each do |panel_load|
+        if panel_load.type == HPXML::ElectricPanelLoadTypeHeating
+          htg += panel_load.watts
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeCooling
+          clg += panel_load.watts
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeWaterHeater
+          hw += panel_load.watts
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeClothesDryer
+          cd += panel_load.watts
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeLighting
+          ltg += panel_load.watts
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeKitchen
+          kit += panel_load.watts
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeLaundry
+          lnd += panel_load.watts
+        end
+      end
+    end
+    return htg, clg, hw, cd, ltg, kit, lnd
+  end
+
   # Calculates total HVAC airflow rates (across all HVAC systems) for a given HPXML Building.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -1163,32 +1188,34 @@ module Outputs
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param results_out [Array] Rows of output data
   # @return [Array>] Rows of output data, with electric panel results appended
-  def self.append_panel_results(_hpxml_bldgs, results_out)
+  def self.append_panel_results(hpxml_bldgs, peak_fuels, results_out)
     line_break = nil
 
     # Summary panel loads
     results_out << [line_break]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeHeating} (W)", 1]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeCooling} (W)", 2]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeWaterHeater} (W)", 3]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeClothesDryer} (W)", 4]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeLighting} (W)", 5]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeKitchen} (W)", 6]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeLaundry} (W)", 7]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeHeating} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[0] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeCooling} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[1] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeWaterHeater} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[2] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeClothesDryer} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[3] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeLighting} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[4] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeKitchen} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[5] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeLaundry} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[6] }.sum(0.0).round(1)]
 
-    # Panel capacities
+    # Load-based capacities
     results_out << [line_break]
-    results_out << ['Electric Panel Capacity: Load-Based Total (W)', 10]
-    results_out << ['Electric Panel Capacity: Load Based Total (A)', 11]
-    results_out << ['Electric Panel Capacity: Load-Based Constraint (W)', 12]
-    results_out << ['Electric Panel Capacity: Meter-Based Total (W)', 13]
-    results_out << ['Electric Panel Capacity: Meter-Based Total (A)', 14]
-    results_out << ['Electric Panel Capacity: Meter-Based Constraint (W)', 15]
+    results_out << ['Electric Panel Capacity: Load-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_w }.sum(0.0) }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Load Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_a }.sum(0.0) }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Load-Based Constraint (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_constraint_a }.sum(0.0) }.sum(0.0).round(1)]
+
+    # Meter-based capacities
+    results_out << ['Electric Panel Capacity: Meter-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[0] }.sum(0.0) }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Meter-Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[1] }.sum(0.0) }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Meter-Based Constraint (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[2] }.sum(0.0) }.sum(0.0).round(1)]
 
     # Panel breaker spaces
     results_out << [line_break]
-    results_out << ['Electric Panel Breaker Space: HVAC Count', 16]
-    results_out << ['Electric Panel Breaker Space: Total Count', 17]
+    results_out << ['Electric Panel Breaker Space: Total Count', 16]
+    results_out << ['Electric Panel Breaker Space: HVAC Count', 17]
 
     return results_out
   end

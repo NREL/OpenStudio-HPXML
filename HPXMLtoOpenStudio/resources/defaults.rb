@@ -3110,7 +3110,7 @@ module Defaults
   # @param unit_num [Integer] Dwelling unit number
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports panel loads/capacities
   # @return [nil]
-  def self.apply_electric_panels(hpxml_bldg, unit_num, update_hpxml: true)
+  def self.apply_electric_panels(hpxml_bldg, unit_num)
     default_values = get_electric_panel_values(hpxml_bldg)
     if hpxml_bldg.electric_panels.empty?
       if not unit_num.nil?
@@ -3182,28 +3182,7 @@ module Defaults
         end
       end
 
-      # TODO
-      loads = PanelLoadValues.new
-      loads.LoadBased_CapacityW = 1.0
-      loads.LoadBased_CapacityA = 2
-      loads.LoadBased_ConstraintW = 3.0
-      loads.MeterBased_CapacityW = 4.0
-      loads.MeterBased_CapacityA = 5
-      loads.MeterBased_ConstraintW = 6.0
-      loads.BreakerSpace_HVAC = 7
-      loads.BreakerSpace_Total = 8
-
-      # Assign panel loads and capacities to HPXML objects for output
-      next unless update_hpxml
-
-      electric_panel.clb_total_w = loads.LoadBased_CapacityW
-      electric_panel.clb_total_a = loads.LoadBased_CapacityA
-      electric_panel.clb_constraint_w = loads.LoadBased_ConstraintW
-      electric_panel.cmb_total_w = loads.MeterBased_CapacityW
-      electric_panel.cmb_total_a = loads.MeterBased_CapacityA
-      electric_panel.cmb_constraint_w = loads.MeterBased_ConstraintW
-      electric_panel.bs_hvac = loads.BreakerSpace_HVAC
-      electric_panel.bs_total = loads.BreakerSpace_Total
+      ElectricPanel.calculate_load_based(electric_panel)
     end
   end
 
