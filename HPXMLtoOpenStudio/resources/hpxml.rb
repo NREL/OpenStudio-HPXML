@@ -539,10 +539,14 @@ class HPXML < Object
                     cdl_lat_vent: 'Ventilation',
                     cdl_lat_intgains: 'InternalLoads' }
 
-  LP_ATTRS = { lp_capacityw: 'CapacityW',
-               lp_capacitya: 'CapacityA' }
-  MP_ATTRS = { mp_capacityw: 'CapacityW',
-               mp_capacitya: 'CapacityA' }
+  CLB_ATTRS = { clb_total_w: 'TotalW',
+                clb_total_a: 'TotalA',
+                clb_constraint_w: 'ConstraintW' }
+  CMB_ATTRS = { cmb_total_w: 'TotalW',
+                cmb_total_a: 'TotalA',
+                cmb_constraint_w: 'ConstraintW' }
+  BS_ATTRS = { bs_hvac: 'HVAC',
+               bs_total: 'Total' }
 
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
     @hpxml_path = hpxml_path
@@ -9166,8 +9170,9 @@ class HPXML < Object
     ATTRS = [:id, # [String] SystemIdentifier/@id
              :voltage,
              :max_current_rating] +
-            LP_ATTRS.keys +
-            MP_ATTRS.keys
+            CLB_ATTRS.keys +
+            CMB_ATTRS.keys +
+            BS_ATTRS.keys
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
@@ -9200,8 +9205,8 @@ class HPXML < Object
       XMLHelper.add_element(electric_panel, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_element(electric_panel, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_isdefaulted) unless @max_current_rating.nil?
       @panel_loads.to_doc(electric_panel)
-      if !@lp_capacityw.nil? && !@lp_capacitya.nil? && !@mp_capacityw.nil? && !@mp_capacitya.nil?
-        HPXML.panel_capacities_to_doc(self, electric_panel)
+      if !@clb_total_w.nil? && !@clb_total_a.nil? && !@clb_constraint_w.nil? && !@cmb_total_w.nil? && !@cmb_total_a.nil? && !@cmb_constraint_w.nil? && !@bs_hvac.nil? && !@bs_total.nil?
+        HPXML.panel_outputs_to_doc(self, electric_panel)
       end
     end
 
@@ -9216,7 +9221,7 @@ class HPXML < Object
       @voltage = XMLHelper.get_value(electric_panel, 'Voltage', :string)
       @max_current_rating = XMLHelper.get_value(electric_panel, 'MaxCurrentRating', :float)
       @panel_loads.from_doc(electric_panel)
-      HPXML.panel_capacities_from_doc(self, electric_panel)
+      HPXML.panel_outputs_from_doc(self, electric_panel)
     end
   end
 
@@ -11620,10 +11625,11 @@ class HPXML < Object
   # @param hpxml_object [HPXML::XXX] The ElectricPanel object
   # @param hpxml_element [Oga::XML::Element] The ElectricPanel XML element
   # @return [nil]
-  def self.panel_capacities_to_doc(hpxml_object, hpxml_element)
-    { LP_ATTRS => 'LoadBased',
-      MP_ATTRS => 'MeterBased' }.each do |attrs, p_child_name|
-      p_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'Capacities'])
+  def self.panel_outputs_to_doc(hpxml_object, hpxml_element)
+    { CLB_ATTRS => 'CapacityLoadBased',
+      CMB_ATTRS => 'CapacityMeterBased',
+      BS_ATTRS => 'BreakerSpace' }.each do |attrs, p_child_name|
+      p_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'Outputs'])
       XMLHelper.add_attribute(p_extension, 'dataSource', 'software')
       p_child = XMLHelper.add_element(p_extension, p_child_name)
       attrs.each do |attr, element_name|
@@ -11637,14 +11643,15 @@ class HPXML < Object
   # @param hpxml_object [HPXML::XXX] The ElectricPanel object
   # @param hpxml_element [Oga::XML::Element] The ElectricPanel XML element
   # @return [nil]
-  def self.panel_capacities_from_doc(hpxml_object, hpxml_element)
-    capacities = XMLHelper.get_element(hpxml_element, 'extension/Capacities')
-    return if capacities.nil?
+  def self.panel_outputs_from_doc(hpxml_object, hpxml_element)
+    outputs = XMLHelper.get_element(hpxml_element, 'extension/Outputs')
+    return if outputs.nil?
 
-    { LP_ATTRS => 'LoadBased',
-      MP_ATTRS => 'MeterBased' }.each do |attrs, p_child_name|
+    { CLB_ATTRS => 'CapacityLoadBased',
+      CMB_ATTRS => 'CapacityMeterBased',
+      BS_ATTRS => 'BreakerSpace' }.each do |attrs, p_child_name|
       attrs.each do |attr, element_name|
-        hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Capacities/#{p_child_name}/#{element_name}", :float))
+        hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :float))
       end
     end
   end

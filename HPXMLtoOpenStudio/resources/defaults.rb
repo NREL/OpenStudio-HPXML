@@ -3186,16 +3186,24 @@ module Defaults
       loads = PanelLoadValues.new
       loads.LoadBased_CapacityW = 1.0
       loads.LoadBased_CapacityA = 2
-      loads.MeterBased_CapacityW = 3.0
-      loads.MeterBased_CapacityA = 4
+      loads.LoadBased_ConstraintW = 3.0
+      loads.MeterBased_CapacityW = 4.0
+      loads.MeterBased_CapacityA = 5
+      loads.MeterBased_ConstraintW = 6.0
+      loads.BreakerSpace_HVAC = 7
+      loads.BreakerSpace_Total = 8
 
       # Assign panel loads and capacities to HPXML objects for output
       next unless update_hpxml
 
-      electric_panel.lp_capacityw = loads.LoadBased_CapacityW
-      electric_panel.lp_capacitya = loads.LoadBased_CapacityA
-      electric_panel.mp_capacityw = loads.MeterBased_CapacityW
-      electric_panel.mp_capacitya = loads.MeterBased_CapacityA
+      electric_panel.clb_total_w = loads.LoadBased_CapacityW
+      electric_panel.clb_total_a = loads.LoadBased_CapacityA
+      electric_panel.clb_constraint_w = loads.LoadBased_ConstraintW
+      electric_panel.cmb_total_w = loads.MeterBased_CapacityW
+      electric_panel.cmb_total_a = loads.MeterBased_CapacityA
+      electric_panel.cmb_constraint_w = loads.MeterBased_ConstraintW
+      electric_panel.bs_hvac = loads.BreakerSpace_HVAC
+      electric_panel.bs_total = loads.BreakerSpace_Total
     end
   end
 

@@ -1158,6 +1158,41 @@ module Outputs
     return results_out
   end
 
+  # Appends electric panel results to the provided array for use in writing output files.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param results_out [Array] Rows of output data
+  # @return [Array>] Rows of output data, with electric panel results appended
+  def self.append_panel_results(_hpxml_bldgs, results_out)
+    line_break = nil
+
+    # Summary panel loads
+    results_out << [line_break]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeHeating} (W)", 1]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeCooling} (W)", 2]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeWaterHeater} (W)", 3]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeClothesDryer} (W)", 4]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeLighting} (W)", 5]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeKitchen} (W)", 6]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeLaundry} (W)", 7]
+
+    # Panel capacities
+    results_out << [line_break]
+    results_out << ['Electric Panel Capacity: Load-Based Total (W)', 10]
+    results_out << ['Electric Panel Capacity: Load Based Total (A)', 11]
+    results_out << ['Electric Panel Capacity: Load-Based Constraint (W)', 12]
+    results_out << ['Electric Panel Capacity: Meter-Based Total (W)', 13]
+    results_out << ['Electric Panel Capacity: Meter-Based Total (A)', 14]
+    results_out << ['Electric Panel Capacity: Meter-Based Constraint (W)', 15]
+
+    # Panel breaker spaces
+    results_out << [line_break]
+    results_out << ['Electric Panel Breaker Space: HVAC Count', 16]
+    results_out << ['Electric Panel Breaker Space: Total Count', 17]
+
+    return results_out
+  end
+
   # Writes an output file for the given rows of output data.
   #
   # @param results_out [Array] Rows of output data
