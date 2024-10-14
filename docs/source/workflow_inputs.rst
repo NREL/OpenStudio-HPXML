@@ -3814,13 +3814,6 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
   .. [#] VentilationOnlyModeAirflowFraction only applies when AdditionalRuntimeOperatingMode="air handler fan".
          Defines the blower airflow rate when operating in ventilation only mode (i.e., not heating or cooling mode), as a fraction of the maximum blower airflow rate.
          This value will depend on whether the blower fan can operate at reduced airflow rates during ventilation only operation.
-         It is used to determine how much conditioned air is recirculated through ducts during ventilation only operation, resulting in additional duct losses.
-         A value of zero will result in no conditioned air recirculation, and thus no additional duct losses.
-
-.. note::
-
-  CFIS systems are automated controllers that use the HVAC system's air handler fan to draw in outdoor air to meet an hourly ventilation target.
-  CFIS systems are modeled as assuming they A) maximize the use of normal heating/cooling runtime operation to meet the hourly ventilation target, B) block the flow of outdoor air when the hourly ventilation target has been met, and C) provide additional runtime operation (via air handler fan or supplemental fan) to meet the remainder of the hourly ventilation target when space heating/cooling runtime alone is not sufficient.
 
 .. _vent_fan_shared:
 
