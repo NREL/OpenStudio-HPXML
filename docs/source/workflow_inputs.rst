@@ -4042,6 +4042,8 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``IsSharedSystem``                             boolean                                                  No        false        Whether it serves multiple dwelling units or shared laundry room
   ``TankVolume``                                 double            gal            > 0                     No        See [#]_     Nominal tank volume
   ``FractionDHWLoadServed``                      double            frac           >= 0, <= 1 [#]_         Yes                    Fraction of hot water load served [#]_
+  ``HeatingCapacity``                            double            Btu/hr         > 0                     No        See [#]_     Heating output capacity
+  ``BackupHeatingCapacity``                      double            Btu/hr         >= 0                    No        15355        Heating capacity of the electric resistance backup
   ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5               Yes                    EnergyGuide label rated efficiency
   ``HPWHOperatingMode``                          string                           See [#]_                No        hybrid/auto  Operating mode [#]_
   ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_     EnergyGuide label usage bin/first hour rating
@@ -4063,6 +4065,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
+  .. [#] If HeatingCapacity not provided, defaults to 0.5 kW (1706 Btu/hr) multiplied by the heat pump COP.
   .. [#] HPWHOperatingMode choices are "hybrid/auto" or "heat pump only".
   .. [#] The heat pump water heater operating mode can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] UsageBin choices are "very small", "low", "medium", or "high".

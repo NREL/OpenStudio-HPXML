@@ -3,7 +3,7 @@
 __New Features__
 - Updates to HPXML v4.0 final release.
 - Allows `Site/Address/ZipCode` to be provided instead of `ClimateandRiskZones/WeatherStation/extension/EPWFilePath`, in which case the closest TMY3 weather station will be automatically selected.
-- Adds inputs for modeling skylight curbs and/or shafts.
+- Allows optional inputs for modeling skylight curbs and/or shafts.
 - Allows modeling exterior horizontal insulation for a slab-on-grade foundation (or basement/crawlspace floor).
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
 - Window shading enhancements:
@@ -15,6 +15,7 @@ __New Features__
   - Updates hot water usage based on FSEC study.
   - Updates misc/tv plug load usage based on RECS 2020 data.
   - Updates relationship between number of bedrooms and number of occupants to use RECS 2020 instead of RECS 2015.
+- Allows optional `HeatingCapacity` and `BackupHeatingCapacity` inputs for heat pump water heaters (HPWHs).
 - Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
   - CFIS systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
