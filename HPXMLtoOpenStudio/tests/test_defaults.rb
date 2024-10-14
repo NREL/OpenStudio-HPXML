@@ -2966,7 +2966,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 19.8, 56.9)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 19.9, 56.9)
 
     # Test defaults w/ MF building, guarded test
     hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
@@ -3030,7 +3030,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     vent_fan.cfis_addtl_runtime_operating_mode = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, nil, 305.4, 1.0, HPXML::CFISModeAirHandler)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, 300.0, 305.4, 1.0, HPXML::CFISModeAirHandler)
 
     # Test inputs not overridden by defaults w/ CFIS & supplemental fan
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
@@ -3052,17 +3052,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_mech_vent_suppl_values(default_hpxml_bldg, false, nil, 35.6, 101.8)
-
-    # Test defaults w/ CFIS
-    vent_fan.is_shared_system = nil
-    vent_fan.hours_in_operation = nil
-    vent_fan.fan_power = nil
-    vent_fan.rated_flow_rate = nil
-    vent_fan.cfis_vent_mode_airflow_fraction = nil
-    vent_fan.cfis_addtl_runtime_operating_mode = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, nil, 305.4, 1.0, HPXML::CFISModeAirHandler)
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-erv.xml')
