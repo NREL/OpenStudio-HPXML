@@ -240,7 +240,22 @@ class ReportSimulationOutputTest < Minitest::Test
     'HVAC Design Load: Cooling Latent: Ventilation (Btu/h)',
     'HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)',
     'HVAC Geothermal Loop: Borehole/Trench Count',
-    'HVAC Geothermal Loop: Borehole/Trench Length (ft)'
+    'HVAC Geothermal Loop: Borehole/Trench Length (ft)',
+    'Electric Panel Load: Heating (W)',
+    'Electric Panel Load: Cooling (W)',
+    'Electric Panel Load: Hot Water (W)',
+    'Electric Panel Load: Clothes Dryer (W)',
+    'Electric Panel Load: Lighting (W)',
+    'Electric Panel Load: Kitchen (W)',
+    'Electric Panel Load: Laundry (W)',
+    'Electric Panel Capacity: Load-Based Total (W)',
+    'Electric Panel Capacity: Load Based Total (A)',
+    'Electric Panel Capacity: Load-Based Constraint (W)',
+    'Electric Panel Capacity: Meter-Based Total (W)',
+    'Electric Panel Capacity: Meter-Based Total (A)',
+    'Electric Panel Capacity: Meter-Based Constraint (W)',
+    'Electric Panel Breaker Space: HVAC Count',
+    'Electric Panel Breaker Space: Total Count'
   ]
 
   BaseHPXMLTimeseriesColsEnergy = [
@@ -664,6 +679,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_annual_component_loads' => false,
                   'include_annual_hot_water_uses' => false,
                   'include_annual_hvac_summary' => false,
+                  'include_annual_panel_summary' => false,
                   'include_annual_resilience' => false }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
