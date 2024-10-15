@@ -102,7 +102,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Require full annual simulation if PV
     if !(@hpxml_header.sim_begin_month == 1 && @hpxml_header.sim_begin_day == 1 && @hpxml_header.sim_end_month == 12 && @hpxml_header.sim_end_day == 31)
-      if @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
+      if @hpxml_buildings.count { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? } > 0
         warnings << 'A full annual simulation is required for calculating utility bills for homes with PV.'
       end
     end
@@ -179,7 +179,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     @hpxml_header = hpxml.header
     @hpxml_buildings = hpxml.buildings
     if @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
-      uses_unit_multipliers = @hpxml_buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
+      uses_unit_multipliers = @hpxml_buildings.count { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 } > 0
       if uses_unit_multipliers || (@hpxml_buildings.size > 1 && hpxml.header.whole_sfa_or_mf_building_sim)
         return result
       end
@@ -203,9 +203,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     has_fuel[HPXML::FuelTypeElectricity] = true
 
     # Has production
-    has_pv = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
+    has_pv = @hpxml_buildings.count { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? } > 0
     has_battery = @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0 # has modeled battery
-    has_generator = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.generators.empty? }.size > 0
+    has_generator = @hpxml_buildings.count { |hpxml_bldg| !hpxml_bldg.generators.empty? } > 0
 
     # Fuel outputs
     fuels.each do |(fuel_type, is_production), fuel|
@@ -270,7 +270,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     @hpxml_header = hpxml.header
     @hpxml_buildings = hpxml.buildings
     if @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
-      uses_unit_multipliers = @hpxml_buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
+      uses_unit_multipliers = @hpxml_buildings.count { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 } > 0
       if uses_unit_multipliers
         runner.registerWarning('Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers.')
         return false
@@ -390,7 +390,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       # Convert from EnergyPlus default (end-of-timestep) to start-of-timestep convention
       if args[:monthly_timestamp_convention] == 'start'
-        ts_offset = Constants.NumDaysInMonths(year)[month - 1] * 60 * 60 * 24 # seconds
+        ts_offset = Calendar.num_days_in_months(year)[month - 1] * 60 * 60 * 24 # seconds
       end
 
       ts = Time.utc(year, month, day, hour, minute)
@@ -488,7 +488,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         data = data.zip(*monthly_data)
 
         # Write file
-        CSV.open(monthly_output_path, 'wb') { |csv| data.to_a.each { |elem| csv << elem } }
+        # Note: We don't use the CSV library here because it's slow for large files
+        File.open(monthly_output_path, 'wb') { |csv| data.to_a.each { |elem| csv << "#{elem.join(',')}\n" } }
       elsif ['json', 'msgpack'].include? args[:output_format]
         h = {}
         h['Time'] = data[2..-1]
@@ -530,7 +531,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   # Fill each UtilityRate object based on simple or detailed utility rate information.
   #
-  # @param hpxml_path [String] path of the input HPXML file
+  # @param hpxml_path [String] Path to the HPXML file
   # @param fuels [Hash] Fuel type, is_production => Fuel object
   # @param utility_rates [Hash] Fuel Type => UtilityRate object
   # @param bill_scenario [HPXML::UtilityBillScenario] HPXML Utility Bill Scenario object
@@ -693,7 +694,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
 
       bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge + bill.annual_production_credit
-      bill.monthly_total = [bill.monthly_fixed_charge, bill.monthly_energy_charge, bill.monthly_production_credit].transpose.map { |x| x.reduce(:+) }
+      bill.monthly_total = [bill.monthly_fixed_charge, bill.monthly_energy_charge, bill.monthly_production_credit].transpose.map { |x| x.sum }
     end
   end
 

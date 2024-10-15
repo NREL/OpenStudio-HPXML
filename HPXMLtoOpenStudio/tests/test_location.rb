@@ -8,6 +8,11 @@ require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioLocationTest < Minitest::Test
+  def teardown
+    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
+    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+  end
+
   def sample_files_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
@@ -99,7 +104,7 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     assert_equal(19, weather.data.DeepGroundPhaseShiftTempAmp1)
     assert_equal(-34, weather.data.DeepGroundPhaseShiftTempAmp2)
     assert_equal(1, runner.result.stepWarnings.size)
-    assert_equal(1, runner.result.stepWarnings.select { |w| w == 'No design condition info found; calculating design conditions from EPW weather data.' }.size)
+    assert_equal(1, runner.result.stepWarnings.count { |w| w == 'No design condition info found; calculating design conditions from EPW weather data.' })
   end
 
   def _test_measure(args_hash)

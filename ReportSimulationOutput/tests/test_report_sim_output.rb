@@ -1166,9 +1166,9 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    assert_equal(1, timeseries_rows[0].select { |r| r == 'Time' }.size)
-    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeDST' }.size)
-    assert_equal(1, timeseries_rows[0].select { |r| r == 'TimeUTC' }.size)
+    assert_equal(1, timeseries_rows[0].count { |r| r == 'Time' })
+    assert_equal(1, timeseries_rows[0].count { |r| r == 'TimeDST' })
+    assert_equal(1, timeseries_rows[0].count { |r| r == 'TimeUTC' })
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     assert_equal(3, _check_for_constant_timeseries_step(timeseries_cols[1]))
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[2])) end
@@ -1249,7 +1249,7 @@ class ReportSimulationOutputTest < Minitest::Test
   def test_timeseries_timestamp_convention
     # Expected values are arrays of time offsets (in seconds) for each reported row of output
     expected_values_array = { 'timestep' => [30 * 60] * 17520,
-                              'monthly' => Constants.NumDaysInMonths(1999).map { |n_days| n_days * 60 * 60 * 24 } }
+                              'monthly' => Calendar.num_days_in_months(1999).map { |n_days| n_days * 60 * 60 * 24 } }
 
     expected_values_array.each do |timeseries_frequency, expected_values|
       args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-simcontrol-timestep-30-mins.xml'),
