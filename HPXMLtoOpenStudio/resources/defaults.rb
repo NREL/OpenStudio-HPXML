@@ -5676,7 +5676,7 @@ module Defaults
               HPXML::ElectricPanelLoadTypeOther => 120 }
 
     # Heating
-    watts[HPXML::ElectricPanelLoadTypeHeating] = heating_watts = heating_watts + heating_handler_watts + backup_heating_watts
+    watts[HPXML::ElectricPanelLoadTypeHeating] = heating_watts + heating_handler_watts + backup_heating_watts
 
     # Cooling
     watts[HPXML::ElectricPanelLoadTypeCooling] = cooling_watts + cooling_handler_watts
