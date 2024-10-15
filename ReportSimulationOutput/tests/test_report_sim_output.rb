@@ -75,7 +75,7 @@ class ReportSimulationOutputTest < Minitest::Test
     "End Use: #{FT::Elec}: #{EUT::PV} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::Generator} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::Battery} (MBtu)",
-    "End Use: #{FT::Elec}: #{EUT::EVBattery} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Vehicle} (MBtu)",
     "End Use: #{FT::Gas}: #{EUT::Heating} (MBtu)",
     "End Use: #{FT::Gas}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
     "End Use: #{FT::Gas}: #{EUT::HotWater} (MBtu)",
@@ -471,7 +471,7 @@ class ReportSimulationOutputTest < Minitest::Test
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV} (lb)",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Generator} (lb)",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::EVBattery} (lb)",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Vehicle} (lb)",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating} (lb)",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HeatingHeatPumpBackup} (lb)",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HotWater} (lb)",
@@ -575,7 +575,7 @@ class ReportSimulationOutputTest < Minitest::Test
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PlugLoads}",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV}",
                "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::EVBattery}",
+               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Vehicle}",
                "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating}"]
     end
     return cols
@@ -584,7 +584,7 @@ class ReportSimulationOutputTest < Minitest::Test
   def pv_battery_timeseries_cols
     return ["End Use: #{FT::Elec}: #{EUT::PV}",
             "End Use: #{FT::Elec}: #{EUT::Battery}",
-            "End Use: #{FT::Elec}: #{EUT::EVBattery}"]
+            "End Use: #{FT::Elec}: #{EUT::Vehicle}"]
   end
 
   def test_annual_only
