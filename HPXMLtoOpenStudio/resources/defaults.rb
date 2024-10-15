@@ -2918,7 +2918,7 @@ module Defaults
           water_heating_system.heating_capacity_isdefaulted = true
         end
         if water_heating_system.backup_heating_capacity.nil?
-          water_heating_system.backup_heating_capacity = UnitConversions.convert(4.5, 'kW', 'Btu/hr')
+          water_heating_system.backup_heating_capacity = UnitConversions.convert(4.5, 'kW', 'Btu/hr').round
           water_heating_system.backup_heating_capacity_isdefaulted = true
         end
         if water_heating_system.tank_volume.nil?
