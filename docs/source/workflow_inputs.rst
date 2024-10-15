@@ -4555,7 +4555,7 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``SystemIdentifier``                                  id                                           Yes                 Unique identifier
   ``Voltage``                                           string              See [#]_                 No        240
   ``MaxCurrentRating``                                  double                                       No        150
-  ``PanelLoads``                                        element                                      No        See [#]_  Individual electric panel loads [#]_
+  ``extension/PanelLoads``                              element                                      No        See [#]_  Individual electric panel loads [#]_
   ====================================================  =======  =========  =======================  ========  ========  ============================================
 
   .. [#] Voltage choices are "120" or "240".

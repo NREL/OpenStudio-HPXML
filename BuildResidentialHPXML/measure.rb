@@ -2639,7 +2639,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_types', false)
     arg.setDisplayName('Electric Panel: Load Types')
-    arg.setDescription("Specified the panel load types. Possible load types are: #{HPXML::ElectricPanelLoadTypeHeating}, #{HPXML::ElectricPanelLoadTypeCooling}, #{HPXML::ElectricPanelLoadTypeWaterHeater}, #{HPXML::ElectricPanelLoadTypeClothesDryer}. If multiple loads, use a comma-separated list.")
+    arg.setDescription("Specified the panel load types. Possible load types are: #{HPXML::ElectricPanelLoadTypeHeating}, #{HPXML::ElectricPanelLoadTypeCooling}, #{HPXML::ElectricPanelLoadTypeWaterHeater}, #{HPXML::ElectricPanelLoadTypeClothesDryer}, #{HPXML::ElectricPanelLoadTypeDishwasher}, #{HPXML::ElectricPanelLoadTypeRangeOven}, #{HPXML::ElectricPanelLoadTypePermanentSpaHeater}, #{HPXML::ElectricPanelLoadTypePermanentSpaPump}, #{HPXML::ElectricPanelLoadTypePoolHeater}, #{HPXML::ElectricPanelLoadTypePoolPump}, #{HPXML::ElectricPanelLoadTypeWellPump}, #{HPXML::ElectricPanelLoadTypeElectricVehicleCharging}, #{HPXML::ElectricPanelLoadTypeOther}. If multiple loads, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_watts', false)

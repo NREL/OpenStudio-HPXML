@@ -4436,7 +4436,7 @@ The service rating of the electric panel. If not provided, the OS-HPXML default 
 
 **Electric Panel: Load Types**
 
-Specified the panel load types. Possible load types are: Heating, Cooling, Hot Water, Clothes Dryer. If multiple loads, use a comma-separated list.
+Specified the panel load types. Possible load types are: Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Permanent Spa Heater, Permanent Spa Pump, Pool Heater, Pool Pump, Well Pump, Electric Vehicle Charging, Other. If multiple loads, use a comma-separated list.
 
 - **Name:** ``electric_panel_load_types``
 - **Type:** ``String``

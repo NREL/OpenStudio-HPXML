@@ -117,9 +117,18 @@ class HPXML < Object
   ElectricPanelLoadTypeCooling = 'Cooling'
   ElectricPanelLoadTypeWaterHeater = 'Hot Water'
   ElectricPanelLoadTypeClothesDryer = 'Clothes Dryer'
+  ElectricPanelLoadTypeDishwasher = 'Dishwasher'
+  ElectricPanelLoadTypeRangeOven = 'Range/Oven'
+  ElectricPanelLoadTypePermanentSpaHeater = 'Permanent Spa Heater'
+  ElectricPanelLoadTypePermanentSpaPump = 'Permanent Spa Pump'
+  ElectricPanelLoadTypePoolHeater = 'Pool Heater'
+  ElectricPanelLoadTypePoolPump = 'Pool Pump'
+  ElectricPanelLoadTypeWellPump = 'Well Pump'
+  ElectricPanelLoadTypeElectricVehicleCharging = 'Electric Vehicle Charging'
   ElectricPanelLoadTypeLighting = 'Lighting'
   ElectricPanelLoadTypeKitchen = 'Kitchen'
   ElectricPanelLoadTypeLaundry = 'Laundry'
+  ElectricPanelLoadTypeOther = 'Other'
   ElectricPanelVoltage120 = '120'
   ElectricPanelVoltage240 = '240'
   ElectricResistanceDistributionRadiantCeiling = 'radiant ceiling'
@@ -543,9 +552,6 @@ class HPXML < Object
   CLB_ATTRS = { clb_total_w: 'Watts',
                 clb_total_a: 'Amps',
                 clb_constraint_a: 'Constraint' }
-  # CMB_ATTRS = { cmb_total_w: 'Watts',
-  # cmb_total_a: 'Amps',
-  # cmb_constraint_a: 'Constraint' }
   BS_ATTRS = { bs_total: 'Total',
                bs_hvac: 'HVAC' }
 

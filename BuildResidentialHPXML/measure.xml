@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>ae866e63-50a1-437a-91b9-c77901247782</version_id>
-  <version_modified>2024-10-14T15:22:20Z</version_modified>
+  <version_id>66edc2f9-fbc8-4b15-b887-8ac3d1a4fe46</version_id>
+  <version_modified>2024-10-15T17:57:34Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5419,7 +5419,7 @@
     <argument>
       <name>electric_panel_load_types</name>
       <display_name>Electric Panel: Load Types</display_name>
-      <description>Specified the panel load types. Possible load types are: Heating, Cooling, Hot Water, Clothes Dryer. If multiple loads, use a comma-separated list.</description>
+      <description>Specified the panel load types. Possible load types are: Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Permanent Spa Heater, Permanent Spa Pump, Pool Heater, Pool Pump, Well Pump, Electric Vehicle Charging, Other. If multiple loads, use a comma-separated list.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -7578,7 +7578,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>41C06872</checksum>
+      <checksum>80927F41</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -7595,7 +7595,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>041D8F54</checksum>
+      <checksum>338BDE01</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
