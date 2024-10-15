@@ -3,9 +3,25 @@
 # TODO
 module ElectricPanel
   # TODO
-  def self.calculate_load_based(electric_panel, update_hpxml: true)
+  def self.calculate(electric_panel, update_hpxml: true)
     panel_loads = PanelLoadValues.new
 
+    calculate_load_based(electric_panel, panel_loads)
+    calculate_breaker_space(panel_loads)
+
+    # Assign load-based capacities to HPXML objects for output
+    return unless update_hpxml
+
+    electric_panel.clb_total_w = panel_loads.LoadBased_CapacityW.round(1)
+    electric_panel.clb_total_a = panel_loads.LoadBased_CapacityA.round
+    electric_panel.clb_constraint_a = panel_loads.LoadBased_ConstraintA.round
+
+    electric_panel.bs_total = panel_loads.BreakerSpace_Total
+    electric_panel.bs_hvac = panel_loads.BreakerSpace_HVAC
+  end
+
+  # TODO
+  def self.calculate_load_based(electric_panel, panel_loads)
     htg = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeHeating }
     clg = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling }
     hw = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeWaterHeater }
@@ -36,19 +52,6 @@ module ElectricPanel
     panel_loads.LoadBased_CapacityW = part_a + part_b
     panel_loads.LoadBased_CapacityA = panel_loads.LoadBased_CapacityW / Float(electric_panel.voltage)
     panel_loads.LoadBased_ConstraintA = electric_panel.max_current_rating - panel_loads.LoadBased_CapacityA
-
-    panel_loads.BreakerSpace_Total = 1
-    panel_loads.BreakerSpace_HVAC = 2
-
-    # Assign load-based capacities to HPXML objects for output
-    return unless update_hpxml
-
-    electric_panel.clb_total_w = panel_loads.LoadBased_CapacityW.round(1)
-    electric_panel.clb_total_a = panel_loads.LoadBased_CapacityA.round
-    electric_panel.clb_constraint_a = panel_loads.LoadBased_ConstraintA.round
-
-    electric_panel.bs_hvac = panel_loads.BreakerSpace_HVAC
-    electric_panel.bs_total = panel_loads.BreakerSpace_Total
   end
 
   # TODO
@@ -61,6 +64,13 @@ module ElectricPanel
     capacity_a = capacity_w / Float(electric_panel.voltage)
     constraint_a = electric_panel.max_current_rating - capacity_a
     return capacity_w, capacity_a, constraint_a
+  end
+
+  # TODO
+  def self.calculate_breaker_space(panel_loads)
+    # TODO
+    panel_loads.BreakerSpace_Total = 1
+    panel_loads.BreakerSpace_HVAC = 2
   end
 end
 

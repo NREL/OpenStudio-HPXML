@@ -999,22 +999,23 @@ module Outputs
   # TODO
   def self.get_total_panel_loads(hpxml_bldg)
     htg, clg, hw, cd, ltg, kit, lnd = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    unit_multiplier = hpxml_bldg.building_construction.number_of_units
     hpxml_bldg.electric_panels.each do |electric_panel|
       electric_panel.panel_loads.each do |panel_load|
         if panel_load.type == HPXML::ElectricPanelLoadTypeHeating
-          htg += panel_load.watts
+          htg += panel_load.watts * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeCooling
-          clg += panel_load.watts
+          clg += panel_load.watts * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeWaterHeater
-          hw += panel_load.watts
+          hw += panel_load.watts * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeClothesDryer
-          cd += panel_load.watts
+          cd += panel_load.watts * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeLighting
-          ltg += panel_load.watts
+          ltg += panel_load.watts * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeKitchen
-          kit += panel_load.watts
+          kit += panel_load.watts * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeLaundry
-          lnd += panel_load.watts
+          lnd += panel_load.watts * unit_multiplier
         end
       end
     end
@@ -1203,19 +1204,19 @@ module Outputs
 
     # Load-based capacities
     results_out << [line_break]
-    results_out << ['Electric Panel Capacity: Load-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_w }.sum(0.0) }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Capacity: Load Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_a }.sum(0.0) }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Capacity: Load-Based Constraint (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_constraint_a }.sum(0.0) }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Load-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_w }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Load Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_a }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Load-Based Constraint (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_constraint_a }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
 
     # Meter-based capacities
-    results_out << ['Electric Panel Capacity: Meter-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[0] }.sum(0.0) }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Capacity: Meter-Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[1] }.sum(0.0) }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Capacity: Meter-Based Constraint (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[2] }.sum(0.0) }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Meter-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[0] }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Meter-Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[1] }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Meter-Based Constraint (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[2] }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
 
     # Panel breaker spaces
     results_out << [line_break]
-    results_out << ['Electric Panel Breaker Space: Total Count', 16]
-    results_out << ['Electric Panel Breaker Space: HVAC Count', 17]
+    results_out << ['Electric Panel Breaker Space: Total Count', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.bs_total }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round]
+    results_out << ['Electric Panel Breaker Space: HVAC Count', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.bs_hvac }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round]
 
     return results_out
   end

@@ -3182,7 +3182,7 @@ module Defaults
         end
       end
 
-      ElectricPanel.calculate_load_based(electric_panel)
+      ElectricPanel.calculate(electric_panel)
     end
   end
 
