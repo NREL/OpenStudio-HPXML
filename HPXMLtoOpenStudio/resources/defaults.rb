@@ -5686,7 +5686,9 @@ module Defaults
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
 
-      if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+      if [HPXML::WaterHeaterTypeStorage, HPXML::WaterHeaterTypeHeatPump].include?(water_heating_system.water_heater_type)
+        water_heater_watts = [water_heater_watts, 4500].max
+      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
         if hpxml_bldg.building_construction.number_of_bathrooms == 1
           water_heater_watts = [water_heater_watts, 18000].max
         elsif hpxml_bldg.building_construction.number_of_bathrooms == 2
@@ -5694,8 +5696,6 @@ module Defaults
         else # 3+
           water_heater_watts = [water_heater_watts, 36000].max
         end
-      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-        water_heater_watts = [water_heater_watts, 4500].max
       end
     end
     watts[HPXML::ElectricPanelLoadTypeWaterHeater] = water_heater_watts

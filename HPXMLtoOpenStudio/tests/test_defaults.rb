@@ -3512,9 +3512,20 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2000, HPXML::ElectricPanelVoltage120, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 3000, HPXML::ElectricPanelVoltage120, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 4000, HPXML::ElectricPanelVoltage120, true)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 8100, HPXML::ElectricPanelVoltage240, false)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeDishwasher, 1200, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 12000, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypePermanentSpaHeater, 0, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypePermanentSpaPump, 0, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypePoolHeater, 0, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypePoolPump, 0, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWellPump, 0, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeElectricVehicleCharging, 0, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 8100, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage120, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLaundry, 1500, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559, HPXML::ElectricPanelVoltage120, false)
+    _test_default_load_based_capacity_values(default_hpxml_bldg, 14640, 122, 78)
+    _test_default_breaker_space_values(default_hpxml_bldg, 1, 2)
 
     # Test defaults
     hpxml_bldg.electric_panels[0].voltage = nil
@@ -3527,13 +3538,24 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage240, 150.0)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 1525.82, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 1525.82, HPXML::ElectricPanelVoltage240, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 4981.34, HPXML::ElectricPanelVoltage240, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 4500, HPXML::ElectricPanelVoltage240, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760, HPXML::ElectricPanelVoltage240, false)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 8100, HPXML::ElectricPanelVoltage240, false)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeDishwasher, 1200, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 12000, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypePermanentSpaHeater, 0, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypePermanentSpaPump, 0, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypePoolHeater, 0, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypePoolPump, 0, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWellPump, 0, HPXML::ElectricPanelVoltage240, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeElectricVehicleCharging, 0, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 8100, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage120, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLaundry, 1500, HPXML::ElectricPanelVoltage120, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559, HPXML::ElectricPanelVoltage120, false)
+    _test_default_load_based_capacity_values(default_hpxml_bldg, 16547, 69, 81)
+    _test_default_breaker_space_values(default_hpxml_bldg, 1, 2)
   end
 
   def test_batteries
@@ -5693,6 +5715,17 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(watts, pl.watts, 0.01)
     assert_equal(voltage, pl.voltage)
     assert_equal(addition, pl.addition)
+  end
+
+  def _test_default_load_based_capacity_values(hpxml_bldg, watts, amps, constraint)
+    assert_in_epsilon(watts, hpxml_bldg.electric_panels[0].clb_total_w, 0.01)
+    assert_in_epsilon(amps, hpxml_bldg.electric_panels[0].clb_total_a, 0.01)
+    assert_in_epsilon(constraint, hpxml_bldg.electric_panels[0].clb_constraint_a, 0.01)
+  end
+
+  def _test_default_breaker_space_values(hpxml_bldg, total, hvac)
+    assert_equal(total, hpxml_bldg.electric_panels[0].bs_total)
+    assert_equal(hvac, hpxml_bldg.electric_panels[0].bs_hvac)
   end
 
   def _test_default_battery_values(battery, nominal_capacity_kwh, nominal_capacity_ah, usable_capacity_kwh, usable_capacity_ah,
