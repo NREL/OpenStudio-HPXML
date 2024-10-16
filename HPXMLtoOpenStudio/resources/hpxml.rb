@@ -8402,6 +8402,7 @@ class HPXML < Object
              :tank_volume,               # [Double] TankVolume (gal)
              :fraction_dhw_load_served,  # [Double] FractionDHWLoadServed (frac)
              :heating_capacity,          # [Double] HeatingCapacity (Btu/hr)
+             :backup_heating_capacity,   # [Double] BackupHeatingCapacity (Btu/hr)
              :energy_factor,             # [Double] EnergyFactor (frac)
              :uniform_energy_factor,     # [Double] UniformEnergyFactor (frac)
              :operating_mode,            # [String] HPWHOperatingMode (HPXML::WaterHeaterOperatingModeXXX)
@@ -8485,6 +8486,7 @@ class HPXML < Object
       XMLHelper.add_element(water_heating_system, 'TankVolume', @tank_volume, :float, @tank_volume_isdefaulted) unless @tank_volume.nil?
       XMLHelper.add_element(water_heating_system, 'FractionDHWLoadServed', @fraction_dhw_load_served, :float) unless @fraction_dhw_load_served.nil?
       XMLHelper.add_element(water_heating_system, 'HeatingCapacity', @heating_capacity, :float, @heating_capacity_isdefaulted) unless @heating_capacity.nil?
+      XMLHelper.add_element(water_heating_system, 'BackupHeatingCapacity', @backup_heating_capacity, :float, @backup_heating_capacity_isdefaulted) unless @backup_heating_capacity.nil?
       XMLHelper.add_element(water_heating_system, 'EnergyFactor', @energy_factor, :float, @energy_factor_isdefaulted) unless @energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'UniformEnergyFactor', @uniform_energy_factor, :float) unless @uniform_energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'HPWHOperatingMode', @operating_mode, :string, @operating_mode_isdefaulted) unless @operating_mode.nil?
@@ -8532,6 +8534,7 @@ class HPXML < Object
       @tank_volume = XMLHelper.get_value(water_heating_system, 'TankVolume', :float)
       @fraction_dhw_load_served = XMLHelper.get_value(water_heating_system, 'FractionDHWLoadServed', :float)
       @heating_capacity = XMLHelper.get_value(water_heating_system, 'HeatingCapacity', :float)
+      @backup_heating_capacity = XMLHelper.get_value(water_heating_system, 'BackupHeatingCapacity', :float)
       @energy_factor = XMLHelper.get_value(water_heating_system, 'EnergyFactor', :float)
       @uniform_energy_factor = XMLHelper.get_value(water_heating_system, 'UniformEnergyFactor', :float)
       @operating_mode = XMLHelper.get_value(water_heating_system, 'HPWHOperatingMode', :string)
