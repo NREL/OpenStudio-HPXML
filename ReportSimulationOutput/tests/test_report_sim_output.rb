@@ -256,7 +256,7 @@ class ReportSimulationOutputTest < Minitest::Test
     'Electric Panel Load: Lighting (W)',
     'Electric Panel Load: Other (W)',
     'Electric Panel Capacity: Load-Based Total (W)',
-    'Electric Panel Capacity: Load Based Total (A)',
+    'Electric Panel Capacity: Load-Based Total (A)',
     'Electric Panel Capacity: Load-Based Constraint (W)',
     'Electric Panel Capacity: Meter-Based Total (W)',
     'Electric Panel Capacity: Meter-Based Total (A)',

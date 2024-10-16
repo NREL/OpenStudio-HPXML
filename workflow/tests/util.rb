@@ -1204,7 +1204,6 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
               puts "#{debug_str}, abs_delta_tol=#{abs_delta_tol}, abs_frac_tol=#{abs_frac_tol}"
             end
           end
-          puts "abs_val_delta #{abs_val_delta} abs_delta_tol #{abs_delta_tol}"
           assert((abs_val_delta <= abs_delta_tol) || (!abs_val_frac.nil? && abs_val_frac <= abs_frac_tol))
         end
       end
