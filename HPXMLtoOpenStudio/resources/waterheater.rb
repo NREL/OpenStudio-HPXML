@@ -21,8 +21,8 @@ module Waterheater
     hpxml_bldg.water_heating_systems.each do |dhw_system|
       if dhw_system.water_heater_type == HPXML::WaterHeaterTypeStorage
         apply_tank(model, runner, spaces, hpxml_bldg, hpxml_header, dhw_system, schedules_file, unavailable_periods, plantloop_map)
-      elsif dhw_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-        apply_tankless(model, runner, spaces, hpxml_bldg, hpxml_header, dhw_system, schedules_file, unavailable_periods, plantloop_map)
+      elsif dhw_system.water_heater_type == HPXML::WaterHeaterTypeInstantaneous
+        apply_instantaneous(model, runner, spaces, hpxml_bldg, hpxml_header, dhw_system, schedules_file, unavailable_periods, plantloop_map)
       elsif dhw_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
         apply_heatpump(model, runner, spaces, hpxml_bldg, hpxml_header, dhw_system, schedules_file, unavailable_periods, plantloop_map)
       elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? dhw_system.water_heater_type
@@ -95,7 +95,7 @@ module Waterheater
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param plantloop_map [Hash] Map of HPXML System ID => OpenStudio PlantLoop objects
   # @return [nil]
-  def self.apply_tankless(model, runner, spaces, hpxml_bldg, hpxml_header, water_heating_system, schedules_file, unavailable_periods, plantloop_map)
+  def self.apply_instantaneous(model, runner, spaces, hpxml_bldg, hpxml_header, water_heating_system, schedules_file, unavailable_periods, plantloop_map)
     loc_space, loc_schedule = Geometry.get_space_or_schedule_from_location(water_heating_system.location, model, spaces)
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     water_heating_system.heating_capacity = 100000000000.0 * unit_multiplier
@@ -1573,7 +1573,7 @@ module Waterheater
     if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
         return [2.4029 * water_heating_system.uniform_energy_factor - 1.2844, 0.96].min
-      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeInstantaneous
         return water_heating_system.uniform_energy_factor
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
         return 1.2101 * water_heating_system.uniform_energy_factor - 0.6052
@@ -1581,7 +1581,7 @@ module Waterheater
     else # Fuel
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
         return 0.9066 * water_heating_system.uniform_energy_factor + 0.0711
-      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeInstantaneous
         return water_heating_system.uniform_energy_factor
       end
     end
@@ -1816,7 +1816,7 @@ module Waterheater
     #   Calculates the U value, UA of the tank and conversion efficiency (eta_c)
     #   based on the Uniform Energy Factor, First Hour Rating, and Recovery Efficiency of the tank
     #   Source: Maguire and Roberts 2020 - https://www.ashrae.org/file%20library/conferences/specialty%20conferences/2020%20building%20performance/papers/d-bsc20-c039.pdf
-    if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+    if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeInstantaneous
       if not water_heating_system.energy_factor.nil?
         eta_c = water_heating_system.energy_factor * water_heating_system.performance_adjustment
       elsif not water_heating_system.uniform_energy_factor.nil?
@@ -2002,7 +2002,7 @@ module Waterheater
       new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
       new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
       new_heater.setMaximumTemperatureLimit(99.0)
-      if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
+      if [HPXML::WaterHeaterTypeInstantaneous, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
         new_heater.setHeaterControlType('Modulate')
       else
         new_heater.setHeaterControlType('Cycle')

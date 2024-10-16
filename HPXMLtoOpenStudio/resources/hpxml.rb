@@ -457,7 +457,7 @@ class HPXML < Object
   WaterHeaterTypeCombiStorage = 'space-heating boiler with storage tank'
   WaterHeaterTypeCombiTankless = 'space-heating boiler with tankless coil'
   WaterHeaterTypeHeatPump = 'heat pump water heater'
-  WaterHeaterTypeTankless = 'instantaneous water heater'
+  WaterHeaterTypeInstantaneous = 'instantaneous water heater'
   WaterHeaterTypeStorage = 'storage water heater'
   WaterHeaterUsageBinVerySmall = 'very small'
   WaterHeaterUsageBinLow = 'low'

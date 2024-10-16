@@ -235,9 +235,9 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
 
-  def test_tankless_electric
+  def test_instantaneous_electric
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tankless-electric.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-instantaneous-electric.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -266,9 +266,9 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
 
-  def test_tankless_electric_uef
+  def test_instantaneous_electric_uef
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tankless-electric-uef.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-instantaneous-electric-uef.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -297,9 +297,9 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     assert_equal(1.0, wh.offCycleLossFractiontoThermalZone)
   end
 
-  def test_tankless_gas_uef
+  def test_instantaneous_gas_uef
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-tankless-gas-uef.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-instantaneous-gas-uef.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values

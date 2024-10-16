@@ -4945,13 +4945,13 @@ module Defaults
     end
   end
 
-  # Gets the default performance adjustment for a tankless water heater. Multiplier on efficiency
+  # Gets the default performance adjustment for an instantaneous water heater. Multiplier on efficiency
   # to account for cycling.
   #
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
   # @return [Double] Water heater performance adjustment (frac)
   def self.get_water_heater_performance_adjustment(water_heating_system)
-    return unless water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+    return unless water_heating_system.water_heater_type == HPXML::WaterHeaterTypeInstantaneous
     if not water_heating_system.energy_factor.nil?
       return 0.92 # Applies to EF, ANSI 301-2019
     elsif not water_heating_system.uniform_energy_factor.nil?
