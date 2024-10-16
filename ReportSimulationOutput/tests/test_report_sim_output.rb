@@ -254,8 +254,6 @@ class ReportSimulationOutputTest < Minitest::Test
     'Electric Panel Load: Well Pump (W)',
     'Electric Panel Load: Electric Vehicle Charging (W)',
     'Electric Panel Load: Lighting (W)',
-    'Electric Panel Load: Kitchen (W)',
-    'Electric Panel Load: Laundry (W)',
     'Electric Panel Load: Other (W)',
     'Electric Panel Capacity: Load-Based Total (W)',
     'Electric Panel Capacity: Load Based Total (A)',

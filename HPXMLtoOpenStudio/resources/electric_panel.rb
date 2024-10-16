@@ -26,9 +26,18 @@ module ElectricPanel
     clg = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling }
     hw = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeWaterHeater }
     cd = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeClothesDryer }
+    dw = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeDishwasher }
+    ov = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeRangeOven }
+    sh = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypePermanentSpaHeater }
+    sp = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypePermanentSpaPump }
+    ph = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypePoolHeater }
+    pp = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypePoolPump }
+    wp = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeWellPump }
+    ev = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging }
     ltg = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeLighting }
     kit = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeKitchen }
     lnd = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeLaundry }
+    oth = electric_panel.panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeOther }
 
     new_hvac = 0.0
     if htg.addition && clg.addition
@@ -40,16 +49,16 @@ module ElectricPanel
     end
 
     if new_hvac > 0
-      all_loads = hw.watts + cd.watts + ltg.watts + kit.watts + lnd.watts
+      all_loads = hw.watts + cd.watts + dw.watts + ov.watts + sh.watts + sp.watts + ph.watts + pp.watts + wp.watts + ev.watts + ltg.watts + kit.watts + lnd.watts + oth.watts
       part_a = 8000.0 + (all_loads - 8000.0) * 0.4
       part_b = new_hvac
     else
-      all_loads = htg.watts + clg.watts + hw.watts + cd.watts + ltg.watts + kit.watts + lnd.watts
+      all_loads = htg.watts + clg.watts + hw.watts + cd.watts + dw.watts + ov.watts + sh.watts + sp.watts + ph.watts + pp.watts + wp.watts + ev.watts + ltg.watts + kit.watts + lnd.watts + oth.watts
       part_a = 8000.0 + (all_loads - 8000.0) * 0.4
       part_b = 0.0
     end
 
-    panel_loads.LoadBased_CapacityW = part_a + part_b
+    panel_loads.LoadBased_CapacityW = (part_a + part_b).round(1)
     panel_loads.LoadBased_CapacityA = panel_loads.LoadBased_CapacityW / Float(electric_panel.voltage)
     panel_loads.LoadBased_ConstraintA = electric_panel.max_current_rating - panel_loads.LoadBased_CapacityA
   end
@@ -60,7 +69,7 @@ module ElectricPanel
     electric_panel.panel_loads.each do |panel_load|
       new_loads += panel_load.watts if panel_load.addition
     end
-    capacity_w = new_loads + 1.25 * peak_fuels[[FT::Elec, PFT::Annual]].annual_output
+    capacity_w = (new_loads + 1.25 * peak_fuels[[FT::Elec, PFT::Annual]].annual_output).round(1)
     capacity_a = capacity_w / Float(electric_panel.voltage)
     constraint_a = electric_panel.max_current_rating - capacity_a
     return capacity_w, capacity_a, constraint_a

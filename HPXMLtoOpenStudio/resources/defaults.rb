@@ -3177,7 +3177,7 @@ module Defaults
 
       electric_panel.panel_loads.each do |panel_load|
         if panel_load.watts.nil?
-          panel_load.watts = default_values[:panel_watts][panel_load.type]
+          panel_load.watts = default_values[:panel_watts][panel_load.type].round(1)
           panel_load.watts_isdefaulted = true
         end
         if panel_load.voltage.nil?

@@ -1226,7 +1226,7 @@ module Outputs
     # Load-based capacities
     results_out << [line_break]
     results_out << ['Electric Panel Capacity: Load-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_w }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Capacity: Load Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_a }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Load-Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_total_a }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
     results_out << ['Electric Panel Capacity: Load-Based Constraint (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_constraint_a }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
 
     # Meter-based capacities
