@@ -1599,14 +1599,14 @@
     "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },
-  "sample_files/base-electric-panel.xml": {
-    "parent_hpxml": "sample_files/base.xml",
+  "sample_files/base-hvac-furnace-elec-central-ac-1-speed-detailed-electric-panel.xml": {
+    "parent_hpxml": "sample_files/base-hvac-furnace-elec-central-ac-1-speed.xml",
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
-    "electric_panel_load_types": "Heating, Cooling, Hot Water, Clothes Dryer",
-    "electric_panel_load_watts": "17943, 16000, 4500, 5760",
-    "electric_panel_load_voltages": "240, 240, 120, 240",
-    "electric_panel_load_additions": "true, true, false, false"
+    "electric_panel_load_types": "Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Other",
+    "electric_panel_load_watts": "17943, 4346, 4500, 5760, 1200, 12000, 559",
+    "electric_panel_load_voltages": "240, 240, 240, 240, 120, 240, 120",
+    "electric_panel_load_additions": "false, false, false, false, false, false, false"
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",

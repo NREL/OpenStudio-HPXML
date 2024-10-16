@@ -1078,7 +1078,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       elsif key.include?('(kWh)')
         abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kWh')
       end
-    elsif key.include?('Peak Electricity:')
+    elsif key.include?('Peak Electricity:') || key.include?('Electric Panel Capacity: Meter-Based')
       # Check that the peak electricity difference is less than 500 W or less than 15%
       # Wider tolerances than others because a small change in when an event (like the
       # water heating firing) occurs can significantly impact the peak.
@@ -1104,7 +1104,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
       abs_frac_tol = nil
-    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:') || key.include?('Electric Panel Load:') || key.include?('Electric Panel Capacity:') || key.include?('Electric Panel Breaker Space:')
+    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:') || key.include?('Electric Panel Load:') || key.include?('Electric Panel Capacity: Load-Based') || key.include?('Electric Panel Breaker Space:')
       # Check that there is no difference
       abs_delta_tol = 0
       abs_frac_tol = nil
@@ -1203,6 +1203,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
               puts "#{debug_str}, abs_delta_tol=#{abs_delta_tol}, abs_frac_tol=#{abs_frac_tol}"
             end
           end
+          puts "abs_val_delta #{abs_val_delta} abs_delta_tol #{abs_delta_tol}"
           assert((abs_val_delta <= abs_delta_tol) || (!abs_val_frac.nil? && abs_val_frac <= abs_frac_tol))
         end
       end

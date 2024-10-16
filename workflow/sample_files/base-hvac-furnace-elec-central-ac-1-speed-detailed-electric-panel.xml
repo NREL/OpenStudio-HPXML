@@ -326,11 +326,11 @@
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingSystemFuel>electricity</HeatingSystemFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.92</Value>
+                <Value>1.0</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
@@ -438,24 +438,42 @@
                   <Type>Heating</Type>
                   <Watts>17943.0</Watts>
                   <Voltage>240</Voltage>
-                  <Addition>true</Addition>
+                  <Addition>false</Addition>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Cooling</Type>
-                  <Watts>16000.0</Watts>
+                  <Watts>4346.0</Watts>
                   <Voltage>240</Voltage>
-                  <Addition>true</Addition>
+                  <Addition>false</Addition>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Hot Water</Type>
                   <Watts>4500.0</Watts>
-                  <Voltage>120</Voltage>
+                  <Voltage>240</Voltage>
                   <Addition>false</Addition>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Clothes Dryer</Type>
                   <Watts>5760.0</Watts>
                   <Voltage>240</Voltage>
+                  <Addition>false</Addition>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Dishwasher</Type>
+                  <Watts>1200.0</Watts>
+                  <Voltage>120</Voltage>
+                  <Addition>false</Addition>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Range/Oven</Type>
+                  <Watts>12000.0</Watts>
+                  <Voltage>240</Voltage>
+                  <Addition>false</Addition>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Other</Type>
+                  <Watts>559.0</Watts>
+                  <Voltage>120</Voltage>
                   <Addition>false</Addition>
                 </PanelLoad>
               </PanelLoads>
