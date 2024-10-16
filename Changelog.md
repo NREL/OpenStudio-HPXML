@@ -45,6 +45,7 @@ __Bugfixes__
 - Fixes lower element height for a water heater using the advanced `WaterHeatingSystem/extension/TankModelType=stratified`.
 - Fixes possible error for a combi boiler system.
 - Fixes error if modeling a ground-to-air heat pump with a separate backup heating system.
+- Fixes default CFIS fan power during ventilation only mode.
 
 ## OpenStudio-HPXML v1.8.1
 

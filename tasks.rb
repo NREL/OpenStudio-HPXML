@@ -2254,7 +2254,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                       fan_type: HPXML::MechVentTypeCFIS,
                                       tested_flow_rate: 42.5,
                                       hours_in_operation: 8,
-                                      fan_power: 37.5,
                                       used_for_whole_building_ventilation: true,
                                       cfis_addtl_runtime_operating_mode: HPXML::CFISModeSupplementalFan,
                                       cfis_supplemental_fan_idref: hpxml_bldg.ventilation_fans.find { |f| f.fan_type == HPXML::MechVentTypeExhaust }.id,

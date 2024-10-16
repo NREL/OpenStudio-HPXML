@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f399dccb-0f0e-4047-b230-4eee17e292b7</version_id>
-  <version_modified>2024-10-16T19:09:03Z</version_modified>
+  <version_id>611abdca-3ead-44bc-9314-4f05aa5fbf6d</version_id>
+  <version_modified>2024-10-16T19:16:54Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -189,7 +189,7 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A1DA58C9</checksum>
+      <checksum>443A48EB</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1221430A</checksum>
+      <checksum>03BF875A</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
@@ -363,7 +363,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>59A2FF81</checksum>
+      <checksum>1143D78D</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -381,7 +381,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>272967A8</checksum>
+      <checksum>4E9DFB56</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -657,7 +657,7 @@
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3FC8C8A7</checksum>
+      <checksum>06A02536</checksum>
     </file>
     <file>
       <filename>test_battery.rb</filename>
@@ -669,7 +669,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>7AE3548D</checksum>
+      <checksum>8EBB575E</checksum>
     </file>
     <file>
       <filename>test_electric_panel.rb</filename>
@@ -747,7 +747,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D7BF36E5</checksum>
+      <checksum>2E4AE571</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
