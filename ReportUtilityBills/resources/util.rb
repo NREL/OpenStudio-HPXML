@@ -614,16 +614,16 @@ def process_usurdb(filepath)
     next if rate['energyweekdayschedule'].nil? || rate['energyweekendschedule'].nil? || rate['energyratestructure'].nil?
 
     # ignore rates without a "rate" key
-    next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys.include?('rate') } }.flatten.any? { |t| !t }
+    next if rate['energyratestructure'].collect { |r| r.collect { |s| !s.keys.include?('rate') } }.flatten.any?
 
     # ignore rates with negative "rate" value
-    next if rate['energyratestructure'].collect { |r| r.collect { |s| s['rate'] >= 0 } }.flatten.any? { |t| !t }
+    next if rate['energyratestructure'].collect { |r| r.collect { |s| s['rate'] < 0 } }.flatten.any?
 
     # ignore rates with a "sell" key
     next if rate['energyratestructure'].collect { |r| r.collect { |s| s.keys } }.flatten.uniq.include?('sell')
 
-    # set rate units to 'kWh'
-    rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] = 'kWh' } }
+    # ignore rates where max usage is provided but max units are not 'kWh'
+    next if rate['energyratestructure'].collect { |r| r.collect { |s| s['unit'] != 'kWh' && s.keys.include?('max') } }.flatten.any?
 
     residential_rates << { 'items' => [rate] }
   end

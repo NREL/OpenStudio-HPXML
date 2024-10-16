@@ -598,20 +598,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
             rate.energy_weekday_schedule = tariff[:energyweekdayschedule]
             rate.energy_weekend_schedule = tariff[:energyweekendschedule]
 
-            if rate.energy_rate_structure.collect { |r| r.collect { |s| s.keys.include?(:rate) } }.flatten.any? { |t| !t }
+            if rate.energy_rate_structure.collect { |r| r.collect { |s| !s.keys.include?(:rate) } }.flatten.any?
               warnings << "#{tariff_name}: Every tier must contain a rate; utility bills will not be calculated."
             end
 
             if rate.energy_rate_structure.collect { |r| r.collect { |s| s.keys } }.flatten.uniq.include?(:sell)
-              warnings << "#{tariff_name}: No tier may contain a sell key; utility bills will not be calculated."
+              warnings << "#{tariff_name}: Tariffs with sell rates are not currently supported; utility bills will not be calculated."
             end
 
-            if rate.energy_rate_structure.collect { |r| r.collect { |s| s.keys.include?(:unit) } }.flatten.any? { |t| !t }
-              warnings << "#{tariff_name}: Every tier must contain a unit; utility bills will not be calculated."
-            end
-
-            if rate.energy_rate_structure.collect { |r| r.collect { |s| s[:unit] == 'kWh' } }.flatten.any? { |t| !t }
-              warnings << "#{tariff_name}: All rates must be in units of kWh; utility bills will not be calculated."
+            if rate.energy_rate_structure.collect { |r| r.collect { |s| s[:unit] != 'kWh' && s.keys.include?(:max) } }.flatten.any?
+              warnings << "#{tariff_name}: Only max usage units of kWh are currently supported; utility bills will not be calculated."
             end
           end
         end
