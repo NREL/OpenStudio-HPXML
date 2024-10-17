@@ -751,6 +751,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       fuel.annual_output = get_report_meter_data_annual(fuel.meters)
       fuel.annual_output -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) if fuel_type == FT::Elec # We add Electric Storage onto the annual Electricity fuel meter
 
+      # Remove EV battery discharging
+      @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+        next unless elcs.additionalProperties.getFeatureAsString('is_ev')
+        fuel.annual_output += get_report_variable_data_annual([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy']) if fuel_type == FT::Elec 
+      end
+
       next unless args[:include_timeseries_fuel_consumptions]
 
       fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
@@ -1415,11 +1421,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Check sum of end use outputs match fuel outputs from meters
+    ev_discharging_energy = 0
+    @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+      if elcs.additionalProperties.getFeatureAsString('is_ev')
+        ev_discharging_energy += get_report_variable_data_annual([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy'])
+      end
+    end
+
     @fuels.keys.each do |fuel_type|
       sum_categories = @end_uses.select { |k, _eu| k[0] == fuel_type }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0)
       meter_fuel_total = @fuels[fuel_type].annual_output.to_f
       if fuel_type == FT::Elec
         meter_fuel_total += meter_elec_produced
+        sum_categories -= ev_discharging_energy
       end
 
       next unless (sum_categories - meter_fuel_total).abs > tol
@@ -2474,7 +2488,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::CeilingFan]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::CeilingFan]))
     @end_uses[[FT::Elec, EUT::Television]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Television]))
     @end_uses[[FT::Elec, EUT::PlugLoads]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::PlugLoads]))
-    @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Vehicle]))
     @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::WellPump]))
     @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::PoolHeater]))
     @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::PoolPump]))
@@ -2488,6 +2501,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                                      is_storage: true)
     @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Vehicle]),
                                                      is_storage: true)
+    @end_uses[[FT::Elec, EUT::VehicleDischarging]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::VehicleDischarging]))
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::Heating]))
     @end_uses[[FT::Gas, EUT::HeatingHeatPumpBackup]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::HeatingHeatPumpBackup]))
     @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::HotWater]))
@@ -2958,7 +2972,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         if object.name.to_s.include? 'ElectricVehicle'
-          return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
+          return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Production Decrement Energy'],
+                   [FT::Elec, EUT::VehicleDischarging] => ['Electric Storage Discharge Energy'] }
         else
           return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
         end
@@ -2987,7 +3002,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           Constants::ObjectTypeMiscElectricVehicleCharging => EUT::Vehicle,
           Constants::ObjectTypeMiscWellPump => EUT::WellPump }.each do |obj_name, eut|
           next unless subcategory.start_with? obj_name
-          fail 'Unepected error: multiple matches.' unless end_use.nil?
+          fail 'Unexpected error: multiple matches.' unless end_use.nil?
 
           end_use = eut
         end
@@ -3018,10 +3033,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           Constants::ObjectTypeMechanicalVentilationPrecooling => EUT::MechVentPrecool,
           Constants::ObjectTypeBackupSuppHeat => EUT::HeatingHeatPumpBackup,
           Constants::ObjectTypeWaterHeaterAdjustment => EUT::HotWater,
-          Constants::ObjectTypeBatteryLossesAdjustment => EUT::Battery,
-          Constants::ObjectTypeEVBatteryDischargeOffset => EUT::Vehicle }.each do |obj_name, eut|
+          Constants::ObjectTypeBatteryLossesAdjustment => EUT::Battery }.each do |obj_name, eut|
           next unless subcategory.start_with? obj_name
-          fail 'Unepected error: multiple matches.' unless end_use.nil?
+          fail 'Unexpected error: multiple matches.' unless end_use.nil?
 
           ### FIXME: ensure loss program applies to the correct battery
           end_use = eut

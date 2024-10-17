@@ -111,43 +111,19 @@ class Vehicle
       ev_discharge_program.addLine('  EndIf')
 
       ev_discharge_program.addLine("  If #{discharge_sch_sensor.name} > 0.0")
-      ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{eff_discharge_power} * power_mult")
+      ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{eff_discharge_power} * power_mult * #{discharge_sch_sensor.name}")
       ev_discharge_program.addLine("    Set #{charge_power_act.name} = 0")
       ev_discharge_program.addLine("  ElseIf #{charge_sch_sensor.name} > 0.0")
-      ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power}")
+      ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power} * #{charge_sch_sensor.name}")
       ev_discharge_program.addLine("    Set #{discharge_power_act.name} = 0")
       ev_discharge_program.addLine('  Else')
       ev_discharge_program.addLine("    Set #{charge_power_act.name} = 0")
       ev_discharge_program.addLine("    Set #{discharge_power_act.name} = 0")
       ev_discharge_program.addLine('  EndIf')
 
-      # Define equipment object to offset discharge power so that it is excluded from charging energy and electricity meter
-      ev_discharge_offset_obj_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-      ev_discharge_offset_obj = OpenStudio::Model::OtherEquipment.new(ev_discharge_offset_obj_def)
-      obj_name = Constants::ObjectTypeEVBatteryDischargeOffset
-      ev_discharge_offset_obj.setName(obj_name)
-      ev_discharge_offset_obj.setEndUseSubcategory(obj_name)
-      ev_discharge_offset_obj.setFuelType(EPlus.fuel_type(HPXML::FuelTypeElectricity))
-      offset_space = nil
-      if not vehicle.additional_properties.space.nil?
-        offset_space = vehicle.additional_properties.space
-      else
-        offset_space = model.getSpaces[0]
-      end
-      ev_discharge_offset_obj.setSpace(offset_space)
-      ev_discharge_offset_obj_def.setName(obj_name)
-      ev_discharge_offset_obj_def.setDesignLevel(0)
-      ev_discharge_offset_obj_def.setFractionRadiant(0)
-      ev_discharge_offset_obj_def.setFractionLatent(0)
-      ev_discharge_offset_obj_def.setFractionLost(1)
-      ev_discharge_offset_obj.setSchedule(model.alwaysOnDiscreteSchedule)
-      ev_discharge_offset_act = OpenStudio::Model::EnergyManagementSystemActuator.new(ev_discharge_offset_obj, *EPlus::EMSActuatorOtherEquipmentPower, offset_space)
-      ev_discharge_offset_act.setName('ev_discharge_offset_act')
-      ev_discharge_program.addLine("Set #{ev_discharge_offset_act.name} = #{discharge_power_act.name}")
-
       ev_discharge_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
       ev_discharge_pcm.setName('ev_discharge_pcm')
-      ev_discharge_pcm.setCallingPoint('EndOfZoneTimestepAfterZoneReporting')
+      ev_discharge_pcm.setCallingPoint('BeginTimestepBeforePredictor')
       ev_discharge_pcm.addProgram(ev_discharge_program)
     end
   end

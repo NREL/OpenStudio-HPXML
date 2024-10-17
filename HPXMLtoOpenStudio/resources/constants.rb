@@ -10,6 +10,7 @@ module Constants
   # Object types
   ObjectTypeAirSourceHeatPump = 'air source heat pump'
   ObjectTypeBackupSuppHeat = 'back up supp heat'
+  ObjectTypeBatteryElectricVehicle = 'BEV'
   ObjectTypeBatteryLossesAdjustment = 'battery losses adjustment'
   ObjectTypeBoiler = 'boiler'
   ObjectTypeCeilingFan = 'ceiling fan'
@@ -189,6 +190,7 @@ module EUT
   Television = 'Television'
   PlugLoads = 'Plug Loads'
   Vehicle = 'Electric Vehicle Charging'
+  VehicleDischarging = 'Electric Vehicle Discharging'
   WellPump = 'Well Pump'
   PoolHeater = 'Pool Heater'
   PoolPump = 'Pool Pump'

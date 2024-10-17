@@ -158,6 +158,7 @@ module Battery
     end
     elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
     elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
+    elcs.additionalProperties.setFeature('is_ev', is_ev)
 
     if is_ev
       # EVs always get their own ELCD, not PV
