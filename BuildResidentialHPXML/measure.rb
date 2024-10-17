@@ -6876,6 +6876,8 @@ module HPXMLFile
       electric_panel_loads.each do |electric_panel_load|
         type, watts, voltage, addition = electric_panel_load
 
+        watts = nil if Float(watts) < 0
+
         panel_loads.add(type: type,
                         watts: watts,
                         voltage: voltage,

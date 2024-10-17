@@ -1368,6 +1368,65 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(315.0, actual_annual_rows['HVAC Geothermal Loop: Borehole/Trench Length (ft)'])
   end
 
+  def test_electric_panel
+    hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-detailed-electric-panel.xml')
+    hpxml = HPXML.new(hpxml_path: hpxml_path)
+
+    args_hash = { 'hpxml_path' => hpxml_path,
+                  'skip_validation' => true, }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+    actual_annual_rows = _get_annual_values(annual_csv)
+    assert_equal(9762.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (W)'])
+    assert_equal(41.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (A)'])
+    assert_equal(100.0 - 41.0, actual_annual_rows['Electric Panel Capacity: Load-Based Constraint (W)'])
+    assert_equal(2565.9, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
+    assert_equal(10.7, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
+    assert_equal(100.0 - 10.7, actual_annual_rows['Electric Panel Capacity: Meter-Based Constraint (W)'])
+    assert_equal(1, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
+    assert_equal(2, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
+
+    # Upgrade
+    hpxml_bldg = hpxml.buildings[0]
+    electric_panel = hpxml_bldg.electric_panels[0]
+    panel_loads = electric_panel.panel_loads
+    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
+    pl.watts = 17942
+    pl.addition = true
+    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }
+    pl.watts = 17942
+    pl.addition = true
+    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeWaterHeater }
+    pl.watts = 4500
+    pl.addition = true
+    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeClothesDryer }
+    pl.watts = 5760
+    pl.addition = true
+    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeRangeOven }
+    pl.watts = 12000
+    pl.addition = true
+    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging }
+    pl.watts = 1650
+    pl.addition = true
+    XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
+
+    args_hash = { 'hpxml_path' => @tmp_hpxml_path,
+                  'skip_validation' => true, }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+    actual_annual_rows = _get_annual_values(annual_csv)
+    assert_equal(35851.2, actual_annual_rows['Electric Panel Capacity: Load-Based Total (W)'])
+    assert_equal(149.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (A)'])
+    assert_equal(100.0 - 149.0, actual_annual_rows['Electric Panel Capacity: Load-Based Constraint (W)'])
+    assert_equal(44417.9, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
+    assert_equal(185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
+    assert_equal(100.0 - 185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Constraint (W)'])
+    assert_equal(1, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
+    assert_equal(2, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
+  end
+
   private
 
   def _test_measure(args_hash, expect_success: true)

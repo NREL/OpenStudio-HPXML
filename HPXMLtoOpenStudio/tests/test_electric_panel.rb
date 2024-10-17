@@ -7,7 +7,7 @@ require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
-class HPXMLtoOpenStudioBatteryTest < Minitest::Test
+class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
@@ -26,33 +26,9 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
 
   def test_electric_panel
     args_hash = {}
-    hpxml_path = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
-
-    # Existing
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-detailed-electric-panel.xml'))
+    _model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     hpxml_bldg = hpxml.buildings[0]
-    hpxml_bldg.electric_panels.add(id: 'ElectricPanel', voltage: HPXML::ElectricPanelVoltage240, max_current_rating: 100)
-    electric_panel = hpxml_bldg.electric_panels[0]
-    panel_loads = electric_panel.panel_loads
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating, watts: 0, voltage: HPXML::ElectricPanelVoltage240, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling, watts: 3542, voltage: HPXML::ElectricPanelVoltage240, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater, watts: 0, voltage: HPXML::ElectricPanelVoltage240, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer, watts: 0, voltage: HPXML::ElectricPanelVoltage240, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher, watts: 0, voltage: HPXML::ElectricPanelVoltage120, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven, watts: 0, voltage: HPXML::ElectricPanelVoltage240, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater, watts: 0, voltage: HPXML::ElectricPanelVoltage240, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaPump, watts: 0, voltage: HPXML::ElectricPanelVoltage120, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater, watts: 0, voltage: HPXML::ElectricPanelVoltage240, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolPump, watts: 0, voltage: HPXML::ElectricPanelVoltage120, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeWellPump, watts: 0, voltage: HPXML::ElectricPanelVoltage240, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging, watts: 0, voltage: HPXML::ElectricPanelVoltage120, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting, watts: 3684, voltage: HPXML::ElectricPanelVoltage120, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen, watts: 3000, voltage: HPXML::ElectricPanelVoltage120, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry, watts: 1500, voltage: HPXML::ElectricPanelVoltage120, addition: false)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther, watts: 679, voltage: HPXML::ElectricPanelVoltage120, addition: false)
-    XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
-    args_hash['hpxml_path'] = @tmp_hpxml_path
-    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     electric_panel = hpxml_bldg.electric_panels[0]
 
     assert_in_epsilon(9762, electric_panel.clb_total_w, 0.01)
@@ -62,6 +38,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
     assert_equal(2, electric_panel.bs_hvac)
 
     # Upgrade
+    panel_loads = electric_panel.panel_loads
     pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
     pl.watts = 17942
     pl.addition = true
