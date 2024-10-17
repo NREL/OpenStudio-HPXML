@@ -433,6 +433,7 @@
             <Voltage>240</Voltage>
             <MaxCurrentRating>100.0</MaxCurrentRating>
             <extension>
+              <NumberofBreakerSpacesRemaining>3</NumberofBreakerSpacesRemaining>
               <PanelLoads>
                 <PanelLoad>
                   <Type>Heating</Type>

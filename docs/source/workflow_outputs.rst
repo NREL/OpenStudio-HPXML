@@ -449,13 +449,17 @@ Individual loads, load-based capacities, and breaker spaces can also be found in
   Electric Panel Load: Other (W)
   Electric Panel Capacity: Load-Based Total (W)         220.83
   Electric Panel Capacity: Load-Based Total (A)         220.83
-  Electric Panel Capacity: Load-Based Constraint (A)    220.83
+  Electric Panel Capacity: Load-Based Headroom (A)      220.83
   Electric Panel Capacity: Meter-Based Total (W)        220.87
   Electric Panel Capacity: Meter-Based Total (A)        220.87
-  Electric Panel Capacity: Meter-Based Constraint (A)   220.87
+  Electric Panel Capacity: Meter-Based Headroom (A)     220.87
   Electric Panel Breaker Space: Total Count (#)
   Electric Panel Breaker Space: HVAC Count (#)
   ====================================================  ====================
+
+.. note::
+
+  Headroom is calculated as the panel's maximum current rating (A) minus calculated capacity (A); a positive value indicates panel availability whereas a negative value indicates that the panel is constrained.
 
 HVAC Capacities
 ~~~~~~~~~~~~~~~

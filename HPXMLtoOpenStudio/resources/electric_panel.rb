@@ -14,7 +14,7 @@ module ElectricPanel
 
     electric_panel.clb_total_w = panel_loads.LoadBased_CapacityW.round(1)
     electric_panel.clb_total_a = panel_loads.LoadBased_CapacityA.round
-    electric_panel.clb_constraint_a = panel_loads.LoadBased_ConstraintA.round
+    electric_panel.clb_headroom_a = panel_loads.LoadBased_HeadRoomA.round
 
     electric_panel.bs_total = panel_loads.BreakerSpace_Total
     electric_panel.bs_hvac = panel_loads.BreakerSpace_HVAC
@@ -62,7 +62,7 @@ module ElectricPanel
 
     panel_loads.LoadBased_CapacityW = part_a + part_b
     panel_loads.LoadBased_CapacityA = panel_loads.LoadBased_CapacityW / Float(electric_panel.voltage)
-    panel_loads.LoadBased_ConstraintA = electric_panel.max_current_rating - panel_loads.LoadBased_CapacityA
+    panel_loads.LoadBased_HeadRoomA = electric_panel.max_current_rating - panel_loads.LoadBased_CapacityA
   end
 
   # TODO
@@ -86,8 +86,8 @@ module ElectricPanel
     end
     capacity_w = new_loads + 1.25 * peak_fuels[[FT::Elec, PFT::Annual]].annual_output
     capacity_a = capacity_w / Float(electric_panel.voltage)
-    constraint_a = electric_panel.max_current_rating - capacity_a
-    return capacity_w, capacity_a, constraint_a
+    headroom_a = electric_panel.max_current_rating - capacity_a
+    return capacity_w, capacity_a, headroom_a
   end
 
   # TODO
@@ -102,7 +102,7 @@ end
 class PanelLoadValues
   LOADBASED_ATTRS = [:LoadBased_CapacityW,
                      :LoadBased_CapacityA,
-                     :LoadBased_ConstraintA]
+                     :LoadBased_HeadRoomA]
   BREAKERSPACE_ATTRS = [:BreakerSpace_HVAC,
                         :BreakerSpace_Total]
   attr_accessor(*LOADBASED_ATTRS)

@@ -257,10 +257,10 @@ class ReportSimulationOutputTest < Minitest::Test
     'Electric Panel Load: Other (W)',
     'Electric Panel Capacity: Load-Based Total (W)',
     'Electric Panel Capacity: Load-Based Total (A)',
-    'Electric Panel Capacity: Load-Based Constraint (W)',
+    'Electric Panel Capacity: Load-Based Headroom (W)',
     'Electric Panel Capacity: Meter-Based Total (W)',
     'Electric Panel Capacity: Meter-Based Total (A)',
-    'Electric Panel Capacity: Meter-Based Constraint (W)',
+    'Electric Panel Capacity: Meter-Based Headroom (W)',
     'Electric Panel Breaker Space: HVAC Count',
     'Electric Panel Breaker Space: Total Count'
   ]
@@ -1380,10 +1380,10 @@ class ReportSimulationOutputTest < Minitest::Test
     actual_annual_rows = _get_annual_values(annual_csv)
     assert_equal(9762.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (W)'])
     assert_equal(41.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (A)'])
-    assert_equal(100.0 - 41.0, actual_annual_rows['Electric Panel Capacity: Load-Based Constraint (W)'])
+    assert_equal(100.0 - 41.0, actual_annual_rows['Electric Panel Capacity: Load-Based Headroom (W)'])
     assert_equal(2565.9, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
     assert_equal(10.7, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
-    assert_equal(100.0 - 10.7, actual_annual_rows['Electric Panel Capacity: Meter-Based Constraint (W)'])
+    assert_equal(100.0 - 10.7, actual_annual_rows['Electric Panel Capacity: Meter-Based Headroom (W)'])
     assert_equal(1, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
     assert_equal(2, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
 
@@ -1419,10 +1419,10 @@ class ReportSimulationOutputTest < Minitest::Test
     actual_annual_rows = _get_annual_values(annual_csv)
     assert_equal(35851.2, actual_annual_rows['Electric Panel Capacity: Load-Based Total (W)'])
     assert_equal(149.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (A)'])
-    assert_equal(100.0 - 149.0, actual_annual_rows['Electric Panel Capacity: Load-Based Constraint (W)'])
+    assert_equal(100.0 - 149.0, actual_annual_rows['Electric Panel Capacity: Load-Based Headroom (W)'])
     assert_equal(44417.9, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
     assert_equal(185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
-    assert_equal(100.0 - 185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Constraint (W)'])
+    assert_equal(100.0 - 185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Headroom (W)'])
     assert_equal(1, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
     assert_equal(2, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
   end

@@ -1618,6 +1618,7 @@
     "dishwasher_present": false,
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
+    "electric_panel_num_breaker_spaces_remaining": 3,
     "electric_panel_load_types": "Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Electric Vehicle Charging, Other",
     "electric_panel_load_watts": "-1, 3542, 0, 0, 0, 0, 0, 679",
     "electric_panel_load_voltages": "240, 240, 240, 240, 120, 240, 120, 120",

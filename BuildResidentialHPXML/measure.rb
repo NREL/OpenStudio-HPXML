@@ -2643,6 +2643,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('A')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_num_breaker_spaces_remaining', false)
+    arg.setDisplayName('Electric Panel: Number of Breaker Spaces Remaining')
+    arg.setDescription("The number of remaining breaker spaces. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('#')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_types', false)
     arg.setDisplayName('Electric Panel: Load Types')
     arg.setDescription("Specified the panel load types. Possible load types are: #{HPXML::ElectricPanelLoadTypeHeating}, #{HPXML::ElectricPanelLoadTypeCooling}, #{HPXML::ElectricPanelLoadTypeWaterHeater}, #{HPXML::ElectricPanelLoadTypeClothesDryer}, #{HPXML::ElectricPanelLoadTypeDishwasher}, #{HPXML::ElectricPanelLoadTypeRangeOven}, #{HPXML::ElectricPanelLoadTypePermanentSpaHeater}, #{HPXML::ElectricPanelLoadTypePermanentSpaPump}, #{HPXML::ElectricPanelLoadTypePoolHeater}, #{HPXML::ElectricPanelLoadTypePoolPump}, #{HPXML::ElectricPanelLoadTypeWellPump}, #{HPXML::ElectricPanelLoadTypeElectricVehicleCharging}, #{HPXML::ElectricPanelLoadTypeOther}. If multiple loads, use a comma-separated list.")
@@ -6855,11 +6861,12 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_electric_panel(hpxml_bldg, args)
-    return if args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil?
+    return if args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil? && args[:electric_panel_num_breaker_spaces_remaining].nil?
 
     hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
                                    voltage: args[:electric_panel_service_voltage],
-                                   max_current_rating: args[:electric_panel_service_rating])
+                                   max_current_rating: args[:electric_panel_service_rating],
+                                   num_breaker_spaces_remaining: args[:electric_panel_num_breaker_spaces_remaining])
 
     if not args[:electric_panel_load_types].nil?
       panel_loads = hpxml_bldg.electric_panels[0].panel_loads

@@ -3155,7 +3155,6 @@ module Defaults
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports panel loads/capacities
   # @return [nil]
   def self.apply_electric_panels(hpxml_bldg, unit_num)
-    default_values = get_electric_panel_values(hpxml_bldg)
     if hpxml_bldg.electric_panels.empty?
       if not unit_num.nil?
         panel_id = "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}_#{unit_num}"
@@ -3165,14 +3164,19 @@ module Defaults
       hpxml_bldg.electric_panels.add(id: panel_id)
     end
 
+    electric_panel_default_values = get_electric_panel_values()
     hpxml_bldg.electric_panels.each do |electric_panel|
       if electric_panel.voltage.nil?
-        electric_panel.voltage = default_values[:panel_voltage]
+        electric_panel.voltage = electric_panel_default_values[:panel_voltage]
         electric_panel.voltage_isdefaulted = true
       end
       if electric_panel.max_current_rating.nil?
-        electric_panel.max_current_rating = default_values[:max_current_rating]
+        electric_panel.max_current_rating = electric_panel_default_values[:max_current_rating]
         electric_panel.max_current_rating_isdefaulted = true
+      end
+      if electric_panel.num_breaker_spaces_remaining.nil?
+        electric_panel.num_breaker_spaces_remaining = electric_panel_default_values[:num_breaker_spaces_remaining]
+        electric_panel.num_breaker_spaces_remaining_isdefaulted = true
       end
 
       panel_loads = electric_panel.panel_loads
@@ -3212,25 +3216,37 @@ module Defaults
       if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging }.nil?
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging)
       end
-      electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting)
-      electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen)
-      electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry)
+      if electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting).nil?
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting)
+      end
+      if electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen).nil?
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen)
+      end
+      if electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry).nil?
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry)
+      end
       if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther }.nil?
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther)
       end
 
-      electric_panel.panel_loads.each do |panel_load|
-        if panel_load.watts.nil?
-          panel_load.watts = default_values[:load_watts][panel_load.type].round(1)
-          panel_load.watts_isdefaulted = true
-        end
+      panel_load_voltage_default_values = get_panel_load_voltage_default_values()
+      panel_loads = electric_panel.panel_loads
+      panel_loads.each do |panel_load|
         if panel_load.voltage.nil?
-          panel_load.voltage = default_values[:load_voltages][panel_load.type]
+          panel_load.voltage = panel_load_voltage_default_values[panel_load.type]
           panel_load.voltage_isdefaulted = true
         end
         if panel_load.addition.nil?
           panel_load.addition = false
           panel_load.addition_isdefaulted = true
+        end
+      end
+
+      panel_load_watts_default_values = get_panel_load_watts_default_values(hpxml_bldg, panel_loads)
+      panel_loads.each do |panel_load|
+        if panel_load.watts.nil?
+          panel_load.watts = panel_load_watts_default_values[panel_load.type].round(1)
+          panel_load.watts_isdefaulted = true
         end
       end
 
@@ -5675,10 +5691,17 @@ module Defaults
   end
 
   # TODO
+  def self.get_electric_panel_values()
+    return { panel_voltage: HPXML::ElectricPanelVoltage240,
+             max_current_rating: 150.0, # A
+             num_breaker_spaces_remaining: 0 }
+  end
+
+  # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Hash] Map of electric panel properties to default values
-  def self.get_electric_panel_values(hpxml_bldg)
+  def self.get_panel_load_watts_default_values(hpxml_bldg, _panel_loads)
     heating_watts = 0.0
     cooling_watts = 0.0
     hpxml_bldg.heating_systems.each do |heating_system|
@@ -5692,7 +5715,6 @@ module Defaults
       cooling_watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
       cooling_watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
     end
-
     hpxml_bldg.heat_pumps.each do |heat_pump|
       heating_watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
       heating_watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
@@ -5726,12 +5748,12 @@ module Defaults
 
       is_hp = false # FIXME
       if clothes_dryer.is_vented
-        clothes_dryer_watts = [clothes_dryer_watts, 5760].max
+        clothes_dryer_watts += 5760
       else
         if is_hp
-          clothes_dryer_watts = [clothes_dryer_watts, 860].max
+          clothes_dryer_watts += 860
         else
-          clothes_dryer_watts = [clothes_dryer_watts, 2640].max
+          clothes_dryer_watts += 2640
         end
       end
     end
@@ -5781,21 +5803,29 @@ module Defaults
                    HPXML::ElectricPanelLoadTypeKitchen => 3000,
                    HPXML::ElectricPanelLoadTypeLaundry => 1500,
                    HPXML::ElectricPanelLoadTypeOther => other_watts }
+    return load_watts
+  end
 
-    load_voltages = Hash[load_watts.keys.map { |k| [k, 120] }]
-    load_voltages[HPXML::ElectricPanelLoadTypeHeating] = 240
-    load_voltages[HPXML::ElectricPanelLoadTypeCooling] = 240
-    load_voltages[HPXML::ElectricPanelLoadTypeWaterHeater] = 240
-    load_voltages[HPXML::ElectricPanelLoadTypeClothesDryer] = 240
-    load_voltages[HPXML::ElectricPanelLoadTypeRangeOven] = 240
-    load_voltages[HPXML::ElectricPanelLoadTypePermanentSpaHeater] = 240
-    load_voltages[HPXML::ElectricPanelLoadTypePoolHeater] = 240
-    load_voltages[HPXML::ElectricPanelLoadTypeWellPump] = 240
+  # TODO
+  def self.get_panel_load_voltage_default_values()
+    load_voltages = { HPXML::ElectricPanelLoadTypeHeating => 240,
+                      HPXML::ElectricPanelLoadTypeCooling => 240,
+                      HPXML::ElectricPanelLoadTypeWaterHeater => 240,
+                      HPXML::ElectricPanelLoadTypeClothesDryer => 240,
+                      HPXML::ElectricPanelLoadTypeDishwasher => 120,
+                      HPXML::ElectricPanelLoadTypeRangeOven => 240,
+                      HPXML::ElectricPanelLoadTypePermanentSpaHeater => 240,
+                      HPXML::ElectricPanelLoadTypePermanentSpaPump => 120,
+                      HPXML::ElectricPanelLoadTypePoolHeater => 240,
+                      HPXML::ElectricPanelLoadTypePoolPump => 120,
+                      HPXML::ElectricPanelLoadTypeWellPump => 240,
+                      HPXML::ElectricPanelLoadTypeElectricVehicleCharging => 120,
+                      HPXML::ElectricPanelLoadTypeLighting => 120,
+                      HPXML::ElectricPanelLoadTypeKitchen => 120,
+                      HPXML::ElectricPanelLoadTypeLaundry => 120,
+                      HPXML::ElectricPanelLoadTypeOther => 120 }
 
-    return { panel_voltage: HPXML::ElectricPanelVoltage240,
-             max_current_rating: 150.0, # A
-             load_watts: load_watts,
-             load_voltages: load_voltages }
+    return load_voltages
   end
 
   # Get default location, lifetime model, nominal capacity/voltage, round trip efficiency, and usable fraction for a battery.

@@ -551,7 +551,7 @@ class HPXML < Object
   # Electric panel attributes
   CLB_ATTRS = { clb_total_w: 'Watts',
                 clb_total_a: 'Amps',
-                clb_constraint_a: 'Constraint' }
+                clb_headroom_a: 'Headroom' }
   BS_ATTRS = { bs_total: 'Total',
                bs_hvac: 'HVAC' }
 
@@ -9184,9 +9184,9 @@ class HPXML < Object
     CLASS_ATTRS = [:panel_loads]
     ATTRS = [:id, # [String] SystemIdentifier/@id
              :voltage,
-             :max_current_rating] +
+             :max_current_rating,
+             :num_breaker_spaces_remaining] +
             CLB_ATTRS.keys +
-            # CMB_ATTRS.keys +
             BS_ATTRS.keys
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
@@ -9219,8 +9219,9 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(electric_panel, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_element(electric_panel, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_isdefaulted) unless @max_current_rating.nil?
+      XMLHelper.add_extension(electric_panel, 'NumberofBreakerSpacesRemaining', @num_breaker_spaces_remaining, :integer, @num_breaker_spaces_remaining_isdefaulted) unless @num_breaker_spaces_remaining.nil?
       @panel_loads.to_doc(electric_panel)
-      if !@clb_total_w.nil? && !@clb_total_a.nil? && !@clb_constraint_a.nil? && !@bs_hvac.nil? && !@bs_total.nil?
+      if !@clb_total_w.nil? && !@clb_total_a.nil? && !@clb_headroom_a.nil? && !@bs_hvac.nil? && !@bs_total.nil?
         HPXML.panel_outputs_to_doc(self, electric_panel)
       end
     end
@@ -9235,6 +9236,7 @@ class HPXML < Object
       @id = HPXML::get_id(electric_panel)
       @voltage = XMLHelper.get_value(electric_panel, 'Voltage', :string)
       @max_current_rating = XMLHelper.get_value(electric_panel, 'MaxCurrentRating', :float)
+      @num_breaker_spaces_remaining = XMLHelper.get_value(electric_panel, 'extension/NumberofBreakerSpacesRemaining', :integer)
       @panel_loads.from_doc(electric_panel)
       HPXML.panel_outputs_from_doc(self, electric_panel)
     end
@@ -11642,7 +11644,6 @@ class HPXML < Object
   # @return [nil]
   def self.panel_outputs_to_doc(hpxml_object, hpxml_element)
     { CLB_ATTRS => 'CapacityLoadBased',
-      # CMB_ATTRS => 'CapacityMeterBased',
       BS_ATTRS => 'BreakerSpace' }.each do |attrs, p_child_name|
       p_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'Outputs'])
       XMLHelper.add_attribute(p_extension, 'dataSource', 'software')
@@ -11663,7 +11664,6 @@ class HPXML < Object
     return if outputs.nil?
 
     { CLB_ATTRS => 'CapacityLoadBased',
-      # CMB_ATTRS => 'CapacityMeterBased',
       BS_ATTRS => 'BreakerSpace' }.each do |attrs, p_child_name|
       attrs.each do |attr, element_name|
         hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :float))

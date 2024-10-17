@@ -33,7 +33,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     assert_in_epsilon(9762, electric_panel.clb_total_w, 0.01)
     assert_in_epsilon(9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_total_a, 0.01)
-    assert_in_epsilon(electric_panel.max_current_rating - 9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_constraint_a, 0.01)
+    assert_in_epsilon(electric_panel.max_current_rating - 9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_headroom_a, 0.01)
     assert_equal(1, electric_panel.bs_total)
     assert_equal(2, electric_panel.bs_hvac)
 
@@ -64,7 +64,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     assert_in_epsilon(35851, electric_panel.clb_total_w, 0.01)
     assert_in_epsilon(35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_total_a, 0.01)
-    assert_in_epsilon(electric_panel.max_current_rating - 35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_constraint_a, 0.01)
+    assert_in_epsilon(electric_panel.max_current_rating - 35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_headroom_a, 0.01)
     assert_equal(1, electric_panel.bs_total)
     assert_equal(2, electric_panel.bs_hvac)
   end

@@ -4447,6 +4447,19 @@ The service rating of the electric panel. If not provided, the OS-HPXML default 
 
 <br/>
 
+**Electric Panel: Number of Breaker Spaces Remaining**
+
+The number of remaining breaker spaces. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+
+- **Name:** ``electric_panel_num_breaker_spaces_remaining``
+- **Type:** ``Integer``
+
+- **Units:** ``#``
+
+- **Required:** ``false``
+
+<br/>
+
 **Electric Panel: Load Types**
 
 Specified the panel load types. Possible load types are: Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Permanent Spa Heater, Permanent Spa Pump, Pool Heater, Pool Pump, Well Pump, Electric Vehicle Charging, Other. If multiple loads, use a comma-separated list.
