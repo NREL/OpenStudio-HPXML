@@ -2184,7 +2184,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_type_choices = OpenStudio::StringVector.new
     water_heater_type_choices << Constants::None
     water_heater_type_choices << HPXML::WaterHeaterTypeStorage
-    water_heater_type_choices << HPXML::WaterHeaterTypeTankless
+    water_heater_type_choices << HPXML::WaterHeaterTypeInstantaneous
     water_heater_type_choices << HPXML::WaterHeaterTypeHeatPump
     water_heater_type_choices << HPXML::WaterHeaterTypeCombiStorage
     water_heater_type_choices << HPXML::WaterHeaterTypeCombiTankless
@@ -2262,7 +2262,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_usage_bin', water_heater_usage_bin_choices, false)
     arg.setDisplayName('Water Heater: Usage Bin')
-    arg.setDescription("The usage of the water heater. Only applies if Efficiency Type is UniformEnergyFactor and Type is not #{HPXML::WaterHeaterTypeTankless}. Does not apply to space-heating boilers. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>, <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>) is used.")
+    arg.setDescription("The usage of the water heater. Only applies if Efficiency Type is UniformEnergyFactor and Type is not #{HPXML::WaterHeaterTypeInstantaneous}. Does not apply to space-heating boilers. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>, <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_recovery_efficiency', false)
@@ -2291,7 +2291,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_jacket_rvalue', false)
     arg.setDisplayName('Water Heater: Jacket R-value')
-    arg.setDescription("The jacket R-value of water heater. Doesn't apply to #{HPXML::WaterHeaterTypeTankless} or #{HPXML::WaterHeaterTypeCombiTankless}. If not provided, defaults to no jacket insulation.")
+    arg.setDescription("The jacket R-value of water heater. Doesn't apply to #{HPXML::WaterHeaterTypeInstantaneous} or #{HPXML::WaterHeaterTypeCombiTankless}. If not provided, defaults to no jacket insulation.")
     arg.setUnits('h-ft^2-R/Btu')
     args << arg
 
@@ -6547,7 +6547,7 @@ module HPXMLFile
         energy_factor = args[:water_heater_efficiency]
       elsif args[:water_heater_efficiency_type] == 'UniformEnergyFactor'
         uniform_energy_factor = args[:water_heater_efficiency]
-        if water_heater_type != HPXML::WaterHeaterTypeTankless
+        if water_heater_type != HPXML::WaterHeaterTypeInstantaneous
           usage_bin = args[:water_heater_usage_bin]
         end
       end
@@ -6557,11 +6557,11 @@ module HPXMLFile
       recovery_efficiency = args[:water_heater_recovery_efficiency]
     end
 
-    if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type
+    if [HPXML::WaterHeaterTypeInstantaneous, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type
       args[:water_heater_tank_volume] = nil
     end
 
-    if [HPXML::WaterHeaterTypeTankless].include? water_heater_type
+    if [HPXML::WaterHeaterTypeInstantaneous].include? water_heater_type
       heating_capacity = nil
       recovery_efficiency = nil
     elsif [HPXML::WaterHeaterTypeCombiTankless, HPXML::WaterHeaterTypeCombiStorage].include? water_heater_type
@@ -6580,7 +6580,7 @@ module HPXMLFile
       end
     end
 
-    if not [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type
+    if not [HPXML::WaterHeaterTypeInstantaneous, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type
       if args[:water_heater_jacket_rvalue].to_f > 0
         jacket_r_value = args[:water_heater_jacket_rvalue]
       end

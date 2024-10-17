@@ -2037,7 +2037,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-dhw-tank-gas-uef-fhr.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].first_hour_rating = 56.0
       hpxml_bldg.water_heating_systems[0].usage_bin = nil
-    elsif ['base-dhw-tankless-electric-outside.xml'].include? hpxml_file
+    elsif ['base-dhw-instantaneous-electric-outside.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].performance_adjustment = 0.92
     elsif ['base-dhw-multiple.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].fraction_dhw_load_served = 0.2
@@ -2061,14 +2061,14 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                            temperature: 125.0)
       hpxml_bldg.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size + 1}",
                                            fuel_type: HPXML::FuelTypeElectricity,
-                                           water_heater_type: HPXML::WaterHeaterTypeTankless,
+                                           water_heater_type: HPXML::WaterHeaterTypeInstantaneous,
                                            location: HPXML::LocationConditionedSpace,
                                            fraction_dhw_load_served: 0.2,
                                            energy_factor: 0.99,
                                            temperature: 125.0)
       hpxml_bldg.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size + 1}",
                                            fuel_type: HPXML::FuelTypeNaturalGas,
-                                           water_heater_type: HPXML::WaterHeaterTypeTankless,
+                                           water_heater_type: HPXML::WaterHeaterTypeInstantaneous,
                                            location: HPXML::LocationConditionedSpace,
                                            fraction_dhw_load_served: 0.1,
                                            energy_factor: 0.82,

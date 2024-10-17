@@ -2139,7 +2139,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem'>
       <sch:assert role='ERROR' test='count(../h:HotWaterDistribution) = 1'>Expected 1 element(s) for xpath: ../HotWaterDistribution</sch:assert> <!-- See [HotWaterDistribution] -->
       <sch:assert role='ERROR' test='count(../h:WaterFixture) &gt;= 1'>Expected 1 or more element(s) for xpath: ../WaterFixture</sch:assert> <!-- See [WaterFixture] -->
-      <sch:assert role='ERROR' test='count(h:WaterHeaterType) = 1'>Expected 1 element(s) for xpath: WaterHeaterType</sch:assert> <!-- See [WaterHeatingSystemType=Tank] or [WaterHeatingSystemType=Tankless] or [WaterHeatingSystemType=HeatPump] or [WaterHeatingSystemType=CombiIndirect] or [WaterHeatingSystemType=CombiTanklessCoil] -->
+      <sch:assert role='ERROR' test='count(h:WaterHeaterType) = 1'>Expected 1 element(s) for xpath: WaterHeaterType</sch:assert> <!-- See [WaterHeatingSystemType=Tank] or [WaterHeatingSystemType=Instantaneous] or [WaterHeatingSystemType=HeatPump] or [WaterHeatingSystemType=CombiIndirect] or [WaterHeatingSystemType=CombiTanklessCoil] -->
       <sch:assert role='ERROR' test='h:WaterHeaterType[text()="storage water heater" or text()="instantaneous water heater" or text()="heat pump water heater" or text()="space-heating boiler with storage tank" or text()="space-heating boiler with tankless coil"] or not(h:WaterHeaterType)'>Expected WaterHeaterType to be 'storage water heater' or 'instantaneous water heater' or 'heat pump water heater' or 'space-heating boiler with storage tank' or 'space-heating boiler with tankless coil'</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -2177,7 +2177,7 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[WaterHeatingSystemType=Tankless]</sch:title>
+    <sch:title>[WaterHeatingSystemType=Instantaneous]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="instantaneous water heater"]'>
       <sch:assert role='ERROR' test='count(h:FuelType) = 1'>Expected 1 element(s) for xpath: FuelType</sch:assert>
       <sch:assert role='ERROR' test='h:FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"] or not(h:FuelType)'>Expected FuelType to be 'natural gas' or 'fuel oil' or 'fuel oil 1' or 'fuel oil 2' or 'fuel oil 4' or 'fuel oil 5/6' or 'diesel' or 'propane' or 'kerosene' or 'coal' or 'coke' or 'bituminous coal' or 'anthracite coal' or 'electricity' or 'wood' or 'wood pellets'</sch:assert>

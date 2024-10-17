@@ -3234,19 +3234,19 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(HPXML::WaterHeaterTankModelTypeMixed, default_hpxml_bldg.water_heating_systems[0].tank_model_type)
   end
 
-  def test_tankless_water_heaters
+  def test_instantaneous_water_heaters
     # Test inputs not overridden by defaults
-    hpxml, hpxml_bldg = _create_hpxml('base-dhw-tankless-gas.xml')
+    hpxml, hpxml_bldg = _create_hpxml('base-dhw-instantaneous-gas.xml')
     hpxml_bldg.water_heating_systems[0].performance_adjustment = 0.88
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_tankless_water_heater_values(default_hpxml_bldg, [0.88])
+    _test_default_instantaneous_water_heater_values(default_hpxml_bldg, [0.88])
 
     # Test defaults w/ EF
     hpxml_bldg.water_heating_systems[0].performance_adjustment = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_tankless_water_heater_values(default_hpxml_bldg, [0.92])
+    _test_default_instantaneous_water_heater_values(default_hpxml_bldg, [0.92])
 
     # Test defaults w/ UEF
     hpxml_bldg.water_heating_systems[0].energy_factor = nil
@@ -3254,7 +3254,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.water_heating_systems[0].first_hour_rating = 5.7
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_tankless_water_heater_values(default_hpxml_bldg, [0.94])
+    _test_default_instantaneous_water_heater_values(default_hpxml_bldg, [0.94])
   end
 
   def test_heat_pump_water_heaters
@@ -5518,10 +5518,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_tankless_water_heater_values(hpxml_bldg, *expected_wh_values)
-    tankless_water_heaters = hpxml_bldg.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeTankless }
-    assert_equal(expected_wh_values.size, tankless_water_heaters.size)
-    tankless_water_heaters.each_with_index do |wh_system, idx|
+  def _test_default_instantaneous_water_heater_values(hpxml_bldg, *expected_wh_values)
+    instantaneous_water_heaters = hpxml_bldg.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeInstantaneous }
+    assert_equal(expected_wh_values.size, instantaneous_water_heaters.size)
+    instantaneous_water_heaters.each_with_index do |wh_system, idx|
       performance_adjustment, = expected_wh_values[idx]
 
       assert_equal(performance_adjustment, wh_system.performance_adjustment)

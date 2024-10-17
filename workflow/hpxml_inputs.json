@@ -1320,7 +1320,7 @@
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
     "water_heater_uses_desuperheater": true
   },
-  "sample_files/base-dhw-desuperheater-tankless.xml": {
+  "sample_files/base-dhw-desuperheater-instantaneous.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "water_heater_type": "instantaneous water heater",
     "water_heater_efficiency": 0.99,
@@ -1558,33 +1558,33 @@
     "parent_hpxml": "sample_files/base-dhw-tank-gas.xml",
     "water_heater_fuel_type": "wood"
   },
-  "sample_files/base-dhw-tankless-electric.xml": {
+  "sample_files/base-dhw-instantaneous-electric.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "water_heater_type": "instantaneous water heater",
     "water_heater_efficiency": 0.99
   },
-  "sample_files/base-dhw-tankless-electric-outside.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-electric.xml",
+  "sample_files/base-dhw-instantaneous-electric-outside.xml": {
+    "parent_hpxml": "sample_files/base-dhw-instantaneous-electric.xml",
     "water_heater_location": "other exterior"
   },
-  "sample_files/base-dhw-tankless-electric-uef.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-electric.xml",
+  "sample_files/base-dhw-instantaneous-electric-uef.xml": {
+    "parent_hpxml": "sample_files/base-dhw-instantaneous-electric.xml",
     "water_heater_efficiency_type": "UniformEnergyFactor",
     "water_heater_efficiency": 0.98
   },
-  "sample_files/base-dhw-tankless-gas.xml": {
+  "sample_files/base-dhw-instantaneous-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "water_heater_type": "instantaneous water heater",
     "water_heater_fuel_type": "natural gas",
     "water_heater_efficiency": 0.82
   },
-  "sample_files/base-dhw-tankless-gas-uef.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
+  "sample_files/base-dhw-instantaneous-gas-uef.xml": {
+    "parent_hpxml": "sample_files/base-dhw-instantaneous-gas.xml",
     "water_heater_efficiency_type": "UniformEnergyFactor",
     "water_heater_efficiency": 0.93
   },
-  "sample_files/base-dhw-tankless-gas-with-solar.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
+  "sample_files/base-dhw-instantaneous-gas-with-solar.xml": {
+    "parent_hpxml": "sample_files/base-dhw-instantaneous-gas.xml",
     "solar_thermal_system_type": "hot water",
     "solar_thermal_collector_area": 40,
     "solar_thermal_collector_azimuth": 180,
@@ -1593,17 +1593,17 @@
     "solar_thermal_collector_rated_thermal_losses": 0.793,
     "solar_thermal_storage_volume": 60
   },
-  "sample_files/base-dhw-tankless-gas-with-solar-fraction.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
+  "sample_files/base-dhw-instantaneous-gas-with-solar-fraction.xml": {
+    "parent_hpxml": "sample_files/base-dhw-instantaneous-gas.xml",
     "solar_thermal_system_type": "hot water",
     "solar_thermal_solar_fraction": 0.65
   },
-  "sample_files/base-dhw-tankless-propane.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
+  "sample_files/base-dhw-instantaneous-propane.xml": {
+    "parent_hpxml": "sample_files/base-dhw-instantaneous-gas.xml",
     "water_heater_fuel_type": "propane"
   },
-  "sample_files/base-dhw-tankless-detailed-setpoints.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
+  "sample_files/base-dhw-instantaneous-detailed-setpoints.xml": {
+    "parent_hpxml": "sample_files/base-dhw-instantaneous-gas.xml",
     "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },

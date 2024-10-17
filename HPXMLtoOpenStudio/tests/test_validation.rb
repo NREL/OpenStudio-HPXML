@@ -918,7 +918,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-multiple.xml')
         hpxml_bldg.water_heating_systems.each do |water_heating_system|
           if [HPXML::WaterHeaterTypeStorage,
-              HPXML::WaterHeaterTypeTankless].include? water_heating_system.water_heater_type
+              HPXML::WaterHeaterTypeInstantaneous].include? water_heating_system.water_heater_type
             water_heating_system.energy_factor = 0.1
           end
         end
