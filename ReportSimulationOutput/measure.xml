@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>5159cf91-466e-4115-a0f9-e0f8d0bbfb9c</version_id>
-  <version_modified>2024-10-15T22:08:51Z</version_modified>
+  <version_id>231cadf6-e649-4e59-99bd-f3ff073a700f</version_id>
+  <version_modified>2024-10-17T23:35:00Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -976,13 +976,6 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>end_use_electricity_electric_vehicle_charging_m_btu</name>
-      <display_name>end_use_electricity_electric_vehicle_charging_m_btu</display_name>
-      <short_name>end_use_electricity_electric_vehicle_charging_m_btu</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
       <name>end_use_electricity_well_pump_m_btu</name>
       <display_name>end_use_electricity_well_pump_m_btu</display_name>
       <short_name>end_use_electricity_well_pump_m_btu</short_name>
@@ -1035,6 +1028,13 @@
       <name>end_use_electricity_battery_m_btu</name>
       <display_name>end_use_electricity_battery_m_btu</display_name>
       <short_name>end_use_electricity_battery_m_btu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>end_use_electricity_electric_vehicle_charging_m_btu</name>
+      <display_name>end_use_electricity_electric_vehicle_charging_m_btu</display_name>
+      <short_name>end_use_electricity_electric_vehicle_charging_m_btu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -1885,6 +1885,13 @@
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
+    <output>
+      <name>vehicle_electric_vehicle_discharging_mbtu</name>
+      <display_name>vehicle_electric_vehicle_discharging_mbtu</display_name>
+      <short_name>vehicle_electric_vehicle_discharging_mbtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
   </outputs>
   <provenances />
   <tags>
@@ -1912,7 +1919,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>CDB2D617</checksum>
+      <checksum>2A081F48</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -1929,7 +1936,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E54A8870</checksum>
+      <checksum>F20C9ED3</checksum>
     </file>
     <file>
       <filename>test_report_sim_output.rb</filename>

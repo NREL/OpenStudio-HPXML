@@ -765,7 +765,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Remove EV battery discharging
       @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
         next unless elcs.additionalProperties.getFeatureAsString('is_ev')
-        fuel.annual_output += get_report_variable_data_annual([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy']) if fuel_type == FT::Elec 
+
+        fuel.annual_output += get_report_variable_data_annual([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy']) if fuel_type == FT::Elec
       end
 
       next unless args[:include_timeseries_fuel_consumptions]
@@ -3016,7 +3017,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         if object.name.to_s.include? 'ElectricVehicle'
-          return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Production Decrement Energy']}
+          return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Production Decrement Energy'] }
         else
           return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
         end
@@ -3187,7 +3188,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         if object.name.to_s.include? 'ElectricVehicle'
-          return { VT::VehicleDischarging => ['Electric Storage Discharge Energy']}
+          return { VT::VehicleDischarging => ['Electric Storage Discharge Energy'] }
         end
       end
 
