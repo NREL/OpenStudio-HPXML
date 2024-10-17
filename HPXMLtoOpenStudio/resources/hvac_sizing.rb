@@ -2535,7 +2535,7 @@ module HVACSizing
       else
         property = :capacity
         # Should use nominal instead of maximum
-        capacity_nominal = hvac_sys.heating_capacity
+        capacity_nominal = (mode == :clg) ? hvac_sys.cooling_capacity : hvac_sys.heating_capacity
       end
       odb_adj = HVAC.interpolate_to_odb_table_point(detailed_performance_data, HPXML::CapacityDescriptionMaximum, outdoor_temp, property) / capacity_nominal
     end
