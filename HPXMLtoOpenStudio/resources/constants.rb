@@ -190,7 +190,6 @@ module EUT
   Television = 'Television'
   PlugLoads = 'Plug Loads'
   Vehicle = 'Electric Vehicle Charging'
-  VehicleDischarging = 'Electric Vehicle Discharging'
   WellPump = 'Well Pump'
   PoolHeater = 'Pool Heater'
   PoolPump = 'Pool Pump'
@@ -287,4 +286,9 @@ module WT
   WindSpeed = 'Wind Speed'
   DiffuseSolar = 'Diffuse Solar Radiation'
   DirectSolar = 'Direct Solar Radiation'
+end
+
+# Vehicle Types
+module VT
+  VehicleDischarging = 'Electric Vehicle Discharging'
 end

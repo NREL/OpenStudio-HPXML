@@ -208,6 +208,10 @@ module Battery
       frac_lost = 1.0
     end
 
+    elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
+    elcs.additionalProperties.setFeature('HPXML_ID', battery.id)
+    elcs.additionalProperties.setFeature('UsableCapacity_kWh', Float(usable_capacity_kwh))
+
     return if is_ev
 
     # Apply round trip efficiency as EMS program b/c E+ input is not hooked up.
@@ -261,10 +265,6 @@ module Battery
       calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
       ems_programs: [battery_losses_program]
     )
-
-    elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
-    elcs.additionalProperties.setFeature('HPXML_ID', battery.id)
-    elcs.additionalProperties.setFeature('UsableCapacity_kWh', Float(usable_capacity_kwh))
   end
 
   # Get nominal capacity (amp-hours) from nominal capacity (kWh) and voltage (V).
