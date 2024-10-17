@@ -113,6 +113,24 @@ class HPXML < Object
   DuctTypeSupply = 'supply'
   DWHRFacilitiesConnectedAll = 'all'
   DWHRFacilitiesConnectedOne = 'one'
+  ElectricPanelLoadTypeHeating = 'Heating'
+  ElectricPanelLoadTypeCooling = 'Cooling'
+  ElectricPanelLoadTypeWaterHeater = 'Hot Water'
+  ElectricPanelLoadTypeClothesDryer = 'Clothes Dryer'
+  ElectricPanelLoadTypeDishwasher = 'Dishwasher'
+  ElectricPanelLoadTypeRangeOven = 'Range/Oven'
+  ElectricPanelLoadTypePermanentSpaHeater = 'Permanent Spa Heater'
+  ElectricPanelLoadTypePermanentSpaPump = 'Permanent Spa Pump'
+  ElectricPanelLoadTypePoolHeater = 'Pool Heater'
+  ElectricPanelLoadTypePoolPump = 'Pool Pump'
+  ElectricPanelLoadTypeWellPump = 'Well Pump'
+  ElectricPanelLoadTypeElectricVehicleCharging = 'Electric Vehicle Charging'
+  ElectricPanelLoadTypeLighting = 'Lighting'
+  ElectricPanelLoadTypeKitchen = 'Kitchen'
+  ElectricPanelLoadTypeLaundry = 'Laundry'
+  ElectricPanelLoadTypeOther = 'Other'
+  ElectricPanelVoltage120 = '120'
+  ElectricPanelVoltage240 = '240'
   ElectricResistanceDistributionRadiantCeiling = 'radiant ceiling'
   ElectricResistanceDistributionRadiantFloor = 'radiant floor'
   ElectricResistanceDistributionBaseboard = 'baseboard'
@@ -529,6 +547,13 @@ class HPXML < Object
                     cdl_lat_infil: 'Infiltration',
                     cdl_lat_vent: 'Ventilation',
                     cdl_lat_intgains: 'InternalLoads' }
+
+  # Electric panel attributes
+  CLB_ATTRS = { clb_total_w: 'Watts',
+                clb_total_a: 'Amps',
+                clb_headroom_a: 'Headroom' }
+  BS_ATTRS = { bs_total: 'Total',
+               bs_hvac: 'HVAC' }
 
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
     @hpxml_path = hpxml_path
@@ -1413,6 +1438,7 @@ class HPXML < Object
                    :solar_thermal_systems,         # [HPXML::SolarThermalSystems]
                    :pv_systems,                    # [HPXML::PVSystems]
                    :inverters,                     # [HPXML::Inverters]
+                   :electric_panels,               # [HPXML::ElectricPanels]
                    :batteries,                     # [HPXML::Batteries]
                    :generators,                    # [HPXML::Generators]
                    :clothes_washers,               # [HPXML::ClothesWashers]
@@ -1552,6 +1578,7 @@ class HPXML < Object
       @solar_thermal_systems.to_doc(building)
       @pv_systems.to_doc(building)
       @inverters.to_doc(building)
+      @electric_panels.to_doc(building)
       @batteries.to_doc(building)
       @generators.to_doc(building)
       @clothes_washers.to_doc(building)
@@ -1638,6 +1665,7 @@ class HPXML < Object
       @solar_thermal_systems = SolarThermalSystems.new(self, building)
       @pv_systems = PVSystems.new(self, building)
       @inverters = Inverters.new(self, building)
+      @electric_panels = ElectricPanels.new(self, building)
       @batteries = Batteries.new(self, building)
       @generators = Generators.new(self, building)
       @clothes_washers = ClothesWashers.new(self, building)
@@ -9125,6 +9153,171 @@ class HPXML < Object
     end
   end
 
+  # Array of HPXML::ElectricPanel objects.
+  class ElectricPanels < BaseArrayElement
+    # Adds a new object, with the specified keyword arguments, to the array.
+    #
+    # @return [nil]
+    def add(**kwargs)
+      self << ElectricPanel.new(@parent_object, **kwargs)
+    end
+
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
+    def from_doc(building)
+      return if building.nil?
+
+      XMLHelper.get_elements(building, 'BuildingDetails/Systems/ElectricPanels/ElectricPanel').each do |electric_panel|
+        self << ElectricPanel.new(@parent_object, electric_panel)
+      end
+    end
+  end
+
+  # Object for /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel.
+  class ElectricPanel < BaseElement
+    def initialize(hpxml_element, *args, **kwargs)
+      @panel_loads = PanelLoads.new(hpxml_element)
+      super(hpxml_element, *args, **kwargs)
+    end
+    CLASS_ATTRS = [:panel_loads]
+    ATTRS = [:id, # [String] SystemIdentifier/@id
+             :voltage,
+             :max_current_rating,
+             :num_breaker_spaces_remaining] +
+            CLB_ATTRS.keys +
+            BS_ATTRS.keys
+    attr_reader(*CLASS_ATTRS)
+    attr_accessor(*ATTRS)
+
+    # Deletes the current object from the array.
+    #
+    # @return [nil]
+    def delete
+      @parent_object.electric_panels.delete(self)
+    end
+
+    # Additional error-checking beyond what's checked in Schema/Schematron validators.
+    #
+    # @return [Array<String>] List of error messages
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    # Adds this object to the provided Oga XML element.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
+    def to_doc(building)
+      return if nil?
+
+      electric_panels = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'ElectricPanels'])
+      electric_panel = XMLHelper.add_element(electric_panels, 'ElectricPanel')
+      sys_id = XMLHelper.add_element(electric_panel, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(electric_panel, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
+      XMLHelper.add_element(electric_panel, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_isdefaulted) unless @max_current_rating.nil?
+      XMLHelper.add_extension(electric_panel, 'NumberofBreakerSpacesRemaining', @num_breaker_spaces_remaining, :integer, @num_breaker_spaces_remaining_isdefaulted) unless @num_breaker_spaces_remaining.nil?
+      @panel_loads.to_doc(electric_panel)
+      if !@clb_total_w.nil? && !@clb_total_a.nil? && !@clb_headroom_a.nil? && !@bs_hvac.nil? && !@bs_total.nil?
+        HPXML.panel_outputs_to_doc(self, electric_panel)
+      end
+    end
+
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param electric_panel [Oga::XML::Element] The current ElectricPanel XML element
+    # @return [nil]
+    def from_doc(electric_panel)
+      return if electric_panel.nil?
+
+      @id = HPXML::get_id(electric_panel)
+      @voltage = XMLHelper.get_value(electric_panel, 'Voltage', :string)
+      @max_current_rating = XMLHelper.get_value(electric_panel, 'MaxCurrentRating', :float)
+      @num_breaker_spaces_remaining = XMLHelper.get_value(electric_panel, 'extension/NumberofBreakerSpacesRemaining', :integer)
+      @panel_loads.from_doc(electric_panel)
+      HPXML.panel_outputs_from_doc(self, electric_panel)
+    end
+  end
+
+  # Array of HPXML::PanelLoad objects.
+  class PanelLoads < BaseArrayElement
+    # Adds a new object, with the specified keyword arguments, to the array.
+    #
+    # @return [nil]
+    def add(**kwargs)
+      self << PanelLoad.new(@parent_object, **kwargs)
+    end
+
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param electric_panel [Oga::XML::Element] The current Electric panel XML element
+    # @return [nil]
+    def from_doc(electric_panel)
+      return if electric_panel.nil?
+
+      XMLHelper.get_elements(electric_panel, 'extension/PanelLoads/PanelLoad').each do |panel_load|
+        self << PanelLoad.new(@parent_object, panel_load)
+      end
+    end
+  end
+
+  # Object for /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/extension/PanelLoads/PanelLoad.
+  class PanelLoad < BaseElement
+    ATTRS = [:type,
+             :watts,
+             :voltage,
+             :addition]
+    attr_accessor(*ATTRS)
+
+    # Deletes the current object from the array.
+    #
+    # @return [nil]
+    def delete
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.delete(self)
+      end
+    end
+
+    # Additional error-checking beyond what's checked in Schema/Schematron validators.
+    #
+    # @return [Array<String>] List of error messages
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    # Adds this object to the provided Oga XML element.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
+    def to_doc(electric_panel)
+      return if nil?
+
+      panel_loads = XMLHelper.create_elements_as_needed(electric_panel, ['extension', 'PanelLoads'])
+      panel_load = XMLHelper.add_element(panel_loads, 'PanelLoad')
+      XMLHelper.add_element(panel_load, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
+      XMLHelper.add_element(panel_load, 'Watts', @watts, :float, @watts_isdefaulted) unless @watts.nil?
+      XMLHelper.add_element(panel_load, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
+      XMLHelper.add_element(panel_load, 'Addition', @addition, :boolean, @addition_isdefaulted) unless @addition.nil?
+    end
+
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param panel_load [Oga::XML::Element] The current PanelLoad XML element
+    # @return [nil]
+    def from_doc(panel_load)
+      return if panel_load.nil?
+
+      @type = XMLHelper.get_value(panel_load, 'Type', :string)
+      @watts = XMLHelper.get_value(panel_load, 'Watts', :float)
+      @voltage = XMLHelper.get_value(panel_load, 'Voltage', :string)
+      @addition = XMLHelper.get_value(panel_load, 'Addition', :boolean)
+    end
+  end
+
   # Array of HPXML::Battery objects.
   class Batteries < BaseArrayElement
     # Adds a new object, with the specified keyword arguments, to the array.
@@ -11440,6 +11633,40 @@ class HPXML < Object
         else
           hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :float))
         end
+      end
+    end
+  end
+
+  # Adds this object's panel capacities to the provided Oga XML element.
+  #
+  # @param hpxml_object [HPXML::XXX] The ElectricPanel object
+  # @param hpxml_element [Oga::XML::Element] The ElectricPanel XML element
+  # @return [nil]
+  def self.panel_outputs_to_doc(hpxml_object, hpxml_element)
+    { CLB_ATTRS => 'CapacityLoadBased',
+      BS_ATTRS => 'BreakerSpace' }.each do |attrs, p_child_name|
+      p_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'Outputs'])
+      XMLHelper.add_attribute(p_extension, 'dataSource', 'software')
+      p_child = XMLHelper.add_element(p_extension, p_child_name)
+      attrs.each do |attr, element_name|
+        XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :float)
+      end
+    end
+  end
+
+  # Populates the HPXML object's panel capacities from the XML element.
+  #
+  # @param hpxml_object [HPXML::XXX] The ElectricPanel object
+  # @param hpxml_element [Oga::XML::Element] The ElectricPanel XML element
+  # @return [nil]
+  def self.panel_outputs_from_doc(hpxml_object, hpxml_element)
+    outputs = XMLHelper.get_element(hpxml_element, 'extension/Outputs')
+    return if outputs.nil?
+
+    { CLB_ATTRS => 'CapacityLoadBased',
+      BS_ATTRS => 'BreakerSpace' }.each do |attrs, p_child_name|
+      attrs.each do |attr, element_name|
+        hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :float))
       end
     end
   end

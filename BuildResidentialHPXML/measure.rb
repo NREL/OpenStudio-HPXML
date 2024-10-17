@@ -2627,6 +2627,48 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(4000)
     args << arg
 
+    electric_panel_voltage_choices = OpenStudio::StringVector.new
+    electric_panel_voltage_choices << HPXML::ElectricPanelVoltage120
+    electric_panel_voltage_choices << HPXML::ElectricPanelVoltage240
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_service_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Service Voltage')
+    arg.setDescription("The service voltage of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_service_rating', false)
+    arg.setDisplayName('Electric Panel: Service Rating')
+    arg.setDescription("The service rating of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('A')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_num_breaker_spaces_remaining', false)
+    arg.setDisplayName('Electric Panel: Number of Breaker Spaces Remaining')
+    arg.setDescription("The number of remaining breaker spaces. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('#')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_types', false)
+    arg.setDisplayName('Electric Panel: Load Types')
+    arg.setDescription("Specified the panel load types. Possible load types are: #{HPXML::ElectricPanelLoadTypeHeating}, #{HPXML::ElectricPanelLoadTypeCooling}, #{HPXML::ElectricPanelLoadTypeWaterHeater}, #{HPXML::ElectricPanelLoadTypeClothesDryer}, #{HPXML::ElectricPanelLoadTypeDishwasher}, #{HPXML::ElectricPanelLoadTypeRangeOven}, #{HPXML::ElectricPanelLoadTypePermanentSpaHeater}, #{HPXML::ElectricPanelLoadTypePermanentSpaPump}, #{HPXML::ElectricPanelLoadTypePoolHeater}, #{HPXML::ElectricPanelLoadTypePoolPump}, #{HPXML::ElectricPanelLoadTypeWellPump}, #{HPXML::ElectricPanelLoadTypeElectricVehicleCharging}, #{HPXML::ElectricPanelLoadTypeOther}. If multiple loads, use a comma-separated list.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_watts', false)
+    arg.setDisplayName('Electric Panel: Load Watts')
+    arg.setDescription("Specifies the panel load watts. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_voltages', false)
+    arg.setDisplayName('Electric Panel: Load Voltages')
+    arg.setDescription("Specifies the panel load voltages. Possible load voltages are: #{HPXML::ElectricPanelVoltage120}, #{HPXML::ElectricPanelVoltage240}. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_additions', false)
+    arg.setDisplayName('Electric Panel: Load Additions')
+    arg.setDescription("Specifies whether the panel loads are additions. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
     battery_location_choices = OpenStudio::StringVector.new
     battery_location_choices << HPXML::LocationConditionedSpace
     battery_location_choices << HPXML::LocationBasementConditioned
@@ -3940,6 +3982,7 @@ module HPXMLFile
     set_water_fixtures(hpxml_bldg, args)
     set_solar_thermal(hpxml_bldg, args, weather)
     set_pv_systems(hpxml_bldg, args, weather)
+    set_electric_panel(hpxml_bldg, args)
     set_battery(hpxml_bldg, args)
     set_lighting(hpxml_bldg, args)
     set_dehumidifier(hpxml_bldg, args)
@@ -6806,6 +6849,47 @@ module HPXMLFile
                              inverter_efficiency: args[:pv_system_inverter_efficiency])
     hpxml_bldg.pv_systems.each do |pv_system|
       pv_system.inverter_idref = hpxml_bldg.inverters[-1].id
+    end
+  end
+
+  # Set the electric panel properties, including:
+  # - service voltage
+  # - max current service rating
+  # - individual panel loads
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param args [Hash] Map of :argument_name => value
+  # @return [nil]
+  def self.set_electric_panel(hpxml_bldg, args)
+    return if args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil? && args[:electric_panel_num_breaker_spaces_remaining].nil?
+
+    hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
+                                   voltage: args[:electric_panel_service_voltage],
+                                   max_current_rating: args[:electric_panel_service_rating],
+                                   num_breaker_spaces_remaining: args[:electric_panel_num_breaker_spaces_remaining])
+
+    if not args[:electric_panel_load_types].nil?
+      panel_loads = hpxml_bldg.electric_panels[0].panel_loads
+
+      electric_panel_load_types = args[:electric_panel_load_types].split(',').map(&:strip)
+      electric_panel_load_watts = args[:electric_panel_load_watts].split(',').map(&:strip)
+      electric_panel_load_voltages = args[:electric_panel_load_voltages].split(',').map(&:strip)
+      electric_panel_load_additions = args[:electric_panel_load_additions].split(',').map(&:strip)
+
+      electric_panel_loads = electric_panel_load_types.zip(electric_panel_load_watts,
+                                                           electric_panel_load_voltages,
+                                                           electric_panel_load_additions)
+
+      electric_panel_loads.each do |electric_panel_load|
+        type, watts, voltage, addition = electric_panel_load
+
+        watts = nil if Float(watts) < 0
+
+        panel_loads.add(type: type,
+                        watts: watts,
+                        voltage: voltage,
+                        addition: addition)
+      end
     end
   end
 

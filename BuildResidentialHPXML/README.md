@@ -4421,6 +4421,89 @@ Maximum power output of the second PV system. For a shared system, this is the t
 
 <br/>
 
+**Electric Panel: Service Voltage**
+
+The service voltage of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+
+- **Name:** ``electric_panel_service_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Electric Panel: Service Rating**
+
+The service rating of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+
+- **Name:** ``electric_panel_service_rating``
+- **Type:** ``Double``
+
+- **Units:** ``A``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Number of Breaker Spaces Remaining**
+
+The number of remaining breaker spaces. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+
+- **Name:** ``electric_panel_num_breaker_spaces_remaining``
+- **Type:** ``Integer``
+
+- **Units:** ``#``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Load Types**
+
+Specified the panel load types. Possible load types are: Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Permanent Spa Heater, Permanent Spa Pump, Pool Heater, Pool Pump, Well Pump, Electric Vehicle Charging, Other. If multiple loads, use a comma-separated list.
+
+- **Name:** ``electric_panel_load_types``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Load Watts**
+
+Specifies the panel load watts. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``electric_panel_load_watts``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Load Voltages**
+
+Specifies the panel load voltages. Possible load voltages are: 120, 240. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``electric_panel_load_voltages``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Load Additions**
+
+Specifies whether the panel loads are additions. If multiple loads, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``electric_panel_load_additions``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **Battery: Present**
 
 Whether there is a lithium ion battery present.
