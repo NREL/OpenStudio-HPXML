@@ -524,8 +524,6 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 
 - ``end_use_electricity_plug_loads_m_btu``
 
-- ``end_use_electricity_electric_vehicle_charging_m_btu``
-
 - ``end_use_electricity_well_pump_m_btu``
 
 - ``end_use_electricity_pool_heater_m_btu``
@@ -541,6 +539,8 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 - ``end_use_electricity_generator_m_btu``
 
 - ``end_use_electricity_battery_m_btu``
+
+- ``end_use_electricity_electric_vehicle_charging_m_btu``
 
 - ``end_use_natural_gas_heating_m_btu``
 
@@ -783,5 +783,7 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 - ``hot_water_distribution_waste_gal``
 
 - ``resilience_battery_hr``
+
+- ``vehicle_electric_vehicle_discharging_mbtu``
 
 
