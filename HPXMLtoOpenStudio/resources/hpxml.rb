@@ -6367,6 +6367,25 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
+
     # Returns the zone that the heating system serves.
     #
     # @return [HPXML::Zone] Zone served
@@ -6672,6 +6691,25 @@ class HPXML < Object
              :htg_seed_id]                                         # [String] extension/HeatingSeedId
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
+
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
 
     # Returns the zone that the cooling system serves.
     #
@@ -8058,6 +8096,25 @@ class HPXML < Object
              :cfis_vent_mode_airflow_fraction]          # [Double] extension/VentilationOnlyModeAirflowFraction (frac)
     attr_accessor(*ATTRS)
 
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
+
     # Returns the HVAC distribution system for the ventilation fan.
     #
     # @return [HPXML::HVACDistribution] The attached HVAC distribution system
@@ -8419,6 +8476,25 @@ class HPXML < Object
              :tank_model_type,           # [String] extension/TankModelType (HPXML::WaterHeaterTankModelTypeXXX)
              :number_of_bedrooms_served] # [Integer] extension/NumberofBedroomsServed
     attr_accessor(*ATTRS)
+
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
 
     # Returns the HVAC system related to this water heating system (e.g., for
     # a combination boiler that provides both water heating and space heating).
@@ -9730,6 +9806,25 @@ class HPXML < Object
              :monthly_multipliers]    # [String] extension/MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
 
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
+
     # Deletes the current object from the array.
     #
     # @return [nil]
@@ -9838,6 +9933,25 @@ class HPXML < Object
              :weekend_fractions,            # [String] extension/WeekendScheduleFractions
              :monthly_multipliers]          # [String] extension/MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
+
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
 
     # Returns the water heating system connected to the dishwasher.
     #
@@ -10246,6 +10360,25 @@ class HPXML < Object
              :weekend_fractions,   # [String] WeekendScheduleFractions
              :monthly_multipliers] # [String] MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
+
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
 
     # Deletes the current object from the array.
     #
@@ -10689,6 +10822,25 @@ class HPXML < Object
              :heater_monthly_multipliers] # [String] Heater/MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
 
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next if panel_load.system_idref != @pump_id && panel_load.system_idref != @heater_id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
+
     # Deletes the current object from the array.
     #
     # @return [nil]
@@ -10832,6 +10984,25 @@ class HPXML < Object
              :heater_weekend_fractions,   # [String] Heater/WeekendScheduleFractions
              :heater_monthly_multipliers] # [String] Heater/MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
+
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next if panel_load.system_idref != @pump_id && panel_load.system_idref != @heater_id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
 
     # Deletes the current object from the array.
     #
@@ -11032,6 +11203,25 @@ class HPXML < Object
              :weekend_fractions,   # [String] WeekendScheduleFractions
              :monthly_multipliers] # [String] MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
+
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
 
     # Deletes the current object from the array.
     #

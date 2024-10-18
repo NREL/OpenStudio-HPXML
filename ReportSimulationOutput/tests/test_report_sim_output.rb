@@ -262,7 +262,8 @@ class ReportSimulationOutputTest < Minitest::Test
     'Electric Panel Capacity: Meter-Based Total (A)',
     'Electric Panel Capacity: Meter-Based Headroom (W)',
     'Electric Panel Breaker Space: HVAC Count',
-    'Electric Panel Breaker Space: Total Count'
+    'Electric Panel Breaker Space: Total Count',
+    'Electric Panel Breaker Space: Headroom Count',
   ]
 
   BaseHPXMLTimeseriesColsEnergy = [
@@ -1381,11 +1382,12 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(9762.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (W)'])
     assert_equal(41.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (A)'])
     assert_equal(100.0 - 41.0, actual_annual_rows['Electric Panel Capacity: Load-Based Headroom (W)'])
-    assert_equal(2565.9, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
-    assert_equal(10.7, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
-    assert_equal(100.0 - 10.7, actual_annual_rows['Electric Panel Capacity: Meter-Based Headroom (W)'])
-    assert_equal(1, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
-    assert_equal(2, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
+    assert_equal(2581.8, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
+    assert_equal(10.8, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
+    assert_equal(100.0 - 10.8, actual_annual_rows['Electric Panel Capacity: Meter-Based Headroom (W)'])
+    assert_equal(10, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
+    assert_equal(4, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
+    assert_equal(20 - 10, actual_annual_rows['Electric Panel Breaker Space: Headroom Count'])
 
     # Upgrade
     hpxml_bldg = hpxml.buildings[0]
@@ -1397,18 +1399,26 @@ class ReportSimulationOutputTest < Minitest::Test
     pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }
     pl.watts = 17942
     pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeWaterHeater }
-    pl.watts = 4500
-    pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeClothesDryer }
-    pl.watts = 5760
-    pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeRangeOven }
-    pl.watts = 12000
-    pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging }
-    pl.watts = 1650
-    pl.addition = true
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                    watts: 4500,
+                    voltage: HPXML::ElectricPanelVoltage240,
+                    breaker_spaces: 2,
+                    addition: true)
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                    watts: 5760,
+                    voltage: HPXML::ElectricPanelVoltage120,
+                    breaker_spaces: 1,
+                    addition: true)
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
+                    watts: 12000,
+                    voltage: HPXML::ElectricPanelVoltage240,
+                    breaker_spaces: 2,
+                    addition: true)
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                    watts: 1650,
+                    voltage: HPXML::ElectricPanelVoltage120,
+                    breaker_spaces: 1,
+                    addition: true)
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
 
     args_hash = { 'hpxml_path' => @tmp_hpxml_path,
@@ -1420,11 +1430,12 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(35851.2, actual_annual_rows['Electric Panel Capacity: Load-Based Total (W)'])
     assert_equal(149.0, actual_annual_rows['Electric Panel Capacity: Load-Based Total (A)'])
     assert_equal(100.0 - 149.0, actual_annual_rows['Electric Panel Capacity: Load-Based Headroom (W)'])
-    assert_equal(44417.9, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
+    assert_equal(44433.8, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
     assert_equal(185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
     assert_equal(100.0 - 185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Headroom (W)'])
-    assert_equal(1, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
-    assert_equal(2, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
+    assert_equal(16, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
+    assert_equal(4, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
+    assert_equal(20 - 16, actual_annual_rows['Electric Panel Breaker Space: Headroom Count'])
   end
 
   private

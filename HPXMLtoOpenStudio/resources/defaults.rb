@@ -3180,56 +3180,123 @@ module Defaults
       end
 
       panel_loads = electric_panel.panel_loads
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeWaterHeater }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeClothesDryer }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeDishwasher }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeRangeOven }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypePermanentSpaHeater }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypePermanentSpaPump }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaPump)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypePoolHeater }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypePoolPump }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolPump)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeWellPump }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeWellPump)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging)
-      end
-      if electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting).nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting)
-      end
-      if electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen).nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen)
-      end
-      if electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry).nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry)
-      end
-      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther }.nil?
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther)
+
+      hpxml_bldg.heating_systems.each do |heating_system|
+        next if !heating_system.panel_loads.nil?
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
+                        system_idref: heating_system.id)
       end
 
-      electric_panel.panel_loads.each do |panel_load|
+      hpxml_bldg.cooling_systems.each do |cooling_system|
+        next if !cooling_system.panel_loads.nil?
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
+                        system_idref: cooling_system.id)
+      end
+
+      hpxml_bldg.heat_pumps.each do |heat_pump|
+        next if !heat_pump.panel_loads.nil?
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
+                        system_idref: heat_pump.id)
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
+                        system_idref: heat_pump.id)
+      end
+
+      hpxml_bldg.water_heating_systems.each do |water_heating_system|
+        next if !water_heating_system.panel_loads.nil?
+        next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                        system_idref: water_heating_system.id)
+      end
+
+      hpxml_bldg.clothes_dryers.each do |clothes_dryer|
+        next if !clothes_dryer.panel_loads.nil?
+        next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                        system_idref: clothes_dryer.id)
+      end
+
+      hpxml_bldg.dishwashers.each do |dishwasher|
+        next if !dishwasher.panel_loads.nil?
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher,
+                        system_idref: dishwasher.id)
+      end
+
+      hpxml_bldg.cooking_ranges.each do |cooking_range|
+        next if !cooking_range.panel_loads.nil?
+        next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
+                        system_idref: cooking_range.id)
+      end
+
+      hpxml_bldg.permanent_spas.each do |permanent_spa|
+        next if !permanent_spa.panel_loads.nil?
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaPump,
+                        system_idref: permanent_spa.pump_id)
+
+        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
+                        system_idref: permanent_spa.heater_id)
+      end
+
+      hpxml_bldg.pools.each do |pool|
+        next if !permanent_spa.panel_loads.nil?
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolPump,
+
+                        system_idref: pool.pump_id)
+
+        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater,
+                        system_idref: pool.heater_id)
+      end
+
+      hpxml_bldg.plug_loads.each do |plug_load|
+        next if !plug_load.panel_loads.nil?
+        next if plug_load.plug_load_type != HPXML::PlugLoadTypeWellPump
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeWellPump,
+                        system_idref: plug_load.id)
+      end
+
+      hpxml_bldg.plug_loads.each do |plug_load|
+        next if !plug_load.panel_loads.nil?
+        next if plug_load.plug_load_type != HPXML::PlugLoadTypeElectricVehicleCharging
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                        system_idref: plug_load.id)
+      end
+
+      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+        next if !ventilation_fan.panel_loads.nil?
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
+                        system_idref: ventilation_fan.id)
+      end
+
+      if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther && pl.system_idref.nil? } == 0
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther) # for garbage disposal and garage door opener
+      end
+      if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLighting } == 0
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting)
+      end
+      if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeKitchen } == 0
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen)
+      end
+      if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLaundry } == 0
+        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry)
+      end
+
+      panel_loads.each do |panel_load|
         if panel_load.voltage.nil?
           panel_load.voltage = get_panel_load_voltage_default_values(panel_load.type)
           panel_load.voltage_isdefaulted = true

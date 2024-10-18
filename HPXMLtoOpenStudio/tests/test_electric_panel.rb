@@ -34,8 +34,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(9762, electric_panel.clb_total_w, 0.01)
     assert_in_epsilon(9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_total_a, 0.01)
     assert_in_epsilon(electric_panel.max_current_rating - 9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_headroom_a, 0.01)
-    assert_equal(1, electric_panel.bs_total)
-    assert_equal(2, electric_panel.bs_hvac)
+    assert_equal(10, electric_panel.bs_total)
+    assert_equal(4, electric_panel.bs_hvac)
+    assert_equal(electric_panel.breaker_spaces - 10, electric_panel.bs_headroom)
 
     # Upgrade
     panel_loads = electric_panel.panel_loads
@@ -45,18 +46,26 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }
     pl.watts = 17942
     pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeWaterHeater }
-    pl.watts = 4500
-    pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeClothesDryer }
-    pl.watts = 5760
-    pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeRangeOven }
-    pl.watts = 12000
-    pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging }
-    pl.watts = 1650
-    pl.addition = true
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                    watts: 4500,
+                    voltage: HPXML::ElectricPanelVoltage240,
+                    breaker_spaces: 2,
+                    addition: true)
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                    watts: 5760,
+                    voltage: HPXML::ElectricPanelVoltage120,
+                    breaker_spaces: 1,
+                    addition: true)
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
+                    watts: 12000,
+                    voltage: HPXML::ElectricPanelVoltage240,
+                    breaker_spaces: 2,
+                    addition: true)
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                    watts: 1650,
+                    voltage: HPXML::ElectricPanelVoltage120,
+                    breaker_spaces: 1,
+                    addition: true)
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
     args_hash['hpxml_path'] = @tmp_hpxml_path
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -65,8 +74,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(35851, electric_panel.clb_total_w, 0.01)
     assert_in_epsilon(35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_total_a, 0.01)
     assert_in_epsilon(electric_panel.max_current_rating - 35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_headroom_a, 0.01)
-    assert_equal(1, electric_panel.bs_total)
-    assert_equal(2, electric_panel.bs_hvac)
+    assert_equal(16, electric_panel.bs_total)
+    assert_equal(4, electric_panel.bs_hvac)
+    assert_equal(electric_panel.breaker_spaces - 16, electric_panel.bs_headroom)
   end
 
   def _test_measure(args_hash)

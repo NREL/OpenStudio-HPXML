@@ -464,18 +464,6 @@
                   <System idref='CoolingSystem1'/>
                 </PanelLoad>
                 <PanelLoad>
-                  <Type>Hot Water</Type>
-                  <System idref='WaterHeatingSystem1'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <Type>Clothes Dryer</Type>
-                  <System idref='ClothesDryer1'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <Type>Range/Oven</Type>
-                  <System idref='CookingRange1'/>
-                </PanelLoad>
-                <PanelLoad>
                   <Type>Other</Type>
                 </PanelLoad>
                 <PanelLoad>

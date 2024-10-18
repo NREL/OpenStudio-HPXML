@@ -70,9 +70,7 @@ module ElectricPanel
 
   # TODO
   def self.calculate_meter_based(electric_panel, peak_fuels)
-    htg = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeHeating && !panel_load.addition }.map { |pl| pl.watts }.sum(0.0)
     htg_add = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeHeating && panel_load.addition }.map { |pl| pl.watts }.sum(0.0)
-    clg = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && !panel_load.addition }.map { |pl| pl.watts }.sum(0.0)
     clg_add = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.addition }.map { |pl| pl.watts }.sum(0.0)
 
     new_loads = 0.0

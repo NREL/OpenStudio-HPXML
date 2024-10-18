@@ -6891,7 +6891,7 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_electric_panel(hpxml_bldg, args)
-    return if args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil? && args[:electric_panel_num_breaker_spaces_remaining].nil?
+    return if args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil? && args[:electric_panel_num_breaker_spaces].nil?
 
     hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
                                    voltage: args[:electric_panel_service_voltage],
@@ -6933,11 +6933,15 @@ module HPXMLFile
     end
 
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
+      next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
                       system_idref: water_heating_system.id)
     end
 
     hpxml_bldg.clothes_dryers.each do |clothes_dryer|
+      next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
+
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
                       system_idref: clothes_dryer.id)
     end
@@ -6948,11 +6952,15 @@ module HPXMLFile
     end
 
     hpxml_bldg.cooking_ranges.each do |cooking_range|
+      next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
+
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
                       system_idref: cooking_range.id)
     end
 
     hpxml_bldg.permanent_spas.each do |permanent_spa|
+      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
+
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
                       system_idref: permanent_spa.heater_id)
     end
@@ -6962,9 +6970,11 @@ module HPXMLFile
                       system_idref: permanent_spa.pump_id)
     end
 
-    hpxml_bldg.pools.each do |_pool|
+    hpxml_bldg.pools.each do |pool|
+      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
+
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater,
-                      system_idref: permanent_spa.heater_id)
+                      system_idref: pool.heater_id)
     end
 
     hpxml_bldg.pools.each do |pool|
