@@ -3174,9 +3174,9 @@ module Defaults
         electric_panel.max_current_rating = electric_panel_default_values[:max_current_rating]
         electric_panel.max_current_rating_isdefaulted = true
       end
-      if electric_panel.num_breaker_spaces_remaining.nil?
-        electric_panel.num_breaker_spaces_remaining = electric_panel_default_values[:num_breaker_spaces_remaining]
-        electric_panel.num_breaker_spaces_remaining_isdefaulted = true
+      if electric_panel.breaker_spaces.nil?
+        electric_panel.breaker_spaces = electric_panel_default_values[:breaker_spaces]
+        electric_panel.breaker_spaces_isdefaulted = true
       end
 
       panel_loads = electric_panel.panel_loads
@@ -3229,24 +3229,22 @@ module Defaults
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther)
       end
 
-      panel_load_voltage_default_values = get_panel_load_voltage_default_values()
-      panel_loads = electric_panel.panel_loads
-      panel_loads.each do |panel_load|
+      electric_panel.panel_loads.each do |panel_load|
         if panel_load.voltage.nil?
-          panel_load.voltage = panel_load_voltage_default_values[panel_load.type]
+          panel_load.voltage = get_panel_load_voltage_default_values(panel_load.type)
           panel_load.voltage_isdefaulted = true
+        end
+        if panel_load.watts.nil?
+          panel_load.watts = get_panel_load_watts_default_values(hpxml_bldg, panel_load.type, panel_load.voltage, panel_load.system_idref)
+          panel_load.watts_isdefaulted = true
+        end
+        if panel_load.breaker_spaces.nil?
+          panel_load.breaker_spaces = get_panel_load_breaker_spaces_default_values(panel_load.watts, panel_load.voltage)
+          panel_load.breaker_spaces_isdefaulted = true
         end
         if panel_load.addition.nil?
           panel_load.addition = false
           panel_load.addition_isdefaulted = true
-        end
-      end
-
-      panel_load_watts_default_values = get_panel_load_watts_default_values(hpxml_bldg, panel_loads)
-      panel_loads.each do |panel_load|
-        if panel_load.watts.nil?
-          panel_load.watts = panel_load_watts_default_values[panel_load.type].round(1)
-          panel_load.watts_isdefaulted = true
         end
       end
 
@@ -5694,138 +5692,207 @@ module Defaults
   def self.get_electric_panel_values()
     return { panel_voltage: HPXML::ElectricPanelVoltage240,
              max_current_rating: 150.0, # A
-             num_breaker_spaces_remaining: 0 }
+             breaker_spaces: 150.0 / 15.0 } # FIXME
+  end
+
+  # TODO
+  def self.get_panel_load_voltage_default_values(type)
+    if [HPXML::ElectricPanelLoadTypeHeating,
+        HPXML::ElectricPanelLoadTypeCooling,
+        HPXML::ElectricPanelLoadTypeWaterHeater,
+        HPXML::ElectricPanelLoadTypeClothesDryer,
+        HPXML::ElectricPanelLoadTypeRangeOven,
+        HPXML::ElectricPanelLoadTypePermanentSpaHeater,
+        HPXML::ElectricPanelLoadTypePoolHeater].include?(type)
+      return 240
+    else
+      return 120
+    end
   end
 
   # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Hash] Map of electric panel properties to default values
-  def self.get_panel_load_watts_default_values(hpxml_bldg, _panel_loads)
-    heating_watts = 0.0
-    cooling_watts = 0.0
-    hpxml_bldg.heating_systems.each do |heating_system|
-      if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-        heating_watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
-      else
-        heating_watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
-      end
-    end
-    hpxml_bldg.cooling_systems.each do |cooling_system|
-      cooling_watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
-      cooling_watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
-    end
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      heating_watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
-      heating_watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
-      if !heat_pump.backup_heating_capacity.nil?
-        heating_watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'kbtu/hr') * 293.07
-      end
-      cooling_watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
-      cooling_watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
-    end
+  def self.get_panel_load_watts_default_values(hpxml_bldg, type, voltage, system_id)
+    watts = 0.0
+    if type == HPXML::ElectricPanelLoadTypeHeating
+      hpxml_bldg.heating_systems.each do |heating_system|
+        next if heating_system.id != system_id
 
-    water_heater_watts = 0
-    hpxml_bldg.water_heating_systems.each do |water_heating_system|
-      next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
-
-      if [HPXML::WaterHeaterTypeStorage, HPXML::WaterHeaterTypeHeatPump].include?(water_heating_system.water_heater_type)
-        water_heater_watts += 4500
-      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-        if hpxml_bldg.building_construction.number_of_bathrooms == 1
-          water_heater_watts += 18000
-        elsif hpxml_bldg.building_construction.number_of_bathrooms == 2
-          water_heater_watts += 24000
-        else # 3+
-          water_heater_watts += 36000
-        end
-      end
-    end
-
-    clothes_dryer_watts = 0
-    hpxml_bldg.clothes_dryers.each do |clothes_dryer|
-      next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
-
-      is_hp = false # FIXME
-      if clothes_dryer.is_vented
-        clothes_dryer_watts += 5760
-      else
-        if is_hp
-          clothes_dryer_watts += 860
+        if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+          watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
         else
-          clothes_dryer_watts += 2640
+          watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+        end
+      end
+      hpxml_bldg.heat_pumps.each do |heat_pump|
+        next if heat_pump.id != system_id
+
+        watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+        watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+        if !heat_pump.backup_heating_capacity.nil?
+          watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'kbtu/hr') * 293.07
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeCooling
+      hpxml_bldg.cooling_systems.each do |cooling_system|
+        next if cooling_system.id != system_id
+
+        watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+        watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+      end
+      hpxml_bldg.heat_pumps.each do |heat_pump|
+        next if heat_pump.id != system_id
+
+        watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+        watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeWaterHeater
+      hpxml_bldg.water_heating_systems.each do |water_heating_system|
+        next if water_heating_system.id != system_id
+        next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+
+        if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
+          watts += 4500
+        elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
+          if voltage == 120
+            watts += 1000
+          else
+            watts += 4500
+          end
+        elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+          if hpxml_bldg.building_construction.number_of_bathrooms == 1
+            watts += 18000
+          elsif hpxml_bldg.building_construction.number_of_bathrooms == 2
+            watts += 24000
+          else # 3+
+            watts += 36000
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeClothesDryer
+      hpxml_bldg.clothes_dryers.each do |clothes_dryer|
+        next if clothes_dryer.id != system_id
+        next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
+
+        is_hp = false
+        if !clothes_dryer.energy_factor.nil? && clothes_dryer.combined_energy_factor > 5.0 # FIXME
+          is_hp = true
+        end
+
+        if !is_hp && clothes_dryer.is_vented
+          watts += 5760
+        elsif !is_hp && !clothes_dryer.is_vented
+          watts += 2640
+        elsif is_hp
+          if voltage == 120
+            watts += 996
+          else
+            watts += 860
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeDishwasher
+      hpxml_bldg.dishwashers.each do |dishwasher|
+        next if dishwasher.id != system_id
+
+        watts += 1200
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeRangeOven
+      hpxml_bldg.cooking_ranges.each do |cooking_range|
+        next if cooking_range.id != system_id
+        next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
+
+        if voltage == 120
+          watts += 1800
+        else
+          watts += 12000
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypePermanentSpaHeater
+      hpxml_bldg.permanent_spas.each do |permanent_spa|
+        next if permanent_spa.id != system_id
+
+        watts += 1000
+      end
+    elsif type == HPXML::ElectricPanelLoadTypePermanentSpaPump
+      hpxml_bldg.permanent_spas.each do |permanent_spa|
+        next if permanent_spa.id != system_id
+
+        watts += 1491
+      end
+    elsif type == HPXML::ElectricPanelLoadTypePoolHeater
+      hpxml_bldg.pools.each do |pool|
+        next if pool.id != system_id
+
+        watts += 27000
+      end
+    elsif type == HPXML::ElectricPanelLoadTypePoolPump
+      hpxml_bldg.pools.each do |pool|
+        next if pool.id != system_id
+
+        watts += 1491
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeWellPump
+      hpxml_bldg.plug_loads.each do |plug_load|
+        next if plug_load.plug_load_type != HPXML::PlugLoadTypeWellPump
+        next if plug_load.id != system_id
+
+        if hpxml_bldg.building_construction.number_of_bedrooms <= 3
+          watts += 746
+        else
+          watts += 1119
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging
+      hpxml_bldg.plug_loads.each do |plug_load|
+        next if plug_load.plug_load_type != HPXML::PlugLoadTypeElectricVehicleCharging
+        next if plug_load.id != system_id
+
+        if voltage == 120 # Level 1
+          watts += 1650
+        else # Level 2
+          watts += 7680
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeLighting
+      return 3 * hpxml_bldg.building_construction.conditioned_floor_area
+    elsif type == HPXML::ElectricPanelLoadTypeKitchen
+      return 3000
+    elsif type == HPXML::ElectricPanelLoadTypeLaundry
+      return 1500
+    elsif type == HPXML::ElectricPanelLoadTypeOther
+      if system_id.nil?
+        watts += 559 # Garbage disposal
+
+        if hpxml_bldg.has_location(HPXML::LocationGarage)
+          watts += 373 # Garage door opener
+        end
+      end
+
+      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+        next if ventilation_fan.id != system_id
+
+        if ventilation_fan.fan_location == HPXML::LocationKitchen
+          watts += 90 * ventilation_fan.count
+        elsif ventilation_fan.fan_location == HPXML::LocationBath
+          watts += 15 * ventilation_fan.count
         end
       end
     end
-
-    dishwasher_watts = 1200 * hpxml_bldg.dishwashers.size
-
-    range_oven_watts = 0
-    hpxml_bldg.cooking_ranges.each do |cooking_range|
-      next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
-
-      range_oven_watts += 12000
-    end
-
-    permanent_spa_heater_watts = 1000 * hpxml_bldg.permanent_spas.size
-    permanent_spa_pump_watts = 0
-    pool_heater_watts = 27000 * hpxml_bldg.pools.size
-    pool_pump_watts = 1491 * hpxml_bldg.pools.size
-
-    well_pump_watts = 0
-    hpxml_bldg.plug_loads.each do |plug_load|
-      next if plug_load.plug_load_type != HPXML::PlugLoadTypeWellPump
-
-      if hpxml_bldg.building_construction.number_of_bedrooms <= 3
-        well_pump_watts += 746
-      else
-        well_pump_watts += 1119
-      end
-    end
-
-    electric_vehicle_charging_watts = 1650 * hpxml_bldg.plug_loads.count { |plug_load| plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
-    lighting_watts = 3 * hpxml_bldg.building_construction.conditioned_floor_area
-    other_watts = 120 * hpxml_bldg.ventilation_fans.size + 559
-
-    load_watts = { HPXML::ElectricPanelLoadTypeHeating => heating_watts,
-                   HPXML::ElectricPanelLoadTypeCooling => cooling_watts,
-                   HPXML::ElectricPanelLoadTypeWaterHeater => water_heater_watts,
-                   HPXML::ElectricPanelLoadTypeClothesDryer => clothes_dryer_watts,
-                   HPXML::ElectricPanelLoadTypeDishwasher => dishwasher_watts,
-                   HPXML::ElectricPanelLoadTypeRangeOven => range_oven_watts,
-                   HPXML::ElectricPanelLoadTypePermanentSpaHeater => permanent_spa_heater_watts,
-                   HPXML::ElectricPanelLoadTypePermanentSpaPump => permanent_spa_pump_watts,
-                   HPXML::ElectricPanelLoadTypePoolHeater => pool_heater_watts,
-                   HPXML::ElectricPanelLoadTypePoolPump => pool_pump_watts,
-                   HPXML::ElectricPanelLoadTypeWellPump => well_pump_watts,
-                   HPXML::ElectricPanelLoadTypeElectricVehicleCharging => electric_vehicle_charging_watts,
-                   HPXML::ElectricPanelLoadTypeLighting => lighting_watts,
-                   HPXML::ElectricPanelLoadTypeKitchen => 3000,
-                   HPXML::ElectricPanelLoadTypeLaundry => 1500,
-                   HPXML::ElectricPanelLoadTypeOther => other_watts }
-    return load_watts
+    return watts
   end
 
   # TODO
-  def self.get_panel_load_voltage_default_values()
-    load_voltages = { HPXML::ElectricPanelLoadTypeHeating => 240,
-                      HPXML::ElectricPanelLoadTypeCooling => 240,
-                      HPXML::ElectricPanelLoadTypeWaterHeater => 240,
-                      HPXML::ElectricPanelLoadTypeClothesDryer => 240,
-                      HPXML::ElectricPanelLoadTypeDishwasher => 120,
-                      HPXML::ElectricPanelLoadTypeRangeOven => 240,
-                      HPXML::ElectricPanelLoadTypePermanentSpaHeater => 240,
-                      HPXML::ElectricPanelLoadTypePermanentSpaPump => 120,
-                      HPXML::ElectricPanelLoadTypePoolHeater => 240,
-                      HPXML::ElectricPanelLoadTypePoolPump => 120,
-                      HPXML::ElectricPanelLoadTypeWellPump => 240,
-                      HPXML::ElectricPanelLoadTypeElectricVehicleCharging => 120,
-                      HPXML::ElectricPanelLoadTypeLighting => 120,
-                      HPXML::ElectricPanelLoadTypeKitchen => 120,
-                      HPXML::ElectricPanelLoadTypeLaundry => 120,
-                      HPXML::ElectricPanelLoadTypeOther => 120 }
+  def self.get_panel_load_breaker_spaces_default_values(watts, voltage)
+    return 0 if watts == 0
 
-    return load_voltages
+    if voltage == 120
+      return 1
+    else
+      return 2
+    end
   end
 
   # Get default location, lifetime model, nominal capacity/voltage, round trip efficiency, and usable fraction for a battery.

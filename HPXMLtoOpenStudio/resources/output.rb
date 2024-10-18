@@ -1238,6 +1238,7 @@ module Outputs
     results_out << [line_break]
     results_out << ['Electric Panel Breaker Space: Total Count', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.bs_total }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round]
     results_out << ['Electric Panel Breaker Space: HVAC Count', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.bs_hvac }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round]
+    results_out << ['Electric Panel Breaker Space: Headroom Count', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.bs_headroom }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round]
 
     return results_out
   end

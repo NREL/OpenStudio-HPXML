@@ -393,6 +393,22 @@
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
+        <MechanicalVentilation>
+          <VentilationFans>
+            <VentilationFan>
+              <SystemIdentifier id='VentilationFan1'/>
+              <Count>1</Count>
+              <FanLocation>kitchen</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='VentilationFan2'/>
+              <Count>2</Count>
+              <FanLocation>bath</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+            </VentilationFan>
+          </VentilationFans>
+        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
@@ -433,54 +449,42 @@
             <Voltage>240</Voltage>
             <MaxCurrentRating>100.0</MaxCurrentRating>
             <extension>
-              <NumberofBreakerSpacesRemaining>3</NumberofBreakerSpacesRemaining>
+              <BreakerSpaces>20</BreakerSpaces>
               <PanelLoads>
                 <PanelLoad>
                   <Type>Heating</Type>
-                  <Voltage>240</Voltage>
-                  <Addition>false</Addition>
+                  <System idref='HeatingSystem1'/>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Cooling</Type>
                   <Watts>3542.0</Watts>
                   <Voltage>240</Voltage>
+                  <BreakerSpaces>2</BreakerSpaces>
                   <Addition>false</Addition>
+                  <System idref='CoolingSystem1'/>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Hot Water</Type>
-                  <Watts>0.0</Watts>
-                  <Voltage>240</Voltage>
-                  <Addition>false</Addition>
+                  <System idref='WaterHeatingSystem1'/>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Clothes Dryer</Type>
-                  <Watts>0.0</Watts>
-                  <Voltage>240</Voltage>
-                  <Addition>false</Addition>
-                </PanelLoad>
-                <PanelLoad>
-                  <Type>Dishwasher</Type>
-                  <Watts>0.0</Watts>
-                  <Voltage>120</Voltage>
-                  <Addition>false</Addition>
+                  <System idref='ClothesDryer1'/>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Range/Oven</Type>
-                  <Watts>0.0</Watts>
-                  <Voltage>240</Voltage>
-                  <Addition>false</Addition>
-                </PanelLoad>
-                <PanelLoad>
-                  <Type>Electric Vehicle Charging</Type>
-                  <Watts>0.0</Watts>
-                  <Voltage>120</Voltage>
-                  <Addition>false</Addition>
+                  <System idref='CookingRange1'/>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Other</Type>
-                  <Watts>679.0</Watts>
-                  <Voltage>120</Voltage>
-                  <Addition>false</Addition>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Other</Type>
+                  <System idref='VentilationFan1'/>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Other</Type>
+                  <System idref='VentilationFan2'/>
                 </PanelLoad>
               </PanelLoads>
             </extension>

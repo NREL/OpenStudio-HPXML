@@ -1616,13 +1616,15 @@
     "cooking_range_oven_fuel_type": "natural gas",
     "clothes_dryer_fuel_type": "natural gas",
     "dishwasher_present": false,
+    "kitchen_fans_quantity": 1,
+    "bathroom_fans_quantity": 2,
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
-    "electric_panel_num_breaker_spaces_remaining": 3,
-    "electric_panel_load_types": "Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Electric Vehicle Charging, Other",
-    "electric_panel_load_watts": "-1, 3542, 0, 0, 0, 0, 0, 679",
-    "electric_panel_load_voltages": "240, 240, 240, 240, 120, 240, 120, 120",
-    "electric_panel_load_additions": "false, false, false, false, false, false, false, false"
+    "electric_panel_num_breaker_spaces": 20,
+    "cooling_system_panel_load_watts": 3542,
+    "cooling_system_panel_load_voltage": "240",
+    "cooling_system_panel_load_breaker_spaces": 2,
+    "cooling_system_panel_load_addition": false
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",

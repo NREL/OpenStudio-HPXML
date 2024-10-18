@@ -553,7 +553,8 @@ class HPXML < Object
                 clb_total_a: 'Amps',
                 clb_headroom_a: 'Headroom' }
   BS_ATTRS = { bs_total: 'Total',
-               bs_hvac: 'HVAC' }
+               bs_hvac: 'HVAC',
+               bs_headroom: 'Headroom' }
 
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
     @hpxml_path = hpxml_path
@@ -9185,7 +9186,7 @@ class HPXML < Object
     ATTRS = [:id, # [String] SystemIdentifier/@id
              :voltage,
              :max_current_rating,
-             :num_breaker_spaces_remaining] +
+             :breaker_spaces] +
             CLB_ATTRS.keys +
             BS_ATTRS.keys
     attr_reader(*CLASS_ATTRS)
@@ -9219,7 +9220,7 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(electric_panel, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_element(electric_panel, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_isdefaulted) unless @max_current_rating.nil?
-      XMLHelper.add_extension(electric_panel, 'NumberofBreakerSpacesRemaining', @num_breaker_spaces_remaining, :integer, @num_breaker_spaces_remaining_isdefaulted) unless @num_breaker_spaces_remaining.nil?
+      XMLHelper.add_extension(electric_panel, 'BreakerSpaces', @breaker_spaces, :integer, @breaker_spaces_isdefaulted) unless @breaker_spaces.nil?
       @panel_loads.to_doc(electric_panel)
       if !@clb_total_w.nil? && !@clb_total_a.nil? && !@clb_headroom_a.nil? && !@bs_hvac.nil? && !@bs_total.nil?
         HPXML.panel_outputs_to_doc(self, electric_panel)
@@ -9236,7 +9237,7 @@ class HPXML < Object
       @id = HPXML::get_id(electric_panel)
       @voltage = XMLHelper.get_value(electric_panel, 'Voltage', :string)
       @max_current_rating = XMLHelper.get_value(electric_panel, 'MaxCurrentRating', :float)
-      @num_breaker_spaces_remaining = XMLHelper.get_value(electric_panel, 'extension/NumberofBreakerSpacesRemaining', :integer)
+      @breaker_spaces = XMLHelper.get_value(electric_panel, 'extension/BreakerSpaces', :integer)
       @panel_loads.from_doc(electric_panel)
       HPXML.panel_outputs_from_doc(self, electric_panel)
     end
@@ -9269,8 +9270,17 @@ class HPXML < Object
     ATTRS = [:type,
              :watts,
              :voltage,
-             :addition]
+             :breaker_spaces,
+             :addition,
+             :system_idref]
     attr_accessor(*ATTRS)
+
+    # Returns the system for the panel load.
+    #
+    # @return [TODO] TODO
+    def system
+      # TODO
+    end
 
     # Deletes the current object from the array.
     #
@@ -9301,7 +9311,12 @@ class HPXML < Object
       XMLHelper.add_element(panel_load, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
       XMLHelper.add_element(panel_load, 'Watts', @watts, :float, @watts_isdefaulted) unless @watts.nil?
       XMLHelper.add_element(panel_load, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
+      XMLHelper.add_element(panel_load, 'BreakerSpaces', @breaker_spaces, :integer, @breaker_spaces_isdefaulted) unless @breaker_spaces.nil?
       XMLHelper.add_element(panel_load, 'Addition', @addition, :boolean, @addition_isdefaulted) unless @addition.nil?
+      if not @system_idref.nil?
+        system = XMLHelper.add_element(panel_load, 'System')
+        XMLHelper.add_attribute(system, 'idref', @system_idref)
+      end
     end
 
     # Populates the HPXML object(s) from the XML document.
@@ -9314,7 +9329,9 @@ class HPXML < Object
       @type = XMLHelper.get_value(panel_load, 'Type', :string)
       @watts = XMLHelper.get_value(panel_load, 'Watts', :float)
       @voltage = XMLHelper.get_value(panel_load, 'Voltage', :string)
+      @breaker_spaces = XMLHelper.get_value(panel_load, 'BreakerSpaces', :integer)
       @addition = XMLHelper.get_value(panel_load, 'Addition', :boolean)
+      @system_idref = HPXML::get_idref(XMLHelper.get_element(panel_load, 'System'))
     end
   end
 
