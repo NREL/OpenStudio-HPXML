@@ -10,6 +10,7 @@ module Constants
   # Object types
   ObjectTypeAirSourceHeatPump = 'air source heat pump'
   ObjectTypeBackupSuppHeat = 'back up supp heat'
+  ObjectTypeBatteryElectricVehicle = 'BEV'
   ObjectTypeBatteryLossesAdjustment = 'battery losses adjustment'
   ObjectTypeBoiler = 'boiler'
   ObjectTypeCeilingFan = 'ceiling fan'
@@ -25,6 +26,7 @@ module Constants
   ObjectTypeDuctLoad = 'duct load'
   ObjectTypeElectricBaseboard = 'electric baseboard'
   ObjectTypeEvaporativeCooler = 'evap cooler'
+  ObjectTypeEVBatteryDischargeOffset = 'ev battery discharge offset'
   ObjectTypeFanPumpDisaggregateCool = 'disaggregate clg'
   ObjectTypeFanPumpDisaggregatePrimaryHeat = 'disaggregate htg primary'
   ObjectTypeFanPumpDisaggregateBackupHeat = 'disaggregate htg backup'
@@ -284,4 +286,9 @@ module WT
   WindSpeed = 'Wind Speed'
   DiffuseSolar = 'Diffuse Solar Radiation'
   DirectSolar = 'Direct Solar Radiation'
+end
+
+# Vehicle Types
+module VT
+  VehicleDischarging = 'Electric Vehicle Discharging'
 end
