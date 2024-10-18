@@ -764,8 +764,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       # Remove EV battery discharging
       @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
-        next unless elcs.additionalProperties.getFeatureAsString('is_ev')
-
+        next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
         fuel.annual_output += get_report_variable_data_annual([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy']) if fuel_type == FT::Elec
       end
 
@@ -778,6 +777,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # We add Electric Storage onto the timeseries Electricity fuel meter
       elec_storage_timeseries_output = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
       fuel.timeseries_output = fuel.timeseries_output.zip(elec_storage_timeseries_output).map { |x, y| x - y }
+
+      # Remove timeseries EV battery discharging
+      @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+        next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
+        ev_discharge_timeseries_output = get_report_variable_data_timeseries([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
+        fuel.timeseries_output = fuel.timeseries_output.zip(ev_discharge_timeseries_output).map { |x, y| x + y }
+      end
     end
 
     # Peak Electricity Consumption
@@ -1480,7 +1486,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @fuels => 'Fuel',
       @emissions => 'Emissions',
       @loads => 'Load',
-      @component_loads => 'Component Load' }.each do |outputs, output_type|
+      @component_loads => 'Component Load',
+      @vehicles => 'Vehicles' }.each do |outputs, output_type|
       outputs.each do |key, obj|
         next if obj.timeseries_output.empty?
 
@@ -2816,7 +2823,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @vehicles[VT::VehicleDischarging] = Vehicles.new(variables: get_object_outputs(VT, VT::VehicleDischarging))
     @vehicles.each do |vehicles_type, vehicle_data|
       vehicle_data.name = "Vehicle: #{vehicles_type}"
-      vehicle_data.annual_units = 'Mbtu'
+      vehicle_data.annual_units = 'MBtu'
       vehicle_data.timeseries_units = 'kWh'
     end
 
