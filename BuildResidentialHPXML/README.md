@@ -2009,6 +2009,56 @@ The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / Design
 
 <br/>
 
+**Heating System: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heating_system_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heating System: Panel Load Voltage**
+
+Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heating_system_panel_load_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Heating System: Panel Load Breaker Spaces**
+
+Specifies the number of breaker spaces for the panel load. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heating_system_panel_load_breaker_spaces``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heating System: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heating_system_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Cooling System: Type**
 
 The type of cooling system. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.
@@ -2219,6 +2269,56 @@ The heating load served by the heating system integrated into cooling system. On
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooling System: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``cooling_system_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooling System: Panel Load Voltage**
+
+Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``cooling_system_panel_load_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Cooling System: Panel Load Breaker Spaces**
+
+Specifies the number of breaker spaces for the panel load. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``cooling_system_panel_load_breaker_spaces``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooling System: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``cooling_system_panel_load_addition``
+- **Type:** ``Boolean``
 
 - **Required:** ``false``
 
@@ -4418,6 +4518,45 @@ Maximum power output of the second PV system. For a shared system, this is the t
 - **Units:** ``W``
 
 - **Required:** ``true``
+
+<br/>
+
+**Electric Panel: Service Voltage**
+
+The service voltage of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+
+- **Name:** ``electric_panel_service_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Electric Panel: Service Rating**
+
+The service rating of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+
+- **Name:** ``electric_panel_service_rating``
+- **Type:** ``Double``
+
+- **Units:** ``A``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Number of Breaker Spaces**
+
+The total number of breaker spaces available. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+
+- **Name:** ``electric_panel_num_breaker_spaces``
+- **Type:** ``Integer``
+
+- **Units:** ``#``
+
+- **Required:** ``false``
 
 <br/>
 

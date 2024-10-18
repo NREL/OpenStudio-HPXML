@@ -424,6 +424,43 @@ Resilience outputs are listed below.
          The entire electric load is treated as a "critical load" that would be supported during an outage.
          Resilience hours are set to 0 for any timestep where the battery is not charged, even if there is sufficient PV to power the building.
 
+Electric Panel
+~~~~~~~~~~~~~~
+
+Electric panel loads, capacities, and breaker spaces are listed below.
+Individual loads, load-based capacities, and breaker spaces can also be found in the ``in.xml`` file.
+
+  ====================================================  ====================
+  Type                                                  Notes
+  ====================================================  ====================
+  Electric Panel Load: Heating (W)
+  Electric Panel Load: Cooling (W)
+  Electric Panel Load: Hot Water (W)
+  Electric Panel Load: Clothes Dryer (W)
+  Electric Panel Load: Dishwasher (W)
+  Electric Panel Load: Range/Oven (W)
+  Electric Panel Load: Permanent Spa Heater (W)
+  Electric Panel Load: Permanent Spa Pump (W)
+  Electric Panel Load: Pool Heater (W)
+  Electric Panel Load: Pool Pump (W)
+  Electric Panel Load: Well Pump (W)
+  Electric Panel Load: Electric Vehicle Charging (W)
+  Electric Panel Load: Lighting (W)
+  Electric Panel Load: Other (W)
+  Electric Panel Capacity: Load-Based Total (W)         220.83
+  Electric Panel Capacity: Load-Based Total (A)         220.83
+  Electric Panel Capacity: Load-Based Headroom (A)      220.83
+  Electric Panel Capacity: Meter-Based Total (W)        220.87
+  Electric Panel Capacity: Meter-Based Total (A)        220.87
+  Electric Panel Capacity: Meter-Based Headroom (A)     220.87
+  Electric Panel Breaker Space: Total Count (#)
+  Electric Panel Breaker Space: HVAC Count (#)
+  ====================================================  ====================
+
+.. note::
+
+  Headroom is calculated as the panel's maximum current rating (A) minus calculated capacity (A); a positive value indicates panel availability whereas a negative value indicates that the panel is constrained.
+
 HVAC Capacities
 ~~~~~~~~~~~~~~~
 
