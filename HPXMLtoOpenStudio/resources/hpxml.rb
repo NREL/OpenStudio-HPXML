@@ -7026,6 +7026,25 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
+    # TODO
+    def panel_loads
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.system_idref.nil?
+          next unless panel_load.system_idref == @id
+
+          list << panel_load
+        end
+      end
+
+      if list.size == 0
+        return
+      end
+
+      return list
+    end
+
     # Returns the zone that the heat pump serves.
     #
     # @return [HPXML::Zone] Zone served
