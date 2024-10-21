@@ -2101,7 +2101,7 @@ class HPXML < Object
 
       # Check for correct PrimaryIndicator values across all refrigerators
       if @refrigerators.size > 1
-        primary_indicators = @refrigerators.select { |r| r.primary_indicator }.size
+        primary_indicators = @refrigerators.count { |r| r.primary_indicator }
         if primary_indicators > 1
           errors << 'More than one refrigerator designated as the primary.'
         elsif primary_indicators == 0
@@ -2110,15 +2110,15 @@ class HPXML < Object
       end
 
       # Check for correct PrimaryHeatingSystem values across all HVAC systems
-      n_primary_heating = @heating_systems.select { |h| h.primary_system }.size +
-                          @heat_pumps.select { |h| h.primary_heating_system }.size
+      n_primary_heating = @heating_systems.count { |h| h.primary_system } +
+                          @heat_pumps.count { |h| h.primary_heating_system }
       if n_primary_heating > 1
         errors << 'More than one heating system designated as the primary.'
       end
 
       # Check for correct PrimaryCoolingSystem values across all HVAC systems
-      n_primary_cooling = @cooling_systems.select { |c| c.primary_system }.size +
-                          @heat_pumps.select { |c| c.primary_cooling_system }.size
+      n_primary_cooling = @cooling_systems.count { |c| c.primary_system } +
+                          @heat_pumps.count { |c| c.primary_cooling_system }
       if n_primary_cooling > 1
         errors << 'More than one cooling system designated as the primary.'
       end
@@ -8287,6 +8287,11 @@ class HPXML < Object
     #
     # @return [nil]
     def delete
+      if is_cfis_supplemental_fan
+        @parent_object.ventilation_fans.each do |vent_fan|
+          vent_fan.cfis_supplemental_fan_idref = nil if vent_fan.cfis_supplemental_fan_idref == @id
+        end
+      end
       @parent_object.ventilation_fans.delete(self)
     end
 
@@ -8445,6 +8450,7 @@ class HPXML < Object
              :tank_volume,               # [Double] TankVolume (gal)
              :fraction_dhw_load_served,  # [Double] FractionDHWLoadServed (frac)
              :heating_capacity,          # [Double] HeatingCapacity (Btu/hr)
+             :backup_heating_capacity,   # [Double] BackupHeatingCapacity (Btu/hr)
              :energy_factor,             # [Double] EnergyFactor (frac)
              :uniform_energy_factor,     # [Double] UniformEnergyFactor (frac)
              :operating_mode,            # [String] HPWHOperatingMode (HPXML::WaterHeaterOperatingModeXXX)
@@ -8528,6 +8534,7 @@ class HPXML < Object
       XMLHelper.add_element(water_heating_system, 'TankVolume', @tank_volume, :float, @tank_volume_isdefaulted) unless @tank_volume.nil?
       XMLHelper.add_element(water_heating_system, 'FractionDHWLoadServed', @fraction_dhw_load_served, :float) unless @fraction_dhw_load_served.nil?
       XMLHelper.add_element(water_heating_system, 'HeatingCapacity', @heating_capacity, :float, @heating_capacity_isdefaulted) unless @heating_capacity.nil?
+      XMLHelper.add_element(water_heating_system, 'BackupHeatingCapacity', @backup_heating_capacity, :float, @backup_heating_capacity_isdefaulted) unless @backup_heating_capacity.nil?
       XMLHelper.add_element(water_heating_system, 'EnergyFactor', @energy_factor, :float, @energy_factor_isdefaulted) unless @energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'UniformEnergyFactor', @uniform_energy_factor, :float) unless @uniform_energy_factor.nil?
       XMLHelper.add_element(water_heating_system, 'HPWHOperatingMode', @operating_mode, :string, @operating_mode_isdefaulted) unless @operating_mode.nil?
@@ -8575,6 +8582,7 @@ class HPXML < Object
       @tank_volume = XMLHelper.get_value(water_heating_system, 'TankVolume', :float)
       @fraction_dhw_load_served = XMLHelper.get_value(water_heating_system, 'FractionDHWLoadServed', :float)
       @heating_capacity = XMLHelper.get_value(water_heating_system, 'HeatingCapacity', :float)
+      @backup_heating_capacity = XMLHelper.get_value(water_heating_system, 'BackupHeatingCapacity', :float)
       @energy_factor = XMLHelper.get_value(water_heating_system, 'EnergyFactor', :float)
       @uniform_energy_factor = XMLHelper.get_value(water_heating_system, 'UniformEnergyFactor', :float)
       @operating_mode = XMLHelper.get_value(water_heating_system, 'HPWHOperatingMode', :string)
@@ -11060,8 +11068,8 @@ class HPXML < Object
       # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
       outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
       outdoor_temps.each do |outdoor_temp|
-        num_min = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }.size
-        num_max = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }.size
+        num_min = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
+        num_max = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
         if (num_min != 1) || (num_max != 1)
           errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is incomplete; there must be exactly one minimum and one maximum capacity datapoint."
         end
@@ -11168,8 +11176,8 @@ class HPXML < Object
       # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
       outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
       outdoor_temps.each do |outdoor_temp|
-        num_min = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }.size
-        num_max = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }.size
+        num_min = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
+        num_max = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
         if (num_min != 1) || (num_max != 1)
           errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is incomplete; there must be exactly one minimum and one maximum capacity datapoint."
         end
@@ -11260,7 +11268,7 @@ class HPXML < Object
   #
   # @return [Oga::XML::Document] The HPXML document
   def _create_hpxml_document
-    doc = XMLHelper.create_doc('1.0', 'UTF-8')
+    doc = XMLHelper.create_doc()
     hpxml = XMLHelper.add_element(doc, 'HPXML')
     XMLHelper.add_attribute(hpxml, 'xmlns', NameSpace)
     XMLHelper.add_attribute(hpxml, 'schemaVersion', Version::HPXML_Version)

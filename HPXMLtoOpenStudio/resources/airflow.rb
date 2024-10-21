@@ -851,7 +851,7 @@ module Airflow
       lto_measurements = hvac_distribution.duct_leakage_measurements.select { |dlm| dlm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside }
       sum_lto = lto_measurements.map { |dlm| dlm.duct_leakage_value }.sum(0.0)
 
-      if hvac_distribution.ducts.select { |d| !HPXML::conditioned_locations_this_unit.include?(d.duct_location) }.size == 0
+      if hvac_distribution.ducts.count { |d| !HPXML::conditioned_locations_this_unit.include?(d.duct_location) } == 0
         # If ducts completely in conditioned space, issue warning if duct leakage to outside above a certain threshold (e.g., 5%)
         issue_warning = false
         if units == HPXML::UnitsCFM25
@@ -1921,7 +1921,6 @@ module Airflow
       fan_data[:rtf_sensor][object].each do |rtf_sensor|
         infil_program.addLine("Set fan_rtf_hvac = fan_rtf_hvac + #{rtf_sensor.name}")
       end
-      infil_program.addLine("Set cfis_fan_w = #{vent_mech.unit_fan_power}") # W
 
       infil_program.addLine('If @ABS(Minute - ZoneTimeStep*60) < 0.1')
       infil_program.addLine("  Set #{cfis_data[:t_sum_open_var][vent_mech.id].name} = 0") # New hour, time on summation re-initializes to 0
@@ -1943,6 +1942,7 @@ module Airflow
       infil_program.addLine("    Set #{cfis_data[:f_damper_extra_open_var][vent_mech.id].name} = @Max (cfis_f_damper_open - fan_rtf_hvac) 0.0")
       if vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler
         # Air handler meets additional runtime requirement
+        infil_program.addLine("Set cfis_fan_w = #{vent_mech.unit_fan_power}") # W
         infil_program.addLine("    Set #{cfis_fan_actuator.name} = #{cfis_fan_actuator.name} + cfis_fan_w * #{cfis_data[:f_damper_extra_open_var][vent_mech.id].name}")
       elsif vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan
         if vent_mech.cfis_supplemental_fan.oa_unit_flow_rate < vent_mech.average_unit_flow_rate
@@ -2340,7 +2340,7 @@ module Airflow
     vent_fans[:mech_preheat].each_with_index do |f_preheat, i|
       infil_program.addLine("If (OASupInTemp < HtgStp) && (#{clg_ssn_sensor.name} < 1)")
 
-      cnt = model.getOtherEquipments.select { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeMechanicalVentilationPreheating }.size # Ensure unique meter for each preheating system
+      cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeMechanicalVentilationPreheating } # Ensure unique meter for each preheating system
       other_equip = Model.add_other_equipment(
         model,
         name: "shared mech vent preheating energy #{i}",
@@ -2385,7 +2385,7 @@ module Airflow
     vent_fans[:mech_precool].each_with_index do |f_precool, i|
       infil_program.addLine("If (OASupInTemp > ClgStp) && (#{clg_ssn_sensor.name} > 0)")
 
-      cnt = model.getOtherEquipments.select { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeMechanicalVentilationPrecooling }.size # Ensure unique meter for each precooling system
+      cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeMechanicalVentilationPrecooling } # Ensure unique meter for each precooling system
       other_equip = Model.add_other_equipment(
         model,
         name: "shared mech vent precooling energy #{i}",

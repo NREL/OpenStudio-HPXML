@@ -96,8 +96,9 @@ module Defaults
     # Do HVAC sizing after all other defaults have been applied
     all_zone_loads, all_space_loads = apply_hvac_sizing(runner, hpxml_bldg, weather)
 
-    # Default detailed performance has to be after sizing to have autosized capacity information
+    # These need to be applied after sizing HVAC capacities/airflows
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
+    apply_cfis_fan_power(hpxml_bldg)
 
     cleanup_zones_spaces(hpxml_bldg)
 
@@ -1973,6 +1974,7 @@ module Defaults
       next if heat_pump.backup_type.nil?
       next unless heat_pump.backup_heating_lockout_temp.nil?
       next unless heat_pump.backup_heating_switchover_temp.nil?
+      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
 
       if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
         hp_backup_fuel = heat_pump.backup_heating_fuel
@@ -2282,6 +2284,8 @@ module Defaults
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
+        HVAC.set_heat_pump_temperatures(heat_pump, runner)
+
         if heat_pump.geothermal_loop.nil?
           if not unit_num.nil?
             loop_id = "GeothermalLoop#{hpxml_bldg.geothermal_loops.size + 1}_#{unit_num}"
@@ -2729,7 +2733,7 @@ module Defaults
       end
 
       if vent_fan.flow_rate.nil?
-        if hpxml_bldg.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation && !vf.is_cfis_supplemental_fan }.size > 1
+        if hpxml_bldg.ventilation_fans.count { |vf| vf.used_for_whole_building_ventilation && !vf.is_cfis_supplemental_fan } > 1
           fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
         end
 
@@ -2737,20 +2741,20 @@ module Defaults
         vent_fan.rated_flow_rate_isdefaulted = true
       end
 
-      if vent_fan.fan_power.nil?
-        fan_w_per_cfm = get_mech_vent_fan_efficiency(vent_fan, eri_version)
-        vent_fan.fan_power = (vent_fan.flow_rate * fan_w_per_cfm).round(1)
+      if vent_fan.fan_power.nil? && vent_fan.fan_type != HPXML::MechVentTypeCFIS # CFIS systems have their fan power defaulted later once we have autosized the total blower fan airflow rate
+        fan_w_per_cfm = get_mech_vent_fan_efficiency(vent_fan)
+        vent_fan.fan_power = (vent_fan.flow_rate * fan_w_per_cfm).round(2)
         vent_fan.fan_power_isdefaulted = true
       end
       next unless vent_fan.fan_type == HPXML::MechVentTypeCFIS
 
-      if vent_fan.cfis_vent_mode_airflow_fraction.nil?
-        vent_fan.cfis_vent_mode_airflow_fraction = 1.0
-        vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
-      end
       if vent_fan.cfis_addtl_runtime_operating_mode.nil?
         vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeAirHandler
         vent_fan.cfis_addtl_runtime_operating_mode_isdefaulted = true
+      end
+      if vent_fan.cfis_vent_mode_airflow_fraction.nil? && (vent_fan.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler)
+        vent_fan.cfis_vent_mode_airflow_fraction = 1.0
+        vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
       end
     end
 
@@ -2821,6 +2825,40 @@ module Defaults
     end
   end
 
+  # Assigns the blower fan power for a CFIS system where the optional input has been omitted.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.apply_cfis_fan_power(hpxml_bldg)
+    hpxml_bldg.ventilation_fans.each do |vent_fan|
+      next unless vent_fan.used_for_whole_building_ventilation
+      next unless vent_fan.fan_type == HPXML::MechVentTypeCFIS
+      next unless vent_fan.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler
+      next unless vent_fan.fan_power.nil?
+
+      hvac_systems = vent_fan.distribution_system.hvac_systems
+      fan_w_per_cfm = hvac_systems[0].fan_watts_per_cfm
+
+      # Get max blower airflow rate
+      blower_flow_rate = nil
+      hvac_systems.each do |hvac_system|
+        if hvac_system.respond_to?(:heating_airflow_cfm) && hvac_system.heating_airflow_cfm > blower_flow_rate.to_f
+          blower_flow_rate = hvac_system.heating_airflow_cfm
+        end
+        if hvac_system.respond_to?(:cooling_airflow_cfm) && hvac_system.cooling_airflow_cfm > blower_flow_rate.to_f
+          blower_flow_rate = hvac_system.cooling_airflow_cfm
+        end
+      end
+      fail 'Unexpected error.' if blower_flow_rate.to_f == 0
+
+      # Calculate blower airflow rate in vent only mode
+      blower_flow_rate *= vent_fan.cfis_vent_mode_airflow_fraction
+
+      vent_fan.fan_power = (blower_flow_rate * fan_w_per_cfm).round(2)
+      vent_fan.fan_power_isdefaulted = true
+    end
+  end
+
   # Assigns default values for omitted optional inputs in the HPXML::WaterHeatingSystem objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -2880,6 +2918,15 @@ module Defaults
         end
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump)
+        Waterheater.set_heat_pump_cop(water_heating_system)
+        if water_heating_system.heating_capacity.nil?
+          water_heating_system.heating_capacity = (UnitConversions.convert(0.5, 'kW', 'Btu/hr') * water_heating_system.additional_properties.cop).round
+          water_heating_system.heating_capacity_isdefaulted = true
+        end
+        if water_heating_system.backup_heating_capacity.nil?
+          water_heating_system.backup_heating_capacity = UnitConversions.convert(4.5, 'kW', 'Btu/hr').round
+          water_heating_system.backup_heating_capacity_isdefaulted = true
+        end
         if water_heating_system.tank_volume.nil?
           water_heating_system.tank_volume = get_water_heater_tank_volume(water_heating_system.fuel_type, nbeds, nbaths)
           water_heating_system.tank_volume_isdefaulted = true
@@ -4101,6 +4148,8 @@ module Defaults
     # Check for atmospheric water heater in conditioned space
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       next if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
+      next if [HPXML::WaterHeaterTypeCombiStorage,
+               HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type # Boiler checked above
       next unless HPXML::conditioned_locations_this_unit.include? water_heating_system.location
 
       if not water_heating_system.energy_factor.nil?
@@ -4665,9 +4714,8 @@ module Defaults
   # Gets the default whole-home mechanical ventilation fan efficiency.
   #
   # @param vent_fan [HPXML::VentilationFan] The HPXML ventilation fan of interest
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [Double] Fan efficiency (W/cfm)
-  def self.get_mech_vent_fan_efficiency(vent_fan, eri_version)
+  def self.get_mech_vent_fan_efficiency(vent_fan)
     # Returns fan power in W/cfm, based on ANSI 301
     if vent_fan.is_shared_system
       return 1.00 # Table 4.2.2(1) Note (n)
@@ -4677,12 +4725,6 @@ module Defaults
       return 0.70
     elsif [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_fan.fan_type
       return 1.00
-    elsif [HPXML::MechVentTypeCFIS].include? vent_fan.fan_type
-      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022')
-        return 0.58
-      else
-        return 0.50
-      end
     else
       fail "Unexpected fan_type: '#{fan_type}'."
     end
