@@ -137,6 +137,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(true)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_vehicle_outputs', false)
+    arg.setDisplayName('Generate Annual Output: Vehicles')
+    arg.setDescription('Generates annual vehicle outputs.')
+    arg.setDefaultValue(true)
+    args << arg
+
     timeseries_frequency_chs = OpenStudio::StringVector.new
     timeseries_frequency_chs << 'none'
     timeseries_frequency_chs << 'timestep'
@@ -236,6 +242,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_resilience', false)
     arg.setDisplayName('Generate Timeseries Output: Resilience')
     arg.setDescription('Generates timeseries resilience outputs.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_vehicle_outputs', false)
+    arg.setDisplayName('Generate Timeseries Output: Vehicles')
+    arg.setDescription('Generates timeseries vehicle outputs.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -533,10 +545,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Vehicle outputs
-    if args[:include_timeseries_end_use_consumptions]
-      @vehicles.values.each do |vehicle_data|
-        vehicle_data.variables.each do |_sys_id, varkey, var|
+    @vehicles.values.each do |vehicle_data|
+      vehicle_data.variables.each do |_sys_id, varkey, var|
+        if args[:include_annual_vehicle_outputs]
           result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},runperiod;").get
+        end
+        if args[:include_timeseries_vehicle_outputs]
           result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},#{args[:timeseries_frequency]};").get
         end
       end
@@ -765,6 +779,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Remove EV battery discharging
       @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
         next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
+
         fuel.annual_output += get_report_variable_data_annual([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy']) if fuel_type == FT::Elec
       end
 
@@ -781,6 +796,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Remove timeseries EV battery discharging
       @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
         next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
+
         ev_discharge_timeseries_output = get_report_variable_data_timeseries([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
         fuel.timeseries_output = fuel.timeseries_output.zip(ev_discharge_timeseries_output).map { |x, y| x + y }
       end
@@ -1666,10 +1682,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Vehicles
-    @vehicles.each do |_type, vehicles_data|
-      results_out << ["#{vehicles_data.name} (#{vehicles_data.annual_units})", vehicles_data.annual_output.to_f.round(n_digits)]
+    if args[:include_annual_vehicle_outputs]
+      @vehicles.each do |_type, vehicles_data|
+        results_out << ["#{vehicles_data.name} (#{vehicles_data.annual_units})", vehicles_data.annual_output.to_f.round(n_digits)]
+      end
+      results_out << [line_break]
     end
-    results_out << [line_break]
 
     # Sizing data
     if args[:include_annual_hvac_summary]
@@ -1842,7 +1860,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     else
       resilience_data = []
     end
-    if args[:include_timeseries_end_use_consumptions]
+    if args[:include_timeseries_vehicle_outputs]
       vehicles_data = @vehicles.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
     else
       vehicles_data = []
@@ -2859,6 +2877,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
     if args[:include_timeseries_fuel_consumptions]
       args[:include_timeseries_end_use_consumptions] = true
+      args[:include_timeseries_vehicle_outputs] = true
     end
     if args[:include_timeseries_system_use_consumptions]
       args[:include_timeseries_end_use_consumptions] = true
