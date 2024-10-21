@@ -3209,9 +3209,7 @@
     "mech_vent_fan_power": null
   },
   "sample_files/base-mechvent-cfis-no-outdoor-air-control.xml": {
-    "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
-    "heating_system_heating_capacity": 48000,
-    "cooling_system_cooling_capacity": 30000
+    "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
   },
   "sample_files/base-mechvent-cfis-supplemental-fan-exhaust.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
