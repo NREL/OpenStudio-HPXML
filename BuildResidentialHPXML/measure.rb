@@ -6907,10 +6907,10 @@ module HPXMLFile
                         voltage: args[:heating_system_panel_load_voltage],
                         breaker_spaces: args[:heating_system_panel_load_breaker_spaces],
                         addition: args[:heating_system_panel_load_addition],
-                        system_idref: heating_system.id)
+                        system_idrefs: [heating_system.id])
       else
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                        system_idref: heating_system.id)
+                        system_idrefs: [heating_system.id])
       end
     end
 
@@ -6922,85 +6922,85 @@ module HPXMLFile
                       voltage: args[:cooling_system_panel_load_voltage],
                       breaker_spaces: args[:cooling_system_panel_load_breaker_spaces],
                       addition: args[:cooling_system_panel_load_addition],
-                      system_idref: cooling_system.id)
+                      system_idrefs: [cooling_system.id])
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                      system_idref: heat_pump.id)
+                      system_idrefs: [heat_pump.id])
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
-                      system_idref: heat_pump.id)
+                      system_idrefs: [heat_pump.id])
     end
 
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
-                      system_idref: water_heating_system.id)
+                      system_idrefs: [water_heating_system.id])
     end
 
     hpxml_bldg.clothes_dryers.each do |clothes_dryer|
       next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                      system_idref: clothes_dryer.id)
+                      system_idrefs: [clothes_dryer.id])
     end
 
     hpxml_bldg.dishwashers.each do |dishwasher|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher,
-                      system_idref: dishwasher.id)
+                      system_idrefs: [dishwasher.id])
     end
 
     hpxml_bldg.cooking_ranges.each do |cooking_range|
       next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
-                      system_idref: cooking_range.id)
-    end
-
-    hpxml_bldg.permanent_spas.each do |permanent_spa|
-      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
-
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
-                      system_idref: permanent_spa.heater_id)
+                      system_idrefs: [cooking_range.id])
     end
 
     hpxml_bldg.permanent_spas.each do |permanent_spa|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaPump,
-                      system_idref: permanent_spa.pump_id)
-    end
+                      system_idrefs: [permanent_spa.pump_id])
 
-    hpxml_bldg.pools.each do |pool|
-      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
+      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
 
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater,
-                      system_idref: pool.heater_id)
+      panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
+                      system_idrefs: [permanent_spa.heater_id])
     end
 
     hpxml_bldg.pools.each do |pool|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolPump,
-                      system_idref: pool.pump_id)
+                      system_idrefs: [pool.pump_id])
+
+      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
+
+      panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater,
+                      system_idrefs: [pool.heater_id])
     end
 
     hpxml_bldg.plug_loads.each do |plug_load|
       next if plug_load.plug_load_type != HPXML::PlugLoadTypeWellPump
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeWellPump,
-                      system_idref: plug_load.id)
+                      system_idrefs: [plug_load.id])
     end
 
     hpxml_bldg.plug_loads.each do |plug_load|
       next if plug_load.plug_load_type != HPXML::PlugLoadTypeElectricVehicleCharging
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
-                      system_idref: plug_load.id)
+                      system_idrefs: [plug_load.id])
     end
 
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther) # for garbage disposal and garage door opener
 
+    ventilation_fan_ids = []
     hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+      ventilation_fan_ids << ventilation_fan.id
+    end
+    if not ventilation_fan_ids.empty?
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
-                      system_idref: ventilation_fan.id)
+                      system_idrefs: ventilation_fan_ids)
     end
   end
 

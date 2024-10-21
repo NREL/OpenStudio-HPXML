@@ -34,11 +34,12 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(9762, electric_panel.clb_total_w, 0.01)
     assert_in_epsilon(9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_total_a, 0.01)
     assert_in_epsilon(electric_panel.max_current_rating - 9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_headroom_a, 0.01)
-    assert_equal(10, electric_panel.bs_total)
+    assert_equal(7, electric_panel.bs_total)
     assert_equal(4, electric_panel.bs_hvac)
-    assert_equal(electric_panel.breaker_spaces - 10, electric_panel.bs_headroom)
+    assert_equal(electric_panel.breaker_spaces - 7, electric_panel.bs_headroom)
 
     # Upgrade
+    electric_panel.breaker_spaces = 7
     panel_loads = electric_panel.panel_loads
     pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
     pl.watts = 17942
@@ -54,7 +55,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
                     watts: 5760,
                     voltage: HPXML::ElectricPanelVoltage120,
-                    breaker_spaces: 1,
+                    breaker_spaces: 2,
                     addition: true)
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
                     watts: 12000,
@@ -74,9 +75,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(35851, electric_panel.clb_total_w, 0.01)
     assert_in_epsilon(35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_total_a, 0.01)
     assert_in_epsilon(electric_panel.max_current_rating - 35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.clb_headroom_a, 0.01)
-    assert_equal(16, electric_panel.bs_total)
+    assert_equal(14, electric_panel.bs_total)
     assert_equal(4, electric_panel.bs_hvac)
-    assert_equal(electric_panel.breaker_spaces - 16, electric_panel.bs_headroom)
+    assert_equal(electric_panel.breaker_spaces - 14, electric_panel.bs_headroom)
   end
 
   def _test_measure(args_hash)

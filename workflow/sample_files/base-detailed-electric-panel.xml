@@ -449,7 +449,6 @@
             <Voltage>240</Voltage>
             <MaxCurrentRating>100.0</MaxCurrentRating>
             <extension>
-              <BreakerSpaces>20</BreakerSpaces>
               <PanelLoads>
                 <PanelLoad>
                   <Type>Heating</Type>
@@ -469,9 +468,6 @@
                 <PanelLoad>
                   <Type>Other</Type>
                   <System idref='VentilationFan1'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <Type>Other</Type>
                   <System idref='VentilationFan2'/>
                 </PanelLoad>
               </PanelLoads>

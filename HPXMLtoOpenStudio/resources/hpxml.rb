@@ -6372,8 +6372,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -6697,8 +6697,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -7031,8 +7031,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -8120,8 +8120,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -8501,8 +8501,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -9367,7 +9367,7 @@ class HPXML < Object
              :voltage,
              :breaker_spaces,
              :addition,
-             :system_idref]
+             :system_idrefs] # [Array<String>] TODO
     attr_accessor(*ATTRS)
 
     # Returns the system for the panel load.
@@ -9408,9 +9408,11 @@ class HPXML < Object
       XMLHelper.add_element(panel_load, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_element(panel_load, 'BreakerSpaces', @breaker_spaces, :integer, @breaker_spaces_isdefaulted) unless @breaker_spaces.nil?
       XMLHelper.add_element(panel_load, 'Addition', @addition, :boolean, @addition_isdefaulted) unless @addition.nil?
-      if not @system_idref.nil?
-        system = XMLHelper.add_element(panel_load, 'System')
-        XMLHelper.add_attribute(system, 'idref', @system_idref)
+      if (not @system_idrefs.nil?) && (not @system_idrefs.empty?)
+        @system_idrefs.each do |system_idref|
+          system = XMLHelper.add_element(panel_load, 'System')
+          XMLHelper.add_attribute(system, 'idref', system_idref)
+        end
       end
     end
 
@@ -9426,7 +9428,7 @@ class HPXML < Object
       @voltage = XMLHelper.get_value(panel_load, 'Voltage', :string)
       @breaker_spaces = XMLHelper.get_value(panel_load, 'BreakerSpaces', :integer)
       @addition = XMLHelper.get_value(panel_load, 'Addition', :boolean)
-      @system_idref = HPXML::get_idref(XMLHelper.get_element(panel_load, 'System'))
+      @system_idrefs = HPXML::get_idrefs(panel_load, 'System')
     end
   end
 
@@ -9830,8 +9832,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -9958,8 +9960,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -10385,8 +10387,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -10846,8 +10848,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next if panel_load.system_idref != @pump_id && panel_load.system_idref != @heater_id
+          next if panel_load.system_idrefs.empty?
+          next if !panel_load.system_idrefs.include?(@pump_id) || !panel_load.system_idrefs.include?(@heater_id)
 
           list << panel_load
         end
@@ -11009,8 +11011,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next if panel_load.system_idref != @pump_id && panel_load.system_idref != @heater_id
+          next if panel_load.system_idrefs.empty?
+          next if !panel_load.system_idrefs.include?(@pump_id) || !panel_load.system_idrefs.include?(@heater_id)
 
           list << panel_load
         end
@@ -11228,8 +11230,8 @@ class HPXML < Object
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.panel_loads.each do |panel_load|
-          next if panel_load.system_idref.nil?
-          next unless panel_load.system_idref == @id
+          next if panel_load.system_idrefs.empty?
+          next unless panel_load.system_idrefs.include?(@id)
 
           list << panel_load
         end
@@ -11774,6 +11776,15 @@ class HPXML < Object
   # @return [String] The element IDREF attribute
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
+  end
+
+  # TODO
+  def self.get_idrefs(parent, element_name)
+    idrefs = []
+    parent.xpath(element_name).each do |value|
+      idrefs << XMLHelper.get_attribute_value(value, 'idref')
+    end
+    return idrefs
   end
 
   # Checks whether a given date is valid (e.g., Sep 31 is invalid).

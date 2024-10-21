@@ -1385,13 +1385,14 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(2581.8, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
     assert_equal(10.8, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
     assert_equal(100.0 - 10.8, actual_annual_rows['Electric Panel Capacity: Meter-Based Headroom (W)'])
-    assert_equal(10, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
+    assert_equal(7, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
     assert_equal(4, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
-    assert_equal(20 - 10, actual_annual_rows['Electric Panel Breaker Space: Headroom Count'])
+    assert_equal(7 - 7, actual_annual_rows['Electric Panel Breaker Space: Headroom Count'])
 
     # Upgrade
     hpxml_bldg = hpxml.buildings[0]
     electric_panel = hpxml_bldg.electric_panels[0]
+    electric_panel.breaker_spaces = 7
     panel_loads = electric_panel.panel_loads
     pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
     pl.watts = 17942
@@ -1407,7 +1408,7 @@ class ReportSimulationOutputTest < Minitest::Test
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
                     watts: 5760,
                     voltage: HPXML::ElectricPanelVoltage120,
-                    breaker_spaces: 1,
+                    breaker_spaces: 2,
                     addition: true)
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
                     watts: 12000,
@@ -1433,9 +1434,9 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(44433.8, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (W)'])
     assert_equal(185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Total (A)'])
     assert_equal(100.0 - 185.1, actual_annual_rows['Electric Panel Capacity: Meter-Based Headroom (W)'])
-    assert_equal(16, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
+    assert_equal(14, actual_annual_rows['Electric Panel Breaker Space: Total Count'])
     assert_equal(4, actual_annual_rows['Electric Panel Breaker Space: HVAC Count'])
-    assert_equal(20 - 16, actual_annual_rows['Electric Panel Breaker Space: Headroom Count'])
+    assert_equal(7 - 14, actual_annual_rows['Electric Panel Breaker Space: Headroom Count'])
   end
 
   private
