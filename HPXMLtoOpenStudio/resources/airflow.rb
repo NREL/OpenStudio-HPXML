@@ -1974,7 +1974,7 @@ module Airflow
       infil_program.addLine("    If (#{t_sum_open_damper_var.name} + addtl_fan_runtime) > t_min_hr_open") # Damper is only open for a portion of this time step to achieve target minutes per hour
       infil_program.addLine("      Set addtl_fan_runtime = t_min_hr_open - #{t_sum_open_damper_var.name}")
       infil_program.addLine('    EndIf')
-      infil_program.addLine('    Set f_damper_open = cfis_fan_runtime / (ZoneTimeStep * 60)')
+      infil_program.addLine('    Set f_damper_open = addtl_fan_runtime / (ZoneTimeStep * 60)')
       infil_program.addLine("    Set #{t_sum_open_damper_var.name} = #{t_sum_open_damper_var.name} + addtl_fan_runtime")
       infil_program.addLine('  EndIf')
       if vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan
