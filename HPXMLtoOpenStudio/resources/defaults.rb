@@ -3264,6 +3264,7 @@ module Defaults
       ventilation_fan_ids = []
       hpxml_bldg.ventilation_fans.each do |ventilation_fan|
         next if !ventilation_fan.panel_loads.nil?
+        next if ![HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
 
         ventilation_fan_ids << ventilation_fan.id
       end
@@ -3273,7 +3274,7 @@ module Defaults
       end
 
       if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther && pl.system_idrefs.empty? } == 0
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther) # for garbage disposal and garage door opener
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther, system_idrefs: []) # for garbage disposal and garage door opener
       end
       if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLighting } == 0
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting)
@@ -3291,7 +3292,6 @@ module Defaults
           panel_load.voltage_isdefaulted = true
         end
         if panel_load.watts.nil?
-          puts "#{panel_load.type} #{panel_load.system_idrefs}"
           panel_load.watts = get_panel_load_watts_default_values(hpxml_bldg, panel_load.type, panel_load.voltage, panel_load.system_idrefs)
           panel_load.watts_isdefaulted = true
         end
@@ -5941,7 +5941,7 @@ module Defaults
     elsif type == HPXML::ElectricPanelLoadTypeLaundry
       return 1500
     elsif type == HPXML::ElectricPanelLoadTypeOther
-      if system_ids.nil? || system_ids.empty?
+      if system_ids.empty?
         watts += 559 # Garbage disposal
 
         if hpxml_bldg.has_location(HPXML::LocationGarage)

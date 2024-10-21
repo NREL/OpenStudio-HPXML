@@ -1625,6 +1625,26 @@
     "cooling_system_panel_load_breaker_spaces": 2,
     "cooling_system_panel_load_addition": false
   },
+  "sample_files/base-detailed-electric-panel-upgrade.xml": {
+    "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
+    "heating_system_type": "none",
+    "cooling_system_type": "none",    
+    "heat_pump_type": "air-to-air",
+    "heat_pump_heating_efficiency": 7.7,
+    "heat_pump_cooling_efficiency": 13,
+    "heat_pump_heating_capacity": 52280,
+    "heat_pump_cooling_capacity": 52280,
+    "heat_pump_backup_type": "integrated",
+    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup_heating_capacity": 27960,
+    "heat_pump_panel_load_watts": 17943,
+    "heat_pump_panel_load_addition": true,
+    "water_heater_fuel_type": "electricity",
+    "cooking_range_oven_fuel_type": "electricity",
+    "clothes_dryer_fuel_type": "electricity",
+    "misc_plug_loads_vehicle_present": true,
+    "electric_panel_num_breaker_spaces": 7
+  },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_floors_above_grade": 2,
