@@ -2713,6 +2713,56 @@ Heat Pump crankcase heater power consumption in Watts. Applies only to air-to-ai
 
 <br/>
 
+**Heat Pump: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heat_pump_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Panel Load Voltage**
+
+Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heat_pump_panel_load_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Heat Pump: Panel Load Breaker Spaces**
+
+Specifies the number of breaker spaces for the panel load. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heat_pump_panel_load_breaker_spaces``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heat_pump_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **HVAC Detailed Performance Data: Capacity Type**
 
 Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps).

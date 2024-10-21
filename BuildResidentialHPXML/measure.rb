@@ -1622,6 +1622,29 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_panel_load_watts', false)
+    arg.setDisplayName('Heat Pump: Panel Load Watts')
+    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_panel_load_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Heat Pump: Panel Load Voltage')
+    arg.setDescription("Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_panel_load_breaker_spaces', false)
+    arg.setDisplayName('Heat Pump: Panel Load Breaker Spaces')
+    arg.setDescription("Specifies the number of breaker spaces for the panel load. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_panel_load_addition', false)
+    arg.setDisplayName('Heat Pump: Panel Load Addition')
+    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
     perf_data_capacity_type_choices = OpenStudio::StringVector.new
     perf_data_capacity_type_choices << 'Absolute capacities'
     perf_data_capacity_type_choices << 'Normalized capacity fractions'
@@ -6927,8 +6950,16 @@ module HPXMLFile
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
+                      watts: args[:heat_pump_panel_load_watts],
+                      voltage: args[:heat_pump_panel_load_voltage],
+                      breaker_spaces: args[:heat_pump_panel_load_breaker_spaces],
+                      addition: args[:heat_pump_panel_load_addition],
                       system_idrefs: [heat_pump.id])
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
+                      watts: args[:heat_pump_panel_load_watts],
+                      voltage: args[:heat_pump_panel_load_voltage],
+                      breaker_spaces: args[:heat_pump_panel_load_breaker_spaces],
+                      addition: args[:heat_pump_panel_load_addition],
                       system_idrefs: [heat_pump.id])
     end
 
