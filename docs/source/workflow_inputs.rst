@@ -3770,12 +3770,14 @@ Central Fan Integrated Supply (CFIS)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+A CFIS system is a supply ventilation system that provides outdoor air to the return duct of a forced-air HVAC system.
 
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
   Element                                                                                        Type      Units    Constraints                    Required  Default          Notes
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
   ``SystemIdentifier``                                                                           id                                                Yes                        Unique identifier
   ``FanType``                                                                                    string             central fan integrated supply  Yes                        Type of ventilation system
+  ``CFISControls/HasOutdoorAirControl``                                                          boolean                                           No        true             Presence of controls to block outdoor air when not ventilating [#]_
   ``CFISControls/AdditionalRuntimeOperatingMode``                                                string             See [#]_                       No        air handler fan  How additional ventilation is provided (beyond HVAC system operation)
   ``CFISControls/SupplementalFan``                                                               idref              See [#]_                       See [#]_                   The supplemental fan providing additional ventilation
   ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0                           No        See [#]_         Flow rate [#]_
@@ -3786,6 +3788,7 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
   ``extension/VentilationOnlyModeAirflowFraction``                                               double    frac     >= 0, <= 1                     No        1.0              Blower airflow rate fraction during ventilation only mode [#]_
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
 
+  .. [#] For example, an electronically-controlled mechanical damper, or an in-line fan that substantially blocks the flow when not running.
   .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan", "supplemental fan", or "none".
   .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
   .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
