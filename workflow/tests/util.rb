@@ -1221,6 +1221,7 @@ def _write_results(results, csv_out, output_groups_filter: [])
     'hvac' => ['HVAC Design Temperature', 'HVAC Capacity', 'HVAC Design Load'],
     'misc' => ['Unmet Hours', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
     'bills' => ['Utility Bills'],
+    'panel' => ['Electric Panel Load', 'Electric Panel Capacity', 'Electric Panel Breaker Spaces'],
   }
 
   output_groups.each do |output_group, key_types|
