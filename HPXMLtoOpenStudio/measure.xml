@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>82d3603a-8c61-459a-b2fa-95dc6f600bda</version_id>
-  <version_modified>2024-10-22T16:40:43Z</version_modified>
+  <version_id>e7d819f6-fda2-4bf2-b6c3-cd1ff3adb569</version_id>
+  <version_modified>2024-10-22T17:43:11Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -189,7 +189,7 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>443A48EB</checksum>
+      <checksum>D2A99996</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1B4820ED</checksum>
+      <checksum>5B6D3CB2</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -357,7 +357,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F866C769</checksum>
+      <checksum>E862E878</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -375,7 +375,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BD9733AC</checksum>
+      <checksum>009BEB48</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -651,7 +651,7 @@
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>06A02536</checksum>
+      <checksum>D1425F08</checksum>
     </file>
     <file>
       <filename>test_battery.rb</filename>
@@ -663,7 +663,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9DD97EAF</checksum>
+      <checksum>9D489184</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
