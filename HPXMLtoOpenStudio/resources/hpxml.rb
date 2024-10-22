@@ -3882,13 +3882,6 @@ class HPXML < Object
              :insulation_continuous_r_value]  # [Double] Insulation/Layer[InstallationType="continuous"]/NominalRValue (F-ft2-hr/Btu)
     attr_accessor(*ATTRS)
 
-    # Returns if the roof is fully described.
-    #
-    # @return [Boolean] True if the roof is fully described
-    def is_fully_described
-      return !@interior_adjacent_to.nil? && @sameas_id.nil?
-    end
-
     # Returns all skylights for this roof.
     #
     # @return [Array<HPXML::Skylight>] List of skylight objects
@@ -4162,16 +4155,9 @@ class HPXML < Object
 
     # Returns if this fully described rim joist is linked by other rim joist object.
     #
-    # @return [Boolean] True if the rim joist is linked
-    def is_attached_by_sameas
-      return HPXML::is_attached_by_sameas(@parent_object.parent_object, self)
-    end
-
-    # Returns if the rim joist is fully described. A rim joist can use sameas attribute to point to another rim joist with full description.
-    #
-    # @return [Boolean] True if the rim joist is fully described
-    def is_fully_described
-      return !@exterior_adjacent_to.nil? && @sameas_id.nil?
+    # @return [String] ID of the rim joist where its sameas_id == this.id
+    def sameas_id_from_other_element
+      return HPXML::get_sameas_id_from_other_element(@parent_object.parent_object, self)
     end
 
     # Returns the space that the rim joist is attached to.
@@ -4424,16 +4410,9 @@ class HPXML < Object
 
     # Returns if this fully described wall is linked by other rim joist object.
     #
-    # @return [Boolean] True if the wall is linked
-    def is_attached_by_sameas
-      return HPXML::is_attached_by_sameas(@parent_object.parent_object, self)
-    end
-
-    # Returns if the wall is fully described. A wall can use sameas attribute to point to another wall with full description.
-    #
-    # @return [Boolean] True if the wall is fully described
-    def is_fully_described
-      return !@exterior_adjacent_to.nil? && @sameas_id.nil?
+    # @return [String] ID of the wall where its sameas_id == this.id
+    def sameas_id_from_other_element
+      return HPXML::get_sameas_id_from_other_element(@parent_object.parent_object, self)
     end
 
     # Returns all windows for this wall.
@@ -4548,7 +4527,7 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      if is_fully_described
+      if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
@@ -4747,16 +4726,9 @@ class HPXML < Object
 
     # Returns if this fully described foundation wall is linked by other rim joist object.
     #
-    # @return [Boolean] True if the foundation wall is linked
-    def is_attached_by_sameas
-      return HPXML::is_attached_by_sameas(@parent_object.parent_object, self)
-    end
-
-    # Returns if the foundation wall is fully described. A foundation wall can use sameas attribute to point to another foundation wall with full description.
-    #
-    # @return [Boolean] True if the foundation wall is fully described
-    def is_fully_described
-      return !@exterior_adjacent_to.nil? && @sameas_id.nil?
+    # @return [String] ID of the foundation wall where its sameas_id == this.id
+    def sameas_id_from_other_element
+      return HPXML::get_sameas_id_from_other_element(@parent_object.parent_object, self)
     end
 
     # Returns all windows for this foundation wall.
@@ -4922,7 +4894,7 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      if is_fully_described
+      if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
@@ -5100,16 +5072,9 @@ class HPXML < Object
 
     # Returns if this fully described floor is linked by other rim joist object.
     #
-    # @return [Boolean] True if the floor is linked
-    def is_attached_by_sameas
-      return HPXML::is_attached_by_sameas(@parent_object.parent_object, self)
-    end
-
-    # Returns if the floor is fully described. A floor can use sameas attribute to point to another floor with full description.
-    #
-    # @return [Boolean] True if the floor is fully described
-    def is_fully_described
-      return !@exterior_adjacent_to.nil? && @sameas_id.nil?
+    # @return [String] ID of the floor where its sameas_id == this.id
+    def sameas_id_from_other_element
+      return HPXML::get_sameas_id_from_other_element(@parent_object.parent_object, self)
     end
 
     # Returns all skylights for this floor.
@@ -5243,7 +5208,7 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      if is_fully_described
+      if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
@@ -5414,13 +5379,6 @@ class HPXML < Object
              :carpet_fraction,                                  # [Double] extension/CarpetFraction (frac)
              :carpet_r_value]                                   # [Double] extension/CarpetRValue (F-ft2-hr/Btu)
     attr_accessor(*ATTRS)
-
-    # Returns if the slab is fully described.
-    #
-    # @return [Boolean] True if the slab is fully described
-    def is_fully_described
-      return !@interior_adjacent_to.nil? && @sameas_id.nil?
-    end
 
     # Returns the space that the slab is attached to.
     #
@@ -11513,8 +11471,8 @@ class HPXML < Object
   #
   # @param parent [Oga::XML::Element] The parent HPXML element
   # @param surface_obj [Oga::XML::Element]  The element to be searched
-  # @return [Boolean] True if the object is linked by another object with its sameas_id
-  def self.is_attached_by_sameas(hpxml, _surface_obj)
+  # @return [String] ID of the object where its sameas_id == surface_obj.id
+  def self.get_sameas_id_from_other_element(hpxml, surface_obj)
     hpxml.buildings.each do |building|
       building.class::CLASS_ATTRS.each do |attr|
         building_child = building.send(attr)
@@ -11522,14 +11480,13 @@ class HPXML < Object
 
         building_child.each do |obj|
           next unless obj.class::ATTRS.include? :sameas_id
-          next unless obj.sameas_id == obj.id
+          next unless obj.sameas_id == surface_obj.id
 
-          return true
+          return obj.id
         end
       end
     end
-
-    return false
+    return
   end
 
   # Checks whether a given date is valid (e.g., Sep 31 is invalid).

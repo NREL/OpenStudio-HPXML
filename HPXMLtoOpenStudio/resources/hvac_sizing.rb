@@ -249,7 +249,7 @@ module HVACSizing
 
     locations = []
     hpxml_bldg.surfaces.each do |surface|
-      surface = surface.sameas unless surface.is_fully_described
+      surface = surface.sameas if surface.sameas_id
       locations << surface.interior_adjacent_to
       locations << surface.exterior_adjacent_to
     end
@@ -1031,9 +1031,7 @@ module HVACSizing
 
       space = wall.space
       zone = space.zone
-      if not wall.is_fully_described
-        wall = wall.sameas # use adjacent wall inputs instead
-      end
+      wall = wall.sameas if wall.sameas_id # use adjacent wall inputs instead
 
       # Get gross/net areas
       if wall.is_a?(HPXML::FoundationWall) && wall.depth_below_grade == wall.height
@@ -1227,7 +1225,7 @@ module HVACSizing
       space = floor.space
       zone = space.zone
       is_ceiling = floor.is_ceiling
-      if not floor.is_fully_described
+      if floor.sameas_id
         floor = floor.sameas # use adjacent wall inputs instead
         is_ceiling = !floor.is_ceiling
       end
@@ -1271,7 +1269,7 @@ module HVACSizing
       space = floor.space
       zone = space.zone
       is_floor = floor.is_floor
-      if not floor.is_fully_described
+      if floor.sameas_id
         floor = floor.sameas # use adjacent wall inputs instead
         is_floor = !floor.is_floor
       end

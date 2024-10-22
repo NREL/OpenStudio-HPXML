@@ -138,7 +138,7 @@ module Geometry
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.walls.each do |wall|
-      if not wall.is_fully_described
+      if not wall.sameas_id.nil?
         # Store wall id in the space to process later
         space = get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
         adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
@@ -232,7 +232,7 @@ module Geometry
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.rim_joists.each do |rim_joist|
-      if not rim_joist.is_fully_described
+      if not rim_joist.sameas_id.nil?
         # Store rim_joist id in the space to process later
         space = get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
         adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
@@ -327,7 +327,7 @@ module Geometry
     walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.floors.each do |floor|
-      if not floor.is_fully_described
+      if not floor.sameas_id.nil?
         # Store floor id in the space to process later
         space = get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
         adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
@@ -485,7 +485,7 @@ module Geometry
       int_fnd_walls.each do |fnd_wall|
         next unless fnd_wall.is_interior
 
-        if not fnd_wall.is_fully_described
+        if not fnd_wall.sameas_id.nil?
           # Store fnd_wall id in the space to process later
           space = get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
           adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
@@ -1782,9 +1782,8 @@ module Geometry
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
-    if hpxml_surface.is_attached_by_sameas
-      surface.additionalProperties.setFeature('HPXMLID', hpxml_surface.id)
-      surface.additionalProperties.setFeature('HPXMLSameasID', hpxml_surface.sameas_id)
+    if not hpxml_surface.sameas_id_from_other_element.nil?
+      surface.additionalProperties.setFeature('HPXMLSameasID', hpxml_surface.sameas_id_from_other_element)
     end
     if [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)

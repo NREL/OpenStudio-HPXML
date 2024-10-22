@@ -1279,7 +1279,7 @@ module Defaults
   # @return [nil]
   def self.apply_walls(hpxml_bldg)
     hpxml_bldg.walls.each do |wall|
-      next unless wall.is_fully_described
+      next if wall.sameas_id
 
       if wall.azimuth.nil?
         wall.azimuth = get_azimuth_from_orientation(wall.orientation)
@@ -1344,7 +1344,7 @@ module Defaults
   # @return [nil]
   def self.apply_foundation_walls(hpxml_bldg)
     hpxml_bldg.foundation_walls.each do |foundation_wall|
-      next unless foundation_wall.is_fully_described
+      next if foundation_wall.sameas_id
 
       if foundation_wall.type.nil?
         foundation_wall.type = HPXML::FoundationWallTypeSolidConcrete
@@ -1406,7 +1406,7 @@ module Defaults
   # @return [nil]
   def self.apply_floors(runner, hpxml_bldg)
     hpxml_bldg.floors.each do |floor|
-      next unless floor.is_fully_described
+      next if floor.sameas_id
 
       if floor.floor_or_ceiling.nil?
         if floor.is_ceiling
