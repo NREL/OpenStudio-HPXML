@@ -447,20 +447,21 @@ Panel loads, load-based capacities, and breaker spaces can also be found in the 
   Electric Panel Load: Electric Vehicle Charging (W)
   Electric Panel Load: Lighting (W)
   Electric Panel Load: Other (W)
-  Electric Panel Capacity: Load-Based Total (W)         220.83
-  Electric Panel Capacity: Load-Based Total (A)         220.83
-  Electric Panel Capacity: Load-Based Headroom (A)      220.83
-  Electric Panel Capacity: Meter-Based Total (W)        220.87
-  Electric Panel Capacity: Meter-Based Total (A)        220.87
-  Electric Panel Capacity: Meter-Based Headroom (A)     220.87
-  Electric Panel Breaker Spaces: Total Count (#)
-  Electric Panel Breaker Spaces: Occupied Count (#)
-  Electric Panel Breaker Spaces: Headroom Count (#)
+  Electric Panel Capacity: Load-Based Total (W)         Calculated per 220.83
+  Electric Panel Capacity: Load-Based Total (A)         Load-Based Total (W) divided by panel voltage
+  Electric Panel Capacity: Load-Based Headroom (A)      Panel max current rating minus Load-Based Total (A)
+  Electric Panel Capacity: Meter-Based Total (W)        Calculated per 220.87
+  Electric Panel Capacity: Meter-Based Total (A)        Meter-Based Total (W) divided by panel voltage
+  Electric Panel Capacity: Meter-Based Headroom (A)     Panel max current rating minus Meter-Based Total (A)
+  Electric Panel Breaker Spaces: Total Count (#)        Total number of breaker spaces on the panel
+  Electric Panel Breaker Spaces: Occupied Count (#)     Number of occupied breaker spaces on the panel
+  Electric Panel Breaker Spaces: Headroom Count (#)     Number of available breaker spaces on the panel
   ====================================================  ====================
 
 .. note::
 
-  Headroom is calculated as the panel's maximum current rating (or total breaker spaces) minus calculated capacity (or occupied breaker spaces); a positive value indicates panel availability whereas a negative value indicates panel constraint.
+  Headroom is calculated as the panel's maximum current rating (or total breaker spaces) minus calculated capacity (or occupied breaker spaces).
+  A positive value indicates panel availability whereas a negative value indicates panel constraint.
 
 HVAC Capacities
 ~~~~~~~~~~~~~~~

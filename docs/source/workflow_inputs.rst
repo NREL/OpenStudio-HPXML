@@ -4564,45 +4564,45 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] The sum of ``extension/PanelLoads/*/BreakerSpaces`` and ``extension/HeadroomBreakerSpaces``.
   .. [#] Panel loads for the following panel load types are created if at least one corresponding system exists:
 
-         \- Heating: ``HeatingSystem``, ``HeatPump``
+         \- **Heating**: ``HeatingSystem``, ``HeatPump``
 
-         \- Cooling: ``CoolingSystem``, ``HeatPump``
+         \- **Cooling**: ``CoolingSystem``, ``HeatPump``
 
-         \- Hot Water: ``WaterHeatingSystem``
+         \- **Hot Water**: ``WaterHeatingSystem``
 
-         \- Clothes Dryer: ``ClothesDryer``
+         \- **Clothes Dryer**: ``ClothesDryer``
 
-         \- Dishwasher: ``Dishwasher``
+         \- **Dishwasher**: ``Dishwasher``
 
-         \- Range/Oven: ``CookingRange``
+         \- **Range/Oven**: ``CookingRange``
 
-         \- Permanent Spa Heater: ``PermanentSpa/Heater``
+         \- **Permanent Spa Heater**: ``PermanentSpa/Heater``
 
-         \- Permanent Spa Pump: ``PermanentSpa/Pumps/Pump``
+         \- **Permanent Spa Pump**: ``PermanentSpa/Pumps/Pump``
 
-         \- Pool Heater: ``Pool/Heater``
+         \- **Pool Heater**: ``Pool/Heater``
 
-         \- Pool Pump: ``Pool/Pumps/Pump``
+         \- **Pool Pump**: ``Pool/Pumps/Pump``
 
-         \- Well Pump: ``PlugLoad[PlugLoadType=”well pump”]``
+         \- **Well Pump**: ``PlugLoad[PlugLoadType=”well pump”]``
 
-         \- Electric Vehicle Charging: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
+         \- **Electric Vehicle Charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
 
-         \- Other: ``VentilationFan[FanLocation="kitchen"]``, ``VentilationFan[FanLocation="bath"]``
+         \- **Other**: ``VentilationFan[FanLocation="kitchen"]``, ``VentilationFan[FanLocation="bath"]``
 
-         \- Other: garage door opener if a garage is present
+         \- **Other**: garage door opener if a garage is present
 
          Panel loads for the following panel load types are always created:
 
-         \- Lighting
+         \- **Lighting**
 
-         \- Kitchen
+         \- **Kitchen**
 
-         \- Laundry
+         \- **Laundry**
 
-         \- Other: garbage disposal
+         \- **Other**: garbage disposal
 
-  .. [#] If PanelLoads is provided, see :ref:`panel_loads`.
+  .. [#] See :ref:`panel_loads`.
 
 .. _panel_loads:
 
@@ -4625,49 +4625,52 @@ Individual panel loads entered in ``extension/PanelLoads/PanelLoad``.
   .. [#] Type choices are "Heating", "Cooling", "Hot Water", "Clothes Dryer", "Dishwasher", "Range/Oven", "Permanent Spa Heater", "Permanent Spa Pump", "Pool Heater", "Pool Pump", "Well Pump", and "Electric Vehicle Charging".
   .. [#] If Watts not provided, defaults as follows:
 
-         \- Heating: autosized
+         \- **Heating**: TODO
 
-         \- Cooling: autosized
+         \- **Cooling**: TODO
 
-         \- Hot Water: TODO
+         \- **Hot Water**: TODO
 
-         \- Clothes Dryer: TODO
+         \- **Clothes Dryer**: TODO
 
-         \- Dishwasher: TODO
+         \- **Dishwasher**: TODO
 
-         \- Range/Oven: TODO
+         \- **Range/Oven**: TODO
 
-         \- Permanent Spa Heater: TODO
+         \- **Permanent Spa Heater**: TODO
 
-         \- Permanent Spa Pump: TODO
+         \- **Permanent Spa Pump**: TODO
 
-         \- Pool Heater: TODO
+         \- **Pool Heater**: TODO
 
-         \- Pool Pump: TODO
+         \- **Pool Pump**: TODO
 
-         \- Well Pump: TODO
+         \- **Well Pump**: TODO
 
-         \- Electric Vehicle Charging: TODO
+         \- **Electric Vehicle Charging**: TODO
 
-         \- Lighting: 3 * ConditionedFloorArea
+         \- **Lighting**: 3 * ConditionedFloorArea
 
-         \- Kitchen: 3000
+         \- **Kitchen**: 3000
 
-         \- Laundry: 1500
+         \- **Laundry**: 1500
 
-         \- Other: TODO
+         \- **Other**: TODO
 
   .. [#] Voltage choices are "120" or "240".
-  .. [#] "240" if Type is "Heating", "Cooling", "Hot Water", "Clothes Dryer", "Range/Oven", "Permanent Spa Heater", or "Pool Heater"; otherwise "120".
-  .. [#] If BreakerSpaces not provided, defaults as follows:
+  .. [#] If Voltage not provided, defaults as follows:
 
-         \- 0: "Lighting" and "Kitchen"
+         \- **Heating, Cooling, Hot Water, Clothes Dryer, Range/Oven, Permanent Spa Heater, Pool Heater**: 240
 
-         \- 1: Voltage is "120"
+         \- **Dishwasher, Permanent Spa Pump, Pool Pump, Well Pump, Electric Vehicle Charging, Lighting, Kitchen, Laundry, Other**: 120
 
-         \- 2: Voltage is "240"
+  .. [#] If BreakerSpaces not provided, defaults based on Type and Voltage:
 
-  .. [#] System must reference a ``HeatingSystem``, ``CoolingSystem``, ``HeatPump``, ``WaterHeatingSystem``, etc.
+         \- **Lighting, Kitchen**: 120=0, 240=0
+
+         \- **Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Permanent Spa Heater, Permanent Spa Pump, Pool Heater, Pool Pump, Well Pump, Electric Vehicle Charging, Other**: 120=1, 240=2
+
+  .. [#] System must reference a ``HeatingSystem``, ``CoolingSystem``, ``HeatPump``, ``WaterHeatingSystem``, ``ClothesDryer``, ``Dishwasher``, ``CookingRange``, ``PermanentSpa/Heater``, ``PermanentSpa/Pumps/Pump``, ``Pool/Heater``, ``Pool/Pump``, ``PlugLoad``, or ``VentilationFan``.
   .. [#] A panel load is created for any system not already referenced by a panel load.
 
 .. _hpxml_batteries:
