@@ -4558,8 +4558,8 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   ====================================================  =======  =========  =======================  ========  ========  ============================================
 
   .. [#] Voltage choices are "120" or "240".
-  .. [#] The sum of extension/PanelLoads/*/BreakerSpaces and extension/HeadroomBreakerSpaces.
-  .. [#] The following panel loads are created if at least one corresponding system exists:
+  .. [#] The sum of ``extension/PanelLoads/*/BreakerSpaces`` and ``extension/HeadroomBreakerSpaces``.
+  .. [#] Panel loads for the following panel load types are created if at least one corresponding system exists:
 
          \- Heating: ``HeatingSystem``, ``HeatPump``
 
@@ -4589,7 +4589,7 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
 
          \- Other: garage door opener if a garage is present
 
-         Always the following:
+         Panel loads for the following panel load types are always created:
 
          \- Lighting
 
