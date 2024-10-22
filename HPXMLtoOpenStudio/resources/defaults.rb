@@ -5965,7 +5965,7 @@ module Defaults
         end
       end
     end
-    return watts
+    return watts.round(1)
   end
 
   # TODO
