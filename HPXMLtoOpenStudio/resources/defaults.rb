@@ -3314,9 +3314,13 @@ module Defaults
         electric_panel.max_current_rating = electric_panel_default_values[:max_current_rating]
         electric_panel.max_current_rating_isdefaulted = true
       end
-      if electric_panel.breaker_spaces.nil?
-        electric_panel.breaker_spaces = electric_panel_default_values[:breaker_spaces]
-        electric_panel.breaker_spaces_isdefaulted = true
+      if electric_panel.headroom_breaker_spaces.nil?
+        electric_panel.headroom_breaker_spaces = electric_panel_default_values[:headroom_breaker_spaces]
+        electric_panel.headroom_breaker_spaces_isdefaulted = true
+      end
+      if electric_panel.total_breaker_spaces.nil?
+        electric_panel.total_breaker_spaces = electric_panel_default_values[:total_breaker_spaces] + electric_panel.headroom_breaker_spaces
+        electric_panel.total_breaker_spaces_isdefaulted = true
       end
 
       ElectricPanel.calculate(electric_panel)
@@ -5761,14 +5765,15 @@ module Defaults
 
   # TODO
   def self.get_electric_panel_values(panel_loads)
-    breaker_spaces = 0
+    total_breaker_spaces = 0
     panel_loads.each do |panel_load|
-      breaker_spaces += panel_load.breaker_spaces
+      total_breaker_spaces += panel_load.breaker_spaces
     end
 
     return { panel_voltage: HPXML::ElectricPanelVoltage240,
              max_current_rating: 150.0, # A
-             breaker_spaces: breaker_spaces }
+             headroom_breaker_spaces: 0,
+             total_breaker_spaces: total_breaker_spaces }
   end
 
   # TODO
@@ -5791,8 +5796,6 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Hash] Map of electric panel properties to default values
   def self.get_panel_load_watts_default_values(hpxml_bldg, type, voltage, system_ids)
-    # system_ids = [] if system_ids.nil?
-
     watts = 0.0
     if type == HPXML::ElectricPanelLoadTypeHeating
       hpxml_bldg.heating_systems.each do |heating_system|

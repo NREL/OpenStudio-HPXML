@@ -551,9 +551,9 @@ class HPXML < Object
   # Electric panel attributes
   CLB_ATTRS = { clb_total_w: 'Watts',
                 clb_total_a: 'Amps',
-                clb_headroom_a: 'Headroom' }
+                clb_headroom_a: 'HeadroomAmps' }
   BS_ATTRS = { bs_total: 'Total',
-               bs_hvac: 'HVAC',
+               bs_occupied: 'Occupied',
                bs_headroom: 'Headroom' }
 
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
@@ -9281,7 +9281,8 @@ class HPXML < Object
     ATTRS = [:id, # [String] SystemIdentifier/@id
              :voltage,
              :max_current_rating,
-             :breaker_spaces] +
+             :headroom_breaker_spaces,
+             :total_breaker_spaces] +
             CLB_ATTRS.keys +
             BS_ATTRS.keys
     attr_reader(*CLASS_ATTRS)
@@ -9315,9 +9316,10 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(electric_panel, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_element(electric_panel, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_isdefaulted) unless @max_current_rating.nil?
-      XMLHelper.add_extension(electric_panel, 'BreakerSpaces', @breaker_spaces, :integer, @breaker_spaces_isdefaulted) unless @breaker_spaces.nil?
+      XMLHelper.add_extension(electric_panel, 'HeadroomBreakerSpaces', @headroom_breaker_spaces, :integer, @headroom_breaker_spaces_isdefaulted) unless @headroom_breaker_spaces.nil?
+      XMLHelper.add_extension(electric_panel, 'TotalBreakerSpaces', @total_breaker_spaces, :integer, @total_breaker_spaces_isdefaulted) unless @total_breaker_spaces.nil?
       @panel_loads.to_doc(electric_panel)
-      if !@clb_total_w.nil? && !@clb_total_a.nil? && !@clb_headroom_a.nil? && !@bs_hvac.nil? && !@bs_total.nil?
+      if !@clb_total_w.nil? && !@clb_total_a.nil? && !@clb_headroom_a.nil? && !@bs_total.nil? && !bs_occupied.nil? && !bs_headroom.nil?
         HPXML.panel_outputs_to_doc(self, electric_panel)
       end
     end
@@ -9332,7 +9334,8 @@ class HPXML < Object
       @id = HPXML::get_id(electric_panel)
       @voltage = XMLHelper.get_value(electric_panel, 'Voltage', :string)
       @max_current_rating = XMLHelper.get_value(electric_panel, 'MaxCurrentRating', :float)
-      @breaker_spaces = XMLHelper.get_value(electric_panel, 'extension/BreakerSpaces', :integer)
+      @headroom_breaker_spaces = XMLHelper.get_value(electric_panel, 'extension/HeadroomBreakerSpaces', :integer)
+      @total_breaker_spaces = XMLHelper.get_value(electric_panel, 'extension/TotalBreakerSpaces', :integer)
       @panel_loads.from_doc(electric_panel)
       HPXML.panel_outputs_from_doc(self, electric_panel)
     end
@@ -11881,12 +11884,16 @@ class HPXML < Object
   # @return [nil]
   def self.panel_outputs_to_doc(hpxml_object, hpxml_element)
     { CLB_ATTRS => 'CapacityLoadBased',
-      BS_ATTRS => 'BreakerSpace' }.each do |attrs, p_child_name|
+      BS_ATTRS => 'BreakerSpaces' }.each do |attrs, p_child_name|
       p_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'Outputs'])
       XMLHelper.add_attribute(p_extension, 'dataSource', 'software')
       p_child = XMLHelper.add_element(p_extension, p_child_name)
       attrs.each do |attr, element_name|
-        XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :float)
+        if p_child_name == 'BreakerSpaces'
+          XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :integer)
+        else
+          XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :float)
+        end
       end
     end
   end
@@ -11901,7 +11908,7 @@ class HPXML < Object
     return if outputs.nil?
 
     { CLB_ATTRS => 'CapacityLoadBased',
-      BS_ATTRS => 'BreakerSpace' }.each do |attrs, p_child_name|
+      BS_ATTRS => 'BreakerSpaces' }.each do |attrs, p_child_name|
       attrs.each do |attr, element_name|
         hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :float))
       end

@@ -2716,9 +2716,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('A')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_num_breaker_spaces', false)
-    arg.setDisplayName('Electric Panel: Number of Breaker Spaces')
-    arg.setDescription("The total number of breaker spaces available. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_headroom', false)
+    arg.setDisplayName('Electric Panel: Breaker Spaces Headroom')
+    arg.setDescription("The number of breaker spaces available. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('#')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_total', false)
+    arg.setDisplayName('Electric Panel: Breaker Spaces Total')
+    arg.setDescription("The total number of breaker spaces. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('#')
     args << arg
 
@@ -6914,12 +6920,13 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_electric_panel(hpxml_bldg, args)
-    return if args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil? && args[:electric_panel_num_breaker_spaces].nil?
+    return if args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil? && args[:electric_panel_breaker_spaces_headroom].nil? && args[:electric_panel_breaker_spaces_total].nil?
 
     hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
                                    voltage: args[:electric_panel_service_voltage],
                                    max_current_rating: args[:electric_panel_service_rating],
-                                   breaker_spaces: args[:electric_panel_num_breaker_spaces])
+                                   headroom_breaker_spaces: args[:electric_panel_breaker_spaces_headroom],
+                                   total_breaker_spaces: args[:electric_panel_breaker_spaces_total])
 
     panel_loads = hpxml_bldg.electric_panels[0].panel_loads
 

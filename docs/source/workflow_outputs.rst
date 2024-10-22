@@ -428,7 +428,7 @@ Electric Panel
 ~~~~~~~~~~~~~~
 
 Electric panel loads, capacities, and breaker spaces are listed below.
-Individual loads, load-based capacities, and breaker spaces can also be found in the ``in.xml`` file.
+Panel loads, load-based capacities, and breaker spaces can also be found in the ``in.xml`` file.
 
   ====================================================  ====================
   Type                                                  Notes
@@ -453,13 +453,14 @@ Individual loads, load-based capacities, and breaker spaces can also be found in
   Electric Panel Capacity: Meter-Based Total (W)        220.87
   Electric Panel Capacity: Meter-Based Total (A)        220.87
   Electric Panel Capacity: Meter-Based Headroom (A)     220.87
-  Electric Panel Breaker Space: Total Count (#)
-  Electric Panel Breaker Space: HVAC Count (#)
+  Electric Panel Breaker Spaces: Total Count (#)
+  Electric Panel Breaker Spaces: Occupied Count (#)
+  Electric Panel Breaker Spaces: Headroom Count (#)
   ====================================================  ====================
 
 .. note::
 
-  Headroom is calculated as the panel's maximum current rating (A) minus calculated capacity (A); a positive value indicates panel availability whereas a negative value indicates that the panel is constrained.
+  Headroom is calculated as the panel's maximum current rating (or total breaker spaces) minus calculated capacity (or occupied breaker spaces); a positive value indicates panel availability whereas a negative value indicates panel constraint.
 
 HVAC Capacities
 ~~~~~~~~~~~~~~~

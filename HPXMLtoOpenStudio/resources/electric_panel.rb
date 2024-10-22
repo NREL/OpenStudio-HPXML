@@ -7,7 +7,7 @@ module ElectricPanel
     panel_loads = PanelLoadValues.new
 
     calculate_load_based(electric_panel, panel_loads)
-    calculate_breaker_space(electric_panel, panel_loads)
+    calculate_breaker_spaces(electric_panel, panel_loads)
 
     # Assign load-based capacities to HPXML objects for output
     return unless update_hpxml
@@ -16,9 +16,9 @@ module ElectricPanel
     electric_panel.clb_total_a = panel_loads.LoadBased_CapacityA.round
     electric_panel.clb_headroom_a = panel_loads.LoadBased_HeadRoomA.round
 
-    electric_panel.bs_total = panel_loads.BreakerSpace_Total
-    electric_panel.bs_hvac = panel_loads.BreakerSpace_HVAC
-    electric_panel.bs_headroom = panel_loads.BreakerSpace_HeadRoom
+    electric_panel.bs_total = panel_loads.BreakerSpaces_Total
+    electric_panel.bs_occupied = panel_loads.BreakerSpaces_Occupied
+    electric_panel.bs_headroom = panel_loads.BreakerSpaces_HeadRoom
   end
 
   # TODO
@@ -94,17 +94,13 @@ module ElectricPanel
   end
 
   # TODO
-  def self.calculate_breaker_space(electric_panel, panel_loads)
-    total = 0
-    hvac = 0
-    electric_panel.panel_loads.each do |panel_load|
-      total += panel_load.breaker_spaces
-      hvac += panel_load.breaker_spaces if [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(panel_load.type)
-    end
+  def self.calculate_breaker_spaces(electric_panel, panel_loads)
+    total = electric_panel.total_breaker_spaces
+    occupied = electric_panel.panel_loads.map { |panel_load| panel_load.breaker_spaces }.sum(0.0)
 
-    panel_loads.BreakerSpace_Total = total
-    panel_loads.BreakerSpace_HVAC = hvac
-    panel_loads.BreakerSpace_HeadRoom = electric_panel.breaker_spaces - panel_loads.BreakerSpace_Total
+    panel_loads.BreakerSpaces_Total = total
+    panel_loads.BreakerSpaces_Occupied = occupied
+    panel_loads.BreakerSpaces_HeadRoom = total - occupied
   end
 end
 
@@ -113,9 +109,9 @@ class PanelLoadValues
   LOADBASED_ATTRS = [:LoadBased_CapacityW,
                      :LoadBased_CapacityA,
                      :LoadBased_HeadRoomA]
-  BREAKERSPACE_ATTRS = [:BreakerSpace_HVAC,
-                        :BreakerSpace_Total,
-                        :BreakerSpace_HeadRoom]
+  BREAKERSPACE_ATTRS = [:BreakerSpaces_Occupied,
+                        :BreakerSpaces_Total,
+                        :BreakerSpaces_HeadRoom]
   attr_accessor(*LOADBASED_ATTRS)
   attr_accessor(*BREAKERSPACE_ATTRS)
 

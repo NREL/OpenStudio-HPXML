@@ -3494,7 +3494,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base-detailed-electric-panel.xml')
     hpxml_bldg.electric_panels[0].voltage = HPXML::ElectricPanelVoltage120
     hpxml_bldg.electric_panels[0].max_current_rating = 200.0
-    hpxml_bldg.electric_panels[0].breaker_spaces = 5
+    hpxml_bldg.electric_panels[0].headroom_breaker_spaces = 5
+    hpxml_bldg.electric_panels[0].total_breaker_spaces = 12
     panel_loads = hpxml_bldg.electric_panels[0].panel_loads
     htg_load = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
     htg_load.watts = 1000
@@ -3528,7 +3529,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                     addition: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage120, 200.0, 5)
+    _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage120, 200.0, 5, 12)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 1000, HPXML::ElectricPanelVoltage120, 0, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2000, HPXML::ElectricPanelVoltage120, 1, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 3000, HPXML::ElectricPanelVoltage120, 2, true)
@@ -3543,7 +3544,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults
     hpxml_bldg.electric_panels[0].voltage = nil
     hpxml_bldg.electric_panels[0].max_current_rating = nil
-    hpxml_bldg.electric_panels[0].breaker_spaces = nil
+    hpxml_bldg.electric_panels[0].headroom_breaker_spaces = nil
+    hpxml_bldg.electric_panels[0].total_breaker_spaces = nil
     hpxml_bldg.electric_panels[0].panel_loads.each do |panel_load|
       panel_load.watts = nil
       panel_load.voltage = nil
@@ -3552,7 +3554,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage240, 150.0, 7)
+    _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage240, 150.0, 0, 7)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 1041.0, HPXML::ElectricPanelVoltage240, 2, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 3809.7, HPXML::ElectricPanelVoltage240, 2, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 0, HPXML::ElectricPanelVoltage240, 0, false)
@@ -5715,11 +5717,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_electric_panel_values(hpxml_bldg, voltage, max_current_rating, breaker_spaces)
+  def _test_default_electric_panel_values(hpxml_bldg, voltage, max_current_rating, headroom_breaker_spaces, total_breaker_spaces)
     electric_panel = hpxml_bldg.electric_panels[0]
     assert_equal(voltage, electric_panel.voltage)
     assert_equal(max_current_rating, electric_panel.max_current_rating)
-    assert_equal(breaker_spaces, electric_panel.breaker_spaces)
+    assert_equal(headroom_breaker_spaces, electric_panel.headroom_breaker_spaces)
+    assert_equal(total_breaker_spaces, electric_panel.total_breaker_spaces)
   end
 
   def _test_default_panel_load_values(hpxml_bldg, type, watts, voltage, breaker_spaces, addition)

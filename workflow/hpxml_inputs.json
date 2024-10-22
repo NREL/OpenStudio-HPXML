@@ -1612,6 +1612,10 @@
     "geometry_unit_cfa": 1228,
     "heating_system_heating_capacity": 52280,
     "cooling_system_cooling_capacity": 14760,
+    "cooling_system_panel_load_watts": 3542,
+    "cooling_system_panel_load_voltage": "240",
+    "cooling_system_panel_load_breaker_spaces": 2,
+    "cooling_system_panel_load_addition": false,
     "water_heater_fuel_type": "natural gas",
     "cooking_range_oven_fuel_type": "natural gas",
     "clothes_dryer_fuel_type": "natural gas",
@@ -1620,10 +1624,7 @@
     "bathroom_fans_quantity": 2,
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
-    "cooling_system_panel_load_watts": 3542,
-    "cooling_system_panel_load_voltage": "240",
-    "cooling_system_panel_load_breaker_spaces": 2,
-    "cooling_system_panel_load_addition": false
+    "electric_panel_breaker_spaces_headroom": 5
   },
   "sample_files/base-detailed-electric-panel-upgrade.xml": {
     "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
@@ -1634,6 +1635,8 @@
     "heat_pump_cooling_efficiency": 13,
     "heat_pump_heating_capacity": 52280,
     "heat_pump_cooling_capacity": 52280,
+    "heat_pump_fraction_heat_load_served": 1,
+    "heat_pump_fraction_cool_load_served": 1,
     "heat_pump_backup_type": "integrated",
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 27960,
@@ -1643,7 +1646,7 @@
     "cooking_range_oven_fuel_type": "electricity",
     "clothes_dryer_fuel_type": "electricity",
     "misc_plug_loads_vehicle_present": true,
-    "electric_panel_num_breaker_spaces": 7
+    "electric_panel_breaker_spaces_total": 12
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",

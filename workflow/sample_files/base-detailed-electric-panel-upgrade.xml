@@ -316,6 +316,10 @@
       <Systems>
         <HVAC>
           <HVACPlant>
+            <PrimarySystems>
+              <PrimaryHeatingSystem idref='HeatPump1'/>
+              <PrimaryCoolingSystem idref='HeatPump1'/>
+            </PrimarySystems>
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
               <DistributionSystem idref='HVACDistribution1'/>
@@ -330,8 +334,8 @@
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>27960.0</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.0</FractionCoolLoadServed>
+              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
@@ -344,6 +348,8 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
+            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
+            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
@@ -440,7 +446,8 @@
             <Voltage>240</Voltage>
             <MaxCurrentRating>100.0</MaxCurrentRating>
             <extension>
-              <BreakerSpaces>7</BreakerSpaces>
+              <HeadroomBreakerSpaces>5</HeadroomBreakerSpaces>
+              <TotalBreakerSpaces>12</TotalBreakerSpaces>
               <PanelLoads>
                 <PanelLoad>
                   <Type>Heating</Type>

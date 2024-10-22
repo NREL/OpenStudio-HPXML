@@ -449,6 +449,7 @@
             <Voltage>240</Voltage>
             <MaxCurrentRating>100.0</MaxCurrentRating>
             <extension>
+              <HeadroomBreakerSpaces>5</HeadroomBreakerSpaces>
               <PanelLoads>
                 <PanelLoad>
                   <Type>Heating</Type>

@@ -4550,22 +4550,44 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   Element                                               Type     Units      Constraints              Required  Default   Notes
   ====================================================  =======  =========  =======================  ========  ========  ============================================
   ``SystemIdentifier``                                  id                                           Yes                 Unique identifier
-  ``Voltage``                                           string              See [#]_                 No        240
-  ``MaxCurrentRating``                                  double                                       No        150
-  ``extension/NumberofBreakerSpacesRemaining``          integer                                      No        0
+  ``Voltage``                                           string   V          See [#]_                 No        240
+  ``MaxCurrentRating``                                  double   A                                   No        150
+  ``extension/HeadroomBreakerSpaces``                   integer                                      No        0
+  ``extension/TotalBreakerSpaces``                      integer                                      No        See [#]_
   ``extension/PanelLoads``                              element                                      No        See [#]_  Individual electric panel loads [#]_
   ====================================================  =======  =========  =======================  ========  ========  ============================================
 
   .. [#] Voltage choices are "120" or "240".
-  .. [#] The following if they exist:
+  .. [#] The sum of extension/PanelLoads/*/BreakerSpaces and extension/HeadroomBreakerSpaces.
+  .. [#] The following panel loads are created if at least one corresponding system exists:
 
-         \- Heating
+         \- Heating: ``HeatingSystem``, ``HeatPump``
 
-         \- Cooling
+         \- Cooling: ``CoolingSystem``, ``HeatPump``
 
-         \- Hot Water
+         \- Hot Water: ``WaterHeatingSystem``
 
-         \- Clothes Dryer
+         \- Clothes Dryer: ``ClothesDryer``
+
+         \- Dishwasher: ``Dishwasher``
+
+         \- Range/Oven: ``CookingRange``
+
+         \- Permanent Spa Heater: ``PermanentSpa/Heater``
+
+         \- Permanent Spa Pump: ``PermanentSpa/Pumps/Pump``
+
+         \- Pool Heater: ``Pool/Heater``
+
+         \- Pool Pump: ``Pool/Pumps/Pump``
+
+         \- Well Pump: ``PlugLoad[PlugLoadType=”well pump”]``
+
+         \- Electric Vehicle Charging: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
+
+         \- Other: ``VentilationFan[FanLocation="kitchen"]``, ``VentilationFan[FanLocation="bath"]``
+
+         \- Other: garage door opener if a garage is present
 
          Always the following:
 
@@ -4574,6 +4596,8 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
          \- Kitchen
 
          \- Laundry
+
+         \- Other: garbage disposal
 
   .. [#] If PanelLoads is provided, see :ref:`panel_loads`.
 
@@ -4590,28 +4614,58 @@ Individual panel loads entered in ``extension/PanelLoads/PanelLoad``.
   ``Type``                                        string                    See [#]_     Yes
   ``Watts``                                       double    W                            No        See [#]_
   ``Voltage``                                     string    V               See [#]_     No        See [#]_
+  ``BreakerSpaces``                               integer                                No        See [#]_
   ``Addition``                                    boolean                                No        false
+  ``System``                                      idref                     See [#]_     No        See [#]_   Can reference one or more systems
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] Type choices are "Heating", "Cooling", "Hot Water", or "Clothes Dryer".
+  .. [#] Type choices are "Heating", "Cooling", "Hot Water", "Clothes Dryer", "Dishwasher", "Range/Oven", "Permanent Spa Heater", "Permanent Spa Pump", "Pool Heater", "Pool Pump", "Well Pump", and "Electric Vehicle Charging".
   .. [#] If Watts not provided, defaults as follows:
 
          \- Heating: autosized
 
          \- Cooling: autosized
 
-         \- Hot Water: 4500
+         \- Hot Water: TODO
 
-         \- Clothes Dryer: 5760
+         \- Clothes Dryer: TODO
 
-         \- Lighting: 3 * CFA
+         \- Dishwasher: TODO
+
+         \- Range/Oven: TODO
+
+         \- Permanent Spa Heater: TODO
+
+         \- Permanent Spa Pump: TODO
+
+         \- Pool Heater: TODO
+
+         \- Pool Pump: TODO
+
+         \- Well Pump: TODO
+
+         \- Electric Vehicle Charging: TODO
+
+         \- Lighting: 3 * ConditionedFloorArea
 
          \- Kitchen: 3000
 
          \- Laundry: 1500
 
+         \- Other: TODO
+
   .. [#] Voltage choices are "120" or "240".
-  .. [#] "120" if Watts <= 2500, otherwise "240".
+  .. [#] "240" if Type is "Heating", "Cooling", "Hot Water", "Clothes Dryer", "Range/Oven", "Permanent Spa Heater", or "Pool Heater"; otherwise "120".
+  .. [#] If BreakerSpaces not provided, defaults as follows:
+
+         \- 0: "Lighting" and "Kitchen"
+
+         \- 1: Voltage is "120"
+
+         \- 2: Voltage is "240"
+
+  .. [#] System must reference a ``HeatingSystem``, ``CoolingSystem``, ``HeatPump``, ``WaterHeatingSystem``, etc.
+  .. [#] A panel load is created for any system not already referenced by a panel load.
 
 .. _hpxml_batteries:
 
