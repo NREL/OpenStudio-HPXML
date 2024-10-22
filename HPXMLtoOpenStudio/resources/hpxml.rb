@@ -8072,6 +8072,7 @@ class HPXML < Object
     ATTRS = [:id,                                       # [String] SystemIdentifier/@id
              :count,                                    # [Integer] Count
              :fan_type,                                 # [String] FanType (HPXML::MechVentTypeXXX)
+             :cfis_has_outdoor_air_control,             # [Boolean] CFISControls/HasOutdoorAirControl
              :cfis_addtl_runtime_operating_mode,        # [String] CFISControls/AdditionalRuntimeOperatingMode (HPXML::CFISModeXXX)
              :cfis_supplemental_fan_idref,              # [String] CFISControls/SupplementalFan/@idref
              :rated_flow_rate,                          # [Double] RatedFlowRate (cfm)
@@ -8319,8 +8320,9 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(ventilation_fan, 'Count', @count, :integer, @count_isdefaulted) unless @count.nil?
       XMLHelper.add_element(ventilation_fan, 'FanType', @fan_type, :string) unless @fan_type.nil?
-      if (not @cfis_addtl_runtime_operating_mode.nil?) || (not @cfis_supplemental_fan_idref.nil?)
+      if (not @cfis_addtl_runtime_operating_mode.nil?) || (not @cfis_supplemental_fan_idref.nil?) || (not @cfis_has_outdoor_air_control.nil?)
         cfis_controls = XMLHelper.add_element(ventilation_fan, 'CFISControls')
+        XMLHelper.add_element(cfis_controls, 'HasOutdoorAirControl', @cfis_has_outdoor_air_control, :boolean, @cfis_has_outdoor_air_control_isdefaulted) unless @cfis_has_outdoor_air_control.nil?
         XMLHelper.add_element(cfis_controls, 'AdditionalRuntimeOperatingMode', @cfis_addtl_runtime_operating_mode, :string, @cfis_addtl_runtime_operating_mode_isdefaulted) unless @cfis_addtl_runtime_operating_mode.nil?
         if not @cfis_supplemental_fan_idref.nil?
           supplemental_fan = XMLHelper.add_element(cfis_controls, 'SupplementalFan')
@@ -8381,6 +8383,9 @@ class HPXML < Object
       @id = HPXML::get_id(ventilation_fan)
       @count = XMLHelper.get_value(ventilation_fan, 'Count', :integer)
       @fan_type = XMLHelper.get_value(ventilation_fan, 'FanType', :string)
+      @cfis_has_outdoor_air_control = XMLHelper.get_value(ventilation_fan, 'CFISControls/HasOutdoorAirControl', :boolean)
+      @cfis_addtl_runtime_operating_mode = XMLHelper.get_value(ventilation_fan, 'CFISControls/AdditionalRuntimeOperatingMode', :string)
+      @cfis_supplemental_fan_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'CFISControls/SupplementalFan'))
       @rated_flow_rate = XMLHelper.get_value(ventilation_fan, 'RatedFlowRate', :float)
       @calculated_flow_rate = XMLHelper.get_value(ventilation_fan, 'CalculatedFlowRate', :float)
       @tested_flow_rate = XMLHelper.get_value(ventilation_fan, 'TestedFlowRate', :float)
@@ -8410,8 +8415,6 @@ class HPXML < Object
       @flow_rate_not_tested = XMLHelper.get_value(ventilation_fan, 'extension/FlowRateNotTested', :boolean)
       @fan_power_defaulted = XMLHelper.get_value(ventilation_fan, 'extension/FanPowerDefaulted', :boolean)
       @cfis_vent_mode_airflow_fraction = XMLHelper.get_value(ventilation_fan, 'extension/VentilationOnlyModeAirflowFraction', :float)
-      @cfis_addtl_runtime_operating_mode = XMLHelper.get_value(ventilation_fan, 'CFISControls/AdditionalRuntimeOperatingMode', :string)
-      @cfis_supplemental_fan_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'CFISControls/SupplementalFan'))
     end
   end
 

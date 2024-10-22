@@ -17,6 +17,7 @@ __New Features__
   - Updates relationship between number of bedrooms and number of occupants to use RECS 2020 instead of RECS 2015.
 - Allows optional `HeatingCapacity` and `BackupHeatingCapacity` inputs for heat pump water heaters (HPWHs).
 - Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
+  - CFIS systems without automatic flow control of outdoor air (`CFISControls/HasOutdoorAirControl=false`).
   - CFIS systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
   - Adds optional `DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh` input.
@@ -49,6 +50,7 @@ __Bugfixes__
 - Fixes possible error for a combi boiler system.
 - Fixes error if modeling a ground-to-air heat pump with a separate backup heating system.
 - Fixes default CFIS fan power during ventilation only mode.
+- Fixes a bug that potentially oversizes heat pumps when detailed performance capacity fractions are provided.
 
 ## OpenStudio-HPXML v1.8.1
 
