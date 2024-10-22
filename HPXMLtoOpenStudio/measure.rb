@@ -150,7 +150,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       Outputs.apply_ems_programs(model, hpxml_osm_map, hpxml.header, args[:add_component_loads])
       Outputs.apply_output_file_controls(model, args[:debug])
       Outputs.apply_additional_properties(model, hpxml, hpxml_osm_map, args[:hpxml_path], args[:building_id], args[:hpxml_defaults_path])
-      # Outputs.apply_ems_debug_output(model) # Uncomment to debug EMS
+      Outputs.apply_ems_debug_output(model) # Uncomment to debug EMS
 
       # Write output files
       Outputs.write_debug_files(runner, model, args[:debug], args[:output_dir], epw_path)

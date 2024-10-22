@@ -3215,6 +3215,9 @@
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
     "mech_vent_fan_power": null
   },
+  "sample_files/base-mechvent-cfis-supplemental-fan-exhaust-synchronized.xml": {
+    "parent_hpxml": "sample_files/base-mechvent-cfis-supplemental-fan-exhaust.xml"
+  },
   "sample_files/base-mechvent-cfis-supplemental-fan-supply.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
     "mech_vent_fan_power": null
