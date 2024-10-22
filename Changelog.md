@@ -50,6 +50,7 @@ __Bugfixes__
 - Fixes possible error for a combi boiler system.
 - Fixes error if modeling a ground-to-air heat pump with a separate backup heating system.
 - Fixes default CFIS fan power during ventilation only mode.
+- Fixes a bug that potentially oversizes heat pumps when detailed performance capacity fractions are provided.
 
 ## OpenStudio-HPXML v1.8.1
 
