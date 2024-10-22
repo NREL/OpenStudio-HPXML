@@ -3882,6 +3882,13 @@ class HPXML < Object
              :insulation_continuous_r_value]  # [Double] Insulation/Layer[InstallationType="continuous"]/NominalRValue (F-ft2-hr/Btu)
     attr_accessor(*ATTRS)
 
+    # Returns if the roof is fully described.
+    #
+    # @return [Boolean] True if the roof is fully described
+    def is_fully_described
+      return !@interior_adjacent_to.nil? && @sameas_id.nil?
+    end
+
     # Returns all skylights for this roof.
     #
     # @return [Array<HPXML::Skylight>] List of skylight objects
@@ -4153,11 +4160,18 @@ class HPXML < Object
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
     end
 
-    # Returns if the rim joist is fully described. A wall can use sameas attribute to point to another rim joist with full description.
+    # Returns if this fully described rim joist is linked by other rim joist object.
+    #
+    # @return [Boolean] True if the rim joist is linked
+    def is_attached_by_sameas
+      return HPXML::is_attached_by_sameas(@parent_object.parent_object, self)
+    end
+
+    # Returns if the rim joist is fully described. A rim joist can use sameas attribute to point to another rim joist with full description.
     #
     # @return [Boolean] True if the rim joist is fully described
     def is_fully_described
-      return !@area.nil?
+      return !@exterior_adjacent_to.nil? && @sameas_id.nil?
     end
 
     # Returns the space that the rim joist is attached to.
@@ -4408,11 +4422,18 @@ class HPXML < Object
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
     end
 
+    # Returns if this fully described wall is linked by other rim joist object.
+    #
+    # @return [Boolean] True if the wall is linked
+    def is_attached_by_sameas
+      return HPXML::is_attached_by_sameas(@parent_object.parent_object, self)
+    end
+
     # Returns if the wall is fully described. A wall can use sameas attribute to point to another wall with full description.
     #
     # @return [Boolean] True if the wall is fully described
     def is_fully_described
-      return !@area.nil?
+      return !@exterior_adjacent_to.nil? && @sameas_id.nil?
     end
 
     # Returns all windows for this wall.
@@ -4724,11 +4745,18 @@ class HPXML < Object
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
     end
 
+    # Returns if this fully described foundation wall is linked by other rim joist object.
+    #
+    # @return [Boolean] True if the foundation wall is linked
+    def is_attached_by_sameas
+      return HPXML::is_attached_by_sameas(@parent_object.parent_object, self)
+    end
+
     # Returns if the foundation wall is fully described. A foundation wall can use sameas attribute to point to another foundation wall with full description.
     #
     # @return [Boolean] True if the foundation wall is fully described
     def is_fully_described
-      return !@height.nil?
+      return !@exterior_adjacent_to.nil? && @sameas_id.nil?
     end
 
     # Returns all windows for this foundation wall.
@@ -5070,11 +5098,18 @@ class HPXML < Object
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
     end
 
+    # Returns if this fully described floor is linked by other rim joist object.
+    #
+    # @return [Boolean] True if the floor is linked
+    def is_attached_by_sameas
+      return HPXML::is_attached_by_sameas(@parent_object.parent_object, self)
+    end
+
     # Returns if the floor is fully described. A floor can use sameas attribute to point to another floor with full description.
     #
     # @return [Boolean] True if the floor is fully described
     def is_fully_described
-      return !@area.nil?
+      return !@exterior_adjacent_to.nil? && @sameas_id.nil?
     end
 
     # Returns all skylights for this floor.
@@ -5379,6 +5414,13 @@ class HPXML < Object
              :carpet_fraction,                                  # [Double] extension/CarpetFraction (frac)
              :carpet_r_value]                                   # [Double] extension/CarpetRValue (F-ft2-hr/Btu)
     attr_accessor(*ATTRS)
+
+    # Returns if the slab is fully described.
+    #
+    # @return [Boolean] True if the slab is fully described
+    def is_fully_described
+      return !@interior_adjacent_to.nil? && @sameas_id.nil?
+    end
 
     # Returns the space that the slab is attached to.
     #
@@ -11465,6 +11507,29 @@ class HPXML < Object
     end
 
     return
+  end
+
+  # If the object is linked by another object with its sameas_id.
+  #
+  # @param parent [Oga::XML::Element] The parent HPXML element
+  # @param surface_obj [Oga::XML::Element]  The element to be searched
+  # @return [Boolean] True if the object is linked by another object with its sameas_id
+  def self.is_attached_by_sameas(hpxml, _surface_obj)
+    hpxml.buildings.each do |building|
+      building.class::CLASS_ATTRS.each do |attr|
+        building_child = building.send(attr)
+        next unless building_child.is_a? HPXML::BaseArrayElement
+
+        building_child.each do |obj|
+          next unless obj.class::ATTRS.include? :sameas_id
+          next unless obj.sameas_id == obj.id
+
+          return true
+        end
+      end
+    end
+
+    return false
   end
 
   # Checks whether a given date is valid (e.g., Sep 31 is invalid).

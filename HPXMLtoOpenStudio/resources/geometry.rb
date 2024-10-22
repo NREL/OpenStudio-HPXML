@@ -140,7 +140,7 @@ module Geometry
     hpxml_bldg.walls.each do |wall|
       if not wall.is_fully_described
         # Store wall id in the space to process later
-        space = get_interior_space(model, spaces, wall.interior_adjacent_to, hpxml_bldg)
+        space = get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
         adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
         if adjacent_surface_ids.is_initialized
           adjacent_surface_ids_new = [adjacent_surface_ids, wall.id].join(', ')
@@ -232,6 +232,18 @@ module Geometry
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.rim_joists.each do |rim_joist|
+      if not rim_joist.is_fully_described
+        # Store rim_joist id in the space to process later
+        space = get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
+        adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
+        if adjacent_surface_ids.is_initialized
+          adjacent_surface_ids_new = [adjacent_surface_ids, rim_joist.id].join(', ')
+          space.additionalProperties.setFeature('adjacentSurfaceIDs', adjacent_surface_ids_new)
+        else
+          space.additionalProperties.setFeature('adjacentSurfaceIDs', rim_joist.id)
+        end
+        next
+      end
       if rim_joist.azimuth.nil?
         if rim_joist.is_exterior
           azimuths = default_azimuths # Model as four directions for average exterior incident solar
@@ -317,7 +329,7 @@ module Geometry
     hpxml_bldg.floors.each do |floor|
       if not floor.is_fully_described
         # Store floor id in the space to process later
-        space = get_interior_space(model, spaces, floor.interior_adjacent_to, hpxml_bldg)
+        space = get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
         adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
         if adjacent_surface_ids.is_initialized
           adjacent_surface_ids_new = [adjacent_surface_ids, floor.id].join(', ')
@@ -475,7 +487,7 @@ module Geometry
 
         if not fnd_wall.is_fully_described
           # Store fnd_wall id in the space to process later
-          space = get_interior_space(model, spaces, fnd_wall.interior_adjacent_to, hpxml_bldg)
+          space = get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
           adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
           if adjacent_surface_ids.is_initialized
             adjacent_surface_ids_new = [adjacent_surface_ids, fnd_wall.id].join(', ')
@@ -1770,7 +1782,7 @@ module Geometry
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
-    if not hpxml_surface.sameas_id.nil?
+    if hpxml_surface.is_attached_by_sameas
       surface.additionalProperties.setFeature('HPXMLID', hpxml_surface.id)
       surface.additionalProperties.setFeature('HPXMLSameasID', hpxml_surface.sameas_id)
     end

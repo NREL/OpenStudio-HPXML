@@ -249,6 +249,7 @@ module HVACSizing
 
     locations = []
     hpxml_bldg.surfaces.each do |surface|
+      surface = surface.sameas unless surface.is_fully_described
       locations << surface.interior_adjacent_to
       locations << surface.exterior_adjacent_to
     end
@@ -1030,7 +1031,6 @@ module HVACSizing
 
       space = wall.space
       zone = space.zone
-      adjacent_space = wall.exterior_adjacent_to
       if not wall.is_fully_described
         wall = wall.sameas # use adjacent wall inputs instead
       end
@@ -1103,8 +1103,8 @@ module HVACSizing
         clg_htm = (1.0 / assembly_r) * cltd
         htg_htm = (1.0 / assembly_r) * mj.htd
       else # Partition wall
-        clg_htm = (1.0 / assembly_r) * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-        htg_htm = (1.0 / assembly_r) * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+        clg_htm = (1.0 / assembly_r) * (mj.cool_design_temps[wall.exterior_adjacent_to] - mj.cool_setpoint)
+        htg_htm = (1.0 / assembly_r) * (mj.heat_setpoint - mj.heat_design_temps[wall.exterior_adjacent_to])
       end
       clg_loads = clg_htm * net_area
       htg_loads = htg_htm * net_area
@@ -1226,7 +1226,6 @@ module HVACSizing
 
       space = floor.space
       zone = space.zone
-      adjacent_space = floor.exterior_adjacent_to
       is_ceiling = floor.is_ceiling
       if not floor.is_fully_described
         floor = floor.sameas # use adjacent wall inputs instead
@@ -1239,8 +1238,8 @@ module HVACSizing
         clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
         htg_htm = (1.0 / floor.insulation_assembly_r_value) * mj.htd
       else
-        clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-        htg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+        clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.cool_design_temps[floor.exterior_adjacent_to] - mj.cool_setpoint)
+        htg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.heat_setpoint - mj.heat_design_temps[floor.exterior_adjacent_to])
       end
       clg_loads = clg_htm * floor.net_area
       htg_loads = htg_htm * floor.net_area
@@ -1271,7 +1270,6 @@ module HVACSizing
 
       space = floor.space
       zone = space.zone
-      adjacent_space = floor.exterior_adjacent_to
       is_floor = floor.is_floor
       if not floor.is_fully_described
         floor = floor.sameas # use adjacent wall inputs instead
@@ -1289,13 +1287,13 @@ module HVACSizing
         clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
         htg_htm = (1.0 / floor.insulation_assembly_r_value) * htd_adj
       else # Partition floor
-        if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include?(adjacent_space)
+        if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include?(floor.exterior_adjacent_to)
           u_floor = 1.0 / floor.insulation_assembly_r_value
 
           sum_ua_wall = 0.0
           sum_a_wall = 0.0
           hpxml_bldg.foundation_walls.each do |foundation_wall|
-            next unless foundation_wall.is_exterior && foundation_wall.interior_adjacent_to == adjacent_space
+            next unless foundation_wall.is_exterior && foundation_wall.interior_adjacent_to == floor.exterior_adjacent_to
 
             bg_area = foundation_wall.below_grade_area
             if bg_area > 0
@@ -1312,7 +1310,7 @@ module HVACSizing
             sum_ua_wall += (u_wall_ag * ag_area)
           end
           hpxml_bldg.walls.each do |wall|
-            next unless wall.is_exterior && wall.interior_adjacent_to == adjacent_space
+            next unless wall.is_exterior && wall.interior_adjacent_to == floor.exterior_adjacent_to
 
             sum_a_wall += wall.net_area
             sum_ua_wall += (1.0 / wall.insulation_assembly_r_value * wall.net_area)
@@ -1326,11 +1324,11 @@ module HVACSizing
 
           # Calculate partition temperature different cooling (PTDC) per Manual J Figure A12-17
           # Calculate partition temperature different heating (PTDH) per Manual J Figure A12-6
-          if [HPXML::LocationCrawlspaceVented].include? adjacent_space
+          if [HPXML::LocationCrawlspaceVented].include? floor.exterior_adjacent_to
             # Vented or Leaky
             ptdc_floor = mj.ctd / (1.0 + (4.0 * u_floor) / (u_wall + 0.11))
             ptdh_floor = htd_adj / (1.0 + (4.0 * u_floor) / (u_wall + 0.11))
-          elsif [HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include? adjacent_space
+          elsif [HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include? floor.exterior_adjacent_to
             # Sealed Tight
             ptdc_floor = u_wall * mj.ctd / (4.0 * u_floor + u_wall)
             ptdh_floor = u_wall * htd_adj / (4.0 * u_floor + u_wall)
@@ -1339,8 +1337,8 @@ module HVACSizing
           clg_htm = (1.0 / floor.insulation_assembly_r_value) * ptdc_floor
           htg_htm = (1.0 / floor.insulation_assembly_r_value) * ptdh_floor
         else # E.g., floor over garage
-          clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-          htg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+          clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.cool_design_temps[floor.exterior_adjacent_to] - mj.cool_setpoint)
+          htg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.heat_setpoint - mj.heat_design_temps[floor.exterior_adjacent_to])
         end
       end
       clg_loads = clg_htm * floor.net_area
