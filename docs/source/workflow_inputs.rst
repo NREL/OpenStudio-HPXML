@@ -1214,8 +1214,8 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Area``                                double             ft2               > 0                       Yes                                        Gross area (including skylights)
   ``Azimuth`` or ``Orientation``          integer or string  deg or direction  >= 0, <= 359 or See [#]_  No         See [#]_                        Direction (clockwise from North)
   ``RoofType``                            string                               See [#]_                  No         asphalt or fiberglass shingles  Roof type
-  ``RoofColor`` or ``SolarAbsorptance``   string or double                     See [#]_ or >= 0, <= 1    No         medium                          Roof color or solar absorptance [#]_
-  ``Emittance``                           double                               >= 0, <= 1                No         0.90                            Emittance
+  ``RoofColor`` or ``SolarAbsorptance``   string or double                     See [#]_ or >= 0, <= 1    No         medium                          Roof color or solar absorptance of outermost material [#]_
+  ``Emittance``                           double                               >= 0, <= 1                No         0.90                            Emittance of outermost material
   ``InteriorFinish/Type``                 string                               See [#]_                  No         See [#]_                        Interior finish material
   ``InteriorFinish/Thickness``            double             in                >= 0                      No         0.5                             Interior finish thickness
   ``Pitch``                               double             ?/12              >= 0                      Yes                                        Pitch [#]_
@@ -1277,8 +1277,8 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   ``Area``                                double             ft2               > 0                       Yes                    Gross area
   ``Azimuth`` or ``Orientation``          integer or string  deg or direction  >= 0, <= 359 or See [#]_  No        See [#]_     Direction (clockwise from North)
   ``Siding``                              string                               See [#]_                  No        wood siding  Siding material
-  ``Color`` or ``SolarAbsorptance``       string or double                     See [#]_ or >= 0, <= 1    No        medium       Color or solar absorptance [#]_
-  ``Emittance``                           double                               >= 0, <= 1                No        0.90         Emittance
+  ``Color`` or ``SolarAbsorptance``       string or double                     See [#]_ or >= 0, <= 1    No        medium       Color or solar absorptance of outermost material [#]_
+  ``Emittance``                           double                               >= 0, <= 1                No        0.90         Emittance of outermost material
   ``Insulation/SystemIdentifier``         id                                                             Yes                    Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                    Assembly R-value [#]_
   ======================================  =================  ================  ========================  ========  ===========  ==============================
@@ -1325,8 +1325,8 @@ Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Wa
   ``Area``                                double             ft2               > 0                       Yes                         Gross area (including doors/windows)
   ``Azimuth`` or ``Orientation``          integer or string  deg or direction  >= 0, <= 359 or See [#]_  No             See [#]_     Direction (clockwise from North)
   ``Siding``                              string                               See [#]_                  No             wood siding  Siding material
-  ``Color`` or ``SolarAbsorptance``       string or double                     See [#]_ or >= 0, <= 1    No             medium       Color or solar absorptance [#]_
-  ``Emittance``                           double                               >= 0, <= 1                No             0.90         Emittance
+  ``Color`` or ``SolarAbsorptance``       string or double                     See [#]_ or >= 0, <= 1    No             medium       Color or solar absorptance of outermost material [#]_
+  ``Emittance``                           double                               >= 0, <= 1                No             0.90         Emittance of outermost material
   ``InteriorFinish/Type``                 string                               See [#]_                  No             See [#]_     Interior finish material
   ``InteriorFinish/Thickness``            double             in                >= 0                      No             0.5          Interior finish thickness
   ``RadiantBarrier``                      boolean                                                        No             false        Presence of radiant barrier [#]_
@@ -3770,12 +3770,14 @@ Central Fan Integrated Supply (CFIS)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+A CFIS system is a supply ventilation system that provides outdoor air to the return duct of a forced-air HVAC system.
 
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
   Element                                                                                        Type      Units    Constraints                    Required  Default          Notes
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
   ``SystemIdentifier``                                                                           id                                                Yes                        Unique identifier
   ``FanType``                                                                                    string             central fan integrated supply  Yes                        Type of ventilation system
+  ``CFISControls/HasOutdoorAirControl``                                                          boolean                                           No        true             Presence of controls to block outdoor air when not ventilating [#]_
   ``CFISControls/AdditionalRuntimeOperatingMode``                                                string             See [#]_                       No        air handler fan  How additional ventilation is provided (beyond HVAC system operation)
   ``CFISControls/SupplementalFan``                                                               idref              See [#]_                       See [#]_                   The supplemental fan providing additional ventilation
   ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0                           No        See [#]_         Flow rate [#]_
@@ -3786,6 +3788,7 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
   ``extension/VentilationOnlyModeAirflowFraction``                                               double    frac     >= 0, <= 1                     No        1.0              Blower airflow rate fraction during ventilation only mode [#]_
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
 
+  .. [#] For example, an electronically-controlled mechanical damper, or an in-line fan that substantially blocks the flow when not running.
   .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan", "supplemental fan", or "none".
   .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
   .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
