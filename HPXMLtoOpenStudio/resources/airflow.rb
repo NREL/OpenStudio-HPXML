@@ -1989,6 +1989,7 @@ module Airflow
       infil_program.addLine('Set f_total_open_damper = 0') # Fraction of the timestep the CFIS damper is open
       infil_program.addLine("Set #{f_extra_open_damper_var.name} = 0")
       infil_program.addLine("Set has_additional_runtime = #{vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeNone ? 0 : 1}")
+      infil_program.addLine("Set has_outdoor_air_control = #{vent_mech.cfis_has_outdoor_air_control ? 1 : 0}")
 
       infil_program.addLine("If #{t_sum_open_damper_var.name} < t_min_hr_open") # Check whether we've met the minimum hourly runtime
       infil_program.addLine("  Set t_damper_open = 60 - (t_min_hr_open - #{t_sum_open_damper_var.name})") # Minute of the hour at which the damper must be opened
@@ -2033,6 +2034,9 @@ module Airflow
       if vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan
         infil_program.addLine("  Set f_total_open_damper = @Max (f_total_open_damper - #{f_extra_open_damper_var.name}) 0.0")
       end
+      infil_program.addLine('EndIf')
+      infil_program.addLine('If has_outdoor_air_control == 0')
+      infil_program.addLine('  Set f_total_open_damper = @Max f_total_open_damper fan_rtf_hvac') # Outdoor air is introduced for at least the entire time the HVAC system is running
       infil_program.addLine('EndIf')
       infil_program.addLine('Set QWHV_cfis_sup = QWHV_cfis_sup + (f_total_open_damper * Q_duct_oa)')
     end
