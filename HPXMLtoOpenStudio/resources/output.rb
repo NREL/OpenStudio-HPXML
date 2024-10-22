@@ -1230,9 +1230,9 @@ module Outputs
     results_out << ['Electric Panel Capacity: Load-Based Headroom (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.clb_headroom_a }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
 
     # Meter-based capacities
-    results_out << ['Electric Panel Capacity: Meter-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[0] }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Capacity: Meter-Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[1] }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Capacity: Meter-Based Headroom (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[2] }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Meter-Based Total (W)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[0] }.sum(0.0) }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Meter-Based Total (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[1] }.sum(0.0) }.sum(0.0).round(1)]
+    results_out << ['Electric Panel Capacity: Meter-Based Headroom (A)', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(electric_panel, peak_fuels)[2] }.sum(0.0) }.sum(0.0).round(1)]
 
     # Panel breaker spaces
     results_out << [line_break]
