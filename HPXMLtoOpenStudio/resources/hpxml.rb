@@ -9231,7 +9231,7 @@ class HPXML < Object
     ATTRS = [:id, :type, :lifetime_model, :rated_power_output, :location,
              :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
              :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah,
-             :energy_efficiency, :miles_per_year, :hours_per_week,
+             :energy_efficiency, :vehicle_type, :miles_per_year, :hours_per_week,
              :fraction_charged_home, :ev_charger_idref]
     attr_accessor(*ATTRS)
 
@@ -9262,7 +9262,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(vehicle, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       ev_type = XMLHelper.add_element(vehicle, 'VehicleType')
-      electric_vehicle = XMLHelper.add_element(ev_type, 'BEV')
+      electric_vehicle = XMLHelper.add_element(ev_type, Constants::ObjectTypeBatteryElectricVehicle)
       battery = XMLHelper.add_element(electric_vehicle, 'Battery')
 
       # Battery

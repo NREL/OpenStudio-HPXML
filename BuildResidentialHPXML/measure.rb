@@ -6944,7 +6944,7 @@ module HPXMLFile
                                  charging_power: args[:ev_charger_power])
     end
 
-    ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.id.include?('ElectricVehicle') }
+    ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle }
     hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
                             type: HPXML::BatteryTypeLithiumIon,
                             rated_power_output: args[:ev_battery_discharge_power],

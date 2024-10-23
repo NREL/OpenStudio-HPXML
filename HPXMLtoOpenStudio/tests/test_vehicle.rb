@@ -37,7 +37,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.vehicles.each do |hpxml_ev|
-      next unless hpxml_ev.id.include? 'ElectricVehicle'
+      next unless hpxml_ev.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle
 
       ev_battery = get_battery(model, hpxml_ev.id)
       assert_nil(ev_battery) # no defaulted schedule means no EV is generated

@@ -13,7 +13,7 @@ class Vehicle
   # @return [nil]
   def self.apply(runner, model, spaces, hpxml_bldg, schedules_file)
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.id.include?('ElectricVehicle')
+      next unless vehicle.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle
 
       apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
     end

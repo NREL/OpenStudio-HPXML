@@ -3168,7 +3168,7 @@ module Defaults
   def self.apply_vehicles(hpxml_bldg)
     default_values = get_eletric_vehicle_values()
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.id.include?('ElectricVehicle')
+      next unless vehicle.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle
 
       apply_battery(vehicle, default_values)
 

@@ -236,7 +236,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
     # Battery with no schedule
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.id.include?('ElectricVehicle')
+      next unless vehicle.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle
       next unless hpxml_bldg.header.schedules_filepaths.empty?
       next unless not vehicle.ev_charger_idref.nil?
       next if message.include? 'Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.'
@@ -245,7 +245,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
     # Battery with no charger
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.id.include?('ElectricVehicle')
+      next unless vehicle.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle
       next unless vehicle.ev_charger_idref.nil?
       next if message.include? 'Electric vehicle specified with no charger provided; battery will not be modeled.'
 

@@ -1075,8 +1075,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       batteries = []
       @hpxml_bldgs.each do |hpxml_bldg|
         hpxml_bldg.batteries.each do |battery|
-          next if battery.id.to_s.include? 'ElectricVehicle'
-
           batteries << battery
         end
       end
@@ -3042,7 +3040,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        if object.name.to_s.include? 'ElectricVehicle'
+        if object.additionalProperties.getFeatureAsBoolean('is_ev').get
           return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Production Decrement Energy'] }
         else
           return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
@@ -3213,7 +3211,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Vehicles
 
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        if object.name.to_s.include? 'ElectricVehicle'
+        if object.additionalProperties.getFeatureAsBoolean('is_ev').get
           return { VT::VehicleDischarging => ['Electric Storage Discharge Energy'] }
         end
       end
