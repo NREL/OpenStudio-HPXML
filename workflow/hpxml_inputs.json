@@ -3184,6 +3184,9 @@
   "sample_files/base-mechvent-cfis-airflow-fraction-zero.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
   },
+  "sample_files/base-mechvent-cfis-control-type-timer.xml": {
+    "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
+  },
   "sample_files/base-mechvent-cfis-dse.xml": {
     "parent_hpxml": "sample_files/base-hvac-dse.xml",
     "mech_vent_fan_type": "central fan integrated supply",
