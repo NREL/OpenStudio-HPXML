@@ -1121,6 +1121,7 @@ class SchedulesFile
   Columns = {
     Occupants: Column.new('occupants', true, true, :frac),
     EVOccupant: Column.new('ev_occupant', true, true, :int),
+    PresentOccupants: Column.new('present_occupants', true, true, :int),
     LightingInterior: Column.new('lighting_interior', true, true, :frac),
     LightingExterior: Column.new('lighting_exterior', true, false, :frac),
     LightingGarage: Column.new('lighting_garage', true, true, :frac),
