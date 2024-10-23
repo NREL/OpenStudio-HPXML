@@ -4153,13 +4153,6 @@ class HPXML < Object
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
     end
 
-    # Returns if this fully described rim joist is linked by other rim joist object.
-    #
-    # @return [String] ID of the rim joist where its sameas_id == this.id
-    def sameas_id_from_other_element
-      return HPXML::get_sameas_id_from_other_element(@parent_object.parent_object, self)
-    end
-
     # Returns the space that the rim joist is attached to.
     #
     # @return [HPXML::Space] Space object
@@ -4406,13 +4399,6 @@ class HPXML < Object
     # @return [<HPXML::Wall>] Wall object linked by sameas attribute
     def sameas
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
-    end
-
-    # Returns if this fully described wall is linked by other rim joist object.
-    #
-    # @return [String] ID of the wall where its sameas_id == this.id
-    def sameas_id_from_other_element
-      return HPXML::get_sameas_id_from_other_element(@parent_object.parent_object, self)
     end
 
     # Returns all windows for this wall.
@@ -4722,13 +4708,6 @@ class HPXML < Object
     # @return [<HPXML::FoundationWall>] FoundationWall object linked by sameas attribute
     def sameas
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
-    end
-
-    # Returns if this fully described foundation wall is linked by other rim joist object.
-    #
-    # @return [String] ID of the foundation wall where its sameas_id == this.id
-    def sameas_id_from_other_element
-      return HPXML::get_sameas_id_from_other_element(@parent_object.parent_object, self)
     end
 
     # Returns all windows for this foundation wall.
@@ -5068,13 +5047,6 @@ class HPXML < Object
     # @return [<HPXML::Floor>] Floor object linked by sameas attribute
     def sameas
       return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
-    end
-
-    # Returns if this fully described floor is linked by other rim joist object.
-    #
-    # @return [String] ID of the floor where its sameas_id == this.id
-    def sameas_id_from_other_element
-      return HPXML::get_sameas_id_from_other_element(@parent_object.parent_object, self)
     end
 
     # Returns all skylights for this floor.
@@ -11467,28 +11439,6 @@ class HPXML < Object
       fail "Sameas object '#{sameas_id}' not found."
     end
 
-    return
-  end
-
-  # If the object is linked by another object with its sameas_id.
-  #
-  # @param parent [Oga::XML::Element] The parent HPXML element
-  # @param surface_obj [Oga::XML::Element]  The element to be searched
-  # @return [String] ID of the object where its sameas_id == surface_obj.id
-  def self.get_sameas_id_from_other_element(hpxml, surface_obj)
-    hpxml.buildings.each do |building|
-      building.class::CLASS_ATTRS.each do |attr|
-        building_child = building.send(attr)
-        next unless building_child.is_a? HPXML::BaseArrayElement
-
-        building_child.each do |obj|
-          next unless obj.class::ATTRS.include? :sameas_id
-          next unless obj.sameas_id == surface_obj.id
-
-          return obj.id
-        end
-      end
-    end
     return
   end
 

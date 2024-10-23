@@ -942,18 +942,19 @@ module Model
     end
 
     model_objects.each do |obj|
-      next unless obj.to_Surface.is_initialized
+      next unless obj.to_Space.is_initialized
 
-      surface = obj.to_Surface.get
-      hpxml_sameas_id = surface.additionalProperties.getFeatureAsString('HPXMLSameasID')
-      next unless hpxml_sameas_id.is_initialized
+      space = obj.to_Space.get
+      adjacent_surface_id_str = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
+      next unless adjacent_surface_id_str.is_initialized
 
-      hpxml_sameas_id = hpxml_sameas_id.to_s
-      adjacent_space = model_objects.find { |obj| obj.to_Space.is_initialized && obj.to_Space.get.additionalProperties.getFeatureAsString('adjacentSurfaceIDs').is_initialized && (obj.to_Space.get.additionalProperties.getFeatureAsString('adjacentSurfaceIDs').to_s.split(', ').include? hpxml_sameas_id) }.to_Space.get
-
-      next if surface.adjacentSurface.is_initialized
-
-      surface.createAdjacentSurface(adjacent_space)
+      adjacent_surface_ids = adjacent_surface_id_str.to_s.split(', ')
+      # All the surfaces that are adjacent to the space
+      adjacent_surfaces = model_objects.select { |o| o.to_Surface.is_initialized && o.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlID').is_initialized && (adjacent_surface_ids.include? o.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlID').to_s) }
+      adjacent_surfaces.each do |surface_obj|
+        surface = surface_obj.to_Surface.get
+        surface.createAdjacentSurface(space)
+      end
     end
   end
 
