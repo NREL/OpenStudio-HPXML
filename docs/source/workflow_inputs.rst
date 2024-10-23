@@ -4549,19 +4549,18 @@ HPXML Electric Panels
 
 A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel``.
 
-  ====================================================  =======  =========  =======================  ========  ========  ============================================
-  Element                                               Type     Units      Constraints              Required  Default   Notes
-  ====================================================  =======  =========  =======================  ========  ========  ============================================
-  ``SystemIdentifier``                                  id                                           Yes                 Unique identifier
-  ``Voltage``                                           string   V          See [#]_                 No        240
-  ``MaxCurrentRating``                                  double   A                                   No        150
-  ``extension/HeadroomBreakerSpaces``                   integer                                      No        0
-  ``extension/TotalBreakerSpaces``                      integer                                      No        See [#]_
-  ``extension/PanelLoads``                              element                                      No        See [#]_  Individual electric panel loads [#]_
-  ====================================================  =======  =========  =======================  ========  ========  ============================================
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  Element                                                                  Type     Units      Constraints              Required  Default        Notes
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  ``SystemIdentifier``                                                     id                                           Yes                      Unique identifier
+  ``Voltage``                                                              string   V          See [#]_                 No        240
+  ``MaxCurrentRating``                                                     double   A                                   No        150
+  ``extension/HeadroomBreakerSpaces`` or ``extension/TotalBreakerSpaces``  integer                                      No        See [#]_
+  ``extension/PanelLoads``                                                 element                                      No        See [#]_       Individual electric panel loads [#]_
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
 
   .. [#] Voltage choices are "120" or "240".
-  .. [#] The sum of ``extension/PanelLoads/*/BreakerSpaces`` and ``extension/HeadroomBreakerSpaces``.
+  .. [#] If neither extension/HeadroomBreakerSpaces nor extension/TotalBreakerSpaces provided, the following default value representing a fully occupied electric panel will be used: extension/HeadroomBreakerSpaces = 0.
   .. [#] Panel loads for the following panel load types are created if at least one corresponding system exists:
 
          \- **Heating**: ``HeatingSystem``, ``HeatPump``

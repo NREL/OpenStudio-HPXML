@@ -1624,7 +1624,8 @@
     "bathroom_fans_quantity": 2,
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
-    "electric_panel_breaker_spaces_headroom": 5
+    "electric_panel_breaker_spaces_type": "headroom",
+    "electric_panel_breaker_spaces": 5
   },
   "sample_files/base-detailed-electric-panel-upgrade.xml": {
     "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
@@ -1646,7 +1647,8 @@
     "cooking_range_oven_fuel_type": "electricity",
     "clothes_dryer_fuel_type": "electricity",
     "misc_plug_loads_vehicle_present": true,
-    "electric_panel_breaker_spaces_total": 12
+    "electric_panel_breaker_spaces_type": "total",
+    "electric_panel_breaker_spaces": 12
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",

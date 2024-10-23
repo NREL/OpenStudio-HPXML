@@ -3310,7 +3310,7 @@ module Defaults
         end
       end
 
-      electric_panel_default_values = get_electric_panel_values(panel_loads)
+      electric_panel_default_values = get_electric_panel_values()
       if electric_panel.voltage.nil?
         electric_panel.voltage = electric_panel_default_values[:panel_voltage]
         electric_panel.voltage_isdefaulted = true
@@ -3319,13 +3319,9 @@ module Defaults
         electric_panel.max_current_rating = electric_panel_default_values[:max_current_rating]
         electric_panel.max_current_rating_isdefaulted = true
       end
-      if electric_panel.headroom_breaker_spaces.nil?
+      if electric_panel.headroom_breaker_spaces.nil? && electric_panel.total_breaker_spaces.nil?
         electric_panel.headroom_breaker_spaces = electric_panel_default_values[:headroom_breaker_spaces]
         electric_panel.headroom_breaker_spaces_isdefaulted = true
-      end
-      if electric_panel.total_breaker_spaces.nil?
-        electric_panel.total_breaker_spaces = electric_panel_default_values[:total_breaker_spaces] + electric_panel.headroom_breaker_spaces
-        electric_panel.total_breaker_spaces_isdefaulted = true
       end
 
       ElectricPanel.calculate(electric_panel)
@@ -5769,16 +5765,10 @@ module Defaults
   end
 
   # TODO
-  def self.get_electric_panel_values(panel_loads)
-    total_breaker_spaces = 0
-    panel_loads.each do |panel_load|
-      total_breaker_spaces += panel_load.breaker_spaces
-    end
-
+  def self.get_electric_panel_values()
     return { panel_voltage: HPXML::ElectricPanelVoltage240,
              max_current_rating: 150.0, # A
-             headroom_breaker_spaces: 0,
-             total_breaker_spaces: total_breaker_spaces }
+             headroom_breaker_spaces: 0 }
   end
 
   # TODO

@@ -446,7 +446,6 @@
             <Voltage>240</Voltage>
             <MaxCurrentRating>100.0</MaxCurrentRating>
             <extension>
-              <HeadroomBreakerSpaces>5</HeadroomBreakerSpaces>
               <TotalBreakerSpaces>12</TotalBreakerSpaces>
               <PanelLoads>
                 <PanelLoad>

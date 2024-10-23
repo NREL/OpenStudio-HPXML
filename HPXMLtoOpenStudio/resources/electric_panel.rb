@@ -95,8 +95,12 @@ module ElectricPanel
 
   # TODO
   def self.calculate_breaker_spaces(electric_panel, panel_loads)
-    total = electric_panel.total_breaker_spaces
     occupied = electric_panel.panel_loads.map { |panel_load| panel_load.breaker_spaces }.sum(0.0)
+    if !electric_panel.total_breaker_spaces.nil?
+      total = electric_panel.total_breaker_spaces
+    else
+      total = occupied + electric_panel.headroom_breaker_spaces
+    end
 
     panel_loads.BreakerSpaces_Total = total
     panel_loads.BreakerSpaces_Occupied = occupied

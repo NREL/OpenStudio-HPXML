@@ -4597,24 +4597,24 @@ The service rating of the electric panel. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Electric Panel: Breaker Spaces Headroom**
+**Electric Panel: Breaker Spaces Type**
 
-The number of breaker spaces available. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+The breaker spaces specification type of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
-- **Name:** ``electric_panel_breaker_spaces_headroom``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
+- **Name:** ``electric_panel_breaker_spaces_type``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
+- **Choices:** `total`, `headroom`
+
 <br/>
 
-**Electric Panel: Breaker Spaces Total**
+**Electric Panel: Breaker Spaces**
 
-The total number of breaker spaces. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+The total, or remaining, number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
-- **Name:** ``electric_panel_breaker_spaces_total``
+- **Name:** ``electric_panel_breaker_spaces``
 - **Type:** ``Integer``
 
 - **Units:** ``#``

@@ -39,6 +39,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_equal(12 - 7, electric_panel.bs_headroom)
 
     # Upgrade
+    electric_panel.headroom_breaker_spaces = nil
     electric_panel.total_breaker_spaces = 12
     panel_loads = electric_panel.panel_loads
     pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }

@@ -2439,8 +2439,7 @@
       <sch:assert role='ERROR' test='count(h:Voltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Voltage</sch:assert>
       <sch:assert role='ERROR' test='h:Voltage[text()="120" or text()="240"] or not(h:Voltage)'>Expected Voltage to be '120' or '240'</sch:assert>
       <sch:assert role='ERROR' test='count(h:MaxCurrentRating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MaxCurrentRating</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:HeadroomBreakerSpaces) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeadroomBreakerSpaces</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:TotalBreakerSpaces) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TotalBreakerSpaces</sch:assert>      
+      <sch:assert role='ERROR' test='count(h:extension/h:HeadroomBreakerSpaces) + count(h:extension/h:TotalBreakerSpaces) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeadroomBreakerSpaces | extension/TotalBreakerSpaces</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:PanelLoads) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PanelLoads</sch:assert> <!-- See [PanelLoads]-->
     </sch:rule>
   </sch:pattern>
