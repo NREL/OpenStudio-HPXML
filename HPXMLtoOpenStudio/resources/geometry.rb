@@ -1066,6 +1066,7 @@ module Geometry
   def self.get_foundation_and_walls_top(hpxml_bldg)
     foundation_top = [hpxml_bldg.building_construction.unit_height_above_grade, 0].max
     hpxml_bldg.foundation_walls.each do |foundation_wall|
+      foundation_wall = foundation_wall.sameas if foundation_wall.sameas_id
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
       foundation_top = top if top > foundation_top
     end

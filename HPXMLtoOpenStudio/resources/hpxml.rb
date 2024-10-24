@@ -4252,6 +4252,8 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(rim_joist, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
+      return unless @sameas_id.nil?
+
       if not @attached_to_space_idref.nil?
         space_attached = XMLHelper.add_element(rim_joist, 'AttachedToSpace')
         XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
@@ -4532,6 +4534,8 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(wall, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
+      return unless @sameas_id.nil?
+
       if not @attached_to_space_idref.nil?
         space_attached = XMLHelper.add_element(wall, 'AttachedToSpace')
         XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
@@ -4892,6 +4896,8 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(foundation_wall, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
+      return unless @sameas_id.nil?
+
       if not @attached_to_space_idref.nil?
         space_attached = XMLHelper.add_element(foundation_wall, 'AttachedToSpace')
         XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
@@ -5199,6 +5205,8 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(floor, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
+      return unless @sameas_id.nil?
+
       if not @attached_to_space_idref.nil?
         space_attached = XMLHelper.add_element(floor, 'AttachedToSpace')
         XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
