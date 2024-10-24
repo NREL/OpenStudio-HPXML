@@ -985,7 +985,6 @@ module Geometry
     sum_cfa = 0.0
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
-      # FIXME: If the hpxml Building that represents an unconditioned space (without HVACPlant), does the hpxml_bldg.building_construction.conditioned_floor_area accounts to the total cfa? Is E+ reporting the correct total cfa? (Need to double-check)
       next unless [HPXML::LocationConditionedSpace, HPXML::LocationBasementConditioned].include?(floor.interior_adjacent_to) ||
                   [HPXML::LocationConditionedSpace, HPXML::LocationBasementConditioned].include?(floor.exterior_adjacent_to)
 

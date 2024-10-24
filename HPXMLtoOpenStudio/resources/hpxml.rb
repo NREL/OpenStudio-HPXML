@@ -5100,10 +5100,14 @@ class HPXML < Object
     #
     # @return [Boolean] True if the surface is a ceiling
     def is_ceiling
-      if @floor_or_ceiling.nil?
-        return HPXML::is_floor_a_ceiling(self, true)
+      if @sameas_id.nil?
+        if @floor_or_ceiling.nil?
+          return HPXML::is_floor_a_ceiling(self, true)
+        else
+          return @floor_or_ceiling == FloorOrCeilingCeiling
+        end
       else
-        return @floor_or_ceiling == FloorOrCeilingCeiling
+        return !sameas.is_ceiling
       end
     end
 

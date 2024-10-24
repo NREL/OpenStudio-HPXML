@@ -1240,6 +1240,8 @@ module Defaults
   # @return [nil]
   def self.apply_rim_joists(hpxml_bldg)
     hpxml_bldg.rim_joists.each do |rim_joist|
+      next if rim_joist.sameas_id
+
       if rim_joist.azimuth.nil?
         rim_joist.azimuth = get_azimuth_from_orientation(rim_joist.orientation)
         rim_joist.azimuth_isdefaulted = true
