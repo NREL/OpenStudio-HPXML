@@ -876,7 +876,6 @@ module Model
                           'OS:SurfaceConvectionAlgorithm:Inside' => 'InsideSurfaceConvectionAlgorithm',
                           'OS:SurfaceConvectionAlgorithm:Outside' => 'OutsideSurfaceConvectionAlgorithm',
                           'OS:Timestep' => 'Timestep' }
-
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
     unit_model_objects = []
@@ -930,7 +929,7 @@ module Model
     end
 
     model_size = model.to_s.size
-    model.addObjects(unit_model_objects, true)
+    model_objects = model.addObjects(unit_model_objects, true)
     if model.to_s.size == model_size
       # Objects not added, check for the culprit
       unit_model_objects.each do |o|
@@ -939,6 +938,22 @@ module Model
         if model.to_s.size == n
           fail "object not successfully merged:\n\n#{o}"
         end
+      end
+    end
+
+    model_objects.each do |obj|
+      next unless obj.to_Space.is_initialized
+
+      space = obj.to_Space.get
+      adjacent_surface_id_str = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
+      next unless adjacent_surface_id_str.is_initialized
+
+      adjacent_surface_ids = adjacent_surface_id_str.to_s.split(', ')
+      # All the surfaces that are adjacent to the space
+      adjacent_surfaces = model_objects.select { |o| o.to_Surface.is_initialized && o.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlID').is_initialized && (adjacent_surface_ids.include? o.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlID').to_s) }
+      adjacent_surfaces.each do |surface_obj|
+        surface = surface_obj.to_Surface.get
+        surface.createAdjacentSurface(space)
       end
     end
   end
