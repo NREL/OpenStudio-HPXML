@@ -1130,7 +1130,6 @@ class ScheduleGenerator
     charging_schedule = []
     discharging_schedule = []
     driving_minutes_used = 0
-    byebug
     chunk_counts = expanded_away_schedule.chunk(&:itself).map { |value, elements| [value, elements.size] }
     total_away_minutes = chunk_counts.map {|value, size| value * size}.sum
     extra_drive_minutes = 0  # accumulator for keeping track of extra driving minutes used due to ceil to upper integer
