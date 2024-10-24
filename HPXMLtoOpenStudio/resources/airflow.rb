@@ -1993,6 +1993,7 @@ module Airflow
       elsif vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler
         infil_program.addLine("Set ah_fan_w = #{vent_mech.unit_fan_power}") # W, air handler fan power
       end
+      infil_program.addLine("Set has_outdoor_air_control = #{vent_mech.cfis_has_outdoor_air_control ? 1 : 0}")
 
       if vent_mech.cfis_control_type == HPXML::CFISControlTypeTimer
         # Ventilation occurs at fixed intervals regardless of HVAC operation
@@ -2019,7 +2020,7 @@ module Airflow
 
         # Calculate hourly-average outdoor air ventilation still needed for the hour
         infil_program.addLine("Set hr_oa_cfm_needed = hr_oa_cfm_target - #{sum_oa_cfm_var.name}")
-        infil_program.addLine('If hr_oa_cfm_needed > 0')
+        infil_program.addLine('If (hr_oa_cfm_needed > 0) || (has_outdoor_air_control == 0)')
 
         # Calculate hourly-average available outdoor air ventilation during HVAC runtime
         infil_program.addLine('  Set hr_hr_oa_cfm_during_hvac_avail = fan_rtf_hvac * oa_cfm_ah * ZoneTimestep')
