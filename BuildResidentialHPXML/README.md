@@ -613,7 +613,7 @@ The width of the garage. Enter zero for no garage. Only applies to single-family
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -626,7 +626,7 @@ The depth of the garage. Only applies to single-family detached units.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -639,7 +639,7 @@ The fraction of the garage that is protruding from the conditioned space. Only a
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -650,7 +650,7 @@ The position of the garage. Only applies to single-family detached units.
 - **Name:** ``geometry_garage_position``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `Right`, `Left`
 
@@ -678,7 +678,7 @@ The height of the foundation (e.g., 3ft for crawlspace, 8ft for basement). Only 
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -691,7 +691,7 @@ The depth above grade of the foundation wall. Only applies to basements/crawlspa
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -728,7 +728,7 @@ The roof type of the building. Ignored if the building has a flat roof.
 - **Name:** ``geometry_roof_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `gable`, `hip`
 
@@ -741,7 +741,7 @@ The roof pitch of the attic. Ignored if the building has a flat roof.
 - **Name:** ``geometry_roof_pitch``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `1:12`, `2:12`, `3:12`, `4:12`, `5:12`, `6:12`, `7:12`, `8:12`, `9:12`, `10:12`, `11:12`, `12:12`
 
@@ -756,7 +756,7 @@ The eaves depth of the roof.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -769,7 +769,7 @@ The distance between the unit and the neighboring building to the front (not inc
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -782,7 +782,7 @@ The distance between the unit and the neighboring building to the back (not incl
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -795,7 +795,7 @@ The distance between the unit and the neighboring building to the left (not incl
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -808,7 +808,7 @@ The distance between the unit and the neighboring building to the right (not inc
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -873,7 +873,7 @@ Assembly R-value for the floor over the foundation. Ignored if the building has 
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -886,7 +886,7 @@ Assembly R-value for the floor over the garage. Ignored unless the building has 
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -938,7 +938,7 @@ Nominal R-value for the foundation wall insulation. Only applies to basements/cr
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1016,7 +1016,7 @@ Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-gr
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1029,7 +1029,7 @@ Depth from grade to bottom of vertical slab perimeter insulation. Applies to sla
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1081,7 +1081,7 @@ Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grad
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1094,7 +1094,7 @@ Width from slab edge inward of horizontal under-slab insulation. Enter 999 to sp
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1380,7 +1380,7 @@ Ratio of window height to width.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1419,7 +1419,7 @@ Full-assembly NFRC U-factor.
 
 - **Units:** ``Btu/hr-ft^2-R``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1430,7 +1430,7 @@ Full-assembly NFRC solar heat gain coefficient.
 - **Name:** ``window_shgc``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1571,7 +1571,7 @@ The overhangs distance to the top of window for the front facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1584,7 +1584,7 @@ The overhangs distance to the bottom of window for the front facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1610,7 +1610,7 @@ The overhangs distance to the top of window for the back facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1623,7 +1623,7 @@ The overhangs distance to the bottom of window for the back facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1649,7 +1649,7 @@ The overhangs distance to the top of window for the left facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1662,7 +1662,7 @@ The overhangs distance to the bottom of window for the left facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1688,7 +1688,7 @@ The overhangs distance to the top of window for the right facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1701,7 +1701,7 @@ The overhangs distance to the bottom of window for the right facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1766,7 +1766,7 @@ Full-assembly NFRC U-factor.
 
 - **Units:** ``Btu/hr-ft^2-R``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1777,7 +1777,7 @@ Full-assembly NFRC solar heat gain coefficient.
 - **Name:** ``skylight_shgc``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1816,7 +1816,7 @@ R-value of the opaque door(s).
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1914,7 +1914,7 @@ The fuel type of the heating system. Ignored for ElectricResistance.
 - **Name:** ``heating_system_fuel``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`, `coal`
 
@@ -1929,7 +1929,7 @@ The rated heating efficiency value of the heating system.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1979,7 +1979,7 @@ The heating load served by the heating system.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2029,7 +2029,7 @@ The efficiency type of the cooling system. System types central air conditioner 
 - **Name:** ``cooling_system_cooling_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `SEER`, `SEER2`, `EER`, `CEER`
 
@@ -2042,7 +2042,7 @@ The rated efficiency value of the cooling system. Ignored for evaporative cooler
 - **Name:** ``cooling_system_cooling_efficiency``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2118,7 +2118,7 @@ The cooling load served by the cooling system.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2244,7 +2244,7 @@ The heating efficiency type of heat pump. System types air-to-air and mini-split
 - **Name:** ``heat_pump_heating_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `HSPF`, `HSPF2`, `COP`
 
@@ -2257,7 +2257,7 @@ The rated heating efficiency value of the heat pump.
 - **Name:** ``heat_pump_heating_efficiency``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2268,7 +2268,7 @@ The cooling efficiency type of heat pump. System types air-to-air and mini-split
 - **Name:** ``heat_pump_cooling_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `SEER`, `SEER2`, `EER`, `CEER`
 
@@ -2281,7 +2281,7 @@ The rated cooling efficiency value of the heat pump.
 - **Name:** ``heat_pump_cooling_efficiency``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2420,7 +2420,7 @@ The heating load served by the heat pump.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2433,7 +2433,7 @@ The cooling load served by the heat pump.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2457,7 +2457,7 @@ The backup type of the heat pump. If 'integrated', represents e.g. built-in elec
 - **Name:** ``heat_pump_backup_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `integrated`, `separate`
 
@@ -2494,7 +2494,7 @@ The backup fuel type of the heat pump. Only applies if Backup Type is 'integrate
 - **Name:** ``heat_pump_backup_fuel``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`
 
@@ -2507,7 +2507,7 @@ The backup rated efficiency value of the heat pump. Percent for electricity fuel
 - **Name:** ``heat_pump_backup_heating_efficiency``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2886,7 +2886,7 @@ The fuel type of the second heating system. Ignored for ElectricResistance.
 - **Name:** ``heating_system_2_fuel``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`, `coal`
 
@@ -2901,7 +2901,7 @@ The rated heating efficiency value of the second heating system.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2951,7 +2951,7 @@ The heat load served fraction of the second heating system. Ignored if this heat
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3041,7 +3041,7 @@ The leakage units of the ducts.
 - **Name:** ``ducts_leakage_units``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `CFM25`, `CFM50`, `Percent`
 
@@ -3054,7 +3054,7 @@ The leakage value to outside for the supply ducts.
 - **Name:** ``ducts_supply_leakage_to_outside_value``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3080,7 +3080,7 @@ The nominal insulation r-value of the supply ducts excluding air films. Use 0 fo
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3143,7 +3143,7 @@ The leakage value to outside for the return ducts.
 - **Name:** ``ducts_return_leakage_to_outside_value``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3169,7 +3169,7 @@ The nominal insulation r-value of the return ducts excluding air films. Use 0 fo
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3284,7 +3284,7 @@ The total recovery efficiency type of the mechanical ventilation.
 - **Name:** ``mech_vent_recovery_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `Unadjusted`, `Adjusted`
 
@@ -3299,7 +3299,7 @@ The Unadjusted or Adjusted total recovery efficiency of the mechanical ventilati
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3312,7 +3312,7 @@ The Unadjusted or Adjusted sensible recovery efficiency of the mechanical ventil
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3338,7 +3338,7 @@ Number of dwelling units served by the mechanical ventilation system. Must be 1 
 
 - **Units:** ``#``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3455,7 +3455,7 @@ The flow rate of the second mechanical ventilation.
 
 - **Units:** ``CFM``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3468,7 +3468,7 @@ The hours in operation of the second mechanical ventilation.
 
 - **Units:** ``hrs/day``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3479,7 +3479,7 @@ The total recovery efficiency type of the second mechanical ventilation.
 - **Name:** ``mech_vent_2_recovery_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `Unadjusted`, `Adjusted`
 
@@ -3494,7 +3494,7 @@ The Unadjusted or Adjusted total recovery efficiency of the second mechanical ve
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3507,7 +3507,7 @@ The Unadjusted or Adjusted sensible recovery efficiency of the second mechanical
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3520,7 +3520,7 @@ The fan power of the second mechanical ventilation.
 
 - **Units:** ``W``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3711,7 +3711,7 @@ The fuel type of water heater. Ignored for heat pump water heater.
 - **Name:** ``water_heater_fuel_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
 
@@ -3750,7 +3750,7 @@ The efficiency type of water heater. Does not apply to space-heating boilers.
 - **Name:** ``water_heater_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `EnergyFactor`, `UniformEnergyFactor`
 
@@ -3763,7 +3763,7 @@ Rated Energy Factor or Uniform Energy Factor. Does not apply to space-heating bo
 - **Name:** ``water_heater_efficiency``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4102,7 +4102,7 @@ The collector area of the solar thermal system.
 
 - **Units:** ``ft^2``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4113,7 +4113,7 @@ The collector loop type of the solar thermal system.
 - **Name:** ``solar_thermal_collector_loop_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `liquid direct`, `liquid indirect`, `passive thermosyphon`
 
@@ -4126,7 +4126,7 @@ The collector type of the solar thermal system.
 - **Name:** ``solar_thermal_collector_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `evacuated tube`, `single glazing black`, `double glazing black`, `integrated collector storage`
 
@@ -4141,7 +4141,7 @@ The collector azimuth of the solar thermal system. Azimuth is measured clockwise
 
 - **Units:** ``degrees``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4152,7 +4152,7 @@ The collector tilt of the solar thermal system. Can also enter, e.g., RoofPitch,
 - **Name:** ``solar_thermal_collector_tilt``
 - **Type:** ``String``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4165,7 +4165,7 @@ The collector rated optical efficiency of the solar thermal system.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4178,7 +4178,7 @@ The collector rated thermal losses of the solar thermal system.
 
 - **Units:** ``Btu/hr-ft^2-R``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4204,7 +4204,7 @@ The solar fraction of the solar thermal system. If provided, overrides all other
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4267,7 +4267,7 @@ Array azimuth of the PV system. Azimuth is measured clockwise from north (e.g., 
 
 - **Units:** ``degrees``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4278,7 +4278,7 @@ Array tilt of the PV system. Can also enter, e.g., RoofPitch, RoofPitch+20, Lati
 - **Name:** ``pv_system_array_tilt``
 - **Type:** ``String``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4291,7 +4291,7 @@ Maximum power output of the PV system. For a shared system, this is the total bu
 
 - **Units:** ``W``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4393,7 +4393,7 @@ Array azimuth of the second PV system. Azimuth is measured clockwise from north 
 
 - **Units:** ``degrees``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4404,7 +4404,7 @@ Array tilt of the second PV system. Can also enter, e.g., RoofPitch, RoofPitch+2
 - **Name:** ``pv_system_2_array_tilt``
 - **Type:** ``String``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4417,7 +4417,7 @@ Maximum power output of the second PV system. For a shared system, this is the t
 
 - **Units:** ``W``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4528,7 +4528,7 @@ Fraction of all lamps (interior) that are compact fluorescent. Lighting not spec
 - **Name:** ``lighting_interior_fraction_cfl``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4539,7 +4539,7 @@ Fraction of all lamps (interior) that are linear fluorescent. Lighting not speci
 - **Name:** ``lighting_interior_fraction_lfl``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4550,7 +4550,7 @@ Fraction of all lamps (interior) that are light emitting diodes. Lighting not sp
 - **Name:** ``lighting_interior_fraction_led``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4572,7 +4572,7 @@ Fraction of all lamps (exterior) that are compact fluorescent. Lighting not spec
 - **Name:** ``lighting_exterior_fraction_cfl``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4583,7 +4583,7 @@ Fraction of all lamps (exterior) that are linear fluorescent. Lighting not speci
 - **Name:** ``lighting_exterior_fraction_lfl``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4594,7 +4594,7 @@ Fraction of all lamps (exterior) that are light emitting diodes. Lighting not sp
 - **Name:** ``lighting_exterior_fraction_led``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4616,7 +4616,7 @@ Fraction of all lamps (garage) that are compact fluorescent. Lighting not specif
 - **Name:** ``lighting_garage_fraction_cfl``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4627,7 +4627,7 @@ Fraction of all lamps (garage) that are linear fluorescent. Lighting not specifi
 - **Name:** ``lighting_garage_fraction_lfl``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4638,7 +4638,7 @@ Fraction of all lamps (garage) that are light emitting diodes. Lighting not spec
 - **Name:** ``lighting_garage_fraction_led``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4708,7 +4708,7 @@ The efficiency type of dehumidifier.
 - **Name:** ``dehumidifier_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `EnergyFactor`, `IntegratedEnergyFactor`
 
@@ -4723,7 +4723,7 @@ The efficiency of the dehumidifier.
 
 - **Units:** ``liters/kWh``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4736,7 +4736,7 @@ The capacity (water removal rate) of the dehumidifier.
 
 - **Units:** ``pint/day``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4749,7 +4749,7 @@ The relative humidity setpoint of the dehumidifier.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4762,7 +4762,7 @@ The dehumidification load served fraction of the dehumidifier.
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4797,7 +4797,7 @@ The efficiency type of the clothes washer.
 - **Name:** ``clothes_washer_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `ModifiedEnergyFactor`, `IntegratedModifiedEnergyFactor`
 
@@ -4936,7 +4936,7 @@ Type of fuel used by the clothes dryer.
 - **Name:** ``clothes_dryer_fuel_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
 
@@ -4949,7 +4949,7 @@ The efficiency type of the clothes dryer.
 - **Name:** ``clothes_dryer_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `EnergyFactor`, `CombinedEnergyFactor`
 
@@ -5023,7 +5023,7 @@ The efficiency type of dishwasher.
 - **Name:** ``dishwasher_efficiency_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `RatedAnnualkWh`, `EnergyFactor`
 
@@ -5293,7 +5293,7 @@ Type of fuel used by the cooking range/oven.
 - **Name:** ``cooking_range_oven_fuel_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
 
@@ -5568,7 +5568,7 @@ The fuel type of the fuel loads grill.
 - **Name:** ``misc_fuel_loads_grill_fuel_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`
 
@@ -5616,7 +5616,7 @@ The fuel type of the fuel loads lighting.
 - **Name:** ``misc_fuel_loads_lighting_fuel_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`
 
@@ -5664,7 +5664,7 @@ The fuel type of the fuel loads fireplace.
 - **Name:** ``misc_fuel_loads_fireplace_fuel_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`
 
@@ -5762,7 +5762,7 @@ The type of pool heater. Use 'none' if there is no pool heater.
 - **Name:** ``pool_heater_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `electric resistance`, `gas fired`, `heat pump`
 
@@ -5847,7 +5847,7 @@ The type of permanent spa heater. Use 'none' if there is no permanent spa heater
 - **Name:** ``permanent_spa_heater_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `electric resistance`, `gas fired`, `heat pump`
 
