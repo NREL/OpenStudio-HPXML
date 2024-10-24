@@ -2761,6 +2761,14 @@ module Defaults
         vent_fan.cfis_vent_mode_airflow_fraction = 1.0
         vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
       end
+      if vent_fan.cfis_supplemental_fan_runs_with_air_handler_fan.nil? && (vent_fan.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan)
+        vent_fan.cfis_supplemental_fan_runs_with_air_handler_fan = false
+        vent_fan.cfis_supplemental_fan_runs_with_air_handler_fan_isdefaulted = true
+      end
+      if vent_fan.cfis_control_type.nil?
+        vent_fan.cfis_control_type = HPXML::CFISControlTypeOptimized
+        vent_fan.cfis_control_type_isdefaulted = true
+      end
     end
 
     # Default kitchen fan
