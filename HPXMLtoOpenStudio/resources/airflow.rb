@@ -2045,7 +2045,7 @@ module Airflow
           elsif vent_mech.cfis_supplemental_fan.fan_type == HPXML::MechVentTypeExhaust
             infil_program.addLine('    Set QWHV_cfis_suppl_exh = QWHV_cfis_suppl_exh + (f_open_damper_ah * oa_cfm_suppl)')
           end
-          infil_program.addLine('EndIf')
+          infil_program.addLine('  EndIf')
         end
 
         # Calculate hourly-average additional outdoor air ventilation still needed for the hour after HVAC runtime
