@@ -2009,37 +2009,11 @@ The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / Design
 
 <br/>
 
-**Heating System: Panel Load Watts**
+**Heating System: Panel Load Heating Watts**
 
-Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load heating watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
-- **Name:** ``heating_system_panel_load_watts``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heating System: Panel Load Voltage**
-
-Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
-
-- **Name:** ``heating_system_panel_load_voltage``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `120`, `240`
-
-<br/>
-
-**Heating System: Panel Load Breaker Spaces**
-
-Specifies the number of breaker spaces for the panel load. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
-
-- **Name:** ``heating_system_panel_load_breaker_spaces``
+- **Name:** ``heating_system_panel_load_heating_watts``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -2274,37 +2248,11 @@ The heating load served by the heating system integrated into cooling system. On
 
 <br/>
 
-**Cooling System: Panel Load Watts**
+**Cooling System: Panel Load Cooling Watts**
 
-Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load cooling watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
-- **Name:** ``cooling_system_panel_load_watts``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooling System: Panel Load Voltage**
-
-Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
-
-- **Name:** ``cooling_system_panel_load_voltage``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `120`, `240`
-
-<br/>
-
-**Cooling System: Panel Load Breaker Spaces**
-
-Specifies the number of breaker spaces for the panel load. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
-
-- **Name:** ``cooling_system_panel_load_breaker_spaces``
+- **Name:** ``cooling_system_panel_load_cooling_watts``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -2713,11 +2661,11 @@ Heat Pump crankcase heater power consumption in Watts. Applies only to air-to-ai
 
 <br/>
 
-**Heat Pump: Panel Load Watts**
+**Heat Pump: Panel Load Heating Watts**
 
-Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load heating watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
-- **Name:** ``heat_pump_panel_load_watts``
+- **Name:** ``heat_pump_panel_load_heating_watts``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -2726,24 +2674,11 @@ Specifies the panel load watts. If not provided, the OS-HPXML default (see <a hr
 
 <br/>
 
-**Heat Pump: Panel Load Voltage**
+**Heat Pump: Panel Load Cooling Watts**
 
-Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load cooling watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
-- **Name:** ``heat_pump_panel_load_voltage``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `120`, `240`
-
-<br/>
-
-**Heat Pump: Panel Load Breaker Spaces**
-
-Specifies the number of breaker spaces for the panel load. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
-
-- **Name:** ``heat_pump_panel_load_breaker_spaces``
+- **Name:** ``heat_pump_panel_load_cooling_watts``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -3102,6 +3037,30 @@ The heat load served fraction of the second heating system. Ignored if this heat
 - **Units:** ``Frac``
 
 - **Required:** ``true``
+
+<br/>
+
+**Heating System 2: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heating_system_2_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heating System 2: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``heating_system_2_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
 
 <br/>
 
@@ -3739,6 +3698,30 @@ The start hour of the kitchen fan. If not provided, the OS-HPXML default (see <a
 
 <br/>
 
+**Kitchen Fans: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``kitchen_fans_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Kitchen Fans: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``kitchen_fans_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Bathroom Fans: Quantity**
 
 The quantity of the bathroom fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
@@ -3799,6 +3782,30 @@ The start hour of the bathroom fans. If not provided, the OS-HPXML default (see 
 - **Type:** ``Integer``
 
 - **Units:** ``hr``
+
+- **Required:** ``false``
+
+<br/>
+
+**Bathroom Fans: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``bathroom_fans_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Bathroom Fans: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``bathroom_fans_panel_load_addition``
+- **Type:** ``Boolean``
 
 - **Required:** ``false``
 
@@ -4055,6 +4062,43 @@ The water heater operating mode. The 'heat pump only' option only uses the heat 
 - **Required:** ``false``
 
 - **Choices:** `hybrid/auto`, `heat pump only`
+
+<br/>
+
+**Water Heater: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``water_heater_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Water Heater: Panel Load Voltage**
+
+Specifies the panel load voltage. Only applies to heat pump water heater (compressor). If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``water_heater_panel_load_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Water Heater: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``water_heater_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
 
 <br/>
 
@@ -5194,6 +5238,43 @@ Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low us
 
 <br/>
 
+**Clothes Dryer: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``clothes_dryer_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Clothes Dryer: Panel Load Voltage**
+
+Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``clothes_dryer_panel_load_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Clothes Dryer: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``clothes_dryer_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Dishwasher: Present**
 
 Whether there is a dishwasher present.
@@ -5315,6 +5396,30 @@ Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage
 
 - **Name:** ``dishwasher_usage_multiplier``
 - **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Dishwasher: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``dishwasher_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Dishwasher: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``dishwasher_panel_load_addition``
+- **Type:** ``Boolean``
 
 - **Required:** ``false``
 
@@ -5534,6 +5639,43 @@ Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/l
 
 <br/>
 
+**Cooking Range/Oven: Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``cooking_range_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooking Range/Oven: Panel Load Voltage**
+
+Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``cooking_range_panel_load_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Cooking Range/Oven: Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``cooking_range_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Ceiling Fan: Present**
 
 Whether there are any ceiling fans.
@@ -5717,6 +5859,30 @@ Multiplier on the well pump energy usage that can reflect, e.g., high/low usage 
 
 <br/>
 
+**Misc Plug Loads: Well Pump Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``misc_plug_loads_well_pump_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Misc Plug Loads: Well Pump Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``misc_plug_loads_well_pump_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Misc Plug Loads: Vehicle Present**
 
 Whether there is an electric vehicle.
@@ -5747,6 +5913,43 @@ Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low
 
 - **Name:** ``misc_plug_loads_vehicle_usage_multiplier``
 - **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Misc Plug Loads: Vehicle Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``misc_plug_loads_vehicle_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Misc Plug Loads: Vehicle Panel Load Voltage**
+
+Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``misc_plug_loads_vehicle_panel_load_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Misc Plug Loads: Vehicle Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``misc_plug_loads_vehicle_panel_load_addition``
+- **Type:** ``Boolean``
 
 - **Required:** ``false``
 
@@ -5957,6 +6160,30 @@ Multiplier on the pool pump energy usage that can reflect, e.g., high/low usage 
 
 <br/>
 
+**Pool: Pump Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``pool_pump_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Pool: Pump Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``pool_pump_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Pool: Heater Type**
 
 The type of pool heater. Use 'none' if there is no pool heater.
@@ -6007,6 +6234,30 @@ Multiplier on the pool heater energy usage that can reflect, e.g., high/low usag
 
 <br/>
 
+**Pool: Heater Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``pool_heater_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Pool: Heater Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``pool_heater_panel_load_addition``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Permanent Spa: Present**
 
 Whether there is a permanent spa.
@@ -6037,6 +6288,30 @@ Multiplier on the permanent spa pump energy usage that can reflect, e.g., high/l
 
 - **Name:** ``permanent_spa_pump_usage_multiplier``
 - **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Permanent Spa: Pump Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``permanent_spa_pump_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Permanent Spa: Pump Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``permanent_spa_pump_panel_load_addition``
+- **Type:** ``Boolean``
 
 - **Required:** ``false``
 
@@ -6087,6 +6362,30 @@ Multiplier on the permanent spa heater energy usage that can reflect, e.g., high
 
 - **Name:** ``permanent_spa_heater_usage_multiplier``
 - **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Permanent Spa: Heater Panel Load Watts**
+
+Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``permanent_spa_heater_panel_load_watts``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Permanent Spa: Heater Panel Load Addition**
+
+Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+
+- **Name:** ``permanent_spa_heater_panel_load_addition``
+- **Type:** ``Boolean``
 
 - **Required:** ``false``
 
