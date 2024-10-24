@@ -103,7 +103,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'enclosure-garage-missing-slab' => ['There must be at least one slab adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]], id: "MyBuilding"]'],
                             'enclosure-conditioned-missing-ceiling-roof' => ['There must be at least one ceiling or roof adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="conditioned space"]], id: "MyBuilding"]',
                                                                              'There must be at least one floor adjacent to "attic - unvented". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]], id: "MyBuilding"]'],
-                            'enclosure-conditioned-missing-exterior-wall' => ['There must be at least one exterior wall adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="conditioned space"]], id: "MyBuilding"]'],
+                            'enclosure-conditioned-missing-exterior-wall' => ['There must be at least one exterior wall or foundation wall adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="conditioned space"]], id: "MyBuilding"]'],
                             'enclosure-conditioned-missing-floor-slab' => ['There must be at least one floor or slab adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="conditioned space"]], id: "MyBuilding"]'],
                             'frac-sensible-latent-fuel-load-values' => ['Expected extension/FracSensible to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"], id: "FuelLoad1"]',
                                                                         'Expected extension/FracLatent to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"], id: "FuelLoad1"]'],
@@ -249,6 +249,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                    'Expected 1 element(s) for xpath: ConditionedFloorArea [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]'],
                             'missing-epw-filepath-and-zipcode' => ['Expected 1 or more element(s) for xpath: Address/ZipCode | ../BuildingDetails/ClimateandRiskZones/WeatherStation/extension/EPWFilePath'],
                             'missing-skylight-floor' => ['Expected 1 element(s) for xpath: ../../AttachedToFloor'],
+                            'multifamily-common-space-extra-inputs' => ['Expected only SystemIdentifier specified',
+                                                                        'Expected only SystemIdentifier specified',
+                                                                        'Expected only SystemIdentifier specified',
+                                                                        'Expected only SystemIdentifier specified'],
                             'multifamily-reference-appliance' => ['There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
@@ -744,6 +748,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['missing-skylight-floor'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
         hpxml_bldg.skylights[0].attached_to_floor_idref = nil
+      elsif ['multifamily-common-space-extra-inputs'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-common-spaces.xml')
+        hpxml.buildings[1].foundation_walls[1].height = 8
+        hpxml.buildings[1].floors[0].area = 20
+        hpxml.buildings[1].rim_joists[1].area = 10
+        hpxml.buildings[2].walls[1].area = 20
       elsif ['multifamily-reference-appliance'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
@@ -1145,6 +1155,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-windows-physical-properties' => ["Could not lookup UFactor and SHGC for window 'Window3'."],
                             'inverter-unequal-efficiencies' => ['Expected all InverterEfficiency values to be equal.'],
                             'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
+                            'multifamily-common-space-wrong-sameas' => ["Sameas object 'Foo' not found."],
                             'net-area-negative-wall' => ["Calculated a negative net surface area for surface 'Wall1'."],
                             'net-area-negative-roof-floor' => ["Calculated a negative net surface area for surface 'Roof1'.",
                                                                "Calculated a negative net surface area for surface 'Floor1'."],
@@ -1500,6 +1511,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['leap-year-TMY'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-simcontrol-calendar-year-custom.xml')
         hpxml.header.sim_calendar_year = 2008
+      elsif ['multifamily-common-space-wrong-sameas'].include? error_case
+        hpxml, _hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-common-spaces.xml')
+        hpxml.buildings[1].floors[0].sameas_id = 'Foo'
       elsif ['net-area-negative-roof-floor'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
         hpxml_bldg.skylights[0].area = 4000

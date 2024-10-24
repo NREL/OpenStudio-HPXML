@@ -169,15 +169,16 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
   hpxml_header = hpxml.header
-  hpxml_bldg = hpxml.buildings[0]
   sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
 
   # Collapse windows further using same logic as measure.rb
-  hpxml_bldg.windows.each do |window|
-    window.fraction_operable = nil
+  hpxml.buildings.each do |hpxml_bldg|
+    hpxml_bldg.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    hpxml_bldg.collapse_enclosure_surfaces()
+    hpxml_bldg.delete_adiabatic_subsurfaces()
   end
-  hpxml_bldg.collapse_enclosure_surfaces()
-  hpxml_bldg.delete_adiabatic_subsurfaces()
 
   # Check for unexpected run.log messages
   File.readlines(File.join(rundir, 'run.log')).each do |message|
@@ -186,45 +187,45 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     next if message.start_with? 'Executing command'
     next if message.include? 'Could not find state average'
 
-    if hpxml_bldg.clothes_washers.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.clothes_washers.empty? }
       next if message.include? 'No clothes washer specified, the model will not include clothes washer energy use.'
     end
-    if hpxml_bldg.clothes_dryers.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.clothes_dryers.empty? }
       next if message.include? 'No clothes dryer specified, the model will not include clothes dryer energy use.'
     end
-    if hpxml_bldg.dishwashers.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.dishwashers.empty? }
       next if message.include? 'No dishwasher specified, the model will not include dishwasher energy use.'
     end
-    if hpxml_bldg.refrigerators.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.refrigerators.empty? }
       next if message.include? 'No refrigerator specified, the model will not include refrigerator energy use.'
     end
-    if hpxml_bldg.cooking_ranges.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.cooking_ranges.empty? }
       next if message.include? 'No cooking range specified, the model will not include cooking range/oven energy use.'
     end
-    if hpxml_bldg.water_heating_systems.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.water_heating_systems.empty? }
       next if message.include? 'No water heating specified, the model will not include water heating energy use.'
     end
-    if (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty? }
       next if message.include? 'No space heating specified, the model will not include space heating energy use.'
     end
-    if (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty? }
       next if message.include? 'No space cooling specified, the model will not include space cooling energy use.'
     end
-    if hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty? }
       next if message.include? "No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use."
     end
-    if hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeTelevision }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeTelevision }.empty? }
       next if message.include? "No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use."
     end
-    if hpxml_bldg.lighting_groups.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.lighting_groups.empty? }
       next if message.include? 'No interior lighting specified, the model will not include interior lighting energy use.'
       next if message.include? 'No exterior lighting specified, the model will not include exterior lighting energy use.'
       next if message.include? 'No garage lighting specified, the model will not include garage lighting energy use.'
     end
-    if hpxml_bldg.windows.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.windows.empty? }
       next if message.include? 'No windows specified, the model will not include window heat transfer.'
     end
-    if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?) }
       next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
     end
     if hpxml_path.include? 'base-location-capetown-zaf.xml'
@@ -232,23 +233,23 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Could not find a marginal Electricity rate.'
       next if message.include? 'Could not find a marginal Natural Gas rate.'
     end
-    if !hpxml_bldg.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| !hpxml_bldg.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty? }
       next if message.include? 'DSE is not currently supported when calculating utility bills.'
     end
     if !hpxml_header.unavailable_periods.select { |up| up.column_name == 'Power Outage' }.empty?
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
       next if message.include? 'It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.'
     end
-    if (not hpxml_bldg.hvac_controls.empty?) && (hpxml_bldg.hvac_controls[0].seasons_heating_begin_month != 1)
+    if hpxml.buildings.any? { |hpxml_bldg| (not hpxml_bldg.hvac_controls.empty?) && (hpxml_bldg.hvac_controls[0].seasons_heating_begin_month != 1) }
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.'
     end
     if !hpxml_header.unavailable_periods.select { |up| (up.column_name == 'No Space Heating') || (up.column_name == 'No Space Cooling') }.empty?
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
     end
-    if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw'
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw' }
       next if message.include? 'No design condition info found; calculating design conditions from EPW weather data.'
     end
-    if hpxml_bldg.building_construction.number_of_units > 1
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }
       next if message.include? 'NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'
     end
     if hpxml_path.include? 'base-hvac-multiple.xml'
@@ -257,10 +258,10 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-zones'
       next if message.include? 'While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'
     end
-    if hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'external overhangs' && w.overhangs_depth.to_f > 0 }
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'external overhangs' && w.overhangs_depth.to_f > 0 }) }
       next if message.include? "Exterior shading type is 'external overhangs', but overhangs are explicitly defined; exterior shading type will be ignored."
     end
-    if hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'building' } && hpxml_bldg.neighbor_buildings.size > 0
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'building' } && hpxml_bldg.neighbor_buildings.size > 0) }
       next if message.include? "Exterior shading type is 'building', but neighbor buildings are explicitly defined; exterior shading type will be ignored."
     end
 

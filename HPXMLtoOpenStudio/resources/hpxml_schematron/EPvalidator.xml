@@ -692,13 +692,6 @@
       <sch:assert role='ERROR' test='count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/AssemblyEffectiveRValue</sch:assert>
     </sch:rule>
   </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[SameasSurfaces]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/*/*[h:SystemIdentifier/@sameas]'>
-      <sch:assert role='ERROR' test='count(*) = 1'>Expected only SystemIdentifier specified</sch:assert>
-    </sch:rule>
-  </sch:pattern>
   
   <sch:pattern>
     <sch:title>[Wall]</sch:title>
@@ -804,6 +797,13 @@
     <sch:title>[FloorType=AdjacentToOther]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Floors/h:Floor[h:ExteriorAdjacentTo[text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]]'>
       <sch:assert role='ERROR' test='count(h:FloorOrCeiling[text()="floor" or text()="ceiling"]) = 1'>Expected 1 element(s) for xpath: FloorOrCeiling[text()="floor" or text()="ceiling"]</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[SameasSurfaces]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/*/*[h:SystemIdentifier/@sameas]'>
+      <sch:assert role='ERROR' test='count(*) = 1'>Expected only SystemIdentifier specified</sch:assert>
     </sch:rule>
   </sch:pattern>
 
