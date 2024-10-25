@@ -5790,7 +5790,7 @@ module Defaults
 
   # TODO
   def self.get_breaker_spaces_from_heating_capacity(capacity)
-    return [UnitConversions.convert(capacity, 'btu/hr', 'kw') / 12.0].ceil * 2.0 + 2
+    return (UnitConversions.convert(capacity, 'btu/hr', 'kw') / 12.0).ceil * 2.0 + 2
   end
 
   # TODO
