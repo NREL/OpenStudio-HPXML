@@ -1375,10 +1375,10 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param window_area_front [Double] amount of window area on unit's front facade (ft2)
-  # @param window_area_back [Double] amount of window area on unit's back facade (ft2)
-  # @param window_area_left [Double] amount of window area on unit's left facade (ft2)
-  # @param window_area_right [Double] amount of window area on unit's right facade (ft2)
+  # @param window_area_front [Double] amount of window area on unit's front facade or window to wall ratio if less than 1 (ft2 or frac)
+  # @param window_area_back [Double] amount of window area on unit's back facade or window to wall ratio if less than 1 (ft2 or frac)
+  # @param window_area_left [Double] amount of window area on unit's left facade or window to wall ratio if less than 1 (ft2 or frac)
+  # @param window_area_right [Double] amount of window area on unit's right facade or window to wall ratio if less than 1 (ft2 or frac)
   # @param window_aspect_ratio [Double] ratio of window height to width (frac)
   # @param skylight_area_front [Double] amount of skylight area on the unit's front conditioned roof facade (ft2)
   # @param skylight_area_back [Double] amount of skylight area on the unit's back conditioned roof facade (ft2)
