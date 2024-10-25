@@ -3306,7 +3306,7 @@ module Defaults
         end
         panel_load_watts_breaker_spaces_values = get_panel_load_watts_breaker_spaces_values(hpxml_bldg, panel_load)
         if panel_load.watts.nil?
-          panel_load.watts = panel_load_watts_breaker_spaces_values[:watts]
+          panel_load.watts = panel_load_watts_breaker_spaces_values[:watts].round
           panel_load.watts_isdefaulted = true
         end
         if panel_load.breaker_spaces.nil?
