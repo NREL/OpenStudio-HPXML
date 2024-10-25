@@ -9335,6 +9335,20 @@ class HPXML < Object
       @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(vehicle, "VehicleType/#{@vehicle_type}/ConnectedCharger"))
       @lifetime_model = XMLHelper.get_value(vehicle, "#{battery_prefix}/extension/LifetimeModel", :string)
     end
+
+    # Returns the EV charger for the vehicle.
+    #
+    # @return [HPXML::ElectricVehicleCharger] The connected EV charger
+    def ev_charger
+      return if @ev_charger_idref.nil?
+
+      @parent_object.ev_chargers.each do |ev_charger|
+        next unless ev_charger.id == @ev_charger_idref
+
+        return ev_charger
+      end
+      fail "Connected charger '#{@ev_charger_idref}' not found for vehicle '#{@id}'."
+    end
   end
 
   # Array of HPXML::Battery objects.
