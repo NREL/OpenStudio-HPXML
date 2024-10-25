@@ -2282,6 +2282,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-mechvent-cfis-no-outdoor-air-control.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].cfis_has_outdoor_air_control = false
     elsif ['base-mechvent-cfis-supplemental-fan-exhaust.xml',
+           'base-mechvent-cfis-supplemental-fan-exhaust-15-mins.xml',
            'base-mechvent-cfis-supplemental-fan-supply.xml',
            'base-mechvent-cfis-supplemental-fan-exhaust-synchronized.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
