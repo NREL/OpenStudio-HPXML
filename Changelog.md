@@ -53,6 +53,7 @@ __Bugfixes__
 - Fixes error if modeling a ground-to-air heat pump with a separate backup heating system.
 - Fixes default CFIS fan power during ventilation only mode.
 - Fixes a bug that potentially oversizes heat pumps when detailed performance capacity fractions are provided.
+- For a CFIS system with a supplemental fan, fixes supplemental fan runtime when using sub-hourly timesteps.
 
 ## OpenStudio-HPXML v1.8.1
 
