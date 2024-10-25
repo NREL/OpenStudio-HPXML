@@ -317,37 +317,41 @@
         <HVAC>
           <HVACPlant>
             <PrimarySystems>
-              <PrimaryHeatingSystem idref='HeatingSystem1'/>
-              <PrimaryCoolingSystem idref='CoolingSystem1'/>
+              <PrimaryHeatingSystem idref='HeatPump1'/>
+              <PrimaryCoolingSystem idref='HeatPump1'/>
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
-                <Furnace/>
+                <Boiler/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>52280.0</HeatingCapacity>
+              <HeatingCapacity>60000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.92</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem1'/>
-              <DistributionSystem idref='HVACDistribution1'/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>14760.0</CoolingCapacity>
-              <CompressorType>single stage</CompressorType>
+            <HeatPump>
+              <SystemIdentifier id='HeatPump1'/>
+              <DistributionSystem idref='HVACDistribution2'/>
+              <HeatPumpType>air-to-air</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <BackupType>separate</BackupType>
+              <BackupSystem idref='HeatingSystem1'/>
+              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
               </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.73</SensibleHeatFraction>
-            </CoolingSystem>
+              <AnnualHeatingEfficiency>
+                <Units>HSPF</Units>
+                <Value>7.7</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
@@ -356,6 +360,14 @@
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
+            <DistributionSystemType>
+              <HydronicDistribution>
+                <HydronicDistributionType>baseboard</HydronicDistributionType>
+              </HydronicDistribution>
+            </DistributionSystemType>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution2'/>
             <DistributionSystemType>
               <AirDistribution>
                 <AirDistributionType>regular velocity</AirDistributionType>
@@ -412,7 +424,7 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
-            <FuelType>natural gas</FuelType>
+            <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
             <TankVolume>40.0</TankVolume>
@@ -449,17 +461,37 @@
             <Voltage>240</Voltage>
             <MaxCurrentRating>100.0</MaxCurrentRating>
             <extension>
-              <HeadroomBreakerSpaces>5</HeadroomBreakerSpaces>
+              <TotalBreakerSpaces>12</TotalBreakerSpaces>
               <PanelLoads>
                 <PanelLoad>
                   <Type>Heating</Type>
                   <System idref='HeatingSystem1'/>
                 </PanelLoad>
                 <PanelLoad>
+                  <Type>Heating</Type>
+                  <Addition>true</Addition>
+                  <System idref='HeatPump1'/>
+                </PanelLoad>
+                <PanelLoad>
                   <Type>Cooling</Type>
-                  <Watts>3542.0</Watts>
-                  <Addition>false</Addition>
-                  <System idref='CoolingSystem1'/>
+                  <Addition>true</Addition>
+                  <System idref='HeatPump1'/>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Hot Water</Type>
+                  <System idref='WaterHeatingSystem1'/>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Clothes Dryer</Type>
+                  <System idref='ClothesDryer1'/>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Range/Oven</Type>
+                  <System idref='CookingRange1'/>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Electric Vehicle Charging</Type>
+                  <System idref='PlugLoad3'/>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Other</Type>
@@ -486,7 +518,7 @@
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
           <Location>conditioned space</Location>
-          <FuelType>natural gas</FuelType>
+          <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <Vented>true</Vented>
           <VentedFlowRate>150.0</VentedFlowRate>
@@ -499,7 +531,7 @@
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>
           <Location>conditioned space</Location>
-          <FuelType>natural gas</FuelType>
+          <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>
@@ -577,6 +609,10 @@
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
           </extension>
+        </PlugLoad>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoad3'/>
+          <PlugLoadType>electric vehicle charging</PlugLoadType>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

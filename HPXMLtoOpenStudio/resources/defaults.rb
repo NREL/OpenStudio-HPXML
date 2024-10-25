@@ -3301,7 +3301,7 @@ module Defaults
 
       panel_loads.each do |panel_load|
         if panel_load.voltage.nil?
-          panel_load.voltage = get_panel_load_voltage_default_values(panel_load)
+          panel_load.voltage = get_panel_load_voltage_default_values(hpxml_bldg, panel_load)
           panel_load.voltage_isdefaulted = true
         end
         panel_load_watts_breaker_spaces_values = get_panel_load_watts_breaker_spaces_values(hpxml_bldg, panel_load)
@@ -5774,6 +5774,37 @@ module Defaults
   end
 
   # TODO
+  def self.get_120v_pump_load_from_capacity(_capacity)
+    return 1000 # FIXME
+  end
+
+  # TODO
+  def self.get_240v_pump_load_from_capacity(_capacity)
+    return 2000 # FIXME
+  end
+
+  # TODO
+  def self.get_120v_fan_load_from_capacity(_capacity)
+    return 500 # FIXME
+  end
+
+  # TODO
+  def self.get_breaker_spaces_from_heating_capacity(capacity)
+    return [UnitConversions.convert(capacity, 'btu/hr', 'kw') / 12.0].ceil * 2.0 + 2
+  end
+
+  # TODO
+  def self.get_breaker_spaces_from_backup_heating_capacity(capacity)
+    if UnitConversions.convert(capacity, 'btu/hr', 'kw') <= 10
+      return 2
+    elsif UnitConversions.convert(capacity, 'btu/hr', 'kw') <= 20
+      return 4
+    else
+      return 6
+    end
+  end
+
+  # TODO
   def self.get_electric_panel_values()
     return { panel_voltage: HPXML::ElectricPanelVoltage240,
              max_current_rating: 150.0, # A
@@ -5781,8 +5812,9 @@ module Defaults
   end
 
   # TODO
-  def self.get_panel_load_voltage_default_values(panel_load)
+  def self.get_panel_load_voltage_default_values(hpxml_bldg, panel_load)
     type = panel_load.type
+    system_ids = panel_load.system_idrefs
 
     if [HPXML::ElectricPanelLoadTypeHeating,
         HPXML::ElectricPanelLoadTypeCooling,
@@ -5791,6 +5823,19 @@ module Defaults
         HPXML::ElectricPanelLoadTypeRangeOven,
         HPXML::ElectricPanelLoadTypePermanentSpaHeater,
         HPXML::ElectricPanelLoadTypePoolHeater].include?(type)
+      hpxml_bldg.heating_systems.each do |heating_system|
+        next if !system_ids.include?(heating_system.id)
+        next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+
+        return 120
+      end
+      hpxml_bldg.cooling_systems.each do |cooling_system|
+        next if !system_ids.include?(cooling_system.id)
+
+        if cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+          return 120
+        end
+      end
       return 240
     else
       return 120
@@ -5807,72 +5852,109 @@ module Defaults
     breaker_spaces = 0
 
     if type == HPXML::ElectricPanelLoadTypeHeating
-      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-        hvac_distribution.hvac_systems.each do |hvac_system|
-          if hvac_system.is_a?(HPXML::HeatingSystem)
-            next if !system_ids.include?(heating_system.id)
-
-            heating_system_type = hvac_system.heating_system_type
-          elsif hvac_system.is_a?(HPXML::CoolingSystem)
-            next if !system_ids.include?(cooling_system.id)
-
-            cooling_system_type = hvac_system.cooling_system_type
-          elsif hvac_system.is_a?(HPXML::HeatPump)
-            next if !system_ids.include?(heat_pump.id)
-
-            heat_pump_type = hvac_system.heat_pump_type
-          end
-        end
-
-        # put the previous in a method, along with a panel load type argument
-        # when Heating, enforce system_ids check on HeatingSystem and HeatPump
-        # when Cooling, enforce system_ids check on CoolingSystem and HeatPump
-
-        if heating_system_type == HPXML::HVACTypeFurnace && [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypeCentralAirConditioner].include?(cooling_system_type)
-          watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
-          breaker_spaces += 1
-        elsif heating_system_type == HPXML::HVACTypeBoiler && [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypeCentralAirConditioner].include?(cooling_system_type)
-          watts += 1000 # FIXME: 120V pump?
-          breaker_spaces += 1
-          # elsif
-          # TODO
-        end
-      end
 
       hpxml_bldg.heating_systems.each do |heating_system|
         next if !system_ids.include?(heating_system.id)
+        next if heating_system.is_shared_system
 
+        distribution_system = heating_system.distribution_system
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-          watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+          watts += UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'w')
+          if !distribution_system.nil?
+            if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir
+              watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+            elsif distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+              watts += get_240v_pump_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+            end
+          end
+          breaker_spaces += get_breaker_spaces_from_heating_capacity(heating_system.heating_capacity)
         else
-          watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+          if !distribution_system.nil?
+            if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir
+              watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+            elsif distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+              watts += get_120v_pump_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+            end
+            breaker_spaces += 1
+          else
+            watts += get_120v_fan_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+          end
         end
       end
+
       hpxml_bldg.heat_pumps.each do |heat_pump|
         next if !system_ids.include?(heat_pump.id)
 
-        watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
-        watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
-        if !heat_pump.backup_heating_capacity.nil?
-          watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'kbtu/hr') * 293.07
+        distribution_system = heat_pump.distribution_system
+        if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+          if !heat_pump.backup_heating_switchover_temp.nil? # max
+            watts += [get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')), UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w')].max
+          else # sum
+            watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+            watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w')
+          end
+          if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+            if !distribution_system.nil?
+              watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+            end
+            breaker_spaces += get_breaker_spaces_from_backup_heating_capacity(heat_pump.backup_heating_capacity)
+          else
+            watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+            breaker_spaces += 1
+          end
+        else # separate or none
+          watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+          if !distribution_system.nil?
+            watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+          end
         end
+        breaker_spaces += 2 # IDU
       end
-      breaker_spaces += 2
+
     elsif type == HPXML::ElectricPanelLoadTypeCooling
       hpxml_bldg.cooling_systems.each do |cooling_system|
         next if !system_ids.include?(cooling_system.id)
+        next if cooling_system.is_shared_system
 
+        distribution_system = cooling_system.distribution_system
         watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
-        watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+        if !distribution_system.nil?
+          heating_system = cooling_system.attached_heating_system
+          if !heating_system.nil? && (heating_system.heating_system_fuel != HPXML::FuelTypeElectricity)
+            watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+            breaker_spaces += 1
+          else
+            watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+            breaker_spaces += 2
+          end
+        end
+        if voltage == 240
+          breaker_spaces += 2
+        end
       end
+
       hpxml_bldg.heat_pumps.each do |heat_pump|
         next if !system_ids.include?(heat_pump.id)
 
+        distribution_system = heat_pump.distribution_system
         watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
-        watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+        if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+          if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+            if !distribution_system.nil?
+              watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+            end
+          else
+            watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+          end
+        else
+          if !distribution_system.nil?
+            watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+          end
+        end
       end
-      breaker_spaces += 2
+
     elsif type == HPXML::ElectricPanelLoadTypeWaterHeater
+
       hpxml_bldg.water_heating_systems.each do |water_heating_system|
         next if !system_ids.include?(water_heating_system.id)
         next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
@@ -5899,6 +5981,7 @@ module Defaults
         end
         breaker_spaces += 1
       end
+
     elsif type == HPXML::ElectricPanelLoadTypeClothesDryer
       hpxml_bldg.clothes_dryers.each do |clothes_dryer|
         next if !system_ids.include?(clothes_dryer.id)
@@ -6014,7 +6097,6 @@ module Defaults
         if hpxml_bldg.has_location(HPXML::LocationGarage)
           watts += 373 # Garage door opener
         end
-        breaker_spaces += 1
       end
 
       hpxml_bldg.ventilation_fans.each do |ventilation_fan|
@@ -6025,8 +6107,9 @@ module Defaults
         elsif ventilation_fan.fan_location == HPXML::LocationBath
           watts += 15 * ventilation_fan.count
         end
-        breaker_spaces += 1
       end
+
+      breaker_spaces += 1
     end
 
     return { watts: watts, breaker_spaces: breaker_spaces }

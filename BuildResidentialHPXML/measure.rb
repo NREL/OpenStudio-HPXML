@@ -1817,7 +1817,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0.25)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_panel_load_watts', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_panel_load_heating_watts', false)
     arg.setDisplayName('Heating System 2: Panel Load Watts')
     arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     arg.setUnits('W')
@@ -7079,12 +7079,12 @@ module HPXMLFile
     hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.primary_system
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                        watts: args[:heating_system_panel_load_watts],
+                        watts: args[:heating_system_panel_load_heating_watts],
                         addition: args[:heating_system_panel_load_addition],
                         system_idrefs: [heating_system.id])
       else
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                        watts: args[:heating_system_2_panel_load_watts],
+                        watts: args[:heating_system_2_panel_load_heating_watts],
                         addition: args[:heating_system_2_panel_load_addition],
                         system_idrefs: [heating_system.id])
       end
@@ -7092,18 +7092,18 @@ module HPXMLFile
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
-                      watts: args[:cooling_system_panel_load_watts],
+                      watts: args[:cooling_system_panel_load_cooling_watts],
                       addition: args[:cooling_system_panel_load_addition],
                       system_idrefs: [cooling_system.id])
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                      watts: args[:heat_pump_panel_load_watts],
+                      watts: args[:heat_pump_panel_load_heating_watts],
                       addition: args[:heat_pump_panel_load_addition],
                       system_idrefs: [heat_pump.id])
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
-                      watts: args[:heat_pump_panel_load_watts],
+                      watts: args[:heat_pump_panel_load_cooling_watts],
                       addition: args[:heat_pump_panel_load_addition],
                       system_idrefs: [heat_pump.id])
     end
@@ -7188,18 +7188,12 @@ module HPXMLFile
       end
     end
 
-    hpxml_bldg.ventilation_fans.each do |ventilation_fan|
-      if ventilation_fan.fan_location == HPXML::LocationKitchen
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
-                        watts: args[:kitchen_fans_panel_load_watts],
-                        addition: args[:kitchen_fans_panel_load_addition],
-                        system_idrefs: [ventilation_fan.id])
-      elsif ventilation_fan.fan_location == HPXML::LocationBath
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
-                        watts: args[:bathroom_fans_panel_load_watts],
-                        addition: args[:bathroom_fans_panel_load_addition],
-                        system_idrefs: [ventilation_fan.id])
-      end
+    kitchen_bath_fan_ids = hpxml_bldg.ventilation_fans.select { |ventilation_fan| [HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location) }.map { |ventilation_fan| ventilation_fan.id }
+    if !kitchen_bath_fan_ids.empty?
+      panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
+                      watts: args[:bathroom_fans_panel_load_watts],
+                      addition: args[:bathroom_fans_panel_load_addition],
+                      system_idrefs: kitchen_bath_fan_ids)
     end
   end
 

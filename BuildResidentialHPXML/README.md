@@ -3044,7 +3044,7 @@ The heat load served fraction of the second heating system. Ignored if this heat
 
 Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
-- **Name:** ``heating_system_2_panel_load_watts``
+- **Name:** ``heating_system_2_panel_load_heating_watts``
 - **Type:** ``Double``
 
 - **Units:** ``W``

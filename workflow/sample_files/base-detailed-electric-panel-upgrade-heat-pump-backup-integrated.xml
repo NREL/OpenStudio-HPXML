@@ -478,9 +478,6 @@
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Other</Type>
-                </PanelLoad>
-                <PanelLoad>
-                  <Type>Other</Type>
                   <System idref='VentilationFan1'/>
                   <System idref='VentilationFan2'/>
                 </PanelLoad>
