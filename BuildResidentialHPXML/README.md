@@ -606,7 +606,7 @@ Describes the above-grade height of apartment units on upper floors or homes abo
 
 **Geometry: Garage Width**
 
-The width of the garage. Enter zero for no garage. Only applies to single-family detached units.
+The width of the garage. Only applies to single-family detached units. If not provided, defaults to zero (no garage).
 
 - **Name:** ``geometry_garage_width``
 - **Type:** ``Double``
@@ -1146,7 +1146,7 @@ Assembly R-value for the ceiling (attic floor).
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1185,7 +1185,7 @@ Assembly R-value of the roof.
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1267,61 +1267,9 @@ Assembly R-value of the walls.
 
 <br/>
 
-**Windows: Front Window-to-Wall Ratio**
-
-The ratio of window area to wall area for the unit's front facade. Enter 0 if specifying Front Window Area instead. If the front wall is adiabatic, the value will be ignored.
-
-- **Name:** ``window_front_wwr``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Windows: Back Window-to-Wall Ratio**
-
-The ratio of window area to wall area for the unit's back facade. Enter 0 if specifying Back Window Area instead. If the back wall is adiabatic, the value will be ignored.
-
-- **Name:** ``window_back_wwr``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Windows: Left Window-to-Wall Ratio**
-
-The ratio of window area to wall area for the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window Area instead. If the left wall is adiabatic, the value will be ignored.
-
-- **Name:** ``window_left_wwr``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Windows: Right Window-to-Wall Ratio**
-
-The ratio of window area to wall area for the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window Area instead. If the right wall is adiabatic, the value will be ignored.
-
-- **Name:** ``window_right_wwr``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
 **Windows: Front Window Area**
 
-The amount of window area on the unit's front facade. Enter 0 if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's front facade. A value less than 1 will be treated as a window-to-wall ratio. If the front wall is adiabatic, the value will be ignored.
 
 - **Name:** ``window_area_front``
 - **Type:** ``Double``
@@ -1334,7 +1282,7 @@ The amount of window area on the unit's front facade. Enter 0 if specifying Fron
 
 **Windows: Back Window Area**
 
-The amount of window area on the unit's back facade. Enter 0 if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's back facade. A value less than 1 will be treated as a window-to-wall ratio. If the back wall is adiabatic, the value will be ignored.
 
 - **Name:** ``window_area_back``
 - **Type:** ``Double``
@@ -1347,7 +1295,7 @@ The amount of window area on the unit's back facade. Enter 0 if specifying Back 
 
 **Windows: Left Window Area**
 
-The amount of window area on the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's left facade (when viewed from the front). A value less than 1 will be treated as a window-to-wall ratio. If the left wall is adiabatic, the value will be ignored.
 
 - **Name:** ``window_area_left``
 - **Type:** ``Double``
@@ -1360,7 +1308,7 @@ The amount of window area on the unit's left facade (when viewed from the front)
 
 **Windows: Right Window Area**
 
-The amount of window area on the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's right facade (when viewed from the front). A value less than 1 will be treated as a window-to-wall ratio. If the right wall is adiabatic, the value will be ignored.
 
 - **Name:** ``window_area_right``
 - **Type:** ``Double``
@@ -1380,7 +1328,31 @@ Ratio of window height to width.
 
 - **Units:** ``Frac``
 
-- **Required:** ``false``
+- **Required:** ``true``
+
+<br/>
+
+**Windows: U-Factor**
+
+Full-assembly NFRC U-factor.
+
+- **Name:** ``window_ufactor``
+- **Type:** ``Double``
+
+- **Units:** ``Btu/hr-ft^2-R``
+
+- **Required:** ``true``
+
+<br/>
+
+**Windows: SHGC**
+
+Full-assembly NFRC solar heat gain coefficient.
+
+- **Name:** ``window_shgc``
+- **Type:** ``Double``
+
+- **Required:** ``true``
 
 <br/>
 
@@ -1405,30 +1377,6 @@ For operable windows, the number of days/week that windows can be opened by occu
 - **Type:** ``Integer``
 
 - **Units:** ``Days/week``
-
-- **Required:** ``false``
-
-<br/>
-
-**Windows: U-Factor**
-
-Full-assembly NFRC U-factor.
-
-- **Name:** ``window_ufactor``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr-ft^2-R``
-
-- **Required:** ``false``
-
-<br/>
-
-**Windows: SHGC**
-
-Full-assembly NFRC solar heat gain coefficient.
-
-- **Name:** ``window_shgc``
-- **Type:** ``Double``
 
 - **Required:** ``false``
 
@@ -1558,7 +1506,7 @@ The depth of overhangs for windows for the front facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1597,7 +1545,7 @@ The depth of overhangs for windows for the back facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1636,7 +1584,7 @@ The depth of overhangs for windows for the left facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1675,7 +1623,7 @@ The depth of overhangs for windows for the right facade.
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1714,7 +1662,7 @@ The amount of skylight area on the unit's front conditioned roof facade.
 
 - **Units:** ``ft^2``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1727,7 +1675,7 @@ The amount of skylight area on the unit's back conditioned roof facade.
 
 - **Units:** ``ft^2``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1740,7 +1688,7 @@ The amount of skylight area on the unit's left conditioned roof facade (when vie
 
 - **Units:** ``ft^2``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1753,7 +1701,7 @@ The amount of skylight area on the unit's right conditioned roof facade (when vi
 
 - **Units:** ``ft^2``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1816,7 +1764,7 @@ R-value of the opaque door(s).
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``false``
+- **Required:** ``true``
 
 <br/>
 
@@ -2868,12 +2816,12 @@ Pipe diameter of the geothermal loop. Only applies to ground-to-air heat pump ty
 
 **Heating System 2: Type**
 
-The type of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents 'separate' backup heating. For ducted heat pumps where the backup heating system is a 'Furnace', the backup would typically be characterized as 'integrated' in that the furnace and heat pump share the same distribution system and blower fan; a 'Furnace' as 'separate' backup to a ducted heat pump is not supported.
+The type of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents 'separate' backup heating. For ducted heat pumps where the backup heating system is a 'Furnace', the backup would typically be characterized as 'integrated' in that the furnace and heat pump share the same distribution system and blower fan; a 'Furnace' as 'separate' backup to a ducted heat pump is not supported. If not provided, defaults to none.
 
 - **Name:** ``heating_system_2_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `Furnace`, `WallFurnace`, `FloorFurnace`, `Boiler`, `ElectricResistance`, `Stove`, `SpaceHeater`, `Fireplace`
 
@@ -3240,12 +3188,12 @@ The fraction of return ducts that are rectangular (as opposed to round); this af
 
 **Mechanical Ventilation: Fan Type**
 
-The type of the mechanical ventilation. Use 'none' if there is no mechanical ventilation system.
+The type of the mechanical ventilation. Use 'none' if there is no mechanical ventilation system. If not provided, defaults to none.
 
 - **Name:** ``mech_vent_fan_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `exhaust only`, `supply only`, `energy recovery ventilator`, `heat recovery ventilator`, `balanced`, `central fan integrated supply`
 
@@ -3435,12 +3383,12 @@ Fraction of cooling load introduced by the shared ventilation system that is met
 
 **Mechanical Ventilation 2: Fan Type**
 
-The type of the second mechanical ventilation. Use 'none' if there is no second mechanical ventilation system.
+The type of the second mechanical ventilation. Use 'none' if there is no second mechanical ventilation system. If not provided, defaults to none.
 
 - **Name:** ``mech_vent_2_fan_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `exhaust only`, `supply only`, `energy recovery ventilator`, `heat recovery ventilator`, `balanced`
 
@@ -3661,7 +3609,7 @@ Whether there is a whole house fan.
 - **Name:** ``whole_house_fan_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4006,7 +3954,7 @@ Which facilities are connected for the drain water heat recovery. Use 'none' if 
 - **Name:** ``dwhr_facilities_connected``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `one`, `all`
 
@@ -4038,23 +3986,23 @@ The efficiency of the drain water heat recovery.
 
 **Hot Water Fixtures: Is Shower Low Flow**
 
-Whether the shower fixture is low flow.
+Whether the shower fixture is low flow. If not provided, defaults to false.
 
 - **Name:** ``water_fixtures_shower_low_flow``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
 **Hot Water Fixtures: Is Sink Low Flow**
 
-Whether the sink fixture is low flow.
+Whether the sink fixture is low flow. If not provided, defaults to false.
 
 - **Name:** ``water_fixtures_sink_low_flow``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4087,7 +4035,7 @@ The type of solar thermal system. Use 'none' if there is no solar thermal system
 - **Name:** ``solar_thermal_system_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `hot water`
 
@@ -4210,12 +4158,12 @@ The solar fraction of the solar thermal system. If provided, overrides all other
 
 **PV System: Present**
 
-Whether there is a PV system present.
+Whether there is a PV system present. If not provided, defaults to false.
 
 - **Name:** ``pv_system_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4336,12 +4284,12 @@ Number of bedrooms served by PV system. Only needed if single-family attached or
 
 **PV System 2: Present**
 
-Whether there is a second PV system present.
+Whether there is a second PV system present. If not provided, defaults to false.
 
 - **Name:** ``pv_system_2_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4423,12 +4371,12 @@ Maximum power output of the second PV system. For a shared system, this is the t
 
 **Battery: Present**
 
-Whether there is a lithium ion battery present.
+Whether there is a lithium ion battery present. If not provided, defaults to false.
 
 - **Name:** ``battery_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4655,12 +4603,12 @@ Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/lo
 
 **Holiday Lighting: Present**
 
-Whether there is holiday lighting.
+Whether there is holiday lighting. If not provided, defaults to false.
 
 - **Name:** ``holiday_lighting_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -4690,12 +4638,12 @@ Enter a date range like 'Nov 25 - Jan 5'. If not provided, the OS-HPXML default 
 
 **Dehumidifier: Type**
 
-The type of dehumidifier.
+The type of dehumidifier. If not provided, defaults to none.
 
 - **Name:** ``dehumidifier_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `none`, `portable`, `whole-home`
 
@@ -5168,12 +5116,12 @@ Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usa
 
 **Extra Refrigerator: Present**
 
-Whether there is an extra refrigerator present.
+Whether there is an extra refrigerator present. If not provided, defaults to false.
 
 - **Name:** ``extra_refrigerator_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -5216,12 +5164,12 @@ Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/l
 
 **Freezer: Present**
 
-Whether there is a freezer present.
+Whether there is a freezer present. If not provided, defaults to false.
 
 - **Name:** ``freezer_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -5482,12 +5430,12 @@ Multiplier on the other energy usage that can reflect, e.g., high/low usage occu
 
 **Misc Plug Loads: Well Pump Present**
 
-Whether there is a well pump.
+Whether there is a well pump. If not provided, defaults to false.
 
 - **Name:** ``misc_plug_loads_well_pump_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -5517,12 +5465,12 @@ Multiplier on the well pump energy usage that can reflect, e.g., high/low usage 
 
 **Misc Plug Loads: Vehicle Present**
 
-Whether there is an electric vehicle.
+Whether there is an electric vehicle. If not provided, defaults to false.
 
 - **Name:** ``misc_plug_loads_vehicle_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -5552,12 +5500,12 @@ Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low
 
 **Misc Fuel Loads: Grill Present**
 
-Whether there is a fuel loads grill.
+Whether there is a fuel loads grill. If not provided, defaults to false.
 
 - **Name:** ``misc_fuel_loads_grill_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -5600,12 +5548,12 @@ Multiplier on the fuel loads grill energy usage that can reflect, e.g., high/low
 
 **Misc Fuel Loads: Lighting Present**
 
-Whether there is fuel loads lighting.
+Whether there is fuel loads lighting. If not provided, defaults to false.
 
 - **Name:** ``misc_fuel_loads_lighting_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -5648,12 +5596,12 @@ Multiplier on the fuel loads lighting energy usage that can reflect, e.g., high/
 
 **Misc Fuel Loads: Fireplace Present**
 
-Whether there is fuel loads fireplace.
+Whether there is fuel loads fireplace. If not provided, defaults to false.
 
 - **Name:** ``misc_fuel_loads_fireplace_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -5722,12 +5670,12 @@ Multiplier on the fuel loads fireplace energy usage that can reflect, e.g., high
 
 **Pool: Present**
 
-Whether there is a pool.
+Whether there is a pool. If not provided, defaults to false.
 
 - **Name:** ``pool_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -5807,12 +5755,12 @@ Multiplier on the pool heater energy usage that can reflect, e.g., high/low usag
 
 **Permanent Spa: Present**
 
-Whether there is a permanent spa.
+Whether there is a permanent spa. If not provided, defaults to false.
 
 - **Name:** ``permanent_spa_present``
 - **Type:** ``Boolean``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
