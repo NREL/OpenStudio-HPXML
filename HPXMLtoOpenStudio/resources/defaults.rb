@@ -6003,10 +6003,10 @@ module Defaults
       end
 
     elsif type == HPXML::ElectricPanelLoadTypeWaterHeater
-
       hpxml_bldg.water_heating_systems.each do |water_heating_system|
         next if !system_ids.include?(water_heating_system.id)
         next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+        next if water_heating_system.is_shared_system
 
         if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
           watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w') # FIXME: use this instead per Work Plan.docx?
@@ -6123,6 +6123,8 @@ module Defaults
       hpxml_bldg.plug_loads.each do |plug_load|
         next if plug_load.plug_load_type != HPXML::PlugLoadTypeElectricVehicleCharging
         next if !system_ids.include?(plug_load.id)
+
+        # FIXME: next if MF?
 
         if voltage == 120 # Level 1
           watts += 1650
