@@ -11,7 +11,7 @@ jobs:
   run-unit-tests:
     runs-on: ubuntu-22.04
     container:
-      image: docker://kuangwenyi/openstudio:develop
+      image: docker://nrel/openstudio:develop
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,7 +77,7 @@ jobs:
   run-workflow1-tests:
     runs-on: ubuntu-22.04
     container:
-      image: docker://kuangwenyi/openstudio:develop
+      image: docker://nrel/openstudio:develop
     steps:
       - uses: actions/checkout@v4
         with:
@@ -100,7 +100,7 @@ jobs:
   run-workflow2-tests:
     runs-on: ubuntu-22.04
     container:
-      image: docker://kuangwenyi/openstudio:develop
+      image: docker://nrel/openstudio:develop
     steps:
       - uses: actions/checkout@v4
         with:
