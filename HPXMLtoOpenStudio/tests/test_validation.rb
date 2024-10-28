@@ -159,6 +159,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-calendar-year-high' => ['Expected CalendarYear to be less than or equal to 9999'],
                             'invalid-clothes-dryer-cef' => ["Element 'CombinedEnergyFactor': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
                             'invalid-clothes-washer-imef' => ["Element 'IntegratedModifiedEnergyFactor': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
+                            'invalid-cfis-addtl-runtime-mode' => ["Expected CFISControls/AdditionalRuntimeOperatingMode to be 'air handler fan'"],
                             'invalid-dishwasher-ler' => ["Element 'LabelElectricRate': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
                             'invalid-duct-area-fractions' => ['Expected sum(Ducts/FractionDuctArea) for DuctType="supply" to be 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution, id: "HVACDistribution1"]',
                                                               'Expected sum(Ducts/FractionDuctArea) for DuctType="return" to be 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution, id: "HVACDistribution1"]'],
@@ -223,6 +224,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-ventilation-fan' => ['Expected 1 element(s) for xpath: UsedForWholeBuildingVentilation[text()="true"] | UsedForLocalVentilation[text()="true"] | UsedForSeasonalCoolingLoadReduction[text()="true"] | UsedForGarageVentilation[text()="true"]'],
                             'invalid-ventilation-recovery' => ['Expected 0 element(s) for xpath: TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency',
                                                                'Expected 0 element(s) for xpath: SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency'],
+                            'invalid-water-heater-heating-capacity' => ['Expected HeatingCapacity to be greater than 0.'],
+                            'invalid-water-heater-heating-capacity2' => ['Expected HeatingCapacity to be greater than 0.'],
                             'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
                             'leakiness-description-missing-year-built' => ['Expected 1 element(s) for xpath: BuildingSummary/BuildingConstruction/YearBuilt'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting, id: "MyBuilding"]'],
@@ -238,7 +241,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'missing-attached-to-zone' => ['Expected 1 element(s) for xpath: AttachedToZone'],
                             'missing-capacity-detailed-performance' => ['Expected 1 element(s) for xpath: ../../../HeatingCapacity',
                                                                         'Expected 1 element(s) for xpath: ../../../CoolingCapacity'],
-                            'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: SupplementalFan'],
+                            'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: CFISControls/SupplementalFan'],
                             'missing-distribution-cfa-served' => ['Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts2"]'],
                             'missing-duct-area' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "Ducts2"]'],
                             'missing-duct-location' => ['Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "Ducts2"]'],
@@ -536,6 +539,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['invalid-clothes-washer-imef'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.clothes_washers[0].integrated_modified_energy_factor = 0
+      elsif ['invalid-cfis-addtl-runtime-mode'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-control-type-timer.xml')
+        hpxml_bldg.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeNone
+        hpxml_bldg.ventilation_fans[0].fan_power = nil
       elsif ['invalid-dishwasher-ler'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.dishwashers[0].label_electric_rate = 0
@@ -670,6 +677,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-exhaust.xml')
         hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency = 0.72
         hpxml_bldg.ventilation_fans[0].total_recovery_efficiency = 0.48
+      elsif ['invalid-water-heater-heating-capacity'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas.xml')
+        hpxml_bldg.water_heating_systems[0].heating_capacity = 0
+      elsif ['invalid-water-heater-heating-capacity2'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
+        hpxml_bldg.water_heating_systems[0].heating_capacity = 0
       elsif ['invalid-window-height'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-overhangs.xml')
         hpxml_bldg.windows[1].overhangs_distance_to_bottom_of_window = 1.0
@@ -708,8 +721,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].cooling_capacity = nil
         hpxml_bldg.heat_pumps[0].heating_capacity = nil
       elsif ['missing-cfis-supplemental-fan'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis.xml')
-        hpxml_bldg.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplementalFan
+        hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
+        hpxml_bldg.ventilation_fans[1].delete
       elsif ['missing-distribution-cfa-served'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area = nil
