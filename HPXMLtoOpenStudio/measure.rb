@@ -417,6 +417,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
     end
   end
+
 end
 
 # register the measure to be used by the application
