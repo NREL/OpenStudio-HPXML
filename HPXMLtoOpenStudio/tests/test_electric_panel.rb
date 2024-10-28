@@ -52,22 +52,28 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                     watts: 4500,
                     voltage: HPXML::ElectricPanelVoltage240,
                     breaker_spaces: 2,
-                    addition: true)
+                    addition: true,
+                    system_idrefs: [hpxml_bldg.water_heating_systems[0].id])
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
                     watts: 5760,
                     voltage: HPXML::ElectricPanelVoltage120,
                     breaker_spaces: 2,
-                    addition: true)
+                    addition: true,
+                    system_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
                     watts: 12000,
                     voltage: HPXML::ElectricPanelVoltage240,
                     breaker_spaces: 2,
-                    addition: true)
+                    addition: true,
+                    system_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
+                              plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging)
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
                     watts: 1650,
                     voltage: HPXML::ElectricPanelVoltage120,
                     breaker_spaces: 1,
-                    addition: true)
+                    addition: true,
+                    system_idrefs: [hpxml_bldg.plug_loads[-1].id])
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
     args_hash['hpxml_path'] = @tmp_hpxml_path
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)

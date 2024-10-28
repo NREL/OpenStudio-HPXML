@@ -4629,7 +4629,7 @@ Individual panel loads entered in ``extension/PanelLoads/PanelLoad``.
   ``System``                                      idref                     See [#]_     See [#]_  See [#]_   Can reference one or more systems
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] Type choices are "Heating", "Cooling", "Hot Water", "Clothes Dryer", "Dishwasher", "Range/Oven", "Permanent Spa Heater", "Permanent Spa Pump", "Pool Heater", "Pool Pump", "Well Pump", "Electric Vehicle Charging", and "Other".
+  .. [#] Type choices are "Heating", "Cooling", "Hot Water", "Clothes Dryer", "Dishwasher", "Range/Oven", "Permanent Spa Heater", "Permanent Spa Pump", "Pool Heater", "Pool Pump", "Well Pump", "Electric Vehicle Charging", "Lighting", "Kitchen", "Laundry", and "Other".
   .. [#] If Watts not provided, defaults as follows:
 
          \- **Heating**: TODO
