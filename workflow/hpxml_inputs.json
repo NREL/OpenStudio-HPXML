@@ -1625,6 +1625,18 @@
     "electric_panel_breaker_spaces_type": "headroom",
     "electric_panel_breaker_spaces": 5
   },
+  "sample_files/base-detailed-electric-panel-low-load.xml": {
+    "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
+    "geometry_unit_cfa": 600,
+    "heating_system_heating_capacity": 20000,
+    "cooling_system_type": "none",
+    "refrigerator_present": false,
+    "clothes_washer_present": false,
+    "kitchen_fans_quantity": 0,
+    "bathroom_fans_quantity": 0,
+    "misc_plug_loads_television_present": "false",
+    "misc_plug_loads_other_annual_kwh": 0
+  },
   "sample_files/base-detailed-electric-panel-upgrade-heat-pump-backup-integrated.xml": {
     "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
     "heating_system_type": "none",

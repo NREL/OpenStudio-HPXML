@@ -102,7 +102,15 @@ module ElectricPanel
 
       all_loads += panel_load.watts
     end
-    part_a = 8000.0 + (all_loads - 8000.0) * 0.4
+
+    watts_at_100 = 8000.0
+    remainder = 0.4
+
+    if all_loads < watts_at_100
+      watts_at_100 = 0.0
+    end
+    part_a = watts_at_100
+    part_a += (all_loads - watts_at_100) * remainder
 
     # Part B
     part_b = [htg_new, clg_new].max
