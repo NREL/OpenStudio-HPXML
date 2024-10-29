@@ -7029,6 +7029,17 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     # TODO
+    def simultaneous_backup
+      if !@compressor_lockout_temp.nil? &&
+         !@backup_heating_lockout_temp.nil? &&
+         (@backup_heating_lockout_temp > @compressor_lockout_temp)
+        return true
+      end
+
+      return false
+    end
+
+    # TODO
     def panel_loads
       list = []
       @parent_object.electric_panels.each do |electric_panel|

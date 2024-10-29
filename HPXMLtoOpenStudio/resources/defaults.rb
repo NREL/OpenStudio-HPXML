@@ -3368,7 +3368,7 @@ module Defaults
         electric_panel.headroom_breaker_spaces_isdefaulted = true
       end
 
-      ElectricPanel.calculate(electric_panel)
+      ElectricPanel.calculate(hpxml_bldg, electric_panel)
     end
   end
 
@@ -5829,17 +5829,6 @@ module Defaults
   end
 
   # TODO
-  def self.heat_pump_backup_simultaneous_operation(heat_pump)
-    if !heat_pump.compressor_lockout_temp.nil? &&
-       !heat_pump.backup_heating_lockout_temp.nil? &&
-       (heat_pump.backup_heating_lockout_temp > heat_pump.compressor_lockout_temp)
-      return true
-    end
-
-    return false
-  end
-
-  # TODO
   def self.get_breaker_spaces_from_backup_heating_capacity(capacity)
     if UnitConversions.convert(capacity, 'btu/hr', 'kw') <= 10
       return 2
@@ -5934,7 +5923,7 @@ module Defaults
         distribution_system = heat_pump.distribution_system
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
-          if heat_pump_backup_simultaneous_operation(heat_pump) # sum
+          if heat_pump.simultaneous_backup # sum
             watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
             watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w')
           else # max
