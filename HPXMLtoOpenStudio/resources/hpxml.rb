@@ -8032,7 +8032,8 @@ class HPXML < Object
     # @return [nil]
     def to_doc(air_distribution)
       if (not @table_number.nil?) || (not @lookup_floor_area.nil?) || (not @leakage_level.nil?) || (not @insulation_r_value.nil?) || (not @supply_surface_area.nil?) || (not @return_surface_area.nil?) || (not @dsf.nil?)
-        duct_load = XMLHelper.create_elements_as_needed(air_distribution, ['extension', 'ManualJInputs', 'DefaultTableDuctLoad'])
+        manualj_inputs = XMLHelper.create_elements_as_needed(air_distribution, ['extension', 'ManualJInputs'])
+        duct_load = XMLHelper.add_element(manualj_inputs, 'DefaultTableDuctLoad')
         XMLHelper.add_element(duct_load, 'TableNumber', @table_number, :string) unless @table_number.nil?
         XMLHelper.add_element(duct_load, 'LookupFloorArea', @lookup_floor_area, :float) unless @lookup_floor_area.nil?
         XMLHelper.add_element(duct_load, 'LeakageLevel', @leakage_level, :string) unless @leakage_level.nil?
