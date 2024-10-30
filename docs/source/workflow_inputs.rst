@@ -3415,20 +3415,20 @@ Air Distribution
 
 Each air distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
-  =======================================================================================  =======  =======  ===========  ========  ============  ==========================
-  Element                                                                                  Type     Units    Constraints  Required  Default       Notes
-  =======================================================================================  =======  =======  ===========  ========  ============  ==========================
-  ``SystemIdentifier``                                                                     id                             Yes                     Unique identifier
-  ``DistributionSystemType/AirDistribution``                                               element                        Yes                     Type of distribution system
-  ``DistributionSystemType/AirDistribution/AirDistributionType``                           string            See [#]_     Yes                     Type of air distribution
-  ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="supply"]``     element                        See [#]_                Supply duct leakage value
-  ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="return"]``     element                        See [#]_                Return duct leakage value
-  ``DistributionSystemType/AirDistribution/Ducts``                                         element                        No                      Supply/return ducts; multiple are allowed [#]_
-  ``DistributionSystemType/AirDistribution/NumberofReturnRegisters``                       integer           >= 0         No        See [#]_      Number of return registers
-  ``DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh``     double   Btu/hr   >= 0         No        0             Blower fan heat for ACCA Manual J design loads [#]_
-  ``DistributionSystemType/AirDistribution/extension/ManualJInputs/DefaultTableDuctLoad``  element                        No        <none> [#]_   Duct Factor Table inputs for ACCA Manual J design loads; multiple are allowed [#]_
-  ``ConditionedFloorAreaServed``                                                           double   ft2      > 0          See [#]_                Conditioned floor area served
-  =======================================================================================  =======  =======  ===========  ========  ============  ==========================
+  =======================================================================================  =======  =======  ===========  ========  =========  ==========================
+  Element                                                                                  Type     Units    Constraints  Required  Default    Notes
+  =======================================================================================  =======  =======  ===========  ========  =========  ==========================
+  ``SystemIdentifier``                                                                     id                             Yes                  Unique identifier
+  ``DistributionSystemType/AirDistribution``                                               element                        Yes                  Type of distribution system
+  ``DistributionSystemType/AirDistribution/AirDistributionType``                           string            See [#]_     Yes                  Type of air distribution
+  ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="supply"]``     element                        See [#]_             Supply duct leakage value
+  ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="return"]``     element                        See [#]_             Return duct leakage value
+  ``DistributionSystemType/AirDistribution/Ducts``                                         element                        No                   Supply/return ducts; multiple are allowed [#]_
+  ``DistributionSystemType/AirDistribution/NumberofReturnRegisters``                       integer           >= 0         No        See [#]_   Number of return registers
+  ``DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh``     double   Btu/hr   >= 0         No        0          Blower fan heat for ACCA Manual J design loads [#]_
+  ``DistributionSystemType/AirDistribution/extension/ManualJInputs/DefaultTableDuctLoad``  element                        No        <none>     Duct Factor Table inputs for ACCA Manual J design loads; multiple are allowed [#]_
+  ``ConditionedFloorAreaServed``                                                           double   ft2      > 0          See [#]_             Conditioned floor area served
+  =======================================================================================  =======  =======  ===========  ========  =========  ==========================
   
   .. [#] AirDistributionType choices are "regular velocity", "gravity", or "fan coil" and are further restricted based on attached HVAC system type (e.g., only "regular velocity" or "gravity" for a furnace, only "fan coil" for a shared boiler, etc.).
   .. [#] Supply duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
