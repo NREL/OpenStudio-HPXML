@@ -4895,13 +4895,19 @@ module HVACSizing
   # Appends additional detailed information needed to fill out, e.g., an ACCA Form J1 to the provided array
   # for eventual writing to an output file.
   #
+  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
   # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
   # @param results_out [Array] Rows of output data
   # @return [nil]
-  def self.append_detailed_output(hpxml_bldg, all_zone_loads, all_space_loads, results_out)
+  def self.append_detailed_output(output_format, hpxml_bldg, all_zone_loads, all_space_loads, results_out)
     line_break = nil
+
+    if (output_format == 'csv') && (not results_out.empty?)
+      # Separate from existing data with line break
+      results_out << [line_break]
+    end
 
     orientation_map = { HPXML::OrientationEast => 'E',
                         HPXML::OrientationNorth => 'N',
@@ -5056,11 +5062,8 @@ module HVACSizing
   # @param output_file_path [String] Detailed output file path
   # @return [nil]
   def self.write_detailed_output(results_out, output_format, output_file_path)
+    line_break = nil
     if ['csv'].include? output_format
-      if File.exist? output_file_path
-        # Separate from existing data
-        results_out.insert(0, [line_break])
-      end
       CSV.open(output_file_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
     elsif ['json', 'msgpack'].include? output_format
       h = {}
@@ -5086,10 +5089,6 @@ module HVACSizing
           items[columns[i - 1]] = out[i]
         end
         h[report][name] = items
-      end
-
-      if File.exist? output_file_path
-        h = JSON.parse(File.read(output_file_path)).merge(h)
       end
 
       if output_format == 'json'

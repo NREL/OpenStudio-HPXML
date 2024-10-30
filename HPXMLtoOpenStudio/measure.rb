@@ -301,7 +301,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # This needs to come before we collapse enclosure surfaces
     design_loads_results_out = []
     hpxml.buildings.each do |hpxml_bldg|
-      HVACSizing.append_detailed_output(hpxml_bldg, hpxml_all_zone_loads[hpxml_bldg], hpxml_all_space_loads[hpxml_bldg], design_loads_results_out)
+      HVACSizing.append_detailed_output(args[:output_format], hpxml_bldg, hpxml_all_zone_loads[hpxml_bldg],
+                                        hpxml_all_space_loads[hpxml_bldg], design_loads_results_out)
     end
 
     return hpxml_sch_map, design_loads_results_out
