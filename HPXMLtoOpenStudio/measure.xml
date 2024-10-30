@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>af21de2e-e4ba-4fda-9f29-f4ad94d0475c</version_id>
-  <version_modified>2024-10-30T04:55:55Z</version_modified>
+  <version_id>2aac8715-c3f4-44d4-ad81-030059bc7e7e</version_id>
+  <version_modified>2024-10-30T17:45:14Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -627,7 +627,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6F8A18EC</checksum>
+      <checksum>0C981353</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -651,7 +651,7 @@
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4366CDCD</checksum>
+      <checksum>A2FA7350</checksum>
     </file>
     <file>
       <filename>test_battery.rb</filename>
@@ -669,7 +669,7 @@
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>26D6E82F</checksum>
+      <checksum>91E1B449</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -735,7 +735,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>20E56F9D</checksum>
+      <checksum>B290B947</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
