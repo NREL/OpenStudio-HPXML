@@ -96,21 +96,16 @@ module ElectricPanel
     clg_new = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.addition }.map { |pl| pl.watts }.sum(0.0)
 
     # Part A
-    all_loads = [htg_existing, clg_existing].max
+    other_load = [htg_existing, clg_existing].max
     electric_panel.panel_loads.each do |panel_load|
       next if panel_load.type == HPXML::ElectricPanelLoadTypeHeating || panel_load.type == HPXML::ElectricPanelLoadTypeCooling
 
-      all_loads += panel_load.watts
+      other_load += panel_load.watts
     end
 
-    watts_at_100 = 8000.0
-    remainder = 0.4
+    threshold = 8000.0 # W
 
-    if all_loads < watts_at_100
-      watts_at_100 = 0.0
-    end
-    part_a = watts_at_100
-    part_a += (all_loads - watts_at_100) * remainder
+    part_a = 1.0 * [threshold, other_load].min + 0.4 * [0, other_load - threshold].max
 
     # Part B
     part_b = [htg_new, clg_new].max
