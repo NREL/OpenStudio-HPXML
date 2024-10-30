@@ -1374,6 +1374,8 @@
                       <InsulationRValue>6.0</InsulationRValue>
                       <SupplySurfaceArea>325.0</SupplySurfaceArea>
                       <ReturnSurfaceArea>165.0</ReturnSurfaceArea>
+                    </DefaultTableDuctLoad>
+                    <DefaultTableDuctLoad>
                       <TableNumber>7I</TableNumber>
                       <LookupFloorArea>1200.0</LookupFloorArea>
                       <LeakageLevel>notably sealed</LeakageLevel>
