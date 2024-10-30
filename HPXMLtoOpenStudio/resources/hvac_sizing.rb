@@ -4892,17 +4892,16 @@ module HVACSizing
     end
   end
 
-  # Writes a output file with additional detailed information needed to fill out, e.g., an ACCA Form J1.
+  # Appends additional detailed information needed to fill out, e.g., an ACCA Form J1 to the provided array
+  # for eventual writing to an output file.
   #
-  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
-  # @param output_file_path [String] Detailed output file path
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
   # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @param results_out [Array] Rows of output data
   # @return [nil]
-  def self.write_detailed_output(output_format, output_file_path, hpxml_bldg, all_zone_loads, all_space_loads)
+  def self.append_detailed_output(hpxml_bldg, all_zone_loads, all_space_loads, results_out)
     line_break = nil
-    results_out = []
 
     orientation_map = { HPXML::OrientationEast => 'E',
                         HPXML::OrientationNorth => 'N',
@@ -5048,7 +5047,15 @@ module HVACSizing
     all_space_loads.values.each_with_index do |space_loads, i|
       results_out << [space_col_names[i]] + space_loads.HourlyFenestrationLoads.map { |l| l.round }
     end
+  end
 
+  # Writes an output file for the given rows of output data.
+  #
+  # @param results_out [Array] Rows of output data
+  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
+  # @param output_file_path [String] Detailed output file path
+  # @return [nil]
+  def self.write_detailed_output(results_out, output_format, output_file_path)
     if ['csv'].include? output_format
       if File.exist? output_file_path
         # Separate from existing data
