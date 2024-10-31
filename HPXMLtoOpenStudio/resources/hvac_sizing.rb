@@ -1721,7 +1721,7 @@ module HVACSizing
   # @return [Array<Double, Double, Double, Double>] total clg oversize limit (frac), 
   # total clg undersize limit (frac), sens. clg undersize limit (frac), lat. clg undersize limit (frac)
 
-  def self.get_hvac_size_limits(hvac_cooling, hvac_sizings, hpxml_bldg, weather)
+  def self.get_hvac_size_limits_cooling(hvac_cooling, hvac_sizings, hpxml_bldg, weather)
 
     load_shr = hvac_sizings.Cool_Load_Sens / hvac_sizings.Cool_Load_Tot
     # calculate Climate JSHR to determine standard vs dry sizing condition (new ACCA)
@@ -1799,7 +1799,11 @@ module HVACSizing
     
     return total_clg_oversize_limit, total_clg_undersize_limit, sens_clg_undersize_limit, lat_clg_undersize_limit 
   
-  end 
+  end
+
+  def self.get_hvac_size_limits_heating(hvac_cooling, hvac_sizings, hpxml_bldg, weather, runner)
+    if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingACCA
+      runner.registerError("No heating size limits  ")
 
   # Transfers the design load totals from the HVAC loads object to the HVAC sizings object.
   #
