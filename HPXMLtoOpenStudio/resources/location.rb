@@ -40,7 +40,7 @@ module Location
     site.setLongitude(hpxml_bldg.longitude)
     site.setTimeZone(hpxml_bldg.time_zone_utc_offset)
     site.setElevation(UnitConversions.convert(hpxml_bldg.elevation, 'ft', 'm').round)
-    
+
     # Tell EnergyPlus to use these values, not what's in the weather station (which
     # may be at a very different, e.g., elevation)
     site.setKeepSiteLocationInformation(true)
