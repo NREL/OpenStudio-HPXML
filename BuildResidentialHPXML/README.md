@@ -115,9 +115,7 @@ The availability of the natural ventilation schedule during unavailable periods.
 Value must be a divisor of 60. If auto or not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
 
 - **Name:** ``simulation_control_timestep``
-- **Type:** ``Integer``
-
-- **Units:** ``min``
+- **Type:** ``String``
 
 - **Required:** ``false``
 
@@ -336,12 +334,10 @@ Zip code of the home address. Either this or the Weather Station: EnergyPlus Wea
 
 **Site: Time Zone UTC Offset**
 
-Time zone UTC offset of the home address. Must be between -12 and 14. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+Time zone UTC offset of the home address. Must be between -12 and 14. If auto or not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
 
 - **Name:** ``site_time_zone_utc_offset``
-- **Type:** ``Double``
-
-- **Units:** ``hr``
+- **Type:** ``String``
 
 - **Required:** ``false``
 

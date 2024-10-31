@@ -51,10 +51,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                      default_href: nil)
 
       fail "Specified #{type} argument with no choices." if type == Argument::Choice && choices.empty?
+      fail 'Specified required argument with indication of OS-HPXML default.' if required && !default_href.nil?
 
-      if type == Argument::Boolean && !default_href.nil?
-        choices = ['true', 'false']
-        type = Argument::Choice
+      if !default_href.nil?
+        if type == Argument::Boolean
+          choices = ['true', 'false']
+          type = Argument::Choice
+        elsif [Argument::Double, Argument::Integer].include?(type)
+          type = Argument::String
+        end
       end
 
       if choices.empty?
@@ -304,11 +309,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Zip code of the home address. Either this or the Weather Station: EnergyPlus Weather (EPW) Filepath input below must be provided.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_time_zone_utc_offset', false)
-    arg.setDisplayName('Site: Time Zone UTC Offset')
-    arg.setDescription("Time zone UTC offset of the home address. Must be between -12 and 14. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
-    arg.setUnits('hr')
-    args << arg
+    args << makeArgument(
+      name: 'site_time_zone_utc_offset',
+      type: Argument::Double,
+      required: false,
+      display_name: 'Site: Time Zone UTC Offset',
+      description: 'Time zone UTC offset of the home address. Must be between -12 and 14.',
+      units: 'hr',
+      default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
+    )
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_elevation', false)
     arg.setDisplayName('Site: Elevation')
@@ -333,10 +342,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Path of the EPW file. Either this or the Site: Zip Code input above must be provided.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('year_built', false)
-    arg.setDisplayName('Building Construction: Year Built')
-    arg.setDescription('The year the building was built.')
-    args << arg
+    args << makeArgument(
+      name: 'year_built',
+      type: Argument::Integer,
+      required: false,
+      display_name: 'Building Construction: Year Built',
+      description: 'The year the building was built.'
+    )
 
     unit_type_choices = OpenStudio::StringVector.new
     unit_type_choices << HPXML::ResidentialTypeSFD
@@ -360,7 +372,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       type: Argument::Boolean,
       required: false,
       display_name: 'Geometry: Unit Left Wall Is Adiabatic',
-      description: 'Presence of an adiabatic left wall.'
+      description: 'Presence of an adiabatic left wall.',
+      default_value: false
     )
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_right_wall_is_adiabatic', false)
@@ -3610,6 +3623,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     Version.check_openstudio_version()
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
+    # FIXME
+    args[:simulation_control_timestep] = Integer(args[:simulation_control_timestep]) if !args[:simulation_control_timestep].nil?
 
     # Argument error checks
     warnings, errors = validate_arguments(args)
