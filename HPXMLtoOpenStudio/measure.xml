@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>53b7c4e2-eb4d-4c61-ae60-ffa1bd5720e0</version_id>
-  <version_modified>2024-10-31T22:53:38Z</version_modified>
+  <version_id>84519ba8-3296-443e-adb6-f519ee9cf1fe</version_id>
+  <version_modified>2024-10-31T22:55:25Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -417,7 +417,7 @@
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5ACAD08F</checksum>
+      <checksum>E5CD0079</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
@@ -459,7 +459,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>148D882B</checksum>
+      <checksum>4949F4F8</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -627,7 +627,7 @@
       <filename>version.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C8C5DD23</checksum>
+      <checksum>084EA5B1</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
