@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>52faa88c-34bf-4073-bdcf-f6bba32cdc80</version_id>
-  <version_modified>2024-10-31T17:20:50Z</version_modified>
+  <version_id>82eee37a-5270-41a4-9564-ede4f4a64823</version_id>
+  <version_modified>2024-10-31T17:36:41Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -88,7 +88,7 @@
     <argument>
       <name>schedules_unavailable_period_window_natvent_availabilities</name>
       <display_name>Schedules: Unavailable Period Window Natural Ventilation Availabilities</display_name>
-      <description>The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-unavailable-periods'&gt;HPXML Unavailable Periods&lt;/a&gt;) is used.</description>
+      <description>The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If auto or not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-unavailable-periods'&gt;HPXML Unavailable Periods&lt;/a&gt;) is used.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -96,7 +96,7 @@
     <argument>
       <name>simulation_control_timestep</name>
       <display_name>Simulation Control: Timestep</display_name>
-      <description>Value must be a divisor of 60. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'&gt;HPXML Simulation Control&lt;/a&gt;) is used.</description>
+      <description>Value must be a divisor of 60. If auto or not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'&gt;HPXML Simulation Control&lt;/a&gt;) is used.</description>
       <type>Integer</type>
       <units>min</units>
       <required>false</required>
@@ -122,11 +122,15 @@
     <argument>
       <name>simulation_control_daylight_saving_enabled</name>
       <display_name>Simulation Control: Daylight Saving Enabled</display_name>
-      <description>Whether to use daylight saving. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-site'&gt;HPXML Building Site&lt;/a&gt;) is used.</description>
-      <type>Boolean</type>
+      <description>Whether to use daylight saving. If auto or not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-site'&gt;HPXML Building Site&lt;/a&gt;) is used.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <choices>
+        <choice>
+          <value>auto</value>
+          <display_name>auto</display_name>
+        </choice>
         <choice>
           <value>true</value>
           <display_name>true</display_name>
@@ -156,11 +160,15 @@
     <argument>
       <name>simulation_control_defrost_model_type</name>
       <display_name>Simulation Control: Defrost Model Type</display_name>
-      <description>Research feature to select the type of defrost model. Use standard for default E+ defrost setting. Use advanced for an improved model that better accounts for load and energy use during defrost; using advanced may impact simulation runtime. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'&gt;HPXML Simulation Control&lt;/a&gt;) is used.</description>
+      <description>Research feature to select the type of defrost model. Use standard for default E+ defrost setting. Use advanced for an improved model that better accounts for load and energy use during defrost; using advanced may impact simulation runtime. If auto or not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'&gt;HPXML Simulation Control&lt;/a&gt;) is used.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <choices>
+        <choice>
+          <value>auto</value>
+          <display_name>auto</display_name>
+        </choice>
         <choice>
           <value>standard</value>
           <display_name>standard</display_name>
@@ -747,7 +755,6 @@
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -2346,11 +2353,15 @@
     <argument>
       <name>air_leakage_has_flue_or_chimney_in_conditioned_space</name>
       <display_name>Air Leakage: Has Flue or Chimney in Conditioned Space</display_name>
-      <description>Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#flue-or-chimney'&gt;Flue or Chimney&lt;/a&gt;) is used.</description>
-      <type>Boolean</type>
+      <description>Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If auto or not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#flue-or-chimney'&gt;Flue or Chimney&lt;/a&gt;) is used.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <choices>
+        <choice>
+          <value>auto</value>
+          <display_name>auto</display_name>
+        </choice>
         <choice>
           <value>true</value>
           <display_name>true</display_name>
@@ -7487,7 +7498,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>83AFC83A</checksum>
+      <checksum>D173B5CB</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -7504,7 +7515,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4B1D3547</checksum>
+      <checksum>8828F84A</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>

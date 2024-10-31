@@ -49,16 +49,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                      default_value: nil,
                      choices: [],
                      default_href: nil)
+
+      fail "Specified #{type} argument with no choices." if type == Argument::Choice && choices.empty?
+
+      if type == Argument::Boolean && !default_href.nil?
+        choices = ['true', 'false']
+        type = Argument::Choice
+      end
+
       if choices.empty?
         arg = OpenStudio::Measure::OSArgument.send(type, name, required)
       else
+        if !default_href.nil?
+          choices.unshift(Argument::Auto)
+        end
         arg = OpenStudio::Measure::OSArgument.send(type, name, choices, required)
       end
       arg.setDisplayName(display_name)
       arg.setUnits(units) if !units.nil?
       arg.setDefaultValue(default_value) if !default_value.nil?
       if !default_href.nil?
-        description += " If not provided, the OS-HPXML default (see #{default_href}) is used."
+        description += " If #{Argument::Auto} or not provided, the OS-HPXML default (see #{default_href}) is used."
       end
       arg.setDescription(description)
       return arg
@@ -160,10 +171,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("This numeric field should contain the calendar year that determines the start day of week. If you are running simulations using AMY weather files, the value entered for calendar year will not be used; it will be overridden by the actual year found in the AMY weather file. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('simulation_control_daylight_saving_enabled', false)
-    arg.setDisplayName('Simulation Control: Daylight Saving Enabled')
-    arg.setDescription("Whether to use daylight saving. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-site'>HPXML Building Site</a>) is used.")
-    args << arg
+    args << makeArgument(
+      name: 'simulation_control_daylight_saving_enabled',
+      type: Argument::Boolean,
+      required: false,
+      display_name: 'Simulation Control: Daylight Saving Enabled',
+      description: 'Whether to use daylight saving.',
+      default_href: "<a href='#{docs_base_url}#hpxml-building-site'>HPXML Building Site</a>"
+    )
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_daylight_saving_period', false)
     arg.setDisplayName('Simulation Control: Daylight Saving Period')
@@ -340,11 +355,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::ResidentialTypeSFD)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_left_wall_is_adiabatic', false)
-    arg.setDisplayName('Geometry: Unit Left Wall Is Adiabatic')
-    arg.setDescription('Presence of an adiabatic left wall.')
-    arg.setDefaultValue(false)
-    args << arg
+    args << makeArgument(
+      name: 'geometry_unit_left_wall_is_adiabatic',
+      type: Argument::Boolean,
+      required: false,
+      display_name: 'Geometry: Unit Left Wall Is Adiabatic',
+      description: 'Presence of an adiabatic left wall.'
+    )
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_right_wall_is_adiabatic', false)
     arg.setDisplayName('Geometry: Unit Right Wall Is Adiabatic')
@@ -1194,10 +1211,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Type of air leakage if providing a numeric air leakage value. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('air_leakage_has_flue_or_chimney_in_conditioned_space', false)
-    arg.setDisplayName('Air Leakage: Has Flue or Chimney in Conditioned Space')
-    arg.setDescription("Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#flue-or-chimney'>Flue or Chimney</a>) is used.")
-    args << arg
+    args << makeArgument(
+      name: 'air_leakage_has_flue_or_chimney_in_conditioned_space',
+      type: Argument::Boolean,
+      required: false,
+      display_name: 'Air Leakage: Has Flue or Chimney in Conditioned Space',
+      description: 'Presence of flue or chimney with combustion air from conditioned space; used for infiltration model.',
+      default_href: "<a href='#{docs_base_url}#flue-or-chimney'>Flue or Chimney</a>"
+    )
 
     heating_system_type_choices = OpenStudio::StringVector.new
     heating_system_type_choices << Constants::None

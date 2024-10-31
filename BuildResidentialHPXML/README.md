@@ -101,7 +101,7 @@ Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - 
 
 **Schedules: Unavailable Period Window Natural Ventilation Availabilities**
 
-The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-unavailable-periods'>HPXML Unavailable Periods</a>) is used.
+The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If auto or not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-unavailable-periods'>HPXML Unavailable Periods</a>) is used.
 
 - **Name:** ``schedules_unavailable_period_window_natvent_availabilities``
 - **Type:** ``String``
@@ -112,7 +112,7 @@ The availability of the natural ventilation schedule during unavailable periods.
 
 **Simulation Control: Timestep**
 
-Value must be a divisor of 60. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+Value must be a divisor of 60. If auto or not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
 
 - **Name:** ``simulation_control_timestep``
 - **Type:** ``Integer``
@@ -149,12 +149,14 @@ This numeric field should contain the calendar year that determines the start da
 
 **Simulation Control: Daylight Saving Enabled**
 
-Whether to use daylight saving. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-site'>HPXML Building Site</a>) is used.
+Whether to use daylight saving. If auto or not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-site'>HPXML Building Site</a>) is used.
 
 - **Name:** ``simulation_control_daylight_saving_enabled``
-- **Type:** ``Boolean``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `auto`, `true`, `false`
 
 <br/>
 
@@ -182,14 +184,14 @@ Affects the transient calculation of indoor air temperatures. If not provided, t
 
 **Simulation Control: Defrost Model Type**
 
-Research feature to select the type of defrost model. Use standard for default E+ defrost setting. Use advanced for an improved model that better accounts for load and energy use during defrost; using advanced may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+Research feature to select the type of defrost model. Use standard for default E+ defrost setting. Use advanced for an improved model that better accounts for load and energy use during defrost; using advanced may impact simulation runtime. If auto or not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
 
 - **Name:** ``simulation_control_defrost_model_type``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `standard`, `advanced`
+- **Choices:** `auto`, `standard`, `advanced`
 
 <br/>
 
@@ -1833,12 +1835,14 @@ Type of air leakage if providing a numeric air leakage value. If 'unit total', r
 
 **Air Leakage: Has Flue or Chimney in Conditioned Space**
 
-Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#flue-or-chimney'>Flue or Chimney</a>) is used.
+Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If auto or not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#flue-or-chimney'>Flue or Chimney</a>) is used.
 
 - **Name:** ``air_leakage_has_flue_or_chimney_in_conditioned_space``
-- **Type:** ``Boolean``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `auto`, `true`, `false`
 
 <br/>
 

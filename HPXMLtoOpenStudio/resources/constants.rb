@@ -144,6 +144,7 @@ end
 
 # TODO
 module Argument
+  Auto = 'auto'
   Choice = 'makeChoiceArgument'
   String = 'makeStringArgument'
   Double = 'makeDoubleArgument'
