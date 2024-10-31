@@ -3514,36 +3514,36 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.electric_panels[0].headroom_breaker_spaces = 5
     panel_loads = hpxml_bldg.electric_panels[0].panel_loads
     htg_load = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
-    htg_load.watts = 1000
+    htg_load.power = 1000
     htg_load.voltage = HPXML::ElectricPanelVoltage120
     htg_load.breaker_spaces = 0
     htg_load.addition = true
     clg_load = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }
-    clg_load.watts = 2000
+    clg_load.power = 2000
     clg_load.voltage = HPXML::ElectricPanelVoltage120
     clg_load.breaker_spaces = 1
     clg_load.addition = true
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
-                    watts: 3000,
+                    power: 3000,
                     voltage: HPXML::ElectricPanelVoltage120,
                     breaker_spaces: 2,
                     addition: true,
                     system_idrefs: [hpxml_bldg.water_heating_systems[0].id])
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                    watts: 4000,
+                    power: 4000,
                     voltage: HPXML::ElectricPanelVoltage120,
                     breaker_spaces: 3,
                     addition: true,
                     system_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     hpxml_bldg.dishwashers.add(id: "Dishwasher#{hpxml_bldg.dishwashers.size + 1}")
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher,
-                    watts: 5000,
+                    power: 5000,
                     voltage: HPXML::ElectricPanelVoltage120,
                     breaker_spaces: 4,
                     addition: true,
                     system_idrefs: [hpxml_bldg.dishwashers[0].id])
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
-                    watts: 6000,
+                    power: 6000,
                     voltage: HPXML::ElectricPanelVoltage120,
                     breaker_spaces: 5,
                     addition: true,
@@ -3557,10 +3557,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 4000, HPXML::ElectricPanelVoltage120, 3, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeDishwasher, 5000, HPXML::ElectricPanelVoltage120, 4, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 6000, HPXML::ElectricPanelVoltage120, 5, true)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 120, HPXML::ElectricPanelVoltage120, 1, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 3684, HPXML::ElectricPanelVoltage120, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage120, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLaundry, 1500, HPXML::ElectricPanelVoltage120, 1, false)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559 + 120, HPXML::ElectricPanelVoltage120, 2, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559, HPXML::ElectricPanelVoltage120, 1, false)
 
     # Test w/ TotalBreakerSpaces instead of HeadroomBreakerSpaces
     hpxml_bldg.electric_panels[0].headroom_breaker_spaces = nil
@@ -3574,10 +3575,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 4000, HPXML::ElectricPanelVoltage120, 3, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeDishwasher, 5000, HPXML::ElectricPanelVoltage120, 4, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 6000, HPXML::ElectricPanelVoltage120, 5, true)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 120, HPXML::ElectricPanelVoltage120, 1, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 3684, HPXML::ElectricPanelVoltage120, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage120, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLaundry, 1500, HPXML::ElectricPanelVoltage120, 1, false)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559 + 120, HPXML::ElectricPanelVoltage120, 2, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559, HPXML::ElectricPanelVoltage120, 1, false)
 
     # Test defaults
     hpxml_bldg.electric_panels[0].voltage = nil
@@ -3585,7 +3587,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.electric_panels[0].headroom_breaker_spaces = nil
     hpxml_bldg.electric_panels[0].total_breaker_spaces = nil
     hpxml_bldg.electric_panels[0].panel_loads.each do |panel_load|
-      panel_load.watts = nil
+      panel_load.power = nil
       panel_load.voltage = nil
       panel_load.breaker_spaces = nil
       panel_load.addition = nil
@@ -3599,10 +3601,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 0, HPXML::ElectricPanelVoltage240, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeDishwasher, 1200, HPXML::ElectricPanelVoltage120, 1, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 0, HPXML::ElectricPanelVoltage240, 0, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 120, HPXML::ElectricPanelVoltage120, 1, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 3684, HPXML::ElectricPanelVoltage120, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage120, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLaundry, 1500, HPXML::ElectricPanelVoltage120, 1, false)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559 + 120, HPXML::ElectricPanelVoltage120, 2, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559, HPXML::ElectricPanelVoltage120, 1, false)
   end
 
   def test_batteries
@@ -5787,11 +5790,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_panel_load_values(hpxml_bldg, type, watts, voltage, breaker_spaces, addition)
+  def _test_default_panel_load_values(hpxml_bldg, type, power, voltage, breaker_spaces, addition)
     panel_loads = hpxml_bldg.electric_panels[0].panel_loads
     pl = panel_loads.select { |pl| pl.type == type }
 
-    assert_in_epsilon(watts, pl.map { |pl| pl.watts }.sum(0.0), 0.01)
+    assert_in_epsilon(power, pl.map { |pl| pl.power }.sum(0.0), 0.01)
     assert_equal(voltage, pl.map { |pl| pl.voltage }.first)
     assert_equal(breaker_spaces, pl.map { |pl| pl.breaker_spaces }.sum(0.0))
     assert_equal(addition, pl.map { |pl| pl.addition }.first)

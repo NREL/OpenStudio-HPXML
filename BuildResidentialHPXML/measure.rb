@@ -1258,21 +1258,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    electric_panel_voltage_choices = OpenStudio::StringVector.new
-    electric_panel_voltage_choices << HPXML::ElectricPanelVoltage120
-    electric_panel_voltage_choices << HPXML::ElectricPanelVoltage240
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_panel_load_heating_watts', false)
-    arg.setDisplayName('Heating System: Panel Load Heating Watts')
-    arg.setDescription("Specifies the panel load heating watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_panel_load_addition', false)
-    arg.setDisplayName('Heating System: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
     arg.setDisplayName('Cooling System: Type')
     arg.setDescription("The type of cooling system. Use '#{Constants::None}' if there is no cooling system or if there is a heat pump serving a cooling load.")
@@ -1371,17 +1356,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooling System: Integrated Heating System Fraction Heat Load Served')
     arg.setDescription("The heating load served by the heating system integrated into cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}.")
     arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_panel_load_cooling_watts', false)
-    arg.setDisplayName('Cooling System: Panel Load Cooling Watts')
-    arg.setDescription("Specifies the panel load cooling watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooling_system_panel_load_addition', false)
-    arg.setDisplayName('Cooling System: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     heat_pump_type_choices = OpenStudio::StringVector.new
@@ -1592,29 +1566,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_crankcase_heater_watts', false)
-    arg.setDisplayName('Heat Pump: Crankcase Heater Power Watts')
-    arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_panel_load_heating_watts', false)
-    arg.setDisplayName('Heat Pump: Panel Load Heating Watts')
-    arg.setDescription("Specifies the panel load heating watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_panel_load_cooling_watts', false)
-    arg.setDisplayName('Heat Pump: Panel Load Cooling Watts')
-    arg.setDescription("Specifies the panel load cooling watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_panel_load_addition', false)
-    arg.setDisplayName('Heat Pump: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    args << arg
-
     perf_data_capacity_type_choices = OpenStudio::StringVector.new
     perf_data_capacity_type_choices << 'Absolute capacities'
     perf_data_capacity_type_choices << 'Normalized capacity fractions'
@@ -1815,17 +1766,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.')
     arg.setUnits('Frac')
     arg.setDefaultValue(0.25)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_panel_load_heating_watts', false)
-    arg.setDisplayName('Heating System 2: Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_2_panel_load_addition', false)
-    arg.setDisplayName('Heating System 2: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekday_setpoint', false)
@@ -2187,17 +2127,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('hr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fans_panel_load_watts', false)
-    arg.setDisplayName('Kitchen Fans: Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('kitchen_fans_panel_load_addition', false)
-    arg.setDisplayName('Kitchen Fans: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('bathroom_fans_quantity', false)
     arg.setDisplayName('Bathroom Fans: Quantity')
     arg.setDescription("The quantity of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
@@ -2226,17 +2155,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Bathroom Fans: Start Hour')
     arg.setDescription("The start hour of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('hr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_panel_load_watts', false)
-    arg.setDisplayName('Bathroom Fans: Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('bathroom_fans_panel_load_addition', false)
-    arg.setDisplayName('Bathroom Fans: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('whole_house_fan_present', true)
@@ -2404,23 +2322,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_operating_mode', water_heater_operating_mode_choices, false)
     arg.setDisplayName('Water Heater: Operating Mode')
     arg.setDescription("The water heater operating mode. The '#{HPXML::WaterHeaterOperatingModeHeatPumpOnly}' option only uses the heat pump, while '#{HPXML::WaterHeaterOperatingModeHybridAuto}' allows the backup electric resistance to come on in high demand situations. This is ignored if a scheduled operating mode type is selected. Applies only to #{HPXML::WaterHeaterTypeHeatPump}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_panel_load_watts', false)
-    arg.setDisplayName('Water Heater: Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_panel_load_voltage', electric_panel_voltage_choices, false)
-    arg.setDisplayName('Water Heater: Panel Load Voltage')
-    arg.setDescription("Specifies the panel load voltage. Only applies to #{HPXML::WaterHeaterTypeHeatPump} (compressor). If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('V')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_panel_load_addition', false)
-    arg.setDisplayName('Water Heater: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     hot_water_distribution_system_type_choices = OpenStudio::StringVector.new
@@ -2751,6 +2652,257 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('#')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heating_system_power', false)
+    arg.setDisplayName('Electric Panel: Heating System Power')
+    arg.setDescription("Specifies the panel load heating system power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heating_system_addition', false)
+    arg.setDisplayName('Electric Panel: Heating System Addition')
+    arg.setDescription("Specifies whether the panel load heating sysem is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_cooling_system_power', false)
+    arg.setDisplayName('Electric Panel: Cooling System Power')
+    arg.setDescription("Specifies the panel load cooling system power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_cooling_system_addition', false)
+    arg.setDisplayName('Electric Panel: Cooling System Addition')
+    arg.setDescription("Specifies whether the panel load cooling system is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_heating_power', false)
+    arg.setDisplayName('Electric Panel: Heat Pump Heating Power')
+    arg.setDescription("Specifies the panel load heating power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_cooling_power', false)
+    arg.setDisplayName('Electric Panel: Heat Pump Cooling Power')
+    arg.setDescription("Specifies the panel load heat pump cooling power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heat_pump_addition', false)
+    arg.setDisplayName('Electric Panel: Heat Pump Addition')
+    arg.setDescription("Specifies whether the panel load heat pump is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heating_system_2_power', false)
+    arg.setDisplayName('Electric Panel: Heating System 2 Power')
+    arg.setDescription("Specifies the panel load second heating system power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heating_system_2_addition', false)
+    arg.setDisplayName('Electric Panel: Heating System 2 Addition')
+    arg.setDescription("Specifies whether the panel load second heating system is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_mech_vent_power', false)
+    arg.setDisplayName('Electric Panel: Mechanical Ventilation Power')
+    arg.setDescription("Specifies the panel load mechanical ventilation  power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_mech_vent_fan_addition', false)
+    arg.setDisplayName('Electric Panel: Mechanical Ventilation Addition')
+    arg.setDescription("Specifies whether the panel load mechanical ventilation  is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_mech_vent_2_power', false)
+    arg.setDisplayName('Electric Panel: Mechanical Ventilation 2 Power')
+    arg.setDescription("Specifies the panel load second mechanical ventilation power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_mech_vent_2_addition', false)
+    arg.setDisplayName('Electric Panel: Mechanical Ventilation 2 Addition')
+    arg.setDescription("Specifies whether the panel load second mechanical ventilation is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_whole_house_fan_power', false)
+    arg.setDisplayName('Electric Panel: Whole House Fan Power')
+    arg.setDescription("Specifies the panel load whole house fan power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_whole_house_fan_addition', false)
+    arg.setDisplayName('Electric Panel: Whole House Fan Addition')
+    arg.setDescription("Specifies whether the panel load whole house fan is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_kitchen_fans_power', false)
+    arg.setDisplayName('Electric Panel: Kitchen Fans Power')
+    arg.setDescription("Specifies the panel load kitchen fans power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_kitchen_fans_addition', false)
+    arg.setDisplayName('Electric Panel: Kitchen Fans Addition')
+    arg.setDescription("Specifies whether the panel load kitchen fans is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_bathroom_fans_power', false)
+    arg.setDisplayName('Electric Panel: Bathroom Fans Power')
+    arg.setDescription("Specifies the panel load bathroom fans power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_bathroom_fans_addition', false)
+    arg.setDisplayName('Electric Panel: Bathroom Fans Addition')
+    arg.setDescription("Specifies whether the panel load bathroom fans is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_water_heater_power', false)
+    arg.setDisplayName('Electric Panel: Water Heater Power')
+    arg.setDescription("Specifies the panel load water heater power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_water_heater_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Water Heater Voltage')
+    arg.setDescription("Specifies the panel load water heater voltage. Only applies to #{HPXML::WaterHeaterTypeHeatPump} (compressor). If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_water_heater_addition', false)
+    arg.setDisplayName('Electric Panel: Water Heater Addition')
+    arg.setDescription("Specifies whether the panel load water heater is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_clothes_dryer_power', false)
+    arg.setDisplayName('Electric Panel: Clothes Dryer Power')
+    arg.setDescription("Specifies the panel load power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_clothes_dryer_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Clothes Dryer Voltage')
+    arg.setDescription("Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_clothes_dryer_addition', false)
+    arg.setDisplayName('Electric Panel: Clothes Dryer Addition')
+    arg.setDescription("Specifies whether the panel load clothes dryer is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_dishwasher_power', false)
+    arg.setDisplayName('Electric Panel: Dishwasher Power')
+    arg.setDescription("Specifies the panel load dishwasher power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_dishwasher_addition', false)
+    arg.setDisplayName('Electric Panel: Dishwasher Addition')
+    arg.setDescription("Specifies whether the panel load dishwasher is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_cooking_range_power', false)
+    arg.setDisplayName('Electric Panel: Cooking Range/Oven Power')
+    arg.setDescription("Specifies the panel load cooking range/oven power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_cooking_range_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Cooking Range/Oven Voltage')
+    arg.setDescription("Specifies the panel load cooking range/oven voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_cooking_range_addition', false)
+    arg.setDisplayName('Electric Panel: Cooking Range/Oven Addition')
+    arg.setDescription("Specifies whether the panel load cooking range/oven is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_misc_plug_loads_well_pump_power', false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Well Pump Power')
+    arg.setDescription("Specifies the panel load well pump power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_misc_plug_loads_well_pump_addition', false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Well Pump Addition')
+    arg.setDescription("Specifies whether the panel load well pump is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_misc_plug_loads_vehicle_power', false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle Power')
+    arg.setDescription("Specifies the panel load electric vehicle power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_misc_plug_loads_vehicle_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle Voltage')
+    arg.setDescription("Specifies the panel load electric vehicle voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_misc_plug_loads_vehicle_addition', false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle Addition')
+    arg.setDescription("Specifies whether the panel load electric vehicle is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_pool_pump_power', false)
+    arg.setDisplayName('Electric Panel: Pool Pump Power')
+    arg.setDescription("Specifies the panel load pool pump power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_pool_pump_addition', false)
+    arg.setDisplayName('Electric Panel: Pool Pump Addition')
+    arg.setDescription("Specifies whether the panel load pool pump is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_pool_heater_power', false)
+    arg.setDisplayName('Electric Panel: Pool Heater Power')
+    arg.setDescription("Specifies the panel load pool heater power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_pool_heater_addition', false)
+    arg.setDisplayName('Electric Panel: Pool Heater Addition')
+    arg.setDescription("Specifies whether the panel load pool heater is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_permanent_spa_pump_power', false)
+    arg.setDisplayName('Electric Panel: Permanent Spa Pump Power')
+    arg.setDescription("Specifies the panel load permanent spa pump power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_permanent_spa_pump_addition', false)
+    arg.setDisplayName('Electric Panel: Permanent Spa Pump Addition')
+    arg.setDescription("Specifies whether the panel load permanent spa pump is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_permanent_spa_heater_power', false)
+    arg.setDisplayName('Electric Panel: Permanent Spa Heater Power')
+    arg.setDescription("Specifies the panel load permanent spa heater power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_permanent_spa_heater_addition', false)
+    arg.setDisplayName('Electric Panel: Permanent Spa Heater Addition')
+    arg.setDescription("Specifies whether the panel load permanent spa heater is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_other_power', false)
+    arg.setDisplayName('Electric Panel: Other Power')
+    arg.setDescription("Specifies the panel load other power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_other_addition', false)
+    arg.setDisplayName('Electric Panel: Other Addition')
+    arg.setDescription("Specifies whether the panel load other is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    args << arg
+
     battery_location_choices = OpenStudio::StringVector.new
     battery_location_choices << HPXML::LocationConditionedSpace
     battery_location_choices << HPXML::LocationBasementConditioned
@@ -3077,23 +3229,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_panel_load_watts', false)
-    arg.setDisplayName('Clothes Dryer: Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_panel_load_voltage', electric_panel_voltage_choices, false)
-    arg.setDisplayName('Clothes Dryer: Panel Load Voltage')
-    arg.setDescription("Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('V')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('clothes_dryer_panel_load_addition', false)
-    arg.setDisplayName('Clothes Dryer: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dishwasher_present', true)
     arg.setDisplayName('Dishwasher: Present')
     arg.setDescription('Whether there is a dishwasher present.')
@@ -3154,17 +3289,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_usage_multiplier', false)
     arg.setDisplayName('Dishwasher: Usage Multiplier')
     arg.setDescription("Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_panel_load_watts', false)
-    arg.setDisplayName('Dishwasher: Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dishwasher_panel_load_addition', false)
-    arg.setDisplayName('Dishwasher: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('refrigerator_present', true)
@@ -3273,23 +3397,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooking_range_panel_load_watts', false)
-    arg.setDisplayName('Cooking Range/Oven: Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooking_range_panel_load_voltage', electric_panel_voltage_choices, false)
-    arg.setDisplayName('Cooking Range/Oven: Panel Load Voltage')
-    arg.setDescription("Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('V')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_panel_load_addition', false)
-    arg.setDisplayName('Cooking Range/Oven: Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ceiling_fan_present', true)
     arg.setDisplayName('Ceiling Fan: Present')
     arg.setDescription('Whether there are any ceiling fans.')
@@ -3377,17 +3484,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_well_pump_panel_load_watts', false)
-    arg.setDisplayName('Misc Plug Loads: Well Pump Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_well_pump_panel_load_addition', false)
-    arg.setDisplayName('Misc Plug Loads: Well Pump Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_vehicle_present', true)
     arg.setDisplayName('Misc Plug Loads: Vehicle Present')
     arg.setDescription('Whether there is an electric vehicle.')
@@ -3403,23 +3499,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_vehicle_usage_multiplier', false)
     arg.setDisplayName('Misc Plug Loads: Vehicle Usage Multiplier')
     arg.setDescription("Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_vehicle_panel_load_watts', false)
-    arg.setDisplayName('Misc Plug Loads: Vehicle Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_plug_loads_vehicle_panel_load_voltage', electric_panel_voltage_choices, false)
-    arg.setDisplayName('Misc Plug Loads: Vehicle Panel Load Voltage')
-    arg.setDescription("Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('V')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_vehicle_panel_load_addition', false)
-    arg.setDisplayName('Misc Plug Loads: Vehicle Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     misc_fuel_loads_fuel_choices = OpenStudio::StringVector.new
@@ -3533,17 +3612,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the pool pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#pool-pump'>Pool Pump</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pool_pump_panel_load_watts', false)
-    arg.setDisplayName('Pool: Pump Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pool_pump_panel_load_addition', false)
-    arg.setDisplayName('Pool: Pump Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pool_heater_type', heater_type_choices, true)
     arg.setDisplayName('Pool: Heater Type')
     arg.setDescription("The type of pool heater. Use '#{HPXML::TypeNone}' if there is no pool heater.")
@@ -3567,17 +3635,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the pool heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#pool-heater'>Pool Heater</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pool_heater_panel_load_watts', false)
-    arg.setDisplayName('Pool: Heater Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pool_heater_panel_load_addition', false)
-    arg.setDisplayName('Pool: Heater Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('permanent_spa_present', true)
     arg.setDisplayName('Permanent Spa: Present')
     arg.setDescription('Whether there is a permanent spa.')
@@ -3593,17 +3650,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_pump_usage_multiplier', false)
     arg.setDisplayName('Permanent Spa: Pump Usage Multiplier')
     arg.setDescription("Multiplier on the permanent spa pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#permanent-spa-pump'>Permanent Spa Pump</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_pump_panel_load_watts', false)
-    arg.setDisplayName('Permanent Spa: Pump Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('permanent_spa_pump_panel_load_addition', false)
-    arg.setDisplayName('Permanent Spa: Pump Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('permanent_spa_heater_type', heater_type_choices, true)
@@ -3627,17 +3673,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_heater_usage_multiplier', false)
     arg.setDisplayName('Permanent Spa: Heater Usage Multiplier')
     arg.setDescription("Multiplier on the permanent spa heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#permanent-spa-heater'>Permanent Spa Heater</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('permanent_spa_heater_panel_load_watts', false)
-    arg.setDisplayName('Permanent Spa: Heater Panel Load Watts')
-    arg.setDescription("Specifies the panel load watts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('permanent_spa_heater_panel_load_addition', false)
-    arg.setDisplayName('Permanent Spa: Heater Panel Load Addition')
-    arg.setDescription("Specifies whether the panel load is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('emissions_scenario_names', false)
@@ -7079,32 +7114,32 @@ module HPXMLFile
     hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.primary_system
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                        watts: args[:heating_system_panel_load_heating_watts],
-                        addition: args[:heating_system_panel_load_addition],
+                        power: args[:electric_panel_load_heating_system_power],
+                        addition: args[:electric_panel_load_heating_system_addition],
                         system_idrefs: [heating_system.id])
       else
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                        watts: args[:heating_system_2_panel_load_heating_watts],
-                        addition: args[:heating_system_2_panel_load_addition],
+                        power: args[:electric_panel_load_heating_system_2_power],
+                        addition: args[:electric_panel_load_heating_system_2_addition],
                         system_idrefs: [heating_system.id])
       end
     end
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
-                      watts: args[:cooling_system_panel_load_cooling_watts],
-                      addition: args[:cooling_system_panel_load_addition],
+                      power: args[:electric_panel_load_cooling_system_power],
+                      addition: args[:electric_panel_load_cooling_system_addition],
                       system_idrefs: [cooling_system.id])
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                      watts: args[:heat_pump_panel_load_heating_watts],
-                      addition: args[:heat_pump_panel_load_addition],
+                      power: args[:electric_panel_load_heat_pump_heating_power],
+                      addition: args[:electric_panel_load_heat_pump_addition],
                       system_idrefs: [heat_pump.id])
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
-                      watts: args[:heat_pump_panel_load_cooling_watts],
-                      addition: args[:heat_pump_panel_load_addition],
+                      power: args[:electric_panel_load_heat_pump_cooling_power],
+                      addition: args[:electric_panel_load_heat_pump_addition],
                       system_idrefs: [heat_pump.id])
     end
 
@@ -7112,9 +7147,9 @@ module HPXMLFile
       next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
-                      watts: args[:water_heater_panel_load_watts],
-                      voltage: args[:water_heater_panel_load_voltage],
-                      addition: args[:water_heater_panel_load_addition],
+                      power: args[:electric_panel_load_water_heater_power],
+                      voltage: args[:electric_panel_load_water_heater_voltage],
+                      addition: args[:electric_panel_load_water_heater_addition],
                       system_idrefs: [water_heating_system.id])
     end
 
@@ -7122,16 +7157,16 @@ module HPXMLFile
       next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                      watts: args[:clothes_dryer_panel_load_watts],
-                      voltage: args[:clothes_dryer_panel_load_voltage],
-                      addition: args[:clothes_dryer_panel_load_addition],
+                      power: args[:electric_panel_load_clothes_dryer_power],
+                      voltage: args[:electric_panel_load_clothes_dryer_voltage],
+                      addition: args[:electric_panel_load_clothes_dryer_addition],
                       system_idrefs: [clothes_dryer.id])
     end
 
     hpxml_bldg.dishwashers.each do |dishwasher|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher,
-                      watts: args[:dishwasher_panel_load_watts],
-                      addition: args[:dishwasher_panel_load_addition],
+                      power: args[:electric_panel_load_dishwasher_power],
+                      addition: args[:electric_panel_load_dishwasher_addition],
                       system_idrefs: [dishwasher.id])
     end
 
@@ -7139,61 +7174,94 @@ module HPXMLFile
       next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
-                      watts: args[:cooking_range_panel_load_watts],
-                      voltage: args[:cooking_range_panel_load_voltage],
-                      addition: args[:cooking_range_panel_load_addition],
+                      power: args[:electric_panel_load_cooking_range_power],
+                      voltage: args[:electric_panel_load_cooking_range_voltage],
+                      addition: args[:electric_panel_load_cooking_range_addition],
                       system_idrefs: [cooking_range.id])
+    end
+
+    kitchen_bath_fan_ids = []
+    hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+      next if !ventilation_fan.panel_loads.nil?
+      next if ![HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
+
+      kitchen_bath_fan_ids << ventilation_fan.id
+    end
+    if not kitchen_bath_fan_ids.empty?
+      power = 0
+      power += args[:electric_panel_load_kitchen_fans_power] if !args[:electric_panel_load_kitchen_fans_power].nil?
+      power += args[:electric_panel_load_bathroom_fans_power] if !args[:electric_panel_load_bathroom_fans_power].nil?
+
+      addition = false
+      addition = true if (!args[:electric_panel_load_kitchen_fans_addition].nil? && args[:electric_panel_load_kitchen_fans_addition]) || (!args[:electric_panel_load_bathroom_fans_addition].nil? && args[:electric_panel_load_bathroom_fans_addition])
+
+      panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
+                      power: power,
+                      addition: addition,
+                      system_idrefs: kitchen_bath_fan_ids)
+    end
+    hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+      if ventilation_fan.fan_type == args[:mech_vent_fan_type]
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
+                        power: args[:electric_panel_load_mech_vent_power],
+                        addition: args[:electric_panel_load_mech_vent_fan_addition],
+                        system_idrefs: [ventilation_fan.id])
+      elsif ventilation_fan.fan_type == args[:mech_vent_2_fan_type]
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
+                        power: args[:electric_panel_load_mech_vent_2_power],
+                        addition: args[:electric_panel_load_mech_vent_2_addition],
+                        system_idrefs: [ventilation_fan.id])
+      elsif ventilation_fan.used_for_seasonal_cooling_load_reduction
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
+                        power: args[:electric_panel_load_whole_house_fan_power],
+                        addition: args[:electric_panel_load_whole_house_fan_addition],
+                        system_idrefs: [ventilation_fan.id])
+      end
     end
 
     hpxml_bldg.permanent_spas.each do |permanent_spa|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaPump,
-                      watts: args[:permanent_spa_pump_panel_load_watts],
+                      power: args[:permanent_spa_pump_panel_load_watts],
                       addition: args[:permanent_spa_pump_panel_load_addition],
                       system_idrefs: [permanent_spa.pump_id])
 
-      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
-
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
-                      watts: args[:permanent_spa_heater_panel_load_watts],
+                      power: args[:permanent_spa_heater_panel_load_watts],
                       addition: args[:permanent_spa_heater_panel_load_addition],
                       system_idrefs: [permanent_spa.heater_id])
     end
 
     hpxml_bldg.pools.each do |pool|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolPump,
-                      watts: args[:pool_pump_panel_load_watts],
-                      addition: args[:pool_pump_panel_load_addition],
+                      power: args[:electric_panel_load_pool_pump_power],
+                      addition: args[:electric_panel_load_pool_pump_addition],
                       system_idrefs: [pool.pump_id])
 
-      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
-
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater,
-                      watts: args[:pool_heater_panel_load_watts],
-                      addition: args[:pool_heater_panel_load_addition],
+                      power: args[:electric_panel_load_pool_heater_power],
+                      addition: args[:electric_panel_load_pool_heater_addition],
                       system_idrefs: [pool.heater_id])
     end
 
     hpxml_bldg.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeWellPump,
-                        watts: args[:misc_plug_loads_well_pump_panel_load_watts],
-                        addition: args[:misc_plug_loads_well_pump_panel_load_addition],
+                        power: args[:electric_panel_load_misc_plug_loads_well_pump_power],
+                        addition: args[:electric_panel_load_misc_plug_loads_well_pump_addition],
                         system_idrefs: [plug_load.id])
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
-                        watts: args[:misc_plug_loads_vehicle_panel_load_watts],
-                        voltage: args[:misc_plug_loads_vehicle_panel_load_voltage],
-                        addition: args[:misc_plug_loads_vehicle_panel_load_addition],
+                        power: args[:electric_panel_load_misc_plug_loads_vehicle_power],
+                        voltage: args[:electric_panel_load_misc_plug_loads_vehicle_voltage],
+                        addition: args[:electric_panel_load_misc_plug_loads_vehicle_addition],
                         system_idrefs: [plug_load.id])
       end
     end
 
-    kitchen_bath_fan_ids = hpxml_bldg.ventilation_fans.select { |ventilation_fan| [HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location) }.map { |ventilation_fan| ventilation_fan.id }
-    if !kitchen_bath_fan_ids.empty?
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
-                      watts: args[:bathroom_fans_panel_load_watts],
-                      addition: args[:bathroom_fans_panel_load_addition],
-                      system_idrefs: kitchen_bath_fan_ids)
+    if !args[:electric_panel_load_other_power].nil?
+      panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricOther,
+                      power: args[:electric_panel_load_other_power],
+                      addition: args[:electric_panel_load_other_addition])
     end
   end
 

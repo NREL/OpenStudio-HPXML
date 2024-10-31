@@ -180,7 +180,7 @@ Generates HVAC capacities, design temperatures, and design loads.
 
 **Generate Annual Output: Electric Panel Summary**
 
-Generates electric panel capacities and panel loads.
+Generates electric panel loads, capacities, and breaker spaces.
 
 - **Name:** ``include_annual_panel_summary``
 - **Type:** ``Boolean``

@@ -1612,8 +1612,6 @@
     "geometry_unit_cfa": 1228,
     "heating_system_heating_capacity": 52280,
     "cooling_system_cooling_capacity": 14760,
-    "cooling_system_panel_load_cooling_watts": 3542,
-    "cooling_system_panel_load_addition": false,
     "water_heater_fuel_type": "natural gas",
     "cooking_range_oven_fuel_type": "natural gas",
     "clothes_dryer_fuel_type": "natural gas",
@@ -1623,7 +1621,9 @@
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
     "electric_panel_breaker_spaces_type": "headroom",
-    "electric_panel_breaker_spaces": 5
+    "electric_panel_breaker_spaces": 5,
+    "electric_panel_load_cooling_system_power": 3542,
+    "electric_panel_load_cooling_system_addition": false
   },
   "sample_files/base-detailed-electric-panel-low-load.xml": {
     "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
@@ -1651,27 +1651,27 @@
     "heat_pump_backup_type": "integrated",
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 27960,
-    "heat_pump_panel_load_heating_watts": 17943,
-    "heat_pump_panel_load_cooling_watts": 17943,
-    "heat_pump_panel_load_addition": true,
     "water_heater_fuel_type": "electricity",
     "cooking_range_oven_fuel_type": "electricity",
     "clothes_dryer_fuel_type": "electricity",
     "misc_plug_loads_vehicle_present": true,
     "electric_panel_breaker_spaces_type": "total",
-    "electric_panel_breaker_spaces": 12
+    "electric_panel_breaker_spaces": 12,
+    "electric_panel_load_heat_pump_heating_power": 17943,
+    "electric_panel_load_heat_pump_cooling_power": 17943,
+    "electric_panel_load_heat_pump_addition": true
   },
   "sample_files/base-detailed-electric-panel-upgrade-heat-pump-backup-separate.xml": {
     "parent_hpxml": "sample_files/base-detailed-electric-panel-upgrade-heat-pump-backup-integrated.xml",
     "heat_pump_backup_type": "separate",
     "heat_pump_heating_capacity": null,
     "heat_pump_cooling_capacity": null,
-    "heat_pump_panel_load_heating_watts": null,
-    "heat_pump_panel_load_cooling_watts": null,
     "heating_system_2_type": "Boiler",
     "heating_system_2_fuel": "natural gas",
     "heating_system_2_heating_efficiency": 0.8,
-    "heating_system_2_heating_capacity": 60000
+    "heating_system_2_heating_capacity": 60000,
+    "electric_panel_load_heat_pump_heating_power": null,
+    "electric_panel_load_heat_pump_cooling_power": null
   },
   "sample_files/base-detailed-electric-panel-upgrade-heat-pump-backup-separate-switchover.xml": {
     "parent_hpxml": "sample_files/base-detailed-electric-panel-upgrade-heat-pump-backup-separate.xml",

@@ -3250,6 +3250,29 @@ module Defaults
                         system_idrefs_isdefaulted: true)
       end
 
+      kitchen_bath_fan_ids = []
+      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+        next if !ventilation_fan.panel_loads.nil?
+        next if ![HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
+
+        kitchen_bath_fan_ids << ventilation_fan.id
+      end
+      if not kitchen_bath_fan_ids.empty?
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
+                        type_isdefaulted: true,
+                        system_idrefs: kitchen_bath_fan_ids,
+                        system_idrefs_isdefaulted: true)
+      end
+      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+        next if !ventilation_fan.panel_loads.nil?
+        next if kitchen_bath_fan_ids.include?(ventilation_fan.id)
+
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
+                        type_isdefaulted: true,
+                        system_idrefs: [ventilation_fan.id],
+                        system_idrefs_isdefaulted: true)
+      end
+
       hpxml_bldg.permanent_spas.each do |permanent_spa|
         next if !permanent_spa.panel_loads.nil?
 
@@ -3302,24 +3325,9 @@ module Defaults
                         system_idrefs_isdefaulted: true)
       end
 
-      ventilation_fan_ids = []
-      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
-        next if !ventilation_fan.panel_loads.nil?
-        next if ![HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
-
-        ventilation_fan_ids << ventilation_fan.id
-      end
-      if not ventilation_fan_ids.empty?
+      if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther } == 0
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
-                        type_isdefaulted: true,
-                        system_idrefs: ventilation_fan_ids,
-                        system_idrefs_isdefaulted: true)
-      end
-
-      if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther && pl.system_idrefs.empty? } == 0
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
-                        type_isdefaulted: true,
-                        system_idrefs: []) # for garbage disposal and garage door opener
+                        type_isdefaulted: true) # for garbage disposal and garage door opener
       end
       if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLighting } == 0
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting,
@@ -3339,10 +3347,10 @@ module Defaults
           panel_load.voltage = get_panel_load_voltage_default_values(hpxml_bldg, panel_load)
           panel_load.voltage_isdefaulted = true
         end
-        panel_load_watts_breaker_spaces_values = get_panel_load_watts_breaker_spaces_values(hpxml_bldg, panel_load)
-        if panel_load.watts.nil?
-          panel_load.watts = panel_load_watts_breaker_spaces_values[:watts].round
-          panel_load.watts_isdefaulted = true
+        panel_load_watts_breaker_spaces_values = get_panel_load_power_breaker_spaces_values(hpxml_bldg, panel_load)
+        if panel_load.power.nil?
+          panel_load.power = panel_load_watts_breaker_spaces_values[:power].round
+          panel_load.power_isdefaulted = true
         end
         if panel_load.breaker_spaces.nil?
           panel_load.breaker_spaces = panel_load_watts_breaker_spaces_values[:breaker_spaces]
@@ -5878,7 +5886,7 @@ module Defaults
   end
 
   # TODO
-  def self.get_panel_load_watts_breaker_spaces_values(hpxml_bldg, panel_load)
+  def self.get_panel_load_power_breaker_spaces_values(hpxml_bldg, panel_load)
     type = panel_load.type
     voltage = panel_load.voltage
     system_ids = panel_load.system_idrefs
@@ -6068,9 +6076,21 @@ module Defaults
         end
         breaker_spaces += 1
       end
+    elsif type == HPXML::ElectricPanelLoadTypeMechVent
+      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+        next if !system_ids.include?(ventilation_fan.id)
+
+        if ventilation_fan.fan_location == HPXML::LocationKitchen
+          watts += 90 * ventilation_fan.count
+        elsif ventilation_fan.fan_location == HPXML::LocationBath
+          watts += 15 * ventilation_fan.count
+        end
+      end
+      breaker_spaces += 1
     elsif type == HPXML::ElectricPanelLoadTypePermanentSpaHeater
       hpxml_bldg.permanent_spas.each do |permanent_spa|
         next if !system_ids.include?(permanent_spa.id)
+        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
 
         watts += 1000
         breaker_spaces += 2
@@ -6085,6 +6105,7 @@ module Defaults
     elsif type == HPXML::ElectricPanelLoadTypePoolHeater
       hpxml_bldg.pools.each do |pool|
         next if !system_ids.include?(pool.id)
+        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
 
         watts += 27000
         breaker_spaces += 2
@@ -6133,28 +6154,15 @@ module Defaults
       watts = + 1500
       breaker_spaces += 1
     elsif type == HPXML::ElectricPanelLoadTypeOther
-      if system_ids.empty?
-        watts += 559 # Garbage disposal
+      watts += 559 # Garbage disposal
 
-        if hpxml_bldg.has_location(HPXML::LocationGarage)
-          watts += 373 # Garage door opener
-        end
+      if hpxml_bldg.has_location(HPXML::LocationGarage)
+        watts += 373 # Garage door opener
       end
-
-      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
-        next if !system_ids.include?(ventilation_fan.id)
-
-        if ventilation_fan.fan_location == HPXML::LocationKitchen
-          watts += 90 * ventilation_fan.count
-        elsif ventilation_fan.fan_location == HPXML::LocationBath
-          watts += 15 * ventilation_fan.count
-        end
-      end
-
       breaker_spaces += 1
     end
 
-    return { watts: watts, breaker_spaces: breaker_spaces }
+    return { power: watts, breaker_spaces: breaker_spaces }
   end
 
   # Get default location, lifetime model, nominal capacity/voltage, round trip efficiency, and usable fraction for a battery.

@@ -491,13 +491,13 @@
                   <System idref='CookingRange1'/>
                 </PanelLoad>
                 <PanelLoad>
-                  <Type>Electric Vehicle Charging</Type>
-                  <System idref='PlugLoad3'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <Type>Other</Type>
+                  <Type>Mech Vent</Type>
                   <System idref='VentilationFan1'/>
                   <System idref='VentilationFan2'/>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Electric Vehicle Charging</Type>
+                  <System idref='PlugLoad3'/>
                 </PanelLoad>
               </PanelLoads>
             </extension>

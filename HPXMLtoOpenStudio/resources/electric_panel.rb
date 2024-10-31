@@ -49,10 +49,10 @@ module ElectricPanel
 
       heating_system = get_panel_load_heating_system(hpxml_bldg, panel_load)
       if !heating_system.nil?
-        heating_system_watts = panel_load.watts
+        heating_system_watts = panel_load.power
         primary_heat_pump_watts = 0
         if !heating_system.primary_heat_pump.nil?
-          primary_heat_pump_watts = electric_panel.panel_loads.find { |pl| pl.system_idrefs.include?(heating_system.primary_heat_pump.id) }.watts
+          primary_heat_pump_watts = electric_panel.panel_loads.find { |pl| pl.system_idrefs.include?(heating_system.primary_heat_pump.id) }.power
         end
 
         if addition.nil? ||
@@ -69,10 +69,10 @@ module ElectricPanel
       heat_pump = get_panel_load_heat_pump(hpxml_bldg, panel_load)
       next unless !heat_pump.nil?
 
-      heat_pump_watts = panel_load.watts
+      heat_pump_watts = panel_load.power
       backup_system_watts = 0
       if !heat_pump.backup_system.nil?
-        backup_system_watts = electric_panel.panel_loads.find { |pl| pl.system_idrefs.include?(heat_pump.backup_system.id) }.watts
+        backup_system_watts = electric_panel.panel_loads.find { |pl| pl.system_idrefs.include?(heat_pump.backup_system.id) }.power
       end
 
       next unless addition.nil? ||
@@ -92,15 +92,15 @@ module ElectricPanel
   def self.calculate_load_based(hpxml_bldg, electric_panel, panel_loads)
     htg_existing = get_panel_load_heating(hpxml_bldg, electric_panel, addition: false)
     htg_new = get_panel_load_heating(hpxml_bldg, electric_panel, addition: true)
-    clg_existing = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && !panel_load.addition }.map { |pl| pl.watts }.sum(0.0)
-    clg_new = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.addition }.map { |pl| pl.watts }.sum(0.0)
+    clg_existing = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && !panel_load.addition }.map { |pl| pl.power }.sum(0.0)
+    clg_new = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.addition }.map { |pl| pl.power }.sum(0.0)
 
     # Part A
     other_load = [htg_existing, clg_existing].max
     electric_panel.panel_loads.each do |panel_load|
       next if panel_load.type == HPXML::ElectricPanelLoadTypeHeating || panel_load.type == HPXML::ElectricPanelLoadTypeCooling
 
-      other_load += panel_load.watts
+      other_load += panel_load.power
     end
 
     threshold = 8000.0 # W
@@ -118,13 +118,13 @@ module ElectricPanel
   # TODO
   def self.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels)
     htg_new = get_panel_load_heating(hpxml_bldg, electric_panel, addition: true)
-    clg_new = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.addition }.map { |pl| pl.watts }.sum(0.0)
+    clg_new = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.addition }.map { |pl| pl.power }.sum(0.0)
 
     new_loads = [htg_new, clg_new].max
     electric_panel.panel_loads.each do |panel_load|
       next if panel_load.type == HPXML::ElectricPanelLoadTypeHeating || panel_load.type == HPXML::ElectricPanelLoadTypeCooling
 
-      new_loads += panel_load.watts if panel_load.addition
+      new_loads += panel_load.power if panel_load.addition
     end
 
     capacity_w = new_loads + 1.25 * peak_fuels[[FT::Elec, PFT::Annual]].annual_output

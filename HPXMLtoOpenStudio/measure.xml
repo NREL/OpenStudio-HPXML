@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5727e644-4336-4b7d-b9e3-6748cbc5717e</version_id>
-  <version_modified>2024-10-30T15:45:25Z</version_modified>
+  <version_id>53b7c4e2-eb4d-4c61-ae60-ffa1bd5720e0</version_id>
+  <version_modified>2024-10-31T22:53:38Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -327,13 +327,13 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>033CC576</checksum>
+      <checksum>A8809A47</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4DF1DCC4</checksum>
+      <checksum>E0D3E797</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -363,7 +363,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>42387553</checksum>
+      <checksum>982DF6A5</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -381,7 +381,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>53CD8B58</checksum>
+      <checksum>CAEE54F4</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -459,7 +459,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5D5A1F16</checksum>
+      <checksum>148D882B</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -669,13 +669,13 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>CC7BD074</checksum>
+      <checksum>F7C9127C</checksum>
     </file>
     <file>
       <filename>test_electric_panel.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>50B3A3E3</checksum>
+      <checksum>0F46197E</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>

@@ -998,41 +998,43 @@ module Outputs
 
   # TODO
   def self.get_total_panel_loads(hpxml_bldg)
-    htg, clg, hw, cd, dw, ov, sh, sp, ph, pp, wp, ev, ltg, oth = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    htg, clg, hw, cd, dw, ov, vf, sh, sp, ph, pp, wp, ev, ltg, oth = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     hpxml_bldg.electric_panels.each do |electric_panel|
       htg += ElectricPanel.get_panel_load_heating(hpxml_bldg, electric_panel) * unit_multiplier
       electric_panel.panel_loads.each do |panel_load|
         if panel_load.type == HPXML::ElectricPanelLoadTypeCooling
-          clg += panel_load.watts * unit_multiplier
+          clg += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeWaterHeater
-          hw += panel_load.watts * unit_multiplier
+          hw += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeClothesDryer
-          cd += panel_load.watts * unit_multiplier
+          cd += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeDishwasher
-          dw += panel_load.watts * unit_multiplier
+          dw += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeRangeOven
-          ov += panel_load.watts * unit_multiplier
+          ov += panel_load.power * unit_multiplier
+        elsif panel_load.type == HPXML::ElectricPanelLoadTypeMechVent
+          vf += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypePermanentSpaHeater
-          sh += panel_load.watts * unit_multiplier
+          sh += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypePermanentSpaPump
-          sp += panel_load.watts * unit_multiplier
+          sp += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypePoolHeater
-          ph += panel_load.watts * unit_multiplier
+          ph += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypePoolPump
-          pp += panel_load.watts * unit_multiplier
+          pp += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeWellPump
-          wp += panel_load.watts * unit_multiplier
+          wp += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging
-          ev += panel_load.watts * unit_multiplier
+          ev += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeLighting
-          ltg += panel_load.watts * unit_multiplier
+          ltg += panel_load.power * unit_multiplier
         elsif panel_load.type == HPXML::ElectricPanelLoadTypeOther
-          oth += panel_load.watts * unit_multiplier
+          oth += panel_load.power * unit_multiplier
         end
       end
     end
-    return htg, clg, hw, cd, dw, ov, sh, sp, ph, pp, wp, ev, ltg, oth
+    return htg, clg, hw, cd, dw, ov, vf, sh, sp, ph, pp, wp, ev, ltg, oth
   end
 
   # Calculates total HVAC airflow rates (across all HVAC systems) for a given HPXML Building.
@@ -1213,14 +1215,15 @@ module Outputs
     results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeClothesDryer} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[3] }.sum(0.0).round(1)]
     results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeDishwasher} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[4] }.sum(0.0).round(1)]
     results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeRangeOven} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[5] }.sum(0.0).round(1)]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypePermanentSpaHeater} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[6] }.sum(0.0).round(1)]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypePermanentSpaPump} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[7] }.sum(0.0).round(1)]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypePoolHeater} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[8] }.sum(0.0).round(1)]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypePoolPump} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[9] }.sum(0.0).round(1)]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeWellPump} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[10] }.sum(0.0).round(1)]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeElectricVehicleCharging} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[11] }.sum(0.0).round(1)]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeLighting} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[12] }.sum(0.0).round(1)]
-    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeOther} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[13] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeMechVent} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[6] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypePermanentSpaHeater} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[7] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypePermanentSpaPump} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[8] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypePoolHeater} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[9] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypePoolPump} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[10] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeWellPump} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[11] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeElectricVehicleCharging} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[12] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeLighting} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[13] }.sum(0.0).round(1)]
+    results_out << ["Electric Panel Load: #{HPXML::ElectricPanelLoadTypeOther} (W)", hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[14] }.sum(0.0).round(1)]
 
     # Load-based capacities
     results_out << [line_break]

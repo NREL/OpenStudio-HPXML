@@ -247,6 +247,7 @@ class ReportSimulationOutputTest < Minitest::Test
     'Electric Panel Load: Clothes Dryer (W)',
     'Electric Panel Load: Dishwasher (W)',
     'Electric Panel Load: Range/Oven (W)',
+    'Electric Panel Load: Mech Vent (W)',
     'Electric Panel Load: Permanent Spa Heater (W)',
     'Electric Panel Load: Permanent Spa Pump (W)',
     'Electric Panel Load: Pool Heater (W)',
@@ -1395,25 +1396,25 @@ class ReportSimulationOutputTest < Minitest::Test
     electric_panel.total_breaker_spaces = 12
     panel_loads = electric_panel.panel_loads
     pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
-    pl.watts = 17942
+    pl.power = 17942
     pl.addition = true
     pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }
-    pl.watts = 17942
+    pl.power = 17942
     pl.addition = true
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
-                    watts: 4500,
+                    power: 4500,
                     voltage: HPXML::ElectricPanelVoltage240,
                     breaker_spaces: 2,
                     addition: true,
                     system_idrefs: [hpxml_bldg.water_heating_systems[0].id])
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                    watts: 5760,
+                    power: 5760,
                     voltage: HPXML::ElectricPanelVoltage120,
                     breaker_spaces: 2,
                     addition: true,
                     system_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
-                    watts: 12000,
+                    power: 12000,
                     voltage: HPXML::ElectricPanelVoltage240,
                     breaker_spaces: 2,
                     addition: true,
@@ -1421,7 +1422,7 @@ class ReportSimulationOutputTest < Minitest::Test
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging)
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
-                    watts: 1650,
+                    power: 1650,
                     voltage: HPXML::ElectricPanelVoltage120,
                     breaker_spaces: 1,
                     addition: true,

@@ -121,6 +121,7 @@ class HPXML < Object
   ElectricPanelLoadTypeClothesDryer = 'Clothes Dryer'
   ElectricPanelLoadTypeDishwasher = 'Dishwasher'
   ElectricPanelLoadTypeRangeOven = 'Range/Oven'
+  ElectricPanelLoadTypeMechVent = 'Mech Vent'
   ElectricPanelLoadTypePermanentSpaHeater = 'Permanent Spa Heater'
   ElectricPanelLoadTypePermanentSpaPump = 'Permanent Spa Pump'
   ElectricPanelLoadTypePoolHeater = 'Pool Heater'
@@ -551,7 +552,7 @@ class HPXML < Object
                     cdl_lat_intgains: 'InternalLoads' }
 
   # Electric panel attributes
-  CLB_ATTRS = { clb_total_w: 'Watts',
+  CLB_ATTRS = { clb_total_w: 'Power',
                 clb_total_a: 'Amps',
                 clb_headroom_a: 'HeadroomAmps' }
   BS_ATTRS = { bs_total: 'Total',
@@ -9388,19 +9389,12 @@ class HPXML < Object
   # Object for /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/extension/PanelLoads/PanelLoad.
   class PanelLoad < BaseElement
     ATTRS = [:type,
-             :watts,
+             :power,
              :voltage,
              :breaker_spaces,
              :addition,
              :system_idrefs] # [Array<String>] TODO
     attr_accessor(*ATTRS)
-
-    # Returns the system for the panel load.
-    #
-    # @return [TODO] TODO
-    def system
-      # TODO
-    end
 
     # Deletes the current object from the array.
     #
@@ -9429,7 +9423,7 @@ class HPXML < Object
       panel_loads = XMLHelper.create_elements_as_needed(electric_panel, ['extension', 'PanelLoads'])
       panel_load = XMLHelper.add_element(panel_loads, 'PanelLoad')
       XMLHelper.add_element(panel_load, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
-      XMLHelper.add_element(panel_load, 'Watts', @watts, :float, @watts_isdefaulted) unless @watts.nil?
+      XMLHelper.add_element(panel_load, 'Power', @power, :float, @power_isdefaulted) unless @power.nil?
       XMLHelper.add_element(panel_load, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_element(panel_load, 'BreakerSpaces', @breaker_spaces, :integer, @breaker_spaces_isdefaulted) unless @breaker_spaces.nil?
       XMLHelper.add_element(panel_load, 'Addition', @addition, :boolean, @addition_isdefaulted) unless @addition.nil?
@@ -9449,7 +9443,7 @@ class HPXML < Object
       return if panel_load.nil?
 
       @type = XMLHelper.get_value(panel_load, 'Type', :string)
-      @watts = XMLHelper.get_value(panel_load, 'Watts', :float)
+      @power = XMLHelper.get_value(panel_load, 'Power', :float)
       @voltage = XMLHelper.get_value(panel_load, 'Voltage', :string)
       @breaker_spaces = XMLHelper.get_value(panel_load, 'BreakerSpaces', :integer)
       @addition = XMLHelper.get_value(panel_load, 'Addition', :boolean)
