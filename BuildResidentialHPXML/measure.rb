@@ -40,31 +40,114 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def arguments(model) # rubocop:disable Lint/UnusedMethodArgument
     docs_base_url = "https://openstudio-hpxml.readthedocs.io/en/v#{Version::OS_HPXML_Version}/workflow_inputs.html"
 
-    def makeArgument(name, type, required, display_name, units, default_value, choices, description)
-      if choices.nil?
+    def makeArgument(name:,
+                     type:,
+                     required:,
+                     display_name:,
+                     description:,
+                     units: nil,
+                     default_value: nil,
+                     choices: [],
+                     default_href: nil)
+      if choices.empty?
         arg = OpenStudio::Measure::OSArgument.send(type, name, required)
       else
         arg = OpenStudio::Measure::OSArgument.send(type, name, choices, required)
       end
       arg.setDisplayName(display_name)
-      arg.setDescription(description)
       arg.setUnits(units) if !units.nil?
       arg.setDefaultValue(default_value) if !default_value.nil?
+      if !default_href.nil?
+        description += " If not provided, the OS-HPXML default (see #{default_href}) is used."
+      end
+      arg.setDescription(description)
       return arg
     end
 
     args = OpenStudio::Measure::OSArgumentVector.new
 
-    args << makeArgument('hpxml_path', Argument::String, true, 'HPXML File Path', nil, nil, nil, 'Absolute/relative path of the HPXML file.')
-    args << makeArgument('existing_hpxml_path', Argument::String, false, 'Existing HPXML File Path', nil, nil, nil, 'Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).')
-    args << makeArgument('whole_sfa_or_mf_building_sim', Argument::Boolean, false, 'Whole SFA/MF Building Simulation?', nil, nil, nil, 'If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.')
-    args << makeArgument('software_info_program_used', Argument::String, false, 'Software Info: Program Used', nil, nil, nil, 'The name of the software program used.')
-    args << makeArgument('software_info_program_version', Argument::String, false, 'Software Info: Program Version', nil, nil, nil, 'The version of the software program used.')
-    args << makeArgument('schedules_filepaths', Argument::String, false, 'Schedules: CSV File Paths', nil, nil, nil, 'Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
-    args << makeArgument('schedules_unavailable_period_types', Argument::String, false, 'Schedules: Unavailable Period Types', nil, nil, nil, "Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: #{Schedule.unavailable_period_types.join(', ')}. If multiple periods, use a comma-separated list.")
-    args << makeArgument('schedules_unavailable_period_dates', Argument::String, false, 'Schedules: Unavailable Period Dates', nil, nil, nil, 'Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.')
-    args << makeArgument('schedules_unavailable_period_window_natvent_availabilities', Argument::String, false, 'Schedules: Unavailable Period Window Natural Ventilation Availabilities', nil, nil, nil, "The availability of the natural ventilation schedule during unavailable periods. Valid choices are: #{[HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].join(', ')}. If multiple periods, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-unavailable-periods'>HPXML Unavailable Periods</a>) is used.")
-    args << makeArgument('simulation_control_timestep', Argument::Integer, false, 'Simulation Control: Timestep', 'min', nil, nil, "Value must be a divisor of 60. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
+    args << makeArgument(
+      name: 'hpxml_path',
+      type: Argument::String,
+      required: true,
+      display_name: 'HPXML File Path',
+      description: 'Absolute/relative path of the HPXML file.'
+    )
+
+    args << makeArgument(
+      name: 'existing_hpxml_path',
+      type: Argument::String,
+      required: false,
+      display_name: 'Existing HPXML File Path',
+      description: 'Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).'
+    )
+
+    args << makeArgument(
+      name: 'whole_sfa_or_mf_building_sim',
+      type: Argument::Boolean,
+      required: false,
+      display_name: 'Whole SFA/MF Building Simulation?',
+      description: 'If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.'
+    )
+
+    args << makeArgument(
+      name: 'software_info_program_used',
+      type: Argument::String,
+      required: false,
+      display_name: 'Software Info: Program Used',
+      description: 'The name of the software program used.'
+    )
+
+    args << makeArgument(
+      name: 'software_info_program_version',
+      type: Argument::String,
+      required: false,
+      display_name: 'Software Info: Program Version',
+      description: 'The version of the software program used.'
+    )
+
+    args << makeArgument(
+      name: 'schedules_filepaths',
+      type: Argument::String,
+      required: false,
+      display_name: 'Schedules: CSV File Paths',
+      description: 'Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.'
+    )
+
+    args << makeArgument(
+      name: 'schedules_unavailable_period_types',
+      type: Argument::String,
+      required: false,
+      display_name: 'Schedules: Unavailable Period Types',
+      description: "Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: #{Schedule.unavailable_period_types.join(', ')}. If multiple periods, use a comma-separated list."
+    )
+
+    args << makeArgument(
+      name: 'schedules_unavailable_period_dates',
+      type: Argument::String,
+      required: false,
+      display_name: 'Schedules: Unavailable Period Dates',
+      description: 'Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.'
+    )
+
+    args << makeArgument(
+      name: 'schedules_unavailable_period_window_natvent_availabilities',
+      type: Argument::String,
+      required: false,
+      display_name: 'Schedules: Unavailable Period Window Natural Ventilation Availabilities',
+      description: "The availability of the natural ventilation schedule during unavailable periods. Valid choices are: #{[HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].join(', ')}. If multiple periods, use a comma-separated list.",
+      default_href: "<a href='#{docs_base_url}#hpxml-unavailable-periods'>HPXML Unavailable Periods</a>"
+    )
+
+    args << makeArgument(
+      name: 'simulation_control_timestep',
+      type: Argument::Integer,
+      required: false,
+      display_name: 'Simulation Control: Timestep',
+      description: 'Value must be a divisor of 60.',
+      units: 'min',
+      default_href: "<a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>"
+    )
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_run_period', false)
     arg.setDisplayName('Simulation Control: Run Period')
@@ -96,8 +179,24 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     defrost_model_type_choices << HPXML::AdvancedResearchDefrostModelTypeStandard
     defrost_model_type_choices << HPXML::AdvancedResearchDefrostModelTypeAdvanced
 
-    args << makeArgument('simulation_control_defrost_model_type', Argument::Choice, false, 'Simulation Control: Defrost Model Type', nil, nil, defrost_model_type_choices, "Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for an improved model that better accounts for load and energy use during defrost; using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
-    args << makeArgument('simulation_control_onoff_thermostat_deadband', Argument::Double, false, 'Simulation Control: HVAC On-Off Thermostat Deadband', 'deg-F', nil, nil, 'Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.')
+    args << makeArgument(
+      name: 'simulation_control_defrost_model_type',
+      type: Argument::Choice,
+      required: false,
+      display_name: 'Simulation Control: Defrost Model Type',
+      description: "Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for an improved model that better accounts for load and energy use during defrost; using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime.",
+      choices: defrost_model_type_choices,
+      default_href: "<a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>"
+    )
+
+    args << makeArgument(
+      name: 'simulation_control_onoff_thermostat_deadband',
+      type: Argument::Double,
+      required: false,
+      display_name: 'Simulation Control: HVAC On-Off Thermostat Deadband',
+      description: 'Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.',
+      units: 'deg-F'
+    )
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_heat_pump_backup_heating_capacity_increment', false)
     arg.setDisplayName('Simulation Control: Heat Pump Backup Heating Capacity Increment')
