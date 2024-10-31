@@ -142,16 +142,6 @@ module Constants
                     'WY' => 'Wyoming' }
 end
 
-# TODO
-module Argument
-  Auto = 'auto'
-  Choice = 'makeChoiceArgument'
-  String = 'makeStringArgument'
-  Double = 'makeDoubleArgument'
-  Integer = 'makeIntegerArgument'
-  Boolean = 'makeBoolArgument'
-end
-
 # Total Energy (Constants for output reporting)
 module TE
   Total = 'Total'

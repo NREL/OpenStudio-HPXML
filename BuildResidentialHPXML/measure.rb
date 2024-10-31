@@ -40,6 +40,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def arguments(model) # rubocop:disable Lint/UnusedMethodArgument
     docs_base_url = "https://openstudio-hpxml.readthedocs.io/en/v#{Version::OS_HPXML_Version}/workflow_inputs.html"
 
+    # TODO
     def makeArgument(name:,
                      type:,
                      required:,
@@ -66,7 +67,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         arg = OpenStudio::Measure::OSArgument.send(type, name, required)
       else
         if !default_href.nil?
-          choices.unshift(Argument::Auto)
+          choices.unshift(Constants::Auto)
         end
         arg = OpenStudio::Measure::OSArgument.send(type, name, choices, required)
       end
@@ -74,7 +75,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       arg.setUnits(units) if !units.nil?
       arg.setDefaultValue(default_value) if !default_value.nil?
       if !default_href.nil?
-        description += " If #{Argument::Auto} or not provided, the OS-HPXML default (see #{default_href}) is used."
+        description += " If #{Constants::Auto} or not provided, the OS-HPXML default (see #{default_href}) is used."
       end
       arg.setDescription(description)
       return arg
