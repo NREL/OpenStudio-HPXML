@@ -3357,7 +3357,9 @@ module Defaults
           panel_load.power_isdefaulted = true
         end
         if panel_load.breaker_spaces.nil?
-          panel_load.breaker_spaces = panel_load_watts_breaker_spaces_values[:breaker_spaces]
+          breaker_spaces = panel_load_watts_breaker_spaces_values[:breaker_spaces]
+          breaker_spaces = 0 if panel_load.power == 0
+          panel_load.breaker_spaces = breaker_spaces
           panel_load.breaker_spaces_isdefaulted = true
         end
         if panel_load.addition.nil?

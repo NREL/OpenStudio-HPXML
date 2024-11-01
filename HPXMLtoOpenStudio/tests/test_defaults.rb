@@ -3605,7 +3605,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 3684, HPXML::ElectricPanelVoltage120, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage120, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLaundry, 1500, HPXML::ElectricPanelVoltage120, 1, false)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 559, HPXML::ElectricPanelVoltage120, 1, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 0, HPXML::ElectricPanelVoltage120, 0, false)
   end
 
   def test_batteries
