@@ -47,7 +47,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                      display_name:,
                      description:,
                      units: nil,
-                     default_value: nil,
                      choices: [],
                      default_href: nil)
 
@@ -73,7 +72,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
       arg.setDisplayName(display_name)
       arg.setUnits(units) if !units.nil?
-      arg.setDefaultValue(default_value) if !default_value.nil?
       if !default_href.nil?
         description += " If #{Constants::Auto} or not provided, the OS-HPXML default (see #{default_href}) is used."
       end
@@ -373,27 +371,32 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       type: Argument::Boolean,
       required: false,
       display_name: 'Geometry: Unit Left Wall Is Adiabatic',
-      description: 'Presence of an adiabatic left wall.',
-      default_value: false
+      description: 'Presence of an adiabatic left wall.'
     )
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_right_wall_is_adiabatic', false)
-    arg.setDisplayName('Geometry: Unit Right Wall Is Adiabatic')
-    arg.setDescription('Presence of an adiabatic right wall.')
-    arg.setDefaultValue(false)
-    args << arg
+    args << makeArgument(
+      name: 'geometry_unit_right_wall_is_adiabatic',
+      type: Argument::Boolean,
+      required: false,
+      display_name: 'Geometry: Unit Right Wall Is Adiabatic',
+      description: 'Presence of an adiabatic right wall.'
+    )
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_front_wall_is_adiabatic', false)
-    arg.setDisplayName('Geometry: Unit Front Wall Is Adiabatic')
-    arg.setDescription('Presence of an adiabatic front wall, for example, the unit is adjacent to a conditioned corridor.')
-    arg.setDefaultValue(false)
-    args << arg
+    args << makeArgument(
+      name: 'geometry_unit_front_wall_is_adiabatic',
+      type: Argument::Boolean,
+      required: false,
+      display_name: 'Geometry: Unit Front Wall Is Adiabatic',
+      description: 'Presence of an adiabatic front wall, for example, the unit is adjacent to a conditioned corridor.'
+    )
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_unit_back_wall_is_adiabatic', false)
-    arg.setDisplayName('Geometry: Unit Back Wall Is Adiabatic')
-    arg.setDescription('Presence of an adiabatic back wall.')
-    arg.setDefaultValue(false)
-    args << arg
+    args << makeArgument(
+      name: 'geometry_unit_back_wall_is_adiabatic',
+      type: Argument::Boolean,
+      required: false,
+      display_name: 'Geometry: Unit Back Wall Is Adiabatic',
+      description: 'Presence of an adiabatic back wall.'
+    )
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_unit_num_floors_above_grade', true)
     arg.setDisplayName('Geometry: Unit Number of Floors Above Grade')
@@ -3605,6 +3608,35 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     return args
   end
 
+  # TODO
+  def convertArgumentValues(arguments_model, args)
+    args.each do |name, value|
+      arg = arguments_model.find { |a| name == a.name.to_sym }
+      type = arg.type
+
+      if type == 'Choice'.to_OSArgumentType
+        choices = arg.choiceValues
+        if choices.include?(Constants::Auto)
+          if value.downcase.to_s == 'true'
+            args[name] = true
+          elsif value.downcase.to_s == 'false'
+            args[name] = false
+          end
+        end
+      elsif type == 'String'.to_OSArgumentType
+        begin
+          args[name] = Integer(value)
+        rescue
+          begin
+            args[name] = Float(value)
+          rescue
+          end
+        end
+      end
+    end
+    return args
+  end
+
   # Define what happens when the measure is run.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -3624,8 +3656,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     Version.check_openstudio_version()
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
-    # FIXME
-    args[:simulation_control_timestep] = Integer(args[:simulation_control_timestep]) if !args[:simulation_control_timestep].nil?
+    args = convertArgumentValues(arguments(model), args)
 
     # Argument error checks
     warnings, errors = validate_arguments(args)
@@ -3649,7 +3680,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     epw_path = args[:weather_station_epw_filepath]
     if epw_path.nil?
       # Get EPW path from zip code
-      epw_path = Defaults.lookup_weather_data_from_zipcode(args[:site_zip_code])[:station_filename]
+      epw_path = Defaults.lookup_weather_data_from_zipcode("#{args[:site_zip_code]}")[:station_filename]
     end
 
     # Create EpwFile object
@@ -3889,7 +3920,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       HPXML::fossil_fuels.each do |fossil_fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
-        emissions_scenario_lengths += [args["emissions_#{underscore_case}_values".to_sym].count(',')] unless args["emissions_#{underscore_case}_values".to_sym].nil?
+        emissions_scenario_lengths += ["#{args["emissions_#{underscore_case}_values".to_sym]}".count(',')] unless args["emissions_#{underscore_case}_values".to_sym].nil?
       end
 
       error = (emissions_scenario_lengths.uniq.size != 1)
@@ -3902,8 +3933,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       HPXML::all_fuels.each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
-        bills_scenario_lengths += [args["utility_bill_#{underscore_case}_fixed_charges".to_sym].count(',')] unless args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
-        bills_scenario_lengths += [args["utility_bill_#{underscore_case}_marginal_rates".to_sym].count(',')] unless args["utility_bill_#{underscore_case}_marginal_rates".to_sym].nil?
+        bills_scenario_lengths += ["#{args["utility_bill_#{underscore_case}_fixed_charges".to_sym]}".count(',')] unless args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
+        bills_scenario_lengths += ["#{args["utility_bill_#{underscore_case}_marginal_rates".to_sym]}".count(',')] unless args["utility_bill_#{underscore_case}_marginal_rates".to_sym].nil?
       end
 
       error = (bills_scenario_lengths.uniq.size != 1)
@@ -4070,9 +4101,9 @@ module HPXMLFile
   def self.need_weather_based_on_args(args)
     if (args[:hvac_control_heating_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:hvac_control_cooling_season_period].to_s == Constants::BuildingAmerica) ||
-       (args[:solar_thermal_system_type] != Constants::None && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
-       (args[:pv_system_present] && args[:pv_system_array_tilt].start_with?('latitude')) ||
-       (args[:pv_system_2_present] && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
+       (args[:solar_thermal_system_type] != Constants::None && "#{args[:solar_thermal_collector_tilt]}".start_with?('latitude')) ||
+       (args[:pv_system_present] && "#{args[:pv_system_array_tilt]}".start_with?('latitude')) ||
+       (args[:pv_system_2_present] && "#{args[:pv_system_2_array_tilt]}".start_with?('latitude')) ||
        (args[:apply_defaults])
       return true
     end
@@ -4349,7 +4380,7 @@ module HPXMLFile
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
         if not args["emissions_#{underscore_case}_values".to_sym].nil?
-          fuel_values[fossil_fuel] = args["emissions_#{underscore_case}_values".to_sym].split(',').map(&:strip)
+          fuel_values[fossil_fuel] = "#{args["emissions_#{underscore_case}_values".to_sym]}".split(',').map(&:strip)
         else
           fuel_values[fossil_fuel] = [nil] * emissions_scenario_names.size
         end
@@ -4451,7 +4482,7 @@ module HPXMLFile
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if not args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
-          fixed_charges[fuel] = args["utility_bill_#{underscore_case}_fixed_charges".to_sym].split(',').map(&:strip)
+          fixed_charges[fuel] = "#{args["utility_bill_#{underscore_case}_fixed_charges".to_sym]}".split(',').map(&:strip)
         else
           fixed_charges[fuel] = [nil] * bills_scenario_names.size
         end
@@ -4462,7 +4493,7 @@ module HPXMLFile
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if not args["utility_bill_#{underscore_case}_marginal_rates".to_sym].nil?
-          marginal_rates[fuel] = args["utility_bill_#{underscore_case}_marginal_rates".to_sym].split(',').map(&:strip)
+          marginal_rates[fuel] = "#{args["utility_bill_#{underscore_case}_marginal_rates".to_sym]}".split(',').map(&:strip)
         else
           marginal_rates[fuel] = [nil] * bills_scenario_names.size
         end
@@ -4481,13 +4512,13 @@ module HPXMLFile
       end
 
       if not args[:utility_bill_pv_net_metering_annual_excess_sellback_rates].nil?
-        bills_pv_net_metering_annual_excess_sellback_rates = args[:utility_bill_pv_net_metering_annual_excess_sellback_rates].split(',').map(&:strip)
+        bills_pv_net_metering_annual_excess_sellback_rates = "#{args[:utility_bill_pv_net_metering_annual_excess_sellback_rates]}".split(',').map(&:strip)
       else
         bills_pv_net_metering_annual_excess_sellback_rates = [nil] * bills_scenario_names.size
       end
 
       if not args[:utility_bill_pv_feed_in_tariff_rates].nil?
-        bills_pv_feed_in_tariff_rates = args[:utility_bill_pv_feed_in_tariff_rates].split(',').map(&:strip)
+        bills_pv_feed_in_tariff_rates = "#{args[:utility_bill_pv_feed_in_tariff_rates]}".split(',').map(&:strip)
       else
         bills_pv_feed_in_tariff_rates = [nil] * bills_scenario_names.size
       end
@@ -4499,7 +4530,7 @@ module HPXMLFile
       end
 
       if not args[:utility_bill_pv_monthly_grid_connection_fees].nil?
-        bills_pv_monthly_grid_connection_fees = args[:utility_bill_pv_monthly_grid_connection_fees].split(',').map(&:strip)
+        bills_pv_monthly_grid_connection_fees = "#{args[:utility_bill_pv_monthly_grid_connection_fees]}".split(',').map(&:strip)
       else
         bills_pv_monthly_grid_connection_fees = [nil] * bills_scenario_names.size
       end
@@ -6372,7 +6403,7 @@ module HPXMLFile
     if hpxml_bldg.total_fraction_heat_load_served > 0
 
       if (not args[:hvac_control_heating_weekday_setpoint].nil?) && (not args[:hvac_control_heating_weekend_setpoint].nil?)
-        if args[:hvac_control_heating_weekday_setpoint] == args[:hvac_control_heating_weekend_setpoint] && !args[:hvac_control_heating_weekday_setpoint].include?(',')
+        if args[:hvac_control_heating_weekday_setpoint] == args[:hvac_control_heating_weekend_setpoint] && !"#{args[:hvac_control_heating_weekday_setpoint]}".include?(',')
           heating_setpoint_temp = Float(args[:hvac_control_heating_weekday_setpoint])
         else
           weekday_heating_setpoints = args[:hvac_control_heating_weekday_setpoint]
@@ -6401,7 +6432,7 @@ module HPXMLFile
     if hpxml_bldg.total_fraction_cool_load_served > 0
 
       if (not args[:hvac_control_cooling_weekday_setpoint].nil?) && (not args[:hvac_control_cooling_weekend_setpoint].nil?)
-        if args[:hvac_control_cooling_weekday_setpoint] == args[:hvac_control_cooling_weekend_setpoint] && !args[:hvac_control_cooling_weekday_setpoint].include?(',')
+        if args[:hvac_control_cooling_weekday_setpoint] == args[:hvac_control_cooling_weekend_setpoint] && !args[:hvac_control_cooling_weekday_setpoint].is_a?(String)
           cooling_setpoint_temp = Float(args[:hvac_control_cooling_weekday_setpoint])
         else
           weekday_cooling_setpoints = args[:hvac_control_cooling_weekday_setpoint]
@@ -6817,7 +6848,7 @@ module HPXMLFile
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
       latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
-      collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
+      collector_tilt = Geometry.get_absolute_tilt(tilt_str: "#{args[:solar_thermal_collector_tilt]}", roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_rated_optical_efficiency = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_rated_thermal_losses = args[:solar_thermal_collector_rated_thermal_losses]
       storage_volume = args[:solar_thermal_storage_volume]
@@ -6873,7 +6904,7 @@ module HPXMLFile
                               module_type: args[:pv_system_module_type],
                               tracking: args[:pv_system_tracking],
                               array_azimuth: args[:pv_system_array_azimuth],
-                              array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_array_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
+                              array_tilt: Geometry.get_absolute_tilt(tilt_str: "#{args[:pv_system_array_tilt]}", roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
                               max_power_output: args[:pv_system_max_power_output],
                               system_losses_fraction: args[:pv_system_system_losses_fraction],
                               is_shared_system: is_shared_system,
@@ -6885,7 +6916,7 @@ module HPXMLFile
                                 module_type: args[:pv_system_2_module_type],
                                 tracking: args[:pv_system_2_tracking],
                                 array_azimuth: args[:pv_system_2_array_azimuth],
-                                array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_2_array_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
+                                array_tilt: Geometry.get_absolute_tilt(tilt_str: "#{args[:pv_system_2_array_tilt]}", roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
                                 max_power_output: args[:pv_system_2_max_power_output],
                                 system_losses_fraction: args[:pv_system_system_losses_fraction],
                                 is_shared_system: is_shared_system,

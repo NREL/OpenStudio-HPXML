@@ -676,10 +676,10 @@ module Geometry
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
-                                         geometry_unit_left_wall_is_adiabatic:,
-                                         geometry_unit_right_wall_is_adiabatic:,
-                                         geometry_unit_front_wall_is_adiabatic:,
-                                         geometry_unit_back_wall_is_adiabatic:,
+                                         geometry_unit_left_wall_is_adiabatic: false,
+                                         geometry_unit_right_wall_is_adiabatic: false,
+                                         geometry_unit_front_wall_is_adiabatic: false,
+                                         geometry_unit_back_wall_is_adiabatic: false,
                                          **)
 
     cfa = geometry_unit_cfa
@@ -976,10 +976,10 @@ module Geometry
                             geometry_attic_type:,
                             geometry_roof_type:,
                             geometry_roof_pitch:,
-                            geometry_unit_left_wall_is_adiabatic:,
-                            geometry_unit_right_wall_is_adiabatic:,
-                            geometry_unit_front_wall_is_adiabatic:,
-                            geometry_unit_back_wall_is_adiabatic:,
+                            geometry_unit_left_wall_is_adiabatic: false,
+                            geometry_unit_right_wall_is_adiabatic: false,
+                            geometry_unit_front_wall_is_adiabatic: false,
+                            geometry_unit_back_wall_is_adiabatic: false,
                             **)
 
     cfa = geometry_unit_cfa

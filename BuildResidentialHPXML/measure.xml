@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>89086b5a-d521-45ab-9a4a-3aa54d285c14</version_id>
-  <version_modified>2024-11-01T16:22:34Z</version_modified>
+  <version_id>a8a555e1-2d84-4a9c-8ad5-a5bf63f13935</version_id>
+  <version_modified>2024-11-01T17:29:58Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -755,7 +755,6 @@
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -774,7 +773,6 @@
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -793,7 +791,6 @@
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -812,7 +809,6 @@
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -7516,7 +7512,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7692B20D</checksum>
+      <checksum>A83FA136</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -7528,7 +7524,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AADC5A37</checksum>
+      <checksum>6F9D002F</checksum>
     </file>
     <file>
       <filename>test_build_residential_hpxml.rb</filename>
