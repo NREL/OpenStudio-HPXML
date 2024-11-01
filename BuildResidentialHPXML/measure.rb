@@ -3868,11 +3868,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'Did not specify all required heating detailed performance data arguments.' if error
 
     if hvac_perf_data_heating_args_initialized.uniq.size == 1 && hvac_perf_data_heating_args_initialized.uniq[0]
-      heating_data_points_lengths = [args[:hvac_perf_data_heating_outdoor_temperatures].count(','),
-                                     args[:hvac_perf_data_heating_min_speed_capacities].count(','),
-                                     args[:hvac_perf_data_heating_max_speed_capacities].count(','),
-                                     args[:hvac_perf_data_heating_min_speed_cops].count(','),
-                                     args[:hvac_perf_data_heating_max_speed_cops].count(',')]
+      heating_data_points_lengths = ["#{args[:hvac_perf_data_heating_outdoor_temperatures]}".count(','),
+                                     "#{args[:hvac_perf_data_heating_min_speed_capacities]}".count(','),
+                                     "#{args[:hvac_perf_data_heating_max_speed_capacities]}".count(','),
+                                     "#{args[:hvac_perf_data_heating_min_speed_cops]}".count(','),
+                                     "#{args[:hvac_perf_data_heating_max_speed_cops]}".count(',')]
 
       error = (heating_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed heating performance data arguments does not have enough comma-separated elements specified.' if error
@@ -3887,11 +3887,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'Did not specify all required cooling detailed performance data arguments.' if error
 
     if hvac_perf_data_cooling_args_initialized.uniq.size == 1 && hvac_perf_data_cooling_args_initialized.uniq[0]
-      cooling_data_points_lengths = [args[:hvac_perf_data_cooling_outdoor_temperatures].count(','),
-                                     args[:hvac_perf_data_cooling_min_speed_capacities].count(','),
-                                     args[:hvac_perf_data_cooling_max_speed_capacities].count(','),
-                                     args[:hvac_perf_data_cooling_min_speed_cops].count(','),
-                                     args[:hvac_perf_data_cooling_max_speed_cops].count(',')]
+      cooling_data_points_lengths = ["#{args[:hvac_perf_data_cooling_outdoor_temperatures]}".count(','),
+                                     "#{args[:hvac_perf_data_cooling_min_speed_capacities]}".count(','),
+                                     "#{args[:hvac_perf_data_cooling_max_speed_capacities]}".count(','),
+                                     "#{args[:hvac_perf_data_cooling_min_speed_cops]}".count(','),
+                                     "#{args[:hvac_perf_data_cooling_max_speed_cops]}".count(',')]
 
       error = (cooling_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
@@ -3917,7 +3917,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       emissions_scenario_lengths = [args[:emissions_scenario_names].count(','),
                                     args[:emissions_types].count(','),
                                     args[:emissions_electricity_units].count(','),
-                                    args[:emissions_electricity_values_or_filepaths].count(',')]
+                                    "#{args[:emissions_electricity_values_or_filepaths]}".count(',')]
 
       emissions_scenario_lengths += [args[:emissions_electricity_number_of_header_rows].count(',')] unless args[:emissions_electricity_number_of_header_rows].nil?
       emissions_scenario_lengths += [args[:emissions_electricity_column_numbers].count(',')] unless args[:emissions_electricity_column_numbers].nil?
@@ -4296,10 +4296,10 @@ module HPXMLFile
       hpxml.header.software_program_used = args[:software_info_program_used]
     end
     if not args[:software_info_program_version].nil?
-      if (not hpxml.header.software_program_version.nil?) && (hpxml.header.software_program_version != args[:software_info_program_version])
+      if (not hpxml.header.software_program_version.nil?) && (hpxml.header.software_program_version != "#{args[:software_info_program_version]}")
         errors << "'Software Info: Program Version' cannot vary across dwelling units."
       end
-      hpxml.header.software_program_version = args[:software_info_program_version]
+      hpxml.header.software_program_version = "#{args[:software_info_program_version]}"
     end
 
     if not args[:simulation_control_timestep].nil?
@@ -4362,7 +4362,7 @@ module HPXMLFile
       emissions_scenario_names = args[:emissions_scenario_names].split(',').map(&:strip)
       emissions_types = args[:emissions_types].split(',').map(&:strip)
       emissions_electricity_units = args[:emissions_electricity_units].split(',').map(&:strip)
-      emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].split(',').map(&:strip)
+      emissions_electricity_values_or_filepaths = "#{args[:emissions_electricity_values_or_filepaths]}".split(',').map(&:strip)
 
       if not args[:emissions_electricity_number_of_header_rows].nil?
         emissions_electricity_number_of_header_rows = args[:emissions_electricity_number_of_header_rows].split(',').map(&:strip)
