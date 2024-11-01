@@ -21,6 +21,7 @@ __New Features__
   - Allows CFIS systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
   - Allows CFIS systems with supplemental fans that run simultaneously with the air handler (`CFISControls/extension/SupplementalFanRunsWithAirHandlerFan=true`).
   - Allows CFIS systems with timer control, in which ventilation operation occurs at a fixed interval (`CFISControls/extension/ControlType="timer"`).
+  - Allows CFIS systems to be attached to ductless HVAC systems like PTHPs (requires using a DSE=1 distribution system, see documentation).
 - HVAC Manual J design load and sizing calculations:
   - Adds optional `DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh` input.
   - Adds optional `DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh` input.
