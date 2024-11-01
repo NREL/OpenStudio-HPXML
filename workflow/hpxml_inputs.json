@@ -650,6 +650,10 @@
     "utility_bill_scenario_names": "Bills",
     "combine_like_surfaces": true
   },
+  "sample_files/base-auto.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "simulation_control_timestep": "auto"
+  },
   "sample_files/base-appliances-coal.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
     "clothes_dryer_fuel_type": "coal",

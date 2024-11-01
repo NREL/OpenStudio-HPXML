@@ -3611,6 +3611,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # TODO
   def convertArgumentValues(arguments_model, args)
     args.each do |name, value|
+      if value == Constants::Auto
+        args.delete(name)
+        next
+      end
+
       arg = arguments_model.find { |a| name == a.name.to_sym }
       type = arg.type
 
