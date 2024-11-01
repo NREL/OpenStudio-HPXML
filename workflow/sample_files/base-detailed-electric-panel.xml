@@ -458,13 +458,16 @@
                 <PanelLoad>
                   <Type>Cooling</Type>
                   <Power>3542.0</Power>
-                  <Addition>false</Addition>
                   <System idref='CoolingSystem1'/>
                 </PanelLoad>
                 <PanelLoad>
                   <Type>Mech Vent</Type>
                   <System idref='VentilationFan1'/>
                   <System idref='VentilationFan2'/>
+                </PanelLoad>
+                <PanelLoad>
+                  <Type>Other</Type>
+                  <Power>559.0</Power>
                 </PanelLoad>
               </PanelLoads>
             </extension>

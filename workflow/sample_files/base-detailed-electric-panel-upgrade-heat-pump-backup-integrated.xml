@@ -481,6 +481,10 @@
                   <Type>Electric Vehicle Charging</Type>
                   <System idref='PlugLoad3'/>
                 </PanelLoad>
+                <PanelLoad>
+                  <Type>Other</Type>
+                  <Power>559.0</Power>
+                </PanelLoad>
               </PanelLoads>
             </extension>
           </ElectricPanel>

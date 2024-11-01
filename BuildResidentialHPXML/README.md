@@ -4449,7 +4449,7 @@ The breaker spaces specification type of the electric panel. If not provided, th
 
 **Electric Panel: Breaker Spaces**
 
-The total, or remaining, number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+The total, or unoccupied, number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
 - **Name:** ``electric_panel_breaker_spaces``
 - **Type:** ``Integer``

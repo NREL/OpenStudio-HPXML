@@ -3325,21 +3325,25 @@ module Defaults
                         system_idrefs_isdefaulted: true)
       end
 
+      # for garbage disposal and garage door opener
       if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther } == 0
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
-                        type_isdefaulted: true) # for garbage disposal and garage door opener
+                        type_isdefaulted: true)
       end
+
       if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLighting } == 0
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting,
-                                       type_isdefaulted: true)
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting,
+                        type_isdefaulted: true)
       end
+
       if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeKitchen } == 0
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen,
-                                       type_isdefaulted: true)
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen,
+                        type_isdefaulted: true)
       end
+
       if panel_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLaundry } == 0
-        electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry,
-                                       type_isdefaulted: true)
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry,
+                        type_isdefaulted: true)
       end
 
       panel_loads.each do |panel_load|
@@ -6154,7 +6158,7 @@ module Defaults
       watts = + 1500
       breaker_spaces += 1
     elsif type == HPXML::ElectricPanelLoadTypeOther
-      watts += 559 # Garbage disposal
+      # watts += 559 # Garbage disposal FIXME: add this?
 
       if hpxml_bldg.has_location(HPXML::LocationGarage)
         watts += 373 # Garage door opener

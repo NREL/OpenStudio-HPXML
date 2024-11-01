@@ -423,6 +423,10 @@
                   <Type>Heating</Type>
                   <System idref='HeatingSystem1'/>
                 </PanelLoad>
+                <PanelLoad>
+                  <Type>Other</Type>
+                  <Power>559.0</Power>
+                </PanelLoad>
               </PanelLoads>
             </extension>
           </ElectricPanel>

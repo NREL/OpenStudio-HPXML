@@ -1623,7 +1623,7 @@
     "electric_panel_breaker_spaces_type": "headroom",
     "electric_panel_breaker_spaces": 5,
     "electric_panel_load_cooling_system_power": 3542,
-    "electric_panel_load_cooling_system_addition": false
+    "electric_panel_load_other_power": 559
   },
   "sample_files/base-detailed-electric-panel-low-load.xml": {
     "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",

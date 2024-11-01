@@ -2648,7 +2648,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces', false)
     arg.setDisplayName('Electric Panel: Breaker Spaces')
-    arg.setDescription("The total, or remaining, number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setDescription("The total, or unoccupied, number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('#')
     args << arg
 
@@ -7205,12 +7205,11 @@ module HPXMLFile
       kitchen_bath_fan_ids << ventilation_fan.id
     end
     if not kitchen_bath_fan_ids.empty?
-      power = 0
-      power += args[:electric_panel_load_kitchen_fans_power] if !args[:electric_panel_load_kitchen_fans_power].nil?
+      power = args[:electric_panel_load_kitchen_fans_power] if !args[:electric_panel_load_kitchen_fans_power].nil?
       power += args[:electric_panel_load_bathroom_fans_power] if !args[:electric_panel_load_bathroom_fans_power].nil?
 
-      addition = false
-      addition = true if (!args[:electric_panel_load_kitchen_fans_addition].nil? && args[:electric_panel_load_kitchen_fans_addition]) || (!args[:electric_panel_load_bathroom_fans_addition].nil? && args[:electric_panel_load_bathroom_fans_addition])
+      addition = true if (!args[:electric_panel_load_kitchen_fans_addition].nil? && args[:electric_panel_load_kitchen_fans_addition])
+      addition = true if (!args[:electric_panel_load_bathroom_fans_addition].nil? && args[:electric_panel_load_bathroom_fans_addition])
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
                       power: power,
@@ -7276,7 +7275,7 @@ module HPXMLFile
     end
 
     if !args[:electric_panel_load_other_power].nil?
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricOther,
+      panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
                       power: args[:electric_panel_load_other_power],
                       addition: args[:electric_panel_load_other_addition])
     end
