@@ -2957,7 +2957,7 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   ===============================================================  ========  ========  =======================================  ========  ==============  ==============================================
   ``SystemIdentifier``                                             id                                                           Yes                       Unique identifier
   ``AttachedToZone``                                               idref               See [#]_                                 See [#]_                  ID of attached zone
-  ``DistributionSystem``                                           idref               See [#]_                     No                        ID of attached distribution system
+  ``DistributionSystem``                                           idref               See [#]_                                 No                        ID of attached distribution system
   ``HeatPumpType``                                                 string              room air conditioner with reverse cycle  Yes                       Type of heat pump
   ``HeatPumpFuel``                                                 string              electricity                              Yes                       Fuel type
   ``HeatingCapacity``                                              double    Btu/hr    >= 0                                     No        autosized [#]_  Heating output capacity (excluding any backup heating)
