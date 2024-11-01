@@ -1369,7 +1369,7 @@
                     <BlowerFanHeatBtuh>1707.0</BlowerFanHeatBtuh>
                     <DefaultTableDuctLoad>
                       <TableNumber>7C-R</TableNumber>
-                      <LookupFloorArea>1200.0</LookupFloorArea>
+                      <LookupFloorArea>2400.0</LookupFloorArea>
                       <LeakageLevel>notably sealed</LeakageLevel>
                       <InsulationRValue>6.0</InsulationRValue>
                       <SupplySurfaceArea>325.0</SupplySurfaceArea>
@@ -1377,7 +1377,7 @@
                     </DefaultTableDuctLoad>
                     <DefaultTableDuctLoad>
                       <TableNumber>7I</TableNumber>
-                      <LookupFloorArea>1200.0</LookupFloorArea>
+                      <LookupFloorArea>2400.0</LookupFloorArea>
                       <LeakageLevel>notably sealed</LeakageLevel>
                       <InsulationRValue>6.0</InsulationRValue>
                       <SupplySurfaceArea>325.0</SupplySurfaceArea>
