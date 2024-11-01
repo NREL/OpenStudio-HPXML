@@ -748,12 +748,15 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     puts 'Testing Bob Ross Residence - 3.8...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-8.xml'))
-    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
     puts "  Duct heat loss = #{Float(json_bldg['Ducts']['Heating (Btuh)'])}"
     puts "  Sensible duct gain = #{Float(json_bldg['Ducts']['Cooling Sensible (Btuh)'])}"
     puts "  Latent duct gain = #{Float(json_bldg['Ducts']['Cooling Latent (Btuh)'])}"
+    puts "  Total heating = #{hpxml_bldg.hvac_plant.hdl_total}"
+    puts "  Total sensible cooling = #{hpxml_bldg.hvac_plant.cdl_sens_total}"
+    puts "  Total latent cooling = #{hpxml_bldg.hvac_plant.cdl_lat_total}"
 
     puts 'Testing Bob Ross Residence - 3.9...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-9.xml'))
@@ -766,12 +769,15 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     puts 'Testing Bob Ross Residence - 3.10...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-10.xml'))
-    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
     puts "  Duct heat loss = #{Float(json_bldg['Ducts']['Heating (Btuh)'])}"
     puts "  Sensible duct gain = #{Float(json_bldg['Ducts']['Cooling Sensible (Btuh)'])}"
     puts "  Latent duct gain = #{Float(json_bldg['Ducts']['Cooling Latent (Btuh)'])}"
+    puts "  Total heating = #{hpxml_bldg.hvac_plant.hdl_total}"
+    puts "  Total sensible cooling = #{hpxml_bldg.hvac_plant.cdl_sens_total}"
+    puts "  Total latent cooling = #{hpxml_bldg.hvac_plant.cdl_lat_total}"
 
     puts 'Testing Bob Ross Residence - 3.11...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-11.xml'))
@@ -802,7 +808,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     puts 'Testing Bob Ross Residence - 3.14...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-14.xml'))
-    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
     puts "  Total ceiling heat loss = #{json_bldg.select { |k, _v| k.start_with?('Ceilings') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
@@ -810,8 +816,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Duct heat loss = #{Float(json_bldg['Ducts']['Heating (Btuh)'])}"
     puts "  Sensible duct gain = #{Float(json_bldg['Ducts']['Cooling Sensible (Btuh)'])}"
     puts "  Latent duct gain = #{Float(json_bldg['Ducts']['Cooling Latent (Btuh)'])}"
-    puts "  Total heat loss for entire house = #{base_hpxml_bldg.hvac_plant.hdl_total}"
-    puts "  Total sensible gain for entire house = #{base_hpxml_bldg.hvac_plant.cdl_sens_total}"
+    puts "  Total heat loss for entire house = #{hpxml_bldg.hvac_plant.hdl_total}"
+    puts "  Total sensible gain for entire house = #{hpxml_bldg.hvac_plant.cdl_sens_total}"
 
     puts 'Testing Bob Ross Residence - 3.15...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-15.xml'))
@@ -831,8 +837,6 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Table 4 Construction Number = #{}"
     puts "  Total floor heat loss = #{json_bldg.select { |k, _v| k.start_with?('Floors') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
     puts "  MJ8 Line 14 subtotal heat loss = #{json_bldg.select { |k, _v| k.start_with?('Windows') || k.start_with?('Skylights') || k.start_with?('Doors') || k.start_with?('Above Grade Walls') || k.start_with?('Ceilings') || k.start_with?('Floors') || k.start_with?('Infiltration') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
-    puts "  Duct Heat Loss value = #{Float(json_bldg['Ducts']['Heating (Btuh)'])}"
-    puts "  Duct Heat Gain value = #{Float(json_bldg['Ducts']['Cooling Sensible (Btuh)'])}"
 
     puts 'Testing Bob Ross Residence - 3.17...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-17.xml'))
@@ -896,7 +900,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     puts 'Testing Bob Ross Residence - 3.22...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-22.xml'))
-    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
     puts "  Basement above grade wall, heat loss = #{json_bldg.select { |k, _v| k.start_with?('Above Grade Walls') && k.include?('FoundationWall') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
@@ -909,13 +913,13 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Duct heat loss = #{Float(json_bldg['Ducts']['Heating (Btuh)'])}"
     puts "  Sensible duct gain = #{Float(json_bldg['Ducts']['Cooling Sensible (Btuh)'])}"
     puts "  Latent duct gain = #{Float(json_bldg['Ducts']['Cooling Latent (Btuh)'])}"
-    puts "  Total heat loss for entire house = #{base_hpxml_bldg.hvac_plant.hdl_total}"
-    puts "  Total sensible gain for entire house = #{base_hpxml_bldg.hvac_plant.cdl_sens_total}"
-    puts "  Total latent gain for entire house = #{base_hpxml_bldg.hvac_plant.cdl_lat_total}"
+    puts "  Total heat loss for entire house = #{hpxml_bldg.hvac_plant.hdl_total}"
+    puts "  Total sensible gain for entire house = #{hpxml_bldg.hvac_plant.cdl_sens_total}"
+    puts "  Total latent gain for entire house = #{hpxml_bldg.hvac_plant.cdl_lat_total}"
 
     puts 'Testing Bob Ross Residence - 3.23...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-23.xml'))
-    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
     puts "  Total heat loss for conditioned space floor = #{json_bldg.select { |k, _v| k.start_with?('Floors') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
@@ -923,23 +927,23 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Total duct loss = #{Float(json_bldg['Ducts']['Heating (Btuh)'])}"
     puts "  Total sensible duct gain = #{Float(json_bldg['Ducts']['Cooling Sensible (Btuh)'])}"
     puts "  Total latent duct gain = #{Float(json_bldg['Ducts']['Cooling Latent (Btuh)'])}"
-    puts "  Total heat loss for entire house = #{base_hpxml_bldg.hvac_plant.hdl_total}"
-    puts "  Total sensible gain for entire house = #{base_hpxml_bldg.hvac_plant.cdl_sens_total}"
-    puts "  Total latent gain for entire house = #{base_hpxml_bldg.hvac_plant.cdl_lat_total}"
+    puts "  Total heat loss for entire house = #{hpxml_bldg.hvac_plant.hdl_total}"
+    puts "  Total sensible gain for entire house = #{hpxml_bldg.hvac_plant.cdl_sens_total}"
+    puts "  Total latent gain for entire house = #{hpxml_bldg.hvac_plant.cdl_lat_total}"
 
     puts 'Testing Bob Ross Residence - 4...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_4.xml'))
-    _model, _hpxml, base_hpxml_bldg = _test_measure(args_hash)
-    puts "  Total heating = #{base_hpxml_bldg.hvac_plant.hdl_total}"
-    puts "  Total sensible cooling = #{base_hpxml_bldg.hvac_plant.cdl_sens_total}"
-    puts "  Total latent cooling = #{base_hpxml_bldg.hvac_plant.cdl_lat_total}"
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    puts "  Total heating = #{hpxml_bldg.hvac_plant.hdl_total}"
+    puts "  Total sensible cooling = #{hpxml_bldg.hvac_plant.cdl_sens_total}"
+    puts "  Total latent cooling = #{hpxml_bldg.hvac_plant.cdl_lat_total}"
 
     puts 'Testing Bob Ross Residence - 5...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_5.xml'))
-    _model, _hpxml, base_hpxml_bldg = _test_measure(args_hash)
-    puts "  Total heating = #{base_hpxml_bldg.hvac_plant.hdl_total}"
-    puts "  Total sensible cooling = #{base_hpxml_bldg.hvac_plant.cdl_sens_total}"
-    puts "  Total latent cooling = #{base_hpxml_bldg.hvac_plant.cdl_lat_total}"
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    puts "  Total heating = #{hpxml_bldg.hvac_plant.hdl_total}"
+    puts "  Total sensible cooling = #{hpxml_bldg.hvac_plant.cdl_sens_total}"
+    puts "  Total latent cooling = #{hpxml_bldg.hvac_plant.cdl_lat_total}"
   end
 
   def test_heat_pump_separate_backup_systems
