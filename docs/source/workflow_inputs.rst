@@ -3606,7 +3606,7 @@ Each exhaust only fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/
          
          OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
-  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
+  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour to maintain the hourly target ventilation rate.
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] If FanPower not provided, defaults to 0.35 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
@@ -3646,7 +3646,7 @@ Each supply only fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/M
          
          OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
-  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
+  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour to maintain the hourly target ventilation rate.
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] If FanPower not provided, defaults to 0.35 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
@@ -3830,7 +3830,7 @@ A CFIS system is a supply ventilation system that provides outdoor air to the re
          
   .. [#] The flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
   .. [#] HoursInOperation is combined with the flow rate to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
-         In addition, if AdditionalRuntimeOperatingMode=air handler fan, it defines the minutes per hour that the air handler must provide ventilation (e.g., 8 hrs/day is treated as 20 mins/hr).
+         In addition, if AdditionalRuntimeOperatingMode="air handler fan", it defines the minutes per hour that the air handler must provide ventilation (e.g., 8 hrs/day is treated as 20 mins/hr).
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] FanPower only applies when AdditionalRuntimeOperatingMode="air handler fan", in which it determines the blower fan power during ventilation only mode.
   .. [#] If FanPower not provided, defaults to the attached HVAC system's FanPowerWattsPerCFM multiplied by the maximum blower airflow rate and VentilationOnlyModeAirflowFraction.
