@@ -330,14 +330,6 @@
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>7.7</Value>
-              </AnnualHeatingEfficiency>
               <extension>
                 <HeatingCapacityRetention>
                   <Fraction>0.6</Fraction>

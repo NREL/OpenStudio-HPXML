@@ -330,22 +330,13 @@
               <CompressorType>variable speed</CompressorType>
               <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
+                <Units>AFUE</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>17.25</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
-              </AnnualHeatingEfficiency>
               <HeatingDetailedPerformanceData>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>47.0</OutdoorTemperature>

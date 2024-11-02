@@ -5167,6 +5167,33 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     return args
   end
 
+  # TODO
+  def defaultOptionalArgumentValues(args)
+    args[:floor_over_foundation_assembly_r] = 28.1 if args[:floor_over_foundation_assembly_r].nil?
+    args[:heating_system_2_type] = Constants::None if args[:heating_system_2_type].nil?
+    args[:mech_vent_fan_type] = Constants::None if args[:mech_vent_fan_type].nil?
+    args[:mech_vent_2_fan_type] = Constants::None if args[:mech_vent_2_fan_type].nil?
+    args[:water_heater_type] = HPXML::WaterHeaterTypeStorage if args[:water_heater_type].nil?
+    args[:water_heater_jacket_rvalue] = Constants::None if args[:water_heater_jacket_rvalue].nil?
+    args[:dehumidifier_type] = Constants::None if args[:dehumidifier_type].nil?
+    args[:solar_thermal_system_type] = Constants::None if args[:solar_thermal_system_type].nil?
+    args[:overhangs_front_depth] = 0 if args[:overhangs_front_depth].nil?
+    args[:overhangs_back_depth] = 0 if args[:overhangs_back_depth].nil?
+    args[:overhangs_left_depth] = 0 if args[:overhangs_left_depth].nil?
+    args[:overhangs_right_depth] = 0 if args[:overhangs_right_depth].nil?
+    args[:solar_thermal_solar_fraction] = 0 if args[:solar_thermal_solar_fraction].nil?
+    args[:geometry_roof_pitch] = '6:12' if args[:geometry_roof_pitch].nil?
+    args[:solar_thermal_collector_tilt] = 'RoofPitch' if args[:solar_thermal_collector_tilt].nil?
+    args[:water_fixtures_shower_low_flow] = false if args[:water_fixtures_shower_low_flow].nil?
+    args[:water_fixtures_sink_low_flow] = false if args[:water_fixtures_sink_low_flow].nil?
+    args[:skylight_ufactor] = 0.33 if args[:skylight_ufactor].nil?
+    args[:skylight_shgc] = 0.45 if args[:skylight_shgc].nil?
+    args[:mech_vent_total_recovery_efficiency] = 0.48 if args[:mech_vent_total_recovery_efficiency].nil?
+    args[:mech_vent_sensible_recovery_efficiency] = 0.72 if args[:mech_vent_sensible_recovery_efficiency].nil?
+    args[:heat_pump_backup_heating_efficiency] = 1 if args[:heat_pump_backup_heating_efficiency].nil?
+    return args
+  end
+
   # Define what happens when the measure is run.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -5187,6 +5214,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
     args = convertArgumentValues(arguments(model), args)
+    args = defaultOptionalArgumentValues(args)
 
     # Argument error checks
     warnings, errors = validate_arguments(args)

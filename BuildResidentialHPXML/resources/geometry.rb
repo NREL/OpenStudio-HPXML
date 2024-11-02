@@ -1392,10 +1392,10 @@ module Geometry
                                         window_area_left:,
                                         window_area_right:,
                                         window_aspect_ratio:,
-                                        skylight_area_front:,
-                                        skylight_area_back:,
-                                        skylight_area_left:,
-                                        skylight_area_right:,
+                                        skylight_area_front: 0,
+                                        skylight_area_back: 0,
+                                        skylight_area_left: 0,
+                                        skylight_area_right: 0,
                                         **)
     facades = [Constants::FacadeBack, Constants::FacadeRight, Constants::FacadeFront, Constants::FacadeLeft]
 

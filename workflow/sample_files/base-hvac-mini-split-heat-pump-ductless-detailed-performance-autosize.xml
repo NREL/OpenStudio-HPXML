@@ -328,14 +328,6 @@
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>21.5</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.5</Value>
-              </AnnualHeatingEfficiency>
               <CoolingDetailedPerformanceData>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>95.0</OutdoorTemperature>

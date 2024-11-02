@@ -252,7 +252,6 @@
               <HeatingSystemType>
                 <Fireplace/>
               </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>

@@ -339,14 +339,6 @@
               <BackupHeatingSwitchoverTemperature>30.0</BackupHeatingSwitchoverTemperature>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>22.0</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
-              </AnnualHeatingEfficiency>
               <extension>
                 <HeatingCapacityRetention>
                   <Fraction>0.6</Fraction>

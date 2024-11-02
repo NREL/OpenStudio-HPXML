@@ -309,7 +309,6 @@
             <Area>15.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.6</UFactor>
-            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight1InteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
@@ -333,7 +332,6 @@
             <Area>15.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.6</UFactor>
-            <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Skylight2InteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
