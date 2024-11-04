@@ -5920,7 +5920,10 @@ module Defaults
         else
           if !distribution_system.nil?
             if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir
-              watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+
+              # watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+              watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity / heating_system.heating_efficiency_afue, 'btu/hr', 'kbtu/hr'))
+
             elsif distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
               watts += get_120v_pump_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
             end
@@ -5939,7 +5942,7 @@ module Defaults
 
           if heat_pump.simultaneous_backup # sum
             watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
-            watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w')
+            watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w') # FIXME: couldn't this be gas backup?
           else # max
             watts += [get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')), UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w')].max
           end
@@ -5967,7 +5970,14 @@ module Defaults
         next if cooling_system.is_shared_system
 
         distribution_system = cooling_system.distribution_system
-        watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+
+        # watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+
+        cop = UnitConversions.convert(cooling_system.cooling_efficiency_seer, 'btu/hr', 'w')
+        # watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity / cop, 'btu/hr', 'kbtu/hr'))
+        # - or -
+        watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity / cooling_system.cooling_efficiency_seer, 'w', 'kbtu/hr'))
+
         if !distribution_system.nil?
           heating_system = cooling_system.attached_heating_system
           if !heating_system.nil? &&
@@ -6012,13 +6022,17 @@ module Defaults
         next if water_heating_system.is_shared_system
 
         if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-          watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w') # FIXME: use this instead per Work Plan.docx?
+          watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w')
           breaker_spaces += 1
         elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
           if voltage == 120
             watts += 1000
           else
-            watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w') # FIXME: we have heating_capacity now right?
+            if water_heating_system.backup_heating_capacity.nil?
+              watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w')
+            else # max
+              watts += [UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w'), UnitConversions.convert(water_heating_system.backup_heating_capacity, 'btu/hr', 'w')].max
+            end
             breaker_spaces += 1
           end
         elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
@@ -6111,7 +6125,7 @@ module Defaults
     elsif type == HPXML::ElectricPanelLoadTypePoolHeater
       hpxml_bldg.pools.each do |pool|
         next if !system_ids.include?(pool.id)
-        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
+        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type) # FIXME: probably want to separate out HeatPump here
 
         watts += 27000
         breaker_spaces += 2

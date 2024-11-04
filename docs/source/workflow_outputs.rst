@@ -439,6 +439,7 @@ Panel loads, load-based capacities, and breaker spaces can also be found in the 
   Electric Panel Load: Clothes Dryer (W)
   Electric Panel Load: Dishwasher (W)
   Electric Panel Load: Range/Oven (W)
+  Electric Panel Load: Mech Vent (W)
   Electric Panel Load: Permanent Spa Heater (W)
   Electric Panel Load: Permanent Spa Pump (W)
   Electric Panel Load: Pool Heater (W)
