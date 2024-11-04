@@ -17,19 +17,12 @@
   </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
-    <Site>
-      <SiteID id='SiteID'/>
-      <Address>
-        <StateCode>CO</StateCode>
-      </Address>
-    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
         <Site>
-          <SiteType>suburban</SiteType>
           <Surroundings>stand-alone</Surroundings>
           <VerticalSurroundings>no units above or below</VerticalSurroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>

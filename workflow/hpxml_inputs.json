@@ -652,7 +652,16 @@
   },
   "sample_files/base-auto.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "simulation_control_timestep": "auto"
+    "simulation_control_timestep": "auto",
+    "simulation_control_run_period_calendar_year": "auto",
+    "simulation_control_daylight_saving_enabled": "auto",
+    "simulation_control_temperature_capacitance_multiplier": "auto",
+    "site_type": "auto",
+    "site_shielding_of_home": "auto",
+    "site_soil_and_moisture_type": "auto",
+    "site_state_code": "auto",
+    "site_time_zone_utc_offset": "auto",
+    "site_elevation": "auto"
   },
   "sample_files/base-appliances-coal.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
