@@ -330,8 +330,9 @@
               <CompressorType>single stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
-                <Units>AFUE</Units>
+                <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>

@@ -5170,27 +5170,47 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # TODO
   def defaultOptionalArgumentValues(args)
     args[:floor_over_foundation_assembly_r] = 28.1 if args[:floor_over_foundation_assembly_r].nil?
-    args[:heating_system_2_type] = Constants::None if args[:heating_system_2_type].nil?
-    args[:mech_vent_fan_type] = Constants::None if args[:mech_vent_fan_type].nil?
-    args[:mech_vent_2_fan_type] = Constants::None if args[:mech_vent_2_fan_type].nil?
-    args[:water_heater_type] = HPXML::WaterHeaterTypeStorage if args[:water_heater_type].nil?
-    args[:water_heater_jacket_rvalue] = Constants::None if args[:water_heater_jacket_rvalue].nil?
-    args[:dehumidifier_type] = Constants::None if args[:dehumidifier_type].nil?
-    args[:solar_thermal_system_type] = Constants::None if args[:solar_thermal_system_type].nil?
+    args[:geometry_roof_pitch] = '6:12' if args[:geometry_roof_pitch].nil?
     args[:overhangs_front_depth] = 0 if args[:overhangs_front_depth].nil?
     args[:overhangs_back_depth] = 0 if args[:overhangs_back_depth].nil?
     args[:overhangs_left_depth] = 0 if args[:overhangs_left_depth].nil?
     args[:overhangs_right_depth] = 0 if args[:overhangs_right_depth].nil?
-    args[:solar_thermal_solar_fraction] = 0 if args[:solar_thermal_solar_fraction].nil?
-    args[:geometry_roof_pitch] = '6:12' if args[:geometry_roof_pitch].nil?
-    args[:solar_thermal_collector_tilt] = 'RoofPitch' if args[:solar_thermal_collector_tilt].nil?
-    args[:water_fixtures_shower_low_flow] = false if args[:water_fixtures_shower_low_flow].nil?
-    args[:water_fixtures_sink_low_flow] = false if args[:water_fixtures_sink_low_flow].nil?
     args[:skylight_ufactor] = 0.33 if args[:skylight_ufactor].nil?
     args[:skylight_shgc] = 0.45 if args[:skylight_shgc].nil?
+    args[:heating_system_2_type] = Constants::None if args[:heating_system_2_type].nil?
+    args[:heating_system_2_fuel] = HPXML::FuelTypeElectricity if args[:heating_system_2_fuel].nil?
+    args[:heat_pump_heating_efficiency_type] = HPXML::UnitsHSPF if args[:heat_pump_heating_efficiency_type].nil?
+    args[:heat_pump_heating_efficiency] = 7.7 if args[:heat_pump_heating_efficiency].nil?
+    args[:heat_pump_cooling_efficiency_type] = HPXML::UnitsSEER if args[:heat_pump_cooling_efficiency_type].nil?
+    args[:heat_pump_cooling_efficiency] = 13.0 if args[:heat_pump_cooling_efficiency].nil?
+    args[:heat_pump_backup_type] = HPXML::HeatPumpBackupTypeIntegrated if args[:heat_pump_backup_type].nil?
+    args[:heat_pump_backup_fuel] = HPXML::FuelTypeElectricity if args[:heat_pump_backup_fuel].nil?
+    args[:heat_pump_backup_heating_efficiency] = 1 if args[:heat_pump_backup_heating_efficiency].nil?
+    args[:mech_vent_fan_type] = Constants::None if args[:mech_vent_fan_type].nil?
+    args[:mech_vent_recovery_efficiency_type] = 'Unadjusted' if args[:mech_vent_recovery_efficiency_type].nil?
     args[:mech_vent_total_recovery_efficiency] = 0.48 if args[:mech_vent_total_recovery_efficiency].nil?
     args[:mech_vent_sensible_recovery_efficiency] = 0.72 if args[:mech_vent_sensible_recovery_efficiency].nil?
-    args[:heat_pump_backup_heating_efficiency] = 1 if args[:heat_pump_backup_heating_efficiency].nil?
+    args[:mech_vent_2_fan_type] = Constants::None if args[:mech_vent_2_fan_type].nil?
+    args[:dehumidifier_type] = Constants::None if args[:dehumidifier_type].nil?
+    args[:water_heater_type] = HPXML::WaterHeaterTypeStorage if args[:water_heater_type].nil?
+    args[:water_heater_jacket_rvalue] = Constants::None if args[:water_heater_jacket_rvalue].nil?
+    args[:water_fixtures_shower_low_flow] = false if args[:water_fixtures_shower_low_flow].nil?
+    args[:water_fixtures_sink_low_flow] = false if args[:water_fixtures_sink_low_flow].nil?
+    args[:solar_thermal_system_type] = Constants::None if args[:solar_thermal_system_type].nil?
+    args[:solar_thermal_solar_fraction] = 0 if args[:solar_thermal_solar_fraction].nil?
+    args[:solar_thermal_collector_tilt] = 'RoofPitch' if args[:solar_thermal_collector_tilt].nil?
+    args[:misc_fuel_loads_grill_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_grill_fuel_type].nil?
+    args[:misc_fuel_loads_lighting_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_lighting_fuel_type].nil?
+    args[:misc_fuel_loads_fireplace_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_fireplace_fuel_type].nil?
+    args[:lighting_interior_fraction_cfl] = 0.1 if args[:lighting_interior_fraction_cfl].nil?
+    args[:lighting_interior_fraction_lfl] = 0.0 if args[:lighting_interior_fraction_lfl].nil?
+    args[:lighting_interior_fraction_led] = 0.0 if args[:lighting_interior_fraction_led].nil?
+    args[:lighting_exterior_fraction_cfl] = 0.0 if args[:lighting_exterior_fraction_cfl].nil?
+    args[:lighting_exterior_fraction_lfl] = 0.0 if args[:lighting_exterior_fraction_lfl].nil?
+    args[:lighting_exterior_fraction_led] = 0.0 if args[:lighting_exterior_fraction_led].nil?
+    args[:lighting_garage_fraction_cfl] = 0.0 if args[:lighting_garage_fraction_cfl].nil?
+    args[:lighting_garage_fraction_lfl] = 0.0 if args[:lighting_garage_fraction_lfl].nil?
+    args[:lighting_garage_fraction_led] = 0.0 if args[:lighting_garage_fraction_led].nil?
     return args
   end
 
@@ -7629,7 +7649,7 @@ module HPXMLFile
 
     return if heating_system_type == Constants::None && (not heating_system_is_heatpump_backup)
 
-    if args[:heating_system_2_fuel] == HPXML::HVACTypeElectricResistance
+    if args[:heating_system_type] == HPXML::HVACTypeElectricResistance
       args[:heating_system_2_fuel] = HPXML::FuelTypeElectricity
     end
 

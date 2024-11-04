@@ -393,6 +393,7 @@
         <LightingGroup>
           <SystemIdentifier id='LightingGroup2'/>
           <Location>interior</Location>
+          <FractionofUnitsInLocation>0.0</FractionofUnitsInLocation>
           <LightingType>
             <FluorescentTube/>
           </LightingType>
@@ -400,6 +401,7 @@
         <LightingGroup>
           <SystemIdentifier id='LightingGroup3'/>
           <Location>interior</Location>
+          <FractionofUnitsInLocation>0.0</FractionofUnitsInLocation>
           <LightingType>
             <LightEmittingDiode/>
           </LightingType>
@@ -407,6 +409,7 @@
         <LightingGroup>
           <SystemIdentifier id='LightingGroup4'/>
           <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.0</FractionofUnitsInLocation>
           <LightingType>
             <CompactFluorescent/>
           </LightingType>
@@ -414,6 +417,7 @@
         <LightingGroup>
           <SystemIdentifier id='LightingGroup5'/>
           <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.0</FractionofUnitsInLocation>
           <LightingType>
             <FluorescentTube/>
           </LightingType>
@@ -421,6 +425,7 @@
         <LightingGroup>
           <SystemIdentifier id='LightingGroup6'/>
           <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.0</FractionofUnitsInLocation>
           <LightingType>
             <LightEmittingDiode/>
           </LightingType>

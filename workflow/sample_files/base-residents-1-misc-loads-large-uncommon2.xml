@@ -599,6 +599,7 @@
         <FuelLoad>
           <SystemIdentifier id='FuelLoad2'/>
           <FuelLoadType>lighting</FuelLoadType>
+          <FuelType>natural gas</FuelType>
         </FuelLoad>
         <FuelLoad>
           <SystemIdentifier id='FuelLoad3'/>
