@@ -5171,6 +5171,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def defaultOptionalArgumentValues(args)
     args[:floor_over_foundation_assembly_r] = 28.1 if args[:floor_over_foundation_assembly_r].nil?
     args[:geometry_roof_pitch] = '6:12' if args[:geometry_roof_pitch].nil?
+    args[:geometry_garage_width] = 0.0 if args[:geometry_garage_width].nil?
+    args[:geometry_garage_depth] = 20.0 if args[:geometry_garage_depth].nil?
+    args[:geometry_garage_protrusion] = 0.0 if args[:geometry_garage_protrusion].nil?
     args[:overhangs_front_depth] = 0 if args[:overhangs_front_depth].nil?
     args[:overhangs_back_depth] = 0 if args[:overhangs_back_depth].nil?
     args[:overhangs_left_depth] = 0 if args[:overhangs_left_depth].nil?
