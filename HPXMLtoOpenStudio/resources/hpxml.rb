@@ -9397,6 +9397,7 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
+      errors += @panel_loads.check_for_errors
       return errors
     end
 
@@ -9462,13 +9463,83 @@ class HPXML < Object
 
   # Object for /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/extension/PanelLoads/PanelLoad.
   class PanelLoad < BaseElement
-    ATTRS = [:type,
-             :power,
-             :voltage,
-             :breaker_spaces,
-             :addition,
-             :system_idrefs] # [Array<String>] TODO
+    ATTRS = [:type,           # [String] Type
+             :power,          # [Double] Power
+             :voltage,        # [String] Voltage
+             :breaker_spaces, # [Integer] BreakerSpaces
+             :addition,       # [Boolean] Addition
+             :system_idrefs] # [Array<String>] System/@idref
     attr_accessor(*ATTRS)
+
+    # TODO
+    def systems
+      return [] if @system_idrefs.nil?
+
+      heating_systems = @parent_object.heating_systems.select { |heating_system| @system_idrefs.include? heating_system.id }
+      cooling_systems = @parent_object.cooling_systems.select { |cooling_system| @system_idrefs.include? cooling_system.id }
+      heat_pumps = @parent_object.heat_pumps.select { |heat_pump| @system_idrefs.include? heat_pump.id }
+      water_heating_systems = @parent_object.water_heating_systems.select { |water_heating_system| @system_idrefs.include? water_heating_system.id }
+      clothes_dryers = @parent_object.clothes_dryers.select { |clothes_dryer| @system_idrefs.include? clothes_dryer.id }
+      dishwashers = @parent_object.dishwashers.select { |dishwasher| @system_idrefs.include? dishwasher.id }
+      cooking_ranges = @parent_object.cooking_ranges.select { |cooking_range| @system_idrefs.include? cooking_range.id }
+      ventilation_fans = @parent_object.ventilation_fans.select { |ventilation_fan| @system_idrefs.include? ventilation_fan.id }
+      permanent_spa_pumps = @parent_object.permanent_spas.select { |permanent_spa| @system_idrefs.include? permanent_spa.pump_id }
+      permanent_spa_heaters = @parent_object.permanent_spas.select { |permanent_spa| @system_idrefs.include? permanent_spa.heater_id }
+      pool_pumps = @parent_object.pools.select { |pool| @system_idrefs.include? pool.pump_id }
+      pool_heaters = @parent_object.pools.select { |pool| @system_idrefs.include? pool.heater_id }
+      plug_load_well_pumps = @parent_object.plug_loads.select { |plug_load| @system_idrefs.include? plug_load.id && plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump }
+      plug_load_vehicles = @parent_object.plug_loads.select { |plug_load| @system_idrefs.include? plug_load.id && plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
+
+      if !heating_systems.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeHeating].include?(@type)
+      end
+      if !cooling_systems.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeCooling].include?(@type)
+      end
+      if !heat_pumps.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
+      end
+      if !water_heating_systems.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeWaterHeater].include?(@type)
+      end
+      if !clothes_dryers.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeClothesDryer].include?(@type)
+      end
+      if !dishwashers.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeDishwasher].include?(@type)
+      end
+      if !cooking_ranges.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeRangeOven].include?(@type)
+      end
+      if !ventilation_fans.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeMechVent].include?(@type)
+      end
+      if !permanent_spa_pumps.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypePermanentSpaPump].include?(@type)
+      end
+      if !permanent_spa_heaters.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypePermanentSpaHeater].include?(@type)
+      end
+      if !pool_pumps.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypePoolPump].include?(@type)
+      end
+      if !pool_heaters.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypePoolHeater].include?(@type)
+      end
+      if !plug_load_well_pumps.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::PlugLoadTypeWellPump].include?(@type)
+      end
+      if !plug_load_vehicles.empty?
+        fail "One or more attached systems '#{@system_idrefs} not valid for panel load type '#{@type}'" if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
+      end
+
+      list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles
+      if @system_idrefs.size > list.size
+        fail "One or more systems '#{@system_idrefs}' not found for panel load type '#{@type}'."
+      end
+
+      return list
+    end
 
     # Deletes the current object from the array.
     #
@@ -9484,6 +9555,7 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
+      begin; systems; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
