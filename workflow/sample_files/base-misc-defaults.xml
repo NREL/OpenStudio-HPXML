@@ -382,9 +382,6 @@
             <VehicleType>
               <BEV>
                 <Battery/>
-                <FractionChargedLocation>
-                  <Location>Home</Location>
-                </FractionChargedLocation>
                 <ConnectedCharger idref='EVCharger1'/>
               </BEV>
             </VehicleType>

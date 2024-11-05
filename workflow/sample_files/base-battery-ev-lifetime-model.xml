@@ -523,9 +523,6 @@
                     <LifetimeModel>KandlerSmith</LifetimeModel>
                   </extension>
                 </Battery>
-                <FractionChargedLocation>
-                  <Location>Home</Location>
-                </FractionChargedLocation>
                 <ConnectedCharger idref='EVCharger1'/>
               </BEV>
             </VehicleType>
@@ -533,7 +530,7 @@
             <HoursDrivenPerWeek>14.0</HoursDrivenPerWeek>
             <FuelEconomyCombined>
               <Units>kWh/mile</Units>
-              <Value>0.32</Value>
+              <Value>0.25</Value>
             </FuelEconomyCombined>
           </Vehicle>
         </Vehicles>
@@ -541,7 +538,7 @@
           <ElectricVehicleCharger>
             <SystemIdentifier id='EVCharger1'/>
             <Location>garage</Location>
-            <ChargingPower>7200.0</ChargingPower>
+            <ChargingPower>7000.0</ChargingPower>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>

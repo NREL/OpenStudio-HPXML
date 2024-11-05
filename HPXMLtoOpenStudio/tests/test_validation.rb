@@ -1821,6 +1821,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                   "Both 'permanent_spa_heater' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and monthly multipliers provided; the latter will be ignored."],
+                              'schedule-file-and-weekday-weekend-multipliers-ev' => ["Both 'ev_battery_charging' and 'ev_battery_discharging' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                     "Both 'ev_battery_charging' and 'ev_battery_discharging' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                     "Both 'ev_battery_charging' and 'ev_battery_discharging' schedule file and monthly multipliers provided; the latter will be ignored."],
                               'schedule-file-and-refrigerators-freezer-coefficients' => ["Both 'refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
                                                                                          "Both 'refrigerator' schedule file and temperature coefficients provided; the latter will be ignored.",
                                                                                          "Both 'extra_refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
@@ -1948,6 +1951,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekdayScheduleFractions']
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekendScheduleFractions']
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']
+      elsif ['schedule-file-and-weekday-weekend-multipliers-ev'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-battery-ev.xml')
+        hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/battery-ev.csv')
+        hpxml_bldg.vehicles[0].nominal_capacity_kwh = 500
+        hpxml_bldg.vehicles[0].ev_charging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['WeekdayScheduleFractions']
+        hpxml_bldg.vehicles[0].ev_charging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['WeekendScheduleFractions']
+        hpxml_bldg.vehicles[0].ev_charging_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['MonthlyScheduleMultipliers']
       elsif ['schedule-file-and-refrigerators-freezer-coefficients'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-stochastic.csv')
