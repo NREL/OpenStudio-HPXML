@@ -6741,6 +6741,8 @@ class HPXML < Object
         return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_ceer, 'btu/hr', 'w')
       elsif !@cooling_efficiency_kw_per_ton.nil?
         # TODO
+      else
+        return @cooling_capacity # FIXME: evap cooler
       end
     end
 
