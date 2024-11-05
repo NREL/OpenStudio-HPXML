@@ -5911,7 +5911,7 @@ module Defaults
 
           # FIXME: convert output capacity to input capacity
           # watts += UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'w')
-          watts += UnitConversions.convert(heating_system.heating_capacity / heating_system.heating_efficiency_afue, 'btu/hr', 'w')
+          watts += UnitConversions.convert(heating_system.heating_input_capacity, 'btu/hr', 'w')
 
           if !distribution_system.nil?
             if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -5946,14 +5946,21 @@ module Defaults
       hpxml_bldg.heat_pumps.each do |heat_pump|
         next if !system_ids.include?(heat_pump.id)
 
+        # FIXME: convert output capacity to input capacity
+        heating_input_capacity = heat_pump.heating_input_capacity
+
         distribution_system = heat_pump.distribution_system
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
+          backup_heating_input_capacity = heat_pump.backup_heating_input_capacity
           if heat_pump.simultaneous_backup # sum
-            watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
-            watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w') # FIXME: couldn't this be gas backup?
+            # watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+            # watts += UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w') if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+            watts += UnitConversions.convert(heating_input_capacity, 'btu/hr', 'w')
+            watts += UnitConversions.convert(backup_heating_input_capacity, 'btu/hr', 'w') if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
           else # max
-            watts += [get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')), UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w')].max
+            # watts += [get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')), UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w')].max
+            watts += [UnitConversions.convert(heating_input_capacity, 'btu/hr', 'w'), UnitConversions.convert(backup_heating_input_capacity, 'btu/hr', 'w')].max
           end
           if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
             if !distribution_system.nil?
@@ -5965,7 +5972,8 @@ module Defaults
             breaker_spaces += 1
           end
         else # separate or none
-          watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+          # watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+          watts += UnitConversions.convert(heating_input_capacity, 'btu/hr', 'w')
           if !distribution_system.nil?
             watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
           end
@@ -5978,12 +5986,11 @@ module Defaults
         next if !system_ids.include?(cooling_system.id)
         next if cooling_system.is_shared_system
 
-        distribution_system = cooling_system.distribution_system
-
         # FIXME: convert output capacity to input capacity
         # watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
-        watts += cooling_system.cooling_capacity / UnitConversions.convert(cooling_system.cooling_efficiency_seer, 'btu/hr', 'w')
+        watts += UnitConversions.convert(cooling_system.cooling_input_capacity, 'btu/hr', 'w')
 
+        distribution_system = cooling_system.distribution_system
         if !distribution_system.nil?
           heating_system = cooling_system.attached_heating_system
           if !heating_system.nil? &&
@@ -6004,8 +6011,11 @@ module Defaults
       hpxml_bldg.heat_pumps.each do |heat_pump|
         next if !system_ids.include?(heat_pump.id)
 
+        # FIXME: convert output capacity to input capacity
+        # watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+        watts += UnitConversions.convert(heat_pump.cooling_input_capacity, 'btu/hr', 'w')
+
         distribution_system = heat_pump.distribution_system
-        watts += get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
           if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
             if !distribution_system.nil?
