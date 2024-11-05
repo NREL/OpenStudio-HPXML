@@ -5908,7 +5908,11 @@ module Defaults
 
         distribution_system = heating_system.distribution_system
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-          watts += UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'w')
+
+          # FIXME: convert output capacity to input capacity
+          # watts += UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'w')
+          watts += UnitConversions.convert(heating_system.heating_capacity / heating_system.heating_efficiency_afue, 'btu/hr', 'w')
+
           if !distribution_system.nil?
             if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir
               watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
@@ -5920,10 +5924,7 @@ module Defaults
         else
           if !distribution_system.nil?
             if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-              # watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
-              watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity / heating_system.heating_efficiency_afue, 'btu/hr', 'kbtu/hr'))
-
+              watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
             elsif distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
               watts += get_120v_pump_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
             end
@@ -5971,12 +5972,9 @@ module Defaults
 
         distribution_system = cooling_system.distribution_system
 
+        # FIXME: convert output capacity to input capacity
         # watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
-
-        cop = UnitConversions.convert(cooling_system.cooling_efficiency_seer, 'btu/hr', 'w')
-        # watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity / cop, 'btu/hr', 'kbtu/hr'))
-        # - or -
-        watts += get_dx_coil_load_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity / cooling_system.cooling_efficiency_seer, 'w', 'kbtu/hr'))
+        watts += cooling_system.cooling_capacity / UnitConversions.convert(cooling_system.cooling_efficiency_seer, 'btu/hr', 'w')
 
         if !distribution_system.nil?
           heating_system = cooling_system.attached_heating_system
