@@ -5917,14 +5917,22 @@ module Defaults
             if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir
               watts += get_240v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
             elsif distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
-              watts += get_240v_pump_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+
+              # FIXME: use ElectricAuxiliaryEnergy and assumptiopn from HVAC.apply_boiler
+              # watts += get_240v_pump_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+              watts += heating_system.electric_auxiliary_energy / 2.08 # only 81 W?
+
             end
           end
           breaker_spaces += get_breaker_spaces_from_heating_capacity(heating_system.heating_capacity)
         else
           if !distribution_system.nil?
             if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir
-              watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+
+              # FIXME: use FanPowerWattsPerCFM and HeatingAirflowCFM
+              # watts += get_120v_air_handler_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
+              watts += heating_system.fan_watts_per_cfm * heating_system.heating_airflow_cfm
+
             elsif distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
               watts += get_120v_pump_load_from_capacity(UnitConversions.convert(heating_system.heating_capacity, 'btu/hr', 'kbtu/hr'))
             end
