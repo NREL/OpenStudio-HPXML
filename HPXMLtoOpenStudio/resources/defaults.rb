@@ -3274,6 +3274,8 @@ module Defaults
       end
 
       hpxml_bldg.permanent_spas.each do |permanent_spa|
+        next if permanent_spa.type == HPXML::TypeNone
+
         if permanent_spa.pump_panel_loads.nil?
           panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaPump,
                           type_isdefaulted: true,
@@ -3282,7 +3284,6 @@ module Defaults
         end
 
         next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
-
         next unless permanent_spa.heater_panel_loads.nil?
 
         panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
@@ -3292,6 +3293,8 @@ module Defaults
       end
 
       hpxml_bldg.pools.each do |pool|
+        next if pool.type == HPXML::TypeNone
+
         if pool.pump_panel_loads.nil?
           panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolPump,
                           type_isdefaulted: true,
@@ -3300,7 +3303,6 @@ module Defaults
         end
 
         next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
-
         next unless pool.heater_panel_loads.nil?
 
         panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater,
