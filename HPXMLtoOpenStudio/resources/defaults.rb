@@ -6119,20 +6119,26 @@ module Defaults
     elsif type == HPXML::ElectricPanelLoadTypeMechVent
       hpxml_bldg.ventilation_fans.each do |ventilation_fan|
         next if !system_ids.include?(ventilation_fan.id)
+        next if ventilation_fan.is_shared_system
 
-        if ventilation_fan.fan_location == HPXML::LocationKitchen
-          watts += 90 * ventilation_fan.count
-        elsif ventilation_fan.fan_location == HPXML::LocationBath
-          watts += 15 * ventilation_fan.count
+        # if ventilation_fan.fan_location == HPXML::LocationKitchen
+        # watts += 90 * ventilation_fan.count
+        # elsif ventilation_fan.fan_location == HPXML::LocationBath
+        # watts += 15 * ventilation_fan.count
+        # end
+        if [HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
+          watts += ventilation_fan.count * ventilation_fan.fan_power
+        else
+          watts += ventilation_fan.fan_power
         end
       end
-      breaker_spaces += 1
+      breaker_spaces += 1 # intentionally outside the ventilation_fans loop
     elsif type == HPXML::ElectricPanelLoadTypePermanentSpaHeater
       hpxml_bldg.permanent_spas.each do |permanent_spa|
         next if !system_ids.include?(permanent_spa.heater_id)
         next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
 
-        watts += 1000
+        watts += 1000 # FIXME
         breaker_spaces += 2
       end
     elsif type == HPXML::ElectricPanelLoadTypePermanentSpaPump
