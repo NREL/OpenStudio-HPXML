@@ -6128,8 +6128,10 @@ module Defaults
         # end
         if [HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
           watts += ventilation_fan.count * ventilation_fan.fan_power
-        else
+        elsif not ventilation_fan.fan_power.nil?
           watts += ventilation_fan.fan_power
+        else
+          watts += 3000 # FIXME: base-mechvent-cfis-no-additional-runtime.xml, e.g., has no FanPower defaulted
         end
       end
       breaker_spaces += 1 # intentionally outside the ventilation_fans loop
