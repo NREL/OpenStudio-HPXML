@@ -9373,11 +9373,11 @@ class HPXML < Object
       super(hpxml_element, *args, **kwargs)
     end
     CLASS_ATTRS = [:panel_loads]
-    ATTRS = [:id, # [String] SystemIdentifier/@id
-             :voltage,
-             :max_current_rating,
-             :headroom_breaker_spaces,
-             :total_breaker_spaces] +
+    ATTRS = [:id,                      # [String] SystemIdentifier/@id
+             :voltage,                 # [String] Voltage
+             :max_current_rating,      # [Double] MaxCurrentRating
+             :headroom_breaker_spaces, # [Integer] HeadroomBreakerSpaces
+             :total_breaker_spaces] +  # [Integer] TotalBreakerSpaces
             CLB_ATTRS.keys +
             BS_ATTRS.keys
     attr_reader(*CLASS_ATTRS)
@@ -9466,7 +9466,7 @@ class HPXML < Object
              :voltage,        # [String] Voltage
              :breaker_spaces, # [Integer] BreakerSpaces
              :addition,       # [Boolean] Addition
-             :system_idrefs] # [Array<String>] System/@idref
+             :system_idrefs]  # [Array<String>] System/@idref
     attr_accessor(*ATTRS)
 
     # TODO
