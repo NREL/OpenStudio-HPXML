@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c962d08b-5f5f-428a-a0b3-a3e83db83567</version_id>
-  <version_modified>2024-11-08T20:35:35Z</version_modified>
+  <version_id>407c4252-0b8c-449f-8133-fc60cd57b161</version_id>
+  <version_modified>2024-11-08T21:18:51Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -363,7 +363,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>95FE0EF9</checksum>
+      <checksum>E1193114</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -459,7 +459,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>77E045BC</checksum>
+      <checksum>B41E220C</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -645,7 +645,7 @@
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C3112FAC</checksum>
+      <checksum>DA4456A1</checksum>
     </file>
     <file>
       <filename>xmlvalidator.rb</filename>

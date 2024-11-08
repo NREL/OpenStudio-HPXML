@@ -9598,7 +9598,8 @@ class HPXML < Object
       if (not @system_idrefs.nil?) && (not @system_idrefs.empty?)
         @system_idrefs.each do |system_idref|
           system = XMLHelper.add_element(panel_load, 'AttachedToSystem')
-          XMLHelper.add_attribute(system, 'idref', system_idref, @system_idrefs_isdefaulted)
+          XMLHelper.add_attribute(system, 'idref', system_idref)
+          XMLHelper.add_attribute(system, 'dataSource', 'software') if @system_idrefs_isdefaulted
         end
       end
     end

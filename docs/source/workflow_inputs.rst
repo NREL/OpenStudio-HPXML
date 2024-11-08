@@ -4584,6 +4584,8 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] If neither extension/HeadroomBreakerSpaces nor extension/TotalBreakerSpaces provided, the following default value representing a fully occupied electric panel will be used: extension/HeadroomBreakerSpaces = 0.
   .. [#] See :ref:`panel_loads`.
 
+See :ref:`annual_outputs` for descriptions of how the calculated capacities and breaker spaces appear in the output files.
+
 .. _panel_loads:
 
 Panel Loads

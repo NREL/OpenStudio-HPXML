@@ -993,7 +993,10 @@ module Outputs
     return htg_cap, clg_cap, hp_backup_cap
   end
 
-  # TODO
+  # Calculates total panel loads (across all panel loads for a given panel load type) for a given HPXML Building.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Array<Double * 15>] Total panel load for each panel load type (W)
   def self.get_total_panel_loads(hpxml_bldg)
     htg, clg, hw, cd, dw, ov, vf, sh, sp, ph, pp, wp, ev, ltg, oth = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
