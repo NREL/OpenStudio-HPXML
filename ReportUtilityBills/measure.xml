@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>0ee6f126-f1ad-4eb6-8afb-617046ab665f</version_id>
-  <version_modified>2024-10-14T15:20:06Z</version_modified>
+  <version_id>31b1e987-41c7-4d52-965d-a902f73bcd90</version_id>
+  <version_modified>2024-10-31T03:05:02Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -180,13 +180,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>007104C8</checksum>
+      <checksum>4D23174A</checksum>
     </file>
     <file>
       <filename>detailed_rates/README.md</filename>
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D038669F</checksum>
+      <checksum>4BA8526F</checksum>
+    </file>
+    <file>
+      <filename>detailed_rates/Sample Flat Rate Fixed Daily Charge.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>03F1B3AD</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
@@ -288,7 +294,7 @@
       <filename>detailed_rates/openei_rates.zip</filename>
       <filetype>zip</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F41F4AA4</checksum>
+      <checksum>FCDE5F5D</checksum>
     </file>
     <file>
       <filename>simple_rates/HouseholdConsumption.csv</filename>
@@ -312,7 +318,7 @@
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>86D22906</checksum>
+      <checksum>22F928DB</checksum>
     </file>
     <file>
       <filename>Contains Demand Charges.json</filename>
@@ -354,7 +360,7 @@
       <filename>test_report_utility_bills.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B9C13CA4</checksum>
+      <checksum>1D59A593</checksum>
     </file>
   </files>
 </measure>

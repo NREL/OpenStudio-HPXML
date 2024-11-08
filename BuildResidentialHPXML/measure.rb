@@ -2273,7 +2273,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_heating_capacity', false)
     arg.setDisplayName('Water Heater: Heating Capacity')
-    arg.setDescription("Heating capacity. Only applies to #{HPXML::WaterHeaterTypeStorage}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>) is used.")
+    arg.setDescription("Heating capacity. Only applies to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump} (compressor). If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>, <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>) is used.")
+    arg.setUnits('Btu/hr')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_backup_heating_capacity', false)
+    arg.setDisplayName('Water Heater: Backup Heating Capacity')
+    arg.setDescription("Backup heating capacity for a #{HPXML::WaterHeaterTypeHeatPump}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>) is used.")
     arg.setUnits('Btu/hr')
     args << arg
 
@@ -6411,6 +6417,23 @@ module HPXMLFile
 
           distribution_system_idref = hvac_distribution.id
         end
+        if distribution_system_idref.nil?
+          # Allow for PTAC/PTHP by automatically adding a DSE=1 distribution system to attach the CFIS to
+          hpxml_bldg.hvac_systems.each do |hvac_system|
+            next unless (hvac_system.is_a?(HPXML::CoolingSystem) && [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(hvac_system.cooling_system_type)) ||
+                        (hvac_system.is_a?(HPXML::HeatPump) && [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include?(hvac_system.heat_pump_type))
+
+            hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
+                                              distribution_system_type: HPXML::HVACDistributionTypeDSE,
+                                              annual_cooling_dse: 1.0,
+                                              annual_heating_dse: 1.0)
+            hvac_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+            distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          end
+        end
+
+        return if distribution_system_idref.nil? # No distribution system to attach the CFIS to
+
         cfis_addtl_runtime_operating_mode = HPXML::CFISModeAirHandler
       end
 
@@ -6609,6 +6632,8 @@ module HPXMLFile
       heating_capacity = args[:water_heater_heating_capacity]
       tank_model_type = args[:water_heater_tank_model_type]
     elsif [HPXML::WaterHeaterTypeHeatPump].include? water_heater_type
+      heating_capacity = args[:water_heater_heating_capacity]
+      backup_heating_capacity = args[:water_heater_backup_heating_capacity]
       operating_mode = args[:water_heater_operating_mode]
     end
 
@@ -6629,6 +6654,7 @@ module HPXMLFile
                                          jacket_r_value: jacket_r_value,
                                          temperature: args[:water_heater_setpoint_temperature],
                                          heating_capacity: heating_capacity,
+                                         backup_heating_capacity: backup_heating_capacity,
                                          is_shared_system: is_shared_system,
                                          number_of_bedrooms_served: number_of_bedrooms_served,
                                          tank_model_type: tank_model_type,

@@ -308,8 +308,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     next if message.include?('WetBulb not converged after') && message.include?('iterations(PsyTwbFnTdbWPb)')
     next if message.include? 'Inside surface heat balance did not converge with Max Temp Difference'
     next if message.include? 'Inside surface heat balance convergence problem continues'
-    next if message.include?('Glycol: Temperature') && message.include?('out of range (too low) for fluid')
-    next if message.include?('Glycol: Temperature') && message.include?('out of range (too high) for fluid')
+    next if message.include?('Glycol') && message.include?('Temperature') && message.include?('out of range (too low) for fluid')
+    next if message.include?('Glycol') && message.include?('Temperature') && message.include?('out of range (too high) for fluid')
     next if message.include? 'Plant loop exceeding upper temperature limit'
     next if message.include? 'Plant loop falling below lower temperature limit'
     next if message.include?('Foundation:Kiva') && message.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
@@ -393,10 +393,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     timestep = hpxml_header.timestep.nil? ? 60 : hpxml_header.timestep
     if timestep > 15
       next if message.include?('Timestep: Requested number') && message.include?('is less than the suggested minimum')
-    end
-    # Location doesn't match EPW station (see https://github.com/NREL/EnergyPlus/issues/10579)
-    if hpxml_path.include? 'base-location-detailed.xml'
-      next if message.include? 'Weather file location will be used rather than entered (IDF) Location object.'
     end
     # Coil speed level EMS
     if hpxml_header.hvac_onoff_thermostat_deadband
@@ -907,30 +903,31 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   assert_equal(hpxml_bldg.total_fraction_cool_load_served > 0, clg_energy > 0)
 
   # Mechanical Ventilation
-  whole_vent_fans = hpxml_bldg.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && !vent_mech.is_cfis_supplemental_fan }
-  local_vent_fans = hpxml_bldg.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation }
-  fan_cfis_with_addl_runtime = whole_vent_fans.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS && vent_mech.cfis_addtl_runtime_operating_mode != HPXML::CFISModeNone }
-  fan_sup = whole_vent_fans.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
-  fan_exh = whole_vent_fans.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
-  fan_bal = whole_vent_fans.select { |vent_mech| [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include?(vent_mech.fan_type) }
-  vent_fan_kitchen = local_vent_fans.select { |vent_mech| vent_mech.fan_location == HPXML::LocationKitchen }
-  vent_fan_bath = local_vent_fans.select { |vent_mech| vent_mech.fan_location == HPXML::LocationBath }
+  whole_vent_fans = hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan }
+  local_vent_fans = hpxml_bldg.ventilation_fans.select { |f| f.used_for_local_ventilation }
+  fan_cfis = whole_vent_fans.select { |f| f.fan_type == HPXML::MechVentTypeCFIS && f.cfis_addtl_runtime_operating_mode != HPXML::CFISModeNone }
+  fan_sup = whole_vent_fans.select { |f| f.fan_type == HPXML::MechVentTypeSupply }
+  fan_exh = whole_vent_fans.select { |f| f.fan_type == HPXML::MechVentTypeExhaust }
+  fan_bal = whole_vent_fans.select { |f| [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include?(f.fan_type) }
+  vent_fan_kitchen = local_vent_fans.select { |f| f.fan_location == HPXML::LocationKitchen }
+  vent_fan_bath = local_vent_fans.select { |f| f.fan_location == HPXML::LocationBath }
 
   mv_energy = UnitConversions.convert(results['End Use: Electricity: Mech Vent (MBtu)'], 'MBtu', 'GJ')
-  if not (fan_cfis_with_addl_runtime + fan_sup + fan_exh + fan_bal + vent_fan_kitchen + vent_fan_bath).empty?
-    if not fan_cfis_with_addl_runtime.empty?
+  if not (fan_cfis + fan_sup + fan_exh + fan_bal + vent_fan_kitchen + vent_fan_bath).empty?
+    if not fan_cfis.empty?
       if (fan_sup + fan_exh + fan_bal + vent_fan_kitchen + vent_fan_bath).empty?
         # CFIS only, check for positive mech vent energy that is less than the energy if it had run 24/7
-        fan_gj = fan_cfis_with_addl_runtime.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        max_fan_gj = fan_cfis.select { |f| f.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler }.map { |f| UnitConversions.convert(f.unit_fan_power * f.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        max_fan_gj += fan_cfis.select { |f| f.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan }.map { |f| UnitConversions.convert(f.cfis_supplemental_fan.unit_fan_power * (f.average_unit_flow_rate / f.cfis_supplemental_fan.oa_unit_flow_rate * 24) * 365.0, 'Wh', 'GJ') }.sum(0.0)
         assert_operator(mv_energy, :>, 0)
-        assert_operator(mv_energy, :<, fan_gj)
+        assert_operator(mv_energy, :<, max_fan_gj)
       end
     else
       # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
       fan_gj = 0
-      fan_gj += (fan_sup + fan_exh + fan_bal).map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
-      fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.unit_fan_power * vent_kitchen.hours_in_operation * vent_kitchen.count * 365.0, 'Wh', 'GJ') }.sum(0.0)
-      fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.unit_fan_power * vent_bath.hours_in_operation * vent_bath.count * 365.0, 'Wh', 'GJ') }.sum(0.0)
+      fan_gj += (fan_sup + fan_exh + fan_bal).map { |f| UnitConversions.convert(f.unit_fan_power * f.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+      fan_gj += vent_fan_kitchen.map { |f| UnitConversions.convert(f.unit_fan_power * f.hours_in_operation * f.count * 365.0, 'Wh', 'GJ') }.sum(0.0)
+      fan_gj += vent_fan_bath.map { |f| UnitConversions.convert(f.unit_fan_power * f.hours_in_operation * f.count * 365.0, 'Wh', 'GJ') }.sum(0.0)
       # Maximum error that can be caused by rounding
       assert_in_delta(mv_energy, fan_gj, 0.006)
     end
