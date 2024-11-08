@@ -1614,6 +1614,7 @@
   },
   "sample_files/base-dhw-undersized2.xml": {
     "parent_hpxml": "sample_files/base.xml",
+    "simulation_control_timestep": 10,
     "water_heater_tank_volume": 1.0,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
   },
