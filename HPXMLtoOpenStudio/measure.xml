@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>993b9729-0a93-4aaa-944d-8eeb8dc67490</version_id>
-  <version_modified>2024-11-07T19:42:18Z</version_modified>
+  <version_id>fa21412b-c3fb-46b8-8bce-b6813e60ecd4</version_id>
+  <version_modified>2024-11-08T19:08:07Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -327,13 +327,13 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D18C348D</checksum>
+      <checksum>0E94E58B</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E0D3E797</checksum>
+      <checksum>C600181F</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -363,7 +363,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FE7F607B</checksum>
+      <checksum>95FE0EF9</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -381,7 +381,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0A32EBF1</checksum>
+      <checksum>2FB75A1A</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -459,7 +459,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4949F4F8</checksum>
+      <checksum>33AEF129</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -747,7 +747,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>78C4225E</checksum>
+      <checksum>9F8C0709</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>

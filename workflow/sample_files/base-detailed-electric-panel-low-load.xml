@@ -420,12 +420,12 @@
               <HeadroomBreakerSpaces>5</HeadroomBreakerSpaces>
               <PanelLoads>
                 <PanelLoad>
-                  <Type>Heating</Type>
-                  <System idref='HeatingSystem1'/>
+                  <LoadType>heating</LoadType>
+                  <AttachedToSystem idref='HeatingSystem1'/>
                 </PanelLoad>
                 <PanelLoad>
-                  <Type>Other</Type>
-                  <Power>559.0</Power>
+                  <LoadType>other</LoadType>
+                  <PowerRating>559.0</PowerRating>
                 </PanelLoad>
               </PanelLoads>
             </extension>

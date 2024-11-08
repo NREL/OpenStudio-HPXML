@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
-# TODO
+# Collection of methods related to electric panel load calculations.
 module ElectricPanel
-  # TODO
+  # Calculates load-based capacity and breaker spaces for an electric panel.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
+  # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports load-based capacities and breaker spaces
+  # @return [nil]
   def self.calculate(hpxml_bldg, electric_panel, update_hpxml: true)
     panel_loads = PanelLoadValues.new
 
@@ -21,7 +26,11 @@ module ElectricPanel
     electric_panel.bs_headroom = panel_loads.BreakerSpaces_HeadRoom
   end
 
-  # TODO
+  # Get the heating system attached to the given panel load.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param [HPXML::PanelLoad] Object that defines a single electric panel load
+  # @return [HPXML::HeatingSystem] The heating system referenced by the panel load
   def self.get_panel_load_heating_system(hpxml_bldg, panel_load)
     hpxml_bldg.heating_systems.each do |heating_system|
       next if !panel_load.system_idrefs.include?(heating_system.id)
@@ -31,7 +40,11 @@ module ElectricPanel
     return
   end
 
-  # TODO
+  # Get the heat pump attached to the given panel load.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param [HPXML::PanelLoad] Object that defines a single electric panel load
+  # @return [HPXML::HeatPump] The heat pump referenced by the panel load
   def self.get_panel_load_heat_pump(hpxml_bldg, panel_load)
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next if !panel_load.system_idrefs.include?(heat_pump.id)
@@ -41,7 +54,15 @@ module ElectricPanel
     return
   end
 
-  # TODO
+  # Gets the electric panel's heating load.
+  # The returned heating load depends on several factors:
+  # - whether the backup heating system can operate simultaneous with the primary heating system (if it can, we sum; if it can't, we take the max)
+  # - whether we are tabulating all heating loads, only existing heating loads, or only new heating loads
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
+  # @param addition [nil or Boolean] Whether we are getting all, existing, or new heating loads
+  # @return [Double] The electric panel's
   def self.get_panel_load_heating(hpxml_bldg, electric_panel, addition: nil)
     htg = 0
     electric_panel.panel_loads.each do |panel_load|
@@ -88,7 +109,12 @@ module ElectricPanel
     return htg
   end
 
-  # TODO
+  # Calculate the load-based capacity for the given electric panel and panel loads according to NEC 220.83.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
+  # @param panel_loads [Array<HPXML::PanelLoad>] List of panel load objects
+  # @return [nil]
   def self.calculate_load_based(hpxml_bldg, electric_panel, panel_loads)
     htg_existing = get_panel_load_heating(hpxml_bldg, electric_panel, addition: false)
     htg_new = get_panel_load_heating(hpxml_bldg, electric_panel, addition: true)
@@ -105,6 +131,7 @@ module ElectricPanel
 
     threshold = 8000.0 # W
 
+    # Part A
     part_a = 1.0 * [threshold, other_load].min + 0.4 * [0, other_load - threshold].max
 
     # Part B
@@ -115,7 +142,12 @@ module ElectricPanel
     panel_loads.LoadBased_HeadRoomA = electric_panel.max_current_rating - panel_loads.LoadBased_CapacityA
   end
 
-  # TODO
+  # Calculate the meter-based capacity and headroom for the given electric panel and panel loads according to NEC 220.87.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
+  # @param peak_fuels [Hash] Map of peak building electricity outputs
+  # @return [Array<Double, Double, Double>] The capacity (W), the capacity (A), and headroom (A)
   def self.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels)
     htg_new = get_panel_load_heating(hpxml_bldg, electric_panel, addition: true)
     clg_new = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.addition }.map { |pl| pl.power }.sum(0.0)
@@ -133,7 +165,11 @@ module ElectricPanel
     return capacity_w, capacity_a, headroom_a
   end
 
-  # TODO
+  # Calculate the number of panel breaker spaces corresponding to total, occupied, and headroom.
+  #
+  # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
+  # @param [Array<HPXML::PanelLoad>] List of panel load objects
+  # @return [nil]
   def self.calculate_breaker_spaces(electric_panel, panel_loads)
     occupied = electric_panel.panel_loads.map { |panel_load| panel_load.breaker_spaces }.sum(0.0)
     if !electric_panel.total_breaker_spaces.nil?
@@ -148,7 +184,7 @@ module ElectricPanel
   end
 end
 
-# TODO
+# Object with calculated panel load capacity and breaker spaces
 class PanelLoadValues
   LOADBASED_ATTRS = [:LoadBased_CapacityW,
                      :LoadBased_CapacityA,

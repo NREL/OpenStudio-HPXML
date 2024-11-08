@@ -1059,9 +1059,9 @@ module Outputs
 
   # Appends HVAC sizing results to the provided array for use in writing output files.
   #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_bldgs [Array<HPXML::Building>] List of HPXML Building objects representing an individual dwelling unit
   # @param results_out [Array] Rows of output data
-  # @return [Array>] Rows of output data, with HVAC sizing results appended
+  # @return [Array] Rows of output data, with HVAC sizing results appended
   def self.append_sizing_results(hpxml_bldgs, results_out)
     line_break = nil
 
@@ -1198,9 +1198,10 @@ module Outputs
 
   # Appends electric panel results to the provided array for use in writing output files.
   #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_bldgs [Array<HPXML::Building>] List of HPXML Building objects representing an individual dwelling unit
   # @param results_out [Array] Rows of output data
-  # @return [Array>] Rows of output data, with electric panel results appended
+  # @param peak_fuels [Hash] Map of peak building electricity outputs
+  # @return [Array] Rows of output data, with electric panel results appended
   def self.append_panel_results(hpxml_bldgs, peak_fuels, results_out)
     line_break = nil
 

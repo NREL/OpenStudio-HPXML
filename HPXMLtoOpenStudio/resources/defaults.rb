@@ -3356,13 +3356,13 @@ module Defaults
           panel_load.voltage = get_panel_load_voltage_default_values(hpxml_bldg, panel_load)
           panel_load.voltage_isdefaulted = true
         end
-        panel_load_watts_breaker_spaces_values = get_panel_load_power_breaker_spaces_values(hpxml_bldg, panel_load)
+        panel_load_watts_breaker_spaces_default_values = get_panel_load_power_breaker_spaces_default_values(hpxml_bldg, panel_load)
         if panel_load.power.nil?
-          panel_load.power = panel_load_watts_breaker_spaces_values[:power].round
+          panel_load.power = panel_load_watts_breaker_spaces_default_values[:power].round
           panel_load.power_isdefaulted = true
         end
         if panel_load.breaker_spaces.nil?
-          breaker_spaces = panel_load_watts_breaker_spaces_values[:breaker_spaces]
+          breaker_spaces = panel_load_watts_breaker_spaces_default_values[:breaker_spaces]
           breaker_spaces = 0 if panel_load.power == 0
           panel_load.breaker_spaces = breaker_spaces
           panel_load.breaker_spaces_isdefaulted = true
@@ -5858,14 +5858,20 @@ module Defaults
     end
   end
 
-  # TODO
+  # Gets the default properties for electric panels.
+  #
+  # @return [Hash] Map of property type => value
   def self.get_electric_panel_values()
     return { panel_voltage: HPXML::ElectricPanelVoltage240,
              max_current_rating: 150.0, # A
              headroom_breaker_spaces: 0 }
   end
 
-  # TODO
+  # Gets the default voltage for a panel load based on load type and attached system.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param panel_load [HPXML::PanelLoad] Object that defines a single electric panel load
+  # @return [Integer] 120 or 240
   def self.get_panel_load_voltage_default_values(hpxml_bldg, panel_load)
     type = panel_load.type
     system_ids = panel_load.system_idrefs
@@ -5896,8 +5902,12 @@ module Defaults
     end
   end
 
-  # TODO
-  def self.get_panel_load_power_breaker_spaces_values(hpxml_bldg, panel_load)
+  # Gets the default power and breaker spaces for a panel load based on load type, voltage, and attached systems.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param panel_load [HPXML::PanelLoad] Object that defines a single electric panel load
+  # @return [Hash] Map of property type => value
+  def self.get_panel_load_power_breaker_spaces_default_values(hpxml_bldg, panel_load)
     type = panel_load.type
     voltage = panel_load.voltage
     system_ids = panel_load.system_idrefs

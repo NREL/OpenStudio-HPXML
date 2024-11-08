@@ -4577,49 +4577,11 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``Voltage``                                                              string   V          See [#]_                 No        240
   ``MaxCurrentRating``                                                     double   A                                   No        150
   ``extension/HeadroomBreakerSpaces`` or ``extension/TotalBreakerSpaces``  integer                                      No        See [#]_
-  ``extension/PanelLoads``                                                 element                                      No        See [#]_       Individual electric panel loads [#]_
+  ``extension/PanelLoads``                                                 element                                      No        See [#]_       Individual electric panel loads
   =======================================================================  =======  =========  =======================  ========  =============  ============================================
 
   .. [#] Voltage choices are "120" or "240".
   .. [#] If neither extension/HeadroomBreakerSpaces nor extension/TotalBreakerSpaces provided, the following default value representing a fully occupied electric panel will be used: extension/HeadroomBreakerSpaces = 0.
-  .. [#] Panel loads for the following panel load types are created if at least one corresponding system exists:
-
-         \- **Heating**: ``HeatingSystem``, ``HeatPump``
-
-         \- **Cooling**: ``CoolingSystem``, ``HeatPump``
-
-         \- **Hot Water**: ``WaterHeatingSystem``
-
-         \- **Clothes Dryer**: ``ClothesDryer``
-
-         \- **Dishwasher**: ``Dishwasher``
-
-         \- **Range/Oven**: ``CookingRange``
-
-         \- **Mech Vent**: ``VentilationFan``
-
-         \- **Permanent Spa Heater**: ``PermanentSpa/Heater``
-
-         \- **Permanent Spa Pump**: ``PermanentSpa/Pumps/Pump``
-
-         \- **Pool Heater**: ``Pool/Heater``
-
-         \- **Pool Pump**: ``Pool/Pumps/Pump``
-
-         \- **Well Pump**: ``PlugLoad[PlugLoadType=”well pump”]``
-
-         \- **Electric Vehicle Charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
-
-         Panel loads for the following panel load types are always created:
-
-         \- **Lighting**
-
-         \- **Kitchen**
-
-         \- **Laundry**
-
-         \- **Other**
-
   .. [#] See :ref:`panel_loads`.
 
 .. _panel_loads:
@@ -4627,73 +4589,118 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
 Panel Loads
 ~~~~~~~~~~~
 
-Individual panel loads entered in ``extension/PanelLoads/PanelLoad``.
+Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
-  ``Type``                                        string                    See [#]_     Yes
-  ``Power``                                       double    W                            No        See [#]_
+  ``LoadType``                                    string                    See [#]_     Yes
+  ``PowerRating``                                 double    W                            No        See [#]_
   ``Voltage``                                     string    V               See [#]_     No        See [#]_
   ``BreakerSpaces``                               integer                                No        See [#]_
-  ``Addition``                                    boolean                                No        false
-  ``System``                                      idref                     See [#]_     See [#]_  See [#]_   ID of referenced system; multiple are allowed [#]_
+  ``NewLoad``                                     boolean                                No        false      Whether, in the context of NEC calculations, the panel load is new
+  ``AttachedToSystem``                            idref                     See [#]_     See [#]_  See [#]_   ID of attached system; multiple are allowed [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] Type choices are "Heating", "Cooling", "Hot Water", "Clothes Dryer", "Dishwasher", "Range/Oven", "Mech Vent", "Permanent Spa Heater", "Permanent Spa Pump", "Pool Heater", "Pool Pump", "Well Pump", "Electric Vehicle Charging", "Lighting", "Kitchen", "Laundry", and "Other".
-  .. [#] If Power not provided, defaults as follows:
+  .. [#] LoadType choices are "heating", "cooling", "hot Water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
+  .. [#] If PowerRating not provided, defaults based on LoadType, Voltage, and AttachedToSystem as follows:
 
-         \- **Heating**: TODO
+         \- **heating**: TODO
 
-         \- **Cooling**: TODO
+         \- **cooling**: TODO
 
-         \- **Hot Water**: TODO
+         \- **hot water** (electric storage water heater): HeatingCapacity,
 
-         \- **Clothes Dryer**: TODO
+         \- **hot water** (electric instantaneous water heater): NumberofBathrooms is 1=18,000, NumberofBathrooms is 2=24,000, NumberofBathrooms is 3 or greater=36,000
 
-         \- **Dishwasher**: TODO
+         \- **hot water** (heat pump): 120=1,000, 240=max(HeatingCapacity, BackupHeatingCapacity)
 
-         \- **Range/Oven**: TODO
+         \- **clothes dryer** (electric): Vented=5,760, Unvented=2,640
 
-         \- **Mech Vent**: TODO
+         \- **clothes dryer** (heat pump): 120=996, 240=860
 
-         \- **Permanent Spa Heater**: TODO
+         \- **dishwasher**: 1,200
 
-         \- **Permanent Spa Pump**: TODO
+         \- **range/oven** (electric): 120=1,800, 240=12,000
 
-         \- **Pool Heater**: TODO
+         \- **mech vent** (local ventilation): Count * FanPower
 
-         \- **Pool Pump**: TODO
+         \- **mech vent** (other): FanPower
 
-         \- **Well Pump**: TODO
+         \- **permanent spa heater** (electric): 1,000
 
-         \- **Electric Vehicle Charging**: TODO
+         \- **permanent spa pump**: 1,491
 
-         \- **Lighting**: 3 * ConditionedFloorArea
+         \- **pool heater** (electric): 27,000
 
-         \- **Kitchen**: 3000
+         \- **pool pump**: 1,491
 
-         \- **Laundry**: 1500
+         \- **well pump**: NumberofBedrooms is 3 or less= 746, NumberofBedrooms is greater than 3=1,119
 
-         \- **Other**: 559 for garage door opener if a garage is present
+         \- **electric vehicle charging**: 120=1,650, 240=7,680
+
+         \- **lighting**: 3 * ConditionedFloorArea
+
+         \- **kitchen**: 3,000
+
+         \- **laundry**: 1,500
+
+         \- **other**: 373 for garage door opener if a garage is present
 
   .. [#] Voltage choices are "120" or "240".
   .. [#] If Voltage not provided, defaults as follows:
 
-         \- **Heating, Cooling, Hot Water, Clothes Dryer, Range/Oven, Permanent Spa Heater, Pool Heater**: 240 (120 if Cooling references a room air conditioner)
+         \- **heating, Cooling, hot water, clothes dryer, range/oven, permanent spa heater, pool heater**: 240 (120 if Cooling references a room air conditioner)
 
-         \- **Mech Vent, Dishwasher, Permanent Spa Pump, Pool Pump, Well Pump, Electric Vehicle Charging, Lighting, Kitchen, Laundry, Other**: 120
+         \- **mech vent, dishwasher, permanent spa pump, pool pump, well pump, electric vehicle charging, lighting, kitchen, laundry, other**: 120
 
-  .. [#] If BreakerSpaces not provided, defaults based on Type and Voltage:
+  .. [#] If BreakerSpaces not provided, defaults based on LoadType and Voltage:
 
-         \- **Lighting, Kitchen**: 120=0, 240=0
+         \- **lighting, kitchen**: 120: 0, 240: 0
 
-         \- **Heating, Cooling, Hot Water, Clothes Dryer, Dishwasher, Range/Oven, Mech Vent, Permanent Spa Heater, Permanent Spa Pump, Pool Heater, Pool Pump, Well Pump, Electric Vehicle Charging, Other**: 120=1, 240=2
+         \- **heating, cooling, hot water, clothes dryer, dishwasher, range/oven, mech vent, permanent spa heater, permanent spa pump, pool heater, pool pump, well pump, electric vehicle charging, laundry, other**: 120: 1, 240: 2
 
-  .. [#] Depending on the Type, System must reference a ``HeatingSystem``, ``CoolingSystem``, ``HeatPump``, ``WaterHeatingSystem``, ``ClothesDryer``, ``Dishwasher``, ``CookingRange``, ``VentilationFan``, ``PermanentSpa/Heater``, ``PermanentSpa/Pumps/Pump``, ``Pool/Heater``, ``Pool/Pump``, or ``PlugLoad``.
-  .. [#] Not allowed if Type is "Other"; otherwise, required.
+  .. [#] Depending on the LoadType, AttachedToSystem must reference:
+
+         \- **heating**: ``HeatingSystem`` or ``HeatPump``
+
+         \- **cooling**: ``CoolingSystem`` or ``HeatPump``
+
+         \- **hot qater**: ``WaterHeatingSystem``
+
+         \- **clothes dryer**: ``ClothesDryer``
+
+         \- **dishwasher**: ``Dishwasher``
+
+         \- **range/oven**: ``CookingRange``
+
+         \- **mech vent**: ``VentilationFan``
+
+         \- **permanent spa heater**: ``PermanentSpa/Heater``
+
+         \- **permanent spa pump**: ``PermanentSpa/Pumps/Pump``
+
+         \- **pool heater**: ``Pool/Heater``
+
+         \- **pool pump**: ``Pool/Pumps/Pump``
+
+         \- **well pump**: ``PlugLoad[PlugLoadType=”well pump”]``
+
+         \- **electric vehicle charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
+
+  .. [#] Not allowed if LoadType is "lighting", "kitchen", "laundry", or "other"; otherwise, required.
   .. [#] A panel load is created for any system not already referenced by a panel load.
-  .. [#] Provide a System element for each referenced system.
+         Panel loads for the following panel load types are always created if they don't already exist:
+
+         \- **lighting**
+
+         \- **kitchen**
+
+         \- **laundry**
+
+         \- **other**
+  
+  .. [#] Provide a AttachedToSystem element for each referenced system.
 
 .. _hpxml_batteries:
 
