@@ -1029,6 +1029,11 @@
   "sample_files/base-battery-ev-lifetime-model.xml": {
     "parent_hpxml": "sample_files/base-battery-ev-scheduled.xml"
   },
+  "sample_files/base-battery-ev-plug-load-ev.xml": {
+    "parent_hpxml": "sample_files/base-battery-ev-scheduled.xml",
+    "misc_plug_loads_vehicle_present": true,
+    "misc_plug_loads_vehicle_annual_kwh": 3000
+  },
   "sample_files/base-pv-battery-and-ev.xml": {
     "parent_hpxml": "sample_files/base-pv-battery.xml",
     "ev_battery_present": true,

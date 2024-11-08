@@ -58,9 +58,9 @@ module Battery
       discharging_schedule = MonthWeekdayWeekendSchedule.new(model, battery.id + ' discharging schedule', weekday_discharge, weekend_discharge, battery.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
       discharging_schedule = discharging_schedule.schedule
     elsif is_ev
-      runner.registerWarning("Both '#{charging_col}' and '#{discharging_col}' schedule file and weekday fractions provided; the latter will be ignored.") if !battery.ev_charging_weekday_fractions.nil?
-      runner.registerWarning("Both '#{charging_col}' and '#{discharging_col}' schedule file and weekend fractions provided; the latter will be ignored.") if !battery.ev_charging_weekend_fractions.nil?
-      runner.registerWarning("Both '#{charging_col}' and '#{discharging_col}' schedule file and monthly multipliers provided; the latter will be ignored.") if !battery.ev_charging_monthly_multipliers.nil?
+      runner.registerWarning("Both schedule file and weekday fractions provided for '#{charging_col}' and '#{discharging_col}'; weekday fractions will be ignored.") if !battery.ev_charging_weekday_fractions.nil?
+      runner.registerWarning("Both schedule file and weekend fractions provided for '#{charging_col}' and '#{discharging_col}'; weekend fractions will be ignored.") if !battery.ev_charging_weekend_fractions.nil?
+      runner.registerWarning("Both schedule file and monthly multipliers provided for '#{charging_col}' and '#{discharging_col}'; monthly multipliers will be ignored.") if !battery.ev_charging_monthly_multipliers.nil?
     end
 
     if !is_ev && pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?

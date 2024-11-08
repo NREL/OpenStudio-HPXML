@@ -1829,9 +1829,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                   "Both 'permanent_spa_heater' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and monthly multipliers provided; the latter will be ignored."],
-                              'schedule-file-and-weekday-weekend-multipliers-ev' => ["Both 'ev_battery_charging' and 'ev_battery_discharging' schedule file and weekday fractions provided; the latter will be ignored.",
-                                                                                     "Both 'ev_battery_charging' and 'ev_battery_discharging' schedule file and weekend fractions provided; the latter will be ignored.",
-                                                                                     "Both 'ev_battery_charging' and 'ev_battery_discharging' schedule file and monthly multipliers provided; the latter will be ignored."],
+                              'schedule-file-and-weekday-weekend-multipliers-ev' => ["Both schedule file and weekday fractions provided for 'ev_battery_charging' and 'ev_battery_discharging'; weekday fractions will be ignored.",
+                                                                                     "Both schedule file and weekend fractions provided for 'ev_battery_charging' and 'ev_battery_discharging'; weekend fractions will be ignored.",
+                                                                                     "Both schedule file and monthly multipliers provided for 'ev_battery_charging' and 'ev_battery_discharging'; monthly multipliers will be ignored."],
                               'schedule-file-and-refrigerators-freezer-coefficients' => ["Both 'refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
                                                                                          "Both 'refrigerator' schedule file and temperature coefficients provided; the latter will be ignored.",
                                                                                          "Both 'extra_refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
@@ -1844,7 +1844,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'schedule-file-and-operating-mode' => ["Both 'water_heater_operating_mode' schedule file and operating mode provided; the latter will be ignored."],
                               'schedule-file-max-power-ratio-with-single-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-two-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
-                              'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'] }
+                              'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'],
+                              'ev-charging-methods' => ['Electric vehicle was specified as a plug load and as a battery, vehicle charging will be modeled as a plug load.'] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
@@ -1995,6 +1996,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['schedule-file-max-power-ratio-with-separate-backup-system'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
+      elsif ['ev-charging-methods'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-battery-ev-plug-load-ev.xml')
       else
         fail "Unhandled case: #{warning_case}."
       end

@@ -164,12 +164,26 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
     end
   end
 
-  def test_ev_battery_home_battery
-    # TO-DO: test two batteries, one EV, one home
+  def test_ev_battery_ev_plug_load
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-ev-plug-load-ev.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    hpxml_bldg.vehicles.each do |hpxml_ev|
+      next unless hpxml_ev.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle
+
+      ev_battery = get_battery(model, hpxml_ev.id)
+      assert_nil(ev_battery) # plug load method take precendence to battery model
+
+      elcds = model.getElectricLoadCenterDistributions
+      elcds.each do |elcd|
+        assert(!elcd.name.to_s.include?(hpxml_ev.id))
+      end
+    end
   end
 
-  def test_ev_battery_scheduled_default
-    # TO-DO: test ev battery with schedule (so it is modeled) but with all other fields defaulted
+  def test_ev_battery_home_battery
+    # TO-DO: test two batteries, one EV, one home
   end
 
   def _test_measure(args_hash)

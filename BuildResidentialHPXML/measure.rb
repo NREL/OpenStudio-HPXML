@@ -3940,9 +3940,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:window_aspect_ratio] <= 0)
     errors << 'Window aspect ratio must be greater than zero.' if error
 
-    error = args[:misc_plug_loads_vehicle_present] && args[:ev_battery_present]
-    errors << 'Cannot specify an electric vehicle as a plug load and as a battery.' if error
-
     return errors
   end
 end
