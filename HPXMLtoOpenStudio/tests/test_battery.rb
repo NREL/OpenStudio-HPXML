@@ -28,7 +28,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   def get_elcd(model, name)
     model.getElectricLoadCenterDistributions.each do |elcd|
       next unless elcd.name.to_s.start_with? "#{name} "
-        
+
       return elcd
     end
   end

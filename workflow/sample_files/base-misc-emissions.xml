@@ -532,9 +532,9 @@
           <Vehicle>
             <SystemIdentifier id='ElectricVehicle1'/>
             <VehicleType>
-              <BEV>
+              <BatteryElectricVehicle>
                 <Battery/>
-              </BEV>
+              </BatteryElectricVehicle>
             </VehicleType>
           </Vehicle>
         </Vehicles>
