@@ -2106,21 +2106,42 @@ module Defaults
     end
 
     # Fan power
-    psc_watts_per_cfm = 0.5 # W/cfm, PSC fan
-    ecm_watts_per_cfm = 0.375 # W/cfm, ECM fan
-    mini_split_ductless_watts_per_cfm = 0.07 # W/cfm
-    mini_split_ducted_watts_per_cfm = 0.18 # W/cfm
+    psc_ducted_watts_per_cfm = 0.414 # W/cfm, PSC fan
+    # psc_ductless_watts_per_cfm = 0.414 # W/cfm, PSC fan
+    bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
+    bpm_ductless_watts_per_cfm = 0.171 # W/cfm, BPM fan
     hpxml_bldg.heating_systems.each do |heating_system|
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
-        if heating_system.fan_watts_per_cfm.nil?
+        # No fan model type nor watts/cfm input, default both
+        if heating_system.fan_watts_per_cfm.nil? && heating_system.fan_model_type.nil?
           if (not heating_system.distribution_system.nil?) && (heating_system.distribution_system.air_type == HPXML::AirTypeGravity)
             heating_system.fan_watts_per_cfm = 0.0
           elsif heating_system.heating_efficiency_afue > 0.9 # HEScore assumption
-            heating_system.fan_watts_per_cfm = ecm_watts_per_cfm
+            heating_system.fan_watts_per_cfm = bpm_ducted_watts_per_cfm
+            heating_system.fan_model_type = HPXML::HVACFanModelTypeBPM
           else
-            heating_system.fan_watts_per_cfm = psc_watts_per_cfm
+            heating_system.fan_watts_per_cfm = psc_ducted_watts_per_cfm
+            heating_system.fan_model_type = HPXML::HVACFanModelTypePSC
           end
           heating_system.fan_watts_per_cfm_isdefaulted = true
+          heating_system.fan_model_type_isdefaulted = true
+        # fan model type provided but not watts/cfm input, default watts/cfm based on fan model type
+        elsif heating_system.fan_watts_per_cfm.nil?
+          if heating_system.fan_model_type == HPXML::HVACFanModelTypeBPM
+            heating_system.fan_watts_per_cfm = bpm_ducted_watts_per_cfm
+          elsif heating_system.fan_model_type == HPXML::HVACFanModelTypePSC
+            heating_system.fan_watts_per_cfm = psc_ducted_watts_per_cfm
+          end
+          heating_system.fan_watts_per_cfm_isdefaulted = true
+        # Watts/cfm provided but not fan model type, default fan model type based on watts/cfm
+        # FIXME: Review this, used average between 0.414 and 0.281 to split
+        elsif heating_system.fan_model_type.nil?
+          if heating_system.fan_watts_per_cfm > 0.3475
+            heating_system.fan_model_type = HPXML::HVACFanModelTypePSC
+          else
+            heating_system.fan_model_type = HPXML::HVACFanModelTypeBPM
+          end
+          heating_system.fan_model_type_isdefaulted = true
         end
       elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
@@ -2138,53 +2159,135 @@ module Defaults
       end
     end
     hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless cooling_system.fan_watts_per_cfm.nil?
+      next unless (cooling_system.fan_watts_per_cfm.nil? || cooling_system.fan_model_type.nil?)
 
-      if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
+      if cooling_system.fan_watts_per_cfm.nil? && (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
         cooling_system.fan_watts_per_cfm = cooling_system.attached_heating_system.fan_watts_per_cfm
         cooling_system.fan_watts_per_cfm_isdefaulted = true
       elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
-        if cooling_system.cooling_efficiency_seer > 13.5 # HEScore assumption
-          cooling_system.fan_watts_per_cfm = ecm_watts_per_cfm
-        else
-          cooling_system.fan_watts_per_cfm = psc_watts_per_cfm
+        # No fan model type nor watts/cfm input, default both
+        if cooling_system.fan_watts_per_cfm.nil? && cooling_system.fan_model_type.nil?
+          if cooling_system.cooling_efficiency_seer > 13.5 # HEScore assumption
+            cooling_system.fan_watts_per_cfm = bpm_ducted_watts_per_cfm
+            cooling_system.fan_model_type = HPXML::HVACFanModelTypeBPM
+          else
+            cooling_system.fan_watts_per_cfm = psc_ducted_watts_per_cfm
+            cooling_system.fan_model_type = HPXML::HVACFanModelTypePSC
+          end
+          cooling_system.fan_watts_per_cfm_isdefaulted = true
+          cooling_system.fan_model_type_isdefaulted = true
+        # fan model type provided but not watts/cfm input, default watts/cfm based on fan model type
+        elsif cooling_system.fan_watts_per_cfm.nil?
+          if cooling_system.fan_model_type == HPXML::HVACFanModelTypeBPM
+            cooling_system.fan_watts_per_cfm = bpm_ducted_watts_per_cfm
+          elsif cooling_system.fan_model_type == HPXML::HVACFanModelTypePSC
+            cooling_system.fan_watts_per_cfm = psc_ducted_watts_per_cfm
+          end
+          cooling_system.fan_watts_per_cfm_isdefaulted = true
+        # Watts/cfm provided but not fan model type, default fan model type based on watts/cfm and compressor type
+        elsif cooling_system.fan_model_type.nil?
+          if (cooling_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed)
+            cooling_system.fan_model_type = HPXML::HVACFanModelTypeBPM
+          else
+            # FIXME: Review this, used average between 0.414 and 0.281 to split
+            if cooling_system.fan_watts_per_cfm > 0.3475
+              cooling_system.fan_model_type = HPXML::HVACFanModelTypePSC
+            else
+              cooling_system.fan_model_type = HPXML::HVACFanModelTypeBPM
+            end
+          end
+          cooling_system.fan_model_type_isdefaulted = true
         end
-        cooling_system.fan_watts_per_cfm_isdefaulted = true
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
-        if not cooling_system.distribution_system.nil?
-          cooling_system.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
-        else
-          cooling_system.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
+        if cooling_system.fan_watts_per_cfm.nil?
+          cooling_system.fan_watts_per_cfm = cooling_system.distribution_system.nil? ? bpm_ductless_watts_per_cfm : bpm_ducted_watts_per_cfm
+          cooling_system.fan_watts_per_cfm_isdefaulted = true
         end
-        cooling_system.fan_watts_per_cfm_isdefaulted = true
+        if cooling_system.fan_model_type.nil?
+          cooling_system.fan_model_type = HPXML::HVACFanModelTypeBPM
+          cooling_system.fan_model_type_isdefaulted = true
+        end
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
         # Depends on airflow rate, so defaulted in hvac_sizing.rb
       end
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fan_watts_per_cfm.nil?
+      next unless (heat_pump.fan_watts_per_cfm.nil? || heat_pump.fan_model_type.nil?)
 
       if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
-        if heat_pump.heating_efficiency_hspf > 8.75 # HEScore assumption
-          heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
-        else
-          heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
+        # No fan model type nor watts/cfm input, default both
+        if heat_pump.fan_watts_per_cfm.nil? && heat_pump.fan_model_type.nil?
+          if heat_pump.heating_efficiency_hspf > 8.75 # HEScore assumption
+            heat_pump.fan_watts_per_cfm = bpm_ducted_watts_per_cfm
+            heat_pump.fan_model_type = HPXML::HVACFanModelTypeBPM
+          else
+            heat_pump.fan_watts_per_cfm = psc_ducted_watts_per_cfm
+            heat_pump.fan_model_type = HPXML::HVACFanModelTypePSC
+          end
+          heat_pump.fan_watts_per_cfm_isdefaulted = true
+          heat_pump.fan_model_type_isdefaulted = true
+        # fan model type provided but not watts/cfm input, default watts/cfm based on fan model type
+        elsif heat_pump.fan_watts_per_cfm.nil?
+          if heat_pump.fan_model_type == HPXML::HVACFanModelTypeBPM
+            heat_pump.fan_watts_per_cfm = bpm_ducted_watts_per_cfm
+          elsif heat_pump.fan_model_type == HPXML::HVACFanModelTypePSC
+            heat_pump.fan_watts_per_cfm = psc_ducted_watts_per_cfm
+          end
+          heat_pump.fan_watts_per_cfm_isdefaulted = true
+        # Watts/cfm provided but not fan model type, default fan model type based on watts/cfm
+        elsif heat_pump.fan_model_type.nil?
+          if (heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed)
+            heat_pump.fan_model_type = HPXML::HVACFanModelTypeBPM
+          else
+            # FIXME: Review this, used average between 0.414 and 0.281 to split
+            if heat_pump.fan_watts_per_cfm > 0.3475
+              heat_pump.fan_model_type = HPXML::HVACFanModelTypePSC
+            else
+              heat_pump.fan_model_type = HPXML::HVACFanModelTypeBPM
+            end
+          end
+          heat_pump.fan_model_type_isdefaulted = true
         end
-        heat_pump.fan_watts_per_cfm_isdefaulted = true
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
-        if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
-          heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
-        else
-          heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
+        next unless (heat_pump.fan_watts_per_cfm.nil? || heat_pump.fan_model_type.nil?)
+
+        # No fan model type nor watts/cfm input, default both
+        if heat_pump.fan_watts_per_cfm.nil? && heat_pump.fan_model_type.nil?
+          if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
+            heat_pump.fan_watts_per_cfm = bpm_ducted_watts_per_cfm
+            heat_pump.fan_model_type = HPXML::HVACFanModelTypeBPM
+          else
+            heat_pump.fan_watts_per_cfm = psc_ducted_watts_per_cfm
+            heat_pump.fan_model_type = HPXML::HVACFanModelTypePSC
+          end
+          heat_pump.fan_watts_per_cfm_isdefaulted = true
+          heat_pump.fan_model_type_isdefaulted = true
+        elsif heat_pump.fan_watts_per_cfm.nil?
+          if heat_pump.fan_model_type == HPXML::HVACFanModelTypeBPM
+            heat_pump.fan_watts_per_cfm = bpm_ducted_watts_per_cfm
+          elsif heat_pump.fan_model_type == HPXML::HVACFanModelTypePSC
+            heat_pump.fan_watts_per_cfm = psc_ducted_watts_per_cfm
+          end
+          heat_pump.fan_watts_per_cfm_isdefaulted = true
+        # Watts/cfm provided but not fan model type, default fan model type based on watts/cfm
+        elsif heat_pump.fan_model_type.nil?
+          # FIXME: Review this, used average between 0.414 and 0.281 to split
+          if heat_pump.fan_watts_per_cfm > 0.3475
+            heat_pump.fan_model_type = HPXML::HVACFanModelTypePSC
+          else
+            heat_pump.fan_model_type = HPXML::HVACFanModelTypeBPM
+          end
+          heat_pump.fan_model_type_isdefaulted = true
         end
-        heat_pump.fan_watts_per_cfm_isdefaulted = true
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-        if not heat_pump.distribution_system.nil?
-          heat_pump.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
-        else
-          heat_pump.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
+        if heat_pump.fan_watts_per_cfm.nil?
+          heat_pump.fan_watts_per_cfm = heat_pump.distribution_system.nil? ? bpm_ductless_watts_per_cfm : bpm_ducted_watts_per_cfm
+          heat_pump.fan_watts_per_cfm_isdefaulted = true
         end
-        heat_pump.fan_watts_per_cfm_isdefaulted = true
+        if heat_pump.fan_model_type.nil?
+          heat_pump.fan_model_type = HPXML::HVACFanModelTypeBPM
+          heat_pump.fan_model_type_isdefaulted = true
+        end
       end
     end
 
