@@ -5975,7 +5975,8 @@ module Defaults
             watts += UnitConversions.convert(backup_heating_input_capacity, 'btu/hr', 'w') if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
           else # max
             # watts += [get_dx_coil_load_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')), UnitConversions.convert(heat_pump.backup_heating_capacity, 'btu/hr', 'w')].max
-            watts += [UnitConversions.convert(heating_input_capacity, 'btu/hr', 'w'), UnitConversions.convert(backup_heating_input_capacity, 'btu/hr', 'w')].max
+            watts += [UnitConversions.convert(heating_input_capacity, 'btu/hr', 'w'),
+                      UnitConversions.convert(backup_heating_input_capacity, 'btu/hr', 'w')].max
           end
           if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
             if !distribution_system.nil?
@@ -6056,16 +6057,9 @@ module Defaults
           watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w')
           breaker_spaces += 1
         elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-          if voltage == 120
-            watts += 1000
-          else
-            if water_heating_system.backup_heating_capacity.nil?
-              watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w')
-            else # max
-              watts += [UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w'), UnitConversions.convert(water_heating_system.backup_heating_capacity, 'btu/hr', 'w')].max
-            end
-            breaker_spaces += 1
-          end
+          watts += [UnitConversions.convert(water_heating_system.heating_input_capacity, 'btu/hr', 'w'),
+                    UnitConversions.convert(water_heating_system.backup_heating_input_capacity, 'btu/hr', 'w')].max
+          breaker_spaces += 1 if voltage == 240
         elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
           if hpxml_bldg.building_construction.number_of_bathrooms == 1
             watts += 18000

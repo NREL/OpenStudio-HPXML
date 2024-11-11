@@ -7119,7 +7119,7 @@ class HPXML < Object
 
     # Returns the backup heating input capacity, calculated as the backup output capacity divided by the efficiency.
     #
-    # @return [Double] The backuup heating input capacity (Btu/hr)
+    # @return [Double] The backup heating input capacity (Btu/hr)
     def backup_heating_input_capacity
       if not @backup_heating_efficiency_afue.nil?
         return @backup_heating_capacity / @backup_heating_efficiency_afue
@@ -8630,6 +8630,24 @@ class HPXML < Object
       end
 
       return list
+    end
+
+    # Returns the heating input capacity, calculated as the output capacity divided by the efficiency.
+    #
+    # @return [Double] The heating input capacity (Btu/hr)
+    def heating_input_capacity
+      if not @additional_properties.cop.nil?
+        return @heating_capacity / UnitConversions.convert(@additional_properties.cop, 'btu/hr', 'w')
+      else
+        return @heating_capacity
+      end
+    end
+
+    # Returns the backup heating input capacity, calculated as the backup output capacity divided by the efficiency.
+    #
+    # @return [Double] The backup heating input capacity (Btu/hr)
+    def backup_heating_input_capacity
+      return @backup_heating_capacity
     end
 
     # Returns the HVAC system related to this water heating system (e.g., for
