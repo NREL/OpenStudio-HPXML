@@ -2179,7 +2179,8 @@ class HPXML < Object
                          :length,
                          :exposed_perimeter,
                          :interior_shading_id,
-                         :exterior_shading_id]
+                         :exterior_shading_id,
+                         :attached_to_space_idref]
 
       # Look for pairs of surfaces that can be collapsed
       like_foundation_walls = {}
