@@ -831,6 +831,20 @@ module HVAC
   end
 
   # TODO
+  def self.get_blower_fan_power(fan_watts_per_cfm, airflow_cfm)
+    return 0.0 if fan_watts_per_cfm.nil? || airflow_cfm.nil?
+
+    return fan_watts_per_cfm * airflow_cfm
+  end
+
+  # TODO
+  def self.get_pump_w(heating_system)
+    return 0.0 if heating_system.electric_auxiliary_energy.nil?
+
+    return heating_system.electric_auxiliary_energy / 2.08
+  end
+
+  # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -871,7 +885,7 @@ module HVAC
     loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
 
     # Pump
-    pump_w = heating_system.electric_auxiliary_energy / 2.08
+    pump_w = get_pump_w(heating_system)
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump = Model.add_pump_variable_speed(
       model,
