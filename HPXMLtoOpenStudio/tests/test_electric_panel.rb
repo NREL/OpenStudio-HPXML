@@ -87,6 +87,89 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_equal(12 - 14, electric_panel.bs_headroom)
   end
 
+  def test_hvac_configurations
+    Dir["#{@sample_files_path}/base-hvac*.xml"].each do |hvac_hpxml|
+      puts "Testing #{hvac_hpxml}..."
+
+      args_hash = {}
+      args_hash['hpxml_path'] = hvac_hpxml
+      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+      electric_panel = hpxml_bldg.electric_panels[0]
+
+      assert_operator(electric_panel.clb_total_w, :>, 0)
+      assert_operator(electric_panel.bs_occupied, :>, 0)
+
+      hpxml_bldg.heating_systems.each do |heating_system|
+        panel_loads = heating_system.panel_loads
+        assert_equal(1, panel_loads.size)
+        panel_load = panel_loads[0]
+
+        # TODO
+      end
+
+      hpxml_bldg.cooling_systems.each do |cooling_system|
+        panel_loads = cooling_system.panel_loads
+        assert_equal(1, panel_loads.size)
+        panel_load = panel_loads[0]
+
+        # TODO
+      end
+
+      hpxml_bldg.heat_pumps.each do |heat_pump|
+        panel_loads = heat_pump.panel_loads
+        assert_equal(2, panel_loads.size)
+        panel_load = panel_loads[0]
+
+        # TODO
+      end
+    end
+  end
+
+  def test_wh_configurations
+    Dir["#{@sample_files_path}/base-dhw*.xml"].each do |dhw_hpxml|
+      puts "Testing #{dhw_hpxml}..."
+
+      args_hash = {}
+      args_hash['hpxml_path'] = dhw_hpxml
+      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+      electric_panel = hpxml_bldg.electric_panels[0]
+
+      assert_operator(electric_panel.clb_total_w, :>, 0)
+      assert_operator(electric_panel.bs_occupied, :>, 0)
+
+      hpxml_bldg.water_heating_systems.each do |water_heating_system|
+        panel_loads = water_heating_system.panel_loads
+        if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
+          assert_equal(1, panel_loads.size)
+        else
+          assert(panel_loads.nil?)
+          next
+        end
+        panel_load = panel_loads[0]
+
+        if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
+          assert_in_delta(panel_load.power, UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w'), 1.0)
+        elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
+          watts = [UnitConversions.convert(water_heating_system.heating_input_capacity, 'btu/hr', 'w'),
+                   UnitConversions.convert(water_heating_system.backup_heating_input_capacity, 'btu/hr', 'w')].max
+          assert_in_delta(panel_load.power, watts, 1.0)
+        elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+          if hpxml_bldg.building_construction.number_of_bathrooms == 1
+            assert_equal(panel_load.power, 18000)
+          elsif hpxml_bldg.building_construction.number_of_bathrooms == 2
+            assert_equal(panel_load.power, 24000)
+          else # 3+
+            assert_equal(panel_load.power, 36000)
+          end
+        else
+          assert(false)
+        end
+      end
+    end
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new

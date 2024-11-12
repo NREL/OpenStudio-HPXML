@@ -8636,8 +8636,9 @@ class HPXML < Object
     #
     # @return [Double] The heating input capacity (Btu/hr)
     def heating_input_capacity
-      if not @additional_properties.cop.nil?
-        return @heating_capacity / UnitConversions.convert(@additional_properties.cop, 'btu/hr', 'w')
+      if @water_heater_type == HPXML::WaterHeaterTypeHeatPump
+        cop = Waterheater.get_heat_pump_cop(self)
+        return @heating_capacity / UnitConversions.convert(cop, 'btu/hr', 'w')
       else
         return @heating_capacity
       end
