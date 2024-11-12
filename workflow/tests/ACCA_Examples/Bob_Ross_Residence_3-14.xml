@@ -47,7 +47,6 @@
               <HumiditySetpoint>0.5</HumiditySetpoint>
               <HumidityDifference>40.0</HumidityDifference>
               <InternalLoadsSensible>2400.0</InternalLoadsSensible>
-              <InfiltrationShieldingClass>1</InfiltrationShieldingClass>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
@@ -133,7 +132,7 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <EffectiveLeakageArea>92.0</EffectiveLeakageArea>
+            <LeakinessDescription>very tight</LeakinessDescription>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Foundations>
@@ -1355,7 +1354,7 @@
                   <ManualJInputs>
                     <BlowerFanHeatBtuh>1707.0</BlowerFanHeatBtuh>
                     <DefaultTableDuctLoad>
-                      <TableNumber>7C-R</TableNumber>
+                      <TableNumber>7A-R</TableNumber>
                       <LookupFloorArea>2400.0</LookupFloorArea>
                       <LeakageLevel>default sealed</LeakageLevel>
                       <InsulationRValue>8.0</InsulationRValue>
@@ -1371,9 +1370,11 @@
           <VentilationFans>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan1'/>
-              <FanType>balanced</FanType>
-              <RatedFlowRate>50.0</RatedFlowRate>
+              <FanType>central fan integrated supply</FanType>
+              <RatedFlowRate>150.0</RatedFlowRate>
+              <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <AttachedToHVACDistributionSystem idref='HVACDistribution1'/>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>
