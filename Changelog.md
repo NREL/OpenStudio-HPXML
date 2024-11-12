@@ -23,8 +23,9 @@ __New Features__
   - Allows CFIS systems with timer control, in which ventilation operation occurs at a fixed interval (`CFISControls/extension/ControlType="timer"`).
   - Allows CFIS systems to be attached to ductless HVAC systems like PTHPs (requires using a DSE=1 distribution system, see documentation).
 - HVAC Manual J design load and sizing calculations:
-  - Adds optional `DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh` input.
-  - Adds optional `DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh` input.
+  - Adds optional `DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh` input for HVAC equipment whose performance data has not been adjusted for blower heat.
+  - Adds optional `DistributionSystemType/AirDistribution/extension/ManualJInputs/DefaultTableDuctLoad` input to use Manual J default duct factor tables instead of ASHRAE 152.
+  - Adds optional `DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh` input to include hydronic distribution piping losses through unconditioned spaces.
   - Adds optional `HVACSizingControl/ManualJInputs/InfiltrationShieldingClass` input to specify wind shielding class for infiltration design load calculations.
   - Adds optional `HVACSizingControl/ManualJInputs/InfiltrationMethod` input to specify which method to use for infiltration design load calculations.
   - Updates heat pump HERS sizing methodology to better prevent unmet hours in warmer climates.
