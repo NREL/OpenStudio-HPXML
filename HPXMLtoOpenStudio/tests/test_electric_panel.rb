@@ -103,25 +103,45 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
       hpxml_bldg.heating_systems.each do |heating_system|
         panel_loads = heating_system.panel_loads
         assert_equal(1, panel_loads.size)
-        panel_load = panel_loads[0]
+        heating_panel_load = panel_loads[0]
 
-        # TODO
+        distribution_system = heating_system.distribution_system
+        cooling_system = heating_system.attached_cooling_system
+        if cooling_system.nil?
+
+        else
+          cooling_panel_load = electric_panel.panel_loads.find { |panel_load| panel_load.system_idrefs.include?(cooling_system.id) }
+          if heating_system.heating_system_fuel != HPXML::FuelTypeElectricity && !distribution_system.nil?
+            assert_equal(1, heating_panel_load.breaker_spaces)
+            assert_equal(3, cooling_panel_load.breaker_spaces)
+          end
+        end
       end
 
       hpxml_bldg.cooling_systems.each do |cooling_system|
         panel_loads = cooling_system.panel_loads
         assert_equal(1, panel_loads.size)
-        panel_load = panel_loads[0]
+        # panel_load = panel_loads[0]
 
-        # TODO
+        # distribution_system = cooling_system.distribution_system
+        heating_system = cooling_system.attached_heating_system
+        if heating_system.nil?
+
+        else
+          # heating_panel_load = electric_panel.panel_loads.find { |panel_load| panel_load.system_idrefs.include?(heating_system.id) }
+        end
       end
 
       hpxml_bldg.heat_pumps.each do |heat_pump|
         panel_loads = heat_pump.panel_loads
-        assert_equal(2, panel_loads.size)
-        panel_load = panel_loads[0]
+        if heat_pump.fraction_heat_load_served != 0 && heat_pump.fraction_cool_load_served != 0
+          assert_equal(2, panel_loads.size)
+        else
+          assert_equal(1, panel_loads.size)
+        end
 
-        # TODO
+        # heating_panel_load = panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeHeating }
+        # cooling_panel_load = panel_loads.find { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling }
       end
     end
   end

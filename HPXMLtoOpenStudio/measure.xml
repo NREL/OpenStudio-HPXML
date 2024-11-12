@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c25e187d-5419-439f-b372-231766808257</version_id>
-  <version_modified>2024-11-12T04:39:43Z</version_modified>
+  <version_id>fcfb29a2-ceaa-4bea-b0dc-1de437ed203e</version_id>
+  <version_modified>2024-11-12T22:34:31Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BC3EA061</checksum>
+      <checksum>ECFC56D2</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
@@ -459,7 +459,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B41E220C</checksum>
+      <checksum>5E5FA4A4</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -681,7 +681,7 @@
       <filename>test_electric_panel.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>2B9ED28C</checksum>
+      <checksum>22AC3DBF</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>

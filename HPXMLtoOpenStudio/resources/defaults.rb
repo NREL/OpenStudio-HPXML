@@ -3182,6 +3182,7 @@ module Defaults
 
       hpxml_bldg.heating_systems.each do |heating_system|
         next if !heating_system.panel_loads.nil?
+        next if heating_system.fraction_heat_load_served == 0
 
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
                         type_isdefaulted: true,
@@ -3191,6 +3192,7 @@ module Defaults
 
       hpxml_bldg.cooling_systems.each do |cooling_system|
         next if !cooling_system.panel_loads.nil?
+        next if cooling_system.fraction_cool_load_served == 0
 
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
                         type_isdefaulted: true,
@@ -3201,10 +3203,14 @@ module Defaults
       hpxml_bldg.heat_pumps.each do |heat_pump|
         next if !heat_pump.panel_loads.nil?
 
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                        type_isdefaulted: true,
-                        system_idrefs: [heat_pump.id],
-                        system_idrefs_isdefaulted: true)
+        if heat_pump.fraction_heat_load_served != 0
+          panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
+                          type_isdefaulted: true,
+                          system_idrefs: [heat_pump.id],
+                          system_idrefs_isdefaulted: true)
+        end
+        next unless heat_pump.fraction_cool_load_served != 0
+
         panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
                         type_isdefaulted: true,
                         system_idrefs: [heat_pump.id],
@@ -5881,6 +5887,7 @@ module Defaults
       hpxml_bldg.heating_systems.each do |heating_system|
         next if !system_ids.include?(heating_system.id)
         next if heating_system.is_shared_system
+        next if heating_system.fraction_heat_load_served == 0
 
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           watts += UnitConversions.convert(heating_system.heating_input_capacity, 'btu/hr', 'w')
@@ -5893,16 +5900,16 @@ module Defaults
         end
 
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-          breaker_spaces += get_breaker_spaces_from_heating_capacity(heating_system.heating_input_capacity)
+          breaker_spaces += get_breaker_spaces_from_heating_capacity(heating_system.heating_input_capacity) # AHU
         else
-          breaker_spaces += 1
+          breaker_spaces += 1 # AHU
         end
       end
 
       hpxml_bldg.heat_pumps.each do |heat_pump|
         next if !system_ids.include?(heat_pump.id)
+        next if heat_pump.fraction_heat_load_served == 0
 
-        distribution_system = heat_pump.distribution_system
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
           if heat_pump.simultaneous_backup # sum
@@ -5920,9 +5927,9 @@ module Defaults
           end
 
           if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-            breaker_spaces += get_breaker_spaces_from_backup_heating_capacity(heat_pump.backup_heating_capacity)
+            breaker_spaces += get_breaker_spaces_from_backup_heating_capacity(heat_pump.backup_heating_capacity) # AHU
           else
-            breaker_spaces += 1
+            breaker_spaces += 1 # AHU
           end
         else # separate or none
           watts += UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w')
@@ -5930,13 +5937,14 @@ module Defaults
 
         watts += HVAC.get_blower_fan_power(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
 
-        breaker_spaces += 2 # IDU
+        breaker_spaces += 2 # ODU
       end
 
     elsif type == HPXML::ElectricPanelLoadTypeCooling
       hpxml_bldg.cooling_systems.each do |cooling_system|
         next if !system_ids.include?(cooling_system.id)
         next if cooling_system.is_shared_system
+        next if cooling_system.fraction_cool_load_served == 0
 
         watts += UnitConversions.convert(cooling_system.cooling_input_capacity, 'btu/hr', 'w')
 
@@ -5944,24 +5952,28 @@ module Defaults
 
         heating_system = cooling_system.attached_heating_system
         if !heating_system.nil? &&
-           (((heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_fuel != HPXML::FuelTypeElectricity)) ||
-           ((heating_system.is_a? HPXML::HeatPump) && (heating_system.heat_pump_fuel != HPXML::FuelTypeElectricity)))
-          breaker_spaces += 1
+           ((heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_fuel != HPXML::FuelTypeElectricity))
+          breaker_spaces += 1 # AHU; paired w/fuel heating system
         else
-          breaker_spaces += 2
+          breaker_spaces += 2 # AHU
         end
 
         if voltage == 240
-          breaker_spaces += 2
+          breaker_spaces += 2 # ODU
         end
       end
 
       hpxml_bldg.heat_pumps.each do |heat_pump|
         next if !system_ids.include?(heat_pump.id)
+        next if heat_pump.fraction_cool_load_served == 0
 
         watts += UnitConversions.convert(heat_pump.cooling_input_capacity, 'btu/hr', 'w')
 
         watts += HVAC.get_blower_fan_power(heat_pump.fan_watts_per_cfm, heat_pump.cooling_airflow_cfm)
+
+        if heat_pump.fraction_heat_load_served == 0
+          breaker_spaces += 3 # ODU; the 3 we missed adding to heating
+        end
       end
 
     elsif type == HPXML::ElectricPanelLoadTypeWaterHeater
