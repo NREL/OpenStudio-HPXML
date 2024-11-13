@@ -6741,22 +6741,24 @@ class HPXML < Object
     #
     # @return [Double] The cooling input capacity (Btu/hr)
     def cooling_input_capacity
-      return @cooling_capacity / @additional_properties.cool_rated_cops.min
-
-      if not @cooling_efficiency_seer.nil?
-        return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_seer, 'btu/hr', 'w')
-      elsif not @cooling_efficiency_seer2.nil?
-        is_ducted = !@distribution_system_idref.nil?
-        return @cooling_capacity / UnitConversions.convert(HVAC.calc_seer_from_seer2(@cooling_efficiency_seer2, is_ducted), 'btu/hr', 'w')
-      elsif not @cooling_efficiency_eer.nil?
-        ceer = @cooling_efficiency_eer / 1.01
-        return @cooling_capacity / UnitConversions.convert(ceer, 'btu/hr', 'w')
-      elsif not @cooling_efficiency_ceer.nil?
-        return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_ceer, 'btu/hr', 'w')
-      elsif not @cooling_efficiency_kw_per_ton.nil?
-        # TODO
-      else
-        return @cooling_capacity # FIXME: evap cooler
+      begin
+        return @cooling_capacity / @additional_properties.cool_rated_cops.min
+      rescue
+        if not @cooling_efficiency_seer.nil?
+          return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_seer, 'btu/hr', 'w')
+        elsif not @cooling_efficiency_seer2.nil?
+          is_ducted = !@distribution_system_idref.nil?
+          return @cooling_capacity / UnitConversions.convert(HVAC.calc_seer_from_seer2(@cooling_efficiency_seer2, is_ducted), 'btu/hr', 'w')
+        elsif not @cooling_efficiency_eer.nil?
+          ceer = @cooling_efficiency_eer / 1.01
+          return @cooling_capacity / UnitConversions.convert(ceer, 'btu/hr', 'w')
+        elsif not @cooling_efficiency_ceer.nil?
+          return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_ceer, 'btu/hr', 'w')
+        elsif not @cooling_efficiency_kw_per_ton.nil?
+          # TODO
+        else
+          return @cooling_capacity # FIXME: evap cooler
+        end
       end
     end
 
@@ -7113,17 +7115,19 @@ class HPXML < Object
     #
     # @return [Double] The heating input capacity (Btu/hr)
     def heating_input_capacity
-      return @heating_capacity / @additional_properties.heat_rated_cops.min
-
-      if not @heating_efficiency_hspf.nil?
-        return @heating_capacity / UnitConversions.convert(@heating_efficiency_hspf, 'btu/hr', 'w')
-      elsif not @heating_efficiency_hspf2.nil?
-        is_ducted = !@distribution_system_idref.nil?
-        return @heating_capacity / UnitConversions.convert(HVAC.calc_hspf_from_hspf2(@heating_efficiency_hspf2, is_ducted), 'btu/hr', 'w')
-      elsif not @heating_efficiency_cop.nil?
-        return @heating_capacity / @heating_efficiency_cop
-      else
-        return @heating_capacity
+      begin
+        return @heating_capacity / @additional_properties.heat_rated_cops.min
+      rescue
+        if not @heating_efficiency_hspf.nil?
+          return @heating_capacity / UnitConversions.convert(@heating_efficiency_hspf, 'btu/hr', 'w')
+        elsif not @heating_efficiency_hspf2.nil?
+          is_ducted = !@distribution_system_idref.nil?
+          return @heating_capacity / UnitConversions.convert(HVAC.calc_hspf_from_hspf2(@heating_efficiency_hspf2, is_ducted), 'btu/hr', 'w')
+        elsif not @heating_efficiency_cop.nil?
+          return @heating_capacity / @heating_efficiency_cop
+        else
+          return @heating_capacity
+        end
       end
     end
 
@@ -7144,20 +7148,22 @@ class HPXML < Object
     #
     # @return [Double] The cooling input capacity (Btu/hr)
     def cooling_input_capacity
-      return @cooling_capacity / @additional_properties.cool_rated_cops.min
-
-      if not @cooling_efficiency_seer.nil?
-        return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_seer, 'btu/hr', 'w')
-      elsif not @cooling_efficiency_seer2.nil?
-        is_ducted = !@distribution_system_idref.nil?
-        return @cooling_capacity / UnitConversions.convert(HVAC.calc_seer_from_seer2(@cooling_efficiency_seer2, is_ducted), 'btu/hr', 'w')
-      elsif not @cooling_efficiency_eer.nil?
-        ceer = @cooling_efficiency_eer / 1.01
-        return @cooling_capacity / UnitConversions.convert(ceer, 'btu/hr', 'w')
-      elsif not @cooling_efficiency_ceer.nil?
-        return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_ceer, 'btu/hr', 'w')
-      else
-        return @cooling_capacity
+      begin
+        return @cooling_capacity / @additional_properties.cool_rated_cops.min
+      rescue
+        if not @cooling_efficiency_seer.nil?
+          return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_seer, 'btu/hr', 'w')
+        elsif not @cooling_efficiency_seer2.nil?
+          is_ducted = !@distribution_system_idref.nil?
+          return @cooling_capacity / UnitConversions.convert(HVAC.calc_seer_from_seer2(@cooling_efficiency_seer2, is_ducted), 'btu/hr', 'w')
+        elsif not @cooling_efficiency_eer.nil?
+          ceer = @cooling_efficiency_eer / 1.01
+          return @cooling_capacity / UnitConversions.convert(ceer, 'btu/hr', 'w')
+        elsif not @cooling_efficiency_ceer.nil?
+          return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_ceer, 'btu/hr', 'w')
+        else
+          return @cooling_capacity
+        end
       end
     end
 
