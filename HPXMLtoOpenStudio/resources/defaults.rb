@@ -6004,18 +6004,8 @@ module Defaults
         next if !system_ids.include?(clothes_dryer.id)
         next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
 
-        is_hp = false
-        if (!clothes_dryer.energy_factor.nil? && clothes_dryer.energy_factor > 5.0) || # FIXME
-           (!clothes_dryer.combined_energy_factor.nil? && clothes_dryer.combined_energy_factor > 5.0) # FIXME
-          is_hp = true
-        end
-
-        if !is_hp &&
-           if clothes_dryer.is_vented
-             watts += 5760
-           else
-             watts += 2640
-           end
+        if clothes_dryer.is_vented
+          watts += 5760 # FIXME: not 2640?
           breaker_spaces += 1
         else # HP
           if voltage == 120
