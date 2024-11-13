@@ -31,6 +31,7 @@ __New Features__
   - Updates heat pump HERS sizing methodology to better prevent unmet hours in warmer climates.
   - Misc Manual J design load calculation improvements.
   - **Breaking change**: Disaggregates "Walls" into "Above Grade Walls" and "Below Grade Walls" in results_design_load_details.csv output file.
+  - Significant speed improvements when using optional space-level design load calculations.
 - Advanced research features:
   - Optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed AC/ASHP systems and time-based realistic staging for two speed AC/ASHP systems.
   - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
