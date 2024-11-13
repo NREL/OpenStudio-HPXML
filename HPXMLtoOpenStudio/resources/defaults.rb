@@ -5893,11 +5893,8 @@ module Defaults
           watts += UnitConversions.convert(heating_system.heating_input_capacity, 'btu/hr', 'w')
         end
 
-        distribution_system = heating_system.distribution_system
         watts += HVAC.get_blower_fan_power(heating_system.fan_watts_per_cfm, heating_system.heating_airflow_cfm)
-        if !distribution_system.nil? && distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
-          watts += HVAC.get_pump_w(heating_system)
-        end
+        watts += HVAC.get_pump_w(heating_system)
 
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           breaker_spaces += get_breaker_spaces_from_heating_capacity(heating_system.heating_input_capacity) # AHU
@@ -5947,7 +5944,6 @@ module Defaults
         next if cooling_system.fraction_cool_load_served == 0
 
         watts += UnitConversions.convert(cooling_system.cooling_input_capacity, 'btu/hr', 'w')
-
         watts += HVAC.get_blower_fan_power(cooling_system.fan_watts_per_cfm, cooling_system.cooling_airflow_cfm)
 
         heating_system = cooling_system.attached_heating_system
@@ -5968,7 +5964,6 @@ module Defaults
         next if heat_pump.fraction_cool_load_served == 0
 
         watts += UnitConversions.convert(heat_pump.cooling_input_capacity, 'btu/hr', 'w')
-
         watts += HVAC.get_blower_fan_power(heat_pump.fan_watts_per_cfm, heat_pump.cooling_airflow_cfm)
 
         if heat_pump.fraction_heat_load_served == 0
