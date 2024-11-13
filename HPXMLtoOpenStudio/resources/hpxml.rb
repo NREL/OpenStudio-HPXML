@@ -6397,7 +6397,7 @@ class HPXML < Object
       return list
     end
 
-    # Returns the heating input capacity, calculated as the output capacity divided by the efficiency.
+    # Returns the heating input capacity, calculated as the output capacity divided by the rated efficiency.
     #
     # @return [Double] The heating input capacity (Btu/hr)
     def heating_input_capacity
@@ -6737,10 +6737,12 @@ class HPXML < Object
       return list
     end
 
-    # Returns the cooling input capacity, calculated as the output capacity divided by the efficiency.
+    # Returns the cooling input capacity, calculated as the output capacity divided by the rated COP.
     #
     # @return [Double] The cooling input capacity (Btu/hr)
     def cooling_input_capacity
+      return @cooling_capacity / @additional_properties.cool_rated_cops.min
+
       if not @cooling_efficiency_seer.nil?
         return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_seer, 'btu/hr', 'w')
       elsif not @cooling_efficiency_seer2.nil?
@@ -7107,10 +7109,12 @@ class HPXML < Object
       return list
     end
 
-    # Returns the heating input capacity, calculated as the output capacity divided by the efficiency.
+    # Returns the heating input capacity, calculated as the output capacity divided by the rated COP.
     #
     # @return [Double] The heating input capacity (Btu/hr)
     def heating_input_capacity
+      return @heating_capacity / @additional_properties.heat_rated_cops.min
+
       if not @heating_efficiency_hspf.nil?
         return @heating_capacity / UnitConversions.convert(@heating_efficiency_hspf, 'btu/hr', 'w')
       elsif not @heating_efficiency_hspf2.nil?
@@ -7123,7 +7127,7 @@ class HPXML < Object
       end
     end
 
-    # Returns the backup heating input capacity, calculated as the backup output capacity divided by the efficiency.
+    # Returns the backup heating input capacity, calculated as the backup output capacity divided by the rated efficiency.
     #
     # @return [Double] The backup heating input capacity (Btu/hr)
     def backup_heating_input_capacity
@@ -7136,10 +7140,12 @@ class HPXML < Object
       end
     end
 
-    # Returns the cooling input capacity, calculated as the output capacity divided by the efficiency.
+    # Returns the cooling input capacity, calculated as the output capacity divided by the rated COP.
     #
     # @return [Double] The cooling input capacity (Btu/hr)
     def cooling_input_capacity
+      return @cooling_capacity / @additional_properties.cool_rated_cops.min
+
       if not @cooling_efficiency_seer.nil?
         return @cooling_capacity / UnitConversions.convert(@cooling_efficiency_seer, 'btu/hr', 'w')
       elsif not @cooling_efficiency_seer2.nil?
@@ -8724,7 +8730,7 @@ class HPXML < Object
       return list
     end
 
-    # Returns the heating input capacity, calculated as the output capacity divided by the efficiency.
+    # Returns the heating input capacity, calculated as the output capacity divided by the rated COP.
     #
     # @return [Double] The heating input capacity (Btu/hr)
     def heating_input_capacity
@@ -8732,11 +8738,11 @@ class HPXML < Object
         cop = Waterheater.get_heat_pump_cop(self)
         return @heating_capacity / UnitConversions.convert(cop, 'btu/hr', 'w')
       else
-        return @heating_capacity
+        return @heating_capacity # FIXME
       end
     end
 
-    # Returns the backup heating input capacity, calculated as the backup output capacity divided by the efficiency.
+    # Returns the backup heating input capacity.
     #
     # @return [Double] The backup heating input capacity (Btu/hr)
     def backup_heating_input_capacity
