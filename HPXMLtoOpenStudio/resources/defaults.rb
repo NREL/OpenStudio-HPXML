@@ -2161,9 +2161,15 @@ module Defaults
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless (cooling_system.fan_watts_per_cfm.nil? || cooling_system.fan_model_type.nil?)
 
-      if cooling_system.fan_watts_per_cfm.nil? && (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
-        cooling_system.fan_watts_per_cfm = cooling_system.attached_heating_system.fan_watts_per_cfm
-        cooling_system.fan_watts_per_cfm_isdefaulted = true
+      if not cooling_system.attached_heating_system.nil?
+        if cooling_system.fan_watts_per_cfm.nil? && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
+          cooling_system.fan_watts_per_cfm = cooling_system.attached_heating_system.fan_watts_per_cfm
+          cooling_system.fan_watts_per_cfm_isdefaulted = true
+        end
+        if cooling_system.fan_model_type.nil? && (not cooling_system.attached_heating_system.fan_model_type.nil?)
+          cooling_system.fan_model_type = cooling_system.attached_heating_system.fan_model_type
+          cooling_system.fan_model_type_isdefaulted = true
+        end
       elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         # No fan model type nor watts/cfm input, default both
         if cooling_system.fan_watts_per_cfm.nil? && cooling_system.fan_model_type.nil?

@@ -5091,7 +5091,7 @@ module HVAC
     end
     # cooling capacity and airflow are already with unit multiplier, calculate the capacity w/o multiplier
     nominal_cooling_capacity = heat_pump.cooling_capacity / unit_multiplier
-    defrost_power_fraction = (max_heating_airflow / design_airflow)**3
+    defrost_power_fraction = calculate_fan_power_from_curve(1.0, max_heating_airflow / design_airflow, heat_pump)
     power_design = fan_watts_per_cfm * design_airflow / unit_multiplier
     p_dot_blower = power_design * defrost_power_fraction
     # Based on manufacturer data for ~70 systems ranging from 1.5 to 5 tons with varying efficiency levels
