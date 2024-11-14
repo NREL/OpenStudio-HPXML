@@ -36,6 +36,9 @@ __New Features__
   - Optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed AC/ASHP systems and time-based realistic staging for two speed AC/ASHP systems.
   - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
+- RESNET HVAC modeling appendix:
+  - Added optional `extension/FanModelType`, changed rated fan power (w/cfm) and measured FanPowerWattsPerCFM assumptions to be based on fan model type.
+  - Updated the fan power calculation at each speed to be based on fan model type and whether ducted.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaced `slab_under_width` and `slab_perimeter_depth` arguments with `slab_under_insulation_width` and `slab_perimeter_insulation_depth`
   - **Breaking change**: Replaced `schedules_vacancy_periods`, `schedules_power_outage_periods`, and `schedules_power_outage_periods_window_natvent_availability` arguments with `schedules_unavailable_period_types`, `schedules_unavailable_period_dates`, and `schedules_unavailable_period_window_natvent_availabilities`; this improves flexibility for handling more unavailable period types.

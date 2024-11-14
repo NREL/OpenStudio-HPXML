@@ -3051,7 +3051,8 @@ module HVAC
     if mode == :clg
       cap_ft_spec_ss, eir_ft_spec_ss = get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
       rated_t_i = HVAC::AirSourceCoolRatedIWB
-      indoor_t = [50.0, rated_t_i, 80.0]
+      # Added two data points to be held constant outside the range 57F to 72F
+      indoor_t = [40.0, 57.0, rated_t_i, 72.0, 90.0]
     else
       # default capacity retention for single speed
       retention_temp, retention_fraction = Defaults.get_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
@@ -3082,6 +3083,10 @@ module HVAC
           data_tmp << dp_new
           if mode == :clg
             dp_new.indoor_wetbulb = t_i
+            # Cooling variations  shall be held constant for Tiwb less than 57°F and greater than 72°F
+            # Fixme: also should be held constant for Todb less than 75°F (haven't find a direct solution yet)
+            t_i = [t_i, 57].max
+            t_i = [t_i, 72].min
           else
             dp_new.indoor_temperature = t_i
           end
@@ -4504,21 +4509,19 @@ module HVAC
   def self.set_fan_power_rated(hvac_system, use_eer_cop)
     hvac_ap = hvac_system.additional_properties
 
+    # Based on RESNET DX Modeling Appendix
+    psc_ducted_watts_per_cfm = 0.414 # W/cfm, PSC fan
+    psc_ductless_watts_per_cfm = 0.414 # W/cfm, PSC fan
+    bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
+    bpm_ductless_watts_per_cfm = 0.171 # W/cfm, BPM fan
+
     if use_eer_cop
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     elsif hvac_system.distribution_system.nil?
-      # Ductless, installed and rated value should be equal
-      hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
+      hvac_ap.fan_power_rated = (hvac_system.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_ductless_watts_per_cfm : bpm_ductless_watts_per_cfm
     else
-      # Based on ASHRAE 1449-RP and recommended by Hugh Henderson
-      if hvac_system.cooling_efficiency_seer <= 14
-        hvac_ap.fan_power_rated = 0.25 # W/cfm
-      elsif hvac_system.cooling_efficiency_seer >= 16
-        hvac_ap.fan_power_rated = 0.18 # W/cfm
-      else
-        hvac_ap.fan_power_rated = 0.25 + (0.18 - 0.25) * (hvac_system.cooling_efficiency_seer - 14.0) / 2.0 # W/cfm
-      end
+      hvac_ap.fan_power_rated = (hvac_system.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_ducted_watts_per_cfm : bpm_ducted_watts_per_cfm
     end
   end
 

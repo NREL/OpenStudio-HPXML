@@ -33,7 +33,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
       clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
       assert_in_epsilon(3.77, clg_coil.ratedCOP, 0.01)
-      assert_in_epsilon(7230, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+      assert_in_epsilon(7360, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
       # Check EMS
       assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -75,10 +75,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(2, clg_coil.stages.size)
-    [5.89, 5.25].each_with_index do |cop, i|
+    [6.01, 5.62].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [2780, 7169].each_with_index do |capacity, i|
+    [2780, 7246].each_with_index do |capacity, i|
       assert_in_epsilon(capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -107,7 +107,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, 2779.53, 5.89, 7168.65, 5.25)
+    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, 2779.53, 6.01, 7246.09, 5.62)
   end
 
   def test_central_air_conditioner_furnace_var_speed_max_power_ratio
@@ -129,7 +129,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, 2779.53, 5.89, 7168.65, 5.25)
+    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, 2779.53, 6.01, 7246.09, 5.62)
   end
 
   def test_room_air_conditioner
@@ -496,13 +496,13 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
       clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
       assert_in_epsilon(3.77, clg_coil.ratedCOP, 0.01)
-      assert_in_epsilon(10846, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+      assert_in_epsilon(11040, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
       # Check heating coil
       assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
       htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
       assert_in_epsilon(3.29, htg_coil.ratedCOP, 0.01)
-      assert_in_epsilon(10262, htg_coil.ratedTotalHeatingCapacity.get, 0.01)
+      assert_in_epsilon(10077, htg_coil.ratedTotalHeatingCapacity.get, 0.01)
 
       # Check supp heating coil
       assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -623,7 +623,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     [4.52, 3.93].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    [7499, 10360].each_with_index do |htg_capacity, i|
+    [7499, 10254].each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
 
@@ -654,10 +654,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(2, clg_coil.stages.size)
-    [5.39, 4.77].each_with_index do |cop, i|
+    [5.49, 5.09].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [4169, 10753].each_with_index do |clg_capacity, i|
+    [4169, 10869].each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -665,10 +665,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(2, htg_coil.stages.size)
-    [4.56, 3.89].each_with_index do |cop, i|
+    [4.61, 4.02].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    [3876, 10634].each_with_index do |htg_capacity, i|
+    [3876, 10510].each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
 
@@ -697,7 +697,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(2, clg_coil.stages.size)
-    [4.51, 2.88].each_with_index do |cop, i|
+    [4.56, 3.00].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
     [3435, 10726].each_with_index do |clg_capacity, i|
@@ -708,10 +708,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(2, htg_coil.stages.size)
-    [4.75, 3.59].each_with_index do |cop, i|
+    [4.75, 3.69].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    [2927, 10376].each_with_index do |htg_capacity, i|
+    [2927, 10270].each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
 
@@ -750,7 +750,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77)
+    _check_max_power_ratio_EMS_multispeed(model, 3876, 4.61, 10510, 4.02, 4169, 5.49, 10869, 5.09)
 
     # two systems
     args_hash = {}
@@ -776,8 +776,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(2, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 0)
-    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 1)
+    _check_max_power_ratio_EMS_multispeed(model, 3876, 4.61, 10510, 4.02, 4169, 5.49, 10869, 5.09, 2, 0)
+    _check_max_power_ratio_EMS_multispeed(model, 3876, 4.61, 10510, 4.02, 4169, 5.49, 10869, 5.09, 2, 1)
   end
 
   def test_air_to_air_heat_pump_1_speed_onoff_thermostat
@@ -840,7 +840,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.06667, 1098.59)
+    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.06667, 1142.4)
 
     # Single Speed heat pump test
     args_hash = {}
@@ -854,7 +854,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.1, 1446.3)
+    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.1, 1525.6)
 
     # Ductless heat pump test
     args_hash = {}
@@ -867,7 +867,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 4028.7)
+    _check_advanced_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 3899)
 
     # Dual fuel heat pump test
     args_hash = {}
@@ -882,7 +882,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1126)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1224)
 
     # Separate backup heat pump test
     args_hash = {}
@@ -897,7 +897,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 2373.9, backup_fuel, 0.06667, 518)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 2373.9, backup_fuel, 0.06667, 540)
 
     # Small capacity test
     args_hash = {}
@@ -916,7 +916,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     supp_htg_power = 131.88
     backup_fuel = EPlus.fuel_type(heat_pump.backup_heating_fuel)
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 131.88, backup_fuel, 0.1, 38.4)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 131.88, backup_fuel, 0.1, 40.6)
   end
 
   def test_mini_split_heat_pump
@@ -1013,7 +1013,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, 3304.36, 4.55, 10634.05, 3.88, 4169.30, 4.64, 10752.98, 4.07)
+    _check_max_power_ratio_EMS_multispeed(model, 3304.36, 4.55, 10510, 4.02, 4169.30, 4.72, 10869, 4.31)
   end
 
   def test_mini_split_air_conditioner
