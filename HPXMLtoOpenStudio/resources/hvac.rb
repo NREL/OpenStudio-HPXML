@@ -594,34 +594,92 @@ module HVAC
     geothermal_loop.num_bore_holes *= unit_multiplier
 
     # Cooling Coil
-    clg_total_cap_curve = Model.add_curve_quad_linear(
-      model,
-      name: "#{obj_name} clg total cap curve",
-      coeff: hp_ap.cool_cap_curve_spec[0]
-    )
-    clg_sens_cap_curve = Model.add_curve_quint_linear(
-      model,
-      name: "#{obj_name} clg sens cap curve",
-      coeff: hp_ap.cool_sh_curve_spec[0]
-    )
-    clg_power_curve = Model.add_curve_quad_linear(
-      model,
-      name: "#{obj_name} clg power curve",
-      coeff: hp_ap.cool_power_curve_spec[0]
-    )
-    clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
-    clg_coil.setName(obj_name + ' clg coil')
-    clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
-    clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
-    clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
-    clg_coil.setRatedAirFlowRate(UnitConversions.convert(clg_cfm_rated, 'cfm', 'm^3/s'))
-    clg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
-    clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(80, 'F', 'C'))
-    clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
-    clg_coil.setRatedEnteringAirWetBulbTemperature(UnitConversions.convert(67, 'F', 'C'))
-    clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
-    clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(hp_ap.cooling_capacity_sensible, 'Btu/hr', 'W'))
-    clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+    if heat_pump.compressor_type = HPXML::HVACCompressorTypeSingleStage
+      clg_total_cap_curve = Model.add_curve_quad_linear(
+        model,
+        name: "#{obj_name} clg total cap curve",
+        coeff: hp_ap.cool_cap_curve_spec[0]
+      )
+      clg_sens_cap_curve = Model.add_curve_quint_linear(
+        model,
+        name: "#{obj_name} clg sens cap curve",
+        coeff: hp_ap.cool_sh_curve_spec[0]
+      )
+      clg_power_curve = Model.add_curve_quad_linear(
+        model,
+        name: "#{obj_name} clg power curve",
+        coeff: hp_ap.cool_power_curve_spec[0]
+      )
+      clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
+      clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
+      clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
+      clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
+      clg_coil.setRatedAirFlowRate(UnitConversions.convert(clg_cfm_rated, 'cfm', 'm^3/s'))
+      clg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
+      clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(80, 'F', 'C'))
+      clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
+      clg_coil.setRatedEnteringAirWetBulbTemperature(UnitConversions.convert(67, 'F', 'C'))
+      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
+      clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(hp_ap.cooling_capacity_sensible, 'Btu/hr', 'W'))
+    else
+      num_speeds = clg_ap.cool_capacity_ratios.size
+      # TODO: Curve placeholder
+      plf_fplr_curve = Model.add_curve_quadratic(
+        model,
+        name: "Cool-PLF-fPLR#{i + 1}",
+        coeff: [1, 0, 0],
+        min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+      )
+      clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.new(model, plf_fplr_curve)
+      for i in 0..(num_speeds - 1)
+        # TODO: Curve placeholder
+        cap_ft_curve = Model.add_curve_biquadratic(
+            model,
+            name: "Cool-CAP-fT#{i + 1}",
+            coeff: [1, 0, 0, 0, 0, 0]
+          )
+        cap_faf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Cool-CAP-fAF#{i + 1}",
+          coeff: [1, 0, 0],
+          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+        )
+        cap_fwf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Cool-CAP-fWF#{i + 1}",
+          coeff: [1, 0, 0],
+          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+        )
+        eir_ft_curve = Model.add_curve_biquadratic(
+            model,
+            name: "Cool-EIR-fT#{i + 1}",
+            coeff: [1, 0, 0, 0, 0, 0]
+          )
+        eir_faf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Cool-EIR-fAF#{i + 1}",
+          coeff: [1, 0, 0],
+          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+        )
+        eir_fwf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Cool-EIR-fWF#{i + 1}",
+          coeff: [1, 0, 0],
+          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+        )
+        # Recoverable heat modifier as a function of indoor wet-bulb and water entering temperatures.
+        waste_heat_ft = Model.add_curve_biquadratic(
+            model,
+            name: "WastHeat-FT#{i + 1}",
+            coeff: [1, 0, 0, 0, 0, 0]
+          )
+        speed = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_faf_curve, cap_fwf_curve, eir_ft_curve, eir_faf_curve, eir_fwf_curve, waste_heat_ft)
+        # TODO: Add speed property inputs
+        clg_coil.addSpeed(speed)
+        # TODO: Add coil inputs
+      end
+      clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+    end
 
     # Heating Coil
     htg_cap_curve = Model.add_curve_quad_linear(
