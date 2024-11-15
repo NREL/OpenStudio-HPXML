@@ -2022,7 +2022,7 @@ module HVAC
 
     # Fan/pump adjustments calculations
     # Fan power to overcome the static pressure adjustment
-    fan_duct_reduction_watts_per_cfm = 0.5*heat_pump.fan_watts_per_cfm # Assume the power to overcome the ductwork is 50 % of the fan power
+    fan_duct_reduction_watts_per_cfm = 0.5 * heat_pump.fan_watts_per_cfm # Assume the power to overcome the ductwork is 50 % of the fan power
     power_f = fan_duct_reduction_watts_per_cfm * 400.0 / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # 400 cfm/ton, result is in W per Btu/hr of capacity
     power_p = heat_pump.pump_watts_per_ton / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
 
