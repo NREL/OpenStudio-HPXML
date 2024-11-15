@@ -3052,7 +3052,9 @@ module HVAC
       cap_ft_spec_ss, eir_ft_spec_ss = get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
       rated_t_i = HVAC::AirSourceCoolRatedIWB
       # Added two data points to be held constant outside the range 57F to 72F
-      indoor_t = [40.0, 57.0, rated_t_i, 72.0, 90.0]
+      # Disable for now
+      # indoor_t = [40.0, 57.0, rated_t_i, 72.0, 90.0]
+      indoor_t = [50.0, rated_t_i, 80.0]
     else
       # default capacity retention for single speed
       retention_temp, retention_fraction = Defaults.get_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
@@ -3085,8 +3087,8 @@ module HVAC
             dp_new.indoor_wetbulb = t_i
             # Cooling variations  shall be held constant for Tiwb less than 57°F and greater than 72°F
             # Fixme: also should be held constant for Todb less than 75°F (haven't find a direct solution yet)
-            t_i = [t_i, 57].max
-            t_i = [t_i, 72].min
+            # t_i = [t_i, 57].max
+            # t_i = [t_i, 72].min
           else
             dp_new.indoor_temperature = t_i
           end
