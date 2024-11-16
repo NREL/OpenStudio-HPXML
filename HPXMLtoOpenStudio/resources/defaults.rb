@@ -5405,7 +5405,7 @@ module Defaults
   #
   # @return [Double] Pump power (W/ton)
   def self.get_gshp_pump_power()
-    return 200.0
+    return 80.0 # Rough estimate based on a literature review of different studies/websites
   end
 
   # Gets the default Electric Auxiliary Energy (EAE) for a boiler.
