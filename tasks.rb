@@ -2739,7 +2739,8 @@ if ARGV[0].to_sym == :create_release_zips
       exit!
     end
 
-    fonts_dir = File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts')
+    # Remove large fonts dir to keep package smaller
+    fonts_dir = File.join(File.dirname(__FILE__), 'documentation', '_static', 'css', 'fonts')
     if Dir.exist? fonts_dir
       FileUtils.rm_r(fonts_dir)
     end
