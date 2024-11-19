@@ -101,7 +101,7 @@ module Defaults
     apply_cfis_fan_power(hpxml_bldg)
 
     # Default electric panels has to be after sizing to have autosized capacity information
-    apply_electric_panels(hpxml_bldg)
+    apply_electric_panels(hpxml.header, hpxml_bldg)
 
     cleanup_zones_spaces(hpxml_bldg)
 
@@ -3167,7 +3167,7 @@ module Defaults
   # @param unit_num [Integer] Dwelling unit number
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports panel loads/capacities
   # @return [nil]
-  def self.apply_electric_panels(hpxml_bldg)
+  def self.apply_electric_panels(hpxml_header, hpxml_bldg)
     hpxml_bldg.electric_panels.each do |electric_panel|
       panel_loads = electric_panel.panel_loads
 
@@ -3384,7 +3384,7 @@ module Defaults
         electric_panel.headroom_breaker_spaces_isdefaulted = true
       end
 
-      ElectricPanel.calculate(hpxml_bldg, electric_panel)
+      ElectricPanel.calculate(hpxml_header, hpxml_bldg, electric_panel)
     end
   end
 

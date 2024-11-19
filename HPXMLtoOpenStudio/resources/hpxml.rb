@@ -115,10 +115,10 @@ class HPXML < Object
   DuctTypeSupply = 'supply'
   DWHRFacilitiesConnectedAll = 'all'
   DWHRFacilitiesConnectedOne = 'one'
-  ElectricPanelLoadCalculationType2023LoadBased = '2023 load-based'
-  ElectricPanelLoadCalculationType2023MeterBased = '2023 meter-based'
-  ElectricPanelLoadCalculationType2026LoadBased = '2026 load-based'
-  ElectricPanelLoadCalculationType2026MeterBased = '2026 meter-based'
+  ElectricPanelLoadCalculationType2023LoadBased = '2023 Load-Based'
+  ElectricPanelLoadCalculationType2023MeterBased = '2023 Meter-Based'
+  ElectricPanelLoadCalculationType2026LoadBased = '2026 Load-Based'
+  ElectricPanelLoadCalculationType2026MeterBased = '2026 Meter-Based'
   ElectricPanelLoadTypeHeating = 'heating'
   ElectricPanelLoadTypeCooling = 'cooling'
   ElectricPanelLoadTypeWaterHeater = 'hot water'
@@ -561,7 +561,8 @@ class HPXML < Object
                     cdl_lat_intgains: 'InternalLoads' }
 
   # Electric panel attributes
-  CLB_ATTRS = { clb_total_w: 'Power',
+  CLB_ATTRS = { clb_type: 'Type',
+                clb_total_w: 'Power',
                 clb_total_a: 'Amps',
                 clb_headroom_a: 'HeadroomAmps' }
   BS_ATTRS = { bs_total: 'Total',
@@ -12270,6 +12271,8 @@ class HPXML < Object
       attrs.each do |attr, element_name|
         if p_child_name == 'BreakerSpaces'
           XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :integer)
+        elsif element_name == 'Type'
+          XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :string)
         else
           XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :float)
         end
@@ -12289,7 +12292,13 @@ class HPXML < Object
     { CLB_ATTRS => 'CapacityLoadBased',
       BS_ATTRS => 'BreakerSpaces' }.each do |attrs, p_child_name|
       attrs.each do |attr, element_name|
-        hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :float))
+        if p_child_name == 'BreakerSpaces'
+          hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :integer))
+        elsif element_name == 'Type'
+          hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :string))
+        else
+          hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :float))
+        end
       end
     end
   end

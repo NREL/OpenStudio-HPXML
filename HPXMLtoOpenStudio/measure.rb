@@ -173,7 +173,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Write electric panel load output file
       electric_panel_results_out = []
-      Outputs.append_panel_results(hpxml.buildings, nil, electric_panel_results_out)
+      Outputs.append_panel_results(hpxml.header, hpxml.buildings, nil, electric_panel_results_out)
       Outputs.write_results_out_to_file(electric_panel_results_out, args[:output_format], args[:electric_panel_output_file_path])
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")

@@ -1653,7 +1653,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Panel data
     if args[:include_annual_panel_summary]
       electric_panel_results_out = []
-      Outputs.append_panel_results(@hpxml_bldgs, @peak_fuels, electric_panel_results_out)
+      Outputs.append_panel_results(@hpxml_header, @hpxml_bldgs, @peak_fuels, electric_panel_results_out)
 
       Outputs.write_results_out_to_file(electric_panel_results_out, args[:output_format], electric_panel_output_path)
       runner.registerInfo("Wrote panel output results to #{electric_panel_output_path}.")
