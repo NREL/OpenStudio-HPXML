@@ -278,7 +278,7 @@
       <sch:assert role='ERROR' test='count(h:Lighting/h:CeilingFan) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Lighting/CeilingFan</sch:assert> <!-- See [CeilingFan] -->
       <sch:assert role='ERROR' test='count(h:Pools/h:Pool) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Pools/Pool</sch:assert> <!-- See [Pool] -->
       <sch:assert role='ERROR' test='count(h:Spas/h:PermanentSpa) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Spas/PermanentSpa</sch:assert> <!-- See [PermanentSpa] -->
-      <sch:assert role='ERROR' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="other"]]) = 1'>Expected 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="other"]]</sch:assert> <!-- See [PlugLoad] -->
+      <sch:assert role='ERROR' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="other"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="other"]]</sch:assert> <!-- See [PlugLoad] -->
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV other"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="TV other"]]</sch:assert> <!-- See [PlugLoad] -->
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="electric vehicle charging"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]</sch:assert> <!-- See [PlugLoad] -->
       <sch:assert role='ERROR' test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="well pump"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="well pump"]]</sch:assert> <!-- See [PlugLoad] -->

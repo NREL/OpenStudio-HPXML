@@ -455,9 +455,9 @@ module Geometry
       # The above-grade portion of these walls are modeled as EnergyPlus surfaces with standard adjacency.
       # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
-      int_fnd_walls = hpxml_bldg.foundation_walls.select { |fw| fw.is_interior && fw.interior_adjacent_to == foundation_type }
+      int_fnd_walls = hpxml_bldg.foundation_walls.select { |fw| (fw.is_interior && fw.interior_adjacent_to == foundation_type) || fw.sameas_id }
       int_fnd_walls.each do |fnd_wall|
-        next unless fnd_wall.is_interior
+        next unless (fnd_wall.is_interior || fw.sameas.is_interior)
 
         store_adjacent_surface_ids_to_space(get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg), fnd_wall)
         next if fnd_wall.sameas_id
