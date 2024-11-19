@@ -115,6 +115,10 @@ class HPXML < Object
   DuctTypeSupply = 'supply'
   DWHRFacilitiesConnectedAll = 'all'
   DWHRFacilitiesConnectedOne = 'one'
+  ElectricPanelLoadCalculationType2023LoadBased = '2023 load-based'
+  ElectricPanelLoadCalculationType2023MeterBased = '2023 meter-based'
+  ElectricPanelLoadCalculationType2026LoadBased = '2026 load-based'
+  ElectricPanelLoadCalculationType2026MeterBased = '2026 meter-based'
   ElectricPanelLoadTypeHeating = 'heating'
   ElectricPanelLoadTypeCooling = 'cooling'
   ElectricPanelLoadTypeWaterHeater = 'hot water'
@@ -885,7 +889,8 @@ class HPXML < Object
              :temperature_capacitance_multiplier,          # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier
              :defrost_model_type,                          # [String] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/DefrostModelType (HPXML::AdvancedResearchDefrostModelTypeXXX)
              :hvac_onoff_thermostat_deadband,              # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature (F)
-             :heat_pump_backup_heating_capacity_increment] # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement (Btu/hr)
+             :heat_pump_backup_heating_capacity_increment, # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement (Btu/hr)
+             :panel_calculation_types]                     # [Array<String>] SoftwareInfo/extension/PanelCalculationType
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
@@ -962,6 +967,13 @@ class HPXML < Object
           XMLHelper.add_element(advanced_research_features, 'HeatPumpBackupCapacityIncrement', @heat_pump_backup_heating_capacity_increment, :float, @heat_pump_backup_heating_capacity_increment_isdefaulted) unless @heat_pump_backup_heating_capacity_increment.nil?
         end
       end
+      if (not @panel_calculation_types.nil?) && (not @panel_calculation_types.empty?)
+        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
+        panel_calculation_types = XMLHelper.add_element(extension, 'PanelCalculationTypes')
+        @panel_calculation_types.each do |panel_calculation_type|
+          XMLHelper.add_element(panel_calculation_types, 'Type', panel_calculation_type, :string)
+        end
+      end
       @emissions_scenarios.to_doc(hpxml)
       @utility_bill_scenarios.to_doc(hpxml)
       @unavailable_periods.to_doc(hpxml)
@@ -997,6 +1009,7 @@ class HPXML < Object
       @heat_pump_backup_heating_capacity_increment = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
+      @panel_calculation_types = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/PanelCalculationTypes/Type', :string)
       @emissions_scenarios.from_doc(hpxml)
       @utility_bill_scenarios.from_doc(hpxml)
       @unavailable_periods.from_doc(hpxml)

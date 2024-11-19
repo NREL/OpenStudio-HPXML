@@ -101,7 +101,7 @@ module Defaults
     apply_cfis_fan_power(hpxml_bldg)
 
     # Default electric panels has to be after sizing to have autosized capacity information
-    apply_electric_panels(hpxml_bldg, unit_num)
+    apply_electric_panels(hpxml_bldg)
 
     cleanup_zones_spaces(hpxml_bldg)
 
@@ -3161,22 +3161,13 @@ module Defaults
     end
   end
 
-  # Assigns default values for omitted optional inputs in the HPXML::ElectricPanel objects
+  # Assigns default values for omitted optional inputs in the HPXML::ElectricPanel objects.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param unit_num [Integer] Dwelling unit number
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports panel loads/capacities
   # @return [nil]
-  def self.apply_electric_panels(hpxml_bldg, unit_num)
-    if hpxml_bldg.electric_panels.empty?
-      if not unit_num.nil?
-        panel_id = "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}_#{unit_num}"
-      else
-        panel_id = "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}"
-      end
-      hpxml_bldg.electric_panels.add(id: panel_id)
-    end
-
+  def self.apply_electric_panels(hpxml_bldg)
     hpxml_bldg.electric_panels.each do |electric_panel|
       panel_loads = electric_panel.panel_loads
 

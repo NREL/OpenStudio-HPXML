@@ -1618,6 +1618,7 @@
     "dishwasher_present": false,
     "kitchen_fans_quantity": 1,
     "bathroom_fans_quantity": 2,
+    "electric_panel_load_calculation_types": "2023 load-based, 2023 meter-based",
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
     "electric_panel_breaker_spaces_type": "headroom",

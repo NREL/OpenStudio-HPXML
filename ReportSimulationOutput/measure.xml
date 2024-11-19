@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>e76e5412-fd7b-49e2-a9ef-6e3b8e08ceef</version_id>
-  <version_modified>2024-11-13T16:14:38Z</version_modified>
+  <version_id>e2e684cc-e1e1-4d19-8534-f96b7c15dbc1</version_id>
+  <version_modified>2024-11-19T20:48:40Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -735,6 +735,14 @@
       <name>annual_output_file_name</name>
       <display_name>Annual Output File Name</display_name>
       <description>If not provided, defaults to 'results_annual.csv' (or 'results_annual.json' or 'results_annual.msgpack').</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>electric_panel_output_file_name</name>
+      <display_name>Electric Panel Output File Name</display_name>
+      <description>If not provided, defaults to 'results_panel.csv' (or 'results_panel.json' or 'results_panel.msgpack').</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1931,7 +1939,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>ED5B9ACA</checksum>
+      <checksum>5F196B1B</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -1948,7 +1956,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>75361300</checksum>
+      <checksum>C25509CF</checksum>
     </file>
     <file>
       <filename>test_report_sim_output.rb</filename>

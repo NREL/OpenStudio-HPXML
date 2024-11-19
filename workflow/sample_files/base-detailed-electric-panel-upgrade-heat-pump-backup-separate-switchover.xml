@@ -11,6 +11,10 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <PanelCalculationTypes>
+        <Type>2023 load-based</Type>
+        <Type>2023 meter-based</Type>
+      </PanelCalculationTypes>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
