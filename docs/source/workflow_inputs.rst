@@ -365,6 +365,28 @@ You can create an additional column in the CSV file to define another unavailabl
 
   It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.
 
+HPXML Electric Panel Calculations
+*********************************
+
+One or more electric panel calculation types (e.g., 2023 NEC 220.83) can be entered as an ``/HPXML/SoftwareInfo/extension/PanelCalculationTypes/Type``.
+If not entered, electric panel loads will not be calculated.
+
+  ====================================  ========  =======  =============  ========  ================  ===========
+  Element                               Type      Units    Constraints    Required  Default           Description
+  ====================================  ========  =======  =============  ========  ================  ===========
+  ``Type``                              string             See [#]_       Yes                         Panel calculation type
+  ====================================  ========  =======  =============  ========  ================  ===========
+
+  .. [#] Type choices are '2023 Load-Based', '2023 Meter-Based', '2026 Load-Based', and '2026 Meter-Based', and are described as follows:
+
+         \- **2023 Load-Based**: Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
+
+         \- **2023 Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
+
+         \- **2026 Load-Based**: TODO
+
+         \- **2026 Meter-Based**: TODO
+
 .. _hpxml_building:
 
 HPXML Building

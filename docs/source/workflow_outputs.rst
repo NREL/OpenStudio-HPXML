@@ -448,19 +448,13 @@ Panel loads, load-based capacities, and breaker spaces can also be found in the 
   Electric Panel Load: Electric Vehicle Charging (W)    Sum of electric vehicle charging panel loads
   Electric Panel Load: Lighting (W)                     Sum of lighting panel loads
   Electric Panel Load: Other (W)                        Sum of other panel loads
-  Electric Panel Capacity: Load-Based Total (W)         Load calculation per NEC 220.83 [#]_
-  Electric Panel Capacity: Load-Based Total (A)         Load-Based Total (W) divided by panel voltage
-  Electric Panel Capacity: Load-Based Headroom (A)      Panel max current rating (A) minus Load-Based Total (A)
-  Electric Panel Capacity: Meter-Based Total (W)        Load calculation per NEC 220.87 [#]_
-  Electric Panel Capacity: Meter-Based Total (A)        Meter-Based Total (W) divided by panel voltage
-  Electric Panel Capacity: Meter-Based Headroom (A)     Panel max current rating (A) minus Meter-Based Total (A)
   Electric Panel Breaker Spaces: Total Count (#)        Total number of breaker spaces on the panel
   Electric Panel Breaker Spaces: Occupied Count (#)     Number of occupied breaker spaces on the panel
   Electric Panel Breaker Spaces: Headroom Count (#)     Total breaker spaces minus occupied breaker spaces
+  Electric Panel Capacity: <Type>: Total (W)            NEC load calculation
+  Electric Panel Capacity: <Type>: Total (A)            Total (W) divided by panel voltage
+  Electric Panel Capacity: <Type>: Headroom (A)         Panel max current rating (A) minus Total (A)
   ====================================================  ====================
-
-  .. [#] Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
-  .. [#] Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
 
 .. note::
 
