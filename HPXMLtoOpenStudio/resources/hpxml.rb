@@ -6411,19 +6411,6 @@ class HPXML < Object
       return list
     end
 
-    # Returns the heating input capacity, calculated as the output capacity divided by the rated efficiency.
-    #
-    # @return [Double] The heating input capacity (Btu/hr)
-    def heating_input_capacity
-      if not @heating_efficiency_afue.nil?
-        return @heating_capacity / @heating_efficiency_afue
-      elsif not @heating_efficiency_percent.nil?
-        return @heating_capacity / @heating_efficiency_percent
-      else
-        return @heating_capacity
-      end
-    end
-
     # Returns the zone that the heating system serves.
     #
     # @return [HPXML::Zone] Zone served
@@ -7142,19 +7129,6 @@ class HPXML < Object
         else
           return @heating_capacity
         end
-      end
-    end
-
-    # Returns the backup heating input capacity, calculated as the backup output capacity divided by the rated efficiency.
-    #
-    # @return [Double] The backup heating input capacity (Btu/hr)
-    def backup_heating_input_capacity
-      if not @backup_heating_efficiency_afue.nil?
-        return @backup_heating_capacity / @backup_heating_efficiency_afue
-      elsif not @backup_heating_efficiency_percent.nil?
-        return @backup_heating_capacity / @backup_heating_efficiency_percent
-      else
-        return @backup_heating_capacity
       end
     end
 

@@ -5881,11 +5881,11 @@ module Defaults
         next if heating_system.fraction_heat_load_served == 0
 
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-          watts += UnitConversions.convert(heating_system.heating_input_capacity, 'btu/hr', 'w')
+          watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heating_system.heating_capacity, heating_system.heating_efficiency_afue, heating_system.heating_efficiency_percent), 'btu/hr', 'w')
         end
 
-        watts += HVAC.get_blower_fan_power(heating_system.fan_watts_per_cfm, heating_system.heating_airflow_cfm)
-        watts += HVAC.get_pump_w(heating_system)
+        watts += HVAC.get_blower_fan_power_watts(heating_system.fan_watts_per_cfm, heating_system.heating_airflow_cfm)
+        watts += HVAC.get_pump_power_watts(heating_system.electric_auxiliary_energy)
 
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           breaker_spaces += get_breaker_spaces_from_heating_capacity(heating_system.heating_input_capacity) # AHU
@@ -5903,12 +5903,12 @@ module Defaults
           if heat_pump.simultaneous_backup # sum
             watts += UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w')
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-              watts += UnitConversions.convert(heat_pump.backup_heating_input_capacity, 'btu/hr', 'w')
+              watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_input_capacity, heat_pump.heating_efficiency_afue, heat_pump.heating_efficiency_percent), 'btu/hr', 'w')
             end
           else # max
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
               watts += [UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w'),
-                        UnitConversions.convert(heat_pump.backup_heating_input_capacity, 'btu/hr', 'w')].max
+                        UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_input_capacity, heat_pump.heating_efficiency_afue, heat_pump.heating_efficiency_percent), 'btu/hr', 'w')].max
             else
               watts += UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w')
             end
@@ -5923,7 +5923,7 @@ module Defaults
           watts += UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w')
         end
 
-        watts += HVAC.get_blower_fan_power(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
+        watts += HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
 
         breaker_spaces += 2 # ODU
       end
@@ -5935,7 +5935,7 @@ module Defaults
         next if cooling_system.fraction_cool_load_served == 0
 
         watts += UnitConversions.convert(cooling_system.cooling_input_capacity, 'btu/hr', 'w')
-        watts += HVAC.get_blower_fan_power(cooling_system.fan_watts_per_cfm, cooling_system.cooling_airflow_cfm)
+        watts += HVAC.get_blower_fan_power_watts(cooling_system.fan_watts_per_cfm, cooling_system.cooling_airflow_cfm)
 
         heating_system = cooling_system.attached_heating_system
         if !heating_system.nil? &&
@@ -5955,7 +5955,7 @@ module Defaults
         next if heat_pump.fraction_cool_load_served == 0
 
         watts += UnitConversions.convert(heat_pump.cooling_input_capacity, 'btu/hr', 'w')
-        watts += HVAC.get_blower_fan_power(heat_pump.fan_watts_per_cfm, heat_pump.cooling_airflow_cfm)
+        watts += HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.cooling_airflow_cfm)
 
         if heat_pump.fraction_heat_load_served == 0
           breaker_spaces += 3 # ODU; the 3 we missed adding to heating

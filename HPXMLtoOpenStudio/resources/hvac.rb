@@ -830,18 +830,52 @@ module HVAC
     return air_loop
   end
 
-  # TODO
-  def self.get_blower_fan_power(fan_watts_per_cfm, airflow_cfm)
+  # FIXME
+  # Get the outdoor unit (compressor) power (W) using regression based on rated capacity.
+  #
+  # @param capacity [Double] Direct expansion coil rated (output) capacity [kBtu/hr].
+  # @return [Double] DX coil rated (input) capacity (W)
+  def self.get_dx_coil_power_watts_from_capacity(capacity)
+    return 240 * (0.626 * capacity + 1.634)
+  end
+
+  # FIXME
+  # Get the indoor unit (air handler) power (W).
+  #
+  # @param fan_watts_per_cfm [Double] Blower fan watts per cfm [W/cfm]
+  # @param airflow_cfm [Double] HVAC system airflow rate [cfm]
+  # @return [Double] Blower fan power [W]
+  def self.get_blower_fan_power_watts(fan_watts_per_cfm, airflow_cfm)
     return 0.0 if fan_watts_per_cfm.nil? || airflow_cfm.nil?
 
     return fan_watts_per_cfm * airflow_cfm
   end
 
-  # TODO
-  def self.get_pump_w(heating_system)
-    return 0.0 if heating_system.electric_auxiliary_energy.nil?
+  # Get the boiler pump power (W).
+  #
+  # @param electric_auxiliary_energy [Double] Boiler electric auxiliary energy [kWh/yr]
+  # @return [Double] Boiler pump power [W]
+  def self.get_pump_power_watts(electric_auxiliary_energy)
+    return 0.0 if electric_auxiliary_energy.nil?
 
-    return heating_system.electric_auxiliary_energy / 2.08
+    return electric_auxiliary_energy / 2.08
+  end
+
+  # FIXME
+  # Returns the heating input capacity, calculated as the rated (output) capacity divided by the rated efficiency.
+  #
+  # @param heating_capacity [Double]
+  # @param heating_efficiency_afue [Double]
+  # @param heating_efficiency_percent [Double]
+  # @return [Double] The heating input capacity [Btu/hr]
+  def self.get_heating_input_capacity(heating_capacity, heating_efficiency_afue, heating_efficiency_percent)
+    if not heating_efficiency_afue.nil?
+      return heating_capacity / heating_efficiency_afue
+    elsif not heating_efficiency_percent.nil?
+      return heating_capacity / heating_efficiency_percent
+    else
+      return
+    end
   end
 
   # TODO
@@ -885,7 +919,7 @@ module HVAC
     loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
 
     # Pump
-    pump_w = get_pump_w(heating_system)
+    pump_w = get_pump_w(heating_system.electric_auxiliary_energy)
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump = Model.add_pump_variable_speed(
       model,
