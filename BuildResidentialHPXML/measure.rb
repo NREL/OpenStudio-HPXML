@@ -33,128 +33,137 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     return "The measure handles geometry by 1) translating high-level geometry inputs (conditioned floor area, number of stories, etc.) to 3D closed-form geometry in an OpenStudio model and then 2) mapping the OpenStudio surfaces to HPXML surfaces (using surface type, boundary condition, area, orientation, etc.). Like surfaces are collapsed into a single surface with aggregate surface area. Note: OS-HPXML default values can be found in the documentation or can be seen by using the 'apply_defaults' argument."
   end
 
+  # TODO
+  def make_argument(name:,
+                    type:,
+                    required:,
+                    display_name:,
+                    description:,
+                    units: nil,
+                    choices: [],
+                    default_href: nil)
+
+    fail "Specified #{type} argument with no choices." if type == Argument::Choice && choices.empty?
+    fail 'Specified required argument with indication of OS-HPXML default.' if required && !default_href.nil?
+
+    if !default_href.nil?
+      if type == Argument::Boolean
+        choices = ['true', 'false']
+        type = Argument::Choice
+      elsif [Argument::Double, Argument::Integer].include?(type)
+        type = Argument::String
+      end
+    end
+
+    if choices.empty?
+      arg = OpenStudio::Measure::OSArgument.send(type, name, required)
+    else
+      if !default_href.nil?
+        choices.unshift(Constants::Auto)
+      end
+      arg = OpenStudio::Measure::OSArgument.send(type, name, choices, required)
+    end
+    arg.setDisplayName(display_name)
+    arg.setUnits(units) if !units.nil?
+    if !default_href.nil?
+      description += " If '#{Constants::Auto}' or not provided, the OS-HPXML default (see #{default_href}) is used."
+    end
+    arg.setDescription(description)
+    return arg
+  end
+
   # Define the arguments that the user will input.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [OpenStudio::Measure::OSArgumentVector] an OpenStudio::Measure::OSArgumentVector object
   def arguments(model) # rubocop:disable Lint/UnusedMethodArgument
+    args = OpenStudio::Measure::OSArgumentVector.new
+    get_arguments.each do |arg|
+      args << make_argument(**arg)
+    end
+    return args
+  end
+
+  # TODO
+  def get_arguments
     docs_base_url = "https://openstudio-hpxml.readthedocs.io/en/v#{Version::OS_HPXML_Version}/workflow_inputs.html"
 
-    # TODO
-    def makeArgument(name:,
-                     type:,
-                     required:,
-                     display_name:,
-                     description:,
-                     units: nil,
-                     choices: [],
-                     default_href: nil)
+    args = []
 
-      fail "Specified #{type} argument with no choices." if type == Argument::Choice && choices.empty?
-      fail 'Specified required argument with indication of OS-HPXML default.' if required && !default_href.nil?
-
-      if !default_href.nil?
-        if type == Argument::Boolean
-          choices = ['true', 'false']
-          type = Argument::Choice
-        elsif [Argument::Double, Argument::Integer].include?(type)
-          type = Argument::String
-        end
-      end
-
-      if choices.empty?
-        arg = OpenStudio::Measure::OSArgument.send(type, name, required)
-      else
-        if !default_href.nil?
-          choices.unshift(Constants::Auto)
-        end
-        arg = OpenStudio::Measure::OSArgument.send(type, name, choices, required)
-      end
-      arg.setDisplayName(display_name)
-      arg.setUnits(units) if !units.nil?
-      if !default_href.nil?
-        description += " If #{Constants::Auto} or not provided, the OS-HPXML default (see #{default_href}) is used."
-      end
-      arg.setDescription(description)
-      return arg
-    end
-
-    args = OpenStudio::Measure::OSArgumentVector.new
-
-    args << makeArgument(
+    args << {
       name: 'hpxml_path',
       type: Argument::String,
       required: true,
       display_name: 'HPXML File Path',
       description: 'Absolute/relative path of the HPXML file.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'existing_hpxml_path',
       type: Argument::String,
       required: false,
       display_name: 'Existing HPXML File Path',
-      description: 'Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).'
-    )
+      description: 'Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units}.'
+    }
 
-    args << makeArgument(
+    args << {
       name: 'whole_sfa_or_mf_building_sim',
       type: Argument::Boolean,
       required: false,
       display_name: 'Whole SFA/MF Building Simulation?',
       description: 'If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'software_info_program_used',
       type: Argument::String,
       required: false,
       display_name: 'Software Info: Program Used',
       description: 'The name of the software program used.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'software_info_program_version',
       type: Argument::String,
       required: false,
       display_name: 'Software Info: Program Version',
       description: 'The version of the software program used.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'schedules_filepaths',
       type: Argument::String,
       required: false,
       display_name: 'Schedules: CSV File Paths',
       description: 'Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'schedules_unavailable_period_types',
       type: Argument::String,
       required: false,
       display_name: 'Schedules: Unavailable Period Types',
       description: "Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: #{Schedule.unavailable_period_types.join(', ')}. If multiple periods, use a comma-separated list."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'schedules_unavailable_period_dates',
       type: Argument::String,
       required: false,
       display_name: 'Schedules: Unavailable Period Dates',
-      description: 'Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.'
-    )
+      description: 'Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24}. If multiple periods, use a comma-separated list.'
+    }
 
-    args << makeArgument(
+    args << {
       name: 'schedules_unavailable_period_window_natvent_availabilities',
       type: Argument::String,
       required: false,
       display_name: 'Schedules: Unavailable Period Window Natural Ventilation Availabilities',
       description: "The availability of the natural ventilation schedule during unavailable periods. Valid choices are: #{[HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].join(', ')}. If multiple periods, use a comma-separated list.",
       default_href: "<a href='#{docs_base_url}#hpxml-unavailable-periods'>HPXML Unavailable Periods</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'simulation_control_timestep',
       type: Argument::Integer,
       required: false,
@@ -162,17 +171,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'Value must be a divisor of 60.',
       units: 'min',
       default_href: "<a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'simulation_control_run_period',
       type: Argument::String,
       required: false,
       display_name: 'Simulation Control: Run Period',
       description: "Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'simulation_control_run_period_calendar_year',
       type: Argument::Integer,
       required: false,
@@ -180,40 +189,40 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'year',
       description: 'This numeric field should contain the calendar year that determines the start day of week. If you are running simulations using AMY weather files, the value entered for calendar year will not be used; it will be overridden by the actual year found in the AMY weather file.',
       default_href: "<a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'simulation_control_daylight_saving_enabled',
       type: Argument::Boolean,
       required: false,
       display_name: 'Simulation Control: Daylight Saving Enabled',
       description: 'Whether to use daylight saving.',
       default_href: "<a href='#{docs_base_url}#hpxml-building-site'>HPXML Building Site</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'simulation_control_daylight_saving_period',
       type: Argument::String,
       required: false,
       display_name: 'Simulation Control: Daylight Saving Period',
       description: "Enter a date range like 'Mar 15 - Dec 15'.",
       default_href: "<a href='#{docs_base_url}#hpxml-building-site'>HPXML Building Site</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'simulation_control_temperature_capacitance_multiplier',
       type: Argument::Double,
       required: false,
       display_name: 'Simulation Control: Temperature Capacitance Multiplier',
       description: 'Affects the transient calculation of indoor air temperatures.',
       default_href: "<a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>"
-    )
+    }
 
     defrost_model_type_choices = OpenStudio::StringVector.new
     defrost_model_type_choices << HPXML::AdvancedResearchDefrostModelTypeStandard
     defrost_model_type_choices << HPXML::AdvancedResearchDefrostModelTypeAdvanced
 
-    args << makeArgument(
+    args << {
       name: 'simulation_control_defrost_model_type',
       type: Argument::Choice,
       required: false,
@@ -221,32 +230,32 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for an improved model that better accounts for load and energy use during defrost; using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime.",
       choices: defrost_model_type_choices,
       default_href: "<a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'simulation_control_onoff_thermostat_deadband',
       type: Argument::Double,
       required: false,
       display_name: 'Simulation Control: HVAC On-Off Thermostat Deadband',
       description: 'Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.',
       units: 'deg-F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'simulation_control_heat_pump_backup_heating_capacity_increment',
       required: false,
       display_name: 'Simulation Control: Heat Pump Backup Heating Capacity Increment',
       description: "Research feature to model capacity increment of multi-stage heat pump backup systems with time-based staging. Only applies to air-source heat pumps where Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'. Currently only supported with 1 min timestep.",
       units: 'Btu/hr'
-    )
+    }
 
     site_type_choices = OpenStudio::StringVector.new
     site_type_choices << HPXML::SiteTypeSuburban
     site_type_choices << HPXML::SiteTypeUrban
     site_type_choices << HPXML::SiteTypeRural
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'site_type',
       choices: site_type_choices,
@@ -254,14 +263,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Site: Type',
       description: 'The type of site.',
       default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
-    )
+    }
 
     site_shielding_of_home_choices = OpenStudio::StringVector.new
     site_shielding_of_home_choices << HPXML::ShieldingExposed
     site_shielding_of_home_choices << HPXML::ShieldingNormal
     site_shielding_of_home_choices << HPXML::ShieldingWellShielded
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'site_shielding_of_home',
       choices: site_shielding_of_home_choices,
@@ -269,7 +278,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Site: Shielding of Home',
       description: 'Presence of nearby buildings, trees, obstructions for infiltration model.',
       default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
-    )
+    }
 
     soil_types = [HPXML::SiteSoilTypeClay,
                   HPXML::SiteSoilTypeGravel,
@@ -289,7 +298,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'site_soil_and_moisture_type',
       choices: site_soil_and_moisture_type_choices,
@@ -297,54 +306,54 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Site: Soil and Moisture Type',
       description: 'Type of soil and moisture. This is used to inform ground conductivity and diffusivity.',
       default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'site_ground_conductivity',
       required: false,
       display_name: 'Site: Ground Conductivity',
       description: 'Conductivity of the ground soil. If provided, overrides the previous site and moisture type input.',
       units: 'Btu/hr-ft-F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'site_ground_diffusivity',
       required: false,
       display_name: 'Site: Ground Diffusivity',
       description: 'Diffusivity of the ground soil. If provided, overrides the previous site and moisture type input.',
       units: 'ft^2/hr'
-    )
+    }
 
     site_iecc_zone_choices = OpenStudio::StringVector.new
     Constants::IECCZones.each do |iz|
       site_iecc_zone_choices << iz
     end
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'site_iecc_zone',
       choices: site_iecc_zone_choices,
       required: false,
       display_name: 'Site: IECC Zone',
       description: 'IECC zone of the home address.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'site_city',
       required: false,
       display_name: 'Site: City',
       description: 'City/municipality of the home address.'
-    )
+    }
 
     site_state_code_choices = OpenStudio::StringVector.new
     Constants::StateCodesMap.keys.each do |sc|
       site_state_code_choices << sc
     end
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'site_state_code',
       choices: site_state_code_choices,
@@ -352,17 +361,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Site: State Code',
       description: 'State code of the home address.',
       default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'site_zip_code',
       required: false,
       display_name: 'Site: Zip Code',
-      description: 'Zip code of the home address. Either this or the Weather Station: EnergyPlus Weather (EPW) Filepath input below must be provided.'
-    )
+      description: 'Zip code of the home address. Either this or the Weather Station: EnergyPlus Weather (EPW} Filepath input below must be provided.'
+    }
 
-    args << makeArgument(
+    args << {
       name: 'site_time_zone_utc_offset',
       type: Argument::Double,
       required: false,
@@ -370,9 +379,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'Time zone UTC offset of the home address. Must be between -12 and 14.',
       units: 'hr',
       default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'site_elevation',
       required: false,
@@ -380,9 +389,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'Elevation of the home address.',
       units: 'ft',
       default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'site_latitude',
       required: false,
@@ -390,9 +399,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'Latitude of the home address. Must be between -90 and 90. Use negative values for southern hemisphere.',
       units: 'deg',
       default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'site_longitude',
       required: false,
@@ -400,23 +409,23 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'Longitude of the home address. Must be between -180 and 180. Use negative values for the western hemisphere.',
       units: 'deg',
       default_href: "<a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'weather_station_epw_filepath',
       required: false,
-      display_name: 'Weather Station: EnergyPlus Weather (EPW) Filepath',
+      display_name: 'Weather Station: EnergyPlus Weather (EPW} Filepath',
       description: 'Path of the EPW file. Either this or the Site: Zip Code input above must be provided.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'year_built',
       type: Argument::Integer,
       required: false,
       display_name: 'Building Construction: Year Built',
       description: 'The year the building was built.'
-    )
+    }
 
     unit_type_choices = OpenStudio::StringVector.new
     unit_type_choices << HPXML::ResidentialTypeSFD
@@ -424,101 +433,101 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     unit_type_choices << HPXML::ResidentialTypeApartment
     unit_type_choices << HPXML::ResidentialTypeManufactured
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'unit_multiplier',
       required: false,
       display_name: 'Building Construction: Unit Multiplier',
       description: 'The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value. If not provided, defaults to 1.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geometry_unit_type',
       choices: unit_type_choices,
       required: true,
       display_name: 'Geometry: Unit Type',
       description: "The type of dwelling unit. Use #{HPXML::ResidentialTypeSFA} for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use #{HPXML::ResidentialTypeApartment} for a dwelling unit with 1 story, attached units to one, two, or three sides, and units above and/or below."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'geometry_unit_left_wall_is_adiabatic',
       type: Argument::Boolean,
       required: false,
       display_name: 'Geometry: Unit Left Wall Is Adiabatic',
       description: 'Presence of an adiabatic left wall.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'geometry_unit_right_wall_is_adiabatic',
       type: Argument::Boolean,
       required: false,
       display_name: 'Geometry: Unit Right Wall Is Adiabatic',
       description: 'Presence of an adiabatic right wall.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'geometry_unit_front_wall_is_adiabatic',
       type: Argument::Boolean,
       required: false,
       display_name: 'Geometry: Unit Front Wall Is Adiabatic',
       description: 'Presence of an adiabatic front wall, for example, the unit is adjacent to a conditioned corridor.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'geometry_unit_back_wall_is_adiabatic',
       type: Argument::Boolean,
       required: false,
       display_name: 'Geometry: Unit Back Wall Is Adiabatic',
       description: 'Presence of an adiabatic back wall.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'geometry_unit_num_floors_above_grade',
       required: true,
       display_name: 'Geometry: Unit Number of Floors Above Grade',
       units: '#',
       description: "The number of floors above grade in the unit. Attic type #{HPXML::AtticTypeConditioned} is included. Assumed to be 1 for #{HPXML::ResidentialTypeApartment}s."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_unit_cfa',
       required: true,
       display_name: 'Geometry: Unit Conditioned Floor Area',
       units: 'ft^2',
-      description: "The total floor area of the unit's conditioned space (including any conditioned basement floor area)."
-    )
+      description: "The total floor area of the unit's conditioned space (including any conditioned basement floor area}."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_unit_aspect_ratio',
       required: true,
       display_name: 'Geometry: Unit Aspect Ratio',
       units: 'Frac',
       description: 'The ratio of front/back wall length to left/right wall length for the unit, excluding any protruding garage wall area.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_unit_orientation',
       required: true,
       display_name: 'Geometry: Unit Orientation',
       units: 'degrees',
-      description: "The unit's orientation is measured clockwise from north (e.g., North=0, East=90, South=180, West=270)."
-    )
+      description: "The unit's orientation is measured clockwise from north (e.g., North=0, East=90, South=180, West=270}."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'geometry_unit_num_bedrooms',
       required: true,
       display_name: 'Geometry: Unit Number of Bedrooms',
       units: '#',
       description: 'The number of bedrooms in the unit.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'geometry_unit_num_bathrooms',
       required: false,
@@ -526,36 +535,36 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '#',
       description: 'The number of bathrooms in the unit.',
       default_href: "<a href='#{docs_base_url}#hpxml-building-construction'>HPXML Building Construction</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_unit_num_occupants',
       required: false,
       display_name: 'Geometry: Unit Number of Occupants',
       units: '#',
-      description: 'The number of occupants in the unit. If not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on Number of Bedrooms and Conditioned Floor Area per ANSI/RESNET/ICC 301-2019. If provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between Number of Bedrooms and Number of Occupants from RECS 2015.'
-    )
+      description: 'The number of occupants in the unit. If not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage} are calculated based on Number of Bedrooms and Conditioned Floor Area per ANSI/RESNET/ICC 301-2019. If provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between Number of Bedrooms and Number of Occupants from RECS 2015.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'geometry_building_num_units',
       required: false,
       display_name: 'Geometry: Building Number of Units',
       units: '#',
       description: "The number of units in the building. Required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment}s."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_average_ceiling_height',
       required: true,
       display_name: 'Geometry: Average Ceiling Height',
       units: 'ft',
       description: 'Average distance from the floor to the ceiling.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_unit_height_above_grade',
       required: false,
@@ -563,47 +572,47 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft',
       description: 'Describes the above-grade height of apartment units on upper floors or homes above ambient or belly-and-wing foundations. It is defined as the height of the lowest conditioned floor above grade and is used to calculate the wind speed for the infiltration model.',
       default_href: "<a href='#{docs_base_url}#hpxml-building-construction'>HPXML Building Construction</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_garage_width',
       required: false,
       display_name: 'Geometry: Garage Width',
       units: 'ft',
-      description: "The width of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units. If not provided, defaults to zero (no garage)."
-    )
+      description: "The width of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units. If not provided, defaults to zero (no garage}."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_garage_depth',
       required: false,
       display_name: 'Geometry: Garage Depth',
       units: 'ft',
       description: "The depth of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_garage_protrusion',
       required: false,
       display_name: 'Geometry: Garage Protrusion',
       units: 'Frac',
       description: "The fraction of the garage that is protruding from the conditioned space. Only applies to #{HPXML::ResidentialTypeSFD} units."
-    )
+    }
 
     garage_position_choices = OpenStudio::StringVector.new
     garage_position_choices << Constants::PositionRight
     garage_position_choices << Constants::PositionLeft
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geometry_garage_position',
       choices: garage_position_choices,
       required: false,
       display_name: 'Geometry: Garage Position',
       description: "The position of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units."
-    )
+    }
 
     foundation_type_choices = OpenStudio::StringVector.new
     foundation_type_choices << HPXML::FoundationTypeSlab
@@ -617,41 +626,41 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     foundation_type_choices << "#{HPXML::FoundationTypeBellyAndWing}WithSkirt"
     foundation_type_choices << "#{HPXML::FoundationTypeBellyAndWing}NoSkirt"
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geometry_foundation_type',
       choices: foundation_type_choices,
       required: true,
       display_name: 'Geometry: Foundation Type',
       description: "The foundation type of the building. Foundation types #{HPXML::FoundationTypeBasementConditioned} and #{HPXML::FoundationTypeCrawlspaceConditioned} are not allowed for #{HPXML::ResidentialTypeApartment}s."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_foundation_height',
       required: false,
       display_name: 'Geometry: Foundation Height',
       units: 'ft',
-      description: 'The height of the foundation (e.g., 3ft for crawlspace, 8ft for basement). Only applies to basements/crawlspaces.'
-    )
+      description: 'The height of the foundation (e.g., 3ft for crawlspace, 8ft for basement}. Only applies to basements/crawlspaces.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_foundation_height_above_grade',
       required: false,
       display_name: 'Geometry: Foundation Height Above Grade',
       units: 'ft',
       description: 'The depth above grade of the foundation wall. Only applies to basements/crawlspaces.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_rim_joist_height',
       required: false,
       display_name: 'Geometry: Rim Joist Height',
       units: 'in',
       description: 'The height of the rim joists. Only applies to basements/crawlspaces.'
-    )
+    }
 
     attic_type_choices = OpenStudio::StringVector.new
     attic_type_choices << HPXML::AtticTypeFlatRoof
@@ -660,27 +669,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     attic_type_choices << HPXML::AtticTypeConditioned
     attic_type_choices << HPXML::AtticTypeBelowApartment # I.e., adiabatic
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geometry_attic_type',
       choices: attic_type_choices,
       required: true,
       display_name: 'Geometry: Attic Type',
       description: "The attic type of the building. Attic type #{HPXML::AtticTypeConditioned} is not allowed for #{HPXML::ResidentialTypeApartment}s."
-    )
+    }
 
     roof_type_choices = OpenStudio::StringVector.new
     roof_type_choices << Constants::RoofTypeGable
     roof_type_choices << Constants::RoofTypeHip
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geometry_roof_type',
       choices: roof_type_choices,
       required: false,
       display_name: 'Geometry: Roof Type',
       description: 'The roof type of the building. Ignored if the building has a flat roof.'
-    )
+    }
 
     roof_pitch_choices = OpenStudio::StringVector.new
     roof_pitch_choices << '1:12'
@@ -696,61 +705,61 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     roof_pitch_choices << '11:12'
     roof_pitch_choices << '12:12'
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geometry_roof_pitch',
       choices: roof_pitch_choices,
       required: false,
       display_name: 'Geometry: Roof Pitch',
       description: 'The roof pitch of the attic. Ignored if the building has a flat roof.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geometry_eaves_depth',
       required: false,
       display_name: 'Geometry: Eaves Depth',
       units: 'ft',
       description: 'The eaves depth of the roof.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'neighbor_front_distance',
       required: false,
       display_name: 'Neighbor: Front Distance',
       units: 'ft',
-      description: 'The distance between the unit and the neighboring building to the front (not including eaves). A value of zero indicates no neighbors. Used for shading.'
-    )
+      description: 'The distance between the unit and the neighboring building to the front (not including eaves}. A value of zero indicates no neighbors. Used for shading.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'neighbor_back_distance',
       required: false,
       display_name: 'Neighbor: Back Distance',
       units: 'ft',
-      description: 'The distance between the unit and the neighboring building to the back (not including eaves). A value of zero indicates no neighbors. Used for shading.'
-    )
+      description: 'The distance between the unit and the neighboring building to the back (not including eaves}. A value of zero indicates no neighbors. Used for shading.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'neighbor_left_distance',
       required: false,
       display_name: 'Neighbor: Left Distance',
       units: 'ft',
-      description: 'The distance between the unit and the neighboring building to the left (not including eaves). A value of zero indicates no neighbors. Used for shading.'
-    )
+      description: 'The distance between the unit and the neighboring building to the left (not including eaves}. A value of zero indicates no neighbors. Used for shading.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'neighbor_right_distance',
       required: false,
       display_name: 'Neighbor: Right Distance',
       units: 'ft',
-      description: 'The distance between the unit and the neighboring building to the right (not including eaves). A value of zero indicates no neighbors. Used for shading.'
-    )
+      description: 'The distance between the unit and the neighboring building to the right (not including eaves}. A value of zero indicates no neighbors. Used for shading.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'neighbor_front_height',
       required: false,
@@ -758,9 +767,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft',
       description: 'The height of the neighboring building to the front.',
       default_href: "<a href='#{docs_base_url}#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'neighbor_back_height',
       required: false,
@@ -768,9 +777,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft',
       description: 'The height of the neighboring building to the back.',
       default_href: "<a href='#{docs_base_url}#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'neighbor_left_height',
       required: false,
@@ -778,9 +787,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft',
       description: 'The height of the neighboring building to the left.',
       default_href: "<a href='#{docs_base_url}#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'neighbor_right_height',
       required: false,
@@ -788,25 +797,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft',
       description: 'The height of the neighboring building to the right.',
       default_href: "<a href='#{docs_base_url}#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'floor_over_foundation_assembly_r',
       required: false,
       display_name: 'Floor: Over Foundation Assembly R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Assembly R-value for the floor over the foundation. Ignored if the building has a slab-on-grade foundation.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'floor_over_garage_assembly_r',
       required: false,
       display_name: 'Floor: Over Garage Assembly R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Assembly R-value for the floor over the garage. Ignored unless the building has a garage under conditioned space.'
-    )
+    }
 
     floor_type_choices = OpenStudio::StringVector.new
     floor_type_choices << HPXML::FloorTypeWoodFrame
@@ -814,14 +823,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     floor_type_choices << HPXML::FloorTypeConcrete
     floor_type_choices << HPXML::FloorTypeSteelFrame
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'floor_type',
       choices: floor_type_choices,
       required: true,
       display_name: 'Floor: Type',
       description: 'The type of floors.'
-    )
+    }
 
     foundation_wall_type_choices = OpenStudio::StringVector.new
     foundation_wall_type_choices << HPXML::FoundationWallTypeSolidConcrete
@@ -833,7 +842,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     foundation_wall_type_choices << HPXML::FoundationWallTypeDoubleBrick
     foundation_wall_type_choices << HPXML::FoundationWallTypeWood
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'foundation_wall_type',
       choices: foundation_wall_type_choices,
@@ -841,9 +850,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Foundation Wall: Type',
       description: 'The material type of the foundation wall.',
       default_href: "<a href='#{docs_base_url}#hpxml-foundation-walls'>HPXML Foundation Walls</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'foundation_wall_thickness',
       required: false,
@@ -851,22 +860,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'in',
       description: 'The thickness of the foundation wall.',
       default_href: "<a href='#{docs_base_url}#hpxml-foundation-walls'>HPXML Foundation Walls</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'foundation_wall_insulation_r',
       required: false,
       display_name: 'Foundation Wall: Insulation Nominal R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Nominal R-value for the foundation wall insulation. Only applies to basements/crawlspaces.'
-    )
+    }
 
     wall_ins_location_choices = OpenStudio::StringVector.new
     wall_ins_location_choices << Constants::LocationInterior
     wall_ins_location_choices << Constants::LocationExterior
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'foundation_wall_insulation_location',
       choices: wall_ins_location_choices,
@@ -874,9 +883,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Foundation Wall: Insulation Location',
       units: 'ft',
       description: 'Whether the insulation is on the interior or exterior of the foundation wall. Only applies to basements/crawlspaces.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'foundation_wall_insulation_distance_to_top',
       required: false,
@@ -884,9 +893,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft',
       description: 'The distance from the top of the foundation wall to the top of the foundation wall insulation. Only applies to basements/crawlspaces.',
       default_href: "<a href='#{docs_base_url}#hpxml-foundation-walls'>HPXML Foundation Walls</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'foundation_wall_insulation_distance_to_bottom',
       required: false,
@@ -894,90 +903,90 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft',
       description: 'The distance from the top of the foundation wall to the bottom of the foundation wall insulation. Only applies to basements/crawlspaces.',
       default_href: "<a href='#{docs_base_url}#hpxml-foundation-walls'>HPXML Foundation Walls</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'foundation_wall_assembly_r',
       required: false,
       display_name: 'Foundation Wall: Assembly R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Assembly R-value for the foundation walls. Only applies to basements/crawlspaces. If provided, overrides the previous foundation wall insulation inputs. If not provided, it is ignored.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'rim_joist_assembly_r',
       required: false,
       display_name: 'Rim Joist: Assembly R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Required if a rim joist height is provided.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_perimeter_insulation_r',
       required: false,
       display_name: 'Slab: Perimeter Insulation Nominal R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_perimeter_insulation_depth',
       required: false,
       display_name: 'Slab: Perimeter Insulation Depth',
       units: 'ft',
       description: 'Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_exterior_horizontal_insulation_r',
       required: false,
       display_name: 'Slab: Exterior Horizontal Insulation Nominal R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Nominal R-value of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_exterior_horizontal_insulation_width',
       required: false,
       display_name: 'Slab: Exterior Horizontal Insulation Width',
       units: 'ft',
       description: 'Width of the slab exterior horizontal insulation measured from the exterior surface of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_exterior_horizontal_insulation_depth_below_grade',
       required: false,
       display_name: 'Slab: Exterior Horizontal Insulation Depth Below Grade',
       units: 'ft',
       description: 'Depth of the slab exterior horizontal insulation measured from the top surface of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_under_insulation_r',
       required: false,
       display_name: 'Slab: Under Slab Insulation Nominal R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_under_insulation_width',
       required: false,
       display_name: 'Slab: Under Slab Insulation Width',
       units: 'ft',
       description: 'Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_thickness',
       required: false,
@@ -985,9 +994,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'in',
       description: 'The thickness of the slab. Zero can be entered if there is a dirt floor instead of a slab.',
       default_href: "<a href='#{docs_base_url}#hpxml-slabs'>HPXML Slabs</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_carpet_fraction',
       required: false,
@@ -995,9 +1004,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Frac',
       description: 'Fraction of the slab floor area that is carpeted.',
       default_href: "<a href='#{docs_base_url}#hpxml-slabs'>HPXML Slabs</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'slab_carpet_r',
       required: false,
@@ -1005,16 +1014,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'h-ft^2-R/Btu',
       description: 'R-value of the slab carpet.',
       default_href: "<a href='#{docs_base_url}#hpxml-slabs'>HPXML Slabs</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ceiling_assembly_r',
       required: false,
       display_name: 'Ceiling: Assembly R-value',
       units: 'h-ft^2-R/Btu',
-      description: 'Assembly R-value for the ceiling (attic floor).'
-    )
+      description: 'Assembly R-value for the ceiling (attic floor}.'
+    }
 
     roof_material_type_choices = OpenStudio::StringVector.new
     roof_material_type_choices << HPXML::RoofTypeAsphaltShingles
@@ -1027,7 +1036,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     roof_material_type_choices << HPXML::RoofTypeShingles
     roof_material_type_choices << HPXML::RoofTypeWoodShingles
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'roof_material_type',
       choices: roof_material_type_choices,
@@ -1035,7 +1044,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Roof: Material Type',
       description: 'The material type of the roof.',
       default_href: "<a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>"
-    )
+    }
 
     color_choices = OpenStudio::StringVector.new
     color_choices << HPXML::ColorDark
@@ -1044,7 +1053,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     color_choices << HPXML::ColorMediumDark
     color_choices << HPXML::ColorReflective
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'roof_color',
       choices: color_choices,
@@ -1052,16 +1061,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Roof: Color',
       description: 'The color of the roof.',
       default_href: "<a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'roof_assembly_r',
       required: false,
       display_name: 'Roof: Assembly R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Assembly R-value of the roof.'
-    )
+    }
 
     radiant_barrier_attic_location_choices = OpenStudio::StringVector.new
     radiant_barrier_attic_location_choices << Constants::None
@@ -1069,21 +1078,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
     radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticFloor
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'radiant_barrier_attic_location',
       choices: radiant_barrier_attic_location_choices,
       required: false,
       display_name: 'Attic: Radiant Barrier Location',
       description: 'The location of the radiant barrier in the attic.'
-    )
+    }
 
     radiant_barrier_grade_choices = OpenStudio::StringVector.new
     radiant_barrier_grade_choices << '1'
     radiant_barrier_grade_choices << '2'
     radiant_barrier_grade_choices << '3'
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'radiant_barrier_grade',
       choices: radiant_barrier_grade_choices,
@@ -1091,7 +1100,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Attic: Radiant Barrier Grade',
       description: 'The grade of the radiant barrier in the attic.',
       default_href: "<a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>"
-    )
+    }
 
     wall_type_choices = OpenStudio::StringVector.new
     wall_type_choices << HPXML::WallTypeWoodStud
@@ -1106,14 +1115,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     wall_type_choices << HPXML::WallTypeStrawBale
     wall_type_choices << HPXML::WallTypeBrick
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'wall_type',
       choices: wall_type_choices,
       required: true,
       display_name: 'Wall: Type',
       description: 'The type of walls.'
-    )
+    }
 
     wall_siding_type_choices = OpenStudio::StringVector.new
     wall_siding_type_choices << HPXML::SidingTypeAluminum
@@ -1128,7 +1137,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     wall_siding_type_choices << HPXML::SidingTypeVinyl
     wall_siding_type_choices << HPXML::SidingTypeWood
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'wall_siding_type',
       choices: wall_siding_type_choices,
@@ -1136,9 +1145,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Wall: Siding Type',
       description: 'The siding type of the walls. Also applies to rim joists.',
       default_href: "<a href='#{docs_base_url}#hpxml-walls'>HPXML Walls</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'wall_color',
       choices: color_choices,
@@ -1146,80 +1155,80 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Wall: Color',
       description: 'The color of the walls. Also applies to rim joists.',
       default_href: "<a href='#{docs_base_url}#hpxml-walls'>HPXML Walls</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'wall_assembly_r',
       required: true,
       display_name: 'Wall: Assembly R-value',
       units: 'h-ft^2-R/Btu',
       description: 'Assembly R-value of the walls.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_area_front',
       required: true,
       display_name: 'Windows: Front Window Area',
       units: 'ft^2',
       description: "The amount of window area on the unit's front facade. A value less than 1 will be treated as a window-to-wall ratio. If the front wall is adiabatic, the value will be ignored."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_area_back',
       required: true,
       display_name: 'Windows: Back Window Area',
       units: 'ft^2',
       description: "The amount of window area on the unit's back facade. A value less than 1 will be treated as a window-to-wall ratio. If the back wall is adiabatic, the value will be ignored."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_area_left',
       required: true,
       display_name: 'Windows: Left Window Area',
       units: 'ft^2',
-      description: "The amount of window area on the unit's left facade (when viewed from the front). A value less than 1 will be treated as a window-to-wall ratio. If the left wall is adiabatic, the value will be ignored."
-    )
+      description: "The amount of window area on the unit's left facade (when viewed from the front}. A value less than 1 will be treated as a window-to-wall ratio. If the left wall is adiabatic, the value will be ignored."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_area_right',
       required: true,
       display_name: 'Windows: Right Window Area',
       units: 'ft^2',
-      description: "The amount of window area on the unit's right facade (when viewed from the front). A value less than 1 will be treated as a window-to-wall ratio. If the right wall is adiabatic, the value will be ignored."
-    )
+      description: "The amount of window area on the unit's right facade (when viewed from the front}. A value less than 1 will be treated as a window-to-wall ratio. If the right wall is adiabatic, the value will be ignored."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_aspect_ratio',
       required: true,
       display_name: 'Windows: Aspect Ratio',
       units: 'Frac',
       description: 'Ratio of window height to width.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_ufactor',
       required: true,
       display_name: 'Windows: U-Factor',
       units: 'Btu/hr-ft^2-R',
       description: 'Full-assembly NFRC U-factor.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_shgc',
       required: true,
       display_name: 'Windows: SHGC',
       description: 'Full-assembly NFRC solar heat gain coefficient.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_fraction_operable',
       required: false,
@@ -1227,9 +1236,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Frac',
       description: 'Fraction of windows that are operable.',
       default_href: "<a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'window_natvent_availability',
       required: false,
@@ -1237,7 +1246,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Days/week',
       description: 'For operable windows, the number of days/week that windows can be opened by occupants for natural ventilation.',
       default_href: "<a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>"
-    )
+    }
 
     window_interior_shading_type_choices = OpenStudio::StringVector.new
     window_interior_shading_type_choices << HPXML::InteriorShadingTypeLightCurtains
@@ -1252,7 +1261,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     window_interior_shading_type_choices << HPXML::InteriorShadingTypeNone
     # Not adding inputs for other because that can be anything
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'window_interior_shading_type',
       choices: window_interior_shading_type_choices,
@@ -1260,9 +1269,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Windows: Interior Shading Type',
       description: 'Type of window interior shading. Summer/winter shading coefficients can be provided below instead.',
       default_href: "<a href='#{docs_base_url}#hpxml-interior-shading'>HPXML Interior Shading</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_interior_shading_winter',
       required: false,
@@ -1270,9 +1279,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Frac',
       description: 'Interior shading coefficient for the winter season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.',
       default_href: "<a href='#{docs_base_url}#hpxml-interior-shading'>HPXML Interior Shading</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_interior_shading_summer',
       required: false,
@@ -1280,17 +1289,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Frac',
       description: 'Interior shading coefficient for the summer season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.',
       default_href: "<a href='#{docs_base_url}#hpxml-interior-shading'>HPXML Interior Shading</a>"
-    )
+    }
 
     window_exterior_shading_type_choices = OpenStudio::StringVector.new
     window_exterior_shading_type_choices << HPXML::ExteriorShadingTypeSolarFilm
     window_exterior_shading_type_choices << HPXML::ExteriorShadingTypeSolarScreens
     window_exterior_shading_type_choices << HPXML::ExteriorShadingTypeNone
     # Not adding inputs for trees since that is more specific to select windows, whereas this will apply to every window
-    # Not adding inputs for overhangs/neighbors because there are other inputs to describe those (and in more detail)
+    # Not adding inputs for overhangs/neighbors because there are other inputs to describe those (and in more detail}
     # Not adding inputs for other because that can be anything
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'window_exterior_shading_type',
       choices: window_exterior_shading_type_choices,
@@ -1298,9 +1307,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Windows: Exterior Shading Type',
       description: 'Type of window exterior shading. Summer/winter shading coefficients can be provided below instead.',
       default_href: "<a href='#{docs_base_url}#hpxml-exterior-shading'>HPXML Exterior Shading</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_exterior_shading_winter',
       required: false,
@@ -1308,9 +1317,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Frac',
       description: 'Exterior shading coefficient for the winter season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.',
       default_href: "<a href='#{docs_base_url}#hpxml-exterior-shading'>HPXML Exterior Shading</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'window_exterior_shading_summer',
       required: false,
@@ -1318,231 +1327,231 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Frac',
       description: 'Exterior shading coefficient for the summer season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.',
       default_href: "<a href='#{docs_base_url}#hpxml-exterior-shading'>HPXML Exterior Shading</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'window_shading_summer_season',
       required: false,
       display_name: 'Windows: Shading Summer Season',
       description: "Enter a date range like 'May 1 - Sep 30'. Defines the summer season for purposes of shading coefficients; the rest of the year is assumed to be winter.",
       default_href: "<a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>"
-    )
+    }
 
     window_insect_screen_choices = OpenStudio::StringVector.new
     window_insect_screen_choices << Constants::None
     window_insect_screen_choices << HPXML::LocationExterior
     window_insect_screen_choices << HPXML::LocationInterior
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'window_insect_screens',
       choices: window_insect_screen_choices,
       required: false,
       display_name: 'Windows: Insect Screens',
       description: 'The type of insect screens, if present. If not provided, assumes there are no insect screens.'
-    )
+    }
 
     storm_window_type_choices = OpenStudio::StringVector.new
     storm_window_type_choices << HPXML::WindowGlassTypeClear
     storm_window_type_choices << HPXML::WindowGlassTypeLowE
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'window_storm_type',
       choices: storm_window_type_choices,
       required: false,
       display_name: 'Windows: Storm Type',
       description: 'The type of storm, if present. If not provided, assumes there is no storm.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_front_depth',
       required: false,
       display_name: 'Overhangs: Front Depth',
       units: 'ft',
       description: 'The depth of overhangs for windows for the front facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_front_distance_to_top_of_window',
       required: false,
       display_name: 'Overhangs: Front Distance to Top of Window',
       units: 'ft',
       description: 'The overhangs distance to the top of window for the front facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_front_distance_to_bottom_of_window',
       required: false,
       display_name: 'Overhangs: Front Distance to Bottom of Window',
       units: 'ft',
       description: 'The overhangs distance to the bottom of window for the front facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_back_depth',
       required: false,
       display_name: 'Overhangs: Back Depth',
       units: 'ft',
       description: 'The depth of overhangs for windows for the back facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_back_distance_to_top_of_window',
       required: false,
       display_name: 'Overhangs: Back Distance to Top of Window',
       units: 'ft',
       description: 'The overhangs distance to the top of window for the back facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_back_distance_to_bottom_of_window',
       required: false,
       display_name: 'Overhangs: Back Distance to Bottom of Window',
       units: 'ft',
       description: 'The overhangs distance to the bottom of window for the back facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_left_depth',
       required: false,
       display_name: 'Overhangs: Left Depth',
       units: 'ft',
       description: 'The depth of overhangs for windows for the left facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_left_distance_to_top_of_window',
       required: false,
       display_name: 'Overhangs: Left Distance to Top of Window',
       units: 'ft',
       description: 'The overhangs distance to the top of window for the left facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_left_distance_to_bottom_of_window',
       required: false,
       display_name: 'Overhangs: Left Distance to Bottom of Window',
       units: 'ft',
       description: 'The overhangs distance to the bottom of window for the left facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_right_depth',
       required: false,
       display_name: 'Overhangs: Right Depth',
       units: 'ft',
       description: 'The depth of overhangs for windows for the right facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_right_distance_to_top_of_window',
       required: false,
       display_name: 'Overhangs: Right Distance to Top of Window',
       units: 'ft',
       description: 'The overhangs distance to the top of window for the right facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'overhangs_right_distance_to_bottom_of_window',
       required: false,
       display_name: 'Overhangs: Right Distance to Bottom of Window',
       units: 'ft',
       description: 'The overhangs distance to the bottom of window for the right facade.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'skylight_area_front',
       required: false,
       display_name: 'Skylights: Front Roof Area',
       units: 'ft^2',
       description: "The amount of skylight area on the unit's front conditioned roof facade."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'skylight_area_back',
       required: false,
       display_name: 'Skylights: Back Roof Area',
       units: 'ft^2',
       description: "The amount of skylight area on the unit's back conditioned roof facade."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'skylight_area_left',
       required: false,
       display_name: 'Skylights: Left Roof Area',
       units: 'ft^2',
-      description: "The amount of skylight area on the unit's left conditioned roof facade (when viewed from the front)."
-    )
+      description: "The amount of skylight area on the unit's left conditioned roof facade (when viewed from the front}."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'skylight_area_right',
       required: false,
       display_name: 'Skylights: Right Roof Area',
       units: 'ft^2',
-      description: "The amount of skylight area on the unit's right conditioned roof facade (when viewed from the front)."
-    )
+      description: "The amount of skylight area on the unit's right conditioned roof facade (when viewed from the front}."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'skylight_ufactor',
       required: false,
       display_name: 'Skylights: U-Factor',
       units: 'Btu/hr-ft^2-R',
-      description: 'Full-assembly NFRC U-factor.'
-    )
+      description: 'Full-assembly NFRC U-factor. If not provided, defaults to 0.33.'
+    }
 
-    args << makeArgument(
+    args << {
       name: 'skylight_shgc',
       type: Argument::Double,
       required: false,
       display_name: 'Skylights: SHGC',
-      description: 'Full-assembly NFRC solar heat gain coefficient.'
-    )
+      description: 'Full-assembly NFRC solar heat gain coefficient. If not provided, defaults to 0.45.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'skylight_storm_type',
       choices: storm_window_type_choices,
       required: false,
       display_name: 'Skylights: Storm Type',
       description: 'The type of storm, if present. If not provided, assumes there is no storm.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'door_area',
       required: true,
       display_name: 'Doors: Area',
       units: 'ft^2',
-      description: 'The area of the opaque door(s).'
-    )
+      description: 'The area of the opaque door(s}.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'door_rvalue',
       required: true,
       display_name: 'Doors: R-value',
       units: 'h-ft^2-R/Btu',
-      description: 'R-value of the opaque door(s).'
-    )
+      description: 'R-value of the opaque door(s}.'
+    }
 
     air_leakage_leakiness_description_choices = OpenStudio::StringVector.new
     air_leakage_leakiness_description_choices << HPXML::LeakinessVeryTight
@@ -1551,14 +1560,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     air_leakage_leakiness_description_choices << HPXML::LeakinessLeaky
     air_leakage_leakiness_description_choices << HPXML::LeakinessVeryLeaky
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'air_leakage_leakiness_description',
       choices: air_leakage_leakiness_description_choices,
       required: false,
       display_name: 'Air Leakage: Leakiness Description',
       description: 'Qualitative description of infiltration. If provided, the Year Built of the home is required. Either provide this input or provide a numeric air leakage value below.'
-    )
+    }
 
     air_leakage_units_choices = OpenStudio::StringVector.new
     air_leakage_units_choices << HPXML::UnitsACH
@@ -1567,53 +1576,53 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     air_leakage_units_choices << HPXML::UnitsCFMNatural
     air_leakage_units_choices << HPXML::UnitsELA
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'air_leakage_units',
       choices: air_leakage_units_choices,
       required: false,
       display_name: 'Air Leakage: Units',
       description: 'The unit of measure for the air leakage if providing a numeric air leakage value.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'air_leakage_house_pressure',
       required: false,
       display_name: 'Air Leakage: House Pressure',
       units: 'Pa',
       description: "The house pressure relative to outside if providing a numeric air leakage value. Required when units are #{HPXML::UnitsACH} or #{HPXML::UnitsCFM}."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'air_leakage_value',
       required: false,
       display_name: 'Air Leakage: Value',
       description: "Numeric air leakage value. For '#{HPXML::UnitsELA}', provide value in sq. in. If provided, overrides Leakiness Description input."
-    )
+    }
 
     air_leakage_type_choices = OpenStudio::StringVector.new
     air_leakage_type_choices << HPXML::InfiltrationTypeUnitTotal
     air_leakage_type_choices << HPXML::InfiltrationTypeUnitExterior
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'air_leakage_type',
       choices: air_leakage_type_choices,
       required: false,
       display_name: 'Air Leakage: Type',
       description: "Type of air leakage if providing a numeric air leakage value. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'air_leakage_has_flue_or_chimney_in_conditioned_space',
       type: Argument::Boolean,
       required: false,
       display_name: 'Air Leakage: Has Flue or Chimney in Conditioned Space',
       description: 'Presence of flue or chimney with combustion air from conditioned space; used for infiltration model.',
       default_href: "<a href='#{docs_base_url}#flue-or-chimney'>Flue or Chimney</a>"
-    )
+    }
 
     heating_system_type_choices = OpenStudio::StringVector.new
     heating_system_type_choices << Constants::None
@@ -1656,34 +1665,34 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     compressor_type_choices << HPXML::HVACCompressorTypeTwoStage
     compressor_type_choices << HPXML::HVACCompressorTypeVariableSpeed
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heating_system_type',
       choices: heating_system_type_choices,
       required: true,
       display_name: 'Heating System: Type',
       description: "The type of heating system. Use '#{Constants::None}' if there is no heating system or if there is a heat pump serving a heating load."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heating_system_fuel',
       choices: heating_system_fuel_choices,
       required: false,
       display_name: 'Heating System: Fuel Type',
       description: "The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_heating_efficiency',
       required: false,
       display_name: 'Heating System: Rated AFUE or Percent',
       units: 'Frac',
       description: 'The rated heating efficiency value of the heating system.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_heating_capacity',
       required: false,
@@ -1691,79 +1700,79 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The output heating capacity of the heating system.',
       units: 'Btu/hr',
       default_href: "<a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_heating_autosizing_factor',
       required: false,
       display_name: 'Heating System: Heating Autosizing Factor',
       description: 'The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_heating_autosizing_limit',
       required: false,
       display_name: 'Heating System: Heating Autosizing Limit',
       description: 'The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.',
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_fraction_heat_load_served',
       required: false,
       display_name: 'Heating System: Fraction Heat Load Served',
       description: 'The heating load served by the heating system.',
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_pilot_light',
       required: false,
       display_name: 'Heating System: Pilot Light',
       description: "The fuel usage of the pilot light. Applies only to #{HPXML::HVACTypeFurnace}, #{HPXML::HVACTypeWallFurnace}, #{HPXML::HVACTypeFloorFurnace}, #{HPXML::HVACTypeStove}, #{HPXML::HVACTypeBoiler}, and #{HPXML::HVACTypeFireplace} with non-electric fuel type. If not provided, assumes no pilot light.",
       units: 'Btuh'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_airflow_defect_ratio',
       required: false,
       display_name: 'Heating System: Airflow Defect Ratio',
-      description: "The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heating system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeFurnace}. If not provided, assumes no defect.",
+      description: "The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow} / DesignAirflow, of the heating system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeFurnace}. If not provided, assumes no defect.",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'cooling_system_type',
       choices: cooling_system_type_choices,
       required: true,
       display_name: 'Cooling System: Type',
       description: "The type of cooling system. Use '#{Constants::None}' if there is no cooling system or if there is a heat pump serving a cooling load."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'cooling_system_cooling_efficiency_type',
       choices: cooling_efficiency_type_choices,
       required: false,
       display_name: 'Cooling System: Efficiency Type',
-      description: "The efficiency type of the cooling system. System types #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} use #{HPXML::UnitsSEER} or #{HPXML::UnitsSEER2}. System types #{HPXML::HVACTypeRoomAirConditioner} and #{HPXML::HVACTypePTAC} use #{HPXML::UnitsEER} or #{HPXML::UnitsCEER}. Ignored for system type #{HPXML::HVACTypeEvaporativeCooler}."
-    )
+      description: "The efficiency type of the cooling system. System types #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} use #{HPXML::UnitsSEER} or #{HPXML::UnitsSEER2}. System types #{HPXML::HVACTypeRoomAirConditioner} and #{HPXML::HVACTypePTAC} use #{HPXML::UnitsEER} or #{HPXML::UnitsCEER}. Ignored for system type #{HPXML::HVACTypeEvaporativeCooler}. If not provided, defaults to #{HPXML::UnitsSEER}."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_cooling_efficiency',
       required: false,
       display_name: 'Cooling System: Efficiency',
       description: "The rated efficiency value of the cooling system. Ignored for #{HPXML::HVACTypeEvaporativeCooler}."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'cooling_system_cooling_compressor_type',
       choices: compressor_type_choices,
@@ -1771,9 +1780,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Cooling System: Cooling Compressor Type',
       description: "The compressor type of the cooling system. Only applies to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}.",
       default_href: "<a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_cooling_sensible_heat_fraction',
       required: false,
@@ -1781,9 +1790,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "The sensible heat fraction of the cooling system. Ignored for #{HPXML::HVACTypeEvaporativeCooler}.",
       default_href: "<a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_cooling_capacity',
       required: false,
@@ -1791,61 +1800,61 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The output cooling capacity of the cooling system.',
       default_href: "<a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='#{docs_base_url}#evaporative-cooler'>Evaporative Cooler</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_cooling_autosizing_factor',
       required: false,
       display_name: 'Cooling System: Cooling Autosizing Factor',
       description: 'The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_cooling_autosizing_limit',
       required: false,
       display_name: 'Cooling System: Cooling Autosizing Limit',
       description: 'The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.',
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_fraction_cool_load_served',
       required: false,
       display_name: 'Cooling System: Fraction Cool Load Served',
       description: 'The cooling load served by the cooling system.',
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'cooling_system_is_ducted',
       type: Argument::Boolean,
       required: false,
       display_name: 'Cooling System: Is Ducted',
       description: "Whether the cooling system is ducted or not. Only used for #{HPXML::HVACTypeMiniSplitAirConditioner} and #{HPXML::HVACTypeEvaporativeCooler}. It's assumed that #{HPXML::HVACTypeCentralAirConditioner} is ducted, and #{HPXML::HVACTypeRoomAirConditioner} and #{HPXML::HVACTypePTAC} are not ducted."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_airflow_defect_ratio',
       required: false,
       display_name: 'Cooling System: Airflow Defect Ratio',
-      description: "The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the cooling system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and ducted #{HPXML::HVACTypeMiniSplitAirConditioner}. If not provided, assumes no defect.",
+      description: "The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow} / DesignAirflow, of the cooling system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and ducted #{HPXML::HVACTypeMiniSplitAirConditioner}. If not provided, assumes no defect.",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_charge_defect_ratio',
       required: false,
       display_name: 'Cooling System: Charge Defect Ratio',
-      description: "The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the cooling system per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}. If not provided, assumes no defect.",
+      description: "The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge} / DesignCharge, of the cooling system per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}. If not provided, assumes no defect.",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_crankcase_heater_watts',
       required: false,
@@ -1853,27 +1862,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Cooling system crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeCentralAirConditioner}, #{HPXML::HVACTypeRoomAirConditioner}, #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeMiniSplitAirConditioner}.",
       default_href: "<a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>",
       units: 'W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'cooling_system_integrated_heating_system_fuel',
       choices: heating_system_fuel_choices,
       required: false,
       display_name: 'Cooling System: Integrated Heating System Fuel Type',
       description: "The fuel type of the heating system integrated into cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_integrated_heating_system_efficiency_percent',
       required: false,
       display_name: 'Cooling System: Integrated Heating System Efficiency',
       units: 'Frac',
       description: "The rated heating efficiency value of the heating system integrated into cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_integrated_heating_system_capacity',
       required: false,
@@ -1881,16 +1890,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "The output heating capacity of the heating system integrated into cooling system. Only used for #{HPXML::HVACTypeRoomAirConditioner} and #{HPXML::HVACTypePTAC}.",
       default_href: "<a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooling_system_integrated_heating_system_fraction_heat_load_served',
       required: false,
       display_name: 'Cooling System: Integrated Heating System Fraction Heat Load Served',
       description: "The heating load served by the heating system integrated into cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}.",
       units: 'Frac'
-    )
+    }
 
     heat_pump_type_choices = OpenStudio::StringVector.new
     heat_pump_type_choices << Constants::None
@@ -1925,50 +1934,50 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingEmergency
     heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingSupplemental
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heat_pump_type',
       choices: heat_pump_type_choices,
       required: true,
       display_name: 'Heat Pump: Type',
       description: "The type of heat pump. Use '#{Constants::None}' if there is no heat pump."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heat_pump_heating_efficiency_type',
       choices: heat_pump_heating_efficiency_type_choices,
       required: false,
       display_name: 'Heat Pump: Heating Efficiency Type',
-      description: "The heating efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsHSPF} or #{HPXML::UnitsHSPF2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsCOP}."
-    )
+      description: "The heating efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsHSPF} or #{HPXML::UnitsHSPF2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsCOP}. If not provided, defaults to #{HPXML::UnitsHSPF}."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_heating_efficiency',
       required: false,
       display_name: 'Heat Pump: Heating Efficiency',
       description: 'The rated heating efficiency value of the heat pump.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heat_pump_cooling_efficiency_type',
       choices: cooling_efficiency_type_choices,
       required: false,
       display_name: 'Heat Pump: Cooling Efficiency Type',
-      description: "The cooling efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsSEER} or #{HPXML::UnitsSEER2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsEER}."
-    )
+      description: "The cooling efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsSEER} or #{HPXML::UnitsSEER2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsEER}. If not provided, defaults to #{HPXML::UnitsSEER}."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_cooling_efficiency',
       required: false,
       display_name: 'Heat Pump: Cooling Efficiency',
       description: 'The rated cooling efficiency value of the heat pump.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heat_pump_cooling_compressor_type',
       choices: compressor_type_choices,
@@ -1976,9 +1985,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Heat Pump: Cooling Compressor Type',
       description: "The compressor type of the heat pump. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}.",
       default_href: "<a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_cooling_sensible_heat_fraction',
       required: false,
@@ -1986,9 +1995,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The sensible heat fraction of the heat pump.',
       default_href: "<a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_heating_capacity',
       required: false,
@@ -1996,45 +2005,45 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The output heating capacity of the heat pump.',
       default_href: "<a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_heating_autosizing_factor',
       required: false,
       display_name: 'Heat Pump: Heating Autosizing Factor',
       description: 'The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_heating_autosizing_limit',
       required: false,
       display_name: 'Heat Pump: Heating Autosizing Limit',
       description: 'The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.',
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_heating_capacity_retention_fraction',
       required: false,
       display_name: 'Heat Pump: Heating Capacity Retention Fraction',
-      description: "The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}.",
+      description: "The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F} divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}.",
       default_href: "<a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_heating_capacity_retention_temp',
       required: false,
       display_name: 'Heat Pump: Heating Capacity Retention Temperature',
-      description: "The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. Required if the Heating Capacity Retention Fraction is provided.",
+      description: "The user-specified temperature (e.g., 17F or 5F} for the above heating capacity retention fraction. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. Required if the Heating Capacity Retention Fraction is provided.",
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_cooling_capacity',
       required: false,
@@ -2042,97 +2051,97 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The output cooling capacity of the heat pump.',
       default_href: "<a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_cooling_autosizing_factor',
       required: false,
       display_name: 'Heat Pump: Cooling Autosizing Factor',
       description: 'The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_cooling_autosizing_limit',
       required: false,
       display_name: 'Heat Pump: Cooling Autosizing Limit',
       description: 'The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.',
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_fraction_heat_load_served',
       required: false,
       display_name: 'Heat Pump: Fraction Heat Load Served',
       description: 'The heating load served by the heat pump.',
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_fraction_cool_load_served',
       required: false,
       display_name: 'Heat Pump: Fraction Cool Load Served',
       description: 'The cooling load served by the heat pump.',
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_compressor_lockout_temp',
       required: false,
       display_name: 'Heat Pump: Compressor Lockout Temperature',
-      description: "The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than #{HPXML::HVACTypeHeatPumpGroundToAir}.",
+      description: "The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump}. Applies to all heat pump types other than #{HPXML::HVACTypeHeatPumpGroundToAir}.",
       default_href: "<a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>",
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heat_pump_backup_type',
       choices: heat_pump_backup_type_choices,
       required: false,
       display_name: 'Heat Pump: Backup Type',
       description: "The backup type of the heat pump. If '#{HPXML::HeatPumpBackupTypeIntegrated}', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If '#{HPXML::HeatPumpBackupTypeSeparate}', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use '#{Constants::None}' if there is no backup heating."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_backup_heating_autosizing_factor',
       required: false,
       display_name: 'Heat Pump: Backup Heating Autosizing Factor',
       description: "The capacity scaling factor applied to the auto-sizing methodology if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. If not provided, 1.0 is used. If Backup Type is '#{HPXML::HeatPumpBackupTypeSeparate}', use Heating System 2: Heating Autosizing Factor."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_backup_heating_autosizing_limit',
       required: false,
       display_name: 'Heat Pump: Backup Heating Autosizing Limit',
       description: "The maximum capacity limit applied to the auto-sizing methodology if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. If not provided, no limit is used. If Backup Type is '#{HPXML::HeatPumpBackupTypeSeparate}', use Heating System 2: Heating Autosizing Limit.",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heat_pump_backup_fuel',
       choices: heat_pump_backup_fuel_choices,
       required: false,
       display_name: 'Heat Pump: Backup Fuel Type',
-      description: "The backup fuel type of the heat pump. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'."
-    )
+      description: "The backup fuel type of the heat pump. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. If not provided, defaults to electricity."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_backup_heating_efficiency',
       required: false,
       display_name: 'Heat Pump: Backup Rated Efficiency',
-      description: "The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'."
-    )
+      description: "The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. If not provided, defaults to 1."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_backup_heating_capacity',
       required: false,
@@ -2140,19 +2149,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "The backup output heating capacity of the heat pump. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'.",
       default_href: "<a href='#{docs_base_url}#backup'>Backup</a>",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_backup_heating_lockout_temp',
       required: false,
       display_name: 'Heat Pump: Backup Heating Lockout Temperature',
-      description: "The temperature above which the heat pump backup system is disabled. If both this and Compressor Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies for both Backup Type of '#{HPXML::HeatPumpBackupTypeIntegrated}' and '#{HPXML::HeatPumpBackupTypeSeparate}'.",
+      description: "The temperature above which the heat pump backup system is disabled. If both this and Compressor Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump}. Applies for both Backup Type of '#{HPXML::HeatPumpBackupTypeIntegrated}' and '#{HPXML::HeatPumpBackupTypeSeparate}'.",
       default_href: "<a href='#{docs_base_url}#backup'>Backup</a>",
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heat_pump_sizing_methodology',
       choices: heat_pump_sizing_choices,
@@ -2160,9 +2169,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Heat Pump: Sizing Methodology',
       description: 'The auto-sizing methodology to use when the heat pump capacity is not provided.',
       default_href: "<a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heat_pump_backup_sizing_methodology',
       choices: heat_pump_backup_sizing_choices,
@@ -2170,35 +2179,35 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Heat Pump: Backup Sizing Methodology',
       description: 'The auto-sizing methodology to use when the heat pump backup capacity is not provided.',
       default_href: "<a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'heat_pump_is_ducted',
       type: Argument::Boolean,
       required: false,
       display_name: 'Heat Pump: Is Ducted',
       description: "Whether the heat pump is ducted or not. Only used for #{HPXML::HVACTypeHeatPumpMiniSplit}. It's assumed that #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpGroundToAir} are ducted, and #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} are not ducted. If not provided, assumes not ducted."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_airflow_defect_ratio',
       required: false,
       display_name: 'Heat Pump: Airflow Defect Ratio',
-      description: "The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, ducted #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, assumes no defect.",
+      description: "The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow} / DesignAirflow, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, ducted #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, assumes no defect.",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_charge_defect_ratio',
       required: false,
       display_name: 'Heat Pump: Charge Defect Ratio',
-      description: 'The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies to all heat pump types. If not provided, assumes no defect.',
+      description: 'The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge} / DesignCharge, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies to all heat pump types. If not provided, assumes no defect.',
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heat_pump_crankcase_heater_watts',
       required: false,
@@ -2206,110 +2215,110 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}.",
       default_href: "<a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>",
       units: 'W'
-    )
+    }
 
     perf_data_capacity_type_choices = OpenStudio::StringVector.new
     perf_data_capacity_type_choices << 'Absolute capacities'
     perf_data_capacity_type_choices << 'Normalized capacity fractions'
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'hvac_perf_data_capacity_type',
       choices: perf_data_capacity_type_choices,
       required: false,
       display_name: 'HVAC Detailed Performance Data: Capacity Type',
-      description: 'Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps).'
-    )
+      description: 'Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_heating_outdoor_temperatures',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Heating Outdoor Temperatures',
-      description: 'Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 F. At least two performance data points are required using a comma-separated list.',
+      description: 'Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. One of the outdoor temperatures must be 47 F. At least two performance data points are required using a comma-separated list.',
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_heating_min_speed_capacities',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Heating Minimum Speed Capacities',
-      description: 'Minimum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.',
+      description: 'Minimum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. At least two performance data points are required using a comma-separated list.',
       units: 'Btu/hr or Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_heating_max_speed_capacities',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Heating Maximum Speed Capacities',
-      description: 'Maximum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.',
+      description: 'Maximum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. At least two performance data points are required using a comma-separated list.',
       units: 'Btu/hr or Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_heating_min_speed_cops',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Heating Minimum Speed COPs',
-      description: 'Minimum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.',
+      description: 'Minimum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. At least two performance data points are required using a comma-separated list.',
       units: 'W/W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_heating_max_speed_cops',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Heating Maximum Speed COPs',
-      description: 'Maximum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.',
+      description: 'Maximum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. At least two performance data points are required using a comma-separated list.',
       units: 'W/W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_cooling_outdoor_temperatures',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Cooling Outdoor Temperatures',
-      description: 'Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 F. At least two performance data points are required using a comma-separated list.',
+      description: 'Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. One of the outdoor temperatures must be 95 F. At least two performance data points are required using a comma-separated list.',
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_cooling_min_speed_capacities',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Cooling Minimum Speed Capacities',
-      description: 'Minimum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.',
+      description: 'Minimum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. At least two performance data points are required using a comma-separated list.',
       units: 'Btu/hr or Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_cooling_max_speed_capacities',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Cooling Maximum Speed Capacities',
-      description: 'Maximum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.',
+      description: 'Maximum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. At least two performance data points are required using a comma-separated list.',
       units: 'Btu/hr or Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_cooling_min_speed_cops',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Cooling Minimum Speed COPs',
-      description: 'Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.',
+      description: 'Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. At least two performance data points are required using a comma-separated list.',
       units: 'W/W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_perf_data_cooling_max_speed_cops',
       required: false,
       display_name: 'HVAC Detailed Performance Data: Cooling Maximum Speed COPs',
-      description: 'Maximum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.',
+      description: 'Maximum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps}. At least two performance data points are required using a comma-separated list.',
       units: 'W/W'
-    )
+    }
 
     geothermal_loop_configuration_choices = OpenStudio::StringVector.new
     geothermal_loop_configuration_choices << Constants::None
@@ -2318,7 +2327,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationOther
     geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationVertical
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geothermal_loop_configuration',
       choices: geothermal_loop_configuration_choices,
@@ -2326,7 +2335,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Geothermal Loop: Configuration',
       description: "Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>"
-    )
+    }
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
     valid_bore_configs = HVACSizing.get_geothermal_loop_valid_configurations
@@ -2334,7 +2343,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       geothermal_loop_borefield_configuration_choices << valid_bore_config
     end
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geothermal_loop_borefield_configuration',
       choices: geothermal_loop_borefield_configuration_choices,
@@ -2342,9 +2351,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Geothermal Loop: Borefield Configuration',
       description: "Borefield configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geothermal_loop_loop_flow',
       required: false,
@@ -2352,9 +2361,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Water flow rate through the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>",
       units: 'gpm'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'geothermal_loop_boreholes_count',
       required: false,
@@ -2362,19 +2371,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Number of boreholes. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>",
       units: '#'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geothermal_loop_boreholes_length',
       required: false,
       display_name: 'Geothermal Loop: Boreholes Length',
-      description: "Average length of each borehole (vertical). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
+      description: "Average length of each borehole (vertical}. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>",
       units: 'ft'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geothermal_loop_boreholes_spacing',
       required: false,
@@ -2382,9 +2391,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Distance between bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>",
       units: 'ft'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'geothermal_loop_boreholes_diameter',
       required: false,
@@ -2392,13 +2401,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Diameter of bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>",
       units: 'in'
-    )
+    }
 
     geothermal_loop_grout_or_pipe_type_choices = OpenStudio::StringVector.new
     geothermal_loop_grout_or_pipe_type_choices << HPXML::GeothermalLoopGroutOrPipeTypeStandard
     geothermal_loop_grout_or_pipe_type_choices << HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geothermal_loop_grout_type',
       choices: geothermal_loop_grout_or_pipe_type_choices,
@@ -2406,9 +2415,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Geothermal Loop: Grout Type',
       description: "Grout type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geothermal_loop_pipe_type',
       choices: geothermal_loop_grout_or_pipe_type_choices,
@@ -2416,14 +2425,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Geothermal Loop: Pipe Type',
       description: "Pipe type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>"
-    )
+    }
 
     geothermal_loop_pipe_diameter_choices = OpenStudio::StringVector.new
     geothermal_loop_pipe_diameter_choices << '3/4" pipe'
     geothermal_loop_pipe_diameter_choices << '1" pipe'
     geothermal_loop_pipe_diameter_choices << '1-1/4" pipe'
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'geothermal_loop_pipe_diameter',
       choices: geothermal_loop_pipe_diameter_choices,
@@ -2432,7 +2441,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Pipe diameter of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.",
       default_href: "<a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>",
       units: 'in'
-    )
+    }
 
     heating_system_2_type_choices = OpenStudio::StringVector.new
     heating_system_2_type_choices << Constants::None
@@ -2445,34 +2454,34 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_2_type_choices << HPXML::HVACTypeSpaceHeater
     heating_system_2_type_choices << HPXML::HVACTypeFireplace
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heating_system_2_type',
       choices: heating_system_2_type_choices,
       required: false,
       display_name: 'Heating System 2: Type',
       description: "The type of the second heating system. If a heat pump is specified and the backup type is '#{HPXML::HeatPumpBackupTypeSeparate}', this heating system represents '#{HPXML::HeatPumpBackupTypeSeparate}' backup heating. For ducted heat pumps where the backup heating system is a '#{HPXML::HVACTypeFurnace}', the backup would typically be characterized as '#{HPXML::HeatPumpBackupTypeIntegrated}' in that the furnace and heat pump share the same distribution system and blower fan; a '#{HPXML::HVACTypeFurnace}' as '#{HPXML::HeatPumpBackupTypeSeparate}' backup to a ducted heat pump is not supported. If not provided, defaults to none."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'heating_system_2_fuel',
       choices: heating_system_fuel_choices,
       required: false,
       display_name: 'Heating System 2: Fuel Type',
-      description: "The fuel type of the second heating system. Ignored for #{HPXML::HVACTypeElectricResistance}."
-    )
+      description: "The fuel type of the second heating system. Ignored for #{HPXML::HVACTypeElectricResistance}. If not provided, defaults to electricity."
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_2_heating_efficiency',
       required: false,
       display_name: 'Heating System 2: Rated AFUE or Percent',
       units: 'Frac',
-      description: 'The rated heating efficiency value of the second heating system.'
-    )
+      description: 'The rated heating efficiency value of the second heating system. If not provided, defaults to 1.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_2_heating_capacity',
       required: false,
@@ -2480,97 +2489,97 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The output heating capacity of the second heating system.',
       default_href: "<a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_2_heating_autosizing_factor',
       required: false,
       display_name: 'Heating System 2: Heating Autosizing Factor',
       description: 'The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_2_heating_autosizing_limit',
       required: false,
       display_name: 'Heating System 2: Heating Autosizing Limit',
       description: 'The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.',
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'heating_system_2_fraction_heat_load_served',
       required: false,
       display_name: 'Heating System 2: Fraction Heat Load Served',
-      description: 'The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.',
+      description: 'The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump. If not provided, defaults to 0.25.',
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_control_heating_weekday_setpoint',
       required: false,
       display_name: 'HVAC Control: Heating Weekday Setpoint Schedule',
       description: 'Specify the constant or 24-hour comma-separated weekday heating setpoint schedule. Required unless a detailed CSV schedule is provided.',
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_control_heating_weekend_setpoint',
       required: false,
       display_name: 'HVAC Control: Heating Weekend Setpoint Schedule',
       description: 'Specify the constant or 24-hour comma-separated weekend heating setpoint schedule. Required unless a detailed CSV schedule is provided.',
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_control_cooling_weekday_setpoint',
       required: false,
       display_name: 'HVAC Control: Cooling Weekday Setpoint Schedule',
       description: 'Specify the constant or 24-hour comma-separated weekday cooling setpoint schedule. Required unless a detailed CSV schedule is provided.',
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_control_cooling_weekend_setpoint',
       required: false,
       display_name: 'HVAC Control: Cooling Weekend Setpoint Schedule',
       description: 'Specify the constant or 24-hour comma-separated weekend cooling setpoint schedule. Required unless a detailed CSV schedule is provided.',
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_control_heating_season_period',
       required: false,
       display_name: 'HVAC Control: Heating Season Period',
       description: "Enter a date range like 'Nov 1 - Jun 30'. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.",
       default_href: "<a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'hvac_control_cooling_season_period',
       required: false,
       display_name: 'HVAC Control: Cooling Season Period',
       description: "Enter a date range like 'Jun 1 - Oct 31'. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.",
       default_href: "<a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'hvac_blower_fan_watts_per_cfm',
       required: false,
       display_name: 'HVAC Blower: Fan Efficiency',
-      description: "The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless #{HPXML::HVACTypeHeatPumpMiniSplit} systems).",
+      description: "The blower fan efficiency at maximum fan speed. Applies only to split (not packaged} systems (i.e., applies to ducted systems as well as ductless #{HPXML::HVACTypeHeatPumpMiniSplit} systems}.",
       default_href: "<a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='#{docs_base_url}#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='#{docs_base_url}#hpxml-heat-pumps'>HPXML Heat Pumps</a>",
       units: 'W/CFM'
-    )
+    }
 
     duct_leakage_units_choices = OpenStudio::StringVector.new
     duct_leakage_units_choices << HPXML::UnitsCFM25
@@ -2599,24 +2608,24 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationOtherNonFreezingSpace
     duct_location_choices << HPXML::LocationManufacturedHomeBelly
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'ducts_leakage_units',
       choices: duct_leakage_units_choices,
       required: false,
       display_name: 'Ducts: Leakage Units',
       description: 'The leakage units of the ducts.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_supply_leakage_to_outside_value',
       required: false,
       display_name: 'Ducts: Supply Leakage to Outside Value',
       description: 'The leakage value to outside for the supply ducts.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'ducts_supply_location',
       choices: duct_location_choices,
@@ -2624,16 +2633,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Ducts: Supply Location',
       description: 'The location of the supply ducts.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_supply_insulation_r',
       required: false,
       display_name: 'Ducts: Supply Insulation R-Value',
       description: 'The nominal insulation r-value of the supply ducts excluding air films. Use 0 for uninsulated ducts.',
       units: 'h-ft^2-R/Btu'
-    )
+    }
 
     duct_buried_level_choices = OpenStudio::StringVector.new
     duct_buried_level_choices << HPXML::DuctBuriedInsulationNone
@@ -2641,7 +2650,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_buried_level_choices << HPXML::DuctBuriedInsulationFull
     duct_buried_level_choices << HPXML::DuctBuriedInsulationDeep
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'ducts_supply_buried_insulation_level',
       choices: duct_buried_level_choices,
@@ -2649,9 +2658,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Ducts: Supply Buried Insulation Level',
       description: 'Whether the supply ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_supply_surface_area',
       required: false,
@@ -2659,9 +2668,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The supply ducts surface area in the given location.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>",
       units: 'ft^2'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_supply_surface_area_fraction',
       required: false,
@@ -2669,27 +2678,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The fraction of supply ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>",
       units: 'frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_supply_fraction_rectangular',
       required: false,
       display_name: 'Ducts: Supply Fraction Rectangular',
-      description: 'The fraction of supply ducts that are rectangular (as opposed to round); this affects the duct effective R-value used for modeling.',
+      description: 'The fraction of supply ducts that are rectangular (as opposed to round}; this affects the duct effective R-value used for modeling.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>",
       units: 'frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_return_leakage_to_outside_value',
       required: false,
       display_name: 'Ducts: Return Leakage to Outside Value',
       description: 'The leakage value to outside for the return ducts.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'ducts_return_location',
       choices: duct_location_choices,
@@ -2697,18 +2706,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Ducts: Return Location',
       description: 'The location of the return ducts.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_return_insulation_r',
       required: false,
       display_name: 'Ducts: Return Insulation R-Value',
       description: 'The nominal insulation r-value of the return ducts excluding air films. Use 0 for uninsulated ducts.',
       units: 'h-ft^2-R/Btu'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'ducts_return_buried_insulation_level',
       choices: duct_buried_level_choices,
@@ -2716,9 +2725,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Ducts: Return Buried Insulation Level',
       description: 'Whether the return ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_return_surface_area',
       required: false,
@@ -2726,9 +2735,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The return ducts surface area in the given location.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>",
       units: 'ft^2'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_return_surface_area_fraction',
       required: false,
@@ -2736,9 +2745,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The fraction of return ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>",
       units: 'frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'ducts_number_of_return_registers',
       required: false,
@@ -2746,17 +2755,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The number of return registers of the ducts. Only used to calculate default return duct surface area.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>",
       units: '#'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ducts_return_fraction_rectangular',
       required: false,
       display_name: 'Ducts: Return Fraction Rectangular',
-      description: 'The fraction of return ducts that are rectangular (as opposed to round); this affects the duct effective R-value used for modeling.',
+      description: 'The fraction of return ducts that are rectangular (as opposed to round}; this affects the duct effective R-value used for modeling.',
       default_href: "<a href='#{docs_base_url}#air-distribution'>Air Distribution</a>",
       units: 'frac'
-    )
+    }
 
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
     mech_vent_fan_type_choices << Constants::None
@@ -2771,16 +2780,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     mech_vent_recovery_efficiency_type_choices << 'Unadjusted'
     mech_vent_recovery_efficiency_type_choices << 'Adjusted'
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'mech_vent_fan_type',
       choices: mech_vent_fan_type_choices,
       required: false,
       display_name: 'Mechanical Ventilation: Fan Type',
       description: "The type of the mechanical ventilation. Use '#{Constants::None}' if there is no mechanical ventilation system. If not provided, defaults to none."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_flow_rate',
       required: false,
@@ -2788,9 +2797,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The flow rate of the mechanical ventilation.',
       default_href: "<a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>",
       units: 'CFM'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_hours_in_operation',
       required: false,
@@ -2798,36 +2807,36 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The hours in operation of the mechanical ventilation.',
       default_href: "<a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>",
       units: 'hrs/day'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'mech_vent_recovery_efficiency_type',
       choices: mech_vent_recovery_efficiency_type_choices,
       required: false,
       display_name: 'Mechanical Ventilation: Total Recovery Efficiency Type',
       description: 'The total recovery efficiency type of the mechanical ventilation.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_total_recovery_efficiency',
       required: false,
       display_name: 'Mechanical Ventilation: Total Recovery Efficiency',
-      description: "The Unadjusted or Adjusted total recovery efficiency of the mechanical ventilation. Applies to #{HPXML::MechVentTypeERV}.",
+      description: "The Unadjusted or Adjusted total recovery efficiency of the mechanical ventilation. Applies to #{HPXML::MechVentTypeERV}. If not provided, defaults to Unadjusted total recovery efficiency of 0.48.",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_sensible_recovery_efficiency',
       required: false,
       display_name: 'Mechanical Ventilation: Sensible Recovery Efficiency',
-      description: "The Unadjusted or Adjusted sensible recovery efficiency of the mechanical ventilation. Applies to #{HPXML::MechVentTypeERV} and #{HPXML::MechVentTypeHRV}.",
+      description: "The Unadjusted or Adjusted sensible recovery efficiency of the mechanical ventilation. Applies to #{HPXML::MechVentTypeERV} and #{HPXML::MechVentTypeHRV}. If not provided, defaults to Unadjusted sensible recovery efficiency of 0.72.",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_fan_power',
       required: false,
@@ -2835,82 +2844,82 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The fan power of the mechanical ventilation.',
       default_href: "<a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>",
       units: 'W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'mech_vent_num_units_served',
       required: false,
       display_name: 'Mechanical Ventilation: Number of Units Served',
       description: "Number of dwelling units served by the mechanical ventilation system. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion flow rate and fan power to the unit.",
       units: '#'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_shared_frac_recirculation',
       required: false,
       display_name: 'Shared Mechanical Ventilation: Fraction Recirculation',
       description: 'Fraction of the total supply air that is recirculated, with the remainder assumed to be outdoor air. The value must be 0 for exhaust only systems. Required for a shared mechanical ventilation system.',
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'mech_vent_shared_preheating_fuel',
       choices: heating_system_fuel_choices,
       required: false,
       display_name: 'Shared Mechanical Ventilation: Preheating Fuel',
       description: 'Fuel type of the preconditioning heating equipment. Only used for a shared mechanical ventilation system. If not provided, assumes no preheating.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_shared_preheating_efficiency',
       required: false,
       display_name: 'Shared Mechanical Ventilation: Preheating Efficiency',
       description: 'Efficiency of the preconditioning heating equipment. Only used for a shared mechanical ventilation system. If not provided, assumes no preheating.',
       units: 'COP'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_shared_preheating_fraction_heat_load_served',
       required: false,
       display_name: 'Shared Mechanical Ventilation: Preheating Fraction Ventilation Heat Load Served',
       description: 'Fraction of heating load introduced by the shared ventilation system that is met by the preconditioning heating equipment. If not provided, assumes no preheating.',
       units: 'Frac'
-    )
+    }
 
     cooling_system_fuel_choices = OpenStudio::StringVector.new
     cooling_system_fuel_choices << HPXML::FuelTypeElectricity
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'mech_vent_shared_precooling_fuel',
       choices: cooling_system_fuel_choices,
       required: false,
       display_name: 'Shared Mechanical Ventilation: Precooling Fuel',
       description: 'Fuel type of the preconditioning cooling equipment. Only used for a shared mechanical ventilation system. If not provided, assumes no precooling.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_shared_precooling_efficiency',
       required: false,
       display_name: 'Shared Mechanical Ventilation: Precooling Efficiency',
       description: 'Efficiency of the preconditioning cooling equipment. Only used for a shared mechanical ventilation system. If not provided, assumes no precooling.',
       units: 'COP'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_shared_precooling_fraction_cool_load_served',
       required: false,
       display_name: 'Shared Mechanical Ventilation: Precooling Fraction Ventilation Cool Load Served',
       description: 'Fraction of cooling load introduced by the shared ventilation system that is met by the preconditioning cooling equipment. If not provided, assumes no precooling.',
       units: 'Frac'
-    )
+    }
 
     mech_vent_2_fan_type_choices = OpenStudio::StringVector.new
     mech_vent_2_fan_type_choices << Constants::None
@@ -2920,70 +2929,70 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     mech_vent_2_fan_type_choices << HPXML::MechVentTypeHRV
     mech_vent_2_fan_type_choices << HPXML::MechVentTypeBalanced
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'mech_vent_2_fan_type',
       choices: mech_vent_2_fan_type_choices,
       required: false,
       display_name: 'Mechanical Ventilation 2: Fan Type',
       description: "The type of the second mechanical ventilation. Use '#{Constants::None}' if there is no second mechanical ventilation system. If not provided, defaults to none."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_2_flow_rate',
       required: false,
       display_name: 'Mechanical Ventilation 2: Flow Rate',
       description: 'The flow rate of the second mechanical ventilation.',
       units: 'CFM'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_2_hours_in_operation',
       required: false,
       display_name: 'Mechanical Ventilation 2: Hours In Operation',
       description: 'The hours in operation of the second mechanical ventilation.',
       units: 'hrs/day'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'mech_vent_2_recovery_efficiency_type',
       choices: mech_vent_recovery_efficiency_type_choices,
       required: false,
       display_name: 'Mechanical Ventilation 2: Total Recovery Efficiency Type',
       description: 'The total recovery efficiency type of the second mechanical ventilation.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_2_total_recovery_efficiency',
       required: false,
       display_name: 'Mechanical Ventilation 2: Total Recovery Efficiency',
       description: "The Unadjusted or Adjusted total recovery efficiency of the second mechanical ventilation. Applies to #{HPXML::MechVentTypeERV}.",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_2_sensible_recovery_efficiency',
       required: false,
       display_name: 'Mechanical Ventilation 2: Sensible Recovery Efficiency',
       description: "The Unadjusted or Adjusted sensible recovery efficiency of the second mechanical ventilation. Applies to #{HPXML::MechVentTypeERV} and #{HPXML::MechVentTypeHRV}.",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'mech_vent_2_fan_power',
       required: false,
       display_name: 'Mechanical Ventilation 2: Fan Power',
       description: 'The fan power of the second mechanical ventilation.',
       units: 'W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'kitchen_fans_quantity',
       required: false,
@@ -2991,9 +3000,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The quantity of the kitchen fans.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: '#'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'kitchen_fans_flow_rate',
       required: false,
@@ -3001,9 +3010,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The flow rate of the kitchen fan.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: 'CFM'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'kitchen_fans_hours_in_operation',
       required: false,
@@ -3011,9 +3020,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The hours in operation of the kitchen fan.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: 'hrs/day'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'kitchen_fans_power',
       required: false,
@@ -3021,9 +3030,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The fan power of the kitchen fan.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: 'W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'kitchen_fans_start_hour',
       required: false,
@@ -3031,9 +3040,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The start hour of the kitchen fan.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: 'hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'bathroom_fans_quantity',
       required: false,
@@ -3041,9 +3050,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The quantity of the bathroom fans.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: '#'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'bathroom_fans_flow_rate',
       required: false,
@@ -3051,9 +3060,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The flow rate of the bathroom fans.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: 'CFM'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'bathroom_fans_hours_in_operation',
       required: false,
@@ -3061,9 +3070,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The hours in operation of the bathroom fans.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: 'hrs/day'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'bathroom_fans_power',
       required: false,
@@ -3071,9 +3080,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The fan power of the bathroom fans.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: 'W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'bathroom_fans_start_hour',
       required: false,
@@ -3081,17 +3090,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The start hour of the bathroom fans.',
       default_href: "<a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>",
       units: 'hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'whole_house_fan_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Whole House Fan: Present',
       description: 'Whether there is a whole house fan.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'whole_house_fan_flow_rate',
       required: false,
@@ -3099,9 +3108,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The flow rate of the whole house fan.',
       default_href: "<a href='#{docs_base_url}#hpxml-whole-house-fans'>HPXML Whole House Fans</a>",
       units: 'CFM'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'whole_house_fan_power',
       required: false,
@@ -3109,7 +3118,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The fan power of the whole house fan.',
       default_href: "<a href='#{docs_base_url}#hpxml-whole-house-fans'>HPXML Whole House Fans</a>",
       units: 'W'
-    )
+    }
 
     water_heater_type_choices = OpenStudio::StringVector.new
     water_heater_type_choices << Constants::None
@@ -3155,25 +3164,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_usage_bin_choices << HPXML::WaterHeaterUsageBinMedium
     water_heater_usage_bin_choices << HPXML::WaterHeaterUsageBinHigh
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'water_heater_type',
       choices: water_heater_type_choices,
       required: true,
       display_name: 'Water Heater: Type',
       description: "The type of water heater. Use '#{Constants::None}' if there is no water heater."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'water_heater_fuel_type',
       choices: water_heater_fuel_choices,
       required: false,
       display_name: 'Water Heater: Fuel Type',
       description: "The fuel type of water heater. Ignored for #{HPXML::WaterHeaterTypeHeatPump}."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'water_heater_location',
       choices: water_heater_location_choices,
@@ -3181,9 +3190,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Water Heater: Location',
       description: 'The location of water heater.',
       default_href: "<a href='#{docs_base_url}#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_heater_tank_volume',
       required: false,
@@ -3191,26 +3200,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'Nominal volume of water heater tank.',
       default_href: "<a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>, <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>, <a href='#{docs_base_url}#combi-boiler-w-storage'>Combi Boiler w/ Storage</a>",
       units: 'gal'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'water_heater_efficiency_type',
       choices: water_heater_efficiency_type_choices,
       required: false,
       display_name: 'Water Heater: Efficiency Type',
       description: 'The efficiency type of water heater. Does not apply to space-heating boilers.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_heater_efficiency',
       required: false,
       display_name: 'Water Heater: Efficiency',
       description: 'Rated Energy Factor or Uniform Energy Factor. Does not apply to space-heating boilers.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'water_heater_usage_bin',
       choices: water_heater_usage_bin_choices,
@@ -3218,9 +3227,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Water Heater: Usage Bin',
       description: "The usage of the water heater. Only applies if Efficiency Type is UniformEnergyFactor and Type is not #{HPXML::WaterHeaterTypeTankless}. Does not apply to space-heating boilers.",
       default_href: "<a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>, <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_heater_recovery_efficiency',
       required: false,
@@ -3228,19 +3237,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'Ratio of energy delivered to water heater to the energy content of the fuel consumed by the water heater. Only used for non-electric storage water heaters.',
       default_href: "<a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_heater_heating_capacity',
       required: false,
       display_name: 'Water Heater: Heating Capacity',
-      description: "Heating capacity. Only applies to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump} (compressor).",
+      description: "Heating capacity. Only applies to #{HPXML::WaterHeaterTypeStorage} and #{HPXML::WaterHeaterTypeHeatPump} (compressor}.",
       default_href: "<a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>, <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_heater_backup_heating_capacity',
       required: false,
@@ -3248,9 +3257,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Backup heating capacity for a #{HPXML::WaterHeaterTypeHeatPump}.",
       default_href: "<a href='#{docs_base_url}#heat-pump'>Heat Pump</a>",
       units: 'Btu/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_heater_standby_loss',
       required: false,
@@ -3258,18 +3267,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The standby loss of water heater. Only applies to space-heating boilers.',
       default_href: "<a href='#{docs_base_url}#combi-boiler-w-storage'>Combi Boiler w/ Storage</a>",
       units: 'F/hr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_heater_jacket_rvalue',
       required: false,
       display_name: 'Water Heater: Jacket R-value',
       description: "The jacket R-value of water heater. Doesn't apply to #{HPXML::WaterHeaterTypeTankless} or #{HPXML::WaterHeaterTypeCombiTankless}. If not provided, defaults to no jacket insulation.",
       units: 'h-ft^2-R/Btu'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_heater_setpoint_temperature',
       required: false,
@@ -3277,30 +3286,30 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The setpoint temperature of water heater.',
       default_href: "<a href='#{docs_base_url}#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>",
       units: 'F'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'water_heater_num_bedrooms_served',
       required: false,
       display_name: 'Water Heater: Number of Bedrooms Served',
-      description: "Number of bedrooms served (directly or indirectly) by the water heater. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared water heater serving multiple dwelling units. Used to apportion water heater tank losses to the unit.",
+      description: "Number of bedrooms served (directly or indirectly} by the water heater. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared water heater serving multiple dwelling units. Used to apportion water heater tank losses to the unit.",
       units: '#'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'water_heater_uses_desuperheater',
       type: Argument::Boolean,
       required: false,
       display_name: 'Water Heater: Uses Desuperheater',
       description: "Requires that the dwelling unit has a #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, or #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump or a #{HPXML::HVACTypeCentralAirConditioner} or #{HPXML::HVACTypeMiniSplitAirConditioner} air conditioner. If not provided, assumes no desuperheater."
-    )
+    }
 
     water_heater_tank_model_type_choices = OpenStudio::StringVector.new
     water_heater_tank_model_type_choices << HPXML::WaterHeaterTankModelTypeMixed
     water_heater_tank_model_type_choices << HPXML::WaterHeaterTankModelTypeStratified
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'water_heater_tank_model_type',
       choices: water_heater_tank_model_type_choices,
@@ -3308,13 +3317,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Water Heater: Tank Type',
       description: "Type of tank model to use. The '#{HPXML::WaterHeaterTankModelTypeStratified}' tank generally provide more accurate results, but may significantly increase run time. Applies only to #{HPXML::WaterHeaterTypeStorage}.",
       default_href: "<a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>"
-    )
+    }
 
     water_heater_operating_mode_choices = OpenStudio::StringVector.new
     water_heater_operating_mode_choices << HPXML::WaterHeaterOperatingModeHybridAuto
     water_heater_operating_mode_choices << HPXML::WaterHeaterOperatingModeHeatPumpOnly
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'water_heater_operating_mode',
       choices: water_heater_operating_mode_choices,
@@ -3322,22 +3331,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Water Heater: Operating Mode',
       description: "The water heater operating mode. The '#{HPXML::WaterHeaterOperatingModeHeatPumpOnly}' option only uses the heat pump, while '#{HPXML::WaterHeaterOperatingModeHybridAuto}' allows the backup electric resistance to come on in high demand situations. This is ignored if a scheduled operating mode type is selected. Applies only to #{HPXML::WaterHeaterTypeHeatPump}.",
       default_href: "<a href='#{docs_base_url}#heat-pump'>Heat Pump</a>"
-    )
+    }
 
     hot_water_distribution_system_type_choices = OpenStudio::StringVector.new
     hot_water_distribution_system_type_choices << HPXML::DHWDistTypeStandard
     hot_water_distribution_system_type_choices << HPXML::DHWDistTypeRecirc
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'hot_water_distribution_system_type',
       choices: hot_water_distribution_system_type_choices,
       required: true,
       display_name: 'Hot Water Distribution: System Type',
       description: 'The type of the hot water distribution system.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'hot_water_distribution_standard_piping_length',
       required: false,
@@ -3345,7 +3354,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft',
       description: "If the distribution system is #{HPXML::DHWDistTypeStandard}, the length of the piping.",
       default_href: "<a href='#{docs_base_url}#standard'>Standard</a>"
-    )
+    }
 
     recirculation_control_type_choices = OpenStudio::StringVector.new
     recirculation_control_type_choices << HPXML::DHWRecircControlTypeNone
@@ -3354,46 +3363,46 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     recirculation_control_type_choices << HPXML::DHWRecircControlTypeSensor
     recirculation_control_type_choices << HPXML::DHWRecircControlTypeManual
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'hot_water_distribution_recirc_control_type',
       choices: recirculation_control_type_choices,
       required: false,
       display_name: 'Hot Water Distribution: Recirculation Control Type',
       description: "If the distribution system is #{HPXML::DHWDistTypeRecirc}, the type of hot water recirculation control, if any."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'hot_water_distribution_recirc_piping_length',
       required: false,
       display_name: 'Hot Water Distribution: Recirculation Piping Length',
       units: 'ft',
       description: "If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation piping.",
-      default_href: "<a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>"
-    )
+      default_href: "<a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit}</a>"
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'hot_water_distribution_recirc_branch_piping_length',
       required: false,
       display_name: 'Hot Water Distribution: Recirculation Branch Piping Length',
       units: 'ft',
       description: "If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation branch piping.",
-      default_href: "<a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>"
-    )
+      default_href: "<a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit}</a>"
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'hot_water_distribution_recirc_pump_power',
       required: false,
       display_name: 'Hot Water Distribution: Recirculation Pump Power',
       units: 'W',
       description: "If the distribution system is #{HPXML::DHWDistTypeRecirc}, the recirculation pump power.",
-      default_href: "<a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>"
-    )
+      default_href: "<a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit}</a>"
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'hot_water_distribution_pipe_r',
       required: false,
@@ -3401,72 +3410,72 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'h-ft^2-R/Btu',
       description: 'Nominal R-value of the pipe insulation.',
       default_href: "<a href='#{docs_base_url}#hpxml-hot-water-distribution'>HPXML Hot Water Distribution</a>"
-    )
+    }
 
     dwhr_facilities_connected_choices = OpenStudio::StringVector.new
     dwhr_facilities_connected_choices << Constants::None
     dwhr_facilities_connected_choices << HPXML::DWHRFacilitiesConnectedOne
     dwhr_facilities_connected_choices << HPXML::DWHRFacilitiesConnectedAll
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'dwhr_facilities_connected',
       choices: dwhr_facilities_connected_choices,
       required: false,
       display_name: 'Drain Water Heat Recovery: Facilities Connected',
       description: "Which facilities are connected for the drain water heat recovery. Use '#{Constants::None}' if there is no drain water heat recovery system."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'dwhr_equal_flow',
       type: Argument::Boolean,
       required: false,
       display_name: 'Drain Water Heat Recovery: Equal Flow',
       description: 'Whether the drain water heat recovery has equal flow.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dwhr_efficiency',
       required: false,
       display_name: 'Drain Water Heat Recovery: Efficiency',
       units: 'Frac',
       description: 'The efficiency of the drain water heat recovery.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'water_fixtures_shower_low_flow',
       type: Argument::Boolean,
       required: false,
       display_name: 'Hot Water Fixtures: Is Shower Low Flow',
       description: 'Whether the shower fixture is low flow. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'water_fixtures_sink_low_flow',
       type: Argument::Boolean,
       required: false,
       display_name: 'Hot Water Fixtures: Is Sink Low Flow',
       description: 'Whether the sink fixture is low flow. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'water_fixtures_usage_multiplier',
       required: false,
       display_name: 'Hot Water Fixtures: Usage Multiplier',
       description: 'Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-water-fixtures'>HPXML Water Fixtures</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'general_water_use_usage_multiplier',
       required: false,
       display_name: 'General Water Use: Usage Multiplier',
-      description: 'Multiplier on internal gains from general water use (floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.) that can reflect, e.g., high/low usage occupants.',
+      description: 'Multiplier on internal gains from general water use (floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.} that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-building-occupancy'>HPXML Building Occupancy</a>"
-    )
+    }
 
     solar_thermal_system_type_choices = OpenStudio::StringVector.new
     solar_thermal_system_type_choices << Constants::None
@@ -3483,79 +3492,79 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     solar_thermal_collector_type_choices << HPXML::SolarThermalCollectorTypeDoubleGlazing
     solar_thermal_collector_type_choices << HPXML::SolarThermalCollectorTypeICS
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'solar_thermal_system_type',
       choices: solar_thermal_system_type_choices,
       required: false,
       display_name: 'Solar Thermal: System Type',
       description: "The type of solar thermal system. Use '#{Constants::None}' if there is no solar thermal system."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'solar_thermal_collector_area',
       required: false,
       display_name: 'Solar Thermal: Collector Area',
       units: 'ft^2',
       description: 'The collector area of the solar thermal system.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'solar_thermal_collector_loop_type',
       choices: solar_thermal_collector_loop_type_choices,
       required: false,
       display_name: 'Solar Thermal: Collector Loop Type',
       description: 'The collector loop type of the solar thermal system.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'solar_thermal_collector_type',
       choices: solar_thermal_collector_type_choices,
       required: false,
       display_name: 'Solar Thermal: Collector Type',
       description: 'The collector type of the solar thermal system.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'solar_thermal_collector_azimuth',
       required: false,
       display_name: 'Solar Thermal: Collector Azimuth',
       units: 'degrees',
-      description: 'The collector azimuth of the solar thermal system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).'
-    )
+      description: 'The collector azimuth of the solar thermal system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270}.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'solar_thermal_collector_tilt',
       required: false,
       display_name: 'Solar Thermal: Collector Tilt',
       units: 'degrees',
       description: 'The collector tilt of the solar thermal system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'solar_thermal_collector_rated_optical_efficiency',
       required: false,
       display_name: 'Solar Thermal: Collector Rated Optical Efficiency',
       units: 'Frac',
       description: 'The collector rated optical efficiency of the solar thermal system.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'solar_thermal_collector_rated_thermal_losses',
       required: false,
       display_name: 'Solar Thermal: Collector Rated Thermal Losses',
       units: 'Btu/hr-ft^2-R',
       description: 'The collector rated thermal losses of the solar thermal system.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'solar_thermal_storage_volume',
       required: false,
@@ -3563,16 +3572,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'gal',
       description: 'The storage volume of the solar thermal system.',
       default_href: "<a href='#{docs_base_url}#detailed-inputs'>Detailed Inputs</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'solar_thermal_solar_fraction',
       required: false,
       display_name: 'Solar Thermal: Solar Fraction',
       units: 'Frac',
       description: 'The solar fraction of the solar thermal system. If provided, overrides all other solar thermal inputs.'
-    )
+    }
 
     pv_system_module_type_choices = OpenStudio::StringVector.new
     pv_system_module_type_choices << HPXML::PVModuleTypeStandard
@@ -3589,15 +3598,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     pv_system_tracking_choices << HPXML::PVTrackingType1AxisBacktracked
     pv_system_tracking_choices << HPXML::PVTrackingType2Axis
 
-    args << makeArgument(
+    args << {
       name: 'pv_system_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'PV System: Present',
       description: 'Whether there is a PV system present. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'pv_system_module_type',
       choices: pv_system_module_type_choices,
@@ -3605,9 +3614,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'PV System: Module Type',
       description: 'Module type of the PV system.',
       default_href: "<a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'pv_system_location',
       choices: pv_system_location_choices,
@@ -3615,9 +3624,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'PV System: Location',
       description: 'Location of the PV system.',
       default_href: "<a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'pv_system_tracking',
       choices: pv_system_tracking_choices,
@@ -3625,36 +3634,36 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'PV System: Tracking',
       description: 'Type of tracking for the PV system.',
       default_href: "<a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pv_system_array_azimuth',
       required: false,
       display_name: 'PV System: Array Azimuth',
       units: 'degrees',
-      description: 'Array azimuth of the PV system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).'
-    )
+      description: 'Array azimuth of the PV system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270}.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'pv_system_array_tilt',
       required: false,
       display_name: 'PV System: Array Tilt',
       units: 'degrees',
       description: 'Array tilt of the PV system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pv_system_max_power_output',
       required: false,
       display_name: 'PV System: Maximum Power Output',
       units: 'W',
       description: 'Maximum power output of the PV system. For a shared system, this is the total building maximum power output.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pv_system_inverter_efficiency',
       required: false,
@@ -3662,9 +3671,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Frac',
       description: 'Inverter efficiency of the PV system. If there are two PV systems, this will apply to both.',
       default_href: "<a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pv_system_system_losses_fraction',
       required: false,
@@ -3672,26 +3681,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'Frac',
       description: 'System losses fraction of the PV system. If there are two PV systems, this will apply to both.',
       default_href: "<a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'pv_system_num_bedrooms_served',
       required: false,
       display_name: 'PV System: Number of Bedrooms Served',
       description: "Number of bedrooms served by PV system. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared PV system serving multiple dwelling units. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.",
       units: '#'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'pv_system_2_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'PV System 2: Present',
       description: 'Whether there is a second PV system present. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'pv_system_2_module_type',
       choices: pv_system_module_type_choices,
@@ -3699,9 +3708,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'PV System 2: Module Type',
       description: 'Module type of the second PV system.',
       default_href: "<a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'pv_system_2_location',
       choices: pv_system_location_choices,
@@ -3709,9 +3718,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'PV System 2: Location',
       description: 'Location of the second PV system.',
       default_href: "<a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'pv_system_2_tracking',
       choices: pv_system_tracking_choices,
@@ -3719,34 +3728,34 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'PV System 2: Tracking',
       description: 'Type of tracking for the second PV system.',
       default_href: "<a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pv_system_2_array_azimuth',
       required: false,
       display_name: 'PV System 2: Array Azimuth',
       units: 'degrees',
-      description: 'Array azimuth of the second PV system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).'
-    )
+      description: 'Array azimuth of the second PV system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270}.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'pv_system_2_array_tilt',
       required: false,
       display_name: 'PV System 2: Array Tilt',
       units: 'degrees',
       description: 'Array tilt of the second PV system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pv_system_2_max_power_output',
       required: false,
       display_name: 'PV System 2: Maximum Power Output',
       units: 'W',
       description: 'Maximum power output of the second PV system. For a shared system, this is the total building maximum power output.'
-    )
+    }
 
     battery_location_choices = OpenStudio::StringVector.new
     battery_location_choices << HPXML::LocationConditionedSpace
@@ -3762,15 +3771,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     battery_location_choices << HPXML::LocationGarage
     battery_location_choices << HPXML::LocationOutside
 
-    args << makeArgument(
+    args << {
       name: 'battery_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Battery: Present',
       description: 'Whether there is a lithium ion battery present. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'battery_location',
       choices: battery_location_choices,
@@ -3778,9 +3787,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Battery: Location',
       description: 'The space type for the lithium ion battery location.',
       default_href: "<a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'battery_power',
       required: false,
@@ -3788,9 +3797,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The rated power output of the lithium ion battery.',
       default_href: "<a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>",
       units: 'W'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'battery_capacity',
       required: false,
@@ -3798,9 +3807,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The nominal capacity of the lithium ion battery.',
       default_href: "<a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>",
       units: 'kWh'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'battery_usable_capacity',
       required: false,
@@ -3808,9 +3817,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The usable capacity of the lithium ion battery.',
       default_href: "<a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>",
       units: 'kWh'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'battery_round_trip_efficiency',
       required: false,
@@ -3818,150 +3827,150 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The round trip efficiency of the lithium ion battery.',
       default_href: "<a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'battery_num_bedrooms_served',
       required: false,
       display_name: 'Battery: Number of Bedrooms Served',
       description: "Number of bedrooms served by the lithium ion battery. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared battery serving multiple dwelling units. Used to apportion battery charging/discharging to the unit of a SFA/MF building.",
       units: '#'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'lighting_present',
       type: Argument::Boolean,
       required: true,
       display_name: 'Lighting: Present',
       description: 'Whether there is lighting energy use.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_interior_fraction_cfl',
       required: false,
       display_name: 'Lighting: Interior Fraction CFL',
-      description: 'Fraction of all lamps (interior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (interior} that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.1.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_interior_fraction_lfl',
       required: false,
       display_name: 'Lighting: Interior Fraction LFL',
-      description: 'Fraction of all lamps (interior) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (interior} that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.0.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_interior_fraction_led',
       required: false,
       display_name: 'Lighting: Interior Fraction LED',
-      description: 'Fraction of all lamps (interior) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (interior} that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.0.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_interior_usage_multiplier',
       required: false,
       display_name: 'Lighting: Interior Usage Multiplier',
-      description: 'Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants.',
+      description: 'Multiplier on the lighting energy usage (interior} that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_exterior_fraction_cfl',
       required: false,
       display_name: 'Lighting: Exterior Fraction CFL',
-      description: 'Fraction of all lamps (exterior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (exterior} that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.0.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_exterior_fraction_lfl',
       required: false,
       display_name: 'Lighting: Exterior Fraction LFL',
-      description: 'Fraction of all lamps (exterior) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (exterior} that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.0.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_exterior_fraction_led',
       required: false,
       display_name: 'Lighting: Exterior Fraction LED',
-      description: 'Fraction of all lamps (exterior) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (exterior} that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.0.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_exterior_usage_multiplier',
       required: false,
       display_name: 'Lighting: Exterior Usage Multiplier',
-      description: 'Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants.',
+      description: 'Multiplier on the lighting energy usage (exterior} that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_garage_fraction_cfl',
       required: false,
       display_name: 'Lighting: Garage Fraction CFL',
-      description: 'Fraction of all lamps (garage) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (garage} that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.0.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_garage_fraction_lfl',
       required: false,
       display_name: 'Lighting: Garage Fraction LFL',
-      description: 'Fraction of all lamps (garage) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (garage} that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.0.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_garage_fraction_led',
       required: false,
       display_name: 'Lighting: Garage Fraction LED',
-      description: 'Fraction of all lamps (garage) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.'
-    )
+      description: 'Fraction of all lamps (garage} that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent. If not provided, defaults to 0.0.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'lighting_garage_usage_multiplier',
       required: false,
       display_name: 'Lighting: Garage Usage Multiplier',
-      description: 'Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants.',
+      description: 'Multiplier on the lighting energy usage (garage} that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'holiday_lighting_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Holiday Lighting: Present',
       description: 'Whether there is holiday lighting. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'holiday_lighting_daily_kwh',
       required: false,
       display_name: 'Holiday Lighting: Daily Consumption',
       units: 'kWh/day',
-      description: 'The daily energy consumption for holiday lighting (exterior).',
+      description: 'The daily energy consumption for holiday lighting (exterior}.',
       default_href: "<a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'holiday_lighting_period',
       required: false,
       display_name: 'Holiday Lighting: Period',
       description: "Enter a date range like 'Nov 25 - Jan 5'.",
       default_href: "<a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>"
-    )
+    }
 
     dehumidifier_type_choices = OpenStudio::StringVector.new
     dehumidifier_type_choices << Constants::None
@@ -3972,59 +3981,59 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     dehumidifier_efficiency_type_choices << 'EnergyFactor'
     dehumidifier_efficiency_type_choices << 'IntegratedEnergyFactor'
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'dehumidifier_type',
       choices: dehumidifier_type_choices,
       required: false,
       display_name: 'Dehumidifier: Type',
       description: 'The type of dehumidifier. If not provided, defaults to none.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'dehumidifier_efficiency_type',
       choices: dehumidifier_efficiency_type_choices,
       required: false,
       display_name: 'Dehumidifier: Efficiency Type',
       description: 'The efficiency type of dehumidifier.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dehumidifier_efficiency',
       required: false,
       display_name: 'Dehumidifier: Efficiency',
       units: 'liters/kWh',
       description: 'The efficiency of the dehumidifier.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dehumidifier_capacity',
       required: false,
       display_name: 'Dehumidifier: Capacity',
-      description: 'The capacity (water removal rate) of the dehumidifier.',
+      description: 'The capacity (water removal rate} of the dehumidifier.',
       units: 'pint/day'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dehumidifier_rh_setpoint',
       required: false,
       display_name: 'Dehumidifier: Relative Humidity Setpoint',
       description: 'The relative humidity setpoint of the dehumidifier.',
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dehumidifier_fraction_dehumidification_load_served',
       required: false,
       display_name: 'Dehumidifier: Fraction Dehumidification Load Served',
       description: 'The dehumidification load served fraction of the dehumidifier.',
       units: 'Frac'
-    )
+    }
 
     appliance_location_choices = OpenStudio::StringVector.new
     appliance_location_choices << HPXML::LocationConditionedSpace
@@ -4040,15 +4049,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     clothes_washer_efficiency_type_choices << 'ModifiedEnergyFactor'
     clothes_washer_efficiency_type_choices << 'IntegratedModifiedEnergyFactor'
 
-    args << makeArgument(
+    args << {
       name: 'clothes_washer_present',
       type: Argument::Boolean,
       required: true,
       display_name: 'Clothes Washer: Present',
       description: 'Whether there is a clothes washer present.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'clothes_washer_location',
       choices: appliance_location_choices,
@@ -4056,18 +4065,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Clothes Washer: Location',
       description: 'The space type for the clothes washer location.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'clothes_washer_efficiency_type',
       choices: clothes_washer_efficiency_type_choices,
       required: false,
       display_name: 'Clothes Washer: Efficiency Type',
       description: 'The efficiency type of the clothes washer.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_washer_efficiency',
       required: false,
@@ -4075,9 +4084,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft^3/kWh-cyc',
       description: 'The efficiency of the clothes washer.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_washer_rated_annual_kwh',
       required: false,
@@ -4085,9 +4094,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'kWh/yr',
       description: 'The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_washer_label_electric_rate',
       required: false,
@@ -4095,9 +4104,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '$/kWh',
       description: 'The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_washer_label_gas_rate',
       required: false,
@@ -4105,9 +4114,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '$/therm',
       description: 'The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_washer_label_annual_gas_cost',
       required: false,
@@ -4115,9 +4124,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '$',
       description: 'The annual cost of using the system under test conditions. Input is obtained from the EnergyGuide label.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_washer_label_usage',
       required: false,
@@ -4125,9 +4134,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'cyc/wk',
       description: 'The clothes washer loads per week.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_washer_capacity',
       required: false,
@@ -4135,26 +4144,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'ft^3',
       description: "Volume of the washer drum. Obtained from the EnergyStar website or the manufacturer's literature.",
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_washer_usage_multiplier',
       required: false,
       display_name: 'Clothes Washer: Usage Multiplier',
       description: 'Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'clothes_dryer_present',
       type: Argument::Boolean,
       required: true,
       display_name: 'Clothes Dryer: Present',
       description: 'Whether there is a clothes dryer present.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'clothes_dryer_location',
       choices: appliance_location_choices,
@@ -4162,7 +4171,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Clothes Dryer: Location',
       description: 'The space type for the clothes dryer location.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>"
-    )
+    }
 
     clothes_dryer_fuel_choices = OpenStudio::StringVector.new
     clothes_dryer_fuel_choices << HPXML::FuelTypeElectricity
@@ -4176,25 +4185,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     clothes_dryer_efficiency_type_choices << 'EnergyFactor'
     clothes_dryer_efficiency_type_choices << 'CombinedEnergyFactor'
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'clothes_dryer_fuel_type',
       choices: clothes_dryer_fuel_choices,
       required: false,
       display_name: 'Clothes Dryer: Fuel Type',
       description: 'Type of fuel used by the clothes dryer.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'clothes_dryer_efficiency_type',
       choices: clothes_dryer_efficiency_type_choices,
       required: false,
       display_name: 'Clothes Dryer: Efficiency Type',
       description: 'The efficiency type of the clothes dryer.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_dryer_efficiency',
       required: false,
@@ -4202,9 +4211,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'lb/kWh',
       description: 'The efficiency of the clothes dryer.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_dryer_vented_flow_rate',
       required: false,
@@ -4212,26 +4221,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The exhaust flow rate of the vented clothes dryer.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>",
       units: 'CFM'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'clothes_dryer_usage_multiplier',
       required: false,
       display_name: 'Clothes Dryer: Usage Multiplier',
       description: 'Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'dishwasher_present',
       type: Argument::Boolean,
       required: true,
       display_name: 'Dishwasher: Present',
       description: 'Whether there is a dishwasher present.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'dishwasher_location',
       choices: appliance_location_choices,
@@ -4239,22 +4248,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Dishwasher: Location',
       description: 'The space type for the dishwasher location.',
       default_href: "<a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>"
-    )
+    }
 
     dishwasher_efficiency_type_choices = OpenStudio::StringVector.new
     dishwasher_efficiency_type_choices << 'RatedAnnualkWh'
     dishwasher_efficiency_type_choices << 'EnergyFactor'
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'dishwasher_efficiency_type',
       choices: dishwasher_efficiency_type_choices,
       required: false,
       display_name: 'Dishwasher: Efficiency Type',
       description: 'The efficiency type of dishwasher.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dishwasher_efficiency',
       required: false,
@@ -4262,9 +4271,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'RatedAnnualkWh or EnergyFactor',
       description: 'The efficiency of the dishwasher.',
       default_href: "<a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dishwasher_label_electric_rate',
       required: false,
@@ -4272,9 +4281,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '$/kWh',
       description: 'The label electric rate of the dishwasher.',
       default_href: "<a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dishwasher_label_gas_rate',
       required: false,
@@ -4282,9 +4291,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '$/therm',
       description: 'The label gas rate of the dishwasher.',
       default_href: "<a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dishwasher_label_annual_gas_cost',
       required: false,
@@ -4292,9 +4301,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '$',
       description: 'The label annual gas cost of the dishwasher.',
       default_href: "<a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dishwasher_label_usage',
       required: false,
@@ -4302,9 +4311,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'cyc/wk',
       description: 'The dishwasher loads per week.',
       default_href: "<a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'dishwasher_place_setting_capacity',
       required: false,
@@ -4312,26 +4321,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '#',
       description: "The number of place settings for the unit. Data obtained from manufacturer's literature.",
       default_href: "<a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'dishwasher_usage_multiplier',
       required: false,
       display_name: 'Dishwasher: Usage Multiplier',
       description: 'Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'refrigerator_present',
       type: Argument::Boolean,
       required: true,
       display_name: 'Refrigerator: Present',
       description: 'Whether there is a refrigerator present.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'refrigerator_location',
       choices: appliance_location_choices,
@@ -4339,9 +4348,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Refrigerator: Location',
       description: 'The space type for the refrigerator location.',
       default_href: "<a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'refrigerator_rated_annual_kwh',
       required: false,
@@ -4349,26 +4358,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'kWh/yr',
       description: 'The EnergyGuide rated annual energy consumption for a refrigerator.',
       default_href: "<a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'refrigerator_usage_multiplier',
       required: false,
       display_name: 'Refrigerator: Usage Multiplier',
       description: 'Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'extra_refrigerator_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Extra Refrigerator: Present',
       description: 'Whether there is an extra refrigerator present. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'extra_refrigerator_location',
       choices: appliance_location_choices,
@@ -4376,9 +4385,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Extra Refrigerator: Location',
       description: 'The space type for the extra refrigerator location.',
       default_href: "<a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'extra_refrigerator_rated_annual_kwh',
       required: false,
@@ -4386,26 +4395,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'kWh/yr',
       description: 'The EnergyGuide rated annual energy consumption for an extra refrigerator.',
       default_href: "<a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'extra_refrigerator_usage_multiplier',
       required: false,
       display_name: 'Extra Refrigerator: Usage Multiplier',
       description: 'Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'freezer_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Freezer: Present',
       description: 'Whether there is a freezer present. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'freezer_location',
       choices: appliance_location_choices,
@@ -4413,9 +4422,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Freezer: Location',
       description: 'The space type for the freezer location.',
       default_href: "<a href='#{docs_base_url}#hpxml-freezers'>HPXML Freezers</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'freezer_rated_annual_kwh',
       required: false,
@@ -4423,16 +4432,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'kWh/yr',
       description: 'The EnergyGuide rated annual energy consumption for a freezer.',
       default_href: "<a href='#{docs_base_url}#hpxml-freezers'>HPXML Freezers</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'freezer_usage_multiplier',
       required: false,
       display_name: 'Freezer: Usage Multiplier',
       description: 'Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-freezers'>HPXML Freezers</a>"
-    )
+    }
 
     cooking_range_oven_fuel_choices = OpenStudio::StringVector.new
     cooking_range_oven_fuel_choices << HPXML::FuelTypeElectricity
@@ -4442,15 +4451,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     cooking_range_oven_fuel_choices << HPXML::FuelTypeWoodCord
     cooking_range_oven_fuel_choices << HPXML::FuelTypeCoal
 
-    args << makeArgument(
+    args << {
       name: 'cooking_range_oven_present',
       type: Argument::Boolean,
       required: true,
       display_name: 'Cooking Range/Oven: Present',
       description: 'Whether there is a cooking range/oven present.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'cooking_range_oven_location',
       choices: appliance_location_choices,
@@ -4458,73 +4467,73 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       display_name: 'Cooking Range/Oven: Location',
       description: 'The space type for the cooking range/oven location.',
       default_href: "<a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'cooking_range_oven_fuel_type',
       choices: cooking_range_oven_fuel_choices,
       required: false,
       display_name: 'Cooking Range/Oven: Fuel Type',
       description: 'Type of fuel used by the cooking range/oven.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'cooking_range_oven_is_induction',
       type: Argument::Boolean,
       required: false,
       display_name: 'Cooking Range/Oven: Is Induction',
       description: 'Whether the cooking range is induction.',
       default_href: "<a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'cooking_range_oven_is_convection',
       type: Argument::Boolean,
       required: false,
       display_name: 'Cooking Range/Oven: Is Convection',
       description: 'Whether the oven is convection.',
       default_href: "<a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'cooking_range_oven_usage_multiplier',
       required: false,
       display_name: 'Cooking Range/Oven: Usage Multiplier',
       description: 'Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'ceiling_fan_present',
       type: Argument::Boolean,
       required: true,
       display_name: 'Ceiling Fan: Present',
       description: 'Whether there are any ceiling fans.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ceiling_fan_label_energy_use',
       required: false,
       display_name: 'Ceiling Fan: Label Energy Use',
       units: 'W',
-      description: 'The label average energy use of the ceiling fan(s).',
+      description: 'The label average energy use of the ceiling fan(s}.',
       default_href: "<a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ceiling_fan_efficiency',
       required: false,
       display_name: 'Ceiling Fan: Efficiency',
       units: 'CFM/W',
-      description: 'The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label Energy Use not provided.',
+      description: 'The efficiency rating of the ceiling fan(s} at medium speed. Only used if Label Energy Use not provided.',
       default_href: "<a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Integer,
       name: 'ceiling_fan_quantity',
       required: false,
@@ -4532,9 +4541,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: '#',
       description: 'Total number of ceiling fans.',
       default_href: "<a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'ceiling_fan_cooling_setpoint_temp_offset',
       required: false,
@@ -4542,17 +4551,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       units: 'F',
       description: 'The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan quantity is greater than zero.',
       default_href: "<a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'misc_plug_loads_television_present',
       type: Argument::Boolean,
       required: true,
       display_name: 'Misc Plug Loads: Television Present',
       description: 'Whether there are televisions.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_television_annual_kwh',
       required: false,
@@ -4560,18 +4569,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the television plug loads.',
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>",
       units: 'kWh/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_television_usage_multiplier',
       required: false,
       display_name: 'Misc Plug Loads: Television Usage Multiplier',
       description: 'Multiplier on the television energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_other_annual_kwh',
       required: false,
@@ -4579,9 +4588,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the other residual plug loads.',
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>",
       units: 'kWh/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_other_frac_sensible',
       required: false,
@@ -4589,9 +4598,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Fraction of other residual plug loads' internal gains that are sensible.",
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_other_frac_latent',
       required: false,
@@ -4599,26 +4608,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Fraction of other residual plug loads' internal gains that are latent.",
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_other_usage_multiplier',
       required: false,
       display_name: 'Misc Plug Loads: Other Usage Multiplier',
       description: 'Multiplier on the other energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'misc_plug_loads_well_pump_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Misc Plug Loads: Well Pump Present',
       description: 'Whether there is a well pump. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_well_pump_annual_kwh',
       required: false,
@@ -4626,26 +4635,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the well pump plug loads.',
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>",
       units: 'kWh/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_well_pump_usage_multiplier',
       required: false,
       display_name: 'Misc Plug Loads: Well Pump Usage Multiplier',
       description: 'Multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'misc_plug_loads_vehicle_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Misc Plug Loads: Vehicle Present',
       description: 'Whether there is an electric vehicle. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_vehicle_annual_kwh',
       required: false,
@@ -4653,16 +4662,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the electric vehicle plug loads.',
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>",
       units: 'kWh/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_plug_loads_vehicle_usage_multiplier',
       required: false,
       display_name: 'Misc Plug Loads: Vehicle Usage Multiplier',
       description: 'Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>"
-    )
+    }
 
     misc_fuel_loads_fuel_choices = OpenStudio::StringVector.new
     misc_fuel_loads_fuel_choices << HPXML::FuelTypeNaturalGas
@@ -4671,24 +4680,24 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     misc_fuel_loads_fuel_choices << HPXML::FuelTypeWoodCord
     misc_fuel_loads_fuel_choices << HPXML::FuelTypeWoodPellets
 
-    args << makeArgument(
+    args << {
       name: 'misc_fuel_loads_grill_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Misc Fuel Loads: Grill Present',
       description: 'Whether there is a fuel loads grill. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'misc_fuel_loads_grill_fuel_type',
       choices: misc_fuel_loads_fuel_choices,
       required: false,
       display_name: 'Misc Fuel Loads: Grill Fuel Type',
-      description: 'The fuel type of the fuel loads grill.'
-    )
+      description: 'The fuel type of the fuel loads grill. If not provided, defaults to natural gas.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_fuel_loads_grill_annual_therm',
       required: false,
@@ -4696,35 +4705,35 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the fuel loads grill.',
       default_href: "<a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>",
       units: 'therm/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_fuel_loads_grill_usage_multiplier',
       required: false,
       display_name: 'Misc Fuel Loads: Grill Usage Multiplier',
       description: 'Multiplier on the fuel loads grill energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'misc_fuel_loads_lighting_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Misc Fuel Loads: Lighting Present',
       description: 'Whether there is fuel loads lighting. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'misc_fuel_loads_lighting_fuel_type',
       choices: misc_fuel_loads_fuel_choices,
       required: false,
       display_name: 'Misc Fuel Loads: Lighting Fuel Type',
-      description: 'The fuel type of the fuel loads lighting.'
-    )
+      description: 'The fuel type of the fuel loads lighting. If not provided, defaults to natural gas.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_fuel_loads_lighting_annual_therm',
       required: false,
@@ -4732,35 +4741,35 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the fuel loads lighting.',
       default_href: "<a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>",
       units: 'therm/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_fuel_loads_lighting_usage_multiplier',
       required: false,
       display_name: 'Misc Fuel Loads: Lighting Usage Multiplier',
       description: 'Multiplier on the fuel loads lighting energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'misc_fuel_loads_fireplace_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Misc Fuel Loads: Fireplace Present',
       description: 'Whether there is fuel loads fireplace. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'misc_fuel_loads_fireplace_fuel_type',
       choices: misc_fuel_loads_fuel_choices,
       required: false,
       display_name: 'Misc Fuel Loads: Fireplace Fuel Type',
-      description: 'The fuel type of the fuel loads fireplace.'
-    )
+      description: 'The fuel type of the fuel loads fireplace. If not provided, defaults to natural gas.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_fuel_loads_fireplace_annual_therm',
       required: false,
@@ -4768,9 +4777,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the fuel loads fireplace.',
       default_href: "<a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>",
       units: 'therm/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_fuel_loads_fireplace_frac_sensible',
       required: false,
@@ -4778,9 +4787,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Fraction of fireplace residual fuel loads' internal gains that are sensible.",
       default_href: "<a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_fuel_loads_fireplace_frac_latent',
       required: false,
@@ -4788,16 +4797,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "Fraction of fireplace residual fuel loads' internal gains that are latent.",
       default_href: "<a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>",
       units: 'Frac'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'misc_fuel_loads_fireplace_usage_multiplier',
       required: false,
       display_name: 'Misc Fuel Loads: Fireplace Usage Multiplier',
       description: 'Multiplier on the fuel loads fireplace energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>"
-    )
+    }
 
     heater_type_choices = OpenStudio::StringVector.new
     heater_type_choices << HPXML::TypeNone
@@ -4805,15 +4814,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heater_type_choices << HPXML::HeaterTypeGas
     heater_type_choices << HPXML::HeaterTypeHeatPump
 
-    args << makeArgument(
+    args << {
       name: 'pool_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Pool: Present',
       description: 'Whether there is a pool. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pool_pump_annual_kwh',
       required: false,
@@ -4821,27 +4830,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the pool pump.',
       default_href: "<a href='#{docs_base_url}#pool-pump'>Pool Pump</a>",
       units: 'kWh/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pool_pump_usage_multiplier',
       required: false,
       display_name: 'Pool: Pump Usage Multiplier',
       description: 'Multiplier on the pool pump energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#pool-pump'>Pool Pump</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'pool_heater_type',
       choices: heater_type_choices,
       required: false,
       display_name: 'Pool: Heater Type',
       description: "The type of pool heater. Use '#{HPXML::TypeNone}' if there is no pool heater."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pool_heater_annual_kwh',
       required: false,
@@ -4849,9 +4858,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "The annual energy consumption of the #{HPXML::HeaterTypeElectricResistance} pool heater.",
       default_href: "<a href='#{docs_base_url}#pool-heater'>Pool Heater</a>",
       units: 'kWh/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pool_heater_annual_therm',
       required: false,
@@ -4859,26 +4868,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "The annual energy consumption of the #{HPXML::HeaterTypeGas} pool heater.",
       default_href: "<a href='#{docs_base_url}#pool-heater'>Pool Heater</a>",
       units: 'therm/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'pool_heater_usage_multiplier',
       required: false,
       display_name: 'Pool: Heater Usage Multiplier',
       description: 'Multiplier on the pool heater energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#pool-heater'>Pool Heater</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'permanent_spa_present',
       type: Argument::Boolean,
       required: false,
       display_name: 'Permanent Spa: Present',
       description: 'Whether there is a permanent spa. If not provided, defaults to false.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'permanent_spa_pump_annual_kwh',
       required: false,
@@ -4886,27 +4895,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: 'The annual energy consumption of the permanent spa pump.',
       default_href: "<a href='#{docs_base_url}#permanent-spa-pump'>Permanent Spa Pump</a>",
       units: 'kWh/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'permanent_spa_pump_usage_multiplier',
       required: false,
       display_name: 'Permanent Spa: Pump Usage Multiplier',
       description: 'Multiplier on the permanent spa pump energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#permanent-spa-pump'>Permanent Spa Pump</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Choice,
       name: 'permanent_spa_heater_type',
       choices: heater_type_choices,
       required: false,
       display_name: 'Permanent Spa: Heater Type',
       description: "The type of permanent spa heater. Use '#{HPXML::TypeNone}' if there is no permanent spa heater."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'permanent_spa_heater_annual_kwh',
       required: false,
@@ -4914,9 +4923,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "The annual energy consumption of the #{HPXML::HeaterTypeElectricResistance} permanent spa heater.",
       default_href: "<a href='#{docs_base_url}#permanent-spa-heater'>Permanent Spa Heater</a>",
       units: 'kWh/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'permanent_spa_heater_annual_therm',
       required: false,
@@ -4924,102 +4933,102 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       description: "The annual energy consumption of the #{HPXML::HeaterTypeGas} permanent spa heater.",
       default_href: "<a href='#{docs_base_url}#permanent-spa-heater'>Permanent Spa Heater</a>",
       units: 'therm/yr'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::Double,
       name: 'permanent_spa_heater_usage_multiplier',
       required: false,
       display_name: 'Permanent Spa: Heater Usage Multiplier',
       description: 'Multiplier on the permanent spa heater energy usage that can reflect, e.g., high/low usage occupants.',
       default_href: "<a href='#{docs_base_url}#permanent-spa-heater'>Permanent Spa Heater</a>"
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'emissions_scenario_names',
       required: false,
       display_name: 'Emissions: Scenario Names',
       description: 'Names of emissions scenarios. If multiple scenarios, use a comma-separated list. If not provided, no emissions scenarios are calculated.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'emissions_types',
       required: false,
       display_name: 'Emissions: Types',
-      description: 'Types of emissions (e.g., CO2e, NOx, etc.). If multiple scenarios, use a comma-separated list.'
-    )
+      description: 'Types of emissions (e.g., CO2e, NOx, etc.}. If multiple scenarios, use a comma-separated list.'
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'emissions_electricity_units',
       required: false,
       display_name: 'Emissions: Electricity Units',
       description: 'Electricity emissions factors units. If multiple scenarios, use a comma-separated list. Only lb/MWh and kg/MWh are allowed.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'emissions_electricity_values_or_filepaths',
       required: false,
       display_name: 'Emissions: Electricity Values or File Paths',
       description: 'Electricity emissions factors values, specified as either an annual factor or an absolute/relative path to a file with hourly factors. If multiple scenarios, use a comma-separated list.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'emissions_electricity_number_of_header_rows',
       required: false,
       display_name: 'Emissions: Electricity Files Number of Header Rows',
       description: 'The number of header rows in the electricity emissions factor file. Only applies when an electricity filepath is used. If multiple scenarios, use a comma-separated list.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'emissions_electricity_column_numbers',
       required: false,
       display_name: 'Emissions: Electricity Files Column Numbers',
       description: 'The column number in the electricity emissions factor file. Only applies when an electricity filepath is used. If multiple scenarios, use a comma-separated list.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'emissions_fossil_fuel_units',
       required: false,
       display_name: 'Emissions: Fossil Fuel Units',
       description: 'Fossil fuel emissions factors units. If multiple scenarios, use a comma-separated list. Only lb/MBtu and kg/MBtu are allowed.'
-    )
+    }
 
     HPXML::fossil_fuels.each do |fossil_fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
       all_caps_case = fossil_fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fossil_fuel.capitalize
 
-      args << makeArgument(
+      args << {
         type: Argument::String,
         name: "emissions_#{underscore_case}_values",
         required: false,
         display_name: "Emissions: #{all_caps_case} Values",
         description: "#{cap_case} emissions factors values, specified as an annual factor. If multiple scenarios, use a comma-separated list."
-      )
+      }
     end
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'utility_bill_scenario_names',
       required: false,
       display_name: 'Utility Bills: Scenario Names',
       description: 'Names of utility bill scenarios. If multiple scenarios, use a comma-separated list. If not provided, no utility bills scenarios are calculated.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'utility_bill_electricity_filepaths',
       required: false,
       display_name: 'Utility Bills: Electricity File Paths',
       description: 'Electricity tariff file specified as an absolute/relative path to a file with utility rate structure information. Tariff file must be formatted to OpenEI API version 7. If multiple scenarios, use a comma-separated list.'
-    )
+    }
 
 
     HPXML::all_fuels.each do |fuel|
@@ -5027,13 +5036,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
 
-      args << makeArgument(
+      args << {
         type: Argument::String,
         name: "utility_bill_#{underscore_case}_fixed_charges",
         required: false,
         display_name: "Utility Bills: #{all_caps_case} Fixed Charges",
         description: "#{cap_case} utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list."
-      )
+      }
     end
 
     HPXML::all_fuels.each do |fuel|
@@ -5041,183 +5050,95 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
 
-      args << makeArgument(
+      args << {
         type: Argument::String,
         name: "utility_bill_#{underscore_case}_marginal_rates",
         required: false,
         display_name: "Utility Bills: #{all_caps_case} Marginal Rates",
         description: "#{cap_case} utility bill marginal rates. If multiple scenarios, use a comma-separated list."
-      )
+      }
     end
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'utility_bill_pv_compensation_types',
       required: false,
       display_name: 'Utility Bills: PV Compensation Types',
       description: 'Utility bill PV compensation types. If multiple scenarios, use a comma-separated list.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'utility_bill_pv_net_metering_annual_excess_sellback_rate_types',
       required: false,
       display_name: 'Utility Bills: PV Net Metering Annual Excess Sellback Rate Types',
       description: "Utility bill PV net metering annual excess sellback rate types. Only applies if the PV compensation type is '#{HPXML::PVCompensationTypeNetMetering}'. If multiple scenarios, use a comma-separated list."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'utility_bill_pv_net_metering_annual_excess_sellback_rates',
       required: false,
       display_name: 'Utility Bills: PV Net Metering Annual Excess Sellback Rates',
       description: "Utility bill PV net metering annual excess sellback rates. Only applies if the PV compensation type is '#{HPXML::PVCompensationTypeNetMetering}' and the PV annual excess sellback rate type is '#{HPXML::PVAnnualExcessSellbackRateTypeUserSpecified}'. If multiple scenarios, use a comma-separated list."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'utility_bill_pv_feed_in_tariff_rates',
       required: false,
       display_name: 'Utility Bills: PV Feed-In Tariff Rates',
       description: "Utility bill PV annual full/gross feed-in tariff rates. Only applies if the PV compensation type is '#{HPXML::PVCompensationTypeFeedInTariff}'. If multiple scenarios, use a comma-separated list."
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'utility_bill_pv_monthly_grid_connection_fee_units',
       required: false,
       display_name: 'Utility Bills: PV Monthly Grid Connection Fee Units',
       description: 'Utility bill PV monthly grid connection fee units. If multiple scenarios, use a comma-separated list.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'utility_bill_pv_monthly_grid_connection_fees',
       required: false,
       display_name: 'Utility Bills: PV Monthly Grid Connection Fees',
       description: 'Utility bill PV monthly grid connection fees. If multiple scenarios, use a comma-separated list.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       type: Argument::String,
       name: 'additional_properties',
       required: false,
       display_name: 'Additional Properties',
-      description: "Additional properties specified as key-value pairs (i.e., key=value). If multiple additional properties, use a |-separated list. For example, 'LowIncome=false|Remodeled|Description=2-story home in Denver'. These properties will be stored in the HPXML file under /HPXML/SoftwareInfo/extension/AdditionalProperties."
-    )
+      description: "Additional properties specified as key-value pairs (i.e., key=value}. If multiple additional properties, use a |-separated list. For example, 'LowIncome=false|Remodeled|Description=2-story home in Denver'. These properties will be stored in the HPXML file under /HPXML/SoftwareInfo/extension/AdditionalProperties."
+    }
 
-    args << makeArgument(
+    args << {
       name: 'combine_like_surfaces',
       type: Argument::Boolean,
       required: false,
       display_name: 'Combine like surfaces?',
       description: 'If true, combines like surfaces to simplify the HPXML file generated.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'apply_defaults',
       type: Argument::Boolean,
       required: false,
       display_name: 'Apply Default Values?',
       description: 'If true, applies OS-HPXML default values to the HPXML output file. Setting to true will also force validation of the HPXML output file before applying OS-HPXML default values.'
-    )
+    }
 
-    args << makeArgument(
+    args << {
       name: 'apply_validation',
       type: Argument::Boolean,
       required: false,
       display_name: 'Apply Validation?',
       description: 'If true, validates the HPXML output file. Set to false for faster performance. Note that validation is not needed if the HPXML file will be validated downstream (e.g., via the HPXMLtoOpenStudio measure).'
-    )
+    }
 
-    return args
-  end
-
-  # TODO
-  def defaultOptionalArgumentValues(args)
-    # these were previously required arguments with default values set (i.e., arg.setDefaultValue(xxx))
-    args[:floor_over_foundation_assembly_r] = 28.1 if args[:floor_over_foundation_assembly_r].nil?
-    args[:floor_over_garage_assembly_r] = 28.1 if args[:floor_over_garage_assembly_r].nil?
-    args[:ceiling_assembly_r] = 31.6 if args[:ceiling_assembly_r].nil?
-    args[:geometry_foundation_height] = 0.0 if args[:geometry_foundation_height].nil?
-    args[:geometry_foundation_height_above_grade] = 0.0 if args[:geometry_foundation_height_above_grade].nil?
-    args[:geometry_roof_pitch] = '6:12' if args[:geometry_roof_pitch].nil?
-    args[:geometry_garage_width] = 0.0 if args[:geometry_garage_width].nil?
-    args[:geometry_garage_depth] = 20.0 if args[:geometry_garage_depth].nil?
-    args[:geometry_garage_protrusion] = 0.0 if args[:geometry_garage_protrusion].nil?
-    args[:geometry_garage_position] = Constants::PositionRight if args[:geometry_garage_position].nil?
-    args[:slab_perimeter_insulation_r] = 0 if args[:slab_perimeter_insulation_r].nil?
-    args[:slab_perimeter_insulation_depth] = 0 if args[:slab_perimeter_insulation_depth].nil?
-    args[:slab_under_insulation_r] = 0 if args[:slab_under_insulation_r].nil?
-    args[:slab_under_insulation_width] = 0 if args[:slab_under_insulation_width].nil?
-    args[:neighbor_front_distance] = 0.0 if args[:neighbor_front_distance].nil?
-    args[:neighbor_back_distance] = 0.0 if args[:neighbor_back_distance].nil?
-    args[:neighbor_left_distance] = 10.0 if args[:neighbor_left_distance].nil?
-    args[:neighbor_right_distance] = 10.0 if args[:neighbor_right_distance].nil?
-    args[:overhangs_front_depth] = 0 if args[:overhangs_front_depth].nil?
-    args[:overhangs_front_distance_to_top_of_window] = 0 if args[:overhangs_front_distance_to_top_of_window].nil?
-    args[:overhangs_front_distance_to_bottom_of_window] = 4 if args[:overhangs_front_distance_to_bottom_of_window].nil?
-    args[:overhangs_back_depth] = 0 if args[:overhangs_back_depth].nil?
-    args[:overhangs_back_distance_to_top_of_window] = 0 if args[:overhangs_back_distance_to_top_of_window].nil?
-    args[:overhangs_back_distance_to_bottom_of_window] = 4 if args[:overhangs_back_distance_to_bottom_of_window].nil?
-    args[:overhangs_left_depth] = 0 if args[:overhangs_left_depth].nil?
-    args[:overhangs_left_distance_to_top_of_window] = 0 if args[:overhangs_left_distance_to_top_of_window].nil?
-    args[:overhangs_left_distance_to_bottom_of_window] = 4 if args[:overhangs_left_distance_to_bottom_of_window].nil?
-    args[:overhangs_right_depth] = 0 if args[:overhangs_right_depth].nil?
-    args[:overhangs_right_distance_to_top_of_window] = 0 if args[:overhangs_right_distance_to_top_of_window].nil?
-    args[:overhangs_right_distance_to_bottom_of_window] = 4 if args[:overhangs_right_distance_to_bottom_of_window].nil?
-    args[:skylight_ufactor] = 0.33 if args[:skylight_ufactor].nil?
-    args[:skylight_shgc] = 0.45 if args[:skylight_shgc].nil?
-    args[:heating_system_fuel] = HPXML::FuelTypeNaturalGas if args[:heating_system_fuel].nil?
-    args[:heating_system_heating_efficiency] = 0.78 if args[:heating_system_heating_efficiency].nil?
-    args[:heating_system_fraction_heat_load_served] = 1 if args[:heating_system_fraction_heat_load_served].nil?
-    args[:cooling_system_cooling_efficiency_type] = HPXML::UnitsSEER if args[:cooling_system_cooling_efficiency_type].nil?
-    args[:cooling_system_cooling_efficiency] = 13.0 if args[:cooling_system_cooling_efficiency].nil?
-    args[:cooling_system_fraction_cool_load_served] = 1 if args[:cooling_system_fraction_cool_load_served].nil?
-    args[:heat_pump_heating_efficiency_type] = HPXML::UnitsHSPF if args[:heat_pump_heating_efficiency_type].nil?
-    args[:heat_pump_heating_efficiency] = 7.7 if args[:heat_pump_heating_efficiency].nil?
-    args[:heat_pump_cooling_efficiency_type] = HPXML::UnitsSEER if args[:heat_pump_cooling_efficiency_type].nil?
-    args[:heat_pump_cooling_efficiency] = 13.0 if args[:heat_pump_cooling_efficiency].nil?
-    args[:heat_pump_fraction_heat_load_served] = 1 if args[:heat_pump_fraction_heat_load_served].nil?
-    args[:heat_pump_fraction_cool_load_served] = 1 if args[:heat_pump_fraction_cool_load_served].nil?
-    args[:heat_pump_backup_type] = HPXML::HeatPumpBackupTypeIntegrated if args[:heat_pump_backup_type].nil?
-    args[:heat_pump_backup_fuel] = HPXML::FuelTypeElectricity if args[:heat_pump_backup_fuel].nil?
-    args[:heat_pump_backup_heating_efficiency] = 1 if args[:heat_pump_backup_heating_efficiency].nil?
-    args[:heating_system_2_type] = Constants::None if args[:heating_system_2_type].nil?
-    args[:heating_system_2_fuel] = HPXML::FuelTypeElectricity if args[:heating_system_2_fuel].nil?
-    args[:heating_system_2_heating_efficiency] = 1.0 if args[:heating_system_2_heating_efficiency].nil?
-    args[:heating_system_2_fraction_heat_load_served] = 0.25 if args[:heating_system_2_fraction_heat_load_served].nil?
-    args[:mech_vent_fan_type] = Constants::None if args[:mech_vent_fan_type].nil?
-    args[:mech_vent_recovery_efficiency_type] = 'Unadjusted' if args[:mech_vent_recovery_efficiency_type].nil?
-    args[:mech_vent_total_recovery_efficiency] = 0.48 if args[:mech_vent_total_recovery_efficiency].nil?
-    args[:mech_vent_sensible_recovery_efficiency] = 0.72 if args[:mech_vent_sensible_recovery_efficiency].nil?
-    args[:mech_vent_2_fan_type] = Constants::None if args[:mech_vent_2_fan_type].nil?
-    args[:dehumidifier_type] = Constants::None if args[:dehumidifier_type].nil?
-    args[:water_heater_type] = HPXML::WaterHeaterTypeStorage if args[:water_heater_type].nil?
-    args[:water_heater_jacket_rvalue] = Constants::None if args[:water_heater_jacket_rvalue].nil?
-    args[:water_fixtures_shower_low_flow] = false if args[:water_fixtures_shower_low_flow].nil?
-    args[:water_fixtures_sink_low_flow] = false if args[:water_fixtures_sink_low_flow].nil?
-    args[:solar_thermal_system_type] = Constants::None if args[:solar_thermal_system_type].nil?
-    args[:solar_thermal_collector_area] = 40.0 if args[:solar_thermal_collector_area].nil?
-    args[:solar_thermal_collector_loop_type] = HPXML::SolarThermalLoopTypeDirect if args[:solar_thermal_collector_loop_type].nil?
-    args[:solar_thermal_collector_type] = HPXML::SolarThermalCollectorTypeEvacuatedTube if args[:solar_thermal_collector_type].nil?
-    args[:solar_thermal_collector_azimuth] = 180 if args[:solar_thermal_collector_azimuth].nil?
-    args[:solar_thermal_collector_tilt] = 'RoofPitch' if args[:solar_thermal_collector_tilt].nil?
-    args[:solar_thermal_collector_rated_optical_efficiency] = 0.5 if args[:solar_thermal_collector_rated_optical_efficiency].nil?
-    args[:solar_thermal_collector_rated_thermal_losses] = 0.2799 if args[:solar_thermal_collector_rated_thermal_losses].nil?
-    args[:solar_thermal_solar_fraction] = 0 if args[:solar_thermal_solar_fraction].nil?
-    args[:misc_fuel_loads_grill_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_grill_fuel_type].nil?
-    args[:misc_fuel_loads_lighting_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_lighting_fuel_type].nil?
-    args[:misc_fuel_loads_fireplace_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_fireplace_fuel_type].nil?
-    args[:lighting_interior_fraction_cfl] = 0.1 if args[:lighting_interior_fraction_cfl].nil?
-    args[:lighting_interior_fraction_lfl] = 0.0 if args[:lighting_interior_fraction_lfl].nil?
-    args[:lighting_interior_fraction_led] = 0.0 if args[:lighting_interior_fraction_led].nil?
-    args[:lighting_exterior_fraction_cfl] = 0.0 if args[:lighting_exterior_fraction_cfl].nil?
-    args[:lighting_exterior_fraction_lfl] = 0.0 if args[:lighting_exterior_fraction_lfl].nil?
-    args[:lighting_exterior_fraction_led] = 0.0 if args[:lighting_exterior_fraction_led].nil?
-    args[:lighting_garage_fraction_cfl] = 0.0 if args[:lighting_garage_fraction_cfl].nil?
-    args[:lighting_garage_fraction_lfl] = 0.0 if args[:lighting_garage_fraction_lfl].nil?
-    args[:lighting_garage_fraction_led] = 0.0 if args[:lighting_garage_fraction_led].nil?
     return args
   end
 
@@ -5240,8 +5161,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     Version.check_openstudio_version()
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
-    args = convertArgumentValues(arguments(model), args)
-    args = defaultOptionalArgumentValues(args)
+    args = convertArgumentValues(get_arguments, args)
 
     # Argument error checks
     warnings, errors = validate_arguments(args)
@@ -5265,7 +5185,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     epw_path = args[:weather_station_epw_filepath]
     if epw_path.nil?
       # Get EPW path from zip code
-      epw_path = Defaults.lookup_weather_data_from_zipcode("#{args[:site_zip_code]}")[:station_filename]
+      epw_path = Defaults.lookup_weather_data_from_zipcode(args[:site_zip_code])[:station_filename]
     end
 
     # Create EpwFile object
@@ -5337,13 +5257,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height_above_grade] > 0)
     warnings << 'Specified a slab foundation type with a non-zero height above grade.' if warning
 
-    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || !args[:foundation_wall_assembly_r].nil?) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
+    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || !args[:foundation_wall_assembly_r].nil?) && (!args[:floor_over_foundation_assembly_r].nil? && args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
     warnings << 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.' if warning
 
     warning = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue) && (args[:roof_assembly_r] > max_uninsulated_roof_rvalue)
     warnings << 'Home with unconditioned attic type has both ceiling insulation and roof insulation.' if warning
 
-    warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
+    warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned) && (!args[:floor_over_foundation_assembly_r].nil? && args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
     warnings << 'Home with conditioned basement has floor insulation.' if warning
 
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue)
@@ -5375,7 +5295,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && ([HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceConditioned].include? args[:geometry_foundation_type])
     errors << 'Conditioned basement/crawlspace foundation type for apartment units is not currently supported.' if error
 
-    error = (args[:heating_system_type] == Constants::None) && (args[:heat_pump_type] == Constants::None) && (args[:heating_system_2_type] != Constants::None)
+    error = (args[:heating_system_type] == Constants::None) && (args[:heat_pump_type] == Constants::None) && (!args[:heating_system_2_type].nil? && args[:heating_system_2_type] != Constants::None)
     errors << 'A second heating system was specified without a primary heating system.' if error
 
     if ((args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate) && (args[:heating_system_2_type] == HPXML::HVACTypeFurnace)) # separate ducted backup
@@ -5448,11 +5368,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'Did not specify all required heating detailed performance data arguments.' if error
 
     if hvac_perf_data_heating_args_initialized.uniq.size == 1 && hvac_perf_data_heating_args_initialized.uniq[0]
-      heating_data_points_lengths = ["#{args[:hvac_perf_data_heating_outdoor_temperatures]}".count(','),
-                                     "#{args[:hvac_perf_data_heating_min_speed_capacities]}".count(','),
-                                     "#{args[:hvac_perf_data_heating_max_speed_capacities]}".count(','),
-                                     "#{args[:hvac_perf_data_heating_min_speed_cops]}".count(','),
-                                     "#{args[:hvac_perf_data_heating_max_speed_cops]}".count(',')]
+      heating_data_points_lengths = [args[:hvac_perf_data_heating_outdoor_temperatures].count(','),
+                                     args[:hvac_perf_data_heating_min_speed_capacities].count(','),
+                                     args[:hvac_perf_data_heating_max_speed_capacities].count(','),
+                                     args[:hvac_perf_data_heating_min_speed_cops].count(','),
+                                     args[:hvac_perf_data_heating_max_speed_cops].count(',')]
 
       error = (heating_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed heating performance data arguments does not have enough comma-separated elements specified.' if error
@@ -5467,11 +5387,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'Did not specify all required cooling detailed performance data arguments.' if error
 
     if hvac_perf_data_cooling_args_initialized.uniq.size == 1 && hvac_perf_data_cooling_args_initialized.uniq[0]
-      cooling_data_points_lengths = ["#{args[:hvac_perf_data_cooling_outdoor_temperatures]}".count(','),
-                                     "#{args[:hvac_perf_data_cooling_min_speed_capacities]}".count(','),
-                                     "#{args[:hvac_perf_data_cooling_max_speed_capacities]}".count(','),
-                                     "#{args[:hvac_perf_data_cooling_min_speed_cops]}".count(','),
-                                     "#{args[:hvac_perf_data_cooling_max_speed_cops]}".count(',')]
+      cooling_data_points_lengths = [args[:hvac_perf_data_cooling_outdoor_temperatures].count(','),
+                                     args[:hvac_perf_data_cooling_min_speed_capacities].count(','),
+                                     args[:hvac_perf_data_cooling_max_speed_capacities].count(','),
+                                     args[:hvac_perf_data_cooling_min_speed_cops].count(','),
+                                     args[:hvac_perf_data_cooling_max_speed_cops].count(',')]
 
       error = (cooling_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
@@ -5505,7 +5425,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       HPXML::fossil_fuels.each do |fossil_fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
-        emissions_scenario_lengths += ["#{args["emissions_#{underscore_case}_values".to_sym]}".count(',')] unless args["emissions_#{underscore_case}_values".to_sym].nil?
+        emissions_scenario_lengths += [args["emissions_#{underscore_case}_values".to_sym].count(',')] unless args["emissions_#{underscore_case}_values".to_sym].nil?
       end
 
       error = (emissions_scenario_lengths.uniq.size != 1)
@@ -5518,8 +5438,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       HPXML::all_fuels.each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
-        bills_scenario_lengths += ["#{args["utility_bill_#{underscore_case}_fixed_charges".to_sym]}".count(',')] unless args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
-        bills_scenario_lengths += ["#{args["utility_bill_#{underscore_case}_marginal_rates".to_sym]}".count(',')] unless args["utility_bill_#{underscore_case}_marginal_rates".to_sym].nil?
+        bills_scenario_lengths += [args["utility_bill_#{underscore_case}_fixed_charges".to_sym].count(',')] unless args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
+        bills_scenario_lengths += [args["utility_bill_#{underscore_case}_marginal_rates".to_sym].count(',')] unless args["utility_bill_#{underscore_case}_marginal_rates".to_sym].nil?
       end
 
       error = (bills_scenario_lengths.uniq.size != 1)
@@ -5686,9 +5606,9 @@ module HPXMLFile
   def self.need_weather_based_on_args(args)
     if (args[:hvac_control_heating_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:hvac_control_cooling_season_period].to_s == Constants::BuildingAmerica) ||
-       (args[:solar_thermal_system_type] != Constants::None && "#{args[:solar_thermal_collector_tilt]}".start_with?('latitude')) ||
-       (args[:pv_system_present] && "#{args[:pv_system_array_tilt]}".start_with?('latitude')) ||
-       (args[:pv_system_2_present] && "#{args[:pv_system_2_array_tilt]}".start_with?('latitude')) ||
+       (!args[:solar_thermal_system_type].nil? && args[:solar_thermal_system_type] != Constants::None && !args[:solar_thermal_collector_tilt].nil? && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
+       (args[:pv_system_present] && !args[:pv_system_array_tilt].nil? && args[:pv_system_array_tilt].start_with?('latitude')) ||
+       (args[:pv_system_2_present] && !args[:pv_system_2_array_tilt].nil? && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
        (args[:apply_defaults])
       return true
     end
@@ -5876,7 +5796,7 @@ module HPXMLFile
       hpxml.header.software_program_used = args[:software_info_program_used]
     end
     if not args[:software_info_program_version].nil?
-      if (not hpxml.header.software_program_version.nil?) && (hpxml.header.software_program_version != "#{args[:software_info_program_version]}")
+      if (not hpxml.header.software_program_version.nil?) && (hpxml.header.software_program_version != args[:software_info_program_version])
         errors << "'Software Info: Program Version' cannot vary across dwelling units."
       end
       hpxml.header.software_program_version = "#{args[:software_info_program_version]}"
@@ -5942,7 +5862,7 @@ module HPXMLFile
       emissions_scenario_names = args[:emissions_scenario_names].split(',').map(&:strip)
       emissions_types = args[:emissions_types].split(',').map(&:strip)
       emissions_electricity_units = args[:emissions_electricity_units].split(',').map(&:strip)
-      emissions_electricity_values_or_filepaths = "#{args[:emissions_electricity_values_or_filepaths]}".split(',').map(&:strip)
+      emissions_electricity_values_or_filepaths = args[:emissions_electricity_values_or_filepaths].split(',').map(&:strip)
 
       if not args[:emissions_electricity_number_of_header_rows].nil?
         emissions_electricity_number_of_header_rows = args[:emissions_electricity_number_of_header_rows].split(',').map(&:strip)
@@ -5965,7 +5885,7 @@ module HPXMLFile
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
         if not args["emissions_#{underscore_case}_values".to_sym].nil?
-          fuel_values[fossil_fuel] = "#{args["emissions_#{underscore_case}_values".to_sym]}".split(',').map(&:strip)
+          fuel_values[fossil_fuel] = args["emissions_#{underscore_case}_values".to_sym].split(',').map(&:strip)
         else
           fuel_values[fossil_fuel] = [nil] * emissions_scenario_names.size
         end
@@ -6067,7 +5987,7 @@ module HPXMLFile
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if not args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
-          fixed_charges[fuel] = "#{args["utility_bill_#{underscore_case}_fixed_charges".to_sym]}".split(',').map(&:strip)
+          fixed_charges[fuel] = args["utility_bill_#{underscore_case}_fixed_charges".to_sym].split(',').map(&:strip)
         else
           fixed_charges[fuel] = [nil] * bills_scenario_names.size
         end
@@ -6078,7 +5998,7 @@ module HPXMLFile
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if not args["utility_bill_#{underscore_case}_marginal_rates".to_sym].nil?
-          marginal_rates[fuel] = "#{args["utility_bill_#{underscore_case}_marginal_rates".to_sym]}".split(',').map(&:strip)
+          marginal_rates[fuel] = args["utility_bill_#{underscore_case}_marginal_rates".to_sym].split(',').map(&:strip)
         else
           marginal_rates[fuel] = [nil] * bills_scenario_names.size
         end
@@ -6097,13 +6017,13 @@ module HPXMLFile
       end
 
       if not args[:utility_bill_pv_net_metering_annual_excess_sellback_rates].nil?
-        bills_pv_net_metering_annual_excess_sellback_rates = "#{args[:utility_bill_pv_net_metering_annual_excess_sellback_rates]}".split(',').map(&:strip)
+        bills_pv_net_metering_annual_excess_sellback_rates = args[:utility_bill_pv_net_metering_annual_excess_sellback_rates].split(',').map(&:strip)
       else
         bills_pv_net_metering_annual_excess_sellback_rates = [nil] * bills_scenario_names.size
       end
 
       if not args[:utility_bill_pv_feed_in_tariff_rates].nil?
-        bills_pv_feed_in_tariff_rates = "#{args[:utility_bill_pv_feed_in_tariff_rates]}".split(',').map(&:strip)
+        bills_pv_feed_in_tariff_rates = args[:utility_bill_pv_feed_in_tariff_rates].split(',').map(&:strip)
       else
         bills_pv_feed_in_tariff_rates = [nil] * bills_scenario_names.size
       end
@@ -6115,7 +6035,7 @@ module HPXMLFile
       end
 
       if not args[:utility_bill_pv_monthly_grid_connection_fees].nil?
-        bills_pv_monthly_grid_connection_fees = "#{args[:utility_bill_pv_monthly_grid_connection_fees]}".split(',').map(&:strip)
+        bills_pv_monthly_grid_connection_fees = args[:utility_bill_pv_monthly_grid_connection_fees].split(',').map(&:strip)
       else
         bills_pv_monthly_grid_connection_fees = [nil] * bills_scenario_names.size
       end
@@ -6259,17 +6179,12 @@ module HPXMLFile
       dst_end_day = end_day
     end
 
-    zip_code = args[:site_zip_code]
-    if !zip_code.nil?
-      zip_code = zip_code.to_s.rjust(5, '0')
-    end
-
     hpxml.buildings.add(building_id: 'MyBuilding',
                         site_id: 'SiteID',
                         event_type: 'proposed workscope',
                         city: args[:site_city],
                         state_code: args[:site_state_code],
-                        zip_code: zip_code,
+                        zip_code: args[:site_zip_code],
                         time_zone_utc_offset: args[:site_time_zone_utc_offset],
                         elevation: args[:site_elevation],
                         latitude: args[:site_latitude],
@@ -6824,7 +6739,7 @@ module HPXMLFile
   # @return [nil]
   def self.set_floors(hpxml_bldg, args, sorted_surfaces)
     if [HPXML::FoundationTypeBasementConditioned,
-        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
+        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (!args[:floor_over_foundation_assembly_r].nil? && args[:floor_over_foundation_assembly_r] > 2.1)
       args[:floor_over_foundation_assembly_r] = 2.1 # Uninsulated
     end
 
@@ -6988,19 +6903,19 @@ module HPXMLFile
       sub_surface_height = Geometry.get_surface_height(surface: sub_surface)
       sub_surface_facade = Geometry.get_facade_for_surface(surface: sub_surface)
 
-      if (sub_surface_facade == Constants::FacadeFront) && (args[:overhangs_front_depth] > 0)
+      if (sub_surface_facade == Constants::FacadeFront) && (!args[:overhangs_front_depth].nil? && args[:overhangs_front_depth] > 0)
         overhangs_depth = args[:overhangs_front_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_front_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_front_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeBack) && (args[:overhangs_back_depth] > 0)
+      elsif (sub_surface_facade == Constants::FacadeBack) && (!args[:overhangs_back_depth].nil? && args[:overhangs_back_depth] > 0)
         overhangs_depth = args[:overhangs_back_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_back_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_back_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeLeft) && (args[:overhangs_left_depth] > 0)
+      elsif (sub_surface_facade == Constants::FacadeLeft) && (!args[:overhangs_left_depth].nil? && args[:overhangs_left_depth] > 0)
         overhangs_depth = args[:overhangs_left_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_left_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_left_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeRight) && (args[:overhangs_right_depth] > 0)
+      elsif (sub_surface_facade == Constants::FacadeRight) && (!args[:overhangs_right_depth].nil? && args[:overhangs_right_depth] > 0)
         overhangs_depth = args[:overhangs_right_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_right_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_right_distance_to_bottom_of_window]
@@ -7066,6 +6981,8 @@ module HPXMLFile
   # @param sorted_subsurfaces [Array<OpenStudio::Model::SubSurface>] subsurfaces sorted by deterministically assigned Index
   # @return [nil]
   def self.set_skylights(hpxml_bldg, args, sorted_subsurfaces)
+    args[:skylight_ufactor] = 0.33 if args[:skylight_ufactor].nil?
+    args[:skylight_shgc] = 0.45 if args[:skylight_shgc].nil?
     sorted_subsurfaces.each do |sub_surface|
       next if sub_surface.subSurfaceType != 'Skylight'
 
@@ -7322,6 +7239,7 @@ module HPXMLFile
     end
 
     if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
+      args[:cooling_system_cooling_efficiency_type] = HPXML::UnitsSEER if args[:cooling_system_cooling_efficiency_type].nil?
       if args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsSEER
         cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
       elsif args[:cooling_system_cooling_efficiency_type] == HPXML::UnitsSEER2
@@ -7432,7 +7350,9 @@ module HPXMLFile
 
     return if heat_pump_type == Constants::None
 
-    if args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated
+    args[:heat_pump_backup_fuel] = HPXML::FuelTypeElectricity if args[:heat_pump_backup_fuel].nil?
+    args[:heat_pump_backup_heating_efficiency] = 1 if args[:heat_pump_backup_heating_efficiency].nil?
+    if (args[:heat_pump_backup_type].nil? || args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated)
       backup_type = args[:heat_pump_backup_type]
       backup_heating_fuel = args[:heat_pump_backup_fuel]
       backup_heating_capacity = args[:heat_pump_backup_heating_capacity]
@@ -7464,6 +7384,7 @@ module HPXMLFile
       compressor_type = args[:heat_pump_cooling_compressor_type]
     end
 
+    args[:heat_pump_heating_efficiency_type] = HPXML::UnitsHSPF if args[:heat_pump_heating_efficiency_type].nil?
     if args[:heat_pump_heating_efficiency_type] == HPXML::UnitsHSPF
       heating_efficiency_hspf = args[:heat_pump_heating_efficiency]
     elsif args[:heat_pump_heating_efficiency_type] == HPXML::UnitsHSPF2
@@ -7472,6 +7393,7 @@ module HPXMLFile
       heating_efficiency_cop = args[:heat_pump_heating_efficiency]
     end
 
+    args[:heat_pump_cooling_efficiency_type] = HPXML::UnitsSEER if args[:heat_pump_cooling_efficiency_type].nil?
     if args[:heat_pump_cooling_efficiency_type] == HPXML::UnitsSEER
       cooling_efficiency_seer = args[:heat_pump_cooling_efficiency]
     elsif args[:heat_pump_cooling_efficiency_type] == HPXML::UnitsSEER2
@@ -7659,7 +7581,11 @@ module HPXMLFile
     heating_system_type = args[:heating_system_2_type]
     heating_system_is_heatpump_backup = (args[:heat_pump_type] != Constants::None && args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate)
 
-    return if heating_system_type == Constants::None && (not heating_system_is_heatpump_backup)
+    return if (heating_system_type.nil? || heating_system_type == Constants::None) && (not heating_system_is_heatpump_backup)
+
+    args[:heating_system_2_fuel] = HPXML::FuelTypeElectricity if args[:heating_system_2_fuel].nil?
+    args[:heating_system_2_heating_efficiency] = 1.0 if args[:heating_system_2_heating_efficiency].nil?
+    args[:heating_system_2_fraction_heat_load_served] = 0.25 if args[:heating_system_2_fraction_heat_load_served].nil?
 
     if args[:heating_system_type] == HPXML::HVACTypeElectricResistance
       args[:heating_system_2_fuel] = HPXML::FuelTypeElectricity
@@ -7993,7 +7919,7 @@ module HPXMLFile
     if hpxml_bldg.total_fraction_heat_load_served > 0
 
       if (not args[:hvac_control_heating_weekday_setpoint].nil?) && (not args[:hvac_control_heating_weekend_setpoint].nil?)
-        if args[:hvac_control_heating_weekday_setpoint] == args[:hvac_control_heating_weekend_setpoint] && !"#{args[:hvac_control_heating_weekday_setpoint]}".include?(',')
+        if args[:hvac_control_heating_weekday_setpoint] == args[:hvac_control_heating_weekend_setpoint] && !args[:hvac_control_heating_weekday_setpoint].include?(',')
           heating_setpoint_temp = Float(args[:hvac_control_heating_weekday_setpoint])
         else
           weekday_heating_setpoints = args[:hvac_control_heating_weekday_setpoint]
@@ -8022,7 +7948,7 @@ module HPXMLFile
     if hpxml_bldg.total_fraction_cool_load_served > 0
 
       if (not args[:hvac_control_cooling_weekday_setpoint].nil?) && (not args[:hvac_control_cooling_weekend_setpoint].nil?)
-        if args[:hvac_control_cooling_weekday_setpoint] == args[:hvac_control_cooling_weekend_setpoint] && !args[:hvac_control_cooling_weekday_setpoint].is_a?(String)
+        if args[:hvac_control_cooling_weekday_setpoint] == args[:hvac_control_cooling_weekend_setpoint] && !args[:hvac_control_cooling_weekday_setpoint].include?(',')
           cooling_setpoint_temp = Float(args[:hvac_control_cooling_weekday_setpoint])
         else
           weekday_cooling_setpoints = args[:hvac_control_cooling_weekday_setpoint]
@@ -8086,8 +8012,11 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_ventilation_fans(hpxml_bldg, args)
-    if args[:mech_vent_fan_type] != Constants::None
+    if (!args[:mech_vent_fan_type].nil? && args[:mech_vent_fan_type] != Constants::None)
 
+      args[:mech_vent_recovery_efficiency_type] = 'Unadjusted' if args[:mech_vent_recovery_efficiency_type].nil?
+      args[:mech_vent_total_recovery_efficiency] = 0.48 if args[:mech_vent_total_recovery_efficiency].nil?
+      args[:mech_vent_sensible_recovery_efficiency] = 0.72 if args[:mech_vent_sensible_recovery_efficiency].nil?
       if [HPXML::MechVentTypeERV].include?(args[:mech_vent_fan_type])
         if args[:mech_vent_recovery_efficiency_type] == 'Unadjusted'
           total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency]
@@ -8167,7 +8096,7 @@ module HPXMLFile
                                       precooling_fraction_load_served: precooling_fraction_load_served)
     end
 
-    if args[:mech_vent_2_fan_type] != Constants::None
+    if (!args[:mech_vent_2_fan_type].nil? && args[:mech_vent_2_fan_type] != Constants::None)
 
       if [HPXML::MechVentTypeERV].include?(args[:mech_vent_2_fan_type])
 
@@ -8406,10 +8335,12 @@ module HPXMLFile
   def self.set_water_fixtures(hpxml_bldg, args)
     return if args[:water_heater_type] == Constants::None
 
+    args[:water_fixtures_shower_low_flow] = false if args[:water_fixtures_shower_low_flow].nil?
     hpxml_bldg.water_fixtures.add(id: "WaterFixture#{hpxml_bldg.water_fixtures.size + 1}",
                                   water_fixture_type: HPXML::WaterFixtureTypeShowerhead,
                                   low_flow: args[:water_fixtures_shower_low_flow])
 
+    args[:water_fixtures_sink_low_flow] = false if args[:water_fixtures_sink_low_flow].nil?
     hpxml_bldg.water_fixtures.add(id: "WaterFixture#{hpxml_bldg.water_fixtures.size + 1}",
                                   water_fixture_type: HPXML::WaterFixtureTypeFaucet,
                                   low_flow: args[:water_fixtures_sink_low_flow])
@@ -8428,9 +8359,9 @@ module HPXMLFile
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [nil]
   def self.set_solar_thermal(hpxml_bldg, args, weather)
-    return if args[:solar_thermal_system_type] == Constants::None
+    return if (args[:solar_thermal_system_type].nil? || args[:solar_thermal_system_type] == Constants::None)
 
-    if args[:solar_thermal_solar_fraction] > 0
+    if (!args[:solar_thermal_solar_fraction].nil? && args[:solar_thermal_solar_fraction] > 0)
       solar_fraction = args[:solar_thermal_solar_fraction]
     else
       collector_area = args[:solar_thermal_collector_area]
@@ -8438,7 +8369,7 @@ module HPXMLFile
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
       latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
-      collector_tilt = Geometry.get_absolute_tilt(tilt_str: "#{args[:solar_thermal_collector_tilt]}", roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
+      collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_rated_optical_efficiency = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_rated_thermal_losses = args[:solar_thermal_collector_rated_thermal_losses]
       storage_volume = args[:solar_thermal_storage_volume]
@@ -8494,7 +8425,7 @@ module HPXMLFile
                               module_type: args[:pv_system_module_type],
                               tracking: args[:pv_system_tracking],
                               array_azimuth: args[:pv_system_array_azimuth],
-                              array_tilt: Geometry.get_absolute_tilt(tilt_str: "#{args[:pv_system_array_tilt]}", roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
+                              array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_array_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
                               max_power_output: args[:pv_system_max_power_output],
                               system_losses_fraction: args[:pv_system_system_losses_fraction],
                               is_shared_system: is_shared_system,
@@ -8506,7 +8437,7 @@ module HPXMLFile
                                 module_type: args[:pv_system_2_module_type],
                                 tracking: args[:pv_system_2_tracking],
                                 array_azimuth: args[:pv_system_2_array_azimuth],
-                                array_tilt: Geometry.get_absolute_tilt(tilt_str: "#{args[:pv_system_2_array_tilt]}", roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
+                                array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_2_array_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
                                 max_power_output: args[:pv_system_2_max_power_output],
                                 system_losses_fraction: args[:pv_system_system_losses_fraction],
                                 is_shared_system: is_shared_system,
@@ -8564,6 +8495,16 @@ module HPXMLFile
   # @return [nil]
   def self.set_lighting(hpxml_bldg, args)
     if args[:lighting_present]
+      args[:lighting_interior_fraction_cfl] = 0.1 if args[:lighting_interior_fraction_cfl].nil?
+      args[:lighting_interior_fraction_lfl] = 0.0 if args[:lighting_interior_fraction_lfl].nil?
+      args[:lighting_interior_fraction_led] = 0.0 if args[:lighting_interior_fraction_led].nil?
+      args[:lighting_exterior_fraction_cfl] = 0.0 if args[:lighting_exterior_fraction_cfl].nil?
+      args[:lighting_exterior_fraction_lfl] = 0.0 if args[:lighting_exterior_fraction_lfl].nil?
+      args[:lighting_exterior_fraction_led] = 0.0 if args[:lighting_exterior_fraction_led].nil?
+      args[:lighting_garage_fraction_cfl] = 0.0 if args[:lighting_garage_fraction_cfl].nil?
+      args[:lighting_garage_fraction_lfl] = 0.0 if args[:lighting_garage_fraction_lfl].nil?
+      args[:lighting_garage_fraction_led] = 0.0 if args[:lighting_garage_fraction_led].nil?
+
       has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
 
       # Interior
@@ -8648,7 +8589,7 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_dehumidifier(hpxml_bldg, args)
-    return if args[:dehumidifier_type] == Constants::None
+    return if (args[:dehumidifier_type].nil? || args[:dehumidifier_type] == Constants::None)
 
     if args[:dehumidifier_efficiency_type] == 'EnergyFactor'
       energy_factor = args[:dehumidifier_efficiency]
@@ -8941,6 +8882,7 @@ module HPXMLFile
   def self.set_misc_fuel_loads_grill(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_grill_present]
 
+    args[:misc_fuel_loads_grill_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_grill_fuel_type].nil?
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeGrill,
                               fuel_type: args[:misc_fuel_loads_grill_fuel_type],
@@ -8959,6 +8901,7 @@ module HPXMLFile
   def self.set_misc_fuel_loads_lighting(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_lighting_present]
 
+    args[:misc_fuel_loads_lighting_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_lighting_fuel_type].nil?
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeLighting,
                               fuel_type: args[:misc_fuel_loads_lighting_fuel_type],
@@ -8978,6 +8921,7 @@ module HPXMLFile
   def self.set_misc_fuel_loads_fireplace(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_fireplace_present]
 
+    args[:misc_fuel_loads_fireplace_fuel_type] = HPXML::FuelTypeNaturalGas if args[:misc_fuel_loads_fireplace_fuel_type].nil?
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeFireplace,
                               fuel_type: args[:misc_fuel_loads_fireplace_fuel_type],

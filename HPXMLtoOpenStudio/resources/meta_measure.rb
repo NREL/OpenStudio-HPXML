@@ -626,18 +626,18 @@ class String
 end
 
 # TODO
-def convertArgumentValues(arguments_model, args, delete_auto = true)
+def convertArgumentValues(get_arguments, args, delete_auto = true)
   args.each do |name, value|
     if delete_auto && value == Constants::Auto
       args.delete(name)
       next
     end
 
-    arg = arguments_model.find { |a| name == a.name.to_sym }
-    type = arg.type
+    arg = get_arguments.find { |a| name.to_s == a[:name] }
+    type = arg[:type]
 
-    if type == 'Choice'.to_OSArgumentType
-      choices = arg.choiceValues
+    if type == Argument::Choice
+      choices = arg[:choices]
       if choices.include?(Constants::Auto)
         if value.downcase.to_s == 'true'
           args[name] = true
@@ -645,16 +645,10 @@ def convertArgumentValues(arguments_model, args, delete_auto = true)
           args[name] = false
         end
       end
-    elsif type == 'String'.to_OSArgumentType
-      begin
-        value = Float(value)
-        if value % 1 == 0
-          args[name] = Integer(value)
-        else
-          args[name] = value
-        end
-      rescue
-      end
+    elsif type == Argument::Double
+      args[name] = Float(value)
+    elsif type == Argument::Integer
+      args[name] = Integer(value)
     end
   end
   return args

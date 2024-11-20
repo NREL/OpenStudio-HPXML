@@ -35,6 +35,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
 
       'base-sfd-header.xml' => 'base-sfd.xml',
       'base-sfd-header-no-duplicates.xml' => 'base-sfd-header.xml',
+      'base-auto.xml' => 'base-sfd.xml',
 
       # Extra files to test
       'extra-auto.xml' => 'base-sfd.xml',
@@ -610,6 +611,17 @@ class BuildResidentialHPXMLTest < Minitest::Test
     elsif ['base-sfd-header-no-duplicates.xml'].include? hpxml_file
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['whole_sfa_or_mf_building_sim'] = true
+    elsif ['base-auto.xml'].include? hpxml_file
+      args['simulation_control_timestep'] = Constants::Auto
+      args['simulation_control_run_period_calendar_year'] = Constants::Auto
+      args['simulation_control_daylight_saving_enabled'] = Constants::Auto
+      args['simulation_control_temperature_capacitance_multiplier'] = Constants::Auto
+      args['site_type'] = Constants::Auto
+      args['site_shielding_of_home'] = Constants::Auto
+      args['site_soil_and_moisture_type'] = Constants::Auto
+      args['site_state_code'] = Constants::Auto
+      args['site_time_zone_utc_offset'] = Constants::Auto
+      args['site_elevation'] = Constants::Auto
     end
 
     # Extras
