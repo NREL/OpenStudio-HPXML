@@ -562,8 +562,8 @@ class HPXML < Object
 
   # Electric panel attributes
   CLB_ATTRS = { clb_type: 'Type',
-                clb_total_w: 'Power',
-                clb_total_a: 'Amps',
+                clb_total_w: 'TotalWatts',
+                clb_total_a: 'TotalAmps',
                 clb_headroom_a: 'HeadroomAmps' }
   BS_ATTRS = { bs_total: 'Total',
                bs_occupied: 'Occupied',
@@ -9509,10 +9509,15 @@ class HPXML < Object
     ATTRS = [:id,                      # [String] SystemIdentifier/@id
              :voltage,                 # [String] Voltage
              :max_current_rating,      # [Double] MaxCurrentRating
-             :headroom_breaker_spaces, # [Integer] HeadroomBreakerSpaces
-             :total_breaker_spaces] +  # [Integer] TotalBreakerSpaces
-            CLB_ATTRS.keys +
-            BS_ATTRS.keys
+             :headroom_breaker_spaces, # [Integer] extension/HeadroomBreakerSpaces
+             :total_breaker_spaces,    # [Integer] extension/TotalBreakerSpaces
+             :capacity_types,          # [Array<String>] extension/Outputs/Capacity/Type
+             :capacity_total_watts,    # [Array<Double>] extension/Outputs/Capacity/TotalWatts
+             :capacity_total_amps,     # [Array<Double>] extension/Outputs/Capacity/TotalAmps
+             :capacity_headroom_amps,  # [Array<Double>] extension/Outputs/Capacity/HeadroomAmps
+             :breaker_spaces_total,    # [Integer] extension/Outputs/BreakerSpaces/Total
+             :breaker_spaces_occupied, # [Integer] extension/Outputs/BreakerSpaces/Occupied
+             :breaker_spaces_headroom] # [Integer] extension/Outputs/BreakerSpaces/Headroom
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
@@ -9548,8 +9553,26 @@ class HPXML < Object
       XMLHelper.add_extension(electric_panel, 'HeadroomBreakerSpaces', @headroom_breaker_spaces, :integer, @headroom_breaker_spaces_isdefaulted) unless @headroom_breaker_spaces.nil?
       XMLHelper.add_extension(electric_panel, 'TotalBreakerSpaces', @total_breaker_spaces, :integer, @total_breaker_spaces_isdefaulted) unless @total_breaker_spaces.nil?
       @panel_loads.to_doc(electric_panel)
-      if !@clb_total_w.nil? && !@clb_total_a.nil? && !@clb_headroom_a.nil? && !@bs_total.nil? && !bs_occupied.nil? && !bs_headroom.nil?
-        HPXML.panel_outputs_to_doc(self, electric_panel)
+      if (not @capacity_types.nil?) && (not @capacity_types.empty?)
+        outputs = XMLHelper.create_elements_as_needed(electric_panel, ['extension', 'Outputs'])
+        XMLHelper.add_attribute(outputs, 'dataSource', 'software')
+        capacities = @capacity_types.zip(@capacity_total_watts, @capacity_total_amps, @capacity_headroom_amps)
+        capacities.each do |capacity|
+          capacity_type, capacity_total_watt, capacity_total_amp, capacity_headroom_amp = capacity
+          capacity = XMLHelper.add_element(outputs, 'Capacity')
+          XMLHelper.add_element(capacity, 'Type', capacity_type, :string)
+          XMLHelper.add_element(capacity, 'TotalWatts', capacity_total_watt, :float)
+          XMLHelper.add_element(capacity, 'TotalAmps', capacity_total_amp, :float)
+          XMLHelper.add_element(capacity, 'HeadroomAmps', capacity_headroom_amp, :float)
+        end
+      end
+      if not @breaker_spaces_total.nil?
+        outputs = XMLHelper.create_elements_as_needed(electric_panel, ['extension', 'Outputs'])
+        XMLHelper.add_attribute(outputs, 'dataSource', 'software')
+        breaker_spaces = XMLHelper.add_element(outputs, 'BreakerSpaces')
+        XMLHelper.add_element(breaker_spaces, 'Total', @breaker_spaces_total, :integer)
+        XMLHelper.add_element(breaker_spaces, 'Occupied', @breaker_spaces_occupied, :integer)
+        XMLHelper.add_element(breaker_spaces, 'Headroom', @breaker_spaces_headroom, :integer)
       end
     end
 
@@ -9566,7 +9589,13 @@ class HPXML < Object
       @headroom_breaker_spaces = XMLHelper.get_value(electric_panel, 'extension/HeadroomBreakerSpaces', :integer)
       @total_breaker_spaces = XMLHelper.get_value(electric_panel, 'extension/TotalBreakerSpaces', :integer)
       @panel_loads.from_doc(electric_panel)
-      HPXML.panel_outputs_from_doc(self, electric_panel)
+      @capacity_types = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/Type', :string)
+      @capacity_total_watts = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/TotalWatts', :float)
+      @capacity_total_amps = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/TotalAmps', :float)
+      @capacity_headroom_amps = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/HeadroomAmps', :float)
+      @breaker_spaces_total = XMLHelper.get_value(electric_panel, 'extension/Outputs/BreakerSpaces/Total', :integer)
+      @breaker_spaces_occupied = XMLHelper.get_value(electric_panel, 'extension/Outputs/BreakerSpaces/Occupied', :integer)
+      @breaker_spaces_headroom = XMLHelper.get_value(electric_panel, 'extension/Outputs/BreakerSpaces/Headroom', :integer)
     end
   end
 
@@ -12226,52 +12255,6 @@ class HPXML < Object
           hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :string))
         else
           hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :float))
-        end
-      end
-    end
-  end
-
-  # Adds this object's panel capacities to the provided Oga XML element.
-  #
-  # @param hpxml_object [HPXML::XXX] The ElectricPanel object
-  # @param hpxml_element [Oga::XML::Element] The ElectricPanel XML element
-  # @return [nil]
-  def self.panel_outputs_to_doc(hpxml_object, hpxml_element)
-    { CLB_ATTRS => 'CapacityLoadBased',
-      BS_ATTRS => 'BreakerSpaces' }.each do |attrs, p_child_name|
-      p_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'Outputs'])
-      XMLHelper.add_attribute(p_extension, 'dataSource', 'software')
-      p_child = XMLHelper.add_element(p_extension, p_child_name)
-      attrs.each do |attr, element_name|
-        if p_child_name == 'BreakerSpaces'
-          XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :integer)
-        elsif element_name == 'Type'
-          XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :string)
-        else
-          XMLHelper.add_element(p_child, element_name, hpxml_object.send(attr), :float)
-        end
-      end
-    end
-  end
-
-  # Populates the HPXML object's panel capacities from the XML element.
-  #
-  # @param hpxml_object [HPXML::XXX] The ElectricPanel object
-  # @param hpxml_element [Oga::XML::Element] The ElectricPanel XML element
-  # @return [nil]
-  def self.panel_outputs_from_doc(hpxml_object, hpxml_element)
-    outputs = XMLHelper.get_element(hpxml_element, 'extension/Outputs')
-    return if outputs.nil?
-
-    { CLB_ATTRS => 'CapacityLoadBased',
-      BS_ATTRS => 'BreakerSpaces' }.each do |attrs, p_child_name|
-      attrs.each do |attr, element_name|
-        if p_child_name == 'BreakerSpaces'
-          hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :integer))
-        elsif element_name == 'Type'
-          hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :string))
-        else
-          hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Outputs/#{p_child_name}/#{element_name}", :float))
         end
       end
     end

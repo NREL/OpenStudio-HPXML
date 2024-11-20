@@ -14,6 +14,8 @@
       <PanelCalculationTypes>
         <Type>2023 Load-Based</Type>
         <Type>2023 Meter-Based</Type>
+        <Type>2026 Load-Based</Type>
+        <Type>2026 Meter-Based</Type>
       </PanelCalculationTypes>
       <UtilityBillScenarios>
         <UtilityBillScenario>

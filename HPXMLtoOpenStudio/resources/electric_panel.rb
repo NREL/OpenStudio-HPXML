@@ -9,26 +9,33 @@ module ElectricPanel
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports load-based capacities and breaker spaces
   # @return [nil]
-  def self.calculate(hpxml_header, hpxml_bldg, electric_panel, update_hpxml: true)
-    panel_loads = PanelLoadValues.new
-
+  def self.calculate(hpxml_header, hpxml_bldg, electric_panel)
+    capacity_types = []
+    capacity_total_watts = []
+    capacity_total_amps = []
+    capacity_headroom_amps = []
     hpxml_header.panel_calculation_types.each do |panel_calculation_type|
-      calculate_load_based(hpxml_bldg, electric_panel, panel_loads, panel_calculation_type)
+      next unless panel_calculation_type.include?('Load-Based')
 
-      # Assign load-based capacities to HPXML objects for output
-      return unless update_hpxml
+      load_based_capacity_values = LoadBasedCapacityValues.new
+      calculate_load_based(hpxml_bldg, electric_panel, load_based_capacity_values, panel_calculation_type)
 
-      electric_panel.clb_type = panel_calculation_type
-      electric_panel.clb_total_w = panel_loads.LoadBased_CapacityW.round(1)
-      electric_panel.clb_total_a = panel_loads.LoadBased_CapacityA.round
-      electric_panel.clb_headroom_a = panel_loads.LoadBased_HeadRoomA.round
+      capacity_types << panel_calculation_type
+      capacity_total_watts << load_based_capacity_values.LoadBased_CapacityW.round(1)
+      capacity_total_amps << load_based_capacity_values.LoadBased_CapacityA.round
+      capacity_headroom_amps << load_based_capacity_values.LoadBased_HeadRoomA.round
     end
+    electric_panel.capacity_types = capacity_types
+    electric_panel.capacity_total_watts = capacity_total_watts
+    electric_panel.capacity_total_amps = capacity_total_amps
+    electric_panel.capacity_headroom_amps = capacity_headroom_amps
 
-    calculate_breaker_spaces(electric_panel, panel_loads)
+    breaker_spaces_values = BreakerSpacesValues.new
+    calculate_breaker_spaces(electric_panel, breaker_spaces_values)
 
-    electric_panel.bs_total = panel_loads.BreakerSpaces_Total
-    electric_panel.bs_occupied = panel_loads.BreakerSpaces_Occupied
-    electric_panel.bs_headroom = panel_loads.BreakerSpaces_HeadRoom
+    electric_panel.breaker_spaces_total = breaker_spaces_values.BreakerSpaces_Total
+    electric_panel.breaker_spaces_occupied = breaker_spaces_values.BreakerSpaces_Occupied
+    electric_panel.breaker_spaces_headroom = breaker_spaces_values.BreakerSpaces_HeadRoom
   end
 
   # Get the heating system attached to the given panel load.
@@ -148,6 +155,9 @@ module ElectricPanel
       panel_loads.LoadBased_HeadRoomA = electric_panel.max_current_rating - panel_loads.LoadBased_CapacityA
     elsif panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2026LoadBased
       # TODO
+      panel_loads.LoadBased_CapacityW = 1
+      panel_loads.LoadBased_CapacityA = 2
+      panel_loads.LoadBased_HeadRoomA = 3
     end
   end
 
@@ -175,6 +185,7 @@ module ElectricPanel
       return capacity_w, capacity_a, headroom_a
     elsif panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2026MeterBased
       # TODO
+      return 1, 2, 3
     end
   end
 
@@ -197,20 +208,29 @@ module ElectricPanel
   end
 end
 
-# Object with calculated panel load capacity and breaker spaces
-class PanelLoadValues
+# Object with calculated panel load capacity
+class LoadBasedCapacityValues
   LOADBASED_ATTRS = [:LoadBased_CapacityW,
                      :LoadBased_CapacityA,
                      :LoadBased_HeadRoomA]
+  attr_accessor(*LOADBASED_ATTRS)
+
+  def initialize
+    LOADBASED_ATTRS.each do |attr|
+      send("#{attr}=", 0.0)
+    end
+  end
+end
+
+# Object with breaker spaces
+class BreakerSpacesValues
   BREAKERSPACE_ATTRS = [:BreakerSpaces_Occupied,
                         :BreakerSpaces_Total,
                         :BreakerSpaces_HeadRoom]
-  attr_accessor(*LOADBASED_ATTRS)
   attr_accessor(*BREAKERSPACE_ATTRS)
 
   def initialize
-    (LOADBASED_ATTRS +
-     BREAKERSPACE_ATTRS).each do |attr|
+    BREAKERSPACE_ATTRS.each do |attr|
       send("#{attr}=", 0.0)
     end
   end
