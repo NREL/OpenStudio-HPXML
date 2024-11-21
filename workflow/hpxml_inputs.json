@@ -3608,7 +3608,8 @@
     "clothes_dryer_present": false
   },
   "sample_files/base-bldgtype-mf-whole-building-common-spaces.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-whole-building.xml"
+    "parent_hpxml": "sample_files/base-bldgtype-mf-whole-building.xml",
+    "heating_system_heating_capacity": 24000
   },
   "sample_files/base-pv.xml": {
     "parent_hpxml": "sample_files/base.xml",

@@ -229,7 +229,7 @@
                 <ElectricResistance/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>12000.0</HeatingCapacity>
+              <HeatingCapacity>24000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -1246,7 +1246,7 @@
                 <ElectricResistance/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>12000.0</HeatingCapacity>
+              <HeatingCapacity>24000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -1949,7 +1949,7 @@
                 <ElectricResistance/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>12000.0</HeatingCapacity>
+              <HeatingCapacity>24000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>

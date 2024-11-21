@@ -138,8 +138,11 @@ module Geometry
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.walls.each do |wall|
-      store_adjacent_surface_ids_to_space(get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg), wall)
-      next if wall.sameas_id
+      hpxml_id = wall.id
+      if wall.sameas_id
+        hpxml_sameas_id = wall.sameas_id
+        wall = wall.sameas
+      end
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if wall.azimuth.nil?
@@ -150,6 +153,9 @@ module Geometry
         end
       else
         azimuths = [wall.azimuth]
+      end
+      if hpxml_sameas_id
+        azimuths = azimuths.map { |a| (a + 180) % 360 }
       end
 
       surfaces = []
@@ -173,15 +179,17 @@ module Geometry
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, wall, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, wall, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, wall, hpxml_bldg) if hpxml_sameas_id.nil?
         if wall.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
-        surface.additionalProperties.setFeature('hpxmlID', wall.id)
+        surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
+        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
       end
 
       next if surfaces.empty?
+      next unless hpxml_sameas_id.nil?
 
       # Apply construction
       # The code below constructs a reasonable wall construction based on the
@@ -223,8 +231,11 @@ module Geometry
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.rim_joists.each do |rim_joist|
-      store_adjacent_surface_ids_to_space(get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg), rim_joist)
-      next if rim_joist.sameas_id
+      hpxml_id = rim_joist.id
+      if rim_joist.sameas_id
+        hpxml_sameas_id = rim_joist.sameas_id
+        rim_joist = rim_joist.sameas
+      end
 
       if rim_joist.azimuth.nil?
         if rim_joist.is_exterior
@@ -234,6 +245,9 @@ module Geometry
         end
       else
         azimuths = [rim_joist.azimuth]
+      end
+      if hpxml_sameas_id
+        azimuths = azimuths.map { |a| (a + 180) % 360 }
       end
 
       surfaces = []
@@ -257,13 +271,16 @@ module Geometry
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, rim_joist, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, rim_joist, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, rim_joist, hpxml_bldg) if hpxml_sameas_id.nil?
         if rim_joist.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
-        surface.additionalProperties.setFeature('hpxmlID', rim_joist.id)
+        surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
+        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
       end
+
+      next unless hpxml_sameas_id.nil?
 
       # Apply construction
 
@@ -310,8 +327,14 @@ module Geometry
     walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.floors.each do |floor|
-      store_adjacent_surface_ids_to_space(get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg), floor)
-      next if floor.sameas_id
+      hpxml_id = floor.id
+      if floor.sameas_id
+        is_ceiling = !floor.sameas.is_ceiling
+        hpxml_sameas_id = floor.sameas_id
+        floor = floor.sameas
+      else
+        is_ceiling = floor.is_ceiling
+      end
       next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       area = floor.net_area
@@ -323,7 +346,7 @@ module Geometry
         z_origin = foundation_top
       end
 
-      if floor.is_ceiling
+      if is_ceiling
         vertices = create_ceiling_vertices(length, width, z_origin, default_azimuths)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
@@ -334,7 +357,7 @@ module Geometry
       end
       surface.additionalProperties.setFeature('Tilt', 0.0)
       set_surface_interior(model, spaces, surface, floor, hpxml_bldg)
-      set_surface_exterior(model, spaces, surface, floor, hpxml_bldg)
+      set_surface_exterior(model, spaces, surface, floor, hpxml_bldg) if hpxml_sameas_id.nil?
       surface.setName(floor.id)
       if floor.is_interior
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
@@ -348,7 +371,9 @@ module Geometry
           end
         end
       end
-      surface.additionalProperties.setFeature('hpxmlID', floor.id)
+      surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
+      surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
+      next unless hpxml_sameas_id.nil?
 
       # Apply construction
 
@@ -457,10 +482,13 @@ module Geometry
       # calculate heat flow between two zones through the ground.
       int_fnd_walls = hpxml_bldg.foundation_walls.select { |fw| (fw.is_interior && fw.interior_adjacent_to == foundation_type) || fw.sameas_id }
       int_fnd_walls.each do |fnd_wall|
-        next unless (fnd_wall.is_interior || fw.sameas.is_interior)
+        hpxml_id = fnd_wall.id
+        if fnd_wall.sameas_id
+          hpxml_sameas_id = fnd_wall.sameas_id
+          fnd_wall = fnd_wall.sameas
+        end
 
-        store_adjacent_surface_ids_to_space(get_interior_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg), fnd_wall)
-        next if fnd_wall.sameas_id
+        next unless fnd_wall.is_interior
 
         ag_height = fnd_wall.height - fnd_wall.depth_below_grade
         ag_net_area = fnd_wall.net_area * ag_height / fnd_wall.height
@@ -473,6 +501,9 @@ module Geometry
         else
           azimuth = fnd_wall.azimuth
         end
+        if hpxml_sameas_id
+          azimuth = (azimuth + 180) % 360
+        end
 
         vertices = create_wall_vertices(length, ag_height, z_origin, azimuth)
         surface = OpenStudio::Model::Surface.new(vertices, model)
@@ -483,10 +514,13 @@ module Geometry
         surface.setName(fnd_wall.id)
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, fnd_wall, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg) if hpxml_sameas_id.nil?
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
         surface.setWindExposure(EPlus::SurfaceWindExposureNo)
-        surface.additionalProperties.setFeature('hpxmlID', fnd_wall.id)
+        surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
+        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
+
+        next unless hpxml_sameas_id.nil?
 
         # Apply construction
 
@@ -1140,24 +1174,6 @@ module Geometry
   # @return [Double] Number of occupants in the dwelling unit
   def self.get_occupancy_default_num(nbeds:)
     return Float(nbeds) # Per ANSI 301 for an asset calculation
-  end
-
-  # Store the adjacent surface ID in Space additional properties, to process after merging unit models
-  #
-  # @param space [OpenStudio::Model::Space] the OpenStudio::Model::Space object of the dwelling unit
-  # @param hpxml_surface [HPXML::Wall or HPXML::Floor or HPXML::RimJoist or HPXML::FoundationWall] any HPXML surface
-  # @return [nil]
-  def self.store_adjacent_surface_ids_to_space(space, hpxml_surface)
-    return if hpxml_surface.sameas_id.nil?
-
-    # Store adjacent surface id in the space to process later
-    adjacent_surface_ids = space.additionalProperties.getFeatureAsString('adjacentSurfaceIDs')
-    if adjacent_surface_ids.is_initialized
-      adjacent_surface_ids_new = [adjacent_surface_ids, hpxml_surface.sameas_id].join(', ')
-      space.additionalProperties.setFeature('adjacentSurfaceIDs', adjacent_surface_ids_new)
-    else
-      space.additionalProperties.setFeature('adjacentSurfaceIDs', hpxml_surface.sameas_id)
-    end
   end
 
   # Creates a space and zone based on contents of spaces and value of location.
