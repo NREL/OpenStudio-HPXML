@@ -647,7 +647,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['pv_system_2_array_tilt'] = 'roofpitch+15'
     elsif ['extra-dhw-solar-latitude.xml'].include? hpxml_file
       args['solar_thermal_system_type'] = HPXML::SolarThermalSystemTypeHotWater
+      args['solar_thermal_collector_area'] = 40.0
+      args['solar_thermal_collector_loop_type'] = HPXML::SolarThermalLoopTypeDirect
+      args['solar_thermal_collector_type'] = HPXML::SolarThermalCollectorTypeEvacuatedTube
+      args['solar_thermal_collector_azimuth'] = 180
       args['solar_thermal_collector_tilt'] = 'Latitude-15'
+      args['solar_thermal_collector_rated_optical_efficiency'] = 0.5
+      args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
     elsif ['extra-second-refrigerator.xml'].include? hpxml_file
       args['extra_refrigerator_location'] = HPXML::LocationConditionedSpace
     elsif ['extra-second-heating-system-portable-heater-to-heating-system.xml'].include? hpxml_file
@@ -677,6 +683,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_type'] = Constants::None
       args['cooling_system_type'] = Constants::None
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
+      args['heat_pump_heating_efficiency'] = 7.7
+      args['heat_pump_cooling_efficiency'] = 13.0
       args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
       args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
       args['heat_pump_heating_capacity'] = 48000.0
@@ -694,6 +702,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('heat_pump_cooling_compressor_type')
       args['heat_pump_heating_efficiency'] = 10.0
       args['heat_pump_cooling_efficiency'] = 19.0
+      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
       args['heat_pump_heating_capacity'] = 48000.0
       args['heat_pump_is_ducted'] = true
       args['heat_pump_fraction_heat_load_served'] = 0.75
@@ -721,6 +730,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_protrusion'] = 0.5
     elsif ['extra-enclosure-garage-atticroof-conditioned.xml'].include? hpxml_file
       args['geometry_garage_width'] = 30.0
+      args['geometry_garage_depth'] = 20.0
       args['geometry_garage_protrusion'] = 1.0
       args['window_area_front'] = 12.0
       args['window_aspect_ratio'] = 5.0 / 1.5
@@ -1136,13 +1146,16 @@ class BuildResidentialHPXMLTest < Minitest::Test
     elsif ['error-hip-roof-and-protruding-garage.xml'].include? hpxml_file
       args['geometry_roof_type'] = Constants::RoofTypeHip
       args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 20
       args['geometry_garage_protrusion'] = 0.5
     elsif ['error-protruding-garage-under-gable-roof.xml'].include? hpxml_file
       args['geometry_unit_aspect_ratio'] = 0.5
       args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 20
       args['geometry_garage_protrusion'] = 0.5
     elsif ['error-ambient-with-garage.xml'].include? hpxml_file
       args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 20
       args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
     elsif ['error-invalid-door-area.xml'].include? hpxml_file
       args['door_area'] = -10
@@ -1150,6 +1163,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_aspect_ratio'] = 0
     elsif ['error-garage-too-wide.xml'].include? hpxml_file
       args['geometry_garage_width'] = 72
+      args['geometry_garage_depth'] = 20
     elsif ['error-garage-too-deep.xml'].include? hpxml_file
       args['geometry_garage_width'] = 12
       args['geometry_garage_depth'] = 40

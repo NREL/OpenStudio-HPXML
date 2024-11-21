@@ -589,7 +589,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       required: false,
       display_name: 'Geometry: Garage Depth',
       units: 'ft',
-      description: "The depth of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units."
+      description: "The depth of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units. If not provided, defaults to zero (no garage}."
     }
 
     args << {
@@ -598,7 +598,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       required: false,
       display_name: 'Geometry: Garage Protrusion',
       units: 'Frac',
-      description: "The fraction of the garage that is protruding from the conditioned space. Only applies to #{HPXML::ResidentialTypeSFD} units."
+      description: "The fraction of the garage that is protruding from the conditioned space. Only applies to #{HPXML::ResidentialTypeSFD} units. If not provided, defaults to zero (no protrusion)."
     }
 
     garage_position_choices = OpenStudio::StringVector.new
@@ -611,7 +611,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       choices: garage_position_choices,
       required: false,
       display_name: 'Geometry: Garage Position',
-      description: "The position of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units."
+      description: "The position of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units. If not provided, defaults to #{Constants::PositionRight}."
     }
 
     foundation_type_choices = OpenStudio::StringVector.new
@@ -929,7 +929,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       required: false,
       display_name: 'Slab: Perimeter Insulation Nominal R-value',
       units: 'h-ft^2-R/Btu',
-      description: 'Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
+      description: 'Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors. If not provided, defaults to zero.'
     }
 
     args << {
@@ -938,7 +938,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       required: false,
       display_name: 'Slab: Perimeter Insulation Depth',
       units: 'ft',
-      description: 'Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
+      description: 'Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors. If not provided, defaults to zero.'
     }
 
     args << {
@@ -974,7 +974,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       required: false,
       display_name: 'Slab: Under Slab Insulation Nominal R-value',
       units: 'h-ft^2-R/Btu',
-      description: 'Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.'
+      description: 'Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors. If not provided, defaults to zero.'
     }
 
     args << {
@@ -983,7 +983,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       required: false,
       display_name: 'Slab: Under Slab Insulation Width',
       units: 'ft',
-      description: 'Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors.'
+      description: 'Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors. If not provided, defaults to zero.'
     }
 
     args << {
@@ -1724,7 +1724,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       name: 'heating_system_fraction_heat_load_served',
       required: false,
       display_name: 'Heating System: Fraction Heat Load Served',
-      description: 'The heating load served by the heating system.',
+      description: 'The heating load served by the heating system. If not provided, defaults to 1.',
       units: 'Frac'
     }
 
@@ -1824,7 +1824,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       name: 'cooling_system_fraction_cool_load_served',
       required: false,
       display_name: 'Cooling System: Fraction Cool Load Served',
-      description: 'The cooling load served by the cooling system.',
+      description: 'The cooling load served by the cooling system. If not provided, defaults to 1.',
       units: 'Frac'
     }
 
@@ -2075,7 +2075,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       name: 'heat_pump_fraction_heat_load_served',
       required: false,
       display_name: 'Heat Pump: Fraction Heat Load Served',
-      description: 'The heating load served by the heat pump.',
+      description: 'The heating load served by the heat pump. If not provided, defaults to 1.',
       units: 'Frac'
     }
 
@@ -2084,7 +2084,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       name: 'heat_pump_fraction_cool_load_served',
       required: false,
       display_name: 'Heat Pump: Fraction Cool Load Served',
-      description: 'The cooling load served by the heat pump.',
+      description: 'The cooling load served by the heat pump. If not provided, defaults to 1.',
       units: 'Frac'
     }
 
@@ -2104,7 +2104,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       choices: heat_pump_backup_type_choices,
       required: false,
       display_name: 'Heat Pump: Backup Type',
-      description: "The backup type of the heat pump. If '#{HPXML::HeatPumpBackupTypeIntegrated}', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If '#{HPXML::HeatPumpBackupTypeSeparate}', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use '#{Constants::None}' if there is no backup heating."
+      description: "The backup type of the heat pump. If '#{HPXML::HeatPumpBackupTypeIntegrated}', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If '#{HPXML::HeatPumpBackupTypeSeparate}', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use '#{Constants::None}' if there is no backup heating. If not provided, defaults to '#{HPXML::HeatPumpBackupTypeIntegrated}'."
     }
 
     args << {
@@ -5283,10 +5283,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def argument_errors(args)
     errors = []
 
-    error = (args[:heating_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:heating_system_fraction_heat_load_served] > 0) && (args[:heat_pump_fraction_heat_load_served] > 0)
+    error = (args[:heating_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:heating_system_fraction_heat_load_served].nil? || args[:heating_system_fraction_heat_load_served] > 0) && (args[:heat_pump_fraction_heat_load_served].nil? || args[:heat_pump_fraction_heat_load_served] > 0)
     errors << 'Multiple central heating systems are not currently supported.' if error
 
-    error = (args[:cooling_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:cooling_system_fraction_cool_load_served] > 0) && (args[:heat_pump_fraction_cool_load_served] > 0)
+    error = (args[:cooling_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:cooling_system_fraction_cool_load_served].nil? || args[:cooling_system_fraction_cool_load_served] > 0) && (args[:heat_pump_fraction_cool_load_served].nil? || args[:heat_pump_fraction_cool_load_served] > 0)
     errors << 'Multiple central cooling systems are not currently supported.' if error
 
     error = ![HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type]) && (args[:geometry_foundation_height] == 0)
@@ -5455,7 +5455,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_num_floors_above_grade] > 6)
     errors << 'Number of above-grade floors must be six or less.' if error
 
-    error = (args[:geometry_garage_protrusion] < 0) || (args[:geometry_garage_protrusion] > 1)
+    error = !args[:geometry_garage_protrusion].nil? && ((args[:geometry_garage_protrusion] < 0) || (args[:geometry_garage_protrusion] > 1))
     errors << 'Garage protrusion fraction must be between zero and one.' if error
 
     error = (args[:geometry_unit_left_wall_is_adiabatic] && args[:geometry_unit_right_wall_is_adiabatic] && args[:geometry_unit_front_wall_is_adiabatic] && args[:geometry_unit_back_wall_is_adiabatic])
@@ -5467,13 +5467,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment)
     errors << 'Single-family attached units cannot be below another unit.' if error
 
-    error = (args[:geometry_garage_protrusion] > 0) && (args[:geometry_roof_type] == Constants::RoofTypeHip) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+    error = (!args[:geometry_garage_protrusion].nil? && args[:geometry_garage_protrusion] > 0) && (args[:geometry_roof_type] == Constants::RoofTypeHip) && !args[:geometry_garage_width].nil? && !args[:geometry_garage_depth].nil? && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
     errors << 'Cannot handle protruding garage and hip roof.' if error
 
-    error = (args[:geometry_garage_protrusion] > 0) && (args[:geometry_unit_aspect_ratio] < 1) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0) && (args[:geometry_roof_type] == Constants::RoofTypeGable)
+    error = (!args[:geometry_garage_protrusion].nil? && args[:geometry_garage_protrusion] > 0) && (args[:geometry_unit_aspect_ratio] < 1) & !args[:geometry_garage_width].nil? && !args[:geometry_garage_depth].nil? && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0) && (args[:geometry_roof_type] == Constants::RoofTypeGable)
     errors << 'Cannot handle protruding garage and attic ridge running from front to back.' if error
 
-    error = (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+    error = (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) && !args[:geometry_garage_width].nil? && !args[:geometry_garage_depth].nil? && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
     errors << 'Cannot handle garages with an ambient foundation type.' if error
 
     error = (args[:door_area] < 0)
@@ -6270,7 +6270,7 @@ module HPXMLFile
 
     nbr_map.each do |facade, data|
       distance, neighbor_height = data
-      next if distance == 0
+      next if distance.nil? || distance == 0
 
       azimuth = Geometry.get_azimuth_from_facade(facade: facade, orientation: args[:geometry_unit_orientation])
 
@@ -6821,6 +6821,10 @@ module HPXMLFile
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   # @return [nil]
   def self.set_slabs(hpxml_bldg, model, args, sorted_surfaces)
+    args[:slab_perimeter_insulation_r] = 0 if args[:slab_perimeter_insulation_r].nil?
+    args[:slab_perimeter_insulation_depth] = 0 if args[:slab_perimeter_insulation_depth].nil?
+    args[:slab_under_insulation_r] = 0 if args[:slab_under_insulation_r].nil?
+    args[:slab_under_insulation_width] = 0 if args[:slab_under_insulation_width].nil?
     sorted_surfaces.each do |surface|
       next unless [EPlus::BoundaryConditionFoundation].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != EPlus::SurfaceTypeFloor
@@ -6847,7 +6851,7 @@ module HPXMLFile
         exposed_perimeter -= Geometry.get_unexposed_garage_perimeter(**args)
       end
 
-      if args[:slab_under_insulation_width] >= 999
+      if !args[:slab_under_insulation_width].nil? && args[:slab_under_insulation_width] >= 999
         under_slab_insulation_spans_entire_slab = true
       else
         under_slab_insulation_width = args[:slab_under_insulation_width]
@@ -7182,8 +7186,6 @@ module HPXMLFile
       end
     end
 
-    fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
-
     if heating_system_type.include?('Shared')
       is_shared_system = true
       number_of_units_served = args[:geometry_building_num_units]
@@ -7194,13 +7196,14 @@ module HPXMLFile
       heating_system_type = HPXML::HVACTypeBoiler
     end
 
+    args[:heating_system_fraction_heat_load_served] = 1 if args[:heating_system_fraction_heat_load_served].nil?
     hpxml_bldg.heating_systems.add(id: "HeatingSystem#{hpxml_bldg.heating_systems.size + 1}",
                                    heating_system_type: heating_system_type,
                                    heating_system_fuel: args[:heating_system_fuel],
                                    heating_capacity: args[:heating_system_heating_capacity],
                                    heating_autosizing_factor: args[:heating_system_heating_autosizing_factor],
                                    heating_autosizing_limit: args[:heating_system_heating_autosizing_limit],
-                                   fraction_heat_load_served: fraction_heat_load_served,
+                                   fraction_heat_load_served: args[:heating_system_fraction_heat_load_served],
                                    heating_efficiency_afue: heating_efficiency_afue,
                                    heating_efficiency_percent: heating_efficiency_percent,
                                    airflow_defect_ratio: airflow_defect_ratio,
@@ -7270,6 +7273,7 @@ module HPXMLFile
       integrated_heating_system_efficiency_percent = args[:cooling_system_integrated_heating_system_efficiency_percent]
     end
 
+    args[:cooling_system_fraction_cool_load_served] = 1 if args[:cooling_system_fraction_cool_load_served].nil?
     hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
                                    cooling_system_type: cooling_system_type,
                                    cooling_system_fuel: HPXML::FuelTypeElectricity,
@@ -7350,9 +7354,10 @@ module HPXMLFile
 
     return if heat_pump_type == Constants::None
 
+    args[:heat_pump_backup_type] = HPXML::HeatPumpBackupTypeIntegrated if args[:heat_pump_backup_type].nil?
     args[:heat_pump_backup_fuel] = HPXML::FuelTypeElectricity if args[:heat_pump_backup_fuel].nil?
     args[:heat_pump_backup_heating_efficiency] = 1 if args[:heat_pump_backup_heating_efficiency].nil?
-    if (args[:heat_pump_backup_type].nil? || args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated)
+    if (args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated)
       backup_type = args[:heat_pump_backup_type]
       backup_heating_fuel = args[:heat_pump_backup_fuel]
       backup_heating_capacity = args[:heat_pump_backup_heating_capacity]
@@ -7410,6 +7415,8 @@ module HPXMLFile
       heat_pump_crankcase_heater_watts = args[:heat_pump_crankcase_heater_watts]
     end
 
+    args[:heat_pump_fraction_heat_load_served] = 1 if args[:heat_pump_fraction_heat_load_served].nil?
+    args[:heat_pump_fraction_cool_load_served] = 1 if args[:heat_pump_fraction_cool_load_served].nil?
     hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
                               heat_pump_type: heat_pump_type,
                               heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -8505,7 +8512,7 @@ module HPXMLFile
       args[:lighting_garage_fraction_lfl] = 0.0 if args[:lighting_garage_fraction_lfl].nil?
       args[:lighting_garage_fraction_led] = 0.0 if args[:lighting_garage_fraction_led].nil?
 
-      has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+      has_garage = !args[:geometry_garage_width].nil? && !args[:geometry_garage_depth].nil? && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
 
       # Interior
       interior_usage_multiplier = args[:lighting_interior_usage_multiplier]

@@ -605,7 +605,7 @@ The width of the garage. Only applies to single-family detached units. If not pr
 
 **Geometry: Garage Depth**
 
-The depth of the garage. Only applies to single-family detached units.
+The depth of the garage. Only applies to single-family detached units. If not provided, defaults to zero (no garage}.
 
 - **Name:** ``geometry_garage_depth``
 - **Type:** ``Double``
@@ -618,7 +618,7 @@ The depth of the garage. Only applies to single-family detached units.
 
 **Geometry: Garage Protrusion**
 
-The fraction of the garage that is protruding from the conditioned space. Only applies to single-family detached units.
+The fraction of the garage that is protruding from the conditioned space. Only applies to single-family detached units. If not provided, defaults to zero (no protrusion).
 
 - **Name:** ``geometry_garage_protrusion``
 - **Type:** ``Double``
@@ -631,7 +631,7 @@ The fraction of the garage that is protruding from the conditioned space. Only a
 
 **Geometry: Garage Position**
 
-The position of the garage. Only applies to single-family detached units.
+The position of the garage. Only applies to single-family detached units. If not provided, defaults to Right.
 
 - **Name:** ``geometry_garage_position``
 - **Type:** ``Choice``
@@ -981,7 +981,7 @@ Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Requ
 
 **Slab: Perimeter Insulation Nominal R-value**
 
-Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors. If not provided, defaults to zero.
 
 - **Name:** ``slab_perimeter_insulation_r``
 - **Type:** ``Double``
@@ -994,7 +994,7 @@ Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-gr
 
 **Slab: Perimeter Insulation Depth**
 
-Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors. If not provided, defaults to zero.
 
 - **Name:** ``slab_perimeter_insulation_depth``
 - **Type:** ``Double``
@@ -1046,7 +1046,7 @@ Depth of the slab exterior horizontal insulation measured from the top surface o
 
 **Slab: Under Slab Insulation Nominal R-value**
 
-Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors. If not provided, defaults to zero.
 
 - **Name:** ``slab_under_insulation_r``
 - **Type:** ``Double``
@@ -1059,7 +1059,7 @@ Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grad
 
 **Slab: Under Slab Insulation Width**
 
-Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors.
+Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors. If not provided, defaults to zero.
 
 - **Name:** ``slab_under_insulation_width``
 - **Type:** ``Double``
@@ -1874,7 +1874,7 @@ The maximum capacity limit applied to the auto-sizing methodology. If not provid
 
 **Heating System: Fraction Heat Load Served**
 
-The heating load served by the heating system.
+The heating load served by the heating system. If not provided, defaults to 1.
 
 - **Name:** ``heating_system_fraction_heat_load_served``
 - **Type:** ``Double``
@@ -2009,7 +2009,7 @@ The maximum capacity limit applied to the auto-sizing methodology. If not provid
 
 **Cooling System: Fraction Cool Load Served**
 
-The cooling load served by the cooling system.
+The cooling load served by the cooling system. If not provided, defaults to 1.
 
 - **Name:** ``cooling_system_fraction_cool_load_served``
 - **Type:** ``Double``
@@ -2299,7 +2299,7 @@ The maximum capacity limit applied to the auto-sizing methodology. If not provid
 
 **Heat Pump: Fraction Heat Load Served**
 
-The heating load served by the heat pump.
+The heating load served by the heat pump. If not provided, defaults to 1.
 
 - **Name:** ``heat_pump_fraction_heat_load_served``
 - **Type:** ``Double``
@@ -2312,7 +2312,7 @@ The heating load served by the heat pump.
 
 **Heat Pump: Fraction Cool Load Served**
 
-The cooling load served by the heat pump.
+The cooling load served by the heat pump. If not provided, defaults to 1.
 
 - **Name:** ``heat_pump_fraction_cool_load_served``
 - **Type:** ``Double``
@@ -2336,7 +2336,7 @@ The temperature below which the heat pump compressor is disabled. If both this a
 
 **Heat Pump: Backup Type**
 
-The backup type of the heat pump. If 'integrated', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If 'separate', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.
+The backup type of the heat pump. If 'integrated', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If 'separate', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating. If not provided, defaults to 'integrated'.
 
 - **Name:** ``heat_pump_backup_type``
 - **Type:** ``Choice``

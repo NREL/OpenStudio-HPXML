@@ -27,10 +27,10 @@ module Geometry
                                          geometry_average_ceiling_height:,
                                          geometry_unit_num_floors_above_grade:,
                                          geometry_unit_aspect_ratio:,
-                                         geometry_garage_width:,
-                                         geometry_garage_depth:,
-                                         geometry_garage_protrusion:,
-                                         geometry_garage_position:,
+                                         geometry_garage_width: 0.0,
+                                         geometry_garage_depth: 0.0,
+                                         geometry_garage_protrusion: 0.0,
+                                         geometry_garage_position: Constants::PositionRight,
                                          geometry_foundation_type:,
                                          geometry_foundation_height:,
                                          geometry_rim_joist_height:,
@@ -1740,9 +1740,9 @@ module Geometry
   # @param geometry_garage_width [Double] width of the garage (ft)
   # @param geometry_garage_depth [Double] depth of the garage (ft)
   # @return [Double] the unexposed garage perimeter
-  def self.get_unexposed_garage_perimeter(geometry_garage_protrusion:,
-                                          geometry_garage_width:,
-                                          geometry_garage_depth:,
+  def self.get_unexposed_garage_perimeter(geometry_garage_protrusion: 0.0,
+                                          geometry_garage_width: 0.0,
+                                          geometry_garage_depth: 0.0,
                                           **)
     protrusion = geometry_garage_protrusion
     width = geometry_garage_width
