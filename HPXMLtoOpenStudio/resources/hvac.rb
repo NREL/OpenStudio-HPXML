@@ -430,7 +430,8 @@ module HVAC
     end
 
     # Fan
-    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
+    hvac_system = cooling_system.nil? ? heating_system : cooling_system
+    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms, hvac_system)
     if heating_system.is_a?(HPXML::HeatPump) && (not heating_system.backup_system.nil?) && (not htg_ap.hp_min_temp.nil?)
       # Disable blower fan power below compressor lockout temperature if separate backup heating system
       add_fan_power_ems_program(model, fan, htg_ap.hp_min_temp)
@@ -524,7 +525,7 @@ module HVAC
 
     # Fan
     fan_watts_per_cfm = [2.79 * (clg_cfm / unit_multiplier)**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
-    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [clg_cfm])
+    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [clg_cfm], cooling_system)
     fan.addToNode(air_loop.supplyInletNode)
     add_fan_pump_disaggregation_ems_program(model, fan, nil, evap_cooler, nil, cooling_system)
 
@@ -737,7 +738,7 @@ module HVAC
     demand_outlet_pipe.addToNode(plant_loop.demandOutletNode)
 
     # Fan
-    fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, [htg_cfm, clg_cfm])
+    fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, [htg_cfm, clg_cfm], heat_pump)
     add_fan_pump_disaggregation_ems_program(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
@@ -818,7 +819,7 @@ module HVAC
 
     # Fan
     fan_power_installed = 0.0 # Use provided net COP
-    fan = create_supply_fan(model, obj_name, fan_power_installed, [htg_cfm])
+    fan = create_supply_fan(model, obj_name, fan_power_installed, [htg_cfm], heat_pump)
     add_fan_pump_disaggregation_ems_program(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
@@ -966,7 +967,7 @@ module HVAC
 
     if heating_system.distribution_system.air_type.to_s == HPXML::AirTypeFanCoil
       # Fan
-      fan = create_supply_fan(model, obj_name, 0.0, [fan_cfm]) # fan energy included in above pump via Electric Auxiliary Energy (EAE)
+      fan = create_supply_fan(model, obj_name, 0.0, [fan_cfm], heating_system) # fan energy included in above pump via Electric Auxiliary Energy (EAE)
 
       # Heating Coil
       htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
@@ -1082,7 +1083,7 @@ module HVAC
     # Fan
     htg_cfm = heating_system.heating_airflow_cfm
     fan_watts_per_cfm = heating_system.fan_watts / htg_cfm
-    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [htg_cfm])
+    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [htg_cfm], heating_system)
     add_fan_pump_disaggregation_ems_program(model, fan, htg_coil, nil, nil, heating_system)
 
     # Unitary System
@@ -2520,14 +2521,15 @@ module HVAC
     return htg_supp_coil
   end
 
-  # TODO
+  # Create OpenStudio FanSystemModel object for HVAC system supply fan
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
-  # @param fan_watts_per_cfm [TODO] TODO
-  # @param fan_cfms [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
+  # @param fan_watts_per_cfm [Double] Fan efficacy watts per cfm
+  # @param fan_cfms [Array<Double>] Fan cfms
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC (heating or cooling or heatpump) systems
+  # @return [OpenStudio::Model::FanSystemModel] OpenStudio FanSystemModel object
+  def self.create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms, hvac_system)
     # Note: fan_cfms should include all unique airflow rates (both heating and cooling, at all speeds)
     max_fan_cfm = Float(fan_cfms.max) # Convert to float to prevent integer division below
     fan = Model.add_fan_system_model(
@@ -2540,21 +2542,32 @@ module HVAC
 
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
-      power_fraction = calculate_fan_power_from_curve(1.0, fan_ratio)
+      power_fraction = calculate_fan_power_from_curve(1.0, fan_ratio, hvac_system)
       fan.addSpeed(fan_ratio.round(5), power_fraction.round(5))
     end
 
     return fan
   end
 
-  # TODO
+  # Calculate fan power at any speed or mode
   #
-  # @param max_fan_power [TODO] TODO
-  # @param fan_ratio [TODO] TODO
-  # @return [TODO] TODO
-  def self.calculate_fan_power_from_curve(max_fan_power, fan_ratio)
-    # Cubic relationship fan power curve
-    return max_fan_power * (fan_ratio**3)
+  # @param max_fan_power [Double] Rated fan power consumption
+  # @param fan_ratio [Double] Fan cfm ratio to full speed
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC (heating or cooling or heatpump) systems
+  # @return [Double] Fan power at any speed or mode
+  def self.calculate_fan_power_from_curve(max_fan_power, fan_ratio, hvac_system)
+    if hvac_system.fan_model_type.nil?
+      # Cubic relationship fan power curve
+      fan_power = max_fan_power * (fan_ratio**3)
+    elsif hvac_system.fan_model_type == HPXML::HVACFanModelTypeBPM
+      # bpm fan
+      index = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
+      fan_power = max_fan_power * (fan_ratio**index)
+    else
+      # psc fan
+      fan_power = max_fan_power * fan_ratio * (0.3 * fan_ratio + 0.7)
+    end
+    return fan_power
   end
 
   # TODO
@@ -2813,16 +2826,18 @@ module HVAC
     return gross_cap_btu_hr, gross_cop
   end
 
-  # TODO
+  # Preprocess the detailed performance user inputs, extrapolate data for OS TableLookup object
   #
-  # @param detailed_performance_data [TODO] TODO
-  # @param hvac_ap [TODO] TODO
-  # @param mode [TODO] TODO
-  # @param max_rated_fan_cfm [TODO] TODO
-  # @param weather_temp [TODO] TODO
-  # @param compressor_lockout_temp [TODO] TODO
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC (heating or cooling or heatpump) systems
+  # @param mode [Symbol] Heating or cooling
+  # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
+  # @param weather_temp [Double] weather_minimum drybulb temperature
+  # @param compressor_lockout_temp [Double] Compressor Lock-out temperature or minimum heat pump compressor operating temperature
   # @return [nil]
-  def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode, max_rated_fan_cfm, weather_temp, compressor_lockout_temp = nil)
+  def self.process_neep_detailed_performance(hvac_system, mode, max_rated_fan_cfm, weather_temp, compressor_lockout_temp = nil)
+    detailed_performance_data_name = (mode == :clg) ? 'cooling_detailed_performance_data' : 'heating_detailed_performance_data'
+    detailed_performance_data = hvac_system.send(detailed_performance_data_name)
+    hvac_ap = hvac_system.additional_properties
     data_array = Array.new(2) { Array.new }
     detailed_performance_data.sort_by { |dp| dp.outdoor_temperature }.each do |data_point|
       # Only process min and max capacities at each outdoor drybulb
@@ -2854,7 +2869,7 @@ module HVAC
       data.each do |dp|
         this_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * cfm_per_ton[speed]
         fan_ratio = this_cfm / max_rated_fan_cfm
-        fan_power = calculate_fan_power_from_curve(hvac_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio)
+        fan_power = calculate_fan_power_from_curve(hvac_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, hvac_system)
         dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
       end
     end
@@ -3039,6 +3054,9 @@ module HVAC
     if mode == :clg
       cap_ft_spec_ss, eir_ft_spec_ss = get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
       rated_t_i = HVAC::AirSourceCoolRatedIWB
+      # Added two data points to be held constant outside the range 57F to 72F
+      # Disable for now
+      # indoor_t = [40.0, 57.0, rated_t_i, 72.0, 90.0]
       indoor_t = [50.0, rated_t_i, 80.0]
     else
       # default capacity retention for single speed
@@ -3070,6 +3088,10 @@ module HVAC
           data_tmp << dp_new
           if mode == :clg
             dp_new.indoor_wetbulb = t_i
+            # Cooling variations  shall be held constant for Tiwb less than 57°F and greater than 72°F
+            # Fixme: also should be held constant for Todb less than 75°F (haven't find a direct solution yet)
+            # t_i = [t_i, 57].max
+            # t_i = [t_i, 72].min
           else
             dp_new.indoor_temperature = t_i
           end
@@ -3118,14 +3140,14 @@ module HVAC
       clg_ap.cool_rated_capacities_net = []
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_ratio = clg_ap.cool_fan_speed_ratios[speed] * max_clg_cfm / max_rated_fan_cfm
-        fan_power = calculate_fan_power_from_curve(clg_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio)
+        fan_power = calculate_fan_power_from_curve(clg_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, cooling_system)
         net_capacity = capacity_ratio * cooling_system.cooling_capacity
         clg_ap.cool_rated_capacities_net << net_capacity
         gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :clg)[0]
         clg_ap.cool_rated_capacities_gross << gross_capacity
       end
     else
-      process_neep_detailed_performance(cooling_system.cooling_detailed_performance_data, clg_ap, :clg, max_rated_fan_cfm, weather_max_drybulb)
+      process_neep_detailed_performance(cooling_system, :clg, max_rated_fan_cfm, weather_max_drybulb)
     end
 
     clg_coil = nil
@@ -3275,14 +3297,14 @@ module HVAC
       htg_ap.heat_rated_capacities_net = []
       htg_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_ratio = htg_ap.heat_fan_speed_ratios[speed] * max_htg_cfm / max_rated_fan_cfm
-        fan_power = calculate_fan_power_from_curve(htg_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio)
+        fan_power = calculate_fan_power_from_curve(htg_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, heating_system)
         net_capacity = capacity_ratio * heating_system.heating_capacity
         htg_ap.heat_rated_capacities_net << net_capacity
         gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :htg)[0]
         htg_ap.heat_rated_capacities_gross << gross_capacity
       end
     else
-      process_neep_detailed_performance(heating_system.heating_detailed_performance_data, htg_ap, :htg, max_rated_fan_cfm, weather_min_drybulb, htg_ap.hp_min_temp)
+      process_neep_detailed_performance(heating_system, :htg, max_rated_fan_cfm, weather_min_drybulb, htg_ap.hp_min_temp)
     end
 
     htg_coil = nil
@@ -4492,21 +4514,19 @@ module HVAC
   def self.set_fan_power_rated(hvac_system, use_eer_cop)
     hvac_ap = hvac_system.additional_properties
 
+    # Based on RESNET DX Modeling Appendix
+    psc_ducted_watts_per_cfm = 0.414 # W/cfm, PSC fan
+    psc_ductless_watts_per_cfm = 0.414 # W/cfm, PSC fan
+    bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
+    bpm_ductless_watts_per_cfm = 0.171 # W/cfm, BPM fan
+
     if use_eer_cop
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     elsif hvac_system.distribution_system.nil?
-      # Ductless, installed and rated value should be equal
-      hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
+      hvac_ap.fan_power_rated = (hvac_system.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_ductless_watts_per_cfm : bpm_ductless_watts_per_cfm
     else
-      # Based on ASHRAE 1449-RP and recommended by Hugh Henderson
-      if hvac_system.cooling_efficiency_seer <= 14
-        hvac_ap.fan_power_rated = 0.25 # W/cfm
-      elsif hvac_system.cooling_efficiency_seer >= 16
-        hvac_ap.fan_power_rated = 0.18 # W/cfm
-      else
-        hvac_ap.fan_power_rated = 0.25 + (0.18 - 0.25) * (hvac_system.cooling_efficiency_seer - 14.0) / 2.0 # W/cfm
-      end
+      hvac_ap.fan_power_rated = (hvac_system.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_ducted_watts_per_cfm : bpm_ducted_watts_per_cfm
     end
   end
 
@@ -5079,7 +5099,7 @@ module HVAC
     end
     # cooling capacity and airflow are already with unit multiplier, calculate the capacity w/o multiplier
     nominal_cooling_capacity = heat_pump.cooling_capacity / unit_multiplier
-    defrost_power_fraction = (max_heating_airflow / design_airflow)**3
+    defrost_power_fraction = calculate_fan_power_from_curve(1.0, max_heating_airflow / design_airflow, heat_pump)
     power_design = fan_watts_per_cfm * design_airflow / unit_multiplier
     p_dot_blower = power_design * defrost_power_fraction
     # Based on manufacturer data for ~70 systems ranging from 1.5 to 5 tons with varying efficiency levels
