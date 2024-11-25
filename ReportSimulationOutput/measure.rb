@@ -2237,7 +2237,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # Looks up the associated ENergyPlus output names for a given class name and key.
+  # Looks up the associated EnergyPlus output names for a given class name and key.
   #
   # @param class_name [String] Type of output (e.g., EUT)
   # @param key [String or Array] E.g., FT::Elec or [FT::Elec, EUT::Heating]
