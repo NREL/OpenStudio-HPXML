@@ -359,7 +359,6 @@
             <Type>concrete block solid core</Type>
             <Height>10.0</Height>
             <Area>1740.0</Area>
-            <Orientation>north</Orientation>
             <DepthBelowGrade>8.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWallCrawlspaceInsulation'/>
