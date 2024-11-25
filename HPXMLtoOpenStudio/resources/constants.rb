@@ -73,11 +73,15 @@ module Constants
   ObjectTypeRefrigerator = 'fridge'
   ObjectTypeRoomAC = 'room ac'
   ObjectTypeRoomHP = 'room ac with reverse cycle'
+  ObjectTypeShowers = 'hot_water_showers'
   ObjectTypeSolarHotWater = 'solar hot water'
   ObjectTypeTotalAirflowsProgram = 'total airflows program'
   ObjectTypeTotalLoadsProgram = 'total loads program'
   ObjectTypeUnitHeater = 'unit heater'
   ObjectTypeUnmetHoursProgram = 'unmet hours program'
+  ObjectTypeUnmetShowersProgram = 'unmet showers program'
+  ObjectTypeUnmetLoadsShowerUnmetTime = 'unmet loads shower unmet time'
+  ObjectTypeUnmetLoadsShowerTime = 'unmet loads shower time'
   ObjectTypeWaterHeater = 'water heater'
   ObjectTypeWaterHeaterSetpoint = 'water heater setpoint'
   ObjectTypeWaterHeaterAdjustment = 'water heater energy adjustment'
@@ -248,6 +252,7 @@ end
 module UHT
   Heating = 'Heating'
   Cooling = 'Cooling'
+  HotWaterShower = 'Showers'
 end
 
 # Resilience Types (Constants for output reporting)
