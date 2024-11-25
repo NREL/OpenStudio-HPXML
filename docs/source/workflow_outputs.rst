@@ -321,14 +321,14 @@ Annual unmet hours are listed below.
   =========================  =====
   Unmet Hours: Heating (hr)  Number of hours where the heating setpoint is not maintained.
   Unmet Hours: Cooling (hr)  Number of hours where the cooling setpoint is not maintained.
-  Unmet Hours: Showers (hr)  Number of hours where the shower fixture water temperature is less than 105 deg-F.
-  Unmet Hours: Showers (%)   Number of unmet shower hours as a percent of total hours with nonzero shower volume.
+  Unmet Hours: Showers (hr)  Number of hours where the shower water temperature is less than 105 deg-F.
+  Unmet Hours: Showers (%)   Number of unmet shower hours as a percent of total hours for showers.
   =========================  =====
 
 Unmet heating/cooling hours reflect the number of hours during the heating/cooling season when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
 
 Unmet showers hours only account for a storage water heater running out of water and occupant discomfort; they do not account for temperature drop due to a distribution system or a tankless water heater's minimum firing rate.
-Using simple schedules (rather than detailed/stochastic schedules) may under-represent these values.
+Using simple hourly schedules (rather than detailed/stochastic sub-hourly schedules) may under-represent these values.
 
 Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -637,7 +637,7 @@ Depending on the outputs requested, the file may include:
   Hot Water Uses               ``hotwater``         Water use for each end use type (in gallons).
   Total Loads                  ``loads``            Heating, cooling, and hot water loads (in kBtu).
   Component Loads              ``componentloads``   Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
-  Unmet Hours                  ``unmethours``       Heating, cooling, and hot water showers unmet hours.
+  Unmet Hours                  ``unmethours``       Heating, cooling, and hot water unmet hours.
   Zone Temperatures            ``temperatures``     Zone temperatures (in deg-F) for each space (e.g., conditioned space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
   Airflows                     ``airflows``         Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
   Weather                      ``weather``          Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.

@@ -114,7 +114,7 @@ Generates annual heating, cooling, and hot water loads.
 
 **Generate Annual Output: Unmet Hours**
 
-Generates annual unmet hours for heating, cooling, and hot water showers.
+Generates annual unmet hours for heating, cooling, and hot water.
 
 - **Name:** ``include_annual_unmet_hours``
 - **Type:** ``Boolean``
@@ -314,7 +314,7 @@ Generates timeseries heating and cooling loads disaggregated by component type.
 
 **Generate Timeseries Output: Unmet Hours**
 
-Generates timeseries unmet hours for heating, cooling, and hot water showers.
+Generates timeseries unmet hours for heating, cooling, and hot water.
 
 - **Name:** ``include_timeseries_unmet_hours``
 - **Type:** ``Boolean``

@@ -13,13 +13,13 @@ module Outputs
   # @param add_component_loads [Boolean] Whether to calculate component loads (since it incurs a runtime speed penalty)
   # @return [nil]
   def self.apply_ems_programs(model, hpxml_osm_map, hpxml_header, add_component_loads)
-    season_day_nums = Outputs.apply_unmet_hours_ems_program(model, hpxml_osm_map, hpxml_header)
-    Outputs.add_unmet_showers_ems_program(model, hpxml_osm_map)
-    loads_data = Outputs.apply_total_loads_ems_program(model, hpxml_osm_map, hpxml_header)
+    season_day_nums = apply_unmet_hours_ems_program(model, hpxml_osm_map, hpxml_header)
+    add_unmet_showers_ems_program(model, hpxml_osm_map)
+    loads_data = apply_total_loads_ems_program(model, hpxml_osm_map, hpxml_header)
     if add_component_loads
-      Outputs.apply_component_loads_ems_program(model, hpxml_osm_map, loads_data, season_day_nums)
+      apply_component_loads_ems_program(model, hpxml_osm_map, loads_data, season_day_nums)
     end
-    Outputs.apply_total_airflows_ems_program(model, hpxml_osm_map)
+    apply_total_airflows_ems_program(model, hpxml_osm_map)
   end
 
   # Creates an EMS program that calculates heating and cooling unmet hours (number
@@ -1077,9 +1077,9 @@ module Outputs
     line_break = nil
 
     # Summary HVAC capacities
-    results_out << ['HVAC Capacity: Heating (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[0] }.sum(0.0).round(1)]
-    results_out << ['HVAC Capacity: Cooling (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[1] }.sum(0.0).round(1)]
-    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[2] }.sum(0.0).round(1)]
+    results_out << ['HVAC Capacity: Heating (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[0] }.sum(0.0).round(1)]
+    results_out << ['HVAC Capacity: Cooling (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[1] }.sum(0.0).round(1)]
+    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[2] }.sum(0.0).round(1)]
 
     # HVAC design temperatures
     results_out << [line_break]

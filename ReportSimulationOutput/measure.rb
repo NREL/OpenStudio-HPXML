@@ -97,7 +97,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_unmet_hours', false)
     arg.setDisplayName('Generate Annual Output: Unmet Hours')
-    arg.setDescription('Generates annual unmet hours for heating, cooling, and hot water showers.')
+    arg.setDescription('Generates annual unmet hours for heating, cooling, and hot water.')
     arg.setDefaultValue(true)
     args << arg
 
@@ -211,7 +211,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_unmet_hours', false)
     arg.setDisplayName('Generate Timeseries Output: Unmet Hours')
-    arg.setDescription('Generates timeseries unmet hours for heating, cooling, and hot water showers.')
+    arg.setDescription('Generates timeseries unmet hours for heating, cooling, and hot water.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -455,9 +455,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Unmet Hours
     @unmet_hours.each do |key, unmet_hour|
-      unmet_program = unmet_hours_program
       if key.include?(UHT::HotWaterShower)
         unmet_program = unmet_showers_program
+      else
+        unmet_program = unmet_hours_program
       end
       next if unmet_program.nil?
 
@@ -2200,9 +2201,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # TODO
+  # Creates the associated EnergyPlus output names for each OpenStudio model object and stores them
+  # in a global cache for later lookup. This is done for performance reasons.
   #
-  # @return [TODO] TODO
+  # @return [nil]
   def create_all_object_outputs_by_key
     @object_variables_by_key = {}
     return if @model.nil?
@@ -2235,11 +2237,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # TODO
+  # Looks up the associated ENergyPlus output names for a given class name and key.
   #
-  # @param class_name [TODO] TODO
-  # @param key [TODO] TODO
-  # @return [TODO] TODO
+  # @param class_name [String] Type of output (e.g., EUT)
+  # @param key [String or Array] E.g., FT::Elec or [FT::Elec, EUT::Heating]
+  # @return [Array] List of Output:Variables or Output:Meters
   def get_object_outputs(class_name, key)
     hash_key = [class_name, key]
     vars = @object_variables_by_key[hash_key]
@@ -2247,7 +2249,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return vars
   end
 
-  # TODO
+  # Base object to store information for an output.
   class BaseOutput
     def initialize()
       @timeseries_output = []
@@ -2255,7 +2257,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:name, :annual_output, :timeseries_output, :annual_units, :timeseries_units)
   end
 
-  # TODO
+  # Object to store information for a TotalEnergy (TE::XXX) output.
   class TotalEnergy < BaseOutput
     def initialize
       super()
@@ -2263,9 +2265,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor()
   end
 
-  # TODO
+  # Object to store information for a Fuel (FT::XXX) output.
   class Fuel < BaseOutput
-    # @param meters [TODO] TODO
+    # @param meters [Array<String>] Names of EnergyPlus meters
     def initialize(meters: [])
       super()
       @meters = meters
@@ -2274,11 +2276,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:meters, :timeseries_output_by_system)
   end
 
-  # TODO
+  # Object to store information for an EndUse (EUT::XXX) output.
   class EndUse < BaseOutput
-    # @param outputs [TODO] TODO
-    # @param is_negative [TODO] TODO
-    # @param is_storage [TODO] TODO
+    # @param outputs [Hash] Map of key (e.g., [FT::Elec, EUT::Heating]) => Output:Variables or Output:Meters to be requested
+    # @param is_negative [Boolean] Whether the output should be converted to a negative value
+    # @param is_storage [Boolean] Whether the output represents electric battery storage
     def initialize(outputs: [], is_negative: false, is_storage: false)
       super()
       @variables = outputs.select { |o| !o[2].include?(':') }
@@ -2295,7 +2297,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                   :hourly_output, :hourly_output_by_system)
   end
 
-  # TODO
+  # Object to store information for an Emission output.
   class Emission < BaseOutput
     def initialize()
       super()
@@ -2310,9 +2312,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                   :net_annual_output, :net_timeseries_output)
   end
 
-  # TODO
+  # Object to store information for a HotWater (HWT::XXX) output.
   class HotWater < BaseOutput
-    # @param outputs [TODO] TODO
+    # @param outputs [Hash] Map of key (e.g., [FT::Elec, EUT::Heating]) => Output:Variables or Output:Meters to be requested
     def initialize(outputs: [])
       super()
       @variables = outputs.select { |o| !o[2].include?(':') }
@@ -2323,19 +2325,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:variables, :meters, :annual_output_by_system, :timeseries_output_by_system)
   end
 
-  # TODO
+  # Object to store information for a Resilience (RT::XXX) output.
   class Resilience < BaseOutput
-    # @param variables [TODO] TODO
-    def initialize(variables: [])
+    # @param outputs [Hash] Map of key (e.g., [FT::Elec, EUT::Heating]) => Output:Variables or Output:Meters to be requested
+    def initialize(outputs: [])
       super()
-      @variables = variables
+      @variables = outputs.select { |o| !o[2].include?(':') }
+      @meters = outputs.select { |o| o[2].include?(':') }
     end
-    attr_accessor(:variables)
+    attr_accessor(:variables, :meters)
   end
 
-  # TODO
+  # Object to store information for a PeakFuel (PFT::XXX) output.
   class PeakFuel < BaseOutput
-    # @param report [TODO] TODO
+    # @param report [String] Name of the EnergyPlus report
     def initialize(report:)
       super()
       @report = report
@@ -2343,25 +2346,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:report)
   end
 
-  # TODO
+  # Object to store information for a Load (LT::XXX) output.
   class Load < BaseOutput
-    # @param variables [TODO] TODO
-    # @param ems_variable [TODO] TODO
-    # @param is_negative [TODO] TODO
-    def initialize(variables: [], ems_variable: nil, is_negative: false)
+    # @param outputs [Hash] Map of key (e.g., [FT::Elec, EUT::Heating]) => Output:Variables or Output:Meters to be requested
+    # @param ems_variable [String] Name of the EMS variable
+    # @param is_negative [Boolean] Whether the output should be converted to a negative value
+    def initialize(outputs: [], ems_variable: nil, is_negative: false)
       super()
-      @variables = variables
+      @variables = outputs.select { |o| !o[2].include?(':') }
+      @meters = outputs.select { |o| o[2].include?(':') }
       @ems_variable = ems_variable
       @is_negative = is_negative
       @timeseries_output_by_system = {}
       @annual_output_by_system = {}
     end
-    attr_accessor(:variables, :ems_variable, :is_negative, :annual_output_by_system, :timeseries_output_by_system)
+    attr_accessor(:variables, :meters, :ems_variable, :is_negative, :annual_output_by_system, :timeseries_output_by_system)
   end
 
-  # TODO
+  # Object to store information for a ComponentLoad (CLT::XXX) output.
   class ComponentLoad < BaseOutput
-    # @param ems_variable [TODO] TODO
+    # @param ems_variable [String] Name of the EMS variable
     def initialize(ems_variable:)
       super()
       @ems_variable = ems_variable
@@ -2369,9 +2373,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:ems_variable)
   end
 
-  # TODO
+  # Object to store information for an UnmetHours (UHT::XXX) output.
   class UnmetHours < BaseOutput
-    # @param ems_variable [TODO] TODO
+    # @param ems_variable [String] Name of the EMS variable
     def initialize(ems_variable:)
       super()
       @ems_variable = ems_variable
@@ -2379,29 +2383,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:ems_variable)
   end
 
-  # TODO
-  class UnmetLoads < BaseOutput
-    def initialize(ems_variable:)
-      super()
-      @ems_variable = ems_variable
-    end
-    attr_accessor(:ems_variable)
-  end
-
-  # TODO
-  class IdealLoad < BaseOutput
-    # @param variables [TODO] TODO
-    def initialize(variables: [])
-      super()
-      @variables = variables
-    end
-    attr_accessor(:variables)
-  end
-
-  # TODO
+  # Object to store information for a PeakLoad (PLT::XXX) output.
   class PeakLoad < BaseOutput
-    # @param ems_variable [TODO] TODO
-    # @param report [TODO] TODO
+    # @param ems_variable [String] Name of the EMS variable
+    # @param report [String] Name of the EnergyPlus report
     def initialize(ems_variable:, report:)
       super()
       @ems_variable = ems_variable
@@ -2410,7 +2395,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:ems_variable, :report)
   end
 
-  # TODO
+  # Object to store information for a ZoneTemp output.
   class ZoneTemp < BaseOutput
     def initialize
       super()
@@ -2418,9 +2403,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor()
   end
 
-  # TODO
+  # Object to store information for an Airflow (AFT::XXX) output.
   class Airflow < BaseOutput
-    # @param ems_variable [TODO] TODO
+    # @param ems_variable [String] Name of the EMS variable
     def initialize(ems_variable:)
       super()
       @ems_variable = ems_variable
@@ -2428,11 +2413,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:ems_variable)
   end
 
-  # TODO
+  # Object to store information for a Weather (WT::XXX) output.
   class Weather < BaseOutput
-    # @param variable [TODO] TODO
-    # @param variable_units [TODO] TODO
-    # @param timeseries_units [TODO] TODO
+    # @param variable [String] Name of the EnergyPlus output variable
+    # @param variable_units [String] Units for the EnergyPlus output variable
+    # @param timeseries_units [String] Desired units for the timeseries output
     def initialize(variable:, variable_units:, timeseries_units:)
       super()
       @variable = variable
@@ -2442,7 +2427,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:variable, :variable_units)
   end
 
-  # TODO
+  # Object to store information for an EnergyPlus OutputVariable output.
   class OutputVariable < BaseOutput
     def initialize
       super()
@@ -2643,7 +2628,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Resilience
     @resilience = {}
-    @resilience[RT::Battery] = Resilience.new(variables: get_object_outputs(RT, RT::Battery))
+    @resilience[RT::Battery] = Resilience.new(outputs: get_object_outputs(RT, RT::Battery))
 
     @resilience.each do |resilience_type, resilience|
       next unless resilience_type == RT::Battery
@@ -2669,13 +2654,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @loads = {}
     @loads[LT::Heating] = Load.new(ems_variable: 'loads_htg_tot')
-    @loads[LT::HeatingHeatPumpBackup] = Load.new(variables: get_object_outputs(LT, LT::HeatingHeatPumpBackup))
+    @loads[LT::HeatingHeatPumpBackup] = Load.new(outputs: get_object_outputs(LT, LT::HeatingHeatPumpBackup))
     @loads[LT::Cooling] = Load.new(ems_variable: 'loads_clg_tot')
-    @loads[LT::HotWaterDelivered] = Load.new(variables: get_object_outputs(LT, LT::HotWaterDelivered))
-    @loads[LT::HotWaterTankLosses] = Load.new(variables: get_object_outputs(LT, LT::HotWaterTankLosses),
+    @loads[LT::HotWaterDelivered] = Load.new(outputs: get_object_outputs(LT, LT::HotWaterDelivered))
+    @loads[LT::HotWaterTankLosses] = Load.new(outputs: get_object_outputs(LT, LT::HotWaterTankLosses),
                                               is_negative: true)
-    @loads[LT::HotWaterDesuperheater] = Load.new(variables: get_object_outputs(LT, LT::HotWaterDesuperheater))
-    @loads[LT::HotWaterSolarThermal] = Load.new(variables: get_object_outputs(LT, LT::HotWaterSolarThermal),
+    @loads[LT::HotWaterDesuperheater] = Load.new(outputs: get_object_outputs(LT, LT::HotWaterDesuperheater))
+    @loads[LT::HotWaterSolarThermal] = Load.new(outputs: get_object_outputs(LT, LT::HotWaterSolarThermal),
                                                 is_negative: true)
 
     @loads.each do |load_type, load|
@@ -2848,16 +2833,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return system_ids
   end
 
-  # TODO
+  # For a given OpenStudio model object, returns the associated EnergyPlus output names.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param object [TODO] TODO
-  # @param class_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param object [OpenStudio::Model::XXX] OpenStudio object
+  # @param class_name [String] Type of output (e.g., EUT)
+  # @return [Hash] Map of key (e.g., [FT::Elec, EUT::Heating]) => Output:Variables or Output:Meters to be requested
   def get_object_outputs_by_key(model, object, class_name)
-    # For a given object, returns the Output:Variables or Output:Meters to be requested,
-    # and associates them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
-
     object_type = object.additionalProperties.getFeatureAsString('ObjectType')
     object_type = object_type.get if object_type.is_initialized
 
