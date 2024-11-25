@@ -257,9 +257,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-zones'
       next if message.include? 'While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'
     end
-    if hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
-      next if message.include? 'Hot water setpoint should typically be greater than or equal to 110 deg-F'
-    end
     if hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'external overhangs' && w.overhangs_depth.to_f > 0 }
       next if message.include? "Exterior shading type is 'external overhangs', but overhangs are explicitly defined; exterior shading type will be ignored."
     end
@@ -407,7 +404,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'SHR adjusted to achieve valid outlet air properties and the simulation continues.'
     end
     if hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
-      next if message.include? 'Target water temperature is greater than the hot water temperature'
       next if message.include? 'Target water temperature should be less than or equal to the hot water temperature'
     end
 

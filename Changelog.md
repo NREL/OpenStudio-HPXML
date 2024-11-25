@@ -1,6 +1,8 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- Output updates:
+  - Adds "Unmet Hours: Showers (hr)" and "Unmet Hours: Showers (%)" to characterize unmet water heating loads.
 
 __Bugfixes__
 
@@ -49,8 +51,6 @@ __New Features__
   - Allows OpenEI URDB tariffs that have $/day fixed charges.
   - Updates `openei_rates.zip` with the latest residential utility rates from the [OpenEI U.S. Utility Rate database](https://apps.openei.org/USURDB/).
 - Adds a warning if the sum of supply/return duct leakage to outside values is very high.
-- Output updates:
-  - Adds "Unmet Hours: Showers (hr)" and "Unmet Hours: Showers (%)" unmet showers outputs.
 
 __Bugfixes__
 - Prevents possible error if only one of FracSensible/FracLatent are provided for a PlugLoad or FuelLoad; **Breaking change**: FracSensible and FracLatent must now be both be provided or omitted.
