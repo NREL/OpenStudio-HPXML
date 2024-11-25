@@ -1333,8 +1333,8 @@ module HVACSizing
       htg_loads = htg_htm * floor.net_area
       all_zone_loads[zone].Cool_Floors += clg_loads
       all_zone_loads[zone].Heat_Floors += htg_loads
-      all_space_loads[space].Cool_Roofs += clg_loads
-      all_space_loads[space].Heat_Roofs += htg_loads
+      all_space_loads[space].Cool_Floors += clg_loads
+      all_space_loads[space].Heat_Floors += htg_loads
       detailed_output_values = DetailedOutputValues.new(area: floor.net_area,
                                                         heat_htm: htg_htm,
                                                         cool_htm: clg_htm,
