@@ -665,30 +665,31 @@ class HPXML < Object
   # @param building_id [String] If provided, only search the single HPXML Building with the given ID
   # @return [Hash] Map of HPXML::FuelTypeXXX => boolean
   def has_fuels(building_id = nil)
-    has_fuels = {}
+    has_fuel = {}
+    has_fuel[HPXML::FuelTypeElectricity] = true
 
     HPXML::fossil_fuels.each do |fuel|
-      has_fuels[fuel] = false
+      has_fuel[fuel] = false
 
       buildings.each do |hpxml_bldg|
-        next if (not building_id.nil? && hpxml_bldg.building_id != building_id)
+        next if (not building_id.nil?) && (hpxml_bldg.building_id != building_id)
 
         # Check HVAC systems
         hpxml_bldg.hvac_systems.each do |hvac_system|
           if hvac_system.respond_to?(:heating_system_fuel) && hvac_system.heating_system_fuel == fuel
-            has_fuels[fuel] = true
+            has_fuel[fuel] = true
           end
           if hvac_system.respond_to?(:cooling_system_fuel) && hvac_system.cooling_system_fuel == fuel
-            has_fuels[fuel] = true
+            has_fuel[fuel] = true
           end
           if hvac_system.respond_to?(:heat_pump_fuel) && hvac_system.heat_pump_fuel == fuel
-            has_fuels[fuel] = true
+            has_fuel[fuel] = true
           end
           if hvac_system.respond_to?(:backup_heating_fuel) && hvac_system.backup_heating_fuel == fuel
-            has_fuels[fuel] = true
+            has_fuel[fuel] = true
           end
           if hvac_system.respond_to?(:integrated_heating_system_fuel) && hvac_system.integrated_heating_system_fuel == fuel
-            has_fuels[fuel] = true
+            has_fuel[fuel] = true
           end
         end
 
@@ -699,7 +700,7 @@ class HPXML < Object
          hpxml_bldg.cooking_ranges +
          hpxml_bldg.fuel_loads).each do |appliance|
           if appliance.fuel_type == fuel
-            has_fuels[fuel] = true
+            has_fuel[fuel] = true
           end
         end
 
@@ -707,16 +708,16 @@ class HPXML < Object
         if fuel == HPXML::FuelTypeNaturalGas
           (hpxml_bldg.pools + hpxml_bldg.permanent_spas).each do |pool_or_spa|
             if pool_or_spa.heater_type == HPXML::HeaterTypeGas
-              has_fuels[fuel] = true
+              has_fuel[fuel] = true
             end
           end
         end
 
-        break if has_fuels[fuel]
+        break if has_fuel[fuel]
       end
     end
 
-    return has_fuels
+    return has_fuel
   end
 
   # Delete any shared HVAC systems that are actually modeled as systems serving multiple dwelling units.
@@ -1767,7 +1768,6 @@ class HPXML < Object
     #
     # @return [Hash] Map of HPXML::FuelTypeXXX => boolean
     def has_fuels()
-      # Returns a hash with whether each fuel exists in the HPXML Building
       return @parent_object.has_fuels(@building_id)
     end
 

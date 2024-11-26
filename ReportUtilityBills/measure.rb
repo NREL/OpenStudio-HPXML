@@ -200,7 +200,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Check for presence of fuels once
     has_fuel = hpxml.has_fuels()
-    has_fuel[HPXML::FuelTypeElectricity] = true
 
     # Has production
     has_pv = @hpxml_buildings.count { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? } > 0
