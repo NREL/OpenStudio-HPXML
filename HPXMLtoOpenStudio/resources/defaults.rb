@@ -5800,16 +5800,36 @@ module Defaults
     return months
   end
 
-  # TODO
-  def self.get_breaker_spaces_from_heating_capacity(capacity)
-    return (UnitConversions.convert(capacity, 'btu/hr', 'kw') / 12.0).ceil * 2.0 + 2
+  # FIXME
+  # Returns the number of breaker spaces based on the heating rated (output) capacity.
+  #
+  # @param heating_capacity [Double] Heating output capacity [Btu/hr]
+  # @return [Integer] Breaker spaces [#]
+  def self.get_breaker_spaces_from_heating_capacity(heating_capacity)
+    return (UnitConversions.convert(heating_capacity, 'btu/hr', 'kw') / 12.0).ceil * 2 + 2
   end
 
-  # TODO
-  def self.get_breaker_spaces_from_backup_heating_capacity(capacity)
-    if UnitConversions.convert(capacity, 'btu/hr', 'kw') <= 10
+  # FIXME
+  # Returns the number of breaker spaces based on TODO.
+  #
+  # @param TODO
+  # @return TODO
+  def self.get_breaker_spaces_from_power_watts(watts, voltage)
+    required_amperage = watts / voltage
+    num_branches = (required_amperage / 50).ceil
+    num_breakers = num_branches * 2
+    return num_breakers
+  end
+
+  # FIXME
+  # Returns the number of breaker spaces based on the backup heating rated (output) capacity.
+  #
+  # @param heating_capacity [Double] Heating output capacity [Btu/hr]
+  # @return [Integer] Breaker spaces [#]
+  def self.get_breaker_spaces_from_backup_heating_capacity(heating_capacity)
+    if UnitConversions.convert(heating_capacity, 'btu/hr', 'kw') <= 10
       return 2
-    elsif UnitConversions.convert(capacity, 'btu/hr', 'kw') <= 20
+    elsif UnitConversions.convert(heating_capacity, 'btu/hr', 'kw') <= 20
       return 4
     else
       return 6
@@ -5888,7 +5908,7 @@ module Defaults
         watts += HVAC.get_pump_power_watts(heating_system.electric_auxiliary_energy)
 
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-          breaker_spaces += get_breaker_spaces_from_heating_capacity(heating_system.heating_input_capacity) # AHU
+          breaker_spaces = + get_breaker_spaces_from_power_watts(watts, voltage) # IDU / AHU
         else
           breaker_spaces += 1 # AHU
         end
@@ -5901,16 +5921,16 @@ module Defaults
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
           if heat_pump.simultaneous_backup # sum
-            watts += UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w')
+            watts += HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
               watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_input_capacity, heat_pump.heating_efficiency_afue, heat_pump.heating_efficiency_percent), 'btu/hr', 'w')
             end
           else # max
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-              watts += [UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w'),
+              watts += [HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')),
                         UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_input_capacity, heat_pump.heating_efficiency_afue, heat_pump.heating_efficiency_percent), 'btu/hr', 'w')].max
             else
-              watts += UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w')
+              watts += HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
             end
           end
 
@@ -5920,7 +5940,7 @@ module Defaults
             breaker_spaces += 1 # AHU
           end
         else # separate or none
-          watts += UnitConversions.convert(heat_pump.heating_input_capacity, 'btu/hr', 'w')
+          watts += HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
         end
 
         watts += HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
@@ -5934,19 +5954,15 @@ module Defaults
         next if cooling_system.is_shared_system
         next if cooling_system.fraction_cool_load_served == 0
 
-        watts += UnitConversions.convert(cooling_system.cooling_input_capacity, 'btu/hr', 'w')
+        watts += HVAC.get_dx_cooling_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
         watts += HVAC.get_blower_fan_power_watts(cooling_system.fan_watts_per_cfm, cooling_system.cooling_airflow_cfm)
 
         heating_system = cooling_system.attached_heating_system
         if !heating_system.nil? &&
            ((heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_fuel != HPXML::FuelTypeElectricity))
-          breaker_spaces += 1 # AHU; paired w/fuel heating system
-        else
+          breaker_spaces += 3 # AHU; paired w/fuel heating system
+        elsif voltage == 240
           breaker_spaces += 2 # AHU
-        end
-
-        if voltage == 240
-          breaker_spaces += 2 # ODU
         end
       end
 
@@ -5954,7 +5970,7 @@ module Defaults
         next if !system_ids.include?(heat_pump.id)
         next if heat_pump.fraction_cool_load_served == 0
 
-        watts += UnitConversions.convert(heat_pump.cooling_input_capacity, 'btu/hr', 'w')
+        watts += HVAC.get_dx_cooling_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
         watts += HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.cooling_airflow_cfm)
 
         if heat_pump.fraction_heat_load_served == 0
@@ -5972,8 +5988,8 @@ module Defaults
           watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w')
           breaker_spaces += 1
         elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-          watts += [UnitConversions.convert(water_heating_system.heating_input_capacity, 'btu/hr', 'w'),
-                    UnitConversions.convert(water_heating_system.backup_heating_input_capacity, 'btu/hr', 'w')].max
+          watts += [UnitConversions.convert(Waterheater.get_heating_input_capacity(water_heating_system.heating_capacity, water_heating_system.additional_properties.cop), 'btu/hr', 'w'),
+                    UnitConversions.convert(water_heating_system.backup_heating_capacity, 'btu/hr', 'w')].max
           if voltage == 240
             breaker_spaces += 1
           end

@@ -831,12 +831,21 @@ module HVAC
   end
 
   # FIXME
-  # Get the outdoor unit (compressor) power (W) using regression based on rated capacity.
+  # Get the outdoor unit (compressor) power (W) using regression based on heating rated (output) capacity.
   #
-  # @param capacity [Double] Direct expansion coil rated (output) capacity [kBtu/hr].
-  # @return [Double] DX coil rated (input) capacity (W)
-  def self.get_dx_coil_power_watts_from_capacity(capacity)
-    return 240 * (0.626 * capacity + 1.634)
+  # @param heating_capacity [Double] Direct expansion coil heating rated (output) capacity [kBtu/hr].
+  # @return [Double] Direct expansion coil rated (input) capacity (W)
+  def self.get_dx_heating_coil_power_watts_from_capacity(heating_capacity)
+    return 240 * (0.626 * heating_capacity + 1.634)
+  end
+
+  # FIXME
+  # Get the outdoor unit (compressor) power (W) using regression based on cooling rated (output) capacity.
+  #
+  # @param cooling_capacity [Double] Direct expansion coil cooling rated (output) capacity [kBtu/hr].
+  # @return [Double] Direct expansion coil rated (input) capacity (W)
+  def self.get_dx_cooling_coil_power_watts_from_capacity(cooling_capacity)
+    return 240 * (0.626 * cooling_capacity + 1.634)
   end
 
   # FIXME
@@ -862,11 +871,11 @@ module HVAC
   end
 
   # FIXME
-  # Returns the heating input capacity, calculated as the rated (output) capacity divided by the rated efficiency.
+  # Returns the heating input capacity, calculated as the heating rated (output) capacity divided by the rated efficiency.
   #
-  # @param heating_capacity [Double]
-  # @param heating_efficiency_afue [Double]
-  # @param heating_efficiency_percent [Double]
+  # @param heating_capacity [Double] Heating output capacity
+  # @param heating_efficiency_afue [Double] Rated efficiency [AFUE]
+  # @param heating_efficiency_percent [Double] Rated efficiency [Percent]
   # @return [Double] The heating input capacity [Btu/hr]
   def self.get_heating_input_capacity(heating_capacity, heating_efficiency_afue, heating_efficiency_percent)
     if not heating_efficiency_afue.nil?
