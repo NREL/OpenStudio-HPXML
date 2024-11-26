@@ -5894,7 +5894,6 @@ module Defaults
     breaker_spaces = 0
 
     if type == HPXML::ElectricPanelLoadTypeHeating
-
       hpxml_bldg.heating_systems.each do |heating_system|
         next if !system_ids.include?(heating_system.id)
         next if heating_system.is_shared_system
@@ -5908,7 +5907,7 @@ module Defaults
         watts += HVAC.get_pump_power_watts(heating_system.electric_auxiliary_energy)
 
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-          breaker_spaces = + get_breaker_spaces_from_power_watts(watts, voltage) # IDU / AHU
+          breaker_spaces += get_breaker_spaces_from_power_watts(watts, voltage) # IDU / AHU
         else
           breaker_spaces += 1 # AHU
         end
@@ -5923,12 +5922,12 @@ module Defaults
           if heat_pump.simultaneous_backup # sum
             watts += HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-              watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_input_capacity, heat_pump.heating_efficiency_afue, heat_pump.heating_efficiency_percent), 'btu/hr', 'w')
+              watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
             end
           else # max
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
               watts += [HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')),
-                        UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_input_capacity, heat_pump.heating_efficiency_afue, heat_pump.heating_efficiency_percent), 'btu/hr', 'w')].max
+                        UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
             else
               watts += HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
             end
@@ -5970,7 +5969,7 @@ module Defaults
         next if !system_ids.include?(heat_pump.id)
         next if heat_pump.fraction_cool_load_served == 0
 
-        watts += HVAC.get_dx_cooling_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
+        watts += HVAC.get_dx_cooling_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'))
         watts += HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.cooling_airflow_cfm)
 
         if heat_pump.fraction_heat_load_served == 0

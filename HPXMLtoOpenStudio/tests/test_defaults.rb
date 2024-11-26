@@ -3627,21 +3627,26 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml_bldg.heating_systems[0].heating_capacity = 36000
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 11763.0, HPXML::ElectricPanelVoltage240, 2, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2794.0, HPXML::ElectricPanelVoltage240, 2, false)
 
     # Electric boiler + central air conditioner
-    # hpxml_bldg.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
-    # XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    # _default_hpxml, default_hpxml_bldg = _test_measure()
-    # _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 11763.0, HPXML::ElectricPanelVoltage240, 4, false)
-    # _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 1320.0, HPXML::ElectricPanelVoltage240, 4, false)
+    hpxml_bldg.hvac_distributions.add(id: 'HVACDistribution',
+                                      distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                      hydronic_type: HPXML::HydronicTypeBaseboard)
+    hpxml_bldg.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
+    hpxml_bldg.heating_systems[0].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 11550.0, HPXML::ElectricPanelVoltage240, 2, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2856.0, HPXML::ElectricPanelVoltage240, 2, false)
 
     # Fuel furnace + room air conditioner
+    hpxml_bldg.hvac_distributions[-1].delete
     hpxml_bldg.heating_systems[0].heating_system_type = HPXML::HVACTypeFurnace
     hpxml_bldg.heating_systems[0].heating_system_fuel = HPXML::FuelTypeNaturalGas
+    hpxml_bldg.heating_systems[0].distribution_system_idref = hpxml_bldg.hvac_distributions[0].id
     hpxml_bldg.cooling_systems[0].cooling_system_type = HPXML::HVACTypeRoomAirConditioner
     hpxml_bldg.cooling_systems[0].cooling_efficiency_seer = nil
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = 8.5
@@ -3652,10 +3657,43 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2610.0, HPXML::ElectricPanelVoltage120, 0, false)
 
     # ASHP
-    # TODO
+    hpxml_bldg.heating_systems.clear
+    hpxml_bldg.cooling_systems.clear
+    hpxml_bldg.heat_pumps.add(id: 'HeatPump',
+                              heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
+                              heat_pump_fuel: HPXML::FuelTypeElectricity,
+                              heating_efficiency_hspf: 7.7,
+                              cooling_efficiency_seer: 13.0,
+                              fraction_heat_load_served: 1,
+                              fraction_cool_load_served: 1,
+                              distribution_system_idref: hpxml_bldg.hvac_distributions[0].id)
+    htg_load.system_idrefs = [hpxml_bldg.heat_pumps[0].id]
+    clg_load.system_idrefs = [hpxml_bldg.heat_pumps[0].id]
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 4346.0, HPXML::ElectricPanelVoltage240, 2, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 4372.0, HPXML::ElectricPanelVoltage240, 0, false)
 
-    # MSHP
-    # TODO
+    # ASHP w/backup
+    hpxml_bldg.heat_pumps[0].backup_type = HPXML::HeatPumpBackupTypeIntegrated
+    hpxml_bldg.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeElectricity
+    hpxml_bldg.heat_pumps[0].backup_heating_efficiency_percent = 1
+    hpxml_bldg.heat_pumps[0].backup_heating_capacity = 36000
+    htg_load.system_idrefs = [hpxml_bldg.heat_pumps[0].id]
+    clg_load.system_idrefs = [hpxml_bldg.heat_pumps[0].id]
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 14896.0, HPXML::ElectricPanelVoltage240, 6, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 4372.0, HPXML::ElectricPanelVoltage240, 0, false)
+
+    # MSHP ductless w/backup
+    hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
+    hpxml_bldg.heat_pumps[0].distribution_system_idref = nil
+    hpxml_bldg.hvac_distributions.clear
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 13632.0, HPXML::ElectricPanelVoltage240, 6, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 3082.0, HPXML::ElectricPanelVoltage240, 0, false)
 
     # Test WH defaults
     # Electric storage
