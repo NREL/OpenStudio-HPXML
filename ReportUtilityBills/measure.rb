@@ -110,7 +110,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Require not DSE
     @hpxml_buildings.each do |hpxml_bldg|
       (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).each do |htg_system|
-        next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served > 0
+        next unless (htg_system.is_a?(HPXML::HeatingSystem) && htg_system.is_heat_pump_backup_system) || htg_system.fraction_heat_load_served.to_f > 0
         next if htg_system.distribution_system_idref.nil?
         next unless htg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
         next if htg_system.distribution_system.annual_heating_dse.nil?
@@ -119,7 +119,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         warnings << 'DSE is not currently supported when calculating utility bills.'
       end
       (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |clg_system|
-        next unless clg_system.fraction_cool_load_served > 0
+        next unless clg_system.fraction_cool_load_served.to_f > 0
         next if clg_system.distribution_system_idref.nil?
         next unless clg_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeDSE
         next if clg_system.distribution_system.annual_cooling_dse.nil?
@@ -199,7 +199,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
                        FT::Coal => HPXML::FuelTypeCoal }
 
     # Check for presence of fuels once
-    has_fuel = hpxml.has_fuels(hpxml.to_doc)
+    has_fuel = hpxml.has_fuels()
     has_fuel[HPXML::FuelTypeElectricity] = true
 
     # Has production

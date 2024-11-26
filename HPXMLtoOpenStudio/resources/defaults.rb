@@ -41,7 +41,7 @@ module Defaults
     end
 
     # Check for presence of fuels once
-    has_fuel = hpxml_bldg.has_fuels(hpxml.to_doc)
+    has_fuel = hpxml_bldg.has_fuels()
 
     add_zones_spaces_if_needed(hpxml_bldg, unit_num)
 
@@ -72,7 +72,7 @@ module Defaults
     apply_doors(hpxml_bldg)
     apply_partition_wall_mass(hpxml_bldg)
     apply_furniture_mass(hpxml_bldg)
-    apply_hvac(runner, hpxml_bldg, weather, convert_shared_systems, unit_num)
+    apply_hvac(runner, hpxml.header, hpxml_bldg, weather, convert_shared_systems, unit_num)
     apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
     apply_hvac_distribution(hpxml_bldg)
     apply_infiltration(hpxml_bldg)
@@ -235,6 +235,13 @@ module Defaults
       if unavailable_period.natvent_availability.nil?
         unavailable_period.natvent_availability = HPXML::ScheduleRegular
         unavailable_period.natvent_availability_isdefaulted = true
+      end
+    end
+
+    if hpxml_header.shared_boiler_operation.nil?
+      if hpxml_bldg.heating_systems.select { |htg| htg.heating_system_type == HPXML::HVACTypeBoiler && htg.is_shared_system_serving_multiple_dwelling_units }.size > 0
+        hpxml_header.shared_boiler_operation = HPXML::SharedBoilerOperationSequenced
+        hpxml_header.shared_boiler_operation_isdefaulted = true
       end
     end
   end
@@ -1832,14 +1839,15 @@ module Defaults
   # HPXML::CoolingSystem, and HPXML::HeatPump objects
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI 301
   # @param unit_num [Integer] Dwelling unit number
   # @return [nil]
-  def self.apply_hvac(runner, hpxml_bldg, weather, convert_shared_systems, unit_num)
+  def self.apply_hvac(runner, hpxml_header, hpxml_bldg, weather, convert_shared_systems, unit_num)
     if convert_shared_systems
-      HVAC.apply_shared_systems(hpxml_bldg)
+      HVAC.convert_shared_systems_to_in_unit_systems(hpxml_bldg, hpxml_header)
     end
 
     # Convert negative values (e.g., -1) to nil as appropriate
@@ -2501,6 +2509,27 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_hvac_distribution(hpxml_bldg)
+    # Hydronic distribution
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.hvac_systems.any? { |h| h.is_a?(HPXML::HeatingSystem) && h.heating_system_type == HPXML::HVACTypeBoiler }
+
+      # Supply/return loop temperatures
+      default_delta_t = 20.0 # deg-F
+      if hvac_distribution.hydronic_supply_temp.nil?
+        if not hvac_distribution.hydronic_return_temp.nil?
+          hvac_distribution.hydronic_supply_temp = hvac_distribution.hydronic_return_temp + default_delta_t # deg-F
+        else
+          hvac_distribution.hydronic_supply_temp = 180.0 # deg-F
+        end
+        hvac_distribution.hydronic_supply_temp_isdefaulted = true
+      end
+      if hvac_distribution.hydronic_return_temp.nil?
+        hvac_distribution.hydronic_return_temp = hvac_distribution.hydronic_supply_temp - default_delta_t # deg-F
+        hvac_distribution.hydronic_return_temp_isdefaulted = true
+      end
+    end
+
+    # Air distribution
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
 
