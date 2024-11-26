@@ -547,7 +547,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Vehicle outputs
     @vehicles.values.each do |vehicle_data|
-      if not vehicle_data.ems_variable.nil?
+      if (not vehicle_data.ems_variable.nil?) && (not unmet_driving_hrs_program.nil?)
         if args[:include_annual_vehicle_outputs]
           result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{vehicle_data.ems_variable}_annual_outvar,#{vehicle_data.ems_variable},Summed,ZoneTimestep,#{unmet_driving_hrs_program.name},hr;").get
           result << OpenStudio::IdfObject.load("Output:Variable,*,#{vehicle_data.ems_variable}_annual_outvar,runperiod;").get
@@ -3236,10 +3236,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         if object.additionalProperties.getFeatureAsBoolean('is_ev').get
           return { VT::VehicleDischarging => ['Electric Storage Discharge Energy'] }
-        end
-      elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
-        if object_type == Constants::ObjectTypeUnmetDrivingHours
-          return { VT::UnmetDrivingHours => [object.name.to_s] }
         end
       end
 
