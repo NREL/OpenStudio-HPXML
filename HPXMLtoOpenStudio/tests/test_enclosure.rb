@@ -938,11 +938,12 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
 
           # Change a property to a unique value so that it won't collapse
           # with other properties of the same surface type.
-          if [HPXML::Roof, HPXML::Wall, HPXML::RimJoist, HPXML::Floor].include? surf_class
+          case surf_class
+          when HPXML::Roof, HPXML::Wall, HPXML::RimJoist, HPXML::Floor
             surfaces[-1].insulation_assembly_r_value += 0.01 * i
-          elsif [HPXML::FoundationWall].include? surf_class
+          when HPXML::FoundationWall
             surfaces[-1].insulation_exterior_r_value += 0.01 * i
-          elsif [HPXML::Slab].include? surf_class
+          when HPXML::Slab
             if i < 2
               surfaces[-1].perimeter_insulation_depth += 0.01 * i
             elsif i < 3
@@ -958,7 +959,7 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
             else
               surfaces[-1].exterior_horizontal_insulation_depth_below_grade = surfaces[-1].exterior_horizontal_insulation_depth_below_grade.to_f + 0.01 * i
             end
-          elsif [HPXML::Window, HPXML::Skylight].include? surf_class
+          when HPXML::Window, HPXML::Skylight
             if i < 3
               surfaces[-1].ufactor += 0.01 * i
             elsif i < 6
@@ -969,7 +970,7 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
                 surfaces[-1].fraction_operable = 1.0 - surfaces[-1].fraction_operable
               end
             end
-          elsif [HPXML::Door].include? surf_class
+          when HPXML::Door
             surfaces[-1].r_value += 0.01 * i
           else
             fail 'Unexpected surface type.'
