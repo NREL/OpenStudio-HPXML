@@ -2046,7 +2046,7 @@ module Airflow
           infil_program.addLine('  If hr_oa_cfm_during_hvac > 0')
           infil_program.addLine('    Set f_open_damper_ah = (hr_oa_cfm_during_hvac / hr_oa_cfm_during_hvac_avail) * fan_rtf_hvac')
           infil_program.addLine("    Set #{cfis_suppl_fan_actuator.name} = #{cfis_suppl_fan_actuator.name} + (suppl_fan_w * f_open_damper_ah)")
-          case vent_mech.cfis_supplemental_fan
+          case vent_mech.cfis_supplemental_fan.fan_type
           when HPXML::MechVentTypeSupply
             infil_program.addLine('    Set QWHV_cfis_suppl_sup = QWHV_cfis_suppl_sup + (f_open_damper_ah * oa_cfm_suppl)')
           when HPXML::MechVentTypeExhaust
