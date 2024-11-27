@@ -879,6 +879,7 @@ module Model
                           'OS:SurfaceConvectionAlgorithm:Outside' => 'OutsideSurfaceConvectionAlgorithm',
                           'OS:Timestep' => 'Timestep',
                           'OS:ZoneCapacitanceMultiplier:ResearchSpecial' => 'ZoneCapacitanceMultiplierResearchSpecial' }
+
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
     unit_model_objects = []

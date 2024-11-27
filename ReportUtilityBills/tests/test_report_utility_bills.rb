@@ -1176,15 +1176,16 @@ class ReportUtilityBillsTest < Minitest::Test
 
       values = col[1..-1].map { |v| Float(v) }
 
-      if col_name == 'Electricity [kWh]'
+      case col_name
+      when 'Electricity [kWh]'
         fuels[[FT::Elec, false]].timeseries = values
-      elsif col_name == 'Gas [therm]'
+      when 'Gas [therm]'
         fuels[[FT::Gas, false]].timeseries = values
-      elsif col_name == 'Propane [gal]'
+      when 'Propane [gal]'
         fuels[[FT::Propane, false]].timeseries = values
-      elsif col_name == 'Oil [gal]'
+      when 'Oil [gal]'
         fuels[[FT::Oil, false]].timeseries = values
-      elsif col_name == "PV_#{pv_size_kw}kW [kWh]"
+      when "PV_#{pv_size_kw}kW [kWh]"
         fuels[[FT::Elec, true]].timeseries = values
       end
     end

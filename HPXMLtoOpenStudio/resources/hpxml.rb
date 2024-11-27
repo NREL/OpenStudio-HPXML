@@ -2751,11 +2751,9 @@ class HPXML < Object
     # @param building [Oga::XML::Element] The current Building XML element
     # @return [nil]
     def to_doc(building)
-      return if nil?
-
       climate_and_risk_zones = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'ClimateandRiskZones'])
-
       @climate_zone_ieccs.to_doc(climate_and_risk_zones)
+      return if nil?
 
       if not @weather_station_id.nil?
         weather_station = XMLHelper.add_element(climate_and_risk_zones, 'WeatherStation')
@@ -3459,11 +3457,12 @@ class HPXML < Object
     def to_location
       return if @attic_type.nil?
 
-      if [AtticTypeCathedral, AtticTypeConditioned, AtticTypeFlatRoof, AtticTypeBelowApartment].include? @attic_type
+      case @attic_type
+      when AtticTypeCathedral, AtticTypeConditioned, AtticTypeFlatRoof, AtticTypeBelowApartment
         return LocationConditionedSpace
-      elsif [AtticTypeUnvented].include? @attic_type
+      when AtticTypeUnvented
         return LocationAtticUnvented
-      elsif [AtticTypeVented].include? @attic_type
+      when AtticTypeVented
         return LocationAtticVented
       else
         fail "Unexpected attic type: '#{@attic_type}'."
@@ -3502,12 +3501,13 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       if not @attic_type.nil?
         attic_type_el = XMLHelper.add_element(attic, 'AtticType')
-        if [AtticTypeFlatRoof, AtticTypeCathedral, AtticTypeBelowApartment].include? @attic_type
+        case @attic_type
+        when AtticTypeFlatRoof, AtticTypeCathedral, AtticTypeBelowApartment
           XMLHelper.add_element(attic_type_el, @attic_type)
-        elsif [AtticTypeUnvented].include? @attic_type
+        when AtticTypeUnvented
           attic_type_attic = XMLHelper.add_element(attic_type_el, 'Attic')
           XMLHelper.add_element(attic_type_attic, 'Vented', false, :boolean)
-        elsif [AtticTypeVented].include? @attic_type
+        when AtticTypeVented
           attic_type_attic = XMLHelper.add_element(attic_type_el, 'Attic')
           XMLHelper.add_element(attic_type_attic, 'Vented', true, :boolean)
           if not @vented_attic_sla.nil?
@@ -3519,7 +3519,7 @@ class HPXML < Object
             XMLHelper.add_element(ventilation_rate, 'UnitofMeasure', UnitsACHNatural, :string)
             XMLHelper.add_element(ventilation_rate, 'Value', @vented_attic_ach, :float)
           end
-        elsif [AtticTypeConditioned].include? @attic_type
+        when AtticTypeConditioned
           attic_type_attic = XMLHelper.add_element(attic_type_el, 'Attic')
           XMLHelper.add_element(attic_type_attic, 'Conditioned', true, :boolean)
         else
@@ -3700,21 +3700,22 @@ class HPXML < Object
     def to_location
       return if @foundation_type.nil?
 
-      if [FoundationTypeSlab, FoundationTypeAboveApartment].include? @foundation_type
+      case @foundation_type
+      when FoundationTypeSlab, FoundationTypeAboveApartment
         return LocationConditionedSpace
-      elsif [FoundationTypeAmbient].include? @foundation_type
+      when FoundationTypeAmbient
         return LocationOutside
-      elsif [FoundationTypeBasementConditioned].include? @foundation_type
+      when FoundationTypeBasementConditioned
         return LocationBasementConditioned
-      elsif [FoundationTypeBasementUnconditioned].include? @foundation_type
+      when FoundationTypeBasementUnconditioned
         return LocationBasementUnconditioned
-      elsif [FoundationTypeCrawlspaceUnvented].include? @foundation_type
+      when FoundationTypeCrawlspaceUnvented
         return LocationCrawlspaceUnvented
-      elsif [FoundationTypeCrawlspaceVented].include? @foundation_type
+      when FoundationTypeCrawlspaceVented
         return LocationCrawlspaceVented
-      elsif @foundation_type == FoundationTypeCrawlspaceConditioned
+      when FoundationTypeCrawlspaceConditioned
         return LocationCrawlspaceConditioned
-      elsif @foundation_type == FoundationTypeBellyAndWing
+      when FoundationTypeBellyAndWing
         return LocationManufacturedHomeUnderBelly
       else
         fail "Unexpected foundation type: '#{@foundation_type}'."
@@ -3773,15 +3774,16 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       if not @foundation_type.nil?
         foundation_type_el = XMLHelper.add_element(foundation, 'FoundationType')
-        if [FoundationTypeSlab, FoundationTypeAmbient, FoundationTypeAboveApartment].include? @foundation_type
+        case @foundation_type
+        when FoundationTypeSlab, FoundationTypeAmbient, FoundationTypeAboveApartment
           XMLHelper.add_element(foundation_type_el, @foundation_type)
-        elsif [FoundationTypeBasementConditioned].include? @foundation_type
+        when FoundationTypeBasementConditioned
           basement = XMLHelper.add_element(foundation_type_el, 'Basement')
           XMLHelper.add_element(basement, 'Conditioned', true, :boolean)
-        elsif [FoundationTypeBasementUnconditioned].include? @foundation_type
+        when FoundationTypeBasementUnconditioned
           basement = XMLHelper.add_element(foundation_type_el, 'Basement')
           XMLHelper.add_element(basement, 'Conditioned', false, :boolean)
-        elsif [FoundationTypeCrawlspaceVented].include? @foundation_type
+        when FoundationTypeCrawlspaceVented
           crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
           XMLHelper.add_element(crawlspace, 'Vented', true, :boolean)
           if not @vented_crawlspace_sla.nil?
@@ -3789,13 +3791,13 @@ class HPXML < Object
             XMLHelper.add_element(ventilation_rate, 'UnitofMeasure', UnitsSLA, :string)
             XMLHelper.add_element(ventilation_rate, 'Value', @vented_crawlspace_sla, :float, @vented_crawlspace_sla_isdefaulted)
           end
-        elsif [FoundationTypeCrawlspaceUnvented].include? @foundation_type
+        when FoundationTypeCrawlspaceUnvented
           crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
           XMLHelper.add_element(crawlspace, 'Vented', false, :boolean)
-        elsif @foundation_type == FoundationTypeCrawlspaceConditioned
+        when FoundationTypeCrawlspaceConditioned
           crawlspace = XMLHelper.add_element(foundation_type_el, 'Crawlspace')
           XMLHelper.add_element(crawlspace, 'Conditioned', true, :boolean)
-        elsif @foundation_type == FoundationTypeBellyAndWing
+        when FoundationTypeBellyAndWing
           belly_and_wing = XMLHelper.add_element(foundation_type_el, 'BellyAndWing')
           XMLHelper.add_element(belly_and_wing, 'SkirtPresent', @belly_wing_skirt_present, :boolean, @belly_wing_skirt_present_isdefaulted) unless @belly_wing_skirt_present.nil?
         else
