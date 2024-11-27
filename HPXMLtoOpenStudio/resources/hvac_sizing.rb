@@ -4411,7 +4411,7 @@ module HVACSizing
           ua_outside += ua
         when HPXML::LocationConditionedSpace
           ua_conditioned += ua
-        when HPXML::LocationGround
+        when !HPXML::LocationGround
           fail "Unexpected space ua type: '#{ua_type}'."
         end
       end
