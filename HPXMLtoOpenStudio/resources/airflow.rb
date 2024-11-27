@@ -2095,7 +2095,7 @@ module Airflow
 
           # Calculate hourly-average actual outdoor air ventilation brought in during non-HVAC runtime
           infil_program.addLine('    Set hr_oa_cfm_during_non_hvac = @Min hr_oa_cfm_during_non_hvac_avail hr_oa_cfm_addtl_needed')
-          case vent_mech.cfis_supplemental_fan
+          case vent_mech.cfis_supplemental_fan.fan_type
           when HPXML::MechVentTypeSupply
             infil_program.addLine('    Set QWHV_cfis_suppl_sup = QWHV_cfis_suppl_sup + (hr_oa_cfm_during_non_hvac / ZoneTimestep)')
           when HPXML::MechVentTypeExhaust
