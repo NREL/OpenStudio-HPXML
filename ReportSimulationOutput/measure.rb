@@ -558,9 +558,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
       vehicle_data.variables.each do |_sys_id, varkey, var|
-        if args[:include_annual_vehicle_outputs]
-          result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},runperiod;").get
-        end
+        result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},runperiod;").get
         if args[:include_timeseries_vehicle_outputs]
           result << OpenStudio::IdfObject.load("Output:Variable,#{varkey},#{var},#{args[:timeseries_frequency]};").get
         end
@@ -1412,9 +1410,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       vehicle_data.variables.map { |v| v[0] }.uniq.each do |sys_id|
         keys = vehicle_data.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = vehicle_data.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
-        if args[:include_annual_vehicle_outputs]
-          vehicle_data.annual_output = get_report_variable_data_annual(keys, vars)
-        end
+        vehicle_data.annual_output = get_report_variable_data_annual(keys, vars)
         if args[:include_timeseries_end_use_consumptions]
           vehicle_data.timeseries_output = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', vehicle_data.timeseries_units), 0, args[:timeseries_frequency])
         end
