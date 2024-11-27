@@ -369,7 +369,7 @@ base-mechvent-cfis-evap-cooler-only-ducted.xml,0.0,0.0,1354.7,998.0,11171.5,2563
 base-mechvent-cfis-no-additional-runtime.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2127.7,3779.0,3779.0,29.918,20.857,0.0
 base-mechvent-cfis-no-outdoor-air-control.xml,49.0,5.0,1354.7,998.0,11171.5,2563.5,2230.6,3728.9,3728.9,37.835,21.601,0.0
 base-mechvent-cfis-supplemental-fan-exhaust-15-mins.xml,0.0,0.0,1354.7,998.0,11171.7,2563.6,2868.1,4776.0,4776.0,37.234,21.241,0.0
-base-mechvent-cfis-supplemental-fan-exhaust-synchronized.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2137.7,3773.5,3773.5,29.918,20.705,0.0
+base-mechvent-cfis-supplemental-fan-exhaust-synchronized.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2142.9,3773.6,3773.6,30.62,20.864,0.0
 base-mechvent-cfis-supplemental-fan-exhaust.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2127.7,3763.5,3763.5,29.918,20.705,0.0
 base-mechvent-cfis-supplemental-fan-supply.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2127.6,4010.6,4010.6,29.918,20.72,0.0
 base-mechvent-cfis.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2127.6,3699.4,3699.4,29.916,20.735,0.0
