@@ -368,6 +368,8 @@ class HPXML < Object
   ScheduleRegular = 'regular schedule'
   ScheduleAvailable = 'always available'
   ScheduleUnavailable = 'always unavailable'
+  SharedBoilerOperationSequenced = 'sequenced'
+  SharedBoilerOperationSimultaneous = 'simultaneous'
   ShieldingExposed = 'exposed'
   ShieldingNormal = 'normal'
   ShieldingWellShielded = 'well-shielded'
@@ -718,6 +720,28 @@ class HPXML < Object
     return has_fuel
   end
 
+  # Delete any shared HVAC systems that are actually modeled as systems serving multiple dwelling units.
+  # Shared systems that are modeled as equivalent in-unit systems per ANSI 301 are not deleted.
+  #
+  # @return [Hash] Map of HPXML Building => [deleted_systems]
+  def delete_shared_systems_serving_multiple_dwelling_units()
+    deleted_systems_map = {}
+    buildings.each do |hpxml_bldg|
+      hpxml_bldg.hvac_systems.each do |hvac_system|
+        next unless hvac_system.is_shared_system_serving_multiple_dwelling_units
+
+        deleted_systems_map[hpxml_bldg] = [] if deleted_systems_map[hpxml_bldg].nil?
+        deleted_systems_map[hpxml_bldg] << hvac_system
+      end
+    end
+    deleted_systems_map.values.each do |deleted_systems|
+      deleted_systems.reverse_each do |deleted_system|
+        deleted_system.delete
+      end
+    end
+    return deleted_systems_map
+  end
+
   # Object to store additional properties on an HPXML object that are not intended
   # to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
   # object for an appliance.
@@ -866,6 +890,7 @@ class HPXML < Object
              :software_program_version,                    # [String] SoftwareInfo/SoftwareProgramVersion
              :apply_ashrae140_assumptions,                 # [Boolean] SoftwareInfo/extension/ApplyASHRAE140Assumptions
              :whole_sfa_or_mf_building_sim,                # [Boolean] SoftwareInfo/extension/WholeSFAorMFBuildingSimulation
+             :shared_boiler_operation,                     # [String] SoftwareInfo/extension/SharedHVACSizingControl/SharedBoilerOperation (HPXML::SharedBoilerXXX)
              :eri_calculation_version,                     # [String] SoftwareInfo/extension/ERICalculation/Version
              :co2index_calculation_version,                # [String] SoftwareInfo/extension/CO2IndexCalculation/Version
              :energystar_calculation_version,              # [String] SoftwareInfo/extension/EnergyStarCalculation/Version
@@ -929,6 +954,10 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', @software_program_version, :string) unless @software_program_version.nil?
       XMLHelper.add_extension(software_info, 'ApplyASHRAE140Assumptions', @apply_ashrae140_assumptions, :boolean) unless @apply_ashrae140_assumptions.nil?
       XMLHelper.add_extension(software_info, 'WholeSFAorMFBuildingSimulation', @whole_sfa_or_mf_building_sim, :boolean) unless @whole_sfa_or_mf_building_sim.nil?
+      if not @shared_boiler_operation.nil?
+        hvac_sizing_control = XMLHelper.create_elements_as_needed(software_info, ['extension', 'SharedHVACSizingControl'])
+        XMLHelper.add_element(hvac_sizing_control, 'SharedBoilerOperation', @shared_boiler_operation, :string, @shared_boiler_operation_isdefaulted)
+      end
       { 'ERICalculation' => @eri_calculation_version,
         'CO2IndexCalculation' => @co2index_calculation_version,
         'EnergyStarCalculation' => @energystar_calculation_version,
@@ -992,6 +1021,7 @@ class HPXML < Object
       @heat_pump_backup_heating_capacity_increment = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
+      @shared_boiler_operation = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SharedHVACSizingControl/SharedBoilerOperation', :string)
       @emissions_scenarios.from_doc(hpxml)
       @utility_bill_scenarios.from_doc(hpxml)
       @unavailable_periods.from_doc(hpxml)
@@ -2150,24 +2180,26 @@ class HPXML < Object
         errors << 'More than one cooling system designated as the primary.'
       end
 
-      # Check for at most 1 shared heating system and 1 shared cooling system
-      num_htg_shared = 0
-      num_clg_shared = 0
-      (@heating_systems + @heat_pumps).each do |hvac_system|
-        next unless hvac_system.is_shared_system
+      if not @parent_object.header.whole_sfa_or_mf_building_sim
+        # Check for at most 1 shared heating system and 1 shared cooling system
+        num_htg_shared = 0
+        num_clg_shared = 0
+        (@heating_systems + @heat_pumps).each do |hvac_system|
+          next unless hvac_system.is_shared_system
 
-        num_htg_shared += 1
-      end
-      (@cooling_systems + @heat_pumps).each do |hvac_system|
-        next unless hvac_system.is_shared_system
+          num_htg_shared += 1
+        end
+        (@cooling_systems + @heat_pumps).each do |hvac_system|
+          next unless hvac_system.is_shared_system
 
-        num_clg_shared += 1
-      end
-      if num_htg_shared > 1
-        errors << 'More than one shared heating system found.'
-      end
-      if num_clg_shared > 1
-        errors << 'More than one shared cooling system found.'
+          num_clg_shared += 1
+        end
+        if num_htg_shared > 1
+          errors << 'More than one shared heating system found.'
+        end
+        if num_clg_shared > 1
+          errors << 'More than one shared cooling system found.'
+        end
       end
 
       return errors
@@ -6402,6 +6434,7 @@ class HPXML < Object
     CLASS_ATTRS = [:heating_detailed_performance_data] # [HPXML::HeatingDetailedPerformanceData]
     ATTRS = [:primary_system,                   # [Boolean] ../PrimarySystems/PrimaryHeatingSystem/@id
              :id,                               # [String] SystemIdentifier/@id
+             :sameas_id,                        # [String] SystemIdentifier/@sameas
              :attached_to_zone_idref,           # [String] AttachedToZone/@idref
              :location,                         # [String] UnitLocation (HPXML::LocationXXX)
              :year_installed,                   # [Integer] YearInstalled
@@ -6509,6 +6542,35 @@ class HPXML < Object
       return !primary_heat_pump.nil?
     end
 
+    # Returns whether if we are modeling a whole MF building and the shared system is explicitly modeled.
+    # Shared systems that are modeled as equivalent in-unit systems per ANSI 301 are not included.
+    #
+    # @return [Boolean] True if modeling a whole MF building and its a shared system
+    def is_shared_system_serving_multiple_dwelling_units
+      if @parent_object.parent_object.header.whole_sfa_or_mf_building_sim
+        actual_system = self
+        if !@sameas_id.nil?
+          actual_system = sameas
+        end
+
+        if actual_system.is_shared_system
+          # Currently central boilers are the only technology explicitly modeled as serving multiple dwelling units
+          if actual_system.is_a?(HPXML::HeatingSystem) && actual_system.heating_system_type == HPXML::HVACTypeBoiler
+            return true
+          end
+        end
+      end
+
+      return false
+    end
+
+    # Returns the shared object specified elsewhere in the HPXML.
+    #
+    # @return [HPXML::HeatingSystem] HeatingSystem object linked by sameas attribute
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
+
     # Deletes the current object from the array.
     #
     # @return [nil]
@@ -6544,6 +6606,7 @@ class HPXML < Object
       heating_system = XMLHelper.add_element(hvac_plant, 'HeatingSystem')
       sys_id = XMLHelper.add_element(heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if not @attached_to_zone_idref.nil?
         zone_attached = XMLHelper.add_element(heating_system, 'AttachedToZone')
         XMLHelper.add_attribute(zone_attached, 'idref', @attached_to_zone_idref)
@@ -6614,6 +6677,7 @@ class HPXML < Object
       return if heating_system.nil?
 
       @id = HPXML::get_id(heating_system)
+      @sameas_id = HPXML::get_sameas_id(heating_system)
       @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(heating_system, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(heating_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heating_system, 'YearInstalled', :integer)
@@ -6700,6 +6764,7 @@ class HPXML < Object
     CLASS_ATTRS = [:cooling_detailed_performance_data] # [HPXML::CoolingDetailedPerformanceData]
     ATTRS = [:primary_system,                                      # [Boolean] ../PrimarySystems/PrimaryCoolingSystem/@idref
              :id,                                                  # [String] SystemIdentifier/@id
+             :sameas_id,                                           # [String] SystemIdentifier/@sameas
              :attached_to_zone_idref,                              # [String] AttachedToZone/@idref
              :location,                                            # [String] UnitLocation (HPXML::LocationXXX)
              :year_installed,                                      # [Integer] YearInstalled
@@ -6790,6 +6855,22 @@ class HPXML < Object
       return true
     end
 
+    # Returns whether if we are modeling a whole MF building and the shared system is explicitly modeled.
+    # Shared systems that are modeled as equivalent in-unit systems per ANSI 301 are not included.
+    #
+    # @return [Boolean] True if modeling a whole MF building and its a shared system
+    def is_shared_system_serving_multiple_dwelling_units
+      # Currently no shared cooling systems are explicitly modeled
+      return false
+    end
+
+    # Returns the shared object specified elsewhere in the HPXML.
+    #
+    # @return [HPXML::CoolingSystem] CoolingSystem object linked by sameas attribute
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
+
     # Deletes the current object from the array.
     #
     # @return [nil]
@@ -6825,6 +6906,7 @@ class HPXML < Object
       cooling_system = XMLHelper.add_element(hvac_plant, 'CoolingSystem')
       sys_id = XMLHelper.add_element(cooling_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if not @attached_to_zone_idref.nil?
         zone_attached = XMLHelper.add_element(cooling_system, 'AttachedToZone')
         XMLHelper.add_attribute(zone_attached, 'idref', @attached_to_zone_idref)
@@ -6905,6 +6987,7 @@ class HPXML < Object
       return if cooling_system.nil?
 
       @id = HPXML::get_id(cooling_system)
+      @sameas_id = HPXML::get_sameas_id(cooling_system)
       @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(cooling_system, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(cooling_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(cooling_system, 'YearInstalled', :integer)
@@ -6998,6 +7081,7 @@ class HPXML < Object
     ATTRS = [:primary_heating_system,              # [Boolean] ../PrimarySystems/PrimaryHeatingSystem/@idref
              :primary_cooling_system,              # [Boolean] ../PrimarySystems/PrimaryCoolingSystem/@idref
              :id,                                  # [String] SystemIdentifier/@id
+             :sameas_id,                           # [String] SystemIdentifier/@sameas
              :attached_to_zone_idref,              # [String] AttachedToZone/@idref
              :location,                            # [String] UnitLocation (HPXML::LocationXXX)
              :year_installed,                      # [Integer] YearInstalled
@@ -7136,6 +7220,22 @@ class HPXML < Object
       end
     end
 
+    # Returns whether if we are modeling a whole MF building and the shared system is explicitly modeled.
+    # Shared systems that are modeled as equivalent in-unit systems per ANSI 301 are not included.
+    #
+    # @return [Boolean] True if modeling a whole MF building and its a shared system
+    def is_shared_system_serving_multiple_dwelling_units
+      # Currently no shared heat pumps are explicitly modeled
+      return false
+    end
+
+    # Returns the shared object specified elsewhere in the HPXML.
+    #
+    # @return [HPXML::HeatPump] HeatPump object linked by sameas attribute
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
+
     # Deletes the current object from the array.
     #
     # @return [nil]
@@ -7173,6 +7273,7 @@ class HPXML < Object
       heat_pump = XMLHelper.add_element(hvac_plant, 'HeatPump')
       sys_id = XMLHelper.add_element(heat_pump, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if not @attached_to_zone_idref.nil?
         zone_attached = XMLHelper.add_element(heat_pump, 'AttachedToZone')
         XMLHelper.add_attribute(zone_attached, 'idref', @attached_to_zone_idref)
@@ -7296,6 +7397,7 @@ class HPXML < Object
       return if heat_pump.nil?
 
       @id = HPXML::get_id(heat_pump)
+      @sameas_id = HPXML::get_sameas_id(heat_pump)
       @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(heat_pump, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(heat_pump, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heat_pump, 'YearInstalled', :integer)
@@ -7719,11 +7821,16 @@ class HPXML < Object
                    :ducts,                     # [HPXML::Ducts]
                    :manualj_duct_loads]        # [HPXML::ManualJDuctLoads]
     ATTRS = [:id,                            # [String] SystemIdentifier/@id
+             :sameas_id,                     # [String] SystemIdentifier/@sameas
              :distribution_system_type,      # [String] DistributionSystemType/* (HPXML::HVACDistributionTypeXXX)
              :number_of_return_registers,    # [Integer] DistributionSystemType/AirDistribution/NumberofReturnRegisters
              :air_type,                      # [String] DistributionSystemType/AirDistribution/AirDistributionType (HPXML::AirTypeXXX)
              :manualj_blower_fan_heat_btuh,  # [Double] DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh (Btu/hr)
              :hydronic_type,                 # [String] DistributionSystemType/HydronicDistribution/HydronicDistributionType (HPXML::HydronicTypeXXX)
+             :hydronic_supply_temp,          # [Double] DistributionSystemType/HydronicDistribution/SupplyTemperature (F)
+             :hydronic_return_temp,          # [Double] DistributionSystemType/HydronicDistribution/ReturnTemperature (F)
+             :hydronic_trvs,                 # [Boolean] DistributionSystemType/HydronicDistribution/PumpandZoneValve/ThermostaticRadiatorValves
+             :hydronic_variable_speed_pump,  # [Boolean] DistributionSystemType/HydronicDistribution/PumpandZoneValve/VariableSpeedPump
              :manualj_hot_water_piping_btuh, # [Double] DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh (Btu/hr)
              :annual_heating_dse,            # [Double] DistributionSystemType/Other/AnnualHeatingDistributionSystemEfficiency (frac)
              :annual_cooling_dse,            # [Double] DistributionSystemType/Other/AnnualCoolingDistributionSystemEfficiency (frac)
@@ -7758,14 +7865,23 @@ class HPXML < Object
         end
       end
 
-      if num_clg > 1
-        fail "Multiple cooling systems found attached to distribution system '#{@id}'."
-      end
-      if num_htg > 1
-        fail "Multiple heating systems found attached to distribution system '#{@id}'."
+      if not @parent_object.parent_object.header.whole_sfa_or_mf_building_sim
+        if num_clg > 1
+          fail "Multiple cooling systems found attached to distribution system '#{@id}'."
+        end
+        if num_htg > 1
+          fail "Multiple heating systems found attached to distribution system '#{@id}'."
+        end
       end
 
       return list
+    end
+
+    # Returns the shared system object elsewhere in the HPXML.
+    #
+    # @return [HPXML::HVACDistribution] HVACDistribution object linked by sameas attribute
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
     end
 
     # Deletes the current object from the array.
@@ -7809,6 +7925,7 @@ class HPXML < Object
       hvac_distribution = XMLHelper.add_element(hvac, 'HVACDistribution')
       sys_id = XMLHelper.add_element(hvac_distribution, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if [HVACDistributionTypeAir, HVACDistributionTypeHydronic].include? @distribution_system_type
         distribution_system_type_el = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
         XMLHelper.add_element(distribution_system_type_el, @distribution_system_type)
@@ -7818,13 +7935,18 @@ class HPXML < Object
         XMLHelper.add_element(distribution_system_type_el, 'Other', @distribution_system_type, :string)
         XMLHelper.add_element(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency', @annual_heating_dse, :float) unless @annual_heating_dse.nil?
         XMLHelper.add_element(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency', @annual_cooling_dse, :float) unless @annual_cooling_dse.nil?
-      else
-        fail "Unexpected distribution_system_type '#{@distribution_system_type}'."
       end
 
       if [HPXML::HVACDistributionTypeHydronic].include? @distribution_system_type
         hydronic_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
         XMLHelper.add_element(hydronic_distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
+        XMLHelper.add_element(hydronic_distribution, 'SupplyTemperature', @hydronic_supply_temp, :float, @hydronic_supply_temp_isdefaulted) unless @hydronic_supply_temp.nil?
+        XMLHelper.add_element(hydronic_distribution, 'ReturnTemperature', @hydronic_return_temp, :float, @hydronic_return_temp_isdefaulted) unless @hydronic_return_temp.nil?
+        if (not @hydronic_trvs.nil?) || (not @hydronic_variable_speed_pump.nil?)
+          pump_and_zone_valve = XMLHelper.add_element(hydronic_distribution, 'PumpandZoneValve')
+          XMLHelper.add_element(pump_and_zone_valve, 'ThermostaticRadiatorValves', @hydronic_trvs, :boolean, @hydronic_trvs_isdefaulted) unless @hydronic_trvs.nil?
+          XMLHelper.add_element(pump_and_zone_valve, 'VariableSpeedPump', @hydronic_variable_speed_pump, :boolean, @hydronic_variable_speed_pump_isdefaulted) unless @hydronic_variable_speed_pump.nil?
+        end
         if not @manualj_hot_water_piping_btuh.nil?
           manualj_inputs = XMLHelper.create_elements_as_needed(hydronic_distribution, ['extension', 'ManualJInputs'])
           XMLHelper.add_element(manualj_inputs, 'HotWaterPipingBtuh', @manualj_hot_water_piping_btuh, :float, @manualj_hot_water_piping_btuh_isdefaulted)
@@ -7852,6 +7974,7 @@ class HPXML < Object
       return if hvac_distribution.nil?
 
       @id = HPXML::get_id(hvac_distribution)
+      @sameas_id = HPXML::get_sameas_id(hvac_distribution)
       @distribution_system_type = XMLHelper.get_child_name(hvac_distribution, 'DistributionSystemType')
       if @distribution_system_type == 'Other'
         @distribution_system_type = XMLHelper.get_value(XMLHelper.get_element(hvac_distribution, 'DistributionSystemType'), 'Other', :string)
@@ -7865,6 +7988,10 @@ class HPXML < Object
 
       if not hydronic_distribution.nil?
         @hydronic_type = XMLHelper.get_value(hydronic_distribution, 'HydronicDistributionType', :string)
+        @hydronic_supply_temp = XMLHelper.get_value(hydronic_distribution, 'SupplyTemperature', :float)
+        @hydronic_return_temp = XMLHelper.get_value(hydronic_distribution, 'ReturnTemperature', :float)
+        @hydronic_trvs = XMLHelper.get_value(hydronic_distribution, 'PumpandZoneValve/ThermostaticRadiatorValves', :boolean)
+        @hydronic_variable_speed_pump = XMLHelper.get_value(hydronic_distribution, 'PumpandZoneValve/VariableSpeedPump', :boolean)
         @manualj_hot_water_piping_btuh = XMLHelper.get_value(hydronic_distribution, 'extension/ManualJInputs/HotWaterPipingBtuh', :float)
       end
       if not air_distribution.nil?
