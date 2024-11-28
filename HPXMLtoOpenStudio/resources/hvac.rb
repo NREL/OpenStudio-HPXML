@@ -829,7 +829,8 @@ module HVAC
     oat_low = nil
     oat_hwst_high = nil
     oat_hwst_low = nil
-    design_temp = 180.0 # F
+    supply_temp = heating_system.distribution_system.hydronic_supply_temp
+    return_temp = heating_system.distribution_system.hydronic_return_temp
 
     if oat_reset_enabled
       if oat_high.nil? || oat_low.nil? || oat_hwst_low.nil? || oat_hwst_high.nil?
@@ -849,8 +850,8 @@ module HVAC
 
     loop_sizing = plant_loop.sizingPlant
     loop_sizing.setLoopType('Heating')
-    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp, 'F', 'C'))
-    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
+    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(supply_temp, 'F', 'C'))
+    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(supply_temp - return_temp, 'deltaF', 'deltaC'))
 
     # Pump
     pump_w = heating_system.electric_auxiliary_energy / 2.08
@@ -871,7 +872,7 @@ module HVAC
       boiler_RatedHWRT = UnitConversions.convert(80.0, 'F', 'C')
       plr_Rated = 1.0
       plr_Design = 1.0
-      boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0, 'F', 'C')
+      boiler_DesignHWRT = UnitConversions.convert(return_temp, 'F', 'C')
       # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
       condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
       boilerEff_Norm = heating_system.heating_efficiency_afue / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
@@ -922,7 +923,7 @@ module HVAC
     supply_setpoint = Model.add_schedule_constant(
       model,
       name: "#{obj_name} hydronic heat supply setpoint",
-      value: UnitConversions.convert(design_temp, 'F', 'C'),
+      value: UnitConversions.convert(supply_temp, 'F', 'C'),
       limits: EPlus::ScheduleTypeLimitsTemperature
     )
 
@@ -943,11 +944,11 @@ module HVAC
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
     bb_ua = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
-    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
-    fan_cfm = 400.0 * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton') # CFM; assumes 400 cfm/ton
+    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / loop_sizing.loopDesignTemperatureDifference / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
 
     if heating_system.distribution_system.air_type.to_s == HPXML::AirTypeFanCoil
       # Fan
+      fan_cfm = 400.0 * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton') # CFM; assumes 400 cfm/ton
       fan = create_supply_fan(model, obj_name, 0.0, [fan_cfm]) # fan energy included in above pump via Electric Auxiliary Energy (EAE)
 
       # Heating Coil
@@ -5285,12 +5286,22 @@ module HVAC
     loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(supply_temp - return_temp, 'deltaF', 'deltaC'))
 
     # Pump
-    pump_w = 1000.0 # FIXME
-    pump = Model.add_pump_variable_speed(
-      model,
-      name: "#{obj_name} hydronic pump",
-      rated_power: pump_w
-    )
+    # FIXME
+    if distribution_system.hydronic_variable_speed_pump
+      pump_w = 1000.0
+      pump = Model.add_pump_variable_speed(
+        model,
+        name: "#{obj_name} hydronic pump",
+        rated_power: pump_w
+      )
+    else
+      pump = Model.add_pump_constant_speed(
+        model,
+        name: "#{obj_name} hydronic pump",
+        rated_power: 0,
+        rated_flow_rate: 0
+      )
+    end
     pump.addToNode(plant_loop.supplyInletNode)
 
     # Hot Water Boilers

@@ -2650,7 +2650,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                               distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                               hydronic_type: HPXML::HydronicTypeBaseboard,
                                               hydronic_supply_temp: 160,
-                                              hydronic_return_temp: 120)
+                                              hydronic_return_temp: 120,
+                                              hydronic_variable_speed_pump: true)
     # Reference the shared boilers from all other buildings
     for i in 1..hpxml.buildings.size - 1
       hpxml.buildings[i].heating_systems.clear

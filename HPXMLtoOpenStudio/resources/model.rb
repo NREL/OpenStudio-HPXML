@@ -353,6 +353,24 @@ module Model
     return fan
   end
 
+  # Adds a PumpConstantSpeed object to the OpenStudio model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param rated_power [Double] Design power consumption (W)
+  # @param rated_flow_rate [Double] Design flow rate (m^3/s)
+  # @return [OpenStudio::Model::PumpConstantSpeed] The model object
+  def self.add_pump_constant_speed(model, name:, rated_power:, rated_flow_rate:)
+    pump = OpenStudio::Model::PumpConstantSpeed.new(model)
+    pump.setName(name)
+    pump.setMotorEfficiency(0.3)
+    pump.setRatedPowerConsumption(rated_power)
+    pump.setRatedPumpHead(90000)
+    pump.setRatedFlowRate(rated_flow_rate)
+    pump.setFractionofMotorInefficienciestoFluidStream(0.2)
+    pump.setPumpControlType('Intermittent')
+  end
+
   # Adds a PumpVariableSpeed object to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -367,8 +385,8 @@ module Model
     pump_eff = 0.75 # Overall efficiency of the pump
     if rated_power > 0
       pump.setRatedPumpHead(20000)
-      flow_rate = pump_eff * rated_power / pump.ratedPumpHead
-      pump.setRatedFlowRate([flow_rate, 0.00001].max)
+      rated_flow_rate = pump_eff * rated_power / pump.ratedPumpHead
+      pump.setRatedFlowRate([rated_flow_rate, 0.00001].max)
     else
       pump.setRatedPumpHead(1)
       pump.setRatedFlowRate(0.01)

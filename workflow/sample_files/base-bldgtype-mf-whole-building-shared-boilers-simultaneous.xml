@@ -399,6 +399,9 @@
                 <HydronicDistributionType>baseboard</HydronicDistributionType>
                 <SupplyTemperature>160.0</SupplyTemperature>
                 <ReturnTemperature>120.0</ReturnTemperature>
+                <PumpandZoneValve>
+                  <VariableSpeedPump>true</VariableSpeedPump>
+                </PumpandZoneValve>
               </HydronicDistribution>
             </DistributionSystemType>
           </HVACDistribution>

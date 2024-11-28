@@ -2532,6 +2532,14 @@ module Defaults
         hvac_distribution.hydronic_return_temp = hvac_distribution.hydronic_supply_temp - default_delta_t # deg-F
         hvac_distribution.hydronic_return_temp_isdefaulted = true
       end
+      if hvac_distribution.hydronic_trvs.nil?
+        hvac_distribution.hydronic_trvs = true
+        hvac_distribution.hydronic_trvs_isdefaulted = true
+      end
+      if hvac_distribution.hydronic_variable_speed_pump.nil?
+        hvac_distribution.hydronic_variable_speed_pump = false
+        hvac_distribution.hydronic_variable_speed_pump_isdefaulted = true
+      end
     end
 
     # Air distribution
