@@ -369,6 +369,7 @@ module Model
     pump.setRatedFlowRate(rated_flow_rate)
     pump.setFractionofMotorInefficienciestoFluidStream(0.2)
     pump.setPumpControlType('Intermittent')
+    return pump
   end
 
   # Adds a PumpVariableSpeed object to the OpenStudio model.
