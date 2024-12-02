@@ -260,10 +260,11 @@ module HVACSizing
     locations.uniq.each do |location|
       next if [HPXML::LocationGround].include? location
 
-      if [HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeUnderBelly].include? location
+      case location
+      when HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeUnderBelly
         mj.cool_design_temps[location] = hpxml_bldg.header.manualj_cooling_design_temp
         mj.heat_design_temps[location] = hpxml_bldg.header.manualj_heating_design_temp
-      elsif HPXML::conditioned_locations.include? location
+      when *HPXML::conditioned_locations
         mj.cool_design_temps[location] = get_design_temp_cooling(mj, weather, HPXML::LocationConditionedSpace, hpxml_bldg)
         mj.heat_design_temps[location] = get_design_temp_heating(mj, weather, HPXML::LocationConditionedSpace, hpxml_bldg)
       else
@@ -423,54 +424,62 @@ module HVACSizing
             end
           else
             if not roof.radiant_barrier
-              if roof.roof_type == HPXML::RoofTypeAsphaltShingles
-                if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+              case roof.roof_type
+              when HPXML::RoofTypeAsphaltShingles
+                case roof.roof_color
+                when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 130.0 * roof.net_area
                 else
                   cool_temp += 120.0 * roof.net_area
                 end
-              elsif roof.roof_type == HPXML::RoofTypeWoodShingles
+              when HPXML::RoofTypeWoodShingles
                 cool_temp += 120.0 * roof.net_area
-              elsif roof.roof_type == HPXML::RoofTypeMetal
-                if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+              when HPXML::RoofTypeMetal
+                case roof.roof_color
+                when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 130.0 * roof.net_area
-                elsif [HPXML::ColorMedium, HPXML::ColorLight].include? roof.roof_color
+                when HPXML::ColorMedium, HPXML::ColorLight
                   cool_temp += 120.0 * roof.net_area
-                elsif [HPXML::ColorReflective].include? roof.roof_color
+                when HPXML::ColorReflective
                   cool_temp += 95.0 * roof.net_area
                 end
-              elsif roof.roof_type == HPXML::RoofTypeClayTile
-                if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+              when HPXML::RoofTypeClayTile
+                case roof.roof_color
+                when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 110.0 * roof.net_area
-                elsif [HPXML::ColorMedium, HPXML::ColorLight].include? roof.roof_color
+                when HPXML::ColorMedium, HPXML::ColorLight
                   cool_temp += 105.0 * roof.net_area
-                elsif [HPXML::ColorReflective].include? roof.roof_color
+                when HPXML::ColorReflective
                   cool_temp += 95.0 * roof.net_area
                 end
               end
             else # with a radiant barrier
-              if roof.roof_type == HPXML::RoofTypeAsphaltShingles
-                if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+              case roof.roof_type
+              when HPXML::RoofTypeAsphaltShingles
+                case roof.roof_color
+                when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 120.0 * roof.net_area
                 else
                   cool_temp += 110.0 * roof.net_area
                 end
-              elsif roof.roof_type == HPXML::RoofTypeWoodShingles
+              when HPXML::RoofTypeWoodShingles
                 cool_temp += 110.0 * roof.net_area
-              elsif roof.roof_type == HPXML::RoofTypeMetal
-                if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+              when HPXML::RoofTypeMetal
+                case roof.roof_color
+                when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 120.0 * roof.net_area
-                elsif [HPXML::ColorMedium, HPXML::ColorLight].include? roof.roof_color
+                when HPXML::ColorMedium, HPXML::ColorLight
                   cool_temp += 110.0 * roof.net_area
-                elsif [HPXML::ColorReflective].include? roof.roof_color
+                when HPXML::ColorReflective
                   cool_temp += 95.0 * roof.net_area
                 end
-              elsif roof.roof_type == HPXML::RoofTypeClayTile
-                if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+              when HPXML::RoofTypeClayTile
+                case roof.roof_color
+                when HPXML::ColorDark, HPXML::ColorMediumDark
                   cool_temp += 105.0 * roof.net_area
-                elsif [HPXML::ColorMedium, HPXML::ColorLight].include? roof.roof_color
+                when HPXML::ColorMedium, HPXML::ColorLight
                   cool_temp += 100.0 * roof.net_area
-                elsif [HPXML::ColorReflective].include? roof.roof_color
+                when HPXML::ColorReflective
                   cool_temp += 95.0 * roof.net_area
                 end
               end
@@ -1070,11 +1079,12 @@ module HVACSizing
           color = HPXML::ColorDark
         end
 
-        if color == HPXML::ColorLight
+        case color
+        when HPXML::ColorLight
           color_multiplier = 0.65      # MJ8 Table 4B Notes, pg 348
-        elsif color == HPXML::ColorMedium
+        when HPXML::ColorMedium
           color_multiplier = 0.83      # MJ8 Appendix 12, pg 519
-        elsif color == HPXML::ColorDark
+        when HPXML::ColorDark
           color_multiplier = 1.0
         end
 
@@ -1170,17 +1180,18 @@ module HVACSizing
       end
 
       # Base CLTD color adjustment based on notes in MJ8 Figure A12-16
-      if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+      case roof.roof_color
+      when HPXML::ColorDark, HPXML::ColorMediumDark
         if [HPXML::RoofTypeClayTile, HPXML::RoofTypeWoodShingles].include? roof.roof_type
           cltd *= 0.83
         end
-      elsif [HPXML::ColorMedium, HPXML::ColorLight].include? roof.roof_color
+      when HPXML::ColorMedium, HPXML::ColorLight
         if [HPXML::RoofTypeClayTile].include? roof.roof_type
           cltd *= 0.65
         else
           cltd *= 0.83
         end
-      elsif [HPXML::ColorReflective].include? roof.roof_color
+      when HPXML::ColorReflective
         if [HPXML::RoofTypeAsphaltShingles, HPXML::RoofTypeWoodShingles].include? roof.roof_type
           cltd *= 0.83
         else
@@ -1748,16 +1759,16 @@ module HVACSizing
   def self.get_duct_regain_factor(duct, hpxml_bldg)
     f_regain = nil
 
-    if [HPXML::LocationOutside, HPXML::LocationRoofDeck].include? duct.duct_location
+    case duct.duct_location
+    when HPXML::LocationOutside, HPXML::LocationRoofDeck
       f_regain = 0.0
 
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
-           HPXML::LocationManufacturedHomeBelly].include? duct.duct_location
+    when HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
+         HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab, HPXML::LocationManufacturedHomeBelly
       space_values = Geometry.get_temperature_scheduled_space_values(duct.duct_location)
       f_regain = space_values[:f_regain]
 
-    elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? duct.duct_location
+    when HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented
 
       ceilings = hpxml_bldg.floors.select { |f| f.is_floor && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(duct.duct_location) }
       avg_ceiling_rvalue = calculate_average_r_value(ceilings)
@@ -1799,13 +1810,13 @@ module HVACSizing
         end
       end
 
-    elsif [HPXML::LocationAtticVented, HPXML::LocationAtticUnvented].include? duct.duct_location
+    when HPXML::LocationAtticVented, HPXML::LocationAtticUnvented
       f_regain = 0.10 # This would likely be higher for unvented attics with roof insulation
 
-    elsif [HPXML::LocationGarage].include? duct.duct_location
+    when HPXML::LocationGarage
       f_regain = 0.05
 
-    elsif HPXML::conditioned_locations.include? duct.duct_location
+    when *HPXML::conditioned_locations
       f_regain = 1.0
 
     end
@@ -3422,13 +3433,14 @@ module HVACSizing
   def self.get_geothermal_loop_borefield_ft_per_ton(mj, hpxml_bldg, geothermal_loop, weather, hvac_cooling)
     hvac_cooling_ap = hvac_cooling.additional_properties
 
-    if hvac_cooling_ap.u_tube_spacing_type == 'b'
+    case hvac_cooling_ap.u_tube_spacing_type
+    when 'b'
       beta_0 = 17.4427
       beta_1 = -0.6052
-    elsif hvac_cooling_ap.u_tube_spacing_type == 'c'
+    when 'c'
       beta_0 = 21.9059
       beta_1 = -0.3796
-    elsif hvac_cooling_ap.u_tube_spacing_type == 'as'
+    when 'as'
       beta_0 = 20.1004
       beta_1 = -0.94467
     end
@@ -4358,13 +4370,14 @@ module HVACSizing
 
       sum_uat, sum_ua = 0.0, 0.0
       space_UAs.each do |ua_type, ua|
-        if ua_type == HPXML::LocationGround
+        case ua_type
+        when HPXML::LocationGround
           sum_uat += ua * ground_db
           sum_ua += ua
-        elsif ua_type == HPXML::LocationOutside
+        when HPXML::LocationOutside
           sum_uat += ua * design_db
           sum_ua += ua
-        elsif ua_type == HPXML::LocationConditionedSpace
+        when HPXML::LocationConditionedSpace
           sum_uat += ua * setpoint_temp
           sum_ua += ua
         else
@@ -4393,11 +4406,12 @@ module HVACSizing
       ua_conditioned = 0.0
       ua_outside = 0.0
       space_UAs.each do |ua_type, ua|
-        if ua_type == HPXML::LocationOutside
+        case ua_type
+        when HPXML::LocationOutside
           ua_outside += ua
-        elsif ua_type == HPXML::LocationConditionedSpace
+        when HPXML::LocationConditionedSpace
           ua_conditioned += ua
-        elsif ua_type != HPXML::LocationGround
+        when !HPXML::LocationGround
           fail "Unexpected space ua type: '#{ua_type}'."
         end
       end
@@ -4795,15 +4809,36 @@ module HVACSizing
 
     assembly_r = Material.FoundationWallMaterial(foundation_wall.type, foundation_wall.thickness).rvalue
     assembly_r += Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
-    if include_insulation_layers
-      if foundation_wall.insulation_interior_distance_to_top == 0 && foundation_wall.insulation_interior_distance_to_bottom > 0
-        assembly_r += foundation_wall.insulation_interior_r_value
-      end
-      if foundation_wall.insulation_exterior_distance_to_top == 0 && foundation_wall.insulation_exterior_distance_to_bottom > 0
-        assembly_r += foundation_wall.insulation_exterior_r_value
-      end
+    if not include_insulation_layers
+      return 1.0 / assembly_r
     end
-    return 1.0 / assembly_r
+
+    ag_depth = foundation_wall.height - foundation_wall.depth_below_grade
+    wall_ins_dist_bottom_to_grade_int = ag_depth - foundation_wall.insulation_interior_distance_to_bottom
+    wall_ins_dist_top_to_grade_int = ag_depth - foundation_wall.insulation_interior_distance_to_top
+    wall_ins_dist_bottom_to_grade_ext = ag_depth - foundation_wall.insulation_exterior_distance_to_bottom
+    wall_ins_dist_top_to_grade_ext = ag_depth - foundation_wall.insulation_exterior_distance_to_top
+    # Perform calculation for each 1ft bin of above grade depth
+    sum_u_wall = 0.0
+    for distance_to_grade in 1..ag_depth.ceil
+      r_wall = assembly_r
+
+      bin_dist_top_to_grade = [distance_to_grade, ag_depth].min
+      bin_dist_bottom_to_grade = distance_to_grade - 1
+      bin_size = bin_dist_top_to_grade - bin_dist_bottom_to_grade # Last bin may be less than 1 ft
+
+      # Add interior insulation R-value at this depth?
+      bin_frac_insulated_int = MathTools.overlap(bin_dist_bottom_to_grade, bin_dist_top_to_grade, wall_ins_dist_bottom_to_grade_int, wall_ins_dist_top_to_grade_int) / bin_size
+      r_wall += foundation_wall.insulation_interior_r_value * bin_frac_insulated_int # Interior insulation at this depth, add R-value
+
+      # Add exterior insulation R-value at this depth?
+      bin_frac_insulated_ext = MathTools.overlap(bin_dist_bottom_to_grade, bin_dist_top_to_grade, wall_ins_dist_bottom_to_grade_ext, wall_ins_dist_top_to_grade_ext) / bin_size
+      r_wall += foundation_wall.insulation_exterior_r_value * bin_frac_insulated_ext # Exterior insulation at this depth, add R-value
+
+      sum_u_wall += (1.0 / r_wall) * bin_size
+    end
+    u_wall = sum_u_wall / ag_depth
+    return u_wall
   end
 
   # Calculates the foundation wall below grade effective U-factor according to Manual J Section A12-4.
@@ -4832,22 +4867,27 @@ module HVACSizing
 
     # Perform calculation for each 1ft bin of below grade depth
     sum_u_wall = 0.0
-    wall_depth_above_grade = foundation_wall.depth_below_grade.ceil
-    for distance_to_grade in 1..wall_depth_above_grade
+    for distance_to_grade in 1..foundation_wall.depth_below_grade.ceil
       # Calculate R-wall at this depth
       r_wall = wall_constr_rvalue - Material.AirFilmOutside.rvalue
-      bin_distance_to_grade = distance_to_grade - 0.5 # Use e.g. 2.5 ft for the 2ft-3ft bin
-      r_soil = (Math::PI * bin_distance_to_grade / 2.0) / ground_conductivity
-      if (distance_to_grade > wall_ins_dist_top_to_grade_int) && (distance_to_grade <= wall_ins_dist_bottom_to_grade_int)
-        r_wall += wall_ins_rvalue_int # Interior insulation at this depth, add R-value
-      end
-      if (distance_to_grade > wall_ins_dist_top_to_grade_ext) && (distance_to_grade <= wall_ins_dist_bottom_to_grade_ext)
-        r_wall += wall_ins_rvalue_ext # Exterior insulation at this depth, add R-value
-      end
+      bin_dist_top_to_grade = distance_to_grade - 1
+      bin_dist_bottom_to_grade = [distance_to_grade, foundation_wall.depth_below_grade].min
+      bin_size = bin_dist_bottom_to_grade - bin_dist_top_to_grade # Last bin may be less than 1 ft
+      bin_avg_dist_to_grade = (bin_dist_top_to_grade + bin_dist_bottom_to_grade) / 2.0
+
+      # Add interior insulation R-value at this depth?
+      bin_frac_insulated_int = MathTools.overlap(bin_dist_top_to_grade, bin_dist_bottom_to_grade, wall_ins_dist_top_to_grade_int, wall_ins_dist_bottom_to_grade_int) / bin_size
+      r_wall += wall_ins_rvalue_int * bin_frac_insulated_int
+
+      # Add exterior insulation R-value at this depth?
+      bin_frac_insulated_ext = MathTools.overlap(bin_dist_top_to_grade, bin_dist_bottom_to_grade, wall_ins_dist_top_to_grade_ext, wall_ins_dist_bottom_to_grade_ext) / bin_size
+      r_wall += wall_ins_rvalue_ext * bin_frac_insulated_ext # Exterior insulation at this depth, add R-value
+
       if include_soil
-        sum_u_wall += 1.0 / (r_soil + r_wall)
+        r_soil = (Math::PI * bin_avg_dist_to_grade / 2.0) / ground_conductivity
+        sum_u_wall += (1.0 / (r_soil + r_wall)) * bin_size
       else
-        sum_u_wall += 1.0 / r_wall
+        sum_u_wall += (1.0 / r_wall) * bin_size
       end
     end
     u_wall = sum_u_wall / foundation_wall.depth_below_grade
@@ -4980,35 +5020,36 @@ module HVACSizing
       end
     else
       # Use physical window properties
-      if window.glass_layers == HPXML::WindowLayersSinglePane
-        if [HPXML::WindowGlassTypeTintedReflective,
-            HPXML::WindowGlassTypeReflective].include? window.glass_type
+      case window.glass_layers
+      when HPXML::WindowLayersSinglePane
+        case window.glass_type
+        when HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGlassTypeReflective
           window_type = '1P Reflective'
-        elsif [HPXML::WindowGlassTypeTinted].include? window.glass_type
+        when HPXML::WindowGlassTypeTinted
           window_type = '1P Heat Absorbing'
         else
           window_type = '1P Clear'
         end
-      elsif window.glass_layers == HPXML::WindowLayersDoublePane
-        if [HPXML::WindowGlassTypeTintedReflective,
-            HPXML::WindowGlassTypeReflective].include? window.glass_type
+      when HPXML::WindowLayersDoublePane
+        case window.glass_type
+        when HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGlassTypeReflective
           window_type = '2P Reflective'
-        elsif [HPXML::WindowGlassTypeTinted].include? window.glass_type
+        when HPXML::WindowGlassTypeTinted
           window_type = '2P Heat Absorbing'
-        elsif [HPXML::WindowGlassTypeLowELowSolarGain].include? window.glass_type
+        when HPXML::WindowGlassTypeLowELowSolarGain
           window_type = '2P Low-e Option 3'
-        elsif [HPXML::WindowGlassTypeLowE].include? window.glass_type
+        when HPXML::WindowGlassTypeLowE
           window_type = '2P Low-e Option 2'
-        elsif [HPXML::WindowGlassTypeLowEHighSolarGain].include? window.glass_type
+        when HPXML::WindowGlassTypeLowEHighSolarGain
           window_type = '2P Low-e Option 1'
         else
           window_type = '2P Clear'
         end
-      elsif window.glass_layers == HPXML::WindowLayersTriplePane
-        if [HPXML::WindowGlassTypeTintedReflective,
-            HPXML::WindowGlassTypeReflective].include? window.glass_type
+      when HPXML::WindowLayersTriplePane
+        case window.glass_type
+        when HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGlassTypeReflective
           window_type = '3P Reflective'
-        elsif [HPXML::WindowGlassTypeTinted].include? window.glass_type
+        when HPXML::WindowGlassTypeTinted
           window_type = '3P Heat Absorbing'
         else
           window_type = '3P Clear'
