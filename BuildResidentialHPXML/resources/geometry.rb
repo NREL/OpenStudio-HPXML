@@ -27,10 +27,10 @@ module Geometry
                                          geometry_average_ceiling_height:,
                                          geometry_unit_num_floors_above_grade:,
                                          geometry_unit_aspect_ratio:,
-                                         geometry_garage_width:,
-                                         geometry_garage_depth:,
-                                         geometry_garage_protrusion:,
-                                         geometry_garage_position:,
+                                         geometry_garage_width: 0.0,
+                                         geometry_garage_depth: 0.0,
+                                         geometry_garage_protrusion: 0.0,
+                                         geometry_garage_position: Constants::PositionRight,
                                          geometry_foundation_type:,
                                          geometry_foundation_height:,
                                          geometry_rim_joist_height:,
@@ -681,10 +681,10 @@ module Geometry
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
-                                         geometry_unit_left_wall_is_adiabatic:,
-                                         geometry_unit_right_wall_is_adiabatic:,
-                                         geometry_unit_front_wall_is_adiabatic:,
-                                         geometry_unit_back_wall_is_adiabatic:,
+                                         geometry_unit_left_wall_is_adiabatic: false,
+                                         geometry_unit_right_wall_is_adiabatic: false,
+                                         geometry_unit_front_wall_is_adiabatic: false,
+                                         geometry_unit_back_wall_is_adiabatic: false,
                                          **)
 
     cfa = geometry_unit_cfa
@@ -983,10 +983,10 @@ module Geometry
                             geometry_attic_type:,
                             geometry_roof_type:,
                             geometry_roof_pitch:,
-                            geometry_unit_left_wall_is_adiabatic:,
-                            geometry_unit_right_wall_is_adiabatic:,
-                            geometry_unit_front_wall_is_adiabatic:,
-                            geometry_unit_back_wall_is_adiabatic:,
+                            geometry_unit_left_wall_is_adiabatic: false,
+                            geometry_unit_right_wall_is_adiabatic: false,
+                            geometry_unit_front_wall_is_adiabatic: false,
+                            geometry_unit_back_wall_is_adiabatic: false,
                             **)
 
     cfa = geometry_unit_cfa
@@ -1385,14 +1385,10 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param window_front_wwr [Double] ratio of window to wall area for the unit's front facade (frac)
-  # @param window_back_wwr [Double] ratio of window to wall area for the unit's back facade (frac)
-  # @param window_left_wwr [Double] ratio of window to wall area for the unit's left facade (frac)
-  # @param window_right_wwr [Double] ratio of window to wall area for the unit's right facade (frac)
-  # @param window_area_front [Double] amount of window area on unit's front facade (ft2)
-  # @param window_area_back [Double] amount of window area on unit's back facade (ft2)
-  # @param window_area_left [Double] amount of window area on unit's left facade (ft2)
-  # @param window_area_right [Double] amount of window area on unit's right facade (ft2)
+  # @param window_area_front [Double] amount of window area on unit's front facade or window to wall ratio if less than 1 (ft2 or frac)
+  # @param window_area_back [Double] amount of window area on unit's back facade or window to wall ratio if less than 1 (ft2 or frac)
+  # @param window_area_left [Double] amount of window area on unit's left facade or window to wall ratio if less than 1 (ft2 or frac)
+  # @param window_area_right [Double] amount of window area on unit's right facade or window to wall ratio if less than 1 (ft2 or frac)
   # @param window_aspect_ratio [Double] ratio of window height to width (frac)
   # @param skylight_area_front [Double] amount of skylight area on the unit's front conditioned roof facade (ft2)
   # @param skylight_area_back [Double] amount of skylight area on the unit's back conditioned roof facade (ft2)
@@ -1401,32 +1397,28 @@ module Geometry
   # @return [Boolean] true if successful
   def self.create_windows_and_skylights(runner:,
                                         model:,
-                                        window_front_wwr:,
-                                        window_back_wwr:,
-                                        window_left_wwr:,
-                                        window_right_wwr:,
                                         window_area_front:,
                                         window_area_back:,
                                         window_area_left:,
                                         window_area_right:,
                                         window_aspect_ratio:,
-                                        skylight_area_front:,
-                                        skylight_area_back:,
-                                        skylight_area_left:,
-                                        skylight_area_right:,
+                                        skylight_area_front: 0,
+                                        skylight_area_back: 0,
+                                        skylight_area_left: 0,
+                                        skylight_area_right: 0,
                                         **)
     facades = [Constants::FacadeBack, Constants::FacadeRight, Constants::FacadeFront, Constants::FacadeLeft]
 
     wwrs = {}
-    wwrs[Constants::FacadeBack] = window_back_wwr
-    wwrs[Constants::FacadeRight] = window_right_wwr
-    wwrs[Constants::FacadeFront] = window_front_wwr
-    wwrs[Constants::FacadeLeft] = window_left_wwr
+    wwrs[Constants::FacadeBack] = (window_area_back < 1 ? window_area_back : 0.0)
+    wwrs[Constants::FacadeRight] = (window_area_right < 1 ? window_area_right : 0.0)
+    wwrs[Constants::FacadeFront] = (window_area_front < 1 ? window_area_front : 0.0)
+    wwrs[Constants::FacadeLeft] = (window_area_left < 1 ? window_area_left : 0.0)
     window_areas = {}
-    window_areas[Constants::FacadeBack] = window_area_back
-    window_areas[Constants::FacadeRight] = window_area_right
-    window_areas[Constants::FacadeFront] = window_area_front
-    window_areas[Constants::FacadeLeft] = window_area_left
+    window_areas[Constants::FacadeBack] = (window_area_back >= 1 ? window_area_back : 0.0)
+    window_areas[Constants::FacadeRight] = (window_area_right >= 1 ? window_area_right : 0.0)
+    window_areas[Constants::FacadeFront] = (window_area_front >= 1 ? window_area_front : 0.0)
+    window_areas[Constants::FacadeLeft] = (window_area_left >= 1 ? window_area_left : 0.0)
 
     skylight_areas = {}
     skylight_areas[Constants::FacadeBack] = skylight_area_back
@@ -1759,9 +1751,9 @@ module Geometry
   # @param geometry_garage_width [Double] width of the garage (ft)
   # @param geometry_garage_depth [Double] depth of the garage (ft)
   # @return [Double] the unexposed garage perimeter
-  def self.get_unexposed_garage_perimeter(geometry_garage_protrusion:,
-                                          geometry_garage_width:,
-                                          geometry_garage_depth:,
+  def self.get_unexposed_garage_perimeter(geometry_garage_protrusion: 0.0,
+                                          geometry_garage_width: 0.0,
+                                          geometry_garage_depth: 0.0,
                                           **)
     protrusion = geometry_garage_protrusion
     width = geometry_garage_width

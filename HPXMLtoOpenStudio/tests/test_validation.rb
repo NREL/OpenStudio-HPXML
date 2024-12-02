@@ -345,18 +345,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.building_construction.conditioned_floor_area = 898.8
       when 'enclosure-garage-missing-exterior-wall'
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-garage.xml')
-        hpxml_bldg.walls.select { |w|
-          w.interior_adjacent_to == HPXML::LocationGarage &&
-            w.exterior_adjacent_to == HPXML::LocationOutside
-        }.reverse_each do |wall|
+        hpxml_bldg.walls.select { |w| w.interior_adjacent_to == HPXML::LocationGarage && w.exterior_adjacent_to == HPXML::LocationOutside }.reverse_each do |wall|
           wall.delete
         end
       when 'enclosure-garage-missing-roof-ceiling'
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-garage.xml')
-        hpxml_bldg.floors.select { |w|
-          w.interior_adjacent_to == HPXML::LocationGarage &&
-            w.exterior_adjacent_to == HPXML::LocationAtticUnvented
-        }.reverse_each do |floor|
+        hpxml_bldg.floors.select { |w| w.interior_adjacent_to == HPXML::LocationGarage && w.exterior_adjacent_to == HPXML::LocationAtticUnvented }.reverse_each do |floor|
           floor.delete
         end
       when 'enclosure-garage-missing-slab'

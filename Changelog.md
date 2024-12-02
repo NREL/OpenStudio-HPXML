@@ -1,6 +1,8 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- BuildResidentialHPXML measure:
+  - **Breaking change**: Removed `window_<side>_wwr` argument; a value less than 1 can be provided to the `window_area_<side>` and will be treated as a window-to-wall ratio.
 
 __Bugfixes__
 

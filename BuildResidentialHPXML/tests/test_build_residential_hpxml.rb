@@ -35,6 +35,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
 
       'base-sfd-header.xml' => 'base-sfd.xml',
       'base-sfd-header-no-duplicates.xml' => 'base-sfd-header.xml',
+      'base-auto.xml' => 'base-sfd.xml',
 
       # Extra files to test
       'extra-auto.xml' => 'base-sfd.xml',
@@ -417,18 +418,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['site_type'] = HPXML::SiteTypeSuburban
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFD
       args['geometry_unit_cfa'] = 2700.0
-      args['geometry_unit_left_wall_is_adiabatic'] = false
-      args['geometry_unit_right_wall_is_adiabatic'] = false
-      args['geometry_unit_front_wall_is_adiabatic'] = false
-      args['geometry_unit_back_wall_is_adiabatic'] = false
       args['geometry_unit_num_floors_above_grade'] = 1
       args['geometry_average_ceiling_height'] = 8.0
       args['geometry_unit_orientation'] = 180.0
       args['geometry_unit_aspect_ratio'] = 1.5
-      args['geometry_garage_width'] = 0.0
-      args['geometry_garage_depth'] = 20.0
-      args['geometry_garage_protrusion'] = 0.0
-      args['geometry_garage_position'] = Constants::PositionRight
       args['geometry_foundation_type'] = HPXML::FoundationTypeBasementConditioned
       args['geometry_foundation_height'] = 8.0
       args['geometry_foundation_height_above_grade'] = 1.0
@@ -440,42 +433,21 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_num_bedrooms'] = 3
       args['geometry_unit_num_bathrooms'] = 2
       args['geometry_unit_num_occupants'] = 3
-      args['floor_over_foundation_assembly_r'] = 0
-      args['floor_over_garage_assembly_r'] = 0
       args['floor_type'] = HPXML::FloorTypeWoodFrame
       args['foundation_wall_thickness'] = 8.0
       args['foundation_wall_insulation_r'] = 8.9
       args['foundation_wall_insulation_distance_to_top'] = 0.0
       args['foundation_wall_insulation_distance_to_bottom'] = 8.0
       args['rim_joist_assembly_r'] = 23.0
-      args['slab_perimeter_insulation_r'] = 0
-      args['slab_perimeter_insulation_depth'] = 0
-      args['slab_under_insulation_r'] = 0
-      args['slab_under_insulation_width'] = 0
-      args['slab_exterior_horizontal_insulation_r'] = 0
-      args['slab_exterior_horizontal_insulation_width'] = 0
-      args['slab_exterior_horizontal_insulation_depth_below_grade'] = 0
-      args['slab_thickness'] = 4.0
-      args['slab_carpet_fraction'] = 0.0
-      args['slab_carpet_r'] = 0.0
       args['ceiling_assembly_r'] = 39.3
       args['roof_material_type'] = HPXML::RoofTypeAsphaltShingles
       args['roof_color'] = HPXML::ColorMedium
       args['roof_assembly_r'] = 2.3
       args['radiant_barrier_attic_location'] = Constants::None
-      args['radiant_barrier_grade'] = 1
-      args['neighbor_front_distance'] = 0
-      args['neighbor_back_distance'] = 0
-      args['neighbor_left_distance'] = 0
-      args['neighbor_right_distance'] = 0
       args['wall_type'] = HPXML::WallTypeWoodStud
       args['wall_siding_type'] = HPXML::SidingTypeWood
       args['wall_color'] = HPXML::ColorMedium
       args['wall_assembly_r'] = 23
-      args['window_front_wwr'] = 0
-      args['window_back_wwr'] = 0
-      args['window_left_wwr'] = 0
-      args['window_right_wwr'] = 0
       args['window_area_front'] = 108.0
       args['window_area_back'] = 108.0
       args['window_area_left'] = 72.0
@@ -486,24 +458,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_shgc'] = 0.45
       args['window_interior_shading_winter'] = 0.85
       args['window_interior_shading_summer'] = 0.7
-      args['overhangs_front_depth'] = 0
-      args['overhangs_back_depth'] = 0
-      args['overhangs_left_depth'] = 0
-      args['overhangs_right_depth'] = 0
-      args['overhangs_front_distance_to_top_of_window'] = 0
-      args['overhangs_back_distance_to_top_of_window'] = 0
-      args['overhangs_left_distance_to_top_of_window'] = 0
-      args['overhangs_right_distance_to_top_of_window'] = 0
-      args['overhangs_front_distance_to_bottom_of_window'] = 0
-      args['overhangs_back_distance_to_bottom_of_window'] = 0
-      args['overhangs_left_distance_to_bottom_of_window'] = 0
-      args['overhangs_right_distance_to_bottom_of_window'] = 0
-      args['skylight_area_front'] = 0
-      args['skylight_area_back'] = 0
-      args['skylight_area_left'] = 0
-      args['skylight_area_right'] = 0
-      args['skylight_ufactor'] = 0.33
-      args['skylight_shgc'] = 0.45
       args['door_area'] = 40.0
       args['door_rvalue'] = 4.4
       args['air_leakage_units'] = HPXML::UnitsACH
@@ -523,21 +477,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['cooling_system_fraction_cool_load_served'] = 1
       args['cooling_system_is_ducted'] = false
       args['heat_pump_type'] = Constants::None
-      args['heat_pump_heating_efficiency_type'] = HPXML::UnitsHSPF
-      args['heat_pump_heating_efficiency'] = 7.7
-      args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsSEER
-      args['heat_pump_cooling_efficiency'] = 13.0
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeSingleStage
-      args['heat_pump_cooling_sensible_heat_fraction'] = 0.73
-      args['heat_pump_heating_capacity'] = 36000.0
-      args['heat_pump_cooling_capacity'] = 36000.0
-      args['heat_pump_fraction_heat_load_served'] = 1
-      args['heat_pump_fraction_cool_load_served'] = 1
-      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-      args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
-      args['heat_pump_backup_heating_efficiency'] = 1
-      args['heat_pump_backup_heating_capacity'] = 36000.0
-      args['geothermal_loop_configuration'] = Constants::None
       args['hvac_control_heating_weekday_setpoint'] = 68
       args['hvac_control_heating_weekend_setpoint'] = 68
       args['hvac_control_cooling_weekday_setpoint'] = 78
@@ -553,27 +492,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['ducts_return_surface_area'] = 50.0
       args['ducts_number_of_return_registers'] = 2
       args['heating_system_2_type'] = Constants::None
-      args['heating_system_2_fuel'] = HPXML::FuelTypeElectricity
-      args['heating_system_2_heating_efficiency'] = 1.0
-      args['heating_system_2_fraction_heat_load_served'] = 0.25
-      args['mech_vent_fan_type'] = Constants::None
-      args['mech_vent_flow_rate'] = 110
-      args['mech_vent_hours_in_operation'] = 24
-      args['mech_vent_recovery_efficiency_type'] = 'Unadjusted'
-      args['mech_vent_total_recovery_efficiency'] = 0.48
-      args['mech_vent_sensible_recovery_efficiency'] = 0.72
-      args['mech_vent_fan_power'] = 30
-      args['mech_vent_num_units_served'] = 1
-      args['mech_vent_2_fan_type'] = Constants::None
-      args['mech_vent_2_flow_rate'] = 110
-      args['mech_vent_2_hours_in_operation'] = 24
-      args['mech_vent_2_recovery_efficiency_type'] = 'Unadjusted'
-      args['mech_vent_2_total_recovery_efficiency'] = 0.48
-      args['mech_vent_2_sensible_recovery_efficiency'] = 0.72
-      args['mech_vent_2_fan_power'] = 30
       args['kitchen_fans_quantity'] = 0
       args['bathroom_fans_quantity'] = 0
-      args['whole_house_fan_present'] = false
       args['water_heater_type'] = HPXML::WaterHeaterTypeStorage
       args['water_heater_fuel_type'] = HPXML::FuelTypeElectricity
       args['water_heater_location'] = HPXML::LocationConditionedSpace
@@ -588,34 +508,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['water_heater_num_bedrooms_served'] = 3
       args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
       args['hot_water_distribution_standard_piping_length'] = 50
-      args['hot_water_distribution_recirc_control_type'] = HPXML::DHWRecircControlTypeNone
-      args['hot_water_distribution_recirc_piping_length'] = 50
-      args['hot_water_distribution_recirc_branch_piping_length'] = 50
-      args['hot_water_distribution_recirc_pump_power'] = 50
       args['hot_water_distribution_pipe_r'] = 0.0
-      args['dwhr_facilities_connected'] = Constants::None
-      args['dwhr_equal_flow'] = true
-      args['dwhr_efficiency'] = 0.55
       args['water_fixtures_shower_low_flow'] = true
       args['water_fixtures_sink_low_flow'] = false
-      args['solar_thermal_system_type'] = Constants::None
-      args['solar_thermal_collector_area'] = 40.0
-      args['solar_thermal_collector_loop_type'] = HPXML::SolarThermalLoopTypeDirect
-      args['solar_thermal_collector_type'] = HPXML::SolarThermalCollectorTypeEvacuatedTube
-      args['solar_thermal_collector_azimuth'] = 180
-      args['solar_thermal_collector_tilt'] = 20
-      args['solar_thermal_collector_rated_optical_efficiency'] = 0.5
-      args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
-      args['solar_thermal_solar_fraction'] = 0
-      args['pv_system_present'] = false
-      args['pv_system_array_azimuth'] = 180
-      args['pv_system_array_tilt'] = 20
-      args['pv_system_max_power_output'] = 4000
-      args['pv_system_2_present'] = false
-      args['pv_system_2_array_azimuth'] = 180
-      args['pv_system_2_array_tilt'] = 20
-      args['pv_system_2_max_power_output'] = 4000
-      args['battery_present'] = false
       args['lighting_present'] = true
       args['lighting_interior_fraction_cfl'] = 0.4
       args['lighting_interior_fraction_lfl'] = 0.1
@@ -626,13 +521,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['lighting_garage_fraction_cfl'] = 0.4
       args['lighting_garage_fraction_lfl'] = 0.1
       args['lighting_garage_fraction_led'] = 0.25
-      args['holiday_lighting_present'] = false
-      args['dehumidifier_type'] = Constants::None
-      args['dehumidifier_efficiency_type'] = 'EnergyFactor'
-      args['dehumidifier_efficiency'] = 1.8
-      args['dehumidifier_capacity'] = 40
-      args['dehumidifier_rh_setpoint'] = 0.5
-      args['dehumidifier_fraction_dehumidification_load_served'] = 1
       args['clothes_washer_present'] = true
       args['clothes_washer_location'] = HPXML::LocationConditionedSpace
       args['clothes_washer_efficiency_type'] = 'IntegratedModifiedEnergyFactor'
@@ -661,8 +549,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['refrigerator_present'] = true
       args['refrigerator_location'] = HPXML::LocationConditionedSpace
       args['refrigerator_rated_annual_kwh'] = 650.0
-      args['extra_refrigerator_present'] = false
-      args['freezer_present'] = false
       args['cooking_range_oven_present'] = true
       args['cooking_range_oven_location'] = HPXML::LocationConditionedSpace
       args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeElectricity
@@ -674,18 +560,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['misc_plug_loads_other_annual_kwh'] = 2457.0
       args['misc_plug_loads_other_frac_sensible'] = 0.855
       args['misc_plug_loads_other_frac_latent'] = 0.045
-      args['misc_plug_loads_well_pump_present'] = false
-      args['misc_plug_loads_vehicle_present'] = false
-      args['misc_fuel_loads_grill_present'] = false
-      args['misc_fuel_loads_grill_fuel_type'] = HPXML::FuelTypeNaturalGas
-      args['misc_fuel_loads_lighting_present'] = false
-      args['misc_fuel_loads_lighting_fuel_type'] = HPXML::FuelTypeNaturalGas
-      args['misc_fuel_loads_fireplace_present'] = false
-      args['misc_fuel_loads_fireplace_fuel_type'] = HPXML::FuelTypeNaturalGas
-      args['pool_present'] = false
-      args['pool_heater_type'] = HPXML::HeaterTypeElectricResistance
-      args['permanent_spa_present'] = false
-      args['permanent_spa_heater_type'] = HPXML::HeaterTypeElectricResistance
     when 'base-sfd2.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
       args['whole_sfa_or_mf_building_sim'] = true
@@ -694,14 +568,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_cfa'] = 1800.0
       args['geometry_building_num_units'] = 3
       args['geometry_unit_right_wall_is_adiabatic'] = true
-      args['window_front_wwr'] = 0.18
-      args['window_back_wwr'] = 0.18
-      args['window_left_wwr'] = 0.18
-      args['window_right_wwr'] = 0.18
-      args['window_area_front'] = 0
-      args['window_area_back'] = 0
-      args['window_area_left'] = 0
-      args['window_area_right'] = 0
+      args['window_area_front'] = 0.18
+      args['window_area_back'] = 0.18
+      args['window_area_left'] = 0.18
+      args['window_area_right'] = 0.18
       args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     when 'base-sfa2.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
@@ -717,14 +587,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeAboveApartment
       args['geometry_unit_right_wall_is_adiabatic'] = true
       args['geometry_building_num_units'] = 6
-      args['window_front_wwr'] = 0.18
-      args['window_back_wwr'] = 0.18
-      args['window_left_wwr'] = 0.18
-      args['window_right_wwr'] = 0.18
-      args['window_area_front'] = 0
-      args['window_area_back'] = 0
-      args['window_area_left'] = 0
-      args['window_area_right'] = 0
+      args['window_area_front'] = 0.18
+      args['window_area_back'] = 0.18
+      args['window_area_left'] = 0.18
+      args['window_area_right'] = 0.18
       args['ducts_supply_leakage_to_outside_value'] = 0.0
       args['ducts_return_leakage_to_outside_value'] = 0.0
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
@@ -762,6 +628,17 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'base-sfd-header-no-duplicates.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['whole_sfa_or_mf_building_sim'] = true
+    when 'base-auto.xml'
+      args['simulation_control_timestep'] = Constants::Auto
+      args['simulation_control_run_period_calendar_year'] = Constants::Auto
+      args['simulation_control_daylight_saving_enabled'] = Constants::Auto
+      args['simulation_control_temperature_capacitance_multiplier'] = Constants::Auto
+      args['site_type'] = Constants::Auto
+      args['site_shielding_of_home'] = Constants::Auto
+      args['site_soil_and_moisture_type'] = Constants::Auto
+      args['site_state_code'] = Constants::Auto
+      args['site_time_zone_utc_offset'] = Constants::Auto
+      args['site_elevation'] = Constants::Auto
     end
 
     # Extras
@@ -788,7 +665,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['pv_system_2_array_tilt'] = 'roofpitch+15'
     when 'extra-dhw-solar-latitude.xml'
       args['solar_thermal_system_type'] = HPXML::SolarThermalSystemTypeHotWater
+      args['solar_thermal_collector_area'] = 40.0
+      args['solar_thermal_collector_loop_type'] = HPXML::SolarThermalLoopTypeDirect
+      args['solar_thermal_collector_type'] = HPXML::SolarThermalCollectorTypeEvacuatedTube
+      args['solar_thermal_collector_azimuth'] = 180
       args['solar_thermal_collector_tilt'] = 'Latitude-15'
+      args['solar_thermal_collector_rated_optical_efficiency'] = 0.5
+      args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
     when 'extra-second-refrigerator.xml'
       args['extra_refrigerator_location'] = HPXML::LocationConditionedSpace
     when 'extra-second-heating-system-portable-heater-to-heating-system.xml'
@@ -818,6 +701,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_type'] = Constants::None
       args['cooling_system_type'] = Constants::None
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
+      args['heat_pump_heating_efficiency'] = 7.7
+      args['heat_pump_cooling_efficiency'] = 13.0
       args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
       args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
       args['heat_pump_heating_capacity'] = 48000.0
@@ -835,6 +720,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('heat_pump_cooling_compressor_type')
       args['heat_pump_heating_efficiency'] = 10.0
       args['heat_pump_cooling_efficiency'] = 19.0
+      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
       args['heat_pump_heating_capacity'] = 48000.0
       args['heat_pump_is_ducted'] = true
       args['heat_pump_fraction_heat_load_served'] = 0.75
@@ -862,6 +748,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_protrusion'] = 0.5
     when 'extra-enclosure-garage-atticroof-conditioned.xml'
       args['geometry_garage_width'] = 30.0
+      args['geometry_garage_depth'] = 20.0
       args['geometry_garage_protrusion'] = 1.0
       args['window_area_front'] = 12.0
       args['window_aspect_ratio'] = 5.0 / 1.5
@@ -1266,13 +1153,16 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-hip-roof-and-protruding-garage.xml'
       args['geometry_roof_type'] = Constants::RoofTypeHip
       args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 20
       args['geometry_garage_protrusion'] = 0.5
     when 'error-protruding-garage-under-gable-roof.xml'
       args['geometry_unit_aspect_ratio'] = 0.5
       args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 20
       args['geometry_garage_protrusion'] = 0.5
     when 'error-ambient-with-garage.xml'
       args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 20
       args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
     when 'error-invalid-door-area.xml'
       args['door_area'] = -10
@@ -1280,6 +1170,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_aspect_ratio'] = 0
     when 'error-garage-too-wide.xml'
       args['geometry_garage_width'] = 72
+      args['geometry_garage_depth'] = 20
     when 'error-garage-too-deep.xml'
       args['geometry_garage_width'] = 12
       args['geometry_garage_depth'] = 40
