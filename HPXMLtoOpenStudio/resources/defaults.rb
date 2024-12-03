@@ -5980,7 +5980,7 @@ module Defaults
         heating_system = cooling_system.attached_heating_system
         if !heating_system.nil? &&
            ((heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_fuel != HPXML::FuelTypeElectricity))
-          breaker_spaces += 3 # AHU; paired w/fuel heating system
+          breaker_spaces += 2 # AHU; paired w/fuel heating system
         elsif voltage == 240
           breaker_spaces += 2 # AHU
         end
