@@ -5919,12 +5919,12 @@ module Defaults
 
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
-          if heat_pump.simultaneous_backup # sum
+          if heat_pump.simultaneous_backup # sum; backup > compressor
             watts += HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
               watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
             end
-          else # max
+          else # max; switchover
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
               watts += [HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')),
                         UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
@@ -6045,11 +6045,6 @@ module Defaults
         next if !system_ids.include?(ventilation_fan.id)
         next if ventilation_fan.is_shared_system
 
-        # if ventilation_fan.fan_location == HPXML::LocationKitchen
-        # watts += 90 * ventilation_fan.count
-        # elsif ventilation_fan.fan_location == HPXML::LocationBath
-        # watts += 15 * ventilation_fan.count
-        # end
         if [HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
           watts += ventilation_fan.count * ventilation_fan.fan_power
         elsif not ventilation_fan.fan_power.nil?
