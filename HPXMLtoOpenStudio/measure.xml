@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c663cdee-85bf-4597-b5e0-74feeeb39387</version_id>
-  <version_modified>2024-12-03T22:27:35Z</version_modified>
+  <version_id>eff4aee6-4410-475b-b510-4d241b54f33b</version_id>
+  <version_modified>2024-12-04T04:55:16Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -336,7 +336,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4DBC9F4F</checksum>
+      <checksum>36D8BB2E</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
@@ -684,7 +684,7 @@
       <filename>test_electric_panel.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3AD8975C</checksum>
+      <checksum>7F389ECE</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>

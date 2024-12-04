@@ -241,14 +241,28 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     test_name = 'ASHP w/out backup'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml', test_name)
-    hpxml_bldg.heat_pumps[0].backup_heating_capacity = 0
+    hpxml_bldg.heat_pumps[0].backup_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801, 4)
     _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 0)
 
-    # ASHP w/integrated backup
+    test_name = 'ASHP w/integrated electric backup'
+    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml', test_name)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801 + 10551, 6)
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 0)
+
+    test_name = 'ASHP w/integrated gas backup'
+    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml', test_name)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801, 3)
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 0)
 
     # ASHP w/integrated switchover
 
@@ -256,7 +270,14 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     # ASHP w/separate switchover
 
-    # Ducted MSHP w/out backup
+    test_name = 'Ducted MSHP w/out backup'
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted.xml', test_name)
+    hpxml_bldg.heat_pumps[0].backup_type = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5801, 2)
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5801, 0)
 
     # Ducted MSHP w/integrated backup
 
@@ -266,7 +287,13 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     # Ducted MSHP w/separate switchover
 
-    # Ductless MSHP w/out backup
+    test_name = 'Ductless MSHP w/out backup'
+    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless.xml', test_name)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 84 + 5801, 2)
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 84 + 5801, 0)
 
     # Ductless MSHP w/integrated backup
 
@@ -318,8 +345,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_equal(breaker_spaces, pl.map { |pl| pl.breaker_spaces }.sum(0.0))
   end
 
-  def _create_hpxml(hpxml_name, test_name)
-    puts "Testing #{test_name}..."
+  def _create_hpxml(hpxml_name, test_name = nil)
+    puts "Testing #{test_name}..." if !test_name.nil?
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
     hpxml_bldg = hpxml.buildings[0]
     if hpxml_bldg.electric_panels.size == 0

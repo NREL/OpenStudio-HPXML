@@ -5822,15 +5822,6 @@ module Defaults
   end
 
   # FIXME
-  # Returns the number of breaker spaces based on the heating rated (output) capacity.
-  #
-  # @param heating_capacity [Double] Heating output capacity [Btu/hr]
-  # @return [Integer] Breaker spaces [#]
-  def self.get_breaker_spaces_from_heating_capacity(heating_capacity)
-    return (UnitConversions.convert(heating_capacity, 'btu/hr', 'kw') / 12.0).ceil * 2 + 2
-  end
-
-  # FIXME
   # Returns the number of breaker spaces based on TODO.
   #
   # @param TODO
@@ -5840,21 +5831,6 @@ module Defaults
     num_branches = (required_amperage / 50).ceil
     num_breakers = num_branches * 2
     return num_breakers
-  end
-
-  # FIXME
-  # Returns the number of breaker spaces based on the backup heating rated (output) capacity.
-  #
-  # @param heating_capacity [Double] Heating output capacity [Btu/hr]
-  # @return [Integer] Breaker spaces [#]
-  def self.get_breaker_spaces_from_backup_heating_capacity(heating_capacity)
-    if UnitConversions.convert(heating_capacity, 'btu/hr', 'kw') <= 10
-      return 2
-    elsif UnitConversions.convert(heating_capacity, 'btu/hr', 'kw') <= 20
-      return 4
-    else
-      return 6
-    end
   end
 
   # Gets the default properties for electric panels.
@@ -5908,7 +5884,7 @@ module Defaults
   # @return [Hash] Map of property type => value
   def self.get_panel_load_power_breaker_spaces_default_values(hpxml_bldg, panel_load)
     type = panel_load.type
-    voltage = panel_load.voltage
+    voltage = Integer(panel_load.voltage)
     system_ids = panel_load.system_idrefs
 
     watts = 0
@@ -5928,15 +5904,18 @@ module Defaults
         watts += HVAC.get_pump_power_watts(heating_system.electric_auxiliary_energy)
 
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-          breaker_spaces += get_breaker_spaces_from_power_watts(watts, voltage) # IDU / AHU
+          breaker_spaces += get_breaker_spaces_from_power_watts(watts, voltage)
         else
-          breaker_spaces += 1 # AHU
+          breaker_spaces += 1 # 120v fan or pump
         end
       end
 
       hpxml_bldg.heat_pumps.each do |heat_pump|
         next if !system_ids.include?(heat_pump.id)
         next if heat_pump.fraction_heat_load_served == 0
+
+        # FIXME: add this only when ducted?
+        watts += HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
 
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
@@ -5955,17 +5934,20 @@ module Defaults
           end
 
           if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-            breaker_spaces += get_breaker_spaces_from_backup_heating_capacity(heat_pump.backup_heating_capacity) # AHU
+            breaker_spaces += get_breaker_spaces_from_power_watts(watts, voltage)
           else
-            breaker_spaces += 1 # AHU
+            breaker_spaces += 1 # 120v fan
           end
-        else # separate or none
+        elsif heat_pump.backup_type == HPXML::HeatPumpBackupTypeSeparate
           watts += HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+        else # none
+          watts += HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'))
+          if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+            breaker_spaces += 2 # top discharge
+          end
         end
 
-        watts += HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
-
-        breaker_spaces += 2 # ODU
+        breaker_spaces += get_breaker_spaces_from_power_watts(HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')), voltage) # ODU; all residential HP ODU should not exceed 12 kW in electrical load and therefore requires only one 240v circuit (2 breaker spaces)
       end
 
     elsif type == HPXML::ElectricPanelLoadTypeCooling
@@ -5977,13 +5959,7 @@ module Defaults
         watts += HVAC.get_dx_cooling_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'))
         watts += HVAC.get_blower_fan_power_watts(cooling_system.fan_watts_per_cfm, cooling_system.cooling_airflow_cfm)
 
-        heating_system = cooling_system.attached_heating_system
-        if !heating_system.nil? &&
-           ((heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_fuel != HPXML::FuelTypeElectricity))
-          breaker_spaces += 2 # AHU; paired w/fuel heating system
-        elsif voltage == 240
-          breaker_spaces += 2 # AHU
-        end
+        breaker_spaces += get_breaker_spaces_from_power_watts(watts, voltage)
       end
 
       hpxml_bldg.heat_pumps.each do |heat_pump|
@@ -5994,7 +5970,7 @@ module Defaults
         watts += HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.cooling_airflow_cfm)
 
         if heat_pump.fraction_heat_load_served == 0
-          breaker_spaces += 3 # ODU; the 3 we missed adding to heating
+          breaker_spaces += get_breaker_spaces_from_power_watts(HVAC.get_dx_cooling_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr')), voltage) # ODU; the ~2 we missed adding to heating
         end
       end
 
