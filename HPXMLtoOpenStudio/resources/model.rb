@@ -933,7 +933,7 @@ module Model
     end
 
     model_size = model.to_s.size
-    model.addObjects(unit_model_objects, true)
+    model_objects = model.addObjects(unit_model_objects, true)
     if model.to_s.size == model_size
       # Objects not added, check for the culprit
       unit_model_objects.each do |o|
@@ -943,6 +943,18 @@ module Model
           fail "object not successfully merged:\n\n#{o}"
         end
       end
+    end
+
+    model_objects.each do |obj|
+      next unless obj.to_Surface.is_initialized
+      next unless obj.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlSameasID').is_initialized
+
+      surface_obj = obj.to_Surface.get
+      hpxml_sameas_id = surface_obj.additionalProperties.getFeatureAsString('hpxmlSameasID').to_s
+
+      adjacent_surface = model_objects.find { |o| o.to_Surface.is_initialized && o.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlID').is_initialized && (hpxml_sameas_id == o.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlID').to_s) }.to_Surface.get
+      surface_obj.setConstruction(adjacent_surface.construction.get.to_Construction.get.reverseConstruction)
+      adjacent_surface.setAdjacentSurface(surface_obj)
     end
   end
 
