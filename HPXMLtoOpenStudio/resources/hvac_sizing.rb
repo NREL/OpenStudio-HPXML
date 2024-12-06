@@ -1281,8 +1281,8 @@ module HVACSizing
         htd_adj = mj.htd
         htd_adj += 25.0 if has_radiant_floor # Table 4A: Radiant floor over open crawlspace: HTM = U-Value × (HTD + 25)
 
-        clg_htm = (1.0 / u_floor) * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
-        htg_htm = (1.0 / u_floor) * htd_adj
+        clg_htm = u_floor * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
+        htg_htm = u_floor * htd_adj
       else # Partition floor
         adjacent_space = floor.exterior_adjacent_to
         if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include?(adjacent_space)
