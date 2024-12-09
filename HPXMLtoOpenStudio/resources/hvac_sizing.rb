@@ -1989,11 +1989,11 @@ module HVACSizing
     end
   end
 
-  # TODO
+  # Calculates the duct loads using Manual J Table 7 default duct tables.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param manualj_duct_load [HPXML::ManualJDuctLoad] Manual J duct load of interest
-  # @return [TODO] TODO
+  # @return [Array<Double, Double, Double>] Heating loss factor, Cooling sensible gain factor, Cooling latent gain Btuh
   def self.get_duct_table7_factors(hpxml_bldg, manualj_duct_load)
     # Gather values
     htg_oat = hpxml_bldg.header.manualj_heating_design_temp

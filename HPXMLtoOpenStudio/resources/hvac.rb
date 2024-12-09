@@ -10,7 +10,7 @@ module HVAC
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
   CrankcaseHeaterTemp = 50.0 # degF
 
-  # TODO
+  # Adds any HVAC Systems to the OpenStudio model.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -727,7 +727,7 @@ module HVAC
     add_pump_power_ems_program(model, pump_w, pump, air_loop_unitary)
 
     if heat_pump.is_shared_system
-      # Shared pump power per ANSI/RESNET/ICC 301-2019 Section 4.4.5.1 (pump runs 8760)
+      # Shared pump power per ANSI/RESNET/ICC 301-2022 Section 4.4.5.1 (pump runs 8760)
       design_level = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
 
       equip = Model.add_electric_equipment(
@@ -1293,14 +1293,14 @@ module HVAC
     ceiling_fan = hpxml_bldg.ceiling_fans[0]
 
     obj_name = Constants::ObjectTypeCeilingFan
-    hrs_per_day = 10.5 # From ANSI 301-2019
+    hrs_per_day = 10.5 # From ANSI/RESNET/ICC 301-2022
     cfm_per_w = ceiling_fan.efficiency
     label_energy_use = ceiling_fan.label_energy_use
     count = ceiling_fan.count
     if !label_energy_use.nil? # priority if both provided
       annual_kwh = UnitConversions.convert(count * label_energy_use * hrs_per_day * 365.0, 'Wh', 'kWh')
     elsif !cfm_per_w.nil?
-      medium_cfm = 3000.0 # cfm, per ANSI 301-2019
+      medium_cfm = 3000.0 # cfm, per ANSI/RESNET/ICC 301-2019
       annual_kwh = UnitConversions.convert(count * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
     end
 
@@ -5286,7 +5286,7 @@ module HVAC
             aux_dweq = cooling_system.fan_coil_watts
           end
         end
-        # ANSI/RESNET/ICC 301-2019 Equation 4.4-2
+        # ANSI/RESNET/ICC 301-2022 Equation 4.4-2
         seer_eq = (cap - 3.41 * aux - 3.41 * aux_dweq * n_dweq) / (chiller_input + aux + aux_dweq * n_dweq)
 
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeCoolingTower
@@ -5299,7 +5299,7 @@ module HVAC
             wlhp_input = wlhp_cap / wlhp.cooling_efficiency_eer
           end
         end
-        # ANSI/RESNET/ICC 301-2019 Equation 4.4-3
+        # ANSI/RESNET/ICC 301-2022 Equation 4.4-3
         seer_eq = (wlhp_cap - 3.41 * aux / n_dweq) / (wlhp_input + aux / n_dweq)
 
       else
@@ -5392,7 +5392,7 @@ module HVAC
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_type.to_s == HPXML::HydronicTypeWaterLoop
 
         # Shared boiler w/ water loop heat pump
-        # Per ANSI/RESNET/ICC 301-2019 Section 4.4.7.2, model as:
+        # Per ANSI/RESNET/ICC 301-2022 Section 4.4.7.2, model as:
         # A) heat pump with constant efficiency and duct losses, fraction heat load served = 1/COP
         # B) boiler, fraction heat load served = 1-1/COP
         fraction_heat_load_served = heating_system.fraction_heat_load_served
@@ -5584,7 +5584,7 @@ module HVAC
   # Calculates rated SEER (older metric) from rated SEER2 (newer metric).
   #
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
-  # This is based on a regression of products, not a translation.
+  # Note that this is a regression based on products on the market, not a conversion.
   #
   # @param seer2 [Double] Cooling efficiency (Btu/Wh)
   # @param is_ducted [Boolean] True if a ducted HVAC system
