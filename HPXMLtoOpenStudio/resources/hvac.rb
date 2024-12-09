@@ -663,20 +663,19 @@ module HVAC
     xing.setAverageSoilSurfaceTemperature(ground_heat_exch_vert.groundTemperature.get)
 
     # Plant Loop
-    plant_loop = OpenStudio::Model::PlantLoop.new(model)
-    plant_loop.setName(obj_name + ' condenser loop')
-    plant_loop.setFluidType(hp_ap.fluid_type)
-    if hp_ap.fluid_type != EPlus::FluidWater
-      plant_loop.setGlycolConcentration((hp_ap.frac_glycol * 100).to_i)
-    end
-    plant_loop.setMaximumLoopTemperature(48.88889)
-    plant_loop.setMinimumLoopTemperature(UnitConversions.convert(hp_ap.design_hw, 'F', 'C'))
-    plant_loop.setMinimumLoopFlowRate(0)
-    plant_loop.setLoadDistributionScheme('SequentialLoad')
+    plant_loop = Model.add_plant_loop(
+      model,
+      name: "#{obj_name} condenser loop",
+      fluid_type: hp_ap.fluid_type,
+      glycol_concentration: (hp_ap.frac_glycol * 100).to_i,
+      min_temp: UnitConversions.convert(hp_ap.design_hw, 'F', 'C'),
+      max_temp: 48.88889,
+      max_flow_rate: UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s')
+    )
+
     plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert)
     plant_loop.addDemandBranchForComponent(htg_coil)
     plant_loop.addDemandBranchForComponent(clg_coil)
-    plant_loop.setMaximumLoopFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
 
     sizing_plant = plant_loop.sizingPlant
     sizing_plant.setLoopType('Condenser')
@@ -839,13 +838,10 @@ module HVAC
     end
 
     # Plant Loop
-    plant_loop = OpenStudio::Model::PlantLoop.new(model)
-    plant_loop.setName(obj_name + ' hydronic heat loop')
-    plant_loop.setFluidType(EPlus::FluidWater)
-    plant_loop.setMaximumLoopTemperature(100)
-    plant_loop.setMinimumLoopTemperature(0)
-    plant_loop.setMinimumLoopFlowRate(0)
-    plant_loop.autocalculatePlantLoopVolume()
+    plant_loop = Model.add_plant_loop(
+      model,
+      name: "#{obj_name} hydronic heat loop"
+    )
 
     loop_sizing = plant_loop.sizingPlant
     loop_sizing.setLoopType('Heating')

@@ -686,19 +686,11 @@ module Waterheater
       end
     end
 
-    plant_loop = OpenStudio::Model::PlantLoop.new(model)
-    plant_loop.setName('solar hot water loop')
-    if fluid_type == EPlus::FluidWater
-      plant_loop.setFluidType(EPlus::FluidWater)
-    else
-      plant_loop.setFluidType(EPlus::FluidPropyleneGlycol)
-      plant_loop.setGlycolConcentration(50)
-    end
-    plant_loop.setMaximumLoopTemperature(100)
-    plant_loop.setMinimumLoopTemperature(0)
-    plant_loop.setMinimumLoopFlowRate(0)
-    plant_loop.setLoadDistributionScheme('Optimal')
-    plant_loop.setPlantEquipmentOperationHeatingLoadSchedule(model.alwaysOnDiscreteSchedule)
+    plant_loop = Model.add_plant_loop(
+      model,
+      name: 'solar hot water loop',
+      fluid_type: fluid_type
+    )
 
     sizing_plant = plant_loop.sizingPlant
     sizing_plant.setLoopType('Heating')
@@ -2156,25 +2148,29 @@ module Waterheater
       t_set_c = UnitConversions.convert(Defaults.get_water_heater_temperature(eri_version), 'F', 'C')
     end
 
-    loop = OpenStudio::Model::PlantLoop.new(model)
-    loop.setName(name)
-    loop.sizingPlant.setDesignLoopExitTemperature(t_set_c)
-    loop.sizingPlant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, 'deltaF', 'deltaC'))
-    loop.setPlantLoopVolume(0.003 * unit_multiplier) # ~1 gal
-    loop.setMaximumLoopFlowRate(0.01 * unit_multiplier) # This size represents the physical limitations to flow due to losses in the piping system. We assume that the pipes are always adequately sized.
+    plant_loop = Model.add_plant_loop(
+      model,
+      name: name,
+      volume: 0.003 * unit_multiplier, # ~1 gal
+      max_flow_rate: 0.01 * unit_multiplier # This size represents the physical limitations to flow due to losses in the piping system. We assume that the pipes are always adequately sized.
+    )
+
+    sizing_plant = plant_loop.sizingPlant
+    sizing_plant.setDesignLoopExitTemperature(t_set_c)
+    sizing_plant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, 'deltaF', 'deltaC'))
 
     bypass_pipe = Model.add_pipe_adiabatic(model)
     out_pipe = Model.add_pipe_adiabatic(model)
 
-    loop.addSupplyBranchForComponent(bypass_pipe)
-    out_pipe.addToNode(loop.supplyOutletNode)
+    plant_loop.addSupplyBranchForComponent(bypass_pipe)
+    out_pipe.addToNode(plant_loop.supplyOutletNode)
 
     pump = Model.add_pump_variable_speed(
       model,
       name: "#{name} pump",
       rated_power: 0
     )
-    pump.addToNode(loop.supplyInletNode)
+    pump.addToNode(plant_loop.supplyInletNode)
 
     temp_schedule = Model.add_schedule_constant(
       model,
@@ -2182,9 +2178,9 @@ module Waterheater
       value: t_set_c
     )
     setpoint_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, temp_schedule)
-    setpoint_manager.addToNode(loop.supplyOutletNode)
+    setpoint_manager.addToNode(plant_loop.supplyOutletNode)
 
-    return loop
+    return plant_loop
   end
 
   # Gets the solar fraction, which is defined as the portion of total conventional hot water heating
