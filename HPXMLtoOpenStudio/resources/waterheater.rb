@@ -1367,7 +1367,9 @@ module Waterheater
         key_name: op_mode_schedule.name
       )
 
-      runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterOperatingMode].name}' schedule file and operating mode provided; the latter will be ignored.") if !op_mode.nil?
+      if not water_heating_system.operating_mode.nil?
+        runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterOperatingMode].name}' schedule file and operating mode provided; the latter will be ignored.")
+      end
     end
 
     t_offset = 9.0 # C
