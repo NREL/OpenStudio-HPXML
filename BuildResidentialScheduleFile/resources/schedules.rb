@@ -1123,6 +1123,11 @@ class ScheduleGenerator
     return lighting_sch
   end
 
+  # TODO
+  #
+  # @param away_schedule [TODO] TODO
+  # @param hours_driven_per_year [TODO] TODO
+  # @return [TODO] TODO
   def _get_ev_battery_schedule(away_schedule, hours_driven_per_year)
     total_driving_minutes_per_year = (hours_driven_per_year * 60).ceil
     expanded_away_schedule = away_schedule.flat_map { |status| [status] * 15 }
@@ -1167,6 +1172,10 @@ class ScheduleGenerator
     return charging_schedule, discharging_schedule
   end
 
+  # TODO
+  #
+  # @param markov_chain_simulation_result [TODO] TODO
+  # @return [TODO] TODO
   def fill_ev_battery_schedule(markov_chain_simulation_result)
     if @hpxml_bldg.vehicles.to_a.empty?
       return
