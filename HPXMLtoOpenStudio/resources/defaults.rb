@@ -6074,7 +6074,11 @@ module Defaults
         next if !system_ids.include?(permanent_spa.heater_id)
         next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
 
-        watts += 1000 # FIXME
+        if permanent_spa.heater_type == HPXML::HeaterTypeElectricResistance
+          watts += 4000 # FIXME: correct value?
+        elsif permanent_spa.heater_type == HPXML::HeaterTypeHeatPump
+          watts += 4000 # FIXME: correct value?
+        end
         breaker_spaces += 2
       end
     elsif type == HPXML::ElectricPanelLoadTypePermanentSpaPump
@@ -6087,9 +6091,13 @@ module Defaults
     elsif type == HPXML::ElectricPanelLoadTypePoolHeater
       hpxml_bldg.pools.each do |pool|
         next if !system_ids.include?(pool.heater_id)
-        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type) # FIXME: probably want to separate out HeatPump here
+        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
 
-        watts += 27000
+        if pool.heater_type == HPXML::HeaterTypeElectricResistance
+          watts += 27000
+        elsif pool.heater_type == HPXML::HeaterTypeHeatPump
+          watts += 5100
+        end
         breaker_spaces += 2
       end
     elsif type == HPXML::ElectricPanelLoadTypePoolPump

@@ -76,7 +76,7 @@ module ElectricPanel
   # @param addition [nil or Boolean] Whether we are getting all, existing, or new heating loads
   # @return [Double] The electric panel's
   def self.get_panel_load_heating(hpxml_bldg, electric_panel, addition: nil)
-    htg = 0
+    htg = 0.0
     electric_panel.panel_loads.each do |panel_load|
       next if panel_load.type != HPXML::ElectricPanelLoadTypeHeating
 
@@ -134,23 +134,25 @@ module ElectricPanel
       clg_existing = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && !panel_load.addition }.map { |pl| pl.power }.sum(0.0)
       clg_new = electric_panel.panel_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.addition }.map { |pl| pl.power }.sum(0.0)
 
-      # Part A
-      other_load = [htg_existing, clg_existing].max
-      electric_panel.panel_loads.each do |panel_load|
-        next if panel_load.type == HPXML::ElectricPanelLoadTypeHeating || panel_load.type == HPXML::ElectricPanelLoadTypeCooling
+      if htg_new + clg_new == 0
+        # Part A
+        total_load = electric_panel.panel_loads.map { |panel_load| panel_load.power }.sum(0.0) # just sum all the loads
+        total_load = discount_load(total_load, 8000.0, 0.4)
+        panel_loads.LoadBased_CapacityW = total_load
+      else
+        # Part B
+        hvac_load = [htg_existing + htg_new, clg_existing + clg_new].max
+        other_load = 0.0
+        electric_panel.panel_loads.each do |panel_load|
+          next if panel_load.type == HPXML::ElectricPanelLoadTypeHeating || panel_load.type == HPXML::ElectricPanelLoadTypeCooling
 
-        other_load += panel_load.power
+          other_load += panel_load.power
+        end
+
+        other_load = discount_load(other_load, 8000.0, 0.4)
+        panel_loads.LoadBased_CapacityW = hvac_load + other_load
       end
 
-      threshold = 8000.0 # W
-
-      # Part A
-      part_a = 1.0 * [threshold, other_load].min + 0.4 * [0, other_load - threshold].max
-
-      # Part B
-      part_b = [htg_new, clg_new].max
-
-      panel_loads.LoadBased_CapacityW = part_a + part_b
       panel_loads.LoadBased_CapacityA = panel_loads.LoadBased_CapacityW / Float(electric_panel.voltage)
       panel_loads.LoadBased_HeadRoomA = electric_panel.max_current_rating - panel_loads.LoadBased_CapacityA
     elsif panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2026LoadBased
@@ -159,6 +161,11 @@ module ElectricPanel
       panel_loads.LoadBased_CapacityA = 2
       panel_loads.LoadBased_HeadRoomA = 3
     end
+  end
+
+  # TODO
+  def self.discount_load(load, threshold, demand_factor)
+    return 1.0 * [threshold, load].min + demand_factor * [0, load - threshold].max
   end
 
   # Calculate the meter-based capacity and headroom for the given electric panel and panel loads according to NEC 220.87.

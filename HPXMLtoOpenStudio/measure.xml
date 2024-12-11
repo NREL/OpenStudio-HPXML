@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>2c9b399d-5b90-4a88-abce-33bb9dd7a1cb</version_id>
-  <version_modified>2024-12-10T23:39:08Z</version_modified>
+  <version_id>da2dc199-75d4-4773-b1fa-80e830a829f5</version_id>
+  <version_modified>2024-12-11T05:06:01Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -342,13 +342,13 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D4F6CF81</checksum>
+      <checksum>A7A4CCC4</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>83911037</checksum>
+      <checksum>6A2F167F</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -378,7 +378,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>42E58EF0</checksum>
+      <checksum>19824A87</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
