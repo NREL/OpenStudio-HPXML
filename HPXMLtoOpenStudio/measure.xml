@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c243de27-e6e7-460e-9fbc-15d2dbcb0fc6</version_id>
-  <version_modified>2024-12-11T17:09:25Z</version_modified>
+  <version_id>5bc9d20e-1a04-4357-a7b7-90f57bdf6588</version_id>
+  <version_modified>2024-12-11T18:26:15Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -267,6 +267,12 @@
       <checksum>FC171B98</checksum>
     </file>
     <file>
+      <filename>data/default_panels.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>89B7D0F0</checksum>
+    </file>
+    <file>
       <filename>data/default_schedules.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -321,12 +327,6 @@
       <checksum>D00579DD</checksum>
     </file>
     <file>
-      <filename>data/panel_defaults.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>747B2419</checksum>
-    </file>
-    <file>
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -342,7 +342,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A7A4CCC4</checksum>
+      <checksum>DDFF8AFE</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
