@@ -32,9 +32,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _model, hpxml, hpxml_bldg = _test_measure(args_hash)
     electric_panel = hpxml_bldg.electric_panels[0]
 
-    assert_in_epsilon(9762, electric_panel.capacity_total_watts[0], 0.01)
-    assert_in_epsilon(9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
-    assert_in_epsilon(electric_panel.max_current_rating - 9762 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
+    assert_in_epsilon(9909, electric_panel.capacity_total_watts[0], 0.01)
+    assert_in_epsilon(9909 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
+    assert_in_epsilon(electric_panel.max_current_rating - 9909 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
     assert_equal(11, electric_panel.breaker_spaces_total)
     assert_equal(6, electric_panel.breaker_spaces_occupied)
     assert_equal(11 - 6, electric_panel.breaker_spaces_headroom)

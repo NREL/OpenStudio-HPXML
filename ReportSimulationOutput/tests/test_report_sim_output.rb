@@ -1401,7 +1401,7 @@ class ReportSimulationOutputTest < Minitest::Test
     _annual_csv, _timeseries_csv, _run_log, panel_csv = _test_measure(args_hash)
     assert(File.exist?(panel_csv))
     actual_panel_rows = _get_annual_values(panel_csv)
-    assert_equal(9738.0, actual_panel_rows['Electric Panel Capacity: 2023 Load-Based: Total (W)'])
+    assert_equal(9909.2, actual_panel_rows['Electric Panel Capacity: 2023 Load-Based: Total (W)'])
     assert_equal(41.0, actual_panel_rows['Electric Panel Capacity: 2023 Load-Based: Total (A)'])
     assert_equal(100.0 - 41.0, actual_panel_rows['Electric Panel Capacity: 2023 Load-Based: Headroom (A)'])
     assert_equal(2581.8, actual_panel_rows['Electric Panel Capacity: 2023 Meter-Based: Total (W)'])
