@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ade4c249-4009-4b6b-8d69-ca71590723fe</version_id>
-  <version_modified>2024-12-11T01:05:14Z</version_modified>
+  <version_id>28ae907d-51bc-4d89-b397-3552f1c66ef7</version_id>
+  <version_modified>2024-12-11T02:42:23Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -261,7 +261,7 @@
       <filename>data/default_schedules.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C2473468</checksum>
+      <checksum>7DA59246</checksum>
     </file>
     <file>
       <filename>data/g_functions/C_configurations_5m_v1.0.json</filename>
@@ -315,7 +315,7 @@
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B7BED6D1</checksum>
+      <checksum>CA857318</checksum>
     </file>
     <file>
       <filename>data/zipcode_weather_stations.csv</filename>
@@ -441,7 +441,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>14A97E13</checksum>
+      <checksum>2A664A7D</checksum>
     </file>
     <file>
       <filename>model.rb</filename>
@@ -489,7 +489,7 @@
       <filename>schedule_files/occupancy-non-stochastic.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A54803E1</checksum>
+      <checksum>FA81E518</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
@@ -597,7 +597,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>503CD4C5</checksum>
+      <checksum>373C4793</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -660,12 +660,6 @@
       <checksum>93120E27</checksum>
     </file>
     <file>
-      <filename>in.schedules.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0074F80E</checksum>
-    </file>
-    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -681,7 +675,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1004443C</checksum>
+      <checksum>C93FDFCD</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -753,7 +747,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>0A79A6EB</checksum>
+      <checksum>8AAB7C24</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>

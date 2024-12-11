@@ -1030,7 +1030,6 @@ class SchedulesFile
     CeilingFan: Column.new('ceiling_fan', true, true, :frac),
     PlugLoadsOther: Column.new('plug_loads_other', true, true, :frac),
     PlugLoadsTV: Column.new('plug_loads_tv', true, true, :frac),
-    PlugLoadsVehicle: Column.new('plug_loads_vehicle', true, false, :frac),
     PlugLoadsWellPump: Column.new('plug_loads_well_pump', true, false, :frac),
     FuelLoadsGrill: Column.new('fuel_loads_grill', true, false, :frac),
     FuelLoadsLighting: Column.new('fuel_loads_lighting', true, false, :frac),
