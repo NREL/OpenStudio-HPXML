@@ -87,10 +87,10 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
     hpxml_bldg.batteries.each do |hpxml_battery|
       batteries = get_batteries(model, hpxml_battery.id)
       assert_equal(0, batteries.size)
-    end
 
-    elcds = model.getElectricLoadCenterDistributions
-    assert_equal(0, elcds.size)
+      elcds = get_elcds(model, hpxml_battery.id)
+      assert_equal(0, elcds.size)
+    end
   end
 
   def test_battery_scheduled
