@@ -1,0 +1,27 @@
+Load Name,Power Rating,Units,Load Type,Voltage,Notes
+lighting,3,W/sqft,lighting,120,# multiplier for conditioned floor area to account  for capacity impacts of general lighting
+kitchen,3000,W,kitchen,120,# two kitchen small appliance circuits at 1.5 kVA
+laundry,1500,W,laundry,120,# one laundry circuit at 1.5 kVA
+ev_level,1650,W,electric vehicle charging,120,# level 1 - 120 V EV charger
+ev_level,7680,W,electric vehicle charging,240,# level 2 - 240 V EV charger
+wellpump_large,1119,W,well pump,120,# well pump capacity - 4 or larger bedroom home
+wellpump_small,746,W,well pump,120,# well pump capacity - 3 or fewer bedroom home
+poolpump,1491,W,pool pump,120,# 2 HP pool pump capacity
+poolheater,27000,W,pool heater,240,# electric resistance pool heater
+poolheater_hp,5100,W,pool heater,240,# heat pump pool heater
+spaheater,4000,W,permanent spa heater,240,# hot tub heater
+spapump,1491,W,permanent spa pump,120,# hot tub pump
+dryer,5760,W,clothes dryer,240,# electric clothes dryer
+dryer_hp,996,W,clothes dryer,120,# 120V heat pump clothes dryer
+dryer_hp,860,W,clothes dryer,240,# 240V heat pump clothes dryer
+dishwasher,1200,W,dishwasher,120,# dishwasher
+rangeoven,1800,W,range/oven,120,# 120V range-oven
+rangeoven,12000,W,range/oven,240,# 240V range-oven
+wh_tankless1,18000,W,hot water,240,# tankless water heater -one bedroom
+wh_tankless2,24000,W,hot water,240,# tankless water heater - two bedrooms
+wh_tankless3,36000,W,hot water,240,# tankless water heater - three or more bedrooms
+mechvent,3000,W,mech vent,120,# using autosized values for ventilation capacity unless unavailable
+other,373,W,other,120,# default other only assumes 1 default garage door opener if a garage is present and does not account for other permanent appliances (e.g. garbage disposal)
+wh_auto,auto,W,hot water,120/240,# using autosize values for storage water heating and hpwh
+heating_auto,auto,W,heating,120/240,# using autosize values for capacity of all heating
+cooling_auto,auto,W,cooling,120/240,# using autosize values for capacity of all cooling
