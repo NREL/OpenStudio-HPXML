@@ -4646,55 +4646,12 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
   ``AttachedToSystem``                            idref                     See [#]_     See [#]_  See [#]_   ID of attached system; multiple are allowed [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] LoadType choices are "heating", "cooling", "hot Water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
-  .. [#] If PowerRating not provided, defaults based on LoadType, Voltage, and AttachedToSystem as follows:
-
-         \- **heating**: TODO
-
-         \- **cooling**: TODO
-
-         \- **hot water** (electric storage water heater): HeatingCapacity,
-
-         \- **hot water** (electric instantaneous water heater): NumberofBathrooms is 1=18,000, NumberofBathrooms is 2=24,000, NumberofBathrooms is 3 or greater=36,000
-
-         \- **hot water** (heat pump): 120=1,000, 240=max(HeatingCapacity, BackupHeatingCapacity)
-
-         \- **clothes dryer** (electric): Vented=5,760, Unvented=2,640
-
-         \- **clothes dryer** (heat pump): 120=996, 240=860
-
-         \- **dishwasher**: 1,200
-
-         \- **range/oven** (electric): 120=1,800, 240=12,000
-
-         \- **mech vent** (local ventilation): Count * FanPower
-
-         \- **mech vent** (other): FanPower
-
-         \- **permanent spa heater** (electric): 1,000
-
-         \- **permanent spa pump**: 1,491
-
-         \- **pool heater** (electric): 27,000
-
-         \- **pool pump**: 1,491
-
-         \- **well pump**: NumberofBedrooms is 3 or less= 746, NumberofBedrooms is greater than 3=1,119
-
-         \- **electric vehicle charging**: 120=1,650, 240=7,680
-
-         \- **lighting**: 3 * ConditionedFloorArea
-
-         \- **kitchen**: 3,000
-
-         \- **laundry**: 1,500
-
-         \- **other**: 373 for garage door opener if a garage is present
-
+  .. [#] LoadType choices are "heating", "cooling", "hot water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
+  .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on LoadType, Voltage, and AttachedToSystem.
   .. [#] Voltage choices are "120" or "240".
   .. [#] If Voltage not provided, defaults as follows:
 
-         \- **heating, Cooling, hot water, clothes dryer, range/oven, permanent spa heater, pool heater**: 240 (120 if Cooling references a room air conditioner)
+         \- **heating, cooling, hot water, clothes dryer, range/oven, permanent spa heater, pool heater**: 240 (120 if **cooling** references a room air conditioner)
 
          \- **mech vent, dishwasher, permanent spa pump, pool pump, well pump, electric vehicle charging, lighting, kitchen, laundry, other**: 120
 
@@ -4702,7 +4659,9 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
 
          \- **lighting, kitchen**: 120: 0, 240: 0
 
-         \- **heating, cooling, hot water, clothes dryer, dishwasher, range/oven, mech vent, permanent spa heater, permanent spa pump, pool heater, pool pump, well pump, electric vehicle charging, laundry, other**: 120: 1, 240: 2
+         \- **hot water, clothes dryer, dishwasher, range/oven, mech vent, permanent spa heater, permanent spa pump, pool heater, pool pump, well pump, electric vehicle charging, laundry, other**: 120: 1, 240: 2
+
+         \- **heating, cooling**: TODO
 
   .. [#] Depending on the LoadType, AttachedToSystem must reference:
 
@@ -4745,6 +4704,15 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
          \- **other**
   
   .. [#] Provide a AttachedToSystem element for each referenced system.
+
+.. _panels_default:
+
+Default Panels
+~~~~~~~~~~~~~~
+
+.. csv-table::
+   :file: ../../HPXMLtoOpenStudio/resources/data/default_panels.csv
+   :header-rows: 1
 
 .. _hpxml_batteries:
 
