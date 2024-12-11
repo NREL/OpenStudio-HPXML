@@ -377,15 +377,11 @@ If not entered, electric panel loads will not be calculated.
   ``Type``                              string             See [#]_       Yes                         Panel calculation type
   ====================================  ========  =======  =============  ========  ================  ===========
 
-  .. [#] Type choices are '2023 Load-Based', '2023 Meter-Based', '2026 Load-Based', and '2026 Meter-Based', and are described as follows:
+  .. [#] Type choices are '2023 Load-Based' and '2023 Meter-Based', and are described as follows:
 
          \- **2023 Load-Based**: Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
 
          \- **2023 Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
-
-         \- **2026 Load-Based**: TODO
-
-         \- **2026 Meter-Based**: TODO
 
 .. _hpxml_building:
 
@@ -4647,22 +4643,15 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] LoadType choices are "heating", "cooling", "hot water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
-  .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on LoadType, Voltage, and AttachedToSystem.
+  .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
   .. [#] Voltage choices are "120" or "240".
   .. [#] If Voltage not provided, defaults as follows:
 
-         \- **heating, cooling, hot water, clothes dryer, range/oven, permanent spa heater, pool heater**: 240 (120 if **cooling** references a room air conditioner)
+         \- **heating, cooling, hot water, clothes dryer, range/oven, permanent spa heater, permanent spa pump, pool heater, pool pump, well pump**: 240 (120 if **cooling** references a room air conditioner)
 
-         \- **mech vent, dishwasher, permanent spa pump, pool pump, well pump, electric vehicle charging, lighting, kitchen, laundry, other**: 120
+         \- **mech vent, dishwasher, electric vehicle charging, lighting, kitchen, laundry, other**: 120
 
-  .. [#] If BreakerSpaces not provided, defaults based on LoadType and Voltage:
-
-         \- **lighting, kitchen**: 120: 0, 240: 0
-
-         \- **hot water, clothes dryer, dishwasher, range/oven, mech vent, permanent spa heater, permanent spa pump, pool heater, pool pump, well pump, electric vehicle charging, laundry, other**: 120: 1, 240: 2
-
-         \- **heating, cooling**: TODO
-
+  .. [#] If BreakerSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
   .. [#] Depending on the LoadType, AttachedToSystem must reference:
 
          \- **heating**: ``HeatingSystem`` or ``HeatPump``
@@ -4710,9 +4699,17 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
 Default Panels
 ~~~~~~~~~~~~~~
 
+If power rating capacities or breaker spaces are not provided, then they are defaulted.
+Default values may be based on voltage, system type, and other properties such as number of bedrooms or bathrooms.
+They can also be found at ``HPXMLtoOpenStudio/resources/data/default_panels.csv``.
+
 .. csv-table::
    :file: ../../HPXMLtoOpenStudio/resources/data/default_panels.csv
    :header-rows: 1
+
+.. note::
+
+  A Voltage value of "*" in the table above means "120" or "240".
 
 .. _hpxml_batteries:
 
