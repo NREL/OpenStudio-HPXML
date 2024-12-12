@@ -4707,10 +4707,6 @@ They can also be found at ``HPXMLtoOpenStudio/resources/data/default_panels.csv`
    :file: ../../HPXMLtoOpenStudio/resources/data/default_panels.csv
    :header-rows: 1
 
-.. note::
-
-  A Voltage value of "*" in the table above means "120" or "240".
-
 .. _hpxml_batteries:
 
 HPXML Batteries
