@@ -5918,7 +5918,7 @@ module Defaults
       breaker_spaces = 0 if breaker_spaces == 'auto'
 
       default_panels_csv_data[load_name] = {} if !default_panels_csv_data.keys.include?(load_name)
-      if voltage != '*'
+      if voltage != '120/240'
         default_panels_csv_data[load_name][voltage] = {}
         default_panels_csv_data[load_name][voltage]['PowerRating'] = Float(power_rating)
         default_panels_csv_data[load_name][voltage]['BreakerSpaces'] = Integer(breaker_spaces)
