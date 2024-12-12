@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>fc2b64b7-68d3-4e91-a258-2c2b0e133b7f</version_id>
-  <version_modified>2024-12-12T16:04:53Z</version_modified>
+  <version_id>da785f11-8e27-4642-b499-ae3e95501244</version_id>
+  <version_modified>2024-12-12T23:14:05Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -270,7 +270,7 @@
       <filename>data/default_panels.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>43F408B5</checksum>
+      <checksum>FA79D148</checksum>
     </file>
     <file>
       <filename>data/default_schedules.csv</filename>
@@ -342,7 +342,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3E0973AF</checksum>
+      <checksum>617D015D</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
@@ -684,7 +684,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>46D37474</checksum>
+      <checksum>8A47B1EF</checksum>
     </file>
     <file>
       <filename>test_electric_panel.rb</filename>
@@ -762,7 +762,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9E786B5D</checksum>
+      <checksum>F69D9773</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>

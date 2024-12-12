@@ -3589,6 +3589,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLaundry, 10000, HPXML::ElectricPanelVoltage120, 9, true)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 11000, HPXML::ElectricPanelVoltage120, 10, true)
 
+    # Test w/ 240v dishwasher
+    dw_load = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeDishwasher }
+    dw_load.voltage = HPXML::ElectricPanelVoltage240
+    dw_load.breaker_spaces = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeDishwasher, 5000, HPXML::ElectricPanelVoltage240, 2, true)
+
     # Test w/ TotalBreakerSpaces instead of HeadroomBreakerSpaces
     hpxml_bldg.electric_panels[0].headroom_breaker_spaces = nil
     hpxml_bldg.electric_panels[0].total_breaker_spaces = 12
@@ -3618,7 +3626,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 0, HPXML::ElectricPanelVoltage240, 0, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 60, HPXML::ElectricPanelVoltage120, 1, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLighting, 3684, HPXML::ElectricPanelVoltage120, 0, false)
-    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage120, 0, false)
+    _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeKitchen, 3000, HPXML::ElectricPanelVoltage120, 2, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeLaundry, 1500, HPXML::ElectricPanelVoltage120, 1, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeOther, 0, HPXML::ElectricPanelVoltage120, 0, false)
   end

@@ -4644,6 +4644,7 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
 
   .. [#] LoadType choices are "heating", "cooling", "hot water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
   .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
+         If no corresponding Voltage is specified, the other Voltage classification will be used.
   .. [#] Voltage choices are "120" or "240".
   .. [#] If Voltage not provided, defaults as follows:
 
@@ -4652,6 +4653,9 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
          \- **mech vent, dishwasher, electric vehicle charging, lighting, kitchen, laundry, other**: 120
 
   .. [#] If BreakerSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
+         If no corresponding Voltage is specified, the other Voltage classification will be used.
+         Breaker spaces will be recalculated based on the new Voltage classification.
+         Breaker spaces are calculated based on PowerRating and Voltage assuming a maximum of 50 amps per circuit branch and either 1 (120V) or 2 (240V) breakers per branch.
   .. [#] Depending on the LoadType, AttachedToSystem must reference:
 
          \- **heating**: ``HeatingSystem`` or ``HeatPump``

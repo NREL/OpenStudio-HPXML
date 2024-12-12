@@ -1800,6 +1800,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'manualj-sum-space-internal-loads-sensible' => ['ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],
                               'manualj-sum-space-internal-loads-latent' => ['ManualJInputs/InternalLoadsLatent (200.0) does not match sum of conditioned spaces (100.0).'],
                               'multiple-conditioned-zone' => ['While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'],
+                              'panel-missing-default' => ["PanelLoad 'dishwasher' has PanelLoad/Voltage (240) not specified in default_panels.csv; PanelLoad/PowerRating will be defaulted.",
+                                                          "PanelLoad 'dishwasher' has PanelLoad/Voltage (240) not specified in default_panels.csv; PanelLoad/BreakerSpaces will be recalculated."],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
@@ -1987,6 +1989,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         end
       when 'multiple-conditioned-zone'
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-multiple.xml')
+      when 'panel-missing-default'
+        hpxml, hpxml_bldg = _create_hpxml('base-detailed-electric-panel.xml')
+        hpxml_bldg.dishwashers.add(id: 'Dishwasher')
+        panel_loads = hpxml_bldg.electric_panels[0].panel_loads
+        panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher,
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        system_idrefs: [hpxml_bldg.dishwashers[0].id])
       when 'power-outage'
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       when 'multistage-backup-more-than-4-stages'
