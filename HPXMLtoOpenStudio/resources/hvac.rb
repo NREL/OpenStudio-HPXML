@@ -1631,6 +1631,22 @@ module HVAC
     return cap_ft_spec, eir_ft_spec
   end
 
+  # Return coefficients of capacity and eir as function of temperature curves,
+  # used to adjust the NEEP performance data to account for variations in indoor conditions
+  #
+  # @param mode [Symbol] Heating or cooling
+  # @return [Array<Double>, Array<Double>] Capacity as function of temperature coefficients, eir as function of temperature coefficients
+  def self.get_resnet_cap_eir_ft_spec(mode)
+    if mode == :htg
+      eir_ft_spec = [0.722917608, 0.003520184, 0.000143097, -0.005760341, 0.000141736, -0.000216676]
+      cap_ft_spec = [0.568706266, -0.000747282, -0.0000103432, 0.00945408, 0.000050812, -0.00000677828]
+    elsif mode == :clg
+      eir_ft_spec = [-3.400341169, 0.135184783, -0.001037932, -0.007852322, 0.000183438, -0.000142548]
+      cap_ft_spec = [3.717717741, -0.09918866, 0.000964488, 0.005887776, -0.000012808, -0.000132822]
+    end
+    return cap_ft_spec, eir_ft_spec
+  end
+
   # TODO
   #
   # @param compressor_type [TODO] TODO
@@ -3038,19 +3054,16 @@ module HVAC
     # Add sensitivity to indoor conditions
     # single speed cutler curve coefficients
     if mode == :clg
-      cap_ft_spec_ss, eir_ft_spec_ss = get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)
       rated_t_i = HVAC::AirSourceCoolRatedIWB
       # Added two data points to be held constant outside the range 57F to 72F
       # Disable for now
       # indoor_t = [40.0, 57.0, rated_t_i, 72.0, 90.0]
       indoor_t = [50.0, rated_t_i, 80.0]
     else
-      # default capacity retention for single speed
-      retention_temp, retention_fraction = Defaults.get_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
-      cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, retention_temp, retention_fraction)
       rated_t_i = HVAC::AirSourceHeatRatedIDB
       indoor_t = [60.0, rated_t_i, 80.0]
     end
+    cap_ft_spec_ss, eir_ft_spec_ss = get_resnet_cap_eir_ft_spec(mode)
     data_array.each do |data|
       data.each do |dp|
         if mode == :clg
@@ -3082,15 +3095,15 @@ module HVAC
             dp_new.indoor_temperature = t_i
           end
           # capacity FT curve output
-          cap_ft_curve_output = MathTools.biquadratic(t_i, dp_new.outdoor_temperature, cap_ft_spec_ss[0])
-          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, dp_new.outdoor_temperature, cap_ft_spec_ss[0])
+          cap_ft_curve_output = MathTools.biquadratic(t_i, dp_new.outdoor_temperature, cap_ft_spec_ss)
+          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, dp_new.outdoor_temperature, cap_ft_spec_ss)
           cap_correction_factor = cap_ft_curve_output / cap_ft_curve_output_rated
           # corrected capacity hash, with two temperature independent variables
           dp_new.gross_capacity *= cap_correction_factor
 
           # eir FT curve output
-          eir_ft_curve_output = MathTools.biquadratic(t_i, dp_new.outdoor_temperature, eir_ft_spec_ss[0])
-          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, dp_new.outdoor_temperature, eir_ft_spec_ss[0])
+          eir_ft_curve_output = MathTools.biquadratic(t_i, dp_new.outdoor_temperature, eir_ft_spec_ss)
+          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, dp_new.outdoor_temperature, eir_ft_spec_ss)
           eir_correction_factor = eir_ft_curve_output / eir_ft_curve_output_rated
           dp_new.gross_efficiency_cop /= eir_correction_factor
         end
