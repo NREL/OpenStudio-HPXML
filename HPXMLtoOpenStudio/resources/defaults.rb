@@ -2282,15 +2282,14 @@ module Defaults
       seer = hvac_system.cooling_efficiency_seer
       case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
-        # FIXME: Review
+        # FIXME: Review compared to AHRI data
         cop = 0.2692 * seer + 0.2706 # Regression based on inverse model
       when HPXML::HVACCompressorTypeTwoStage
-        # FIXME: Review
+        # FIXME: Review compared to AHRI data
         cop = 0.2773 * seer - 0.0018 # Regression based on inverse model
       when HPXML::HVACCompressorTypeVariableSpeed
-        # FIXME: Need to double check this w/ Jon
-        is_ducted = !hvac_system.distribution_system_idref.nil?
-        cop = is_ducted ? 0.1953 * seer : 0.06635 * seer + 1.8707 # Based on NEEP data
+        # FIXME: Need to develop something here based on AHRI/NEEP data
+        cop = 4.5
       end
       hvac_system.cooling_efficiency_eer = UnitConversions.convert(cop, 'W', 'Btu/hr').round(2)
       hvac_system.cooling_efficiency_eer_isdefaulted = true
