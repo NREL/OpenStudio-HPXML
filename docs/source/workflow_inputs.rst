@@ -2092,7 +2092,7 @@ Each electric resistance heating system is entered as a ``/HPXML/Building/Buildi
   ``HeatingSystemType/ElectricResistance/ElectricDistribution``  string           See [#]_            No        baseboard       Type of electric resistance distribution
   ``HeatingSystemFuel``                                          string           electricity         Yes                       Fuel type
   ``HeatingCapacity``                                            double   Btu/hr  >= 0                No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``             double   frac    > 0, <= 1           Yes                       Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``             double   frac    > 0, <= 1           Yes                       Heating efficiency
   ``FractionHeatLoadServed``                                     double   frac    >= 0, <= 1 [#]_     See [#]_                  Fraction of heating load served
   ``extension/HeatingAutosizingFactor``                          double   frac    > 0                 No        1.0             Heating autosizing capacity multiplier
   ``extension/HeatingAutosizingLimit``                           double   Btu/hr  > 0                 No                        Heating autosizing capacity limit
@@ -2125,7 +2125,7 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ``HeatingSystemType/Furnace/extension/PilotLightBtuh``  double   Btu/hr     >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                   string              See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                     double   Btu/hr     >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``         double   frac       > 0, <= 1        Yes                       Rated efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``         double   frac       > 0, <= 1        Yes                       Rated heating efficiency
   ``FractionHeatLoadServed``                              double   frac       >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanModelType``                              string              See [#]_         No        See [#]_        Blower fan model type [#]_
   ``extension/FanPowerWattsPerCFM``                       double   W/cfm      >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed [#]_
@@ -2174,7 +2174,7 @@ Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ``HeatingSystemType/WallFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                       string           See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                         double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``             double   frac    > 0, <= 1        Yes                       Rated efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``             double   frac    > 0, <= 1        Yes                       Rated heating efficiency
   ``FractionHeatLoadServed``                                  double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                                 double   W       >= 0             No        0               Fan power
   ``extension/HeatingAutosizingFactor``                       double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2206,7 +2206,7 @@ Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVA
   ``HeatingSystemType/FloorFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                        string           See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                          double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``              double   frac    > 0, <= 1        Yes                       Rated efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``              double   frac    > 0, <= 1        Yes                       Rated heating efficiency
   ``FractionHeatLoadServed``                                   double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                                  double   W       >= 0             No        0               Fan power
   ``extension/HeatingAutosizingFactor``                        double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2240,7 +2240,7 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
   ``HeatingSystemType/Boiler/extension/PilotLightBtuh``  double   Btu/hr     >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                  string              See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                    double   Btu/hr     >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``        double   frac       > 0, <= 1        Yes                       Rated efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``        double   frac       > 0, <= 1        Yes                       Rated heating efficiency
   ``FractionHeatLoadServed``                             double   frac       >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``ElectricAuxiliaryEnergy``                            double   kWh/yr     >= 0             No        See [#]_        Electric auxiliary energy
   ``extension/HeatingAutosizingFactor``                  double   frac       > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2289,7 +2289,7 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   ``HeatingSystemType/Boiler/PilotLight``                       boolean                                No        false               Presence of standing pilot light (older systems)
   ``HeatingSystemType/Boiler/extension/PilotLightBtuh``         double   Btu/hr       >= 0             No        500                 Pilot light burn rate
   ``HeatingSystemFuel``                                         string                See [#]_         Yes                           Fuel type
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``               double   frac         > 0, <= 1        Yes                           Rated efficiency
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``               double   frac         > 0, <= 1        Yes                           Rated heating efficiency
   ``FractionHeatLoadServed``                                    double   frac         >= 0, <= 1 [#]_  See [#]_                      Fraction of heating load served
   ``ElectricAuxiliaryEnergy`` or ``extension/SharedLoopWatts``  double   kWh/yr or W  >= 0             No        See [#]_            Electric auxiliary energy or shared loop power
   ``ElectricAuxiliaryEnergy`` or ``extension/FanCoilWatts``     double   kWh/yr or W  >= 0             No [#]_                       Electric auxiliary energy or fan coil power
@@ -2334,7 +2334,7 @@ Each stove is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPl
   ``HeatingSystemType/Stove/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                 string           See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                   double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``    double   frac    > 0, <= 1        Yes                       Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``    double   frac    > 0, <= 1        Yes                       Heating efficiency
   ``FractionHeatLoadServed``                            double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                           double   W       >= 0             No        40              Fan power
   ``extension/HeatingAutosizingFactor``                 double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2364,7 +2364,7 @@ Each space heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ``HeatingSystemType/SpaceHeater``                   element                           Yes                       Type of heating system
   ``HeatingSystemFuel``                               string           See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                 double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double   frac    > 0, <= 1        Yes                       Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double   frac    > 0, <= 1        Yes                       Heating efficiency
   ``FractionHeatLoadServed``                          double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                         double   W       >= 0             No        0               Fan power
   ``extension/HeatingAutosizingFactor``               double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2397,7 +2397,7 @@ Instead of modeling fireplaces as serving a fraction of the heating load, firepl
   ``HeatingSystemType/Fireplace/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                     string           See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                       double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``        double   frac    > 0, <= 1        Yes                       Efficiency
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``        double   frac    > 0, <= 1        Yes                       Heating efficiency
   ``FractionHeatLoadServed``                                double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                               double   W       >= 0             No        0               Fan power
   ``extension/HeatingAutosizingFactor``                     double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
@@ -2446,7 +2446,8 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   ``CoolingCapacity``                                               double   Btu/hr       >= 0                     No        autosized [#]_  Cooling output capacity
   ``CompressorType``                                                string                See [#]_                 No        See [#]_        Type of compressor
   ``FractionCoolLoadServed``                                        double   frac         >= 0, <= 1 [#]_          Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh       > 0                      Yes                       Rated efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh       > 0                      Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double   Btu/Wh       > 0                      No        See [#]_        Rated cooling efficiency [#]_
   ``SensibleHeatFraction``                                          double   frac         > 0.5, <= 1              No        See [#]_        Sensible heat fraction
   ``CoolingDetailedPerformanceData``                                element                                        No        <none>          Cooling detailed performance data [#]_
   ``extension/FanModelType``                                        string                See [#]_                 No        See [#]_        Blower fan model type [#]_
@@ -2473,6 +2474,8 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
+  .. [#] If neither EER nor EER2 provided, EER defaults to ... FIXME.
+  .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 (assumed to be a split system).
   .. [#] If SensibleHeatFraction not provided, defaults to 0.73 for single/two stage and 0.78 for variable speed.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] FanModelType choices are "psc" and "bpm".
@@ -2503,7 +2506,7 @@ Each room air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``CoolingSystemFuel``                                           string          electricity           Yes                       Fuel type
   ``CoolingCapacity``                                             double  Btu/hr  >= 0                  No        autosized [#]_  Cooling output capacity
   ``FractionCoolLoadServed``                                      double  frac    >= 0, <= 1 [#]_       Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``  double  Btu/Wh  > 0                   Yes                       Rated efficiency
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``  double  Btu/Wh  > 0                   Yes                       Rated cooling efficiency
   ``SensibleHeatFraction``                                        double  frac    > 0.5, <= 1           No        0.65            Sensible heat fraction
   ``IntegratedHeatingSystemFuel``                                 string          See [#]_              No        <none>          Fuel type of integrated heater
   ``extension/CrankcaseHeaterPowerWatts``                         double  W       >= 0                  No        0.0             Crankcase heater power
@@ -2550,7 +2553,7 @@ Each packaged terminal air conditioner (PTAC) is entered as a ``/HPXML/Building/
   ``CoolingSystemFuel``                                           string          electricity                        Yes                       Fuel type
   ``CoolingCapacity``                                             double  Btu/hr  >= 0                               No        autosized [#]_  Cooling output capacity
   ``FractionCoolLoadServed``                                      double  frac    >= 0, <= 1 [#]_                    Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``  double  Btu/Wh  > 0                                Yes                       Rated efficiency
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``  double  Btu/Wh  > 0                                Yes                       Rated cooling efficiency
   ``SensibleHeatFraction``                                        double  frac    > 0.5, <= 1                        No        0.65            Sensible heat fraction
   ``IntegratedHeatingSystemFuel``                                 string          See [#]_                           No        <none>          Fuel type of integrated heater
   ``extension/CrankcaseHeaterPowerWatts``                         double  W       >= 0                               No        0.0             Crankcase heater power
@@ -2627,6 +2630,7 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   ``CompressorType``                                                string            See [#]_         No        variable speed  Type of compressor
   ``FractionCoolLoadServed``                                        double    frac    >= 0, <= 1 [#]_  Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh  > 0              Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh  > 0              No        See [#]_        Rated cooling efficiency [#]_
   ``SensibleHeatFraction``                                          double    frac    > 0.5, <= 1      No        0.73            Sensible heat fraction
   ``CoolingDetailedPerformanceData``                                element                            No        <none>          Cooling detailed performance data [#]_
   ``extension/FanModelType``                                        string            See [#]_         No        See [#]_        Blower fan model type
@@ -2652,6 +2656,8 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   .. [#] CompressorType only choices is "variable speed" (i.e., they are assumed to be inverter driven).
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
+  .. [#] If neither EER nor EER2 provided, EER defaults to ... FIXME.
+  .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] FanModelType choices are "psc" and "bpm".
   .. [#] If FanModelType is not provided, defaults to "bpm".
@@ -2682,7 +2688,7 @@ Each shared chiller (serving multiple dwelling units) is entered as a ``/HPXML/B
   ``CoolingSystemFuel``                              string            electricity      Yes                  Fuel type
   ``CoolingCapacity``                                double    Btu/hr  >= 0             Yes                  Total cooling output capacity
   ``FractionCoolLoadServed``                         double    frac    >= 0, <= 1 [#]_  Yes                  Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="kW/ton"]/Value``  double    kW/ton  > 0              Yes                  Rated efficiency
+  ``AnnualCoolingEfficiency[Units="kW/ton"]/Value``  double    kW/ton  > 0              Yes                  Rated cooling efficiency
   ``extension/SharedLoopWatts``                      double    W       >= 0             Yes                  Pumping and fan power serving the system
   ``extension/FanCoilWatts``                         double    W       >= 0             See [#]_             Fan coil power
   ``extension/CoolingAutosizingFactor``              double    frac    > 0              No        1.0        Cooling autosizing capacity multiplier
@@ -2773,6 +2779,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``FractionHeatLoadServed``                                        double   frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                        double   frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double   Btu/Wh    > 0                       No        See [#]_        Rated cooling efficiency [#]_
   ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                      No        <none>          Cooling detailed performance data [#]_
   ``HeatingDetailedPerformanceData``                                element                                      No        <none>          Heating detailed performance data [#]_
@@ -2812,6 +2819,8 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
+  .. [#] If neither EER nor EER2 provided, EER defaults to ... FIXME.
+  .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 (assumed to be a split system).
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 (assumed to be a split system).
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] If HeatingDetailedPerformanceData is provided, see :ref:`htg_detailed_perf_data`.
@@ -2859,6 +2868,7 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   ``FractionHeatLoadServed``                                        double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                        double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh    > 0                       No        See [#]_        Rated cooling efficiency [#]_
   ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                       No        <none>          Cooling detailed performance data [#]_
   ``HeatingDetailedPerformanceData``                                element                                       No        <none>          Heating detailed performance data [#]_
@@ -2896,6 +2906,8 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
+  .. [#] If neither EER nor EER2 provided, EER defaults to ... FIXME.
+  .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 if ducted and HSPF = HSPF2 / 0.90 if ductless.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] If HeatingDetailedPerformanceData is provided, see :ref:`htg_detailed_perf_data`.

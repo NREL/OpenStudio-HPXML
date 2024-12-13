@@ -1,6 +1,9 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- HVAC modeling updates:
+  - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
+  - Allows optional EER or EER2 inputs for central air conditioners/heat pumps and mini-splits.
 
 __Bugfixes__
 

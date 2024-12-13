@@ -873,12 +873,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                           'AFUE should typically be greater than or equal to 0.5.',
                                                           'Percent efficiency should typically be greater than or equal to 0.5.',
                                                           'SEER should typically be greater than or equal to 8.',
-                                                          'EER should typically be greater than or equal to 8.',
+                                                          'EER should typically be greater than or equal to 6.',
+                                                          'EER should typically be greater than or equal to 6.',
                                                           'SEER should typically be greater than or equal to 8.',
                                                           'HSPF should typically be greater than or equal to 6.',
                                                           'SEER should typically be greater than or equal to 8.',
+                                                          'EER should typically be greater than or equal to 6.',
                                                           'HSPF should typically be greater than or equal to 6.',
-                                                          'EER should typically be greater than or equal to 8.',
+                                                          'EER should typically be greater than or equal to 6.',
                                                           'COP should typically be greater than or equal to 2.'],
                               'hvac-research-features-onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1.'],
                               'hvac-setpoints-high' => ['Heating setpoint should typically be less than or equal to 76 deg-F.',
@@ -989,6 +991,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             case hvac_system.cooling_system_type
             when HPXML::HVACTypeCentralAirConditioner
               hvac_system.cooling_efficiency_seer = 0.1
+              hvac_system.cooling_efficiency_eer = 0.1
             when HPXML::HVACTypeRoomAirConditioner
               hvac_system.cooling_efficiency_eer = 0.1
             end
@@ -997,6 +1000,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             when HPXML::HVACTypeHeatPumpAirToAir,
                 HPXML::HVACTypeHeatPumpMiniSplit
               hvac_system.cooling_efficiency_seer = 0.1
+              hvac_system.cooling_efficiency_eer = 0.1
               hvac_system.heating_efficiency_hspf = 0.1
             when HPXML::HVACTypeHeatPumpGroundToAir
               hvac_system.cooling_efficiency_eer = 0.1

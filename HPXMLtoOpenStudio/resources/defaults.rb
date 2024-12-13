@@ -1853,26 +1853,27 @@ module Defaults
       end
     end
 
-    # Convert SEER2/HSPF2 to SEER/HSPF
-    hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
-      next unless cooling_system.cooling_efficiency_seer.nil?
+    # Convert SEER2/EER2/HSPF2 to SEER/EER/HSPF
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a?(HPXML::CoolingSystem)
+        next unless [HPXML::HVACTypeCentralAirConditioner,
+                     HPXML::HVACTypeMiniSplitAirConditioner].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a?(HPXML::HeatPump)
+        next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                     HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
+      end
+      if hvac_system.cooling_efficiency_seer.nil?
+        is_ducted = !hvac_system.distribution_system_idref.nil?
+        hvac_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(hvac_system.cooling_efficiency_seer2, is_ducted).round(2)
+        hvac_system.cooling_efficiency_seer_isdefaulted = true
+        hvac_system.cooling_efficiency_seer2 = nil
+      end
+      next unless hvac_system.cooling_efficiency_eer.nil? && (not hvac_system.cooling_efficiency_eer2.nil?)
 
-      is_ducted = !cooling_system.distribution_system_idref.nil?
-      cooling_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(cooling_system.cooling_efficiency_seer2, is_ducted).round(2)
-      cooling_system.cooling_efficiency_seer_isdefaulted = true
-      cooling_system.cooling_efficiency_seer2 = nil
-    end
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless [HPXML::HVACTypeHeatPumpAirToAir,
-                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-      next unless heat_pump.cooling_efficiency_seer.nil?
-
-      is_ducted = !heat_pump.distribution_system_idref.nil?
-      heat_pump.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(heat_pump.cooling_efficiency_seer2, is_ducted).round(2)
-      heat_pump.cooling_efficiency_seer_isdefaulted = true
-      heat_pump.cooling_efficiency_seer2 = nil
+      is_ducted = !hvac_system.distribution_system_idref.nil?
+      hvac_system.cooling_efficiency_eer = HVAC.calc_eer_from_eer2(hvac_system.cooling_efficiency_eer2, is_ducted).round(2)
+      hvac_system.cooling_efficiency_eer_isdefaulted = true
+      hvac_system.cooling_efficiency_eer2 = nil
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
@@ -2265,6 +2266,34 @@ module Defaults
         heating_system.pilot_light_btuh = 500.0
         heating_system.pilot_light_btuh_isdefaulted = true
       end
+    end
+
+    # EER
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a?(HPXML::CoolingSystem)
+        next unless [HPXML::HVACTypeCentralAirConditioner,
+                     HPXML::HVACTypeMiniSplitAirConditioner].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a?(HPXML::HeatPump)
+        next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                     HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
+      end
+      next unless hvac_system.cooling_efficiency_eer.nil? && hvac_system.cooling_efficiency_eer2.nil?
+
+      seer = hvac_system.cooling_efficiency_seer
+      case hvac_system.compressor_type
+      when HPXML::HVACCompressorTypeSingleStage
+        # FIXME: Review
+        cop = 0.2692 * seer + 0.2706 # Regression based on inverse model
+      when HPXML::HVACCompressorTypeTwoStage
+        # FIXME: Review
+        cop = 0.2773 * seer - 0.0018 # Regression based on inverse model
+      when HPXML::HVACCompressorTypeVariableSpeed
+        # FIXME: Need to double check this w/ Jon
+        is_ducted = !hvac_system.distribution_system_idref.nil?
+        cop = is_ducted ? 0.1953 * seer : 0.06635 * seer + 1.8707 # Based on NEEP data
+      end
+      hvac_system.cooling_efficiency_eer = UnitConversions.convert(cop, 'W', 'Btu/hr').round(2)
+      hvac_system.cooling_efficiency_eer_isdefaulted = true
     end
 
     # Detailed HVAC performance

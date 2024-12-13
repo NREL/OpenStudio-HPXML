@@ -427,6 +427,7 @@ class HPXML < Object
   UnitsDollars = '$'
   UnitsDollarsPerkW = '$/kW'
   UnitsEER = 'EER'
+  UnitsEER2 = 'EER2'
   UnitsELA = 'EffectiveLeakageArea'
   UnitsCEER = 'CEER'
   UnitsHSPF = 'HSPF'
@@ -6661,6 +6662,7 @@ class HPXML < Object
              :cooling_efficiency_seer,                             # [Double] AnnualCoolingEfficiency[Units="SEER"]/Value (Btu/Wh)
              :cooling_efficiency_seer2,                            # [Double] AnnualCoolingEfficiency[Units="SEER2"]/Value (Btu/Wh)
              :cooling_efficiency_eer,                              # [Double] AnnualCoolingEfficiency[Units="EER"]/Value (Btu/Wh)
+             :cooling_efficiency_eer2,                             # [Double] AnnualCoolingEfficiency[Units="EER2"]/Value (Btu/Wh)
              :cooling_efficiency_ceer,                             # [Double] AnnualCoolingEfficiency[Units="CEER"]/Value (Btu/Wh)
              :cooling_efficiency_kw_per_ton,                       # [Double] AnnualCoolingEfficiency[Units="kW/ton"]/Value (kW/ton)
              :cooling_shr,                                         # [Double] SensibleHeatFraction (frac)
@@ -6805,6 +6807,11 @@ class HPXML < Object
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER, :string)
         XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_eer, :float, @cooling_efficiency_eer_isdefaulted)
       end
+      if not @cooling_efficiency_eer2.nil?
+        annual_efficiency = XMLHelper.add_element(cooling_system, 'AnnualCoolingEfficiency')
+        XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER2, :string)
+        XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_eer2, :float, @cooling_efficiency_eer2_isdefaulted)
+      end
       if not @cooling_efficiency_ceer.nil?
         annual_efficiency = XMLHelper.add_element(cooling_system, 'AnnualCoolingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsCEER, :string)
@@ -6868,6 +6875,7 @@ class HPXML < Object
       @cooling_efficiency_seer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value", :float)
       @cooling_efficiency_seer2 = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsSEER2}']/Value", :float)
       @cooling_efficiency_eer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
+      @cooling_efficiency_eer2 = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsEER2}']/Value", :float)
       @cooling_efficiency_ceer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       @cooling_efficiency_kw_per_ton = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsKwPerTon}']/Value", :float)
       @cooling_detailed_performance_data.from_doc(cooling_system)
@@ -6975,6 +6983,7 @@ class HPXML < Object
              :cooling_efficiency_seer,             # [Double] AnnualCoolingEfficiency[Units="SEER"]/Value (Btu/Wh)
              :cooling_efficiency_seer2,            # [Double] AnnualCoolingEfficiency[Units="SEER2"]/Value (Btu/Wh)
              :cooling_efficiency_eer,              # [Double] AnnualCoolingEfficiency[Units="EER"]/Value (Btu/Wh)
+             :cooling_efficiency_eer2,             # [Double] AnnualCoolingEfficiency[Units="EER2"]/Value (Btu/Wh)
              :cooling_efficiency_ceer,             # [Double] AnnualCoolingEfficiency[Units="CEER"]/Value (Btu/Wh)
              :heating_efficiency_hspf,             # [Double] AnnualHeatingEfficiency[Units="HSPF"]/Value (Btu/Wh)
              :heating_efficiency_hspf2,            # [Double] AnnualHeatingEfficiency[Units="HSPF2"]/Value (Btu/Wh)
@@ -7185,6 +7194,11 @@ class HPXML < Object
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER, :string)
         XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_eer, :float, @cooling_efficiency_eer_isdefaulted)
       end
+      if not @cooling_efficiency_eer2.nil?
+        annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualCoolingEfficiency')
+        XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER2, :string)
+        XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_eer2, :float, @cooling_efficiency_eer2_isdefaulted)
+      end
       if not @heating_efficiency_hspf.nil?
         annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualHeatingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsHSPF, :string)
@@ -7276,6 +7290,7 @@ class HPXML < Object
       @cooling_efficiency_seer2 = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsSEER2}']/Value", :float)
       @cooling_efficiency_ceer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       @cooling_efficiency_eer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
+      @cooling_efficiency_eer2 = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER2}']/Value", :float)
       @heating_efficiency_hspf = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF}']/Value", :float)
       @heating_efficiency_hspf2 = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF2}']/Value", :float)
       @heating_efficiency_cop = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value", :float)

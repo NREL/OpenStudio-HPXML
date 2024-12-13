@@ -1634,7 +1634,7 @@ module HVAC
   # Return coefficients of capacity and eir as function of temperature curves,
   # used to adjust the NEEP performance data to account for variations in indoor conditions
   #
-  # @param mode [Symbol] Heating or cooling
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Array<Double>, Array<Double>] Capacity as function of temperature coefficients, eir as function of temperature coefficients
   def self.get_resnet_cap_eir_ft_spec(mode)
     if mode == :htg
@@ -1683,7 +1683,6 @@ module HVAC
     clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
     set_cool_c_d(cooling_system)
 
-    seer = cooling_system.cooling_efficiency_seer
     case cooling_system.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
       clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(cooling_system.compressor_type)
@@ -1691,7 +1690,7 @@ module HVAC
         clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[0]
         clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
         clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
-        clg_ap.cool_rated_cops = [0.2692 * seer + 0.2706] # Regression based on inverse model
+        clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W')]
       else
         clg_ap.cool_fan_speed_ratios = [1.0]
         clg_ap.cool_cap_fflow_spec = [[1.0, 0.0, 0.0]]
@@ -1703,7 +1702,7 @@ module HVAC
       clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
       clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(cooling_system.compressor_type)
       clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
-      clg_ap.cool_rated_cops = [0.2773 * seer - 0.0018] # Regression based on inverse model
+      clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W')]
       clg_ap.cool_rated_cops << clg_ap.cool_rated_cops[0] * 0.91 # COP ratio based on Dylan's data as seen in BEopt 2.8 options
 
     when HPXML::HVACCompressorTypeVariableSpeed
@@ -1849,7 +1848,7 @@ module HVAC
     max_cap_maint_82 = 1.0 - (1.0 - hp_ap.cooling_capacity_retention_fraction) * (HVAC::AirSourceCoolRatedODB - 82.0) /
                              (HVAC::AirSourceCoolRatedODB - hp_ap.cooling_capacity_retention_temperature)
 
-    max_cop_95 = is_ducted ? 0.1953 * seer : 0.06635 * seer + 1.8707
+    max_cop_95 = UnitConversions.convert(heat_pump.cooling_efficiency_eer, 'Btu/hr', 'W')
     max_capacity_95 = heat_pump.cooling_capacity * hp_ap.cool_capacity_ratios[-1]
     min_capacity_95 = max_capacity_95 / hp_ap.cool_capacity_ratios[-1] * hp_ap.cool_capacity_ratios[0]
     min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)
@@ -2809,7 +2808,7 @@ module HVAC
   #
   # @param net_cap [TODO] TODO
   # @param fan_power [TODO] TODO
-  # @param mode [TODO] TODO
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param net_cop [TODO] TODO
   # @return [TODO] TODO
   def self.convert_net_to_gross_capacity_cop(net_cap, fan_power, mode, net_cop = nil)
@@ -2831,7 +2830,7 @@ module HVAC
   # Preprocess the detailed performance user inputs, extrapolate data for OS TableLookup object
   #
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC (heating or cooling or heatpump) systems
-  # @param mode [Symbol] Heating or cooling
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
   # @param weather_temp [Double] weather_minimum drybulb temperature
   # @param compressor_lockout_temp [Double] Compressor Lock-out temperature or minimum heat pump compressor operating temperature
@@ -2875,40 +2874,40 @@ module HVAC
         dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
       end
     end
-    # convert to table lookup data
-    interpolate_to_odb_table_points(data_array, mode, compressor_lockout_temp, weather_temp)
+    extrapolate_data_points(data_array, mode, compressor_lockout_temp, weather_temp)
     add_data_point_adaptive_step_size(data_array, mode)
     correct_ft_cap_eir(data_array, mode)
   end
 
-  # TODO
+  # Adds additional detailed data points at the min/max outdoor temperatures that cover the
+  # full range of equipment operation.
   #
   # @param data_array [TODO] TODO
-  # @param mode [TODO] TODO
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param compressor_lockout_temp [TODO] TODO
   # @param weather_temp [TODO] TODO
   # @return [nil]
-  def self.interpolate_to_odb_table_points(data_array, mode, compressor_lockout_temp, weather_temp)
+  def self.extrapolate_data_points(data_array, mode, compressor_lockout_temp, weather_temp)
     # Set of data used for table lookup
     data_array.each do |data|
       user_odbs = data.map { |dp| dp.outdoor_temperature }
-      # Determine min/max ODB temperatures to cover full range of heat pump operation
+      # Determine min/max ODB temperatures to cover full range of equipment operation
       if mode == :clg
         outdoor_dry_bulbs = []
         # Calculate ODB temperature at which COP or capacity is zero
-        high_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop, true)
-        high_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity, true)
-        low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop, false)
-        low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity, false)
+        high_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, true)
+        high_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, true)
+        low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, false)
+        low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, false)
         outdoor_dry_bulbs << [low_odb_at_zero_cop, low_odb_at_zero_capacity, 55.0].max # Min cooling ODB
         outdoor_dry_bulbs << [high_odb_at_zero_cop, high_odb_at_zero_capacity, weather_temp].min # Max cooling ODB
       else
         outdoor_dry_bulbs = []
         # Calculate ODB temperature at which COP or capacity is zero
-        low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop, false)
-        low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity, false)
-        high_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_efficiency_cop, true)
-        high_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, mode, user_odbs, :gross_capacity, true)
+        low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, false)
+        low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, false)
+        high_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, true)
+        high_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, true)
         outdoor_dry_bulbs << [low_odb_at_zero_cop, low_odb_at_zero_capacity, compressor_lockout_temp, weather_temp].max # Min heating ODB
         outdoor_dry_bulbs << [high_odb_at_zero_cop, high_odb_at_zero_capacity, 60.0].min # Max heating ODB
       end
@@ -2932,12 +2931,11 @@ module HVAC
   # TODO
   #
   # @param data [TODO] TODO
-  # @param _mode [TODO] TODO
   # @param user_odbs [TODO] TODO
   # @param property [TODO] TODO
   # @param find_high [TODO] TODO
   # @return [TODO] TODO
-  def self.calculate_odb_at_zero_cop_or_capacity(data, _mode, user_odbs, property, find_high)
+  def self.calculate_odb_at_zero_cop_or_capacity(data, user_odbs, property, find_high)
     if find_high
       odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[-1] }
       odb_dp2 = data.find { |dp| dp.outdoor_temperature == user_odbs[-2] }
@@ -3007,7 +3005,7 @@ module HVAC
   # TODO
   #
   # @param data_array [TODO] TODO
-  # @param mode [TODO] TODO
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param tol [TODO] TODO
   # @return [nil]
   def self.add_data_point_adaptive_step_size(data_array, mode, tol = 0.1)
@@ -3048,7 +3046,7 @@ module HVAC
   # TODO
   #
   # @param data_array [TODO] TODO
-  # @param mode [TODO] TODO
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [nil]
   def self.correct_ft_cap_eir(data_array, mode)
     # Add sensitivity to indoor conditions
@@ -4786,7 +4784,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param f_chg [TODO] TODO
   # @param obj_name [String] Name for the OpenStudio object
-  # @param mode [TODO] TODO
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param defect_ratio [TODO] TODO
   # @param hvac_ap [TODO] TODO
   # @return [nil]
@@ -5624,6 +5622,24 @@ module HVAC
       return seer2 / 0.95
     else # Ductless systems
       return seer2 / 1.00
+    end
+  end
+
+  # Calculates rated EER (older metric) from rated EER2 (newer metric).
+  #
+  # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
+  # Note that this is a regression based on products on the market, not a conversion.
+  #
+  # @param eer2 [Double] Cooling efficiency (Btu/Wh)
+  # @param is_ducted [Boolean] True if a ducted HVAC system
+  # @return [Double] EER value (Btu/Wh)
+  def self.calc_eer_from_eer2(eer2, is_ducted)
+    # Note: There are less common system types (packaged, small duct high velocity,
+    # and space-constrained) that we don't handle here.
+    if is_ducted # Ducted split system
+      return eer2 / 0.95
+    else # Ductless systems
+      return eer2 / 1.00
     end
   end
 
