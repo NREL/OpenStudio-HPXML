@@ -51,7 +51,7 @@ __New Features__
   - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 - RESNET HVAC modeling appendix:
-  - Added optional `extension/FanModelType`, changed rated fan power (w/cfm) and measured FanPowerWattsPerCFM assumptions to be based on fan model type.
+  - Added optional `extension/FanMotorType`, changed rated fan power (w/cfm) and measured FanPowerWattsPerCFM assumptions to be based on fan model type.
   - Updated the fan power calculation at each speed to be based on fan model type and whether ducted.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaced `slab_under_width` and `slab_perimeter_depth` arguments with `slab_under_insulation_width` and `slab_perimeter_insulation_depth`

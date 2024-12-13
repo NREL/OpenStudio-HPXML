@@ -2112,52 +2112,52 @@ module Defaults
     # Fan model type
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless heating_system.heating_system_type == HPXML::HVACTypeFurnace
-      next unless heating_system.fan_model_type.nil?
+      next unless heating_system.fan_motor_type.nil?
       next if (not heating_system.distribution_system.nil?) && (heating_system.distribution_system.air_type == HPXML::AirTypeGravity)
 
       if (not heating_system.attached_cooling_system.nil?) && (not heating_system.attached_cooling_system.compressor_type.nil?)
         # Based on RESNET DX Modeling Appendix
-        heating_system.fan_model_type = (heating_system.attached_cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanModelTypePSC : HPXML::HVACFanModelTypeBPM
+        heating_system.fan_motor_type = (heating_system.attached_cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
       else
         # HEScore assumption
-        heating_system.fan_model_type = (heating_system.heating_efficiency_afue > 0.9) ? HPXML::HVACFanModelTypeBPM : HPXML::HVACFanModelTypePSC
+        heating_system.fan_motor_type = (heating_system.heating_efficiency_afue > 0.9) ? HPXML::HVACFanMotorTypeBPM : HPXML::HVACFanMotorTypePSC
       end
-      heating_system.fan_model_type_isdefaulted = true
+      heating_system.fan_motor_type_isdefaulted = true
     end
     hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless cooling_system.fan_model_type.nil?
+      next unless cooling_system.fan_motor_type.nil?
 
-      if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_model_type.nil?)
-        cooling_system.fan_model_type = cooling_system.attached_heating_system.fan_model_type
-        cooling_system.fan_model_type_isdefaulted = true
+      if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_motor_type.nil?)
+        cooling_system.fan_motor_type = cooling_system.attached_heating_system.fan_motor_type
+        cooling_system.fan_motor_type_isdefaulted = true
       elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         # Based on RESNET DX Modeling Appendix
-        cooling_system.fan_model_type = (cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanModelTypePSC : HPXML::HVACFanModelTypeBPM
-        cooling_system.fan_model_type_isdefaulted = true
+        cooling_system.fan_motor_type = (cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
+        cooling_system.fan_motor_type_isdefaulted = true
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
-        cooling_system.fan_model_type = HPXML::HVACFanModelTypeBPM
-        cooling_system.fan_model_type_isdefaulted = true
+        cooling_system.fan_motor_type = HPXML::HVACFanMotorTypeBPM
+        cooling_system.fan_motor_type_isdefaulted = true
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
         # Depends on airflow rate, so defaulted in hvac_sizing.rb
       end
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fan_model_type.nil?
+      next unless heat_pump.fan_motor_type.nil?
 
       if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
         # Based on RESNET DX Modeling Appendix
-        heat_pump.fan_model_type = (heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanModelTypePSC : HPXML::HVACFanModelTypeBPM
-        heat_pump.fan_model_type_isdefaulted = true
+        heat_pump.fan_motor_type = (heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
+        heat_pump.fan_motor_type_isdefaulted = true
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
-          heat_pump.fan_model_type = HPXML::HVACFanModelTypeBPM
+          heat_pump.fan_motor_type = HPXML::HVACFanMotorTypeBPM
         else
-          heat_pump.fan_model_type = HPXML::HVACFanModelTypePSC
+          heat_pump.fan_motor_type = HPXML::HVACFanMotorTypePSC
         end
-        heat_pump.fan_model_type_isdefaulted = true
+        heat_pump.fan_motor_type_isdefaulted = true
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-        heat_pump.fan_model_type = HPXML::HVACFanModelTypeBPM
-        heat_pump.fan_model_type_isdefaulted = true
+        heat_pump.fan_motor_type = HPXML::HVACFanMotorTypeBPM
+        heat_pump.fan_motor_type_isdefaulted = true
       end
     end
 
@@ -2173,7 +2173,7 @@ module Defaults
           if (not heating_system.distribution_system.nil?) && (heating_system.distribution_system.air_type == HPXML::AirTypeGravity)
             heating_system.fan_watts_per_cfm = 0.0
           else
-            heating_system.fan_watts_per_cfm = (heating_system.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
+            heating_system.fan_watts_per_cfm = (heating_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
           end
           heating_system.fan_watts_per_cfm_isdefaulted = true
         end
@@ -2200,7 +2200,7 @@ module Defaults
       else
         case cooling_system.cooling_system_type
         when HPXML::HVACTypeCentralAirConditioner
-          cooling_system.fan_watts_per_cfm = (cooling_system.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
+          cooling_system.fan_watts_per_cfm = (cooling_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
           cooling_system.fan_watts_per_cfm_isdefaulted = true
         when HPXML::HVACTypeMiniSplitAirConditioner
           cooling_system.fan_watts_per_cfm = cooling_system.distribution_system.nil? ? mini_split_ductless_watts_per_cfm : mini_split_ducted_watts_per_cfm
@@ -2216,7 +2216,7 @@ module Defaults
 
       case heat_pump.heat_pump_type
       when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir
-        heat_pump.fan_watts_per_cfm = (heat_pump.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
+        heat_pump.fan_watts_per_cfm = (heat_pump.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
         heat_pump.fan_watts_per_cfm_isdefaulted = true
       when HPXML::HVACTypeHeatPumpMiniSplit
         heat_pump.fan_watts_per_cfm = heat_pump.distribution_system.nil? ? mini_split_ductless_watts_per_cfm : mini_split_ducted_watts_per_cfm

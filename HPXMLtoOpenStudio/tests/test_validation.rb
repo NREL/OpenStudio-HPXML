@@ -132,7 +132,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-gshp-invalid-bore-depth-low' => ['Expected BoreholesOrTrenches/Length to be greater than or equal to 80 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
                             'hvac-gshp-invalid-bore-depth-high' => ['Expected BoreholesOrTrenches/Length to be less than or equal to 500 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
                             'hvac-gshp-autosized-count-not-rectangle' => ["Expected BoreholesOrTrenches/Count when extension/BorefieldConfiguration is not 'Rectangle' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
-                            'hvac-invalid-fan-model-type' => ["Expected extension/FanModelType to be 'psc' or 'bpm'"],
+                            'hvac-invalid-fan-model-type' => ["Expected extension/FanMotorType to be 'psc' or 'bpm'"],
                             'hvac-location-heating-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-location-cooling-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-location-heat-pump' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
@@ -489,7 +489,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.geothermal_loops[0].num_bore_holes = nil
       when 'hvac-invalid-fan-model-type'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.heat_pumps[0].fan_model_type = 'foo'
+        hpxml_bldg.heat_pumps[0].fan_motor_type = 'foo'
       when 'hvac-location-heating-system'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-oil-only.xml')
         hpxml_bldg.heating_systems[0].location = HPXML::LocationBasementUnconditioned
