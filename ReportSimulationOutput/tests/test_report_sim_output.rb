@@ -1407,9 +1407,9 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(2581.8, actual_panel_rows['Electric Panel Capacity: 2023 Meter-Based: Total (W)'])
     assert_equal(10.8, actual_panel_rows['Electric Panel Capacity: 2023 Meter-Based: Total (A)'])
     assert_equal(100.0 - 10.8, actual_panel_rows['Electric Panel Capacity: 2023 Meter-Based: Headroom (A)'])
-    assert_equal(11, actual_panel_rows['Electric Panel Breaker Spaces: Total Count'])
-    assert_equal(6, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
-    assert_equal(11 - 6, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
+    assert_equal(13, actual_panel_rows['Electric Panel Breaker Spaces: Total Count'])
+    assert_equal(8, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
+    assert_equal(13 - 8, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
 
     # Upgrade
     hpxml_bldg = hpxml.buildings[0]
@@ -1462,8 +1462,8 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(186.1, actual_panel_rows['Electric Panel Capacity: 2023 Meter-Based: Total (A)'])
     assert_equal(100.0 - 186.1, actual_panel_rows['Electric Panel Capacity: 2023 Meter-Based: Headroom (A)'])
     assert_equal(12, actual_panel_rows['Electric Panel Breaker Spaces: Total Count'])
-    assert_equal(13, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
-    assert_equal(12 - 13, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
+    assert_equal(17, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
+    assert_equal(12 - 17, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
   end
 
   private

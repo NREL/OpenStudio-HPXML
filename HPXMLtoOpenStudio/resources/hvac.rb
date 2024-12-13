@@ -811,7 +811,6 @@ module HVAC
     return air_loop
   end
 
-  # FIXME
   # Get the outdoor unit (compressor) power (W) using regression based on heating rated (output) capacity.
   #
   # @param heating_capacity [Double] Direct expansion coil heating rated (output) capacity [kBtu/hr].
@@ -820,7 +819,6 @@ module HVAC
     return 240 * (0.626 * heating_capacity + 1.634)
   end
 
-  # FIXME
   # Get the outdoor unit (compressor) power (W) using regression based on cooling rated (output) capacity.
   #
   # @param cooling_capacity [Double] Direct expansion coil cooling rated (output) capacity [kBtu/hr].
@@ -829,7 +827,6 @@ module HVAC
     return 240 * (0.626 * cooling_capacity + 1.634)
   end
 
-  # FIXME
   # Get the indoor unit (air handler) power (W).
   #
   # @param fan_watts_per_cfm [Double] Blower fan watts per cfm [W/cfm]
@@ -851,7 +848,6 @@ module HVAC
     return electric_auxiliary_energy / 2.08
   end
 
-  # FIXME
   # Returns the heating input capacity, calculated as the heating rated (output) capacity divided by the rated efficiency.
   #
   # @param heating_capacity [Double] Heating output capacity

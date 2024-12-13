@@ -5835,14 +5835,12 @@ module Defaults
     return months
   end
 
-  # FIXME
-  # Returns the number of breaker spaces based on TODO.
+  # Returns the number of breaker spaces based on rated power and voltage.
   #
-  # @param TODO
-  # @return TODO
+  # @param watts [Double] power rating (W)
+  # @param voltage [String] '120' or '240'
+  # @return [Integer] the number of breakers
   def self.get_breaker_spaces_from_power_watts_and_voltage(watts, voltage)
-    return 0 if watts == 0
-
     max_amps = 50
     required_amperage = watts / Float(voltage)
     num_branches = (required_amperage / max_amps).ceil
@@ -5863,7 +5861,7 @@ module Defaults
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param panel_load [HPXML::PanelLoad] Object that defines a single electric panel load
-  # @return [Integer] 120 or 240
+  # @return [String] '120' or '240'
   def self.get_panel_load_voltage_default_values(hpxml_bldg, panel_load)
     type = panel_load.type
     system_ids = panel_load.system_idrefs
@@ -5926,7 +5924,7 @@ module Defaults
     return default_panels_csv_data
   end
 
-  # Gets the default power and breaker spaces for a panel load based on load type, voltage, and attached systems.
+  # Gets the default power rating for a panel load based on load type, voltage, and attached systems.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param panel_load [HPXML::PanelLoad] Object that defines a single electric panel load
@@ -6131,14 +6129,16 @@ module Defaults
     return watts.round
   end
 
-  # Gets the default power and breaker spaces for a panel load based on load type, voltage, and attached systems.
+  # Gets the default breaker spaces for a panel load based on load type, power rating, voltage, and attached systems.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param panel_load [HPXML::PanelLoad] Object that defines a single electric panel load
   # @return [Hash] Map of property type => value
   def self.get_panel_load_breaker_spaces_default_values(runner, hpxml_bldg, panel_load, default_panels_csv_data)
-    type = panel_load.type
     watts = panel_load.power
+    return 0 if watts == 0
+
+    type = panel_load.type
     voltage = panel_load.voltage
     system_ids = panel_load.system_idrefs
 
@@ -6235,7 +6235,7 @@ module Defaults
         if voltage == HPXML::ElectricPanelVoltage240
           runner.registerWarning("PanelLoad '#{type}' has PanelLoad/Voltage (#{voltage}) not specified in default_panels.csv; PanelLoad/BreakerSpaces will be recalculated.")
           default_panels_csv_data['dishwasher'][voltage] = {}
-          default_panels_csv_data['dishwasher'][voltage]['BreakerSpaces'] = get_breaker_spaces_from_power_watts_and_voltage(watts, HPXML::ElectricPanelVoltage240)
+          default_panels_csv_data['dishwasher'][voltage]['BreakerSpaces'] = get_breaker_spaces_from_power_watts_and_voltage(watts, voltage)
         end
         breaker_spaces += default_panels_csv_data['dishwasher'][voltage]['BreakerSpaces']
       end
@@ -6309,9 +6309,7 @@ module Defaults
     elsif type == HPXML::ElectricPanelLoadTypeLaundry
       breaker_spaces += default_panels_csv_data['laundry'][voltage]['BreakerSpaces']
     elsif type == HPXML::ElectricPanelLoadTypeOther
-      if hpxml_bldg.has_location(HPXML::LocationGarage)
-        breaker_spaces += default_panels_csv_data['other'][voltage]['BreakerSpaces'] # Garage door opener
-      end
+      breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(watts, voltage)
     end
 
     return breaker_spaces

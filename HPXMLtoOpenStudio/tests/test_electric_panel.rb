@@ -15,7 +15,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
   end
 
   def teardown
-    # File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
     File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_panel.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_panel.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
@@ -35,9 +35,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(9909, electric_panel.capacity_total_watts[0], 0.01)
     assert_in_epsilon(9909 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
     assert_in_epsilon(electric_panel.max_current_rating - 9909 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
-    assert_equal(11, electric_panel.breaker_spaces_total)
-    assert_equal(6, electric_panel.breaker_spaces_occupied)
-    assert_equal(11 - 6, electric_panel.breaker_spaces_headroom)
+    assert_equal(13, electric_panel.breaker_spaces_total)
+    assert_equal(8, electric_panel.breaker_spaces_occupied)
+    assert_equal(13 - 8, electric_panel.breaker_spaces_headroom)
 
     # Upgrade
     electric_panel.headroom_breaker_spaces = nil
@@ -83,8 +83,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
     assert_in_epsilon(electric_panel.max_current_rating - 35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
     assert_equal(12, electric_panel.breaker_spaces_total)
-    assert_equal(13, electric_panel.breaker_spaces_occupied)
-    assert_equal(12 - 13, electric_panel.breaker_spaces_headroom)
+    assert_equal(15, electric_panel.breaker_spaces_occupied)
+    assert_equal(12 - 15, electric_panel.breaker_spaces_headroom)
   end
 
   def test_low_load
@@ -100,9 +100,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher, power: 0, system_idrefs: [hpxml_bldg.dishwashers[0].id])
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven, power: 0, system_idrefs: [hpxml_bldg.cooking_ranges[0].id])
     panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting, power: 500)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen, power: 1000)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry, power: 1500) # +1 breaker space
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther, power: 2000) # +1 breaker space
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen, power: 1000) # +2 breaker spaces
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry, power: 1500) # +1 breaker spaces
+    panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther, power: 2000) # +1 breaker spaces
 
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -111,8 +111,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(5000, electric_panel.capacity_total_watts[0], 0.01)
     assert_in_epsilon(5000 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
     assert_in_epsilon(electric_panel.max_current_rating - 5000 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
-    assert_equal(2, electric_panel.breaker_spaces_total)
-    assert_equal(2, electric_panel.breaker_spaces_occupied)
+    assert_equal(4, electric_panel.breaker_spaces_total)
+    assert_equal(4, electric_panel.breaker_spaces_occupied)
     assert_equal(0, electric_panel.breaker_spaces_headroom)
   end
 
@@ -346,7 +346,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 24000, 2)
+    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 24000, 4)
 
     test_name = 'HPWH w/backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml', test_name)

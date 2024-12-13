@@ -157,13 +157,15 @@ module ElectricPanel
       panel_loads.LoadBased_HeadRoomA = electric_panel.max_current_rating - panel_loads.LoadBased_CapacityA
     elsif panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2026LoadBased
       # TODO
-      panel_loads.LoadBased_CapacityW = 1
-      panel_loads.LoadBased_CapacityA = 2
-      panel_loads.LoadBased_HeadRoomA = 3
     end
   end
 
   # TODO
+  #
+  # @param [Double] load (W)
+  # @param [Double] threshold (W)
+  # @param [Double] demand factor (frac)
+  # @return [Double] TODO
   def self.discount_load(load, threshold, demand_factor)
     return 1.0 * [threshold, load].min + demand_factor * [0, load - threshold].max
   end
@@ -192,7 +194,6 @@ module ElectricPanel
       return capacity_w, capacity_a, headroom_a
     elsif panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2026MeterBased
       # TODO
-      return 1, 2, 3
     end
   end
 
