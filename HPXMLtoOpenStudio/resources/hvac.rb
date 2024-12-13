@@ -3056,9 +3056,7 @@ module HVAC
     if mode == :clg
       rated_t_i = HVAC::AirSourceCoolRatedIWB
       # Added two data points to be held constant outside the range 57F to 72F
-      # Disable for now
-      # indoor_t = [40.0, 57.0, rated_t_i, 72.0, 90.0]
-      indoor_t = [50.0, rated_t_i, 80.0]
+      indoor_t = [40.0, 57.0, rated_t_i, 72.0, 90.0]
     else
       rated_t_i = HVAC::AirSourceHeatRatedIDB
       indoor_t = [60.0, rated_t_i, 80.0]
@@ -3087,23 +3085,24 @@ module HVAC
           data_tmp << dp_new
           if mode == :clg
             dp_new.indoor_wetbulb = t_i
-            # Cooling variations  shall be held constant for Tiwb less than 57°F and greater than 72°F
-            # Fixme: also should be held constant for Todb less than 75°F (haven't find a direct solution yet)
-            # t_i = [t_i, 57].max
-            # t_i = [t_i, 72].min
+            # Cooling variations  shall be held constant for Tiwb less than 57°F and greater than 72°F, and for Todb less than 75°F
+            curve_t_i = [[t_i, 57].max, 72].min
+            curve_t_o = [dp_new.outdoor_temperature, 75].max
           else
             dp_new.indoor_temperature = t_i
+            curve_t_i = t_i
+            curve_t_o = dp_new.outdoor_temperature
           end
           # capacity FT curve output
-          cap_ft_curve_output = MathTools.biquadratic(t_i, dp_new.outdoor_temperature, cap_ft_spec_ss)
-          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, dp_new.outdoor_temperature, cap_ft_spec_ss)
+          cap_ft_curve_output = MathTools.biquadratic(curve_t_i, curve_t_o, cap_ft_spec_ss)
+          cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, curve_t_o, cap_ft_spec_ss)
           cap_correction_factor = cap_ft_curve_output / cap_ft_curve_output_rated
           # corrected capacity hash, with two temperature independent variables
           dp_new.gross_capacity *= cap_correction_factor
 
           # eir FT curve output
-          eir_ft_curve_output = MathTools.biquadratic(t_i, dp_new.outdoor_temperature, eir_ft_spec_ss)
-          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, dp_new.outdoor_temperature, eir_ft_spec_ss)
+          eir_ft_curve_output = MathTools.biquadratic(curve_t_i, curve_t_o, eir_ft_spec_ss)
+          eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, curve_t_o, eir_ft_spec_ss)
           eir_correction_factor = eir_ft_curve_output / eir_ft_curve_output_rated
           dp_new.gross_efficiency_cop /= eir_correction_factor
         end
