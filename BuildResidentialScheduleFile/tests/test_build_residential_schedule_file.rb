@@ -34,7 +34,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     hpxml = _create_hpxml('base.xml')
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -65,6 +65,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(273, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(346, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(380, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
   end
 
@@ -81,7 +82,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                SchedulesFile::Columns[:HotWaterFixtures].name]
 
     @args_hash['schedules_type'] = 'stochastic'
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     @args_hash['schedules_column_names'] = columns.join(', ')
     hpxml, result = _test_measure()
 
@@ -105,7 +106,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['schedules_type'] = 'stochastic'
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     @args_hash['schedules_column_names'] = "foobar, #{SchedulesFile::Columns[:CookingRange].name}, foobar2"
     _hpxml, result = _test_measure(expect_fail: true)
 
@@ -118,7 +119,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     hpxml = _create_hpxml('base-location-detailed.xml')
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -149,6 +150,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(273, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(346, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(380, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
   end
 
@@ -156,7 +158,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     hpxml = _create_hpxml('base.xml')
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     @args_hash['debug'] = true
     hpxml, result = _test_measure()
 
@@ -188,6 +190,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(273, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(346, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(380, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(3067, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Sleeping].name, schedules: sf.tmp_schedules), @tol)
   end
 
@@ -196,7 +199,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['schedules_random_seed'] = 1
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -227,6 +230,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(288, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(320, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(889, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(386, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
 
     @args_hash['schedules_random_seed'] = 2
@@ -260,6 +264,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(233, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(244, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(1077, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(528, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
   end
 
@@ -267,7 +272,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     hpxml = _create_hpxml('base-simcontrol-timestep-10-mins.xml')
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -298,6 +303,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_in_epsilon(146, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(154, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(397, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(142, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
   end
 
@@ -308,7 +314,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     hpxml.buildings[0].building_occupancy.number_of_residents = num_occupants
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     _hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -322,7 +328,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     hpxml.buildings[0].building_occupancy.number_of_residents = num_occupants
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     _hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -339,7 +345,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants.csv'))
     @args_hash['building_id'] = 'ALL'
     hpxml, result = _test_measure()
 
@@ -361,7 +367,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
       if hpxml_bldg.building_id == 'MyBuilding'
         assert_equal(1, hpxml_bldg.header.schedules_filepaths.size)
-        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'occupancy-stochastic.csv')
+        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'stochastic-3-occupants.csv')
         assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
@@ -375,10 +381,11 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         assert_in_epsilon(273, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(346, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+        assert_in_epsilon(380, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
         assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
       elsif hpxml_bldg.building_id == 'MyBuilding_2'
         assert_equal(1, hpxml_bldg.header.schedules_filepaths.size)
-        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'occupancy-stochastic_2.csv')
+        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'stochastic-3-occupants_2.csv')
         assert_in_epsilon(6072, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
@@ -392,10 +399,11 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         assert_in_epsilon(221, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(266, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(894, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+        assert_in_epsilon(559, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
         assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
       elsif hpxml_bldg.building_id == 'MyBuilding_3'
         assert_equal(1, hpxml_bldg.header.schedules_filepaths.size)
-        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'occupancy-stochastic_3.csv')
+        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'stochastic-3-occupants_3.csv')
         assert_in_epsilon(6045, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(1745, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(1745, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
@@ -409,6 +417,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         assert_in_epsilon(224, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(209, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(970, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+        assert_in_epsilon(501, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
         assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
       end
     end
@@ -421,7 +430,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
-    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic_2.csv'))
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'stochastic-3-occupants_2.csv'))
     @args_hash['building_id'] = 'MyBuilding_2'
     hpxml, result = _test_measure()
 
@@ -445,7 +454,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                                output_path: @tmp_schedule_file_path)
 
         assert_equal(1, hpxml_bldg.header.schedules_filepaths.size)
-        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'occupancy-stochastic_2.csv')
+        assert(hpxml_bldg.header.schedules_filepaths[0].include? 'stochastic-3-occupants_2.csv')
         assert_in_epsilon(6072, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(1765, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
@@ -459,6 +468,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         assert_in_epsilon(221, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(266, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
         assert_in_epsilon(894, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
+        assert_in_epsilon(559, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterShowers].name, schedules: sf.tmp_schedules), @tol)
         assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
       else
         assert_empty(hpxml_bldg.header.schedules_filepaths)
