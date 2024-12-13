@@ -1548,7 +1548,7 @@
   },
   "sample_files/base-dhw-tank-model-type-stratified-detailed-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-model-type-stratified.xml",
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants.csv"
   },
   "sample_files/base-dhw-tank-oil.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-gas.xml",
@@ -3743,9 +3743,17 @@
     "permanent_spa_pump_annual_kwh": null,
     "permanent_spa_heater_annual_kwh": null
   },
+  "sample_files/base-residents-1-occupancy-stochastic.xml": {
+    "parent_hpxml": "sample_files/base-residents-1.xml",
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-1-occupant.csv"
+  },
   "sample_files/base-residents-5-5.xml": {
     "parent_hpxml": "sample_files/base-misc-defaults.xml",
     "geometry_unit_num_occupants": 5.5
+  },
+  "sample_files/base-residents-5-5-occupancy-stochastic.xml": {
+    "parent_hpxml": "sample_files/base-residents-5-5.xml",
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-5-occupants.csv"
   },
   "sample_files/base-schedules-simple.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3793,7 +3801,7 @@
     "hvac_control_cooling_weekday_setpoint": null,
     "hvac_control_cooling_weekend_setpoint": null,
     "water_heater_setpoint_temperature": null,
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants-10-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
@@ -3802,7 +3810,7 @@
     "hvac_control_cooling_weekday_setpoint": null,
     "hvac_control_cooling_weekend_setpoint": null,
     "water_heater_setpoint_temperature": null,
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-30-mins.csv"
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants-30-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps-power-outage.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-mixed-timesteps.xml",
@@ -3811,7 +3819,7 @@
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants.csv"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-vacancy.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
@@ -3836,7 +3844,7 @@
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-10-mins.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants-10-mins.csv"
   },
   "sample_files/base-schedules-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3888,11 +3896,11 @@
   },
   "sample_files/base-simcontrol-timestep-10-mins-occupancy-stochastic-10-mins.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants-10-mins.csv"
   },
   "sample_files/base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants.csv"
   },
   "sample_files/base-simcontrol-timestep-30-mins.xml": {
     "parent_hpxml": "sample_files/base.xml",

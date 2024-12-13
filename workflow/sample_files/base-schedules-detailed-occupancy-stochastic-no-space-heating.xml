@@ -63,7 +63,7 @@
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
