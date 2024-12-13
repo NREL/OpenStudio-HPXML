@@ -1801,7 +1801,7 @@ module HVAC
     end
     max_cop_47 = a * hspf + b * max_cap_maint_5 + c * max_cap_maint_5**2 + d * max_cap_maint_5 * hspf + e
     max_capacity_47 = heat_pump.heating_capacity * hp_ap.heat_capacity_ratios[-1]
-    min_capacity_47 = max_capacity_47 / hp_ap.heat_capacity_ratios[-1] * hp_ap.heat_capacity_ratios[0]
+    min_capacity_47 = heat_pump.heating_capacity * hp_ap.heat_capacity_ratios[0]
     min_cop_47 = is_ducted ? max_cop_47 * (-0.0306 * hspf + 1.5385) : max_cop_47 * (-0.01698 * hspf + 1.5907)
     max_capacity_5 = max_capacity_47 * max_cap_maint_5
     max_cop_5 = is_ducted ? max_cop_47 * 0.587 : max_cop_47 * 0.671
@@ -1895,22 +1895,8 @@ module HVAC
     when HPXML::HVACCompressorTypeTwoStage
       return [0.72, 1.0]
     when HPXML::HVACCompressorTypeVariableSpeed
-      is_ducted = !heat_pump.distribution_system_idref.nil?
-      if is_ducted
-        nominal_to_max_ratio = 0.972
-      else
-        nominal_to_max_ratio = 0.812
-      end
-      if is_ducted && heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
-        # central ducted
-        return [0.358 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
-      elsif !is_ducted
-        # wall placement
-        return [0.252 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
-      else
-        # ducted minisplit
-        return [0.305 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
-      end
+      nominal_to_max_ratio = 0.908
+      return [0.272 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
     end
 
     fail 'Unable to get heating capacity ratios.'
@@ -2557,10 +2543,10 @@ module HVAC
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC (heating or cooling or heatpump) systems
   # @return [Double] Fan power at any speed or mode
   def self.calculate_fan_power_from_curve(max_fan_power, fan_ratio, hvac_system)
-    if hvac_system.fan_model_type.nil?
+    if hvac_system.fan_motor_type.nil?
       # Cubic relationship fan power curve
       fan_power = max_fan_power * (fan_ratio**3)
-    elsif hvac_system.fan_model_type == HPXML::HVACFanModelTypeBPM
+    elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypeBPM
       # bpm fan
       index = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
       fan_power = max_fan_power * (fan_ratio**index)
@@ -4526,9 +4512,9 @@ module HVAC
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     elsif hvac_system.distribution_system.nil?
-      hvac_ap.fan_power_rated = (hvac_system.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_ductless_watts_per_cfm : bpm_ductless_watts_per_cfm
+      hvac_ap.fan_power_rated = (hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_ductless_watts_per_cfm : bpm_ductless_watts_per_cfm
     else
-      hvac_ap.fan_power_rated = (hvac_system.fan_model_type == HPXML::HVACFanModelTypePSC) ? psc_ducted_watts_per_cfm : bpm_ducted_watts_per_cfm
+      hvac_ap.fan_power_rated = (hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_ducted_watts_per_cfm : bpm_ducted_watts_per_cfm
     end
   end
 

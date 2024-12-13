@@ -76,6 +76,7 @@ class HPXML < Object
   BlindsOpen = 'open'
   BlindsHalfOpen = 'half open'
   CapacityDescriptionMinimum = 'minimum'
+  CapacityDescriptionNominal = 'nominal'
   CapacityDescriptionMaximum = 'maximum'
   CertificationEnergyStar = 'Energy Star'
   ClothesDryerControlTypeMoisture = 'moisture'
@@ -224,8 +225,8 @@ class HPXML < Object
   HVACTypeSpaceHeater = 'SpaceHeater'
   HVACTypeStove = 'Stove'
   HVACTypeWallFurnace = 'WallFurnace'
-  HVACFanModelTypePSC = 'psc'
-  HVACFanModelTypeBPM = 'bpm'
+  HVACFanMotorTypePSC = 'psc'
+  HVACFanMotorTypeBPM = 'bpm'
   HydronicTypeBaseboard = 'baseboard'
   HydronicTypeRadiantCeiling = 'radiant ceiling'
   HydronicTypeRadiantFloor = 'radiant floor'
@@ -6372,7 +6373,7 @@ class HPXML < Object
              :heating_airflow_cfm,              # [Double] extension/HeatingAirflowCFM (cfm)
              :heating_autosizing_factor,        # [Double] extension/HeatingAutosizingFactor (frac)
              :heating_autosizing_limit,         # [Double] extension/HeatingAutosizingLimit (Btu/hr)
-             :fan_model_type,                   # [String] extension/FanModelType
+             :fan_motor_type,                   # [String] extension/FanMotorType
              :htg_seed_id]                      # [String] extension/HeatingSeedId
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
@@ -6537,7 +6538,7 @@ class HPXML < Object
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', @electric_auxiliary_energy, :float, @electric_auxiliary_energy_isdefaulted) unless @electric_auxiliary_energy.nil?
       XMLHelper.add_extension(heating_system, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heating_system, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
-      XMLHelper.add_extension(heating_system, 'FanModelType', @fan_model_type, :string, @fan_model_type_isdefaulted) unless @fan_model_type.nil?
+      XMLHelper.add_extension(heating_system, 'FanMotorType', @fan_motor_type, :string, @fan_motor_type_isdefaulted) unless @fan_motor_type.nil?
       XMLHelper.add_extension(heating_system, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
       XMLHelper.add_extension(heating_system, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
       XMLHelper.add_extension(heating_system, 'FanPowerWatts', @fan_watts, :float, @fan_watts_isdefaulted) unless @fan_watts.nil?
@@ -6584,7 +6585,7 @@ class HPXML < Object
       @electric_auxiliary_energy = XMLHelper.get_value(heating_system, 'ElectricAuxiliaryEnergy', :float)
       @shared_loop_watts = XMLHelper.get_value(heating_system, 'extension/SharedLoopWatts', :float)
       @shared_loop_motor_efficiency = XMLHelper.get_value(heating_system, 'extension/SharedLoopMotorEfficiency', :float)
-      @fan_model_type = XMLHelper.get_value(heating_system, 'extension/FanModelType', :string)
+      @fan_motor_type = XMLHelper.get_value(heating_system, 'extension/FanMotorType', :string)
       @fan_coil_watts = XMLHelper.get_value(heating_system, 'extension/FanCoilWatts', :float)
       @fan_watts_per_cfm = XMLHelper.get_value(heating_system, 'extension/FanPowerWattsPerCFM', :float)
       @fan_watts = XMLHelper.get_value(heating_system, 'extension/FanPowerWatts', :float)
@@ -6681,7 +6682,7 @@ class HPXML < Object
              :crankcase_heater_watts,                              # [Double] extension/CrankcaseHeaterPowerWatts (W)
              :cooling_autosizing_factor,                           # [Double] extension/CoolingAutosizingFactor (frac)
              :cooling_autosizing_limit,                            # [Double] extension/CoolingAutosizingLimit (Btu/hr)
-             :fan_model_type,                                      # [String] extension/FanModelType
+             :fan_motor_type,                                      # [String] extension/FanMotorType
              :clg_seed_id,                                         # [String] extension/CoolingSeedId
              :htg_seed_id]                                         # [String] extension/HeatingSeedId
     attr_reader(*CLASS_ATTRS)
@@ -6834,7 +6835,7 @@ class HPXML < Object
       XMLHelper.add_element(cooling_system, 'IntegratedHeatingSystemFractionHeatLoadServed', @integrated_heating_system_fraction_heat_load_served, :float) unless @integrated_heating_system_fraction_heat_load_served.nil?
       XMLHelper.add_extension(cooling_system, 'AirflowDefectRatio', @airflow_defect_ratio, :float, @airflow_defect_ratio_isdefaulted) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(cooling_system, 'ChargeDefectRatio', @charge_defect_ratio, :float, @charge_defect_ratio_isdefaulted) unless @charge_defect_ratio.nil?
-      XMLHelper.add_extension(cooling_system, 'FanModelType', @fan_model_type, :string, @fan_model_type_isdefaulted) unless @fan_model_type.nil?
+      XMLHelper.add_extension(cooling_system, 'FanMotorType', @fan_motor_type, :string, @fan_motor_type_isdefaulted) unless @fan_motor_type.nil?
       XMLHelper.add_extension(cooling_system, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingAirflowCFM', @cooling_airflow_cfm, :float, @cooling_airflow_cfm_isdefaulted) unless @cooling_airflow_cfm.nil?
       XMLHelper.add_extension(cooling_system, 'HeatingAirflowCFM', @integrated_heating_system_airflow_cfm, :float, @integrated_heating_system_airflow_cfm_isdefaulted) unless @integrated_heating_system_airflow_cfm.nil?
@@ -6886,7 +6887,7 @@ class HPXML < Object
       @integrated_heating_system_fraction_heat_load_served = XMLHelper.get_value(cooling_system, 'IntegratedHeatingSystemFractionHeatLoadServed', :float)
       @airflow_defect_ratio = XMLHelper.get_value(cooling_system, 'extension/AirflowDefectRatio', :float)
       @charge_defect_ratio = XMLHelper.get_value(cooling_system, 'extension/ChargeDefectRatio', :float)
-      @fan_model_type = XMLHelper.get_value(cooling_system, 'extension/FanModelType', :string)
+      @fan_motor_type = XMLHelper.get_value(cooling_system, 'extension/FanMotorType', :string)
       @fan_watts_per_cfm = XMLHelper.get_value(cooling_system, 'extension/FanPowerWattsPerCFM', :float)
       @cooling_airflow_cfm = XMLHelper.get_value(cooling_system, 'extension/CoolingAirflowCFM', :float)
       @integrated_heating_system_airflow_cfm = XMLHelper.get_value(cooling_system, 'extension/HeatingAirflowCFM', :float)
@@ -7006,7 +7007,7 @@ class HPXML < Object
              :cooling_autosizing_limit,            # [Double] extension/CoolingAutosizingLimit (Btu/hr)
              :heating_autosizing_limit,            # [Double] extension/HeatingAutosizingLimit (Btu/hr)
              :backup_heating_autosizing_limit,     # [Double] extension/BackupHeatingAutosizingLimit (Btu/hr)
-             :fan_model_type,                      # [String] extension/FanModelType
+             :fan_motor_type,                      # [String] extension/FanMotorType
              :htg_seed_id,                         # [String] extension/HeatingSeedId
              :clg_seed_id]                         # [String] extension/CoolingSeedId
     attr_reader(*CLASS_ATTRS)
@@ -7222,7 +7223,7 @@ class HPXML < Object
       @heating_detailed_performance_data.to_doc(heat_pump)
       XMLHelper.add_extension(heat_pump, 'AirflowDefectRatio', @airflow_defect_ratio, :float, @airflow_defect_ratio_isdefaulted) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(heat_pump, 'ChargeDefectRatio', @charge_defect_ratio, :float, @charge_defect_ratio_isdefaulted) unless @charge_defect_ratio.nil?
-      XMLHelper.add_extension(heat_pump, 'FanModelType', @fan_model_type, :string, @fan_model_type_isdefaulted) unless @fan_model_type.nil?
+      XMLHelper.add_extension(heat_pump, 'FanMotorType', @fan_motor_type, :string, @fan_motor_type_isdefaulted) unless @fan_motor_type.nil?
       XMLHelper.add_extension(heat_pump, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAirflowCFM', @heating_airflow_cfm, :float, @heating_airflow_cfm_isdefaulted) unless @heating_airflow_cfm.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingAirflowCFM', @cooling_airflow_cfm, :float, @cooling_airflow_cfm_isdefaulted) unless @cooling_airflow_cfm.nil?
@@ -7299,7 +7300,7 @@ class HPXML < Object
       @heating_detailed_performance_data.from_doc(heat_pump)
       @airflow_defect_ratio = XMLHelper.get_value(heat_pump, 'extension/AirflowDefectRatio', :float)
       @charge_defect_ratio = XMLHelper.get_value(heat_pump, 'extension/ChargeDefectRatio', :float)
-      @fan_model_type = XMLHelper.get_value(heat_pump, 'extension/FanModelType', :string)
+      @fan_motor_type = XMLHelper.get_value(heat_pump, 'extension/FanMotorType', :string)
       @fan_watts_per_cfm = XMLHelper.get_value(heat_pump, 'extension/FanPowerWattsPerCFM', :float)
       @heating_airflow_cfm = XMLHelper.get_value(heat_pump, 'extension/HeatingAirflowCFM', :float)
       @cooling_airflow_cfm = XMLHelper.get_value(heat_pump, 'extension/CoolingAirflowCFM', :float)
