@@ -1848,7 +1848,7 @@ module HVAC
     max_cap_maint_82 = 1.0 - (1.0 - hp_ap.cooling_capacity_retention_fraction) * (HVAC::AirSourceCoolRatedODB - 82.0) /
                              (HVAC::AirSourceCoolRatedODB - hp_ap.cooling_capacity_retention_temperature)
 
-    max_cop_95 = UnitConversions.convert(heat_pump.cooling_efficiency_eer, 'Btu/hr', 'W')
+    max_cop_95 = UnitConversions.convert(heat_pump.cooling_efficiency_eer, 'Btu/hr', 'W') # FIXME: Need to double check this w/ Jon (or maybe this will be replaced)
     max_capacity_95 = heat_pump.cooling_capacity * hp_ap.cool_capacity_ratios[-1]
     min_capacity_95 = max_capacity_95 / hp_ap.cool_capacity_ratios[-1] * hp_ap.cool_capacity_ratios[0]
     min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)
