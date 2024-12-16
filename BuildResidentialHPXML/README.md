@@ -4715,7 +4715,7 @@ Whether the bathroom fans is a new panel load addition to an existing service pa
 
 **Electric Panel: Water Heater Power**
 
-Specifies the panel load water heater power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load water heater power. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_water_heater_power``
 - **Type:** ``Double``
@@ -4752,7 +4752,7 @@ Whether the water heater is a new panel load addition to an existing service pan
 
 **Electric Panel: Clothes Dryer Power**
 
-Specifies the panel load power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load power. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_clothes_dryer_power``
 - **Type:** ``Double``
@@ -4813,7 +4813,7 @@ Whether the dishwasher is a new panel load addition to an existing service panel
 
 **Electric Panel: Cooking Range/Oven Power**
 
-Specifies the panel load cooking range/oven power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load cooking range/oven power. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_cooking_range_power``
 - **Type:** ``Double``
@@ -4935,7 +4935,7 @@ Whether the pool pump is a new panel load addition to an existing service panel.
 
 **Electric Panel: Pool Heater Power**
 
-Specifies the panel load pool heater power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load pool heater power. Only applies to electric pool heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_pool_heater_power``
 - **Type:** ``Double``
@@ -4983,7 +4983,7 @@ Whether the spa pump is a new panel load addition to an existing service panel. 
 
 **Electric Panel: Permanent Spa Heater Power**
 
-Specifies the panel load permanent spa heater power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load permanent spa heater power. Only applies to electric permanent spa heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_permanent_spa_heater_power``
 - **Type:** ``Double``

@@ -2772,7 +2772,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_water_heater_power', false)
     arg.setDisplayName('Electric Panel: Water Heater Power')
-    arg.setDescription("Specifies the panel load water heater power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setDescription("Specifies the panel load water heater power. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -2789,7 +2789,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_clothes_dryer_power', false)
     arg.setDisplayName('Electric Panel: Clothes Dryer Power')
-    arg.setDescription("Specifies the panel load power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setDescription("Specifies the panel load power. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -2817,7 +2817,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_cooking_range_power', false)
     arg.setDisplayName('Electric Panel: Cooking Range/Oven Power')
-    arg.setDescription("Specifies the panel load cooking range/oven power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setDescription("Specifies the panel load cooking range/oven power. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -2874,7 +2874,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_pool_heater_power', false)
     arg.setDisplayName('Electric Panel: Pool Heater Power')
-    arg.setDescription("Specifies the panel load pool heater power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setDescription("Specifies the panel load pool heater power. Only applies to electric pool heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -2896,7 +2896,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_permanent_spa_heater_power', false)
     arg.setDisplayName('Electric Panel: Permanent Spa Heater Power')
-    arg.setDescription("Specifies the panel load permanent spa heater power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setDescription("Specifies the panel load permanent spa heater power. Only applies to electric permanent spa heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -7276,6 +7276,8 @@ module HPXMLFile
                       addition: args[:permanent_spa_pump_panel_load_addition],
                       system_idrefs: [permanent_spa.pump_id])
 
+      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
+
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
                       power: args[:permanent_spa_heater_panel_load_watts],
                       addition: args[:permanent_spa_heater_panel_load_addition],
@@ -7287,6 +7289,8 @@ module HPXMLFile
                       power: args[:electric_panel_load_pool_pump_power],
                       addition: args[:electric_panel_load_pool_pump_addition],
                       system_idrefs: [pool.pump_id])
+
+      next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
 
       panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater,
                       power: args[:electric_panel_load_pool_heater_power],
