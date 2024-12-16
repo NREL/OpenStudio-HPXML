@@ -4711,6 +4711,10 @@ They can also be found at ``HPXMLtoOpenStudio/resources/data/default_panels.csv`
    :file: ../../HPXMLtoOpenStudio/resources/data/default_panels.csv
    :header-rows: 1
 
+Mechanical ventilation loads may be assigned power ratings based on fan count and W (if available), otherwise 3000 W.
+Loads with power ratings of "auto" are calculated based on estimates for `input` capacity (using regressions involving `output` capacity and efficiency if direct expansion), blower fans (using fan W/cfm and airflow cfm), pumps, etc.
+Loads with breaker spaces of "auto" therefore vary based on calculated power ratings.
+
 .. _hpxml_batteries:
 
 HPXML Batteries
