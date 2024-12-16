@@ -1675,30 +1675,32 @@ module HVAC
   # TODO
   #
   # @param cooling_system [TODO] TODO
-  # @param use_ceer [TODO] TODO
   # @return [nil]
-  def self.set_cool_curves_dx(cooling_system, use_ceer = false)
+  def self.set_cool_curves_dx_air_source(cooling_system)
     clg_ap = cooling_system.additional_properties
-    clg_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton(cooling_system.compressor_type, use_ceer)
     clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
     set_cool_c_d(cooling_system)
 
     case cooling_system.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
       clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(cooling_system.compressor_type)
-      if not use_ceer
-        clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[0]
-        clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
-        clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
-        clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W')]
-      else
+      if (cooling_system.is_a?(HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
+         (cooling_system.is_a?(HPXML::HeatPump) && ([HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? cooling_system.heat_pump_type))
+        clg_ap.cool_rated_cfm_per_ton = [312] # medium speed
         clg_ap.cool_fan_speed_ratios = [1.0]
         clg_ap.cool_cap_fflow_spec = [[1.0, 0.0, 0.0]]
         clg_ap.cool_eir_fflow_spec = [[1.0, 0.0, 0.0]]
         clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_ceer, 'Btu/hr', 'W')]
+      else
+        clg_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton(cooling_system.compressor_type)
+        clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[0]
+        clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
+        clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
+        clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_eer, 'Btu/hr', 'W')]
       end
 
     when HPXML::HVACCompressorTypeTwoStage
+      clg_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton(cooling_system.compressor_type)
       clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[-1]
       clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
       clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(cooling_system.compressor_type)
@@ -1707,6 +1709,7 @@ module HVAC
       clg_ap.cool_rated_cops << clg_ap.cool_rated_cops[0] * 0.91 # COP ratio based on Dylan's data as seen in BEopt 2.8 options
 
     when HPXML::HVACCompressorTypeVariableSpeed
+      clg_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton(cooling_system.compressor_type)
       clg_ap.cooling_capacity_retention_temperature = 82.0
       clg_ap.cooling_capacity_retention_fraction = 1.033 # From NEEP data
       clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[-1]
@@ -1743,11 +1746,9 @@ module HVAC
   # TODO
   #
   # @param heating_system [TODO] TODO
-  # @param use_cop [TODO] TODO
   # @return [nil]
-  def self.set_heat_curves_dx(heating_system, use_cop = false)
+  def self.set_heat_curves_dx_air_source(heating_system)
     htg_ap = heating_system.additional_properties
-    htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type, use_cop)
     htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heating_system.compressor_type)
     htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system)
     set_heat_c_d(heating_system)
@@ -1757,16 +1758,19 @@ module HVAC
     when HPXML::HVACCompressorTypeSingleStage
       heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heating_system)
       htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
-      if not use_cop
+      if [HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? heating_system.heat_pump_type
+        htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton_simple()
+        htg_ap.heat_fan_speed_ratios = [1.0]
+      else
+        htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type)
         htg_ap.heat_rated_cops = [0.0353 * hspf**2 + 0.0331 * hspf + 0.9447] # Regression based on inverse model
         htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[0]
         htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
-      else
-        htg_ap.heat_fan_speed_ratios = [1.0]
       end
 
     when HPXML::HVACCompressorTypeTwoStage
       heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heating_system)
+      htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type)
       htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
       htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
@@ -1774,6 +1778,7 @@ module HVAC
       htg_ap.heat_rated_cops << htg_ap.heat_rated_cops[0] * 0.87 # COP ratio based on Dylan's data as seen in BEopt 2.8 options
 
     when HPXML::HVACCompressorTypeVariableSpeed
+      htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type)
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
       htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system)
       htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
@@ -1937,16 +1942,11 @@ module HVAC
   # TODO
   #
   # @param compressor_type [TODO] TODO
-  # @param use_ceer [TODO] TODO
   # @return [TODO] TODO
-  def self.get_cool_cfm_per_ton(compressor_type, use_ceer = false)
+  def self.get_cool_cfm_per_ton(compressor_type)
     # cfm/ton of rated capacity
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
-      if not use_ceer
-        return [394.2]
-      else
-        return [312] # medium speed
-      end
+      return [394.2]
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [411.0083, 344.1]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
@@ -1959,17 +1959,12 @@ module HVAC
   # TODO
   #
   # @param compressor_type [TODO] TODO
-  # @param use_cop_or_htg_sys [TODO] TODO
   # @return [TODO] TODO
-  def self.get_heat_cfm_per_ton(compressor_type, use_cop_or_htg_sys = false)
+  def self.get_heat_cfm_per_ton(compressor_type)
     # cfm/ton of rated capacity
     case compressor_type
     when HPXML::HVACCompressorTypeSingleStage
-      if not use_cop_or_htg_sys
-        return [384.1]
-      else
-        return [350]
-      end
+      return [384.1]
     when HPXML::HVACCompressorTypeTwoStage
       return [391.3333, 352.2]
     when HPXML::HVACCompressorTypeVariableSpeed
@@ -1977,6 +1972,14 @@ module HVAC
     else
       fail 'Compressor type not supported.'
     end
+  end
+
+  # Return heating CFM/ton for heating systems (non-central), eg. room heat pump, pthp, stove, space heater etc.
+  #
+  # @return [Array<Double>] heating cfm/ton
+  def self.get_heat_cfm_per_ton_simple()
+    # cfm/ton of rated capacity
+    return [350.0]
   end
 
   # TODO
@@ -4483,9 +4486,8 @@ module HVAC
   # TODO
   #
   # @param hvac_system [TODO] TODO
-  # @param use_ceer_cop [TODO] TODO
   # @return [nil]
-  def self.set_fan_power_rated(hvac_system, use_ceer_cop)
+  def self.set_fan_power_rated(hvac_system)
     hvac_ap = hvac_system.additional_properties
 
     # Based on RESNET DX Modeling Appendix
@@ -4493,8 +4495,8 @@ module HVAC
     psc_ductless_watts_per_cfm = 0.414 # W/cfm, PSC fan
     bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
     bpm_ductless_watts_per_cfm = 0.171 # W/cfm, BPM fan
-
-    if use_ceer_cop
+    if (hvac_system.is_a?(HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? hvac_system.cooling_system_type)) ||
+       (hvac_system.is_a?(HPXML::HeatPump) && ([HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? hvac_system.heat_pump_type))
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     elsif hvac_system.distribution_system.nil?
