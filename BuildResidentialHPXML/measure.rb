@@ -2682,12 +2682,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_discharge_power', false)
-    arg.setDisplayName('Electric Vehicle: Rated Battery Power Output')
-    arg.setDescription('The rated power output of the EV battery. If not provided, the OS-HPXML default is used.')
-    arg.setUnits('W')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_capacity', false)
     arg.setDisplayName('Electric Vehicle: Nominal Battery Capacity')
     arg.setDescription('The nominal capacity of the EV battery. If not provided, the OS-HPXML default is used.')
@@ -6961,7 +6955,6 @@ module HPXMLFile
     ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle }
     hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
                             type: HPXML::BatteryTypeLithiumIon,
-                            rated_power_output: args[:ev_battery_discharge_power],
                             nominal_capacity_kwh: args[:ev_battery_capacity],
                             usable_capacity_kwh: args[:ev_battery_usable_capacity],
                             energy_efficiency: args[:ev_energy_efficiency],
