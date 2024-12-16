@@ -1675,18 +1675,18 @@ module HVAC
   # TODO
   #
   # @param cooling_system [TODO] TODO
-  # @param use_eer [TODO] TODO
+  # @param use_ceer [TODO] TODO
   # @return [nil]
-  def self.set_cool_curves_central_air_source(cooling_system, use_eer = false)
+  def self.set_cool_curves_dx(cooling_system, use_ceer = false)
     clg_ap = cooling_system.additional_properties
-    clg_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton(cooling_system.compressor_type, use_eer)
+    clg_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton(cooling_system.compressor_type, use_ceer)
     clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
     set_cool_c_d(cooling_system)
 
     case cooling_system.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
       clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(cooling_system.compressor_type)
-      if not use_eer
+      if not use_ceer
         clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[0]
         clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
         clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
@@ -1695,6 +1695,7 @@ module HVAC
         clg_ap.cool_fan_speed_ratios = [1.0]
         clg_ap.cool_cap_fflow_spec = [[1.0, 0.0, 0.0]]
         clg_ap.cool_eir_fflow_spec = [[1.0, 0.0, 0.0]]
+        clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_ceer, 'Btu/hr', 'W')]
       end
 
     when HPXML::HVACCompressorTypeTwoStage
@@ -1744,7 +1745,7 @@ module HVAC
   # @param heating_system [TODO] TODO
   # @param use_cop [TODO] TODO
   # @return [nil]
-  def self.set_heat_curves_central_air_source(heating_system, use_cop = false)
+  def self.set_heat_curves_dx(heating_system, use_cop = false)
     htg_ap = heating_system.additional_properties
     htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type, use_cop)
     htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heating_system.compressor_type)
@@ -1936,12 +1937,12 @@ module HVAC
   # TODO
   #
   # @param compressor_type [TODO] TODO
-  # @param use_eer [TODO] TODO
+  # @param use_ceer [TODO] TODO
   # @return [TODO] TODO
-  def self.get_cool_cfm_per_ton(compressor_type, use_eer = false)
+  def self.get_cool_cfm_per_ton(compressor_type, use_ceer = false)
     # cfm/ton of rated capacity
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
-      if not use_eer
+      if not use_ceer
         return [394.2]
       else
         return [312] # medium speed
@@ -3110,12 +3111,6 @@ module HVAC
   def self.create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm, weather_max_drybulb, has_deadband_control = false)
     clg_ap = cooling_system.additional_properties
 
-    if cooling_system.is_a? HPXML::CoolingSystem
-      clg_type = cooling_system.cooling_system_type
-    elsif cooling_system.is_a? HPXML::HeatPump
-      clg_type = cooling_system.heat_pump_type
-    end
-
     if cooling_system.cooling_detailed_performance_data.empty?
       max_clg_cfm = UnitConversions.convert(cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1], 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
       clg_ap.cool_rated_capacities_gross = []
@@ -3201,16 +3196,7 @@ module HVAC
       if num_speeds == 1
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
         # Coil COP calculation based on system type
-        if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? clg_type
-          if cooling_system.cooling_efficiency_ceer.nil?
-            ceer = calc_ceer_from_eer(cooling_system)
-          else
-            ceer = cooling_system.cooling_efficiency_ceer
-          end
-          clg_coil.setRatedCOP(UnitConversions.convert(ceer, 'Btu/hr', 'W'))
-        else
-          clg_coil.setRatedCOP(clg_ap.cool_rated_cops[i])
-        end
+        clg_coil.setRatedCOP(clg_ap.cool_rated_cops[i])
         clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C')) if cooling_system.crankcase_heater_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
         clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
         clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
@@ -4488,18 +4474,18 @@ module HVAC
   #
   # Source: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
   #
-  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
+  # @param cooling_efficiency_eer [Double] The HPXML cooling system or heat pump cooling efficiency EER
   # @return [Double] The CEER value (Btu/Wh)
-  def self.calc_ceer_from_eer(cooling_system)
-    return cooling_system.cooling_efficiency_eer / 1.01
+  def self.calc_ceer_from_eer(cooling_efficiency_eer)
+    return cooling_efficiency_eer / 1.01
   end
 
   # TODO
   #
   # @param hvac_system [TODO] TODO
-  # @param use_eer_cop [TODO] TODO
+  # @param use_ceer_cop [TODO] TODO
   # @return [nil]
-  def self.set_fan_power_rated(hvac_system, use_eer_cop)
+  def self.set_fan_power_rated(hvac_system, use_ceer_cop)
     hvac_ap = hvac_system.additional_properties
 
     # Based on RESNET DX Modeling Appendix
@@ -4508,7 +4494,7 @@ module HVAC
     bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
     bpm_ductless_watts_per_cfm = 0.171 # W/cfm, BPM fan
 
-    if use_eer_cop
+    if use_ceer_cop
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     elsif hvac_system.distribution_system.nil?

@@ -1582,16 +1582,18 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_shr = 0.88
     hpxml_bldg.cooling_systems[0].cooling_capacity = 12345
     hpxml_bldg.cooling_systems[0].crankcase_heater_watts = 40.0
+    hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = nil
+    hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = 10.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, nil, 12345, 40.0, 1.0)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, nil, 12345, 40.0, 1.0, 10.0)
 
     # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, nil, nil, 40.0, 1.2)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, nil, nil, 40.0, 1.2, 10.0)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1599,9 +1601,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].crankcase_heater_watts = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = nil
+    hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = 8.5
+    hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.65, nil, nil, 0.0, 1.0)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.65, nil, nil, 0.0, 1.0, 8.42)
   end
 
   def test_evaporative_coolers
@@ -1689,16 +1693,18 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_shr = 0.75
     hpxml_bldg.cooling_systems[0].cooling_capacity = 12345
     hpxml_bldg.cooling_systems[0].crankcase_heater_watts = 40.0
+    hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = nil
+    hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = 12.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, nil, 12345, 40.0, 1.0)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, nil, 12345, 40.0, 1.0, 12.0)
 
     # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, nil, nil, 40.0, 1.2)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, nil, nil, 40.0, 1.2, 12.0)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1706,9 +1712,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].crankcase_heater_watts = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = nil
+    hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = 10.7
+    hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.65, nil, nil, 0.0, 1.0)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.65, nil, nil, 0.0, 1.0, 10.59)
   end
 
   def test_furnaces
@@ -4986,7 +4994,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_room_air_conditioner_ptac_values(cooling_system, shr, cooling_airflow_cfm, cooling_capacity, crankcase_heater_watts, cooling_autosizing_factor)
+  def _test_default_room_air_conditioner_ptac_values(cooling_system, shr, cooling_airflow_cfm, cooling_capacity, crankcase_heater_watts, cooling_autosizing_factor, cooling_efficiency_ceer)
     assert_equal(shr, cooling_system.cooling_shr)
     if cooling_airflow_cfm.nil? # nil implies an autosized value
       assert(cooling_system.cooling_airflow_cfm > 0)
@@ -4995,6 +5003,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
     assert_equal(crankcase_heater_watts, cooling_system.crankcase_heater_watts)
     assert_equal(cooling_autosizing_factor, cooling_system.cooling_autosizing_factor)
+    assert_equal(cooling_efficiency_ceer, cooling_system.cooling_efficiency_ceer)
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else

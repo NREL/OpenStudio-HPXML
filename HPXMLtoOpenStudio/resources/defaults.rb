@@ -1886,6 +1886,21 @@ module Defaults
       heat_pump.heating_efficiency_hspf2 = nil
     end
 
+    # Convert EER to CEER
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a?(HPXML::CoolingSystem)
+        next unless [HPXML::HVACTypeRoomAirConditioner,
+                     HPXML::HVACTypePTAC].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a?(HPXML::HeatPump)
+        next unless [HPXML::HVACTypeHeatPumpPTHP].include? hvac_system.heat_pump_type
+      end
+      next unless hvac_system.cooling_efficiency_ceer.nil?
+
+      hvac_system.cooling_efficiency_ceer = HVAC.calc_ceer_from_eer(hvac_system.cooling_efficiency_eer).round(2)
+      hvac_system.cooling_efficiency_ceer_isdefaulted = true
+      hvac_system.cooling_efficiency_eer = nil
+    end
+
     # Default HVAC autosizing factors
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_autosizing_factor.nil?
@@ -2303,13 +2318,13 @@ module Defaults
            HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC
         if [HPXML::HVACTypeRoomAirConditioner,
             HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-          use_eer = true
+          use_ceer = true
         else
-          use_eer = false
+          use_ceer = false
         end
         # Note: We use HP cooling curve so that a central AC behaves the same.
-        HVAC.set_fan_power_rated(cooling_system, use_eer)
-        HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
+        HVAC.set_fan_power_rated(cooling_system, use_ceer)
+        HVAC.set_cool_curves_dx(cooling_system, use_ceer)
 
       when HPXML::HVACTypeEvaporativeCooler
         clg_ap.effectiveness = 0.72 # Assumption from HEScore
@@ -2330,14 +2345,14 @@ module Defaults
       when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom
         if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-          use_eer_cop = true
+          use_ceer_cop = true
         else
-          use_eer_cop = false
+          use_ceer_cop = false
         end
-        HVAC.set_fan_power_rated(heat_pump, use_eer_cop)
+        HVAC.set_fan_power_rated(heat_pump, use_ceer_cop)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
-        HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
+        HVAC.set_cool_curves_dx(heat_pump, use_ceer_cop)
+        HVAC.set_heat_curves_dx(heat_pump, use_ceer_cop)
 
       when HPXML::HVACTypeHeatPumpGroundToAir
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
