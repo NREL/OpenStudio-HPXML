@@ -294,7 +294,7 @@ class ReportSimulationOutputTest < Minitest::Test
 
   BaseHPXMLTimeseriesColsVehicles = [
     "Vehicle: #{VT::VehicleDischarging}",
-    "Vehicle: #{VT::UnmetDrivingHours}",
+    # "Vehicle: #{VT::UnmetDrivingHours}", FIXME: Zero in all the tests below, so it doesn't end up in the timeseries outputs
   ]
 
   BaseHPXMLTimeseriesColsTotalLoads = [
