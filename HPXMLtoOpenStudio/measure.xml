@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>7ffe134e-3f39-41dc-ace4-fb58dca7f683</version_id>
-  <version_modified>2024-12-13T19:03:02Z</version_modified>
+  <version_id>63541135-e007-4a69-b880-68a3c9dc6ae0</version_id>
+  <version_modified>2024-12-17T18:11:44Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2519725A</checksum>
+      <checksum>7B04D536</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -375,7 +375,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0F44988F</checksum>
+      <checksum>DEF9E132</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -387,19 +387,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>16046276</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9FEEA133</checksum>
+      <checksum>DCCE1070</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A3B81222</checksum>
+      <checksum>5CA7BCAC</checksum>
     </file>
     <file>
       <filename>internal_gains.rb</filename>
@@ -669,7 +663,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>5561FB61</checksum>
+      <checksum>E30EF199</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -741,7 +735,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9CEB3358</checksum>
+      <checksum>BD59C7B1</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
