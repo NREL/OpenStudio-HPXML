@@ -1235,6 +1235,8 @@ module Defaults
   # @return [nil]
   def self.apply_rim_joists(hpxml_bldg)
     hpxml_bldg.rim_joists.each do |rim_joist|
+      next if rim_joist.sameas_id
+
       if rim_joist.azimuth.nil?
         rim_joist.azimuth = get_azimuth_from_orientation(rim_joist.orientation)
         rim_joist.azimuth_isdefaulted = true
@@ -1274,6 +1276,8 @@ module Defaults
   # @return [nil]
   def self.apply_walls(hpxml_bldg)
     hpxml_bldg.walls.each do |wall|
+      next if wall.sameas_id
+
       if wall.azimuth.nil?
         wall.azimuth = get_azimuth_from_orientation(wall.orientation)
         wall.azimuth_isdefaulted = true
@@ -1337,6 +1341,8 @@ module Defaults
   # @return [nil]
   def self.apply_foundation_walls(hpxml_bldg)
     hpxml_bldg.foundation_walls.each do |foundation_wall|
+      next if foundation_wall.sameas_id
+
       if foundation_wall.type.nil?
         foundation_wall.type = HPXML::FoundationWallTypeSolidConcrete
         foundation_wall.type_isdefaulted = true
@@ -1397,6 +1403,8 @@ module Defaults
   # @return [nil]
   def self.apply_floors(runner, hpxml_bldg)
     hpxml_bldg.floors.each do |floor|
+      next if floor.sameas_id
+
       if floor.floor_or_ceiling.nil?
         if floor.is_ceiling
           floor.floor_or_ceiling = HPXML::FloorOrCeilingCeiling

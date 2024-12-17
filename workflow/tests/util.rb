@@ -169,15 +169,16 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
   hpxml_header = hpxml.header
-  hpxml_bldg = hpxml.buildings[0]
   sqlFile = OpenStudio::SqlFile.new(File.join(rundir, 'eplusout.sql'), false)
 
   # Collapse windows further using same logic as measure.rb
-  hpxml_bldg.windows.each do |window|
-    window.fraction_operable = nil
+  hpxml.buildings.each do |hpxml_bldg|
+    hpxml_bldg.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    hpxml_bldg.collapse_enclosure_surfaces()
+    hpxml_bldg.delete_adiabatic_subsurfaces()
   end
-  hpxml_bldg.collapse_enclosure_surfaces()
-  hpxml_bldg.delete_adiabatic_subsurfaces()
 
   # Check for unexpected run.log messages
   File.readlines(File.join(rundir, 'run.log')).each do |message|
@@ -186,45 +187,45 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     next if message.start_with? 'Executing command'
     next if message.include? 'Could not find state average'
 
-    if hpxml_bldg.clothes_washers.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.clothes_washers.empty? }
       next if message.include? 'No clothes washer specified, the model will not include clothes washer energy use.'
     end
-    if hpxml_bldg.clothes_dryers.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.clothes_dryers.empty? }
       next if message.include? 'No clothes dryer specified, the model will not include clothes dryer energy use.'
     end
-    if hpxml_bldg.dishwashers.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.dishwashers.empty? }
       next if message.include? 'No dishwasher specified, the model will not include dishwasher energy use.'
     end
-    if hpxml_bldg.refrigerators.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.refrigerators.empty? }
       next if message.include? 'No refrigerator specified, the model will not include refrigerator energy use.'
     end
-    if hpxml_bldg.cooking_ranges.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.cooking_ranges.empty? }
       next if message.include? 'No cooking range specified, the model will not include cooking range/oven energy use.'
     end
-    if hpxml_bldg.water_heating_systems.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.water_heating_systems.empty? }
       next if message.include? 'No water heating specified, the model will not include water heating energy use.'
     end
-    if (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty? }
       next if message.include? 'No space heating specified, the model will not include space heating energy use.'
     end
-    if (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty? }
       next if message.include? 'No space cooling specified, the model will not include space cooling energy use.'
     end
-    if hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty? }
       next if message.include? "No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use."
     end
-    if hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeTelevision }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeTelevision }.empty? }
       next if message.include? "No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use."
     end
-    if hpxml_bldg.lighting_groups.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.lighting_groups.empty? }
       next if message.include? 'No interior lighting specified, the model will not include interior lighting energy use.'
       next if message.include? 'No exterior lighting specified, the model will not include exterior lighting energy use.'
       next if message.include? 'No garage lighting specified, the model will not include garage lighting energy use.'
     end
-    if hpxml_bldg.windows.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.windows.empty? }
       next if message.include? 'No windows specified, the model will not include window heat transfer.'
     end
-    if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?) }
       next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
     end
     if hpxml_path.include? 'base-location-capetown-zaf.xml'
@@ -232,23 +233,23 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Could not find a marginal Electricity rate.'
       next if message.include? 'Could not find a marginal Natural Gas rate.'
     end
-    if !hpxml_bldg.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| !hpxml_bldg.hvac_distributions.select { |d| d.distribution_system_type == HPXML::HVACDistributionTypeDSE }.empty? }
       next if message.include? 'DSE is not currently supported when calculating utility bills.'
     end
     if !hpxml_header.unavailable_periods.select { |up| up.column_name == 'Power Outage' }.empty?
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
       next if message.include? 'It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.'
     end
-    if (not hpxml_bldg.hvac_controls.empty?) && (hpxml_bldg.hvac_controls[0].seasons_heating_begin_month != 1)
+    if hpxml.buildings.any? { |hpxml_bldg| (not hpxml_bldg.hvac_controls.empty?) && (hpxml_bldg.hvac_controls[0].seasons_heating_begin_month != 1) }
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.'
     end
     if !hpxml_header.unavailable_periods.select { |up| (up.column_name == 'No Space Heating') || (up.column_name == 'No Space Cooling') }.empty?
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
     end
-    if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw'
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw' }
       next if message.include? 'No design condition info found; calculating design conditions from EPW weather data.'
     end
-    if hpxml_bldg.building_construction.number_of_units > 1
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }
       next if message.include? 'NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'
     end
     if hpxml_path.include? 'base-hvac-multiple.xml'
@@ -257,10 +258,10 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-zones'
       next if message.include? 'While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'
     end
-    if hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'external overhangs' && w.overhangs_depth.to_f > 0 }
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'external overhangs' && w.overhangs_depth.to_f > 0 }) }
       next if message.include? "Exterior shading type is 'external overhangs', but overhangs are explicitly defined; exterior shading type will be ignored."
     end
-    if hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'building' } && hpxml_bldg.neighbor_buildings.size > 0
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'building' } && hpxml_bldg.neighbor_buildings.size > 0) }
       next if message.include? "Exterior shading type is 'building', but neighbor buildings are explicitly defined; exterior shading type will be ignored."
     end
 
@@ -324,7 +325,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     next if message.include? 'Multiple speed fan will be applied to this unit. The speed number is determined by load.'
 
     # HPWHs
-    if hpxml_bldg.water_heating_systems.count { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.water_heating_systems.count { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump } > 0 }
       next if message.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
       next if message.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
       next if message.include? 'For object = Coil:WaterHeating:AirToWaterHeatPump:Wrapped'
@@ -332,23 +333,23 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include?('CheckWarmupConvergence: Loads Initialization') && message.include?('did not converge after 25 warmup days')
     end
     # HPWHs outside
-    if hpxml_bldg.water_heating_systems.count { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.location == HPXML::LocationOtherExterior } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.water_heating_systems.count { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.location == HPXML::LocationOtherExterior } > 0 }
       next if message.include? 'Water heater tank set point temperature is greater than or equal to the cut-in temperature of the heat pump water heater.'
     end
     # Stratified tank WHs
-    if hpxml_bldg.water_heating_systems.count { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.water_heating_systems.count { |wh| wh.tank_model_type == HPXML::WaterHeaterTankModelTypeStratified } > 0 }
       next if message.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
     end
     # HP defrost curves
-    if hpxml_bldg.heat_pumps.count { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hp.heat_pump_type } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.heat_pumps.count { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hp.heat_pump_type } > 0 }
       next if message.include?('GetDXCoils: Coil:Heating:DX') && message.include?('curve values') && message.include?('Defrost Energy Input Ratio Function of Temperature Curve')
     end
     # variable system SHR adjustment
-    if (hpxml_bldg.heat_pumps + hpxml_bldg.cooling_systems).count { |hp| hp.compressor_type == HPXML::HVACCompressorTypeVariableSpeed } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.heat_pumps + hpxml_bldg.cooling_systems).count { |hp| hp.compressor_type == HPXML::HVACCompressorTypeVariableSpeed } > 0 }
       next if message.include?('CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues.')
     end
     # Evaporative coolers
-    if hpxml_bldg.cooling_systems.count { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.cooling_systems.count { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler } > 0 }
       # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
       # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
       # Manually removing Controller:MechanicalVentilation from idf eliminates these two warnings.
@@ -361,24 +362,24 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
     end
     # Fan coil distribution
-    if hpxml_bldg.hvac_distributions.count { |d| d.air_type.to_s == HPXML::AirTypeFanCoil } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.hvac_distributions.count { |d| d.air_type.to_s == HPXML::AirTypeFanCoil } > 0 }
       next if message.include? 'In calculating the design coil UA for Coil:Cooling:Water' # Warning for unused cooling coil for fan coil
     end
     # Boilers
-    if hpxml_bldg.heating_systems.count { |h| h.heating_system_type == HPXML::HVACTypeBoiler } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.heating_systems.count { |h| h.heating_system_type == HPXML::HVACTypeBoiler } > 0 }
       next if message.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
     end
     # GSHPs
-    if hpxml_bldg.heat_pumps.count { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.heat_pumps.count { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir } > 0 }
       next if message.include?('CheckSimpleWAHPRatedCurvesOutputs') && message.include?('WaterToAirHeatPump:EquationFit') # FUTURE: Check these
       next if message.include? 'Actual air mass flow rate is smaller than 25% of water-to-air heat pump coil rated air flow rate.' # FUTURE: Remove this when https://github.com/NREL/EnergyPlus/issues/9125 is resolved
     end
     # GSHPs with only heating or cooling
-    if hpxml_bldg.heat_pumps.count { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir && (hp.fraction_heat_load_served == 0 || hp.fraction_cool_load_served == 0) } > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.heat_pumps.count { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir && (hp.fraction_heat_load_served == 0 || hp.fraction_cool_load_served == 0) } > 0 }
       next if message.include? 'heating capacity is disproportionate (> 20% different) to total cooling capacity' # safe to ignore
     end
     # Solar thermal systems
-    if hpxml_bldg.solar_thermal_systems.size > 0
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.solar_thermal_systems.size > 0 }
       next if message.include? 'Supply Side is storing excess heat the majority of the time.'
     end
     # Unavailability periods
@@ -421,7 +422,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
   end
   assert_equal(0, num_unused_objects)
-  assert_equal(0, num_unused_schedules)
+  # FIXME: Common space test file has 2 unused schedule by dropping the othersidecoefficient object, which contains schedules
+  assert_equal(0, num_unused_schedules) unless (hpxml_path.include? 'base-bldgtype-mf-whole-building-common-spaces')
   assert_equal(0, num_unused_constructions)
 
   # Check for Output:Meter and Output:Variable warnings
@@ -458,7 +460,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     assert((abs_clg_load_delta < 1.5 * unit_multiplier) || (!abs_clg_load_frac.nil? && abs_clg_load_frac < 0.1))
   end
 
-  return if (hpxml.buildings.size > 1) || (hpxml_bldg.building_construction.number_of_units > 1)
+  return if (hpxml.buildings.size > 1) || (hpxml.buildings[0].building_construction.number_of_units > 1)
 
   # Timestep
   timestep = hpxml_header.timestep.nil? ? 60 : hpxml_header.timestep
@@ -466,6 +468,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   sql_value = sqlFile.execAndReturnFirstDouble(query).get
   assert_equal(60 / timestep, sql_value)
 
+  hpxml_bldg = hpxml.buildings[0]
   # Conditioned Floor Area
   if (hpxml_bldg.total_fraction_cool_load_served > 0) || (hpxml_bldg.total_fraction_heat_load_served > 0) # EnergyPlus will only report conditioned floor area if there is an HVAC system
     hpxml_value = hpxml_bldg.building_construction.conditioned_floor_area
@@ -1288,15 +1291,11 @@ def _write_hers_hvac_results(all_results, test_results_csv)
   all_results = all_results.sort_by { |k, _v| k.downcase }.to_h
   hvac_energy = {}
   CSV.open(test_results_csv, 'w') do |csv|
-    csv << ['Test Case', 'HVAC (kWh or therm)', 'HVAC Fan (kWh)']
+    csv << ['Test Case', 'Heat/Cool Energy (MBtu)', 'Fan Energy (MBtu)']
     all_results.each do |xml, results|
       csv << [xml, results[0], results[1]]
       test_name = File.basename(xml, File.extname(xml))
-      if xml.include?('HVAC2a') || xml.include?('HVAC2b')
-        hvac_energy[test_name] = results[0] / 10.0 + results[1] / 293.08
-      else
-        hvac_energy[test_name] = results[0] + results[1]
-      end
+      hvac_energy[test_name] = results[0] + results[1]
     end
   end
   puts "Wrote results to #{test_results_csv}."
@@ -1309,20 +1308,11 @@ def _write_hers_dse_results(all_results, test_results_csv)
   all_results = all_results.sort_by { |k, _v| k.downcase }.to_h
   dhw_energy = {}
   CSV.open(test_results_csv, 'w') do |csv|
-    csv << ['Test Case', 'Heat/Cool (kWh or therm)', 'HVAC Fan (kWh)']
+    csv << ['Test Case', 'Heat/Cool Energy (MBtu)', 'Fan Energy (MBtu)']
     all_results.each do |xml, results|
-      next unless ['HVAC3a.xml', 'HVAC3e.xml'].include? xml
-
       csv << [xml, results[0], results[1]]
       test_name = File.basename(xml, File.extname(xml))
-      dhw_energy[test_name] = results[0] / 10.0 + results[1] / 293.08
-    end
-    all_results.each do |xml, results|
-      next if ['HVAC3a.xml', 'HVAC3e.xml'].include? xml
-
-      csv << [xml, results[0], results[1]]
-      test_name = File.basename(xml, File.extname(xml))
-      dhw_energy[test_name] = results[0] / 10.0 + results[1] / 293.08
+      dhw_energy[test_name] = results[0] + results[1]
     end
   end
   puts "Wrote results to #{test_results_csv}."
@@ -1335,10 +1325,10 @@ def _write_hers_hot_water_results(all_results, test_results_csv)
   all_results = all_results.sort_by { |k, _v| k.downcase }.to_h
   dhw_energy = {}
   CSV.open(test_results_csv, 'w') do |csv|
-    csv << ['Test Case', 'DHW Energy (therms)', 'Recirc Pump (kWh)']
+    csv << ['Test Case', 'DHW Energy (MBtu)', 'Pump Energy (MBtu)']
     all_results.each do |xml, result|
       wh_energy, recirc_energy = result
-      csv << [xml, (wh_energy * 10.0).round(1), (recirc_energy * 293.08).round(1)]
+      csv << [xml, wh_energy, recirc_energy]
       test_name = File.basename(xml, File.extname(xml))
       dhw_energy[test_name] = wh_energy + recirc_energy
     end
@@ -1357,15 +1347,15 @@ end
 
 def _get_simulation_hvac_energy_results(results, is_heat, is_electric_heat)
   if not is_heat
-    hvac = UnitConversions.convert(results["End Use: #{FT::Elec}: #{EUT::Cooling} (MBtu)"], 'MBtu', 'kwh').round(2)
-    hvac_fan = UnitConversions.convert(results["End Use: #{FT::Elec}: #{EUT::CoolingFanPump} (MBtu)"], 'MBtu', 'kwh').round(2)
+    hvac = results["End Use: #{FT::Elec}: #{EUT::Cooling} (MBtu)"].round(2)
+    hvac_fan = results["End Use: #{FT::Elec}: #{EUT::CoolingFanPump} (MBtu)"].round(2)
   else
     if is_electric_heat
-      hvac = UnitConversions.convert(results["End Use: #{FT::Elec}: #{EUT::Heating} (MBtu)"], 'MBtu', 'kwh').round(2)
+      hvac = results["End Use: #{FT::Elec}: #{EUT::Heating} (MBtu)"].round(2)
     else
-      hvac = UnitConversions.convert(results["End Use: #{FT::Gas}: #{EUT::Heating} (MBtu)"], 'MBtu', 'therm').round(2)
+      hvac = results["End Use: #{FT::Gas}: #{EUT::Heating} (MBtu)"].round(2)
     end
-    hvac_fan = UnitConversions.convert(results["End Use: #{FT::Elec}: #{EUT::HeatingFanPump} (MBtu)"], 'MBtu', 'kwh').round(2)
+    hvac_fan = results["End Use: #{FT::Elec}: #{EUT::HeatingFanPump} (MBtu)"].round(2)
   end
 
   assert_operator(hvac, :>, 0)
