@@ -9359,9 +9359,9 @@ class HPXML < Object
 
   # Object for /HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle.
   class Vehicle < BaseElement
-    ATTRS = [:id, :type, :lifetime_model, :location, :nominal_capacity_kwh, :nominal_capacity_ah,
-             :nominal_voltage, :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah,
-             :energy_efficiency, :vehicle_type, :miles_per_year, :hours_per_week,
+    ATTRS = [:id, :type, :lifetime_model, :location, :rated_power_output, :nominal_capacity_kwh,
+             :nominal_capacity_ah, :nominal_voltage, :round_trip_efficiency, :usable_capacity_kwh,
+             :usable_capacity_ah, :energy_efficiency, :vehicle_type, :miles_per_year, :hours_per_week,
              :fraction_charged_home, :ev_charger_idref, :ev_charging_weekday_fractions,
              :ev_charging_weekend_fractions, :ev_charging_monthly_multipliers]
     attr_accessor(*ATTRS)

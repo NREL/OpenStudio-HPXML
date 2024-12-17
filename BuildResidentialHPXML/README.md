@@ -4508,19 +4508,6 @@ Whether there is an electric vehicle battery present. Cannot be included if an e
 
 <br/>
 
-**Electric Vehicle: Rated Battery Power Output**
-
-The rated power output of the EV battery. If not provided, the OS-HPXML default is used.
-
-- **Name:** ``ev_battery_discharge_power``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
 **Electric Vehicle: Nominal Battery Capacity**
 
 The nominal capacity of the EV battery. If not provided, the OS-HPXML default is used.

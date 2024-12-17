@@ -51,6 +51,12 @@ class Vehicle
       vehicle.location = ev_charger.location
       vehicle.additional_properties.space = Geometry.get_space_from_location(vehicle.location, spaces)
     end
+
+    # Calculate average discharge power
+    hrs_driven_year = vehicle.hours_per_week / 7 * UnitConversions.convert(1, 'yr', 'day') # hrs/year
+    ev_annl_energy = vehicle.energy_efficiency * vehicle.miles_per_year # kWh/year
+    vehicle.rated_power_output = UnitConversions.convert(ev_annl_energy / hrs_driven_year, 'kw', 'w') # W
+
     Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
 
     # Apply EMS program to adjust discharge power based on ambient temperature.
@@ -65,10 +71,7 @@ class Vehicle
         end
       end
 
-      # Calculate effective discharge power
-      hrs_driven_year = vehicle.hours_per_week / 7 * UnitConversions.convert(1, 'yr', 'day') # hrs/year
-      ev_annl_energy = vehicle.energy_efficiency * vehicle.miles_per_year # kWh/year
-      eff_discharge_power = UnitConversions.convert(ev_annl_energy / hrs_driven_year, 'kw', 'w') # W
+      eff_discharge_power = vehicle.rated_power_output
       eff_charge_power = ev_elcd.designStorageControlChargePower
       min_soc = ev_elcd.minimumStorageStateofChargeFraction
       discharging_schedule = ev_elcd.storageDischargePowerFractionSchedule.get
