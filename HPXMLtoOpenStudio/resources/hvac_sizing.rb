@@ -9,7 +9,7 @@ module HVACSizing
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
+  # @param hvac_systems [Array<Hash>] List of HPXML HVAC systems of interest
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports capacities/airflows
   # @return [Array<Hash, Hash, Hash>] Maps of HVAC systems => HVACSizingValues objects, HPXML::Zones => DesignLoadValues object, HPXML::Spaces => DesignLoadValues object
   def self.calculate(runner, weather, hpxml_bldg, hvac_systems, update_hpxml: true)
@@ -145,7 +145,7 @@ module HVACSizing
   # Initial checks for errors (i.e., situations that should not occur). Throws an error if found.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
+  # @param hvac_systems [Array<Hash>] List of HPXML HVAC systems of interest
   # @return [nil]
   def self.check_for_errors(hpxml_bldg, hvac_systems)
     # Check all surfaces adjacent to conditioned space (and not adiabatic) are
@@ -1690,7 +1690,7 @@ module HVACSizing
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
+  # @param hvac_systems [Array<Hash>] List of HPXML HVAC systems of interest
   # @param zone [HPXML::Zone] The current zone of interest
   # @return [nil]
   def self.apply_hvac_fractions_load_served(hvac_loads, hvac_heating, hvac_cooling, hpxml_bldg, hvac_systems, zone)
@@ -2606,7 +2606,7 @@ module HVACSizing
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @param hvac_system [Hash] HPXML HVAC (heating and/or cooling) system
+  # @param hvac_system [Hash] The HPXML HVAC system of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_hvac_equipment_adjustments(mj, runner, hvac_sizings, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
@@ -3701,7 +3701,7 @@ module HVACSizing
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param cool_cap_adj_factor [Double] Heat pump's cooling capacity at the design temperature as a fraction of the nominal cooling capacity (frac)
-  # @param hvac_system [Hash] HPXML HVAC (heating and/or cooling) system
+  # @param hvac_system [Hash] The HPXML HVAC system of interest
   # @param hvac_heating_speed [Integer] Nominal heating speed index of the HVAC system
   # @param oversize_limit [Double] Oversize fraction (frac)
   # @param oversize_delta [Double] Oversize delta (Btu/hr)
@@ -5144,7 +5144,7 @@ module HVACSizing
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
+  # @param hvac_systems [Array<Hash>] List of HPXML HVAC systems of interest
   # @param zone [HPXML::Zone] The current zone of interest
   # @return [Array<Double, Double>] Fraction of zone heat load, fraction of zone cool load
   def self.get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, hvac_systems, zone)

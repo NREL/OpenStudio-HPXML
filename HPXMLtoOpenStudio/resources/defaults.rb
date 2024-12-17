@@ -1888,12 +1888,7 @@ module Defaults
 
     # Convert EER to CEER
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
-      if hvac_system.is_a?(HPXML::CoolingSystem)
-        next unless [HPXML::HVACTypeRoomAirConditioner,
-                     HPXML::HVACTypePTAC].include? hvac_system.cooling_system_type
-      elsif hvac_system.is_a?(HPXML::HeatPump)
-        next unless [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hvac_system.heat_pump_type
-      end
+      next unless HVAC.is_room_dx_hvac_system(hvac_system)
       next unless hvac_system.cooling_efficiency_ceer.nil?
 
       hvac_system.cooling_efficiency_ceer = HVAC.calc_ceer_from_eer(hvac_system.cooling_efficiency_eer).round(2)
