@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>53940e02-1fcd-4d6c-8923-4329f53a108b</version_id>
-  <version_modified>2024-12-16T22:22:00Z</version_modified>
+  <version_id>e3ceba5c-4250-41a9-a020-9c3a2f473065</version_id>
+  <version_modified>2024-12-17T21:30:16Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,13 +183,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D7F18DFB</checksum>
+      <checksum>CA101CA3</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C329DF48</checksum>
+      <checksum>06E4A131</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FA973656</checksum>
+      <checksum>543F5DBB</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -351,7 +351,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5F7B3A25</checksum>
+      <checksum>0B205523</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -399,13 +399,13 @@
       <filename>internal_gains.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>94B4EA05</checksum>
+      <checksum>206BE2B6</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9B17C563</checksum>
+      <checksum>7B7F6D4C</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -441,7 +441,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DF088D8A</checksum>
+      <checksum>039B0042</checksum>
     </file>
     <file>
       <filename>model.rb</filename>
@@ -651,7 +651,7 @@
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>DA1297B3</checksum>
+      <checksum>6BDC58E4</checksum>
     </file>
     <file>
       <filename>test_battery.rb</filename>
@@ -681,7 +681,7 @@
       <filename>test_hotwater_appliance.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>A1E1E023</checksum>
+      <checksum>27A0085A</checksum>
     </file>
     <file>
       <filename>test_hvac.rb</filename>
@@ -699,7 +699,7 @@
       <filename>test_lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9F945097</checksum>
+      <checksum>5300BCE3</checksum>
     </file>
     <file>
       <filename>test_location.rb</filename>
@@ -711,7 +711,7 @@
       <filename>test_miscloads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>974B3838</checksum>
+      <checksum>784CC382</checksum>
     </file>
     <file>
       <filename>test_pv.rb</filename>
