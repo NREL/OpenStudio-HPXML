@@ -128,6 +128,16 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
+                            'hvac-gshp-invalid-bore-config' => ["Expected BorefieldConfiguration to be 'Rectangle' or 'Open Rectangle' or 'C' or 'L' or 'U' or 'Lopsided U' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
+                            'hvac-gshp-invalid-bore-depth-low' => ['Expected BoreholesOrTrenches/Length to be greater than or equal to 80 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
+                            'hvac-gshp-invalid-bore-depth-high' => ['Expected BoreholesOrTrenches/Length to be less than or equal to 500 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
+                            'hvac-gshp-autosized-count-not-rectangle' => ["Expected BoreholesOrTrenches/Count when extension/BorefieldConfiguration is not 'Rectangle' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
+                            'hvac-invalid-fan-model-type' => ["Expected extension/FanMotorType to be 'psc' or 'bpm'"],
+                            'hvac-location-heating-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
+                            'hvac-location-cooling-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
+                            'hvac-location-heat-pump' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
+                            'hvac-msac-not-var-speed' => ["Expected CompressorType to be 'variable speed'"],
+                            'hvac-mshp-not-var-speed' => ["Expected CompressorType to be 'variable speed'"],
                             'hvac-research-features-timestep-ten-mins' => ['Expected ../../SoftwareInfo/extension/SimulationControl/Timestep to be 1.0',
                                                                            'Expected ../../Timestep to be 1.0'],
                             'hvac-research-features-timestep-missing' => ['Expected ../../SoftwareInfo/extension/SimulationControl/Timestep to be 1.0',
@@ -137,15 +147,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-research-features-onoff-thermostat-negative-value' => ['Expected OnOffThermostatDeadbandTemperature to be greater than 0'],
                             'hvac-research-features-onoff-thermostat-two-heat-pumps' => ['Expected at maximum one cooling system for each Building',
                                                                                          'Expected at maximum one heating system for each Building'],
-                            'hvac-gshp-invalid-bore-config' => ["Expected BorefieldConfiguration to be 'Rectangle' or 'Open Rectangle' or 'C' or 'L' or 'U' or 'Lopsided U' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
-                            'hvac-gshp-invalid-bore-depth-low' => ['Expected BoreholesOrTrenches/Length to be greater than or equal to 80 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
-                            'hvac-gshp-invalid-bore-depth-high' => ['Expected BoreholesOrTrenches/Length to be less than or equal to 500 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
-                            'hvac-gshp-autosized-count-not-rectangle' => ["Expected BoreholesOrTrenches/Count when extension/BorefieldConfiguration is not 'Rectangle' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
-                            'hvac-location-heating-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
-                            'hvac-location-cooling-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
-                            'hvac-location-heat-pump' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
-                            'hvac-msac-not-var-speed' => ["Expected CompressorType to be 'variable speed'"],
-                            'hvac-mshp-not-var-speed' => ["Expected CompressorType to be 'variable speed'"],
                             'hvac-shr-low' => ["The value '0.4' must be greater than '0.5'"],
                             'hvac-sizing-humidity-setpoint' => ['Expected ManualJInputs/HumiditySetpoint to be less than 1'],
                             'hvac-sizing-daily-temp-range' => ["Expected ManualJInputs/DailyTemperatureRange to be 'low' or 'medium' or 'high'"],
@@ -486,6 +487,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'hvac-gshp-autosized-count-not-rectangle'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml')
         hpxml_bldg.geothermal_loops[0].num_bore_holes = nil
+      when 'hvac-invalid-fan-model-type'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].fan_motor_type = 'foo'
       when 'hvac-location-heating-system'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-oil-only.xml')
         hpxml_bldg.heating_systems[0].location = HPXML::LocationBasementUnconditioned
@@ -869,12 +873,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                           'AFUE should typically be greater than or equal to 0.5.',
                                                           'Percent efficiency should typically be greater than or equal to 0.5.',
                                                           'SEER should typically be greater than or equal to 8.',
-                                                          'EER should typically be greater than or equal to 8.',
+                                                          'EER should typically be greater than or equal to 6.',
+                                                          'EER should typically be greater than or equal to 6.',
                                                           'SEER should typically be greater than or equal to 8.',
                                                           'HSPF should typically be greater than or equal to 6.',
                                                           'SEER should typically be greater than or equal to 8.',
+                                                          'EER should typically be greater than or equal to 6.',
                                                           'HSPF should typically be greater than or equal to 6.',
-                                                          'EER should typically be greater than or equal to 8.',
+                                                          'EER should typically be greater than or equal to 6.',
                                                           'COP should typically be greater than or equal to 2.'],
                               'hvac-research-features-onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1.'],
                               'hvac-setpoints-high' => ['Heating setpoint should typically be less than or equal to 76 deg-F.',
@@ -985,6 +991,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             case hvac_system.cooling_system_type
             when HPXML::HVACTypeCentralAirConditioner
               hvac_system.cooling_efficiency_seer = 0.1
+              hvac_system.cooling_efficiency_eer = 0.1
             when HPXML::HVACTypeRoomAirConditioner
               hvac_system.cooling_efficiency_eer = 0.1
             end
@@ -993,6 +1000,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             when HPXML::HVACTypeHeatPumpAirToAir,
                 HPXML::HVACTypeHeatPumpMiniSplit
               hvac_system.cooling_efficiency_seer = 0.1
+              hvac_system.cooling_efficiency_eer = 0.1
               hvac_system.heating_efficiency_hspf = 0.1
             when HPXML::HVACTypeHeatPumpGroundToAir
               hvac_system.cooling_efficiency_eer = 0.1
