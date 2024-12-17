@@ -111,9 +111,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(5000, electric_panel.capacity_total_watts[0], 0.01)
     assert_in_epsilon(5000 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
     assert_in_epsilon(electric_panel.max_current_rating - 5000 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
-    assert_equal(4, electric_panel.breaker_spaces_total)
+    assert_equal(4 + 3, electric_panel.breaker_spaces_total)
     assert_equal(4, electric_panel.breaker_spaces_occupied)
-    assert_equal(0, electric_panel.breaker_spaces_headroom)
+    assert_equal(3, electric_panel.breaker_spaces_headroom)
   end
 
   def test_hvac_configurations

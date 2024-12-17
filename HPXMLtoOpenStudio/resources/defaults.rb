@@ -5853,8 +5853,8 @@ module Defaults
   # @return [Hash] Map of property type => value
   def self.get_electric_panel_values()
     return { panel_voltage: HPXML::ElectricPanelVoltage240,
-             max_current_rating: 150.0, # A
-             headroom_breaker_spaces: 0 }
+             max_current_rating: 200.0, # A
+             headroom_breaker_spaces: 3 }
   end
 
   # Gets the default voltage for a panel load based on load type and attached system.

@@ -3617,7 +3617,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage240, 150.0, 0, nil)
+    _test_default_electric_panel_values(default_hpxml_bldg, HPXML::ElectricPanelVoltage240, 200.0, 3, nil)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 428.0, HPXML::ElectricPanelVoltage120, 1, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2794.0, HPXML::ElectricPanelVoltage240, 2, false)
     _test_default_panel_load_values(default_hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 0, HPXML::ElectricPanelVoltage240, 0, false)
