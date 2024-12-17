@@ -12,6 +12,11 @@ module MiscLoads
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_plug_loads(runner, model, spaces, hpxml_bldg, hpxml_header, schedules_file)
+    if hpxml_bldg.building_occupancy.number_of_residents == 0
+      # Operational calculation w/ zero occupants, zero out energy use
+      return
+    end
+
     hpxml_bldg.plug_loads.each do |plug_load|
       case plug_load.plug_load_type
       when HPXML::PlugLoadTypeOther
