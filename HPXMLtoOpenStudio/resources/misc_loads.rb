@@ -12,7 +12,7 @@ module MiscLoads
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_plug_loads(runner, model, spaces, hpxml_bldg, hpxml_header, schedules_file)
-    if hpxml_bldg.building_occupancy.number_of_residents == 0
+    if hpxml_bldg.building_occupancy.number_of_residents == 0 && (not hpxml_header.apply_ashrae140_assumptions)
       # Operational calculation w/ zero occupants, zero out energy use
       return
     end
