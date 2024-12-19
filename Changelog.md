@@ -3,6 +3,7 @@
 __New Features__
 
 __Bugfixes__
+- Fixes EPvalidator schematron file extension (.sch, not .xml).
 
 ## OpenStudio-HPXML v1.9.1
 
