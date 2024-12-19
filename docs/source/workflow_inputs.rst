@@ -365,6 +365,24 @@ You can create an additional column in the CSV file to define another unavailabl
 
   It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.
 
+HPXML Electric Panel Calculations
+*********************************
+
+One or more electric panel calculation types (e.g., 2023 NEC 220.83) can be entered as an ``/HPXML/SoftwareInfo/extension/PanelCalculationTypes/Type``.
+If not entered, electric panel loads will not be calculated.
+
+  ====================================  ========  =======  =============  ========  ================  ===========
+  Element                               Type      Units    Constraints    Required  Default           Description
+  ====================================  ========  =======  =============  ========  ================  ===========
+  ``Type``                              string             See [#]_       Yes                         Panel calculation type
+  ====================================  ========  =======  =============  ========  ================  ===========
+
+  .. [#] Type choices are '2023 Load-Based' and '2023 Meter-Based', and are described as follows:
+
+         \- **2023 Load-Based**: Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
+
+         \- **2023 Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
+
 .. _hpxml_building:
 
 HPXML Building
@@ -4582,6 +4600,131 @@ In addition, the PVSystem must be connected to an inverter that is entered as a 
   =======================================================  =================  ================  ===================  ========  ========  ============================================
 
   .. [#] For homes with multiple inverters, all InverterEfficiency elements must have the same value.
+
+.. _hpxml_electric_panels:
+
+HPXML Electric Panels
+*********************
+
+A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel``.
+
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  Element                                                                  Type     Units      Constraints              Required  Default        Notes
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  ``SystemIdentifier``                                                     id                                           Yes                      Unique identifier
+  ``Voltage``                                                              string   V          See [#]_                 No        240
+  ``MaxCurrentRating``                                                     double   A                                   No        200
+  ``extension/HeadroomBreakerSpaces`` or ``extension/TotalBreakerSpaces``  integer                                      No        See [#]_
+  ``extension/PanelLoads``                                                 element                                      No        See [#]_       Individual electric panel loads
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+
+  .. [#] Voltage choices are "120" or "240".
+  .. [#] If neither extension/HeadroomBreakerSpaces nor extension/TotalBreakerSpaces provided, the following default value representing an electric panel with 3 open breaker spaces will be used: extension/HeadroomBreakerSpaces = 3.
+  .. [#] See :ref:`panel_loads`.
+
+See :ref:`annual_outputs` for descriptions of how the calculated capacities and breaker spaces appear in the output files.
+
+.. _panel_loads:
+
+Panel Loads
+~~~~~~~~~~~
+
+Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
+
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``LoadType``                                    string                    See [#]_     Yes
+  ``PowerRating``                                 double    W                            No        See [#]_
+  ``Voltage``                                     string    V               See [#]_     No        See [#]_
+  ``BreakerSpaces``                               integer                                No        See [#]_   Number of occupied breaker spaces
+  ``NewLoad``                                     boolean                                No        false      Whether, in the context of NEC calculations, the panel load is new
+  ``AttachedToSystem``                            idref                     See [#]_     See [#]_  See [#]_   ID of attached system; multiple are allowed [#]_
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+
+  .. [#] LoadType choices are "heating", "cooling", "hot water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
+  .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
+         If no corresponding Voltage is specified, the other Voltage classification will be used.
+  .. [#] Voltage choices are "120" or "240".
+  .. [#] If Voltage not provided, defaults as follows:
+
+         \- **heating, cooling, hot water, clothes dryer, range/oven, permanent spa heater, permanent spa pump, pool heater, pool pump, well pump**: 240 (120 if **cooling** references a room air conditioner)
+
+         \- **mech vent, dishwasher, electric vehicle charging, lighting, kitchen, laundry, other**: 120
+
+  .. [#] If BreakerSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
+         If no corresponding Voltage is specified, the other Voltage classification will be used.
+         Breaker spaces will be recalculated based on the new Voltage classification.
+         Breaker spaces are calculated based on PowerRating and Voltage as follows:
+         
+         RequiredAmperage = PowerRating / Voltage
+         
+         NumBranches = ceiling(RequiredAmperage / MaxAmps)
+         
+         NumBreakers = NumBranches * (Voltage / 120)
+         
+         where
+         
+         MaxAmps = 50
+         
+  .. [#] Depending on the LoadType, AttachedToSystem must reference:
+
+         \- **heating**: ``HeatingSystem`` or ``HeatPump``
+
+         \- **cooling**: ``CoolingSystem`` or ``HeatPump``
+
+         \- **hot qater**: ``WaterHeatingSystem``
+
+         \- **clothes dryer**: ``ClothesDryer``
+
+         \- **dishwasher**: ``Dishwasher``
+
+         \- **range/oven**: ``CookingRange``
+
+         \- **mech vent**: ``VentilationFan``
+
+         \- **permanent spa heater**: ``PermanentSpa/Heater``
+
+         \- **permanent spa pump**: ``PermanentSpa/Pumps/Pump``
+
+         \- **pool heater**: ``Pool/Heater``
+
+         \- **pool pump**: ``Pool/Pumps/Pump``
+
+         \- **well pump**: ``PlugLoad[PlugLoadType=”well pump”]``
+
+         \- **electric vehicle charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
+
+  .. [#] Not allowed if LoadType is "lighting", "kitchen", "laundry", or "other"; otherwise, required.
+  .. [#] A panel load is created for any system not already referenced by a panel load.
+         Panel loads for the following panel load types are always created if they don't already exist:
+
+         \- **lighting**
+
+         \- **kitchen**
+
+         \- **laundry**
+
+         \- **other**
+  
+  .. [#] Provide a AttachedToSystem element for each referenced system.
+
+.. _panels_default:
+
+Default Panels
+~~~~~~~~~~~~~~
+
+If power rating capacities or breaker spaces are not provided, then they are defaulted.
+Default values may be based on voltage, system type, and other properties such as number of bedrooms or bathrooms.
+They can also be found at ``HPXMLtoOpenStudio/resources/data/default_panels.csv``.
+
+.. csv-table::
+   :file: ../../HPXMLtoOpenStudio/resources/data/default_panels.csv
+   :header-rows: 1
+
+Mechanical ventilation loads may be assigned power ratings based on fan count and W (if available), otherwise 3000 W.
+Loads with power ratings of "auto" are calculated based on estimates for `input` capacity (using regressions involving `output` capacity and efficiency if direct expansion), blower fans (using fan W/cfm and airflow cfm), pumps, etc.
+Loads with breaker spaces of "auto" therefore vary based on calculated power ratings.
 
 .. _hpxml_batteries:
 
