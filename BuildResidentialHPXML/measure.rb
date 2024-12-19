@@ -2698,6 +2698,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_heat_pump_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Heat Pump Voltage')
+    arg.setDescription("Specifies the panel load heat pump voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heat_pump_addition', false)
     arg.setDisplayName('Electric Panel: Heat Pump Addition')
     arg.setDescription("Whether the heat pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
@@ -7187,10 +7193,12 @@ module HPXMLFile
     hpxml_bldg.heat_pumps.each do |heat_pump|
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
                       power: args[:electric_panel_load_heat_pump_heating_power],
+                      voltage: args[:electric_panel_load_heat_pump_voltage],
                       addition: args[:electric_panel_load_heat_pump_addition],
                       system_idrefs: [heat_pump.id])
       panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
                       power: args[:electric_panel_load_heat_pump_cooling_power],
+                      voltage: args[:electric_panel_load_heat_pump_voltage],
                       addition: args[:electric_panel_load_heat_pump_addition],
                       system_idrefs: [heat_pump.id])
     end

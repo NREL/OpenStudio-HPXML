@@ -4637,7 +4637,7 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
   ``LoadType``                                    string                    See [#]_     Yes
   ``PowerRating``                                 double    W                            No        See [#]_
   ``Voltage``                                     string    V               See [#]_     No        See [#]_
-  ``BreakerSpaces``                               integer                                No        See [#]_
+  ``BreakerSpaces``                               integer                                No        See [#]_   Number of occupied breaker spaces
   ``NewLoad``                                     boolean                                No        false      Whether, in the context of NEC calculations, the panel load is new
   ``AttachedToSystem``                            idref                     See [#]_     See [#]_  See [#]_   ID of attached system; multiple are allowed [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
@@ -4655,7 +4655,18 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
   .. [#] If BreakerSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
          Breaker spaces will be recalculated based on the new Voltage classification.
-         Breaker spaces are calculated based on PowerRating and Voltage assuming a maximum of 50 amps per circuit branch and either 1 (120V) or 2 (240V) breakers per branch.
+         Breaker spaces are calculated based on PowerRating and Voltage as follows:
+         
+         RequiredAmperage = PowerRating / Voltage
+         
+         NumBranches = ceiling(RequiredAmperage / MaxAmps)
+         
+         NumBreakers = NumBranches * (Voltage / 120)
+         
+         where
+         
+         MaxAmps = 50
+         
   .. [#] Depending on the LoadType, AttachedToSystem must reference:
 
          \- **heating**: ``HeatingSystem`` or ``HeatPump``
