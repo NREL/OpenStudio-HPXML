@@ -5841,6 +5841,8 @@ module Defaults
   # @param voltage [String] '120' or '240'
   # @return [Integer] the number of breakers
   def self.get_breaker_spaces_from_power_watts_and_voltage(watts, voltage)
+    # Note that default_panels.csv has a Breaker Spaces column manually populated based on the following calculation.
+    # If max_amps were to change, for example, the value in Breaker Spaces may change.
     max_amps = 50
     required_amperage = watts / Float(voltage)
     num_branches = (required_amperage / max_amps).ceil
