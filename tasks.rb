@@ -2624,13 +2624,13 @@ if ARGV[0].to_sym == :update_measures
   puts 'Applying rubocop auto-correct to measures...'
   system(command)
 
-  # Copy HPXMLtoOpenStudio/resources/version.rb into BuildResidentialHPXML measure.
-  # This will ensure that the BuildResidentialHPXML measure.xml updates below when
-  # there is a version change. Without this, the BuildResidentialHPXML measure has
-  # no differences and so OpenStudio would skip updating it.
-  src_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/version.rb')
-  dst_path = File.join(File.dirname(__FILE__), 'BuildResidentialHPXML/resources/version.rb')
-  FileUtils.cp(src_path, dst_path)
+  # Update a BuildResidentialHPXML/resources file when the OS-HPXML version changes.
+  # This will ensure that the BuildResidentialHPXML measure.xml is appropriately updated.
+  # Without this, the BuildResidentialHPXML measure has no differences and so OpenStudio
+  # would skip updating it.
+  version_rb_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/version.rb')
+  version_txt_path = File.join(File.dirname(__FILE__), 'BuildResidentialHPXML/resources/version.txt')
+  File.write(version_txt_path, Digest::MD5.file(version_rb_path).hexdigest)
 
   # Update measures XMLs
   puts 'Updating measure.xmls...'
