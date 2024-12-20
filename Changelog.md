@@ -3,7 +3,8 @@
 __New Features__
 
 __Bugfixes__
-- Bugfix for when detailed schedules are used with higher resolution (e.g., 10-min data) than the simulation timestep (e.g., 60-min).
+- Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
+- Fixes using detailed schedules with higher resolution (e.g., 10-min data) than the simulation timestep (e.g., 60-min).
 
 ## OpenStudio-HPXML v1.9.1
 
