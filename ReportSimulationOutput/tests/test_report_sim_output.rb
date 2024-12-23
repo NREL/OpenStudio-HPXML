@@ -888,7 +888,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_unmet_hours' => true }
-    annual_csv, timeseries_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv, run_log = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsUnmetHours
@@ -899,6 +899,9 @@ class ReportSimulationOutputTest < Minitest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, unmet_hours_cols)
+    if xml_file.include? 'base-battery-ev-undercharged'
+      assert(File.readlines(run_log).any? { |line| line.include?('A total of 1073.0 driving hours could not be met') })
+    end
   end
 
   def test_timeseries_hourly_unmet_hours

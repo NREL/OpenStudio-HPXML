@@ -393,6 +393,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{args[:timeseries_frequency]};").get
       end
 
+      # Request EV discharge energy for error checking
+      @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+        next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
+
+        result << OpenStudio::IdfObject.load("Output:Variable,#{elcs.name.to_s.upcase},Electric Storage Discharge Energy,runperiod;").get
+        if args[:include_timeseries_fuel_consumptions]
+          result << OpenStudio::IdfObject.load("Output:Variable,#{elcs.name.to_s.upcase},Electric Storage Discharge Energy ,#{args[:timeseries_frequency]};").get
+        end
+      end
+
       # Resilience
       if args[:include_annual_resilience] || args[:include_timeseries_resilience]
         resilience_frequency = 'timestep'
@@ -533,18 +543,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if args[:include_timeseries_weather]
       @weather.values.each do |weather_data|
         result << OpenStudio::IdfObject.load("Output:Variable,*,#{weather_data.variable},#{args[:timeseries_frequency]};").get
-      end
-    end
-
-    # Request EV battery discharge to adjust electricity fuel meter
-    @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
-      next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
-
-      if args[:include_annual_fuel_consumptions]
-        result << OpenStudio::IdfObject.load("Output:Variable,#{elcs.name.to_s.upcase},Electric Storage Discharge Energy,runperiod;").get
-      end
-      if args[:include_timeseries_fuel_consumptions]
-        result << OpenStudio::IdfObject.load("Output:Variable,#{elcs.name.to_s.upcase},Electric Storage Discharge Energy ,#{args[:timeseries_frequency]};").get
       end
     end
 
@@ -844,10 +842,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Unmet Hours
-    @unmet_hours.each do |_key, unmet_hour|
+    @unmet_hours.each do |key, unmet_hour|
       unmet_hour.annual_output = get_report_variable_data_annual(['EMS'], ["#{unmet_hour.ems_variable}_annual_outvar"], 1.0)
       if args[:include_timeseries_unmet_hours]
         unmet_hour.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{unmet_hour.ems_variable}_timeseries_outvar"], 1.0, 0, args[:timeseries_frequency])
+      end
+
+      if key == UHT::Driving && unmet_hour.annual_output > 0.0
+        runner.registerWarning("A total of #{unmet_hour.annual_output} driving hours could not be met due to insufficient vehicle charge. This issue may result from a combination EV battery parameters, charging power, and driving or discharging schedules.")
       end
     end
 
