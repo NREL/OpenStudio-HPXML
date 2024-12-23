@@ -63,6 +63,7 @@ base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml
 base-bldgtype-mf-unit-shared-water-heater-recirc.xml
 base-bldgtype-mf-unit-shared-water-heater.xml
 base-bldgtype-mf-unit.xml
+base-bldgtype-mf-whole-building-detailed-electric-panel.xml
 base-bldgtype-mf-whole-building.xml
 base-bldgtype-sfa-unit-2stories.xml
 base-bldgtype-sfa-unit-atticroof-cathedral.xml
@@ -401,6 +402,7 @@ base-misc-loads-large-uncommon2.xml
 base-misc-loads-none.xml
 base-misc-neighbor-shading.xml
 base-misc-shielding-of-home.xml
+base-misc-unit-multiplier-detailed-electric_panel.xml
 base-misc-unit-multiplier.xml
 base-misc-usage-multiplier.xml
 base-pv-battery-ah.xml
@@ -412,7 +414,6 @@ base-pv-generators-battery-scheduled.xml
 base-pv-generators-battery.xml
 base-pv-generators.xml
 base-pv.xml
-base-residents-0-runperiod-1-month.xml
 base-residents-0.xml
 base-residents-1-misc-loads-large-uncommon.xml
 base-residents-1-misc-loads-large-uncommon2.xml
