@@ -2678,7 +2678,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_battery_present', false)
     arg.setDisplayName('Electric Vehicle: Present')
-    arg.setDescription('Whether there is an electric vehicle battery present. Cannot be included if an electric vehicle is modeled as a plug load as specified by the `misc_plug_loads_vehicle_present` argument.')
+    arg.setDescription('Whether there is an electric vehicle battery present. If the `misc_plug_loads_vehicle_present` argument is true, this argument is superseded and vehicle charging will be modeled as a plug load only.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -3272,7 +3272,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_vehicle_present', true)
     arg.setDisplayName('Misc Plug Loads: Vehicle Present')
-    arg.setDescription('Whether there is an electric vehicle. Cannot be included if an electric vehicle is modeled as a battery as specified by the `ev_battery_present` argument.')
+    arg.setDescription('Whether there is an electric vehicle. Specifying this argument will model EV charging as a plug load and take precendence over the `ev_battery_present` argument.')
     arg.setDefaultValue(false)
     args << arg
 
