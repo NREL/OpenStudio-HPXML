@@ -3324,7 +3324,6 @@ module Defaults
 
     # Calculate rated power from nominal capacity
     if not battery.nominal_capacity_kwh.nil?
-      # FIXME: proper asssumption for EVs?
       battery.rated_power_output = (UnitConversions.convert(battery.nominal_capacity_kwh, 'kWh', 'Wh') * 0.5).round(0)
     elsif not battery.nominal_capacity_ah.nil?
       battery.rated_power_output = (UnitConversions.convert(Battery.get_kWh_from_Ah(battery.nominal_capacity_ah, battery.nominal_voltage), 'kWh', 'Wh') * 0.5).round(0)

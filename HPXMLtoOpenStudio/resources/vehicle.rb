@@ -145,7 +145,7 @@ class Vehicle
       ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{eff_discharge_power} * power_mult * #{discharge_sch_sensor.name}")
       ev_discharge_program.addLine("    Set #{charge_power_act.name} = 0")
       ev_discharge_program.addLine("      If #{soc_sensor.name} <= #{min_soc}")
-      ev_discharge_program.addLine("        Set #{unmet_hr_var.name} = ZoneTimeStep")
+      ev_discharge_program.addLine("        Set #{unmet_hr_var.name} = #{discharge_sch_sensor.name}")
       ev_discharge_program.addLine('      Else')
       ev_discharge_program.addLine("        Set #{unmet_hr_var.name} = 0")
       ev_discharge_program.addLine('      EndIf')

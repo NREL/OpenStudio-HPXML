@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>4112e5cd-7419-4a81-93be-111ee8b3b294</version_id>
-  <version_modified>2024-12-17T00:16:35Z</version_modified>
+  <version_id>45caa5c5-6192-466c-aee4-f64d2bdc0a48</version_id>
+  <version_modified>2024-12-23T00:14:19Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -207,7 +207,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FD379E31</checksum>
+      <checksum>14C61D4C</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EDE95D00</checksum>
+      <checksum>E471D5D3</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -466,6 +466,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>F8E8DDDD</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/battery-ev-low-charge.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F46D9158</checksum>
     </file>
     <file>
       <filename>schedule_files/battery-ev.csv</filename>
@@ -627,7 +633,7 @@
       <filename>vehicle.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>70590950</checksum>
+      <checksum>864D6550</checksum>
     </file>
     <file>
       <filename>version.rb</filename>

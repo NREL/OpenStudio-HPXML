@@ -250,6 +250,7 @@ end
 module UHT
   Heating = 'Heating'
   Cooling = 'Cooling'
+  Driving = 'Driving'
 end
 
 # Resilience Types (Constants for output reporting)
@@ -286,10 +287,4 @@ module WT
   WindSpeed = 'Wind Speed'
   DiffuseSolar = 'Diffuse Solar Radiation'
   DirectSolar = 'Direct Solar Radiation'
-end
-
-# Vehicle Types (Constants for output reporting)
-module VT
-  VehicleDischarging = 'Electric Vehicle Discharging'
-  UnmetDrivingHours = 'Unmet Driving Hours'
 end
