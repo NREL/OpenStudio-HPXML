@@ -3102,9 +3102,10 @@ module HVAC
   # @param max_rated_fan_cfm [TODO] TODO
   # @param weather_max_drybulb [TODO] TODO
   # @param has_deadband_control [Boolean] Whether to apply on off thermostat deadband
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::CoilCoolingDX] The DX cooling cool
   def self.create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm, weather_max_drybulb, has_deadband_control = false)
     clg_ap = cooling_system.additional_properties
+    num_speeds = clg_ap.cool_rated_cfm_per_ton.size
 
     if cooling_system.cooling_detailed_performance_data.empty?
       max_clg_cfm = UnitConversions.convert(cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1], 'Btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton[-1]
@@ -3120,11 +3121,43 @@ module HVAC
       end
     else
       process_neep_detailed_performance(cooling_system, :clg, max_rated_fan_cfm, weather_max_drybulb)
+      for i in 0..(num_speeds - 1)
+        speed_performance_data = clg_ap.cooling_performance_data_array[i].sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
+        rate_dp = speed_performance_data.find { |dp| (dp.indoor_wetbulb == HVAC::AirSourceCoolRatedIWB) && (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) }
+        clg_ap.cool_rated_cops << rate_dp.gross_efficiency_cop
+        clg_ap.cool_rated_capacities_gross << rate_dp.gross_capacity
+        clg_ap.cool_rated_capacities_net << rate_dp.capacity
+      end
     end
 
-    clg_coil = nil
-    coil_name = obj_name + ' clg coil'
-    num_speeds = clg_ap.cool_rated_cfm_per_ton.size
+    constant_biquadratic = Model.add_curve_biquadratic(
+      model,
+      name: 'ConstantBiquadratic',
+      coeff: [1, 0, 0, 0, 0, 0]
+    )
+
+    operating_mode = OpenStudio::Model::CoilCoolingDXCurveFitOperatingMode.new(model)
+    operating_mode.setRatedGrossTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities_gross[0], 'Btu/hr', 'W'))
+    operating_mode.setMaximumCyclingRate(3.0)
+    operating_mode.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
+    operating_mode.setLatentCapacityTimeConstant(45)
+    operating_mode.setNominalTimeforCondensateRemovaltoBegin(1000)
+    operating_mode.setCondenserType('AirCooled')
+    operating_mode.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
+    rated_airflow_rate = calc_rated_airflow(clg_ap.cool_rated_capacities_net[0], clg_ap.cool_rated_cfm_per_ton[0])
+    operating_mode.setRatedEvaporatorAirFlowRate(rated_airflow_rate)
+    operating_mode.setRatedCondenserAirFlowRate(rated_airflow_rate)
+
+    performance = OpenStudio::Model::CoilCoolingDXCurveFitPerformance.new(model, operating_mode)
+    performance.setCompressorFuelType(EPlus::FuelTypeElectricity)
+    performance.setCrankcaseHeaterCapacity(cooling_system.crankcase_heater_watts)
+    performance.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C')) if cooling_system.crankcase_heater_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
+
+    clg_coil = OpenStudio::Model::CoilCoolingDX.new(model, performance)
+    clg_coil.setName(obj_name + ' clg coil')
+    clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+    clg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
+
     for i in 0..(num_speeds - 1)
       if not cooling_system.cooling_detailed_performance_data.empty?
         speed_performance_data = clg_ap.cooling_performance_data_array[i].sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
@@ -3134,9 +3167,6 @@ module HVAC
         eir_ft_independent_vars = [var_wb, var_db]
 
         rate_dp = speed_performance_data.find { |dp| (dp.indoor_wetbulb == HVAC::AirSourceCoolRatedIWB) && (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) }
-        clg_ap.cool_rated_cops << rate_dp.gross_efficiency_cop
-        clg_ap.cool_rated_capacities_gross << rate_dp.gross_capacity
-        clg_ap.cool_rated_capacities_net << rate_dp.capacity
         cap_ft_output_values = speed_performance_data.map { |dp| dp.gross_capacity / rate_dp.gross_capacity }
         eir_ft_output_values = speed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / (1.0 / rate_dp.gross_efficiency_cop) }
         cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values, 0.0)
@@ -3188,50 +3218,25 @@ module HVAC
         )
       end
 
-      if num_speeds == 1
-        clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
-        # Coil COP calculation based on system type
-        clg_coil.setRatedCOP(clg_ap.cool_rated_cops[i])
-        clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C')) if cooling_system.crankcase_heater_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
-        clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
-        clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
-        clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
-        clg_coil.setMaximumCyclingRate(3.0)
-        clg_coil.setLatentCapacityTimeConstant(45.0)
-        clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities_gross[i], 'Btu/hr', 'W'))
-        clg_coil.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton[0]))
-      else
-        if clg_coil.nil?
-          clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
-          clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
-          clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-          clg_coil.setFuelType(EPlus::FuelTypeElectricity)
-          clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-          clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C')) if cooling_system.crankcase_heater_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
-          constant_biquadratic = Model.add_curve_biquadratic(
-            model,
-            name: 'ConstantBiquadratic',
-            coeff: [1, 0, 0, 0, 0, 0]
-          )
-        end
-        stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
-        stage.setGrossRatedCoolingCOP(clg_ap.cool_rated_cops[i])
-        stage.setGrossRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
-        stage.setNominalTimeforCondensateRemovaltoBegin(1000)
-        stage.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
-        stage.setRatedWasteHeatFractionofPowerInput(0.2)
-        stage.setMaximumCyclingRate(3.0)
-        stage.setLatentCapacityTimeConstant(45.0)
-        stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities_gross[i], 'Btu/hr', 'W'))
-        stage.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton[i]))
-        clg_coil.addStage(stage)
-      end
+      speed = OpenStudio::Model::CoilCoolingDXCurveFitSpeed.new(model)
+      speed.setTotalCoolingCapacityModifierFunctionofTemperatureCurve(cap_ft_curve)
+      speed.setTotalCoolingCapacityModifierFunctionofAirFlowFractionCurve(cap_fff_curve)
+      speed.setEnergyInputRatioModifierFunctionofTemperatureCurve(eir_ft_curve)
+      speed.setEnergyInputRatioModifierFunctionofAirFlowFractionCurve(eir_fff_curve)
+      speed.setPartLoadFractionCorrelationCurve(plf_fplr_curve)
+      speed.setWasteHeatModifierFunctionofTemperatureCurve(constant_biquadratic)
+
+      airflow_fraction = calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton[i]) / rated_airflow_rate
+      speed.setEvaporatorAirFlowRateFraction(airflow_fraction)
+      speed.setCondenserAirFlowRateFraction(airflow_fraction)
+      speed.setGrossCoolingCOP(clg_ap.cool_rated_cops[i])
+      speed.setGrossTotalCoolingCapacityFraction(clg_ap.cool_rated_capacities_gross[i] / clg_ap.cool_rated_capacities_gross[0])
+      speed.setGrossSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
+      speed.setRatedWasteHeatFractionofPowerInput(0.2)
+
+      clg_coil.performanceObject.baseOperatingMode.addSpeed(speed)
     end
 
-    clg_coil.setName(coil_name)
-    clg_coil.setCondenserType('AirCooled')
-    clg_coil.setCrankcaseHeaterCapacity(cooling_system.crankcase_heater_watts)
-    clg_coil.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
     if has_deadband_control
       # Apply startup capacity degradation
       add_capacity_degradation_ems_proram(model, clg_ap, clg_coil.name.get, true, cap_fff_curve_0, eir_fff_curve_0)
@@ -3919,8 +3924,8 @@ module HVAC
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
-  # @param clg_coil [OpenStudio::Model::CoilCoolingDXMultiSpeed] OpenStudio MultiStage Cooling Coil object
-  # @param htg_coil [OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio MultiStage Heating Coil object
+  # @param clg_coil [OpenStudio::Model::CoilCoolingDX] OpenStudio DX Cooling Coil object
+  # @param htg_coil [OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio DX Heating Coil object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.add_variable_speed_power_ems_program(model, runner, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
@@ -4051,13 +4056,15 @@ module HVAC
       coil_eir_stage_plf_sensors = []
       # Heating/Cooling specific calculations and names
       if coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+        mode = :htg
+        speeds = coil.stages
         cap_fff_curve_name = 'heatingCapacityFunctionofFlowFractionCurve'
         cap_ft_curve_name = 'heatingCapacityFunctionofTemperatureCurve'
         capacity_name = 'grossRatedHeatingCapacity'
+        capacity_multiplier = 1.0
         cop_name = 'grossRatedHeatingCOP'
         cap_multiplier = 'htg_frost_multiplier_cap'
         pow_multiplier = 'htg_frost_multiplier_pow'
-        mode_s = 'If htg_mode > 0'
 
         # Outdoor sensors added to calculate defrost adjustment for heating
         outdoor_db_sensor = Model.add_ems_sensor(
@@ -4094,14 +4101,16 @@ module HVAC
         program.addLine("    Set #{pow_multiplier} = 1.0")
         program.addLine('  EndIf')
         program.addLine('EndIf')
-      elsif coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
-        cap_fff_curve_name = 'totalCoolingCapacityFunctionofFlowFractionCurve'
-        cap_ft_curve_name = 'totalCoolingCapacityFunctionofTemperatureCurve'
-        capacity_name = 'grossRatedTotalCoolingCapacity'
-        cop_name = 'grossRatedCoolingCOP'
+      elsif coil.is_a? OpenStudio::Model::CoilCoolingDX
+        mode = :clg
+        speeds = coil.performanceObject.baseOperatingMode.speeds
+        cap_fff_curve_name = 'totalCoolingCapacityModifierFunctionofAirFlowFractionCurve'
+        cap_ft_curve_name = 'totalCoolingCapacityModifierFunctionofTemperatureCurve'
+        capacity_name = 'grossTotalCoolingCapacityFraction'
+        capacity_multiplier = coil.performanceObject.baseOperatingMode.ratedGrossTotalCoolingCapacity.get
+        cop_name = 'grossCoolingCOP'
         cap_multiplier = 'shr'
         pow_multiplier = '1.0'
-        mode_s = 'If clg_mode > 0'
 
         # cooling coil cooling rate sensors to calculate real time SHR
         clg_tot_sensor = Model.add_ems_sensor(
@@ -4127,48 +4136,48 @@ module HVAC
         program.addLine('EndIf')
       end
       # Heating and cooling performance curve sensors that need to be added
-      coil.stages.each_with_index do |stage, i|
+      speeds.each_with_index do |speed, i|
         coil_cap_stage_fff_sensors << Model.add_ems_sensor(
           model,
           name: "#{coil.name} cap stage #{i} fff",
           output_var_or_meter_name: 'Performance Curve Output Value',
-          key_name: stage.send(cap_fff_curve_name).name
+          key_name: mode == :clg ? speed.send(cap_fff_curve_name).get.name : speed.send(cap_fff_curve_name).name
         )
 
         coil_cap_stage_ft_sensors << Model.add_ems_sensor(
           model,
           name: "#{coil.name} cap stage #{i} ft",
           output_var_or_meter_name: 'Performance Curve Output Value',
-          key_name: stage.send(cap_ft_curve_name).name
+          key_name: mode == :clg ? speed.send(cap_ft_curve_name).get.name : speed.send(cap_ft_curve_name).name
         )
 
         coil_eir_stage_fff_sensors << Model.add_ems_sensor(
           model,
           name: "#{coil.name} eir stage #{i} fff",
           output_var_or_meter_name: 'Performance Curve Output Value',
-          key_name: stage.energyInputRatioFunctionofFlowFractionCurve.name
+          key_name: mode == :clg ? speed.energyInputRatioModifierFunctionofAirFlowFractionCurve.get.name : speed.energyInputRatioFunctionofFlowFractionCurve.name
         )
 
         coil_eir_stage_ft_sensors << Model.add_ems_sensor(
           model,
           name: "#{coil.name} eir stage #{i} ft",
           output_var_or_meter_name: 'Performance Curve Output Value',
-          key_name: stage.energyInputRatioFunctionofTemperatureCurve.name
+          key_name: mode == :clg ? speed.energyInputRatioModifierFunctionofTemperatureCurve.get.name : speed.energyInputRatioFunctionofTemperatureCurve.name
         )
 
         coil_eir_stage_plf_sensors << Model.add_ems_sensor(
           model,
           name: "#{coil.name} eir stage #{i} fplr",
           output_var_or_meter_name: 'Performance Curve Output Value',
-          key_name: stage.partLoadFractionCorrelationCurve.name
+          key_name: mode == :clg ? speed.partLoadFractionCorrelationCurve.get.name : speed.partLoadFractionCorrelationCurve.name
         )
       end
       # Calculate the target speed ratio that operates at the target power output
-      program.addLine(mode_s)
-      coil.stages.each_with_index do |stage, i|
-        program.addLine("  Set rt_capacity_#{i} = #{stage.send(capacity_name)} * #{coil_cap_stage_fff_sensors[i].name} * #{coil_cap_stage_ft_sensors[i].name}")
+      program.addLine("If #{mode}_mode > 0")
+      speeds.each_with_index do |speed, i|
+        program.addLine("  Set rt_capacity_#{i} = #{speed.send(capacity_name)} * #{capacity_multiplier} * #{coil_cap_stage_fff_sensors[i].name} * #{coil_cap_stage_ft_sensors[i].name}")
         program.addLine("  Set rt_capacity_#{i}_adj = rt_capacity_#{i} * #{cap_multiplier}")
-        program.addLine("  Set rated_eir_#{i} = 1 / #{stage.send(cop_name)}")
+        program.addLine("  Set rated_eir_#{i} = 1 / #{speed.send(cop_name)}")
         program.addLine("  Set plf = #{coil_eir_stage_plf_sensors[i].name}")
         program.addLine("  If #{coil_eir_stage_plf_sensors[i].name} > 0.0")
         program.addLine("    Set rt_eir_#{i} = rated_eir_#{i} * #{coil_eir_stage_ft_sensors[i].name} * #{coil_eir_stage_fff_sensors[i].name} / #{coil_eir_stage_plf_sensors[i].name}")
@@ -4177,8 +4186,8 @@ module HVAC
         program.addLine('  EndIf')
         program.addLine("  Set rt_power_#{i} = rt_eir_#{i} * rt_capacity_#{i} * #{pow_multiplier}") # use unadjusted capacity value in pow calculations
       end
-      program.addLine("  Set target_power = #{coil.stages[-1].send(capacity_name)} * rated_eir_#{coil.stages.size - 1} * #{pow_ratio_sensor.name}")
-      (0..coil.stages.size - 1).each do |i|
+      program.addLine("  Set target_power = #{speeds[-1].send(capacity_name)} * #{capacity_multiplier} * rated_eir_#{speeds.size - 1} * #{pow_ratio_sensor.name}")
+      (0..speeds.size - 1).each do |i|
         if i == 0
           program.addLine("  If target_power < rt_power_#{i}")
           program.addLine("    Set target_speed_ratio = target_power / rt_power_#{i}")
@@ -4188,11 +4197,11 @@ module HVAC
         end
       end
       program.addLine('  Else')
-      program.addLine("    Set target_speed_ratio = #{coil.stages.size}")
+      program.addLine("    Set target_speed_ratio = #{speeds.size}")
       program.addLine('  EndIf')
 
       # Calculate the current power that needs to meet zone loads
-      (0..coil.stages.size - 1).each do |i|
+      (0..speeds.size - 1).each do |i|
         if i == 0
           program.addLine("  If sens_load <= rt_capacity_#{i}_adj")
           program.addLine("    Set current_power = sens_load / rt_capacity_#{i}_adj * rt_power_#{i}")
@@ -4204,7 +4213,7 @@ module HVAC
         end
       end
       program.addLine('  Else')
-      program.addLine("    Set current_power = rt_power_#{coil.stages.size - 1}")
+      program.addLine("    Set current_power = rt_power_#{speeds.size - 1}")
       program.addLine('  EndIf')
       program.addLine('EndIf')
     end
@@ -4753,18 +4762,15 @@ module HVAC
   # @return [nil]
   def self.add_installation_quality_program(fault_program, tin_sensor, tout_sensor, airflow_rated_defect_ratio, clg_or_htg_coil, model, f_chg, obj_name, mode, defect_ratio, hvac_ap)
     if mode == :clg
-      if clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
-        num_speeds = 1
-        cap_fff_curves = [clg_or_htg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
-        eir_pow_fff_curves = [clg_or_htg_coil.energyInputRatioFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
-      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
-        num_speeds = clg_or_htg_coil.stages.size
-        if clg_or_htg_coil.stages[0].totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.is_initialized
-          cap_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
-          eir_pow_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+      if clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingDX
+        speeds = clg_or_htg_coil.performanceObject.baseOperatingMode.speeds
+        num_speeds = speeds.size
+        if speeds[0].totalCoolingCapacityModifierFunctionofAirFlowFractionCurve.get.to_CurveQuadratic.is_initialized
+          cap_fff_curves = speeds.map { |speed| speed.totalCoolingCapacityModifierFunctionofAirFlowFractionCurve.get.to_CurveQuadratic.get }
+          eir_pow_fff_curves = speeds.map { |speed| speed.energyInputRatioModifierFunctionofAirFlowFractionCurve.get.to_CurveQuadratic.get }
         else
-          cap_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_TableLookup.get }
-          eir_pow_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_TableLookup.get }
+          cap_fff_curves = speeds.map { |speed| speed.totalCoolingCapacityModifierFunctionofAirFlowFractionCurve.get.to_TableLookup.get }
+          eir_pow_fff_curves = speeds.map { |speed| speed.energyInputRatioModifierFunctionofAirFlowFractionCurve.get.to_TableLookup.get }
         end
       elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
         num_speeds = 1
@@ -4979,10 +4985,11 @@ module HVAC
     if (not clg_coil.nil?) && (cooling_system.fraction_cool_load_served > 0)
       clg_ap = cooling_system.additional_properties
       clg_cfm = cooling_system.cooling_airflow_cfm
-      if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized || clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
+      if clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
         cool_airflow_rated_defect_ratio = [UnitConversions.convert(clg_cfm, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
-      elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
-        cool_airflow_rated_defect_ratio = clg_coil.stages.zip(clg_ap.cool_fan_speed_ratios).map { |stage, speed_ratio| UnitConversions.convert(clg_cfm * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
+      elsif clg_coil.to_CoilCoolingDX.is_initialized
+        clg_oper = clg_coil.performanceObject.baseOperatingMode
+        cool_airflow_rated_defect_ratio = clg_oper.speeds.zip(clg_ap.cool_fan_speed_ratios).map { |speed, speed_ratio| UnitConversions.convert(clg_cfm * speed_ratio, 'cfm', 'm^3/s') / (speed.evaporatorAirFlowRateFraction * clg_oper.ratedEvaporatorAirFlowRate.get) - 1.0 }
       end
     end
 
