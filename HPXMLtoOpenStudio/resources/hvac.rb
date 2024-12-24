@@ -1701,7 +1701,7 @@ module HVAC
         clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[0]
         clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
         clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
-        clg_ap.cool_rated_cops = [0.2692 * cooling_system.cooling_efficiency_seer + 0.2706] # Regression based on inverse model
+        clg_ap.cool_rated_cops = [(0.2692 * cooling_system.cooling_efficiency_seer + 0.2706).round(2)] # Regression based on inverse model
       end
 
     when HPXML::HVACCompressorTypeTwoStage
@@ -1710,7 +1710,7 @@ module HVAC
       clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
       clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(cooling_system.compressor_type)
       clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
-      clg_ap.cool_rated_cops = [0.2773 * cooling_system.cooling_efficiency_seer - 0.0018] # Regression based on inverse model
+      clg_ap.cool_rated_cops = [(0.2773 * cooling_system.cooling_efficiency_seer - 0.0018).round(2)] # Regression based on inverse model
       clg_ap.cool_rated_cops << clg_ap.cool_rated_cops[0] * 0.91 # COP ratio based on Dylan's data as seen in BEopt 2.8 options
 
     when HPXML::HVACCompressorTypeVariableSpeed
