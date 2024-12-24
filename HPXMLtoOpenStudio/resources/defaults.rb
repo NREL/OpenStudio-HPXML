@@ -1846,7 +1846,7 @@ module Defaults
       end
     end
 
-    # Convert SEER2/EER2/HSPF2 to SEER/EER/HSPF
+    # Convert SEER2/EER/HSPF2 to SEER/EER2/HSPF
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)
         next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -1861,12 +1861,12 @@ module Defaults
         hvac_system.cooling_efficiency_seer_isdefaulted = true
         hvac_system.cooling_efficiency_seer2 = nil
       end
-      next unless hvac_system.cooling_efficiency_eer.nil? && (not hvac_system.cooling_efficiency_eer2.nil?)
+      next unless hvac_system.cooling_efficiency_eer2.nil? && (not hvac_system.cooling_efficiency_eer.nil?)
 
       is_ducted = !hvac_system.distribution_system_idref.nil?
-      hvac_system.cooling_efficiency_eer = HVAC.calc_eer_from_eer2(hvac_system.cooling_efficiency_eer2, is_ducted).round(2)
-      hvac_system.cooling_efficiency_eer_isdefaulted = true
-      hvac_system.cooling_efficiency_eer2 = nil
+      hvac_system.cooling_efficiency_eer2 = HVAC.calc_eer2_from_eer(hvac_system.cooling_efficiency_eer, is_ducted).round(2)
+      hvac_system.cooling_efficiency_eer2_isdefaulted = true
+      hvac_system.cooling_efficiency_eer = nil
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
@@ -2271,7 +2271,7 @@ module Defaults
       end
     end
 
-    # EER
+    # EER2
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)
         next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -2282,20 +2282,19 @@ module Defaults
       end
       next unless hvac_system.cooling_efficiency_eer.nil? && hvac_system.cooling_efficiency_eer2.nil?
 
+      # Regressions based on Central ACs & HPs in ENERGY STAR product lists
       seer = hvac_system.cooling_efficiency_seer
+      seer2 = (hvac_system.distribution_system_idref.nil? ? seer : seer * 0.95) # Temporary conversion, will be removed when model is based on SEER2
       case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
-        # FIXME: Review compared to AHRI data
-        cop = 0.2692 * seer + 0.2706 # Regression based on inverse model
+        eer2 = 0.73 * seer2 + 1.47
       when HPXML::HVACCompressorTypeTwoStage
-        # FIXME: Review compared to AHRI data
-        cop = 0.2773 * seer - 0.0018 # Regression based on inverse model
+        eer2 = 0.63 * seer2 + 2.34
       when HPXML::HVACCompressorTypeVariableSpeed
-        # FIXME: Need to develop something here based on AHRI/NEEP data
-        cop = 4.5
+        eer2 = 0.31 * seer2 + 6.45
       end
-      hvac_system.cooling_efficiency_eer = UnitConversions.convert(cop, 'W', 'Btu/hr').round(2)
-      hvac_system.cooling_efficiency_eer_isdefaulted = true
+      hvac_system.cooling_efficiency_eer2 = eer2.round(2)
+      hvac_system.cooling_efficiency_eer2_isdefaulted = true
     end
 
     # Detailed HVAC performance
