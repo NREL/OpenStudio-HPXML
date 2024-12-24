@@ -1846,7 +1846,7 @@ module Defaults
       end
     end
 
-    # Convert SEER2/EER2/HSPF2 to SEER/EER/HSPF
+    # Convert SEER2/EER/HSPF2 to SEER/EER2/HSPF
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)
         next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -1861,12 +1861,12 @@ module Defaults
         hvac_system.cooling_efficiency_seer_isdefaulted = true
         hvac_system.cooling_efficiency_seer2 = nil
       end
-      next unless hvac_system.cooling_efficiency_eer.nil? && (not hvac_system.cooling_efficiency_eer2.nil?)
+      next unless hvac_system.cooling_efficiency_eer2.nil? && (not hvac_system.cooling_efficiency_eer.nil?)
 
       is_ducted = !hvac_system.distribution_system_idref.nil?
-      hvac_system.cooling_efficiency_eer = HVAC.calc_eer_from_eer2(hvac_system.cooling_efficiency_eer2, is_ducted).round(2)
-      hvac_system.cooling_efficiency_eer_isdefaulted = true
-      hvac_system.cooling_efficiency_eer2 = nil
+      hvac_system.cooling_efficiency_eer2 = HVAC.calc_eer2_from_eer(hvac_system.cooling_efficiency_eer, is_ducted).round(2)
+      hvac_system.cooling_efficiency_eer2_isdefaulted = true
+      hvac_system.cooling_efficiency_eer = nil
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
@@ -2271,31 +2271,6 @@ module Defaults
       end
     end
 
-    # EER
-    # FIXME: This will be deleted when the model is based on EER2 (block of code after this)
-    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
-      if hvac_system.is_a?(HPXML::CoolingSystem)
-        next unless [HPXML::HVACTypeCentralAirConditioner,
-                     HPXML::HVACTypeMiniSplitAirConditioner].include? hvac_system.cooling_system_type
-      elsif hvac_system.is_a?(HPXML::HeatPump)
-        next unless [HPXML::HVACTypeHeatPumpAirToAir,
-                     HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
-      end
-      next unless hvac_system.cooling_efficiency_eer.nil? && hvac_system.cooling_efficiency_eer2.nil?
-
-      seer = hvac_system.cooling_efficiency_seer
-      case hvac_system.compressor_type
-      when HPXML::HVACCompressorTypeSingleStage
-        cop = 0.2692 * seer + 0.2706 # Regression based on inverse model
-      when HPXML::HVACCompressorTypeTwoStage
-        cop = 0.2773 * seer - 0.0018 # Regression based on inverse model
-      when HPXML::HVACCompressorTypeVariableSpeed
-        cop = 4.5 # Unused
-      end
-      hvac_system.cooling_efficiency_eer = UnitConversions.convert(cop, 'W', 'Btu/hr').round(2)
-      hvac_system.cooling_efficiency_eer_isdefaulted = true
-    end
-
     # EER2
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)
@@ -2312,12 +2287,13 @@ module Defaults
       seer2 = (hvac_system.distribution_system_idref.nil? ? seer : seer * 0.95) # Temporary conversion, will be removed when model is based on SEER2
       case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
-        hvac_system.cooling_efficiency_eer2 = 0.73 * seer2 + 1.47
+        eer2 = 0.73 * seer2 + 1.47
       when HPXML::HVACCompressorTypeTwoStage
-        hvac_system.cooling_efficiency_eer2 = 0.63 * seer2 + 2.34
+        eer2 = 0.63 * seer2 + 2.34
       when HPXML::HVACCompressorTypeVariableSpeed
-        hvac_system.cooling_efficiency_eer2 = 0.31 * seer2 + 6.45
+        eer2 = 0.31 * seer2 + 6.45
       end
+      hvac_system.cooling_efficiency_eer2 = eer2.round(2)
       hvac_system.cooling_efficiency_eer2_isdefaulted = true
     end
 
