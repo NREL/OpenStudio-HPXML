@@ -6,6 +6,8 @@ __New Features__
   - Allows optional EER or EER2 inputs for central air conditioners/heat pumps and mini-splits.
 
 __Bugfixes__
+- Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
+- Fixes using detailed schedules with higher resolution (e.g., 10-min data) than the simulation timestep (e.g., 60-min).
 
 ## OpenStudio-HPXML v1.9.1
 
