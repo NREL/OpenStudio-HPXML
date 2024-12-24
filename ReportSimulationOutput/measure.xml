@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>5e609cb1-8e83-479b-afda-c1de10cd62ea</version_id>
-  <version_modified>2024-11-27T02:33:41Z</version_modified>
+  <version_id>00dfeffa-3e25-4ece-b59c-eafb96bd337f</version_id>
+  <version_modified>2024-12-23T17:09:42Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -976,13 +976,6 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>end_use_electricity_electric_vehicle_charging_m_btu</name>
-      <display_name>end_use_electricity_electric_vehicle_charging_m_btu</display_name>
-      <short_name>end_use_electricity_electric_vehicle_charging_m_btu</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
       <name>end_use_electricity_well_pump_m_btu</name>
       <display_name>end_use_electricity_well_pump_m_btu</display_name>
       <short_name>end_use_electricity_well_pump_m_btu</short_name>
@@ -1035,6 +1028,13 @@
       <name>end_use_electricity_battery_m_btu</name>
       <display_name>end_use_electricity_battery_m_btu</display_name>
       <short_name>end_use_electricity_battery_m_btu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>end_use_electricity_electric_vehicle_charging_m_btu</name>
+      <display_name>end_use_electricity_electric_vehicle_charging_m_btu</display_name>
+      <short_name>end_use_electricity_electric_vehicle_charging_m_btu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -1536,6 +1536,13 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>unmet_hours_driving_hr</name>
+      <display_name>unmet_hours_driving_hr</display_name>
+      <short_name>unmet_hours_driving_hr</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>peak_electricity_winter_total_w</name>
       <display_name>peak_electricity_winter_total_w</display_name>
       <short_name>peak_electricity_winter_total_w</short_name>
@@ -1912,7 +1919,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>CDB2D617</checksum>
+      <checksum>3F24E13F</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -1929,13 +1936,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4C7478A8</checksum>
+      <checksum>6531373B</checksum>
     </file>
     <file>
       <filename>test_report_sim_output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>8552F493</checksum>
+      <checksum>6A4B9A7B</checksum>
     </file>
   </files>
 </measure>
