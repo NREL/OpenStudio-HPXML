@@ -411,7 +411,6 @@ base-pv-generators-battery-scheduled.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,213
 base-pv-generators-battery.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2159.9,3825.3,3825.3,23.664,18.729,78.322
 base-pv-generators.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2131.3,3717.5,3717.5,23.664,18.729,0.0
 base-pv.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2131.3,3717.5,3717.5,23.664,18.729,0.0
-base-residents-0-runperiod-1-month.xml,0.0,0.0,0.0,0.0,0.0,0.0,702.74,0.0,702.74,27.096,0.0,0.0
 base-residents-0.xml,0.0,0.0,0.0,0.0,0.0,0.0,674.5,1921.2,1921.2,25.664,14.792,0.0
 base-residents-1-misc-loads-large-uncommon.xml,0.0,0.0,821.3,625.4,3446.7,1167.8,2392.6,4336.4,4336.4,23.603,19.118,0.0
 base-residents-1-misc-loads-large-uncommon2.xml,0.0,0.0,821.3,625.4,3446.7,1167.8,2289.3,4162.5,4162.5,23.603,19.118,0.0
@@ -420,7 +419,7 @@ base-residents-5-5.xml,0.0,0.0,2432.4,2087.7,23985.6,5811.5,3272.5,3870.7,3870.7
 base-schedules-detailed-all-10-mins.xml,0.333,0.833,1354.7,998.0,11252.4,2582.1,9460.7,11150.0,11150.0,37.912,22.094,0.0
 base-schedules-detailed-mixed-timesteps-power-outage.xml,1.667,0.0,1141.2,883.5,9207.2,2112.8,9386.8,10864.5,10864.5,47.477,21.609,0.0
 base-schedules-detailed-mixed-timesteps.xml,0.0,0.0,1354.7,998.0,11253.6,2582.4,9379.0,10867.8,10867.8,34.0,21.613,0.0
-base-schedules-detailed-occupancy-stochastic-10-mins.xml,0.0,0.0,1002.6,945.2,11359.4,2606.6,6673.0,7268.0,9249.8,32.22,20.63,0.0
+base-schedules-detailed-occupancy-stochastic-10-mins.xml,0.0,0.0,1354.7,998.0,11169.8,2563.1,4828.2,5697.6,5697.6,31.601,18.786,0.0
 base-schedules-detailed-occupancy-stochastic-no-space-cooling.xml,0.0,7.0,1354.7,998.0,11168.6,2562.9,4821.3,6362.5,6362.5,31.596,23.089,0.0
 base-schedules-detailed-occupancy-stochastic-no-space-heating.xml,1.0,0.0,1354.7,998.0,11168.6,2562.9,4696.5,5680.5,5680.5,33.971,18.772,0.0
 base-schedules-detailed-occupancy-stochastic-power-outage.xml,19.0,0.0,1141.2,883.5,9132.4,2095.6,6441.3,5673.7,6441.3,42.664,18.716,0.0
