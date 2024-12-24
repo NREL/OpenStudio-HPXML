@@ -976,6 +976,7 @@ module Schedule
   # Splits a comma seperated schedule string into charging (positive) and discharging (negative) schedules
   #
   # @param schedule_str [String] schedule with values seperated by commas
+  # @return [Array<String, String>] 24 hourly comma-seperated charging and discharging schedules
   def self.split_signed_charging_schedule(schedule_str)
     charge_schedule, discharge_schedule = [], []
     schedule_str.split(', ').each do |frac|
@@ -984,7 +985,7 @@ module Schedule
         discharge_schedule.append(0)
       elsif frac.to_f < 0
         charge_schedule.append(0)
-        discharge_schedule.append(frac)
+        discharge_schedule.append((-frac.to_f).to_s)
       else
         charge_schedule.append(0)
         discharge_schedule.append(0)
