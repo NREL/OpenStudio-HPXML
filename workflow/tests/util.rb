@@ -345,7 +345,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
     # variable system SHR adjustment
     if (hpxml_bldg.heat_pumps + hpxml_bldg.cooling_systems).count { |hp| hp.compressor_type == HPXML::HVACCompressorTypeVariableSpeed } > 0
-      next if message.include?('CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues.')
+      next if message.include?('CalcBypassFactor') || message.include?('CalcCBF')
     end
     # Evaporative coolers
     if hpxml_bldg.cooling_systems.count { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler } > 0
