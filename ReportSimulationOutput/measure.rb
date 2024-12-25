@@ -2195,7 +2195,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if object.to_AdditionalProperties.is_initialized
 
       [EUT, HWT, LT, RT].each do |class_name|
-        vars_by_key = get_object_outputs_by_key(@model, object, class_name)
+        vars_by_key = get_object_outputs_by_key(object, class_name)
         next if vars_by_key.size == 0
 
         sys_id = object.additionalProperties.getFeatureAsString('HPXML_ID')
@@ -2816,11 +2816,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param object [TODO] TODO
   # @param class_name [TODO] TODO
   # @return [TODO] TODO
-  def get_object_outputs_by_key(model, object, class_name)
+  def get_object_outputs_by_key(object, class_name)
     # For a given object, returns the Output:Variables or Output:Meters to be requested,
     # and associates them with the appropriate keys (e.g., [FT::Elec, EUT::Heating]).
 
@@ -2885,26 +2884,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       elsif object.to_CoilCoolingDX.is_initialized
-        vars = { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
-        parent = model.getAirLoopHVACUnitarySystems.select { |u| u.coolingCoil.is_initialized && u.coolingCoil.get.handle.to_s == object.handle.to_s }
-        if (not parent.empty?) && parent[0].heatingCoil.is_initialized
-          htg_coil = parent[0].heatingCoil.get
-        end
-        if parent.empty?
-          parent = model.getZoneHVACPackagedTerminalAirConditioners.select { |u| u.coolingCoil.handle.to_s == object.handle.to_s }
-          if not parent.empty?
-            htg_coil = parent[0].heatingCoil
-          end
-        end
-        if parent.empty?
-          fail 'Could not find parent object.'
-        end
-
-        if htg_coil.nil? || (not (htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized))
-          # Crankcase variable only available if no DX heating coil on parent
-          vars[[FT::Elec, EUT::Cooling]] << "Cooling Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"
-        end
-        return vars
+        return { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy", "Cooling Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
         return { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
