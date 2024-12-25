@@ -3136,15 +3136,17 @@ module HVAC
       coeff: [1, 0, 0, 0, 0, 0]
     )
 
+    rated_capacity = clg_ap.cool_rated_capacities_gross[-1]
+    rated_airflow_rate = calc_rated_airflow(clg_ap.cool_rated_capacities_net[-1], clg_ap.cool_rated_cfm_per_ton[-1])
+
     operating_mode = OpenStudio::Model::CoilCoolingDXCurveFitOperatingMode.new(model)
-    operating_mode.setRatedGrossTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities_gross[0], 'Btu/hr', 'W'))
+    operating_mode.setRatedGrossTotalCoolingCapacity(UnitConversions.convert(rated_capacity, 'Btu/hr', 'W'))
     operating_mode.setMaximumCyclingRate(3.0)
     operating_mode.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
     operating_mode.setLatentCapacityTimeConstant(45)
     operating_mode.setNominalTimeforCondensateRemovaltoBegin(1000)
     operating_mode.setCondenserType('AirCooled')
     operating_mode.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-    rated_airflow_rate = calc_rated_airflow(clg_ap.cool_rated_capacities_net[0], clg_ap.cool_rated_cfm_per_ton[0])
     operating_mode.setRatedEvaporatorAirFlowRate(rated_airflow_rate)
     operating_mode.setRatedCondenserAirFlowRate(rated_airflow_rate)
 
@@ -3232,7 +3234,7 @@ module HVAC
       speed.setEvaporatorAirFlowRateFraction(airflow_fraction)
       speed.setCondenserAirFlowRateFraction(airflow_fraction)
       speed.setGrossCoolingCOP(clg_ap.cool_rated_cops[i])
-      speed.setGrossTotalCoolingCapacityFraction(clg_ap.cool_rated_capacities_gross[i] / clg_ap.cool_rated_capacities_gross[0])
+      speed.setGrossTotalCoolingCapacityFraction(clg_ap.cool_rated_capacities_gross[i] / rated_capacity)
       speed.setGrossSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
       speed.setRatedWasteHeatFractionofPowerInput(0.2)
 
@@ -4109,7 +4111,7 @@ module HVAC
         cap_fff_curve_name = 'totalCoolingCapacityModifierFunctionofAirFlowFractionCurve'
         cap_ft_curve_name = 'totalCoolingCapacityModifierFunctionofTemperatureCurve'
         capacity_name = 'grossTotalCoolingCapacityFraction'
-        capacity_multiplier = coil.performanceObject.baseOperatingMode.ratedGrossTotalCoolingCapacity.get
+        capacity_multiplier = coil.performanceObject.baseOperatingMode.ratedGrossTotalCoolingCapacity.get.round(2)
         cop_name = 'grossCoolingCOP'
         cap_multiplier = 'shr'
         pow_multiplier = '1.0'
