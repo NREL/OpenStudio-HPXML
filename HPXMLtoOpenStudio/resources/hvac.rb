@@ -3150,7 +3150,9 @@ module HVAC
 
     performance = OpenStudio::Model::CoilCoolingDXCurveFitPerformance.new(model, operating_mode)
     performance.setCompressorFuelType(EPlus::FuelTypeElectricity)
-    performance.setCrankcaseHeaterCapacity(cooling_system.crankcase_heater_watts)
+    if not cooling_system.is_a? HPXML::HeatPump # Crankcase used on heating coil instead
+      performance.setCrankcaseHeaterCapacity(cooling_system.crankcase_heater_watts)
+    end
     performance.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C')) if cooling_system.crankcase_heater_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
 
     clg_coil = OpenStudio::Model::CoilCoolingDX.new(model, performance)
