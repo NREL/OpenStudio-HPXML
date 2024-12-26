@@ -34,12 +34,17 @@ class Vehicle
       discharging_schedule = schedules_file.create_schedule_file(model, col_name: discharging_col)
     end
     if charging_schedule.nil? && discharging_schedule.nil?
-      weekday_charge, weekday_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_charging_weekday_fractions)
-      weekend_charge, weekend_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_charging_weekend_fractions)
-      charging_schedule = MonthWeekdayWeekendSchedule.new(model, vehicle.id + ' charging schedule', weekday_charge, weekend_charge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, false)
-      charging_schedule = charging_schedule.schedule
-      discharging_schedule = MonthWeekdayWeekendSchedule.new(model, vehicle.id + ' discharging schedule', weekday_discharge, weekend_discharge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, false)
-      discharging_schedule = discharging_schedule.schedule
+      charge_name, discharge_name = "#{vehicle.id} charging schedule", "#{vehicle.id} discharging schedule"
+      charging_schedule = model.getScheduleRulesets.find { |s| s.name.to_s == charge_name }
+      discharging_schedule = model.getScheduleRulesets.find { |s| s.name.to_s == discharge_name }
+      if charging_schedule.nil? || discharging_schedule.nil?
+        weekday_charge, weekday_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_charging_weekday_fractions)
+        weekend_charge, weekend_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_charging_weekend_fractions)
+        charging_schedule = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, false)
+        charging_schedule = charging_schedule.schedule
+        discharging_schedule = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, false)
+        discharging_schedule = discharging_schedule.schedule
+      end
     else
       runner.registerWarning("Both schedule file and weekday fractions provided for '#{charging_col}' and '#{discharging_col}'; weekday fractions will be ignored.") if !vehicle.ev_charging_weekday_fractions.nil?
       runner.registerWarning("Both schedule file and weekend fractions provided for '#{charging_col}' and '#{discharging_col}'; weekend fractions will be ignored.") if !vehicle.ev_charging_weekend_fractions.nil?

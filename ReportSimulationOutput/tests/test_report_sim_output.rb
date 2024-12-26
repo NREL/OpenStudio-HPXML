@@ -900,7 +900,7 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, unmet_hours_cols)
     if xml_file.include? 'base-battery-ev-undercharged'
-      assert(File.readlines(run_log).any? { |line| line.include?('A total of 1073.0 driving hours could not be met') })
+      assert(File.readlines(run_log).any? { |line| line.include?('A total of 1066.0 driving hours could not be met') })
     end
   end
 
