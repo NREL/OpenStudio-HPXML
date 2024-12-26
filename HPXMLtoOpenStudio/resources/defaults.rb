@@ -2913,7 +2913,12 @@ module Defaults
         hvac_system.crankcase_heater_watts = 0.0
       else
         # 10 W/ton of cooling capacity per RESNET MINHERS Addendum 82
-        hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+        if hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.fraction_cool_load_served == 0)
+          # Heat pump only provides heating, use heating capacity instead
+          hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+        else
+          hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+        end
       end
       hvac_system.crankcase_heater_watts_isdefaulted = true
     end
