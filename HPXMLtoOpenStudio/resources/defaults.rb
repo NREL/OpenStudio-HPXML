@@ -99,6 +99,7 @@ module Defaults
     # These need to be applied after sizing HVAC capacities/airflows
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
     apply_cfis_fan_power(hpxml_bldg)
+    apply_crankcase_heating(hpxml_bldg)
 
     cleanup_zones_spaces(hpxml_bldg)
 
@@ -1846,7 +1847,7 @@ module Defaults
       end
     end
 
-    # Convert SEER2/EER2/HSPF2 to SEER/EER/HSPF
+    # Convert SEER2/EER/HSPF2 to SEER/EER2/HSPF
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)
         next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -1861,12 +1862,12 @@ module Defaults
         hvac_system.cooling_efficiency_seer_isdefaulted = true
         hvac_system.cooling_efficiency_seer2 = nil
       end
-      next unless hvac_system.cooling_efficiency_eer.nil? && (not hvac_system.cooling_efficiency_eer2.nil?)
+      next unless hvac_system.cooling_efficiency_eer2.nil? && (not hvac_system.cooling_efficiency_eer.nil?)
 
       is_ducted = !hvac_system.distribution_system_idref.nil?
-      hvac_system.cooling_efficiency_eer = HVAC.calc_eer_from_eer2(hvac_system.cooling_efficiency_eer2, is_ducted).round(2)
-      hvac_system.cooling_efficiency_eer_isdefaulted = true
-      hvac_system.cooling_efficiency_eer2 = nil
+      hvac_system.cooling_efficiency_eer2 = HVAC.calc_eer2_from_eer(hvac_system.cooling_efficiency_eer, is_ducted).round(2)
+      hvac_system.cooling_efficiency_eer2_isdefaulted = true
+      hvac_system.cooling_efficiency_eer = nil
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
@@ -2228,30 +2229,6 @@ module Defaults
       end
     end
 
-    # Crankcase heater power [Watts]
-    hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-      next unless cooling_system.crankcase_heater_watts.nil?
-
-      if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-        cooling_system.crankcase_heater_watts = 0.0
-      else
-        cooling_system.crankcase_heater_watts = 50 # From RESNET Publication No. 002-2017
-      end
-      cooling_system.crankcase_heater_watts_isdefaulted = true
-    end
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-      next unless heat_pump.crankcase_heater_watts.nil?
-
-      if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-        heat_pump.crankcase_heater_watts = 0.0
-      else
-        heat_pump.crankcase_heater_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0 : 50 # From RESNET Publication No. 002-2017
-      end
-      heat_pump.crankcase_heater_watts_isdefaulted = true
-    end
-
     # Maximum compressor operating temperature
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a? HPXML::CoolingSystem
@@ -2284,7 +2261,7 @@ module Defaults
       end
     end
 
-    # EER
+    # EER2
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)
         next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -2295,20 +2272,19 @@ module Defaults
       end
       next unless hvac_system.cooling_efficiency_eer.nil? && hvac_system.cooling_efficiency_eer2.nil?
 
+      # Regressions based on Central ACs & HPs in ENERGY STAR product lists
       seer = hvac_system.cooling_efficiency_seer
+      seer2 = (hvac_system.distribution_system_idref.nil? ? seer : seer * 0.95) # Temporary conversion, will be removed when model is based on SEER2
       case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
-        # FIXME: Review compared to AHRI data
-        cop = 0.2692 * seer + 0.2706 # Regression based on inverse model
+        eer2 = 0.73 * seer2 + 1.47
       when HPXML::HVACCompressorTypeTwoStage
-        # FIXME: Review compared to AHRI data
-        cop = 0.2773 * seer - 0.0018 # Regression based on inverse model
+        eer2 = 0.63 * seer2 + 2.34
       when HPXML::HVACCompressorTypeVariableSpeed
-        # FIXME: Need to develop something here based on AHRI/NEEP data
-        cop = 4.5
+        eer2 = 0.31 * seer2 + 6.45
       end
-      hvac_system.cooling_efficiency_eer = UnitConversions.convert(cop, 'W', 'Btu/hr').round(2)
-      hvac_system.cooling_efficiency_eer_isdefaulted = true
+      hvac_system.cooling_efficiency_eer2 = eer2.round(2)
+      hvac_system.cooling_efficiency_eer2_isdefaulted = true
     end
 
     # Detailed HVAC performance
@@ -2930,6 +2906,34 @@ module Defaults
 
       vent_fan.fan_power = (blower_flow_rate * fan_w_per_cfm).round(2)
       vent_fan.fan_power_isdefaulted = true
+    end
+  end
+
+  # Assigns the crankcase heater power for an HVAC system where the optional input has been omitted.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.apply_crankcase_heating(hpxml_bldg)
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a? HPXML::CoolingSystem
+        next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a? HPXML::HeatPump
+        next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hvac_system.heat_pump_type
+      end
+      next unless hvac_system.crankcase_heater_watts.nil?
+
+      if HVAC.is_room_dx_hvac_system(hvac_system)
+        hvac_system.crankcase_heater_watts = 0.0
+      else
+        # 10 W/ton of cooling capacity per RESNET MINHERS Addendum 82
+        if hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.fraction_cool_load_served == 0)
+          # Heat pump only provides heating, use heating capacity instead
+          hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+        else
+          hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+        end
+      end
+      hvac_system.crankcase_heater_watts_isdefaulted = true
     end
   end
 

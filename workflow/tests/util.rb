@@ -890,10 +890,18 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   # HVAC Load Fractions
   if not is_warm_climate
     htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-    assert_equal(hpxml_bldg.total_fraction_heat_load_served > 0, htg_energy > 0)
+    if hpxml_bldg.total_fraction_heat_load_served > 0
+      assert_operator(htg_energy, :>, 0)
+    else
+      assert_operator(htg_energy, :<, 1) # Allow for e.g., crankcase heating
+    end
   end
   clg_energy = results.select { |k, _v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-  assert_equal(hpxml_bldg.total_fraction_cool_load_served > 0, clg_energy > 0)
+  if hpxml_bldg.total_fraction_cool_load_served > 0
+    assert_operator(clg_energy, :>, 0)
+  else
+    assert_operator(clg_energy, :<, 1) # Allow for e.g., crankcase heating
+  end
 
   # Mechanical Ventilation
   whole_vent_fans = hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan }
