@@ -6680,6 +6680,7 @@ class HPXML < Object
              :shared_loop_motor_efficiency,                        # [Double] extension/SharedLoopMotorEfficiency (frac)
              :fan_coil_watts,                                      # [Double] extension/FanCoilWatts (W)
              :crankcase_heater_watts,                              # [Double] extension/CrankcaseHeaterPowerWatts (W)
+             :compressor_maximum_temp,                             # [Double] extension/CompressorMaximumTemperature (F)
              :cooling_autosizing_factor,                           # [Double] extension/CoolingAutosizingFactor (frac)
              :cooling_autosizing_limit,                            # [Double] extension/CoolingAutosizingLimit (Btu/hr)
              :fan_motor_type,                                      # [String] extension/FanMotorType
@@ -6843,6 +6844,7 @@ class HPXML < Object
       XMLHelper.add_extension(cooling_system, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
       XMLHelper.add_extension(cooling_system, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
       XMLHelper.add_extension(cooling_system, 'CrankcaseHeaterPowerWatts', @crankcase_heater_watts, :float, @crankcase_heater_watts_isdefaulted) unless @crankcase_heater_watts.nil?
+      XMLHelper.add_extension(cooling_system, 'CompressorMaximumTemperature', @compressor_maximum_temp, :float, @compressor_maximum_temp_isdefaulted) unless @compressor_maximum_temp.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingAutosizingFactor', @cooling_autosizing_factor, :float, @cooling_autosizing_factor_isdefaulted) unless @cooling_autosizing_factor.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingAutosizingLimit', @cooling_autosizing_limit, :float, @cooling_autosizing_limit_isdefaulted) unless @cooling_autosizing_limit.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
@@ -6895,6 +6897,7 @@ class HPXML < Object
       @shared_loop_motor_efficiency = XMLHelper.get_value(cooling_system, 'extension/SharedLoopMotorEfficiency', :float)
       @fan_coil_watts = XMLHelper.get_value(cooling_system, 'extension/FanCoilWatts', :float)
       @crankcase_heater_watts = XMLHelper.get_value(cooling_system, 'extension/CrankcaseHeaterPowerWatts', :float)
+      @compressor_maximum_temp = XMLHelper.get_value(cooling_system, 'extension/CompressorMaximumTemperature', :float)
       @cooling_autosizing_factor = XMLHelper.get_value(cooling_system, 'extension/CoolingAutosizingFactor', :float)
       @cooling_autosizing_limit = XMLHelper.get_value(cooling_system, 'extension/CoolingAutosizingLimit', :float)
       @clg_seed_id = XMLHelper.get_value(cooling_system, 'extension/CoolingSeedId', :string)
@@ -7001,6 +7004,7 @@ class HPXML < Object
              :heating_capacity_retention_fraction, # [Double] extension/HeatingCapacityRetention/Fraction (frac)
              :heating_capacity_retention_temp,     # [Double] extension/HeatingCapacityRetention/Temperature (F)
              :crankcase_heater_watts,              # [Double] extension/CrankcaseHeaterPowerWatts (W)
+             :compressor_maximum_temp,             # [Double] extension/CompressorMaximumTemperature (F)
              :cooling_autosizing_factor,           # [Double] extension/CoolingAutosizingFactor (frac)
              :heating_autosizing_factor,           # [Double] extension/HeatingAutosizingFactor (frac)
              :backup_heating_autosizing_factor,    # [Double] extension/BackupHeatingAutosizingFactor (frac)
@@ -7236,6 +7240,7 @@ class HPXML < Object
         XMLHelper.add_element(htg_cap_retention, 'Temperature', @heating_capacity_retention_temp, :float, @heating_capacity_retention_temp_isdefaulted) unless @heating_capacity_retention_temp.nil?
       end
       XMLHelper.add_extension(heat_pump, 'CrankcaseHeaterPowerWatts', @crankcase_heater_watts, :float, @crankcase_heater_watts_isdefaulted) unless @crankcase_heater_watts.nil?
+      XMLHelper.add_extension(heat_pump, 'CompressorMaximumTemperature', @compressor_maximum_temp, :float, @compressor_maximum_temp_isdefaulted) unless @compressor_maximum_temp.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingAutosizingFactor', @cooling_autosizing_factor, :float, @cooling_autosizing_factor_isdefaulted) unless @cooling_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAutosizingFactor', @heating_autosizing_factor, :float, @heating_autosizing_factor_isdefaulted) unless @heating_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'BackupHeatingAutosizingFactor', @backup_heating_autosizing_factor, :float, @backup_heating_autosizing_factor_isdefaulted) unless @backup_heating_autosizing_factor.nil?
@@ -7310,6 +7315,7 @@ class HPXML < Object
       @heating_capacity_retention_fraction = XMLHelper.get_value(heat_pump, 'extension/HeatingCapacityRetention/Fraction', :float)
       @heating_capacity_retention_temp = XMLHelper.get_value(heat_pump, 'extension/HeatingCapacityRetention/Temperature', :float)
       @crankcase_heater_watts = XMLHelper.get_value(heat_pump, 'extension/CrankcaseHeaterPowerWatts', :float)
+      @compressor_maximum_temp = XMLHelper.get_value(heat_pump, 'extension/CompressorMaximumTemperature', :float)
       @cooling_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/CoolingAutosizingFactor', :float)
       @heating_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/HeatingAutosizingFactor', :float)
       @backup_heating_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/BackupHeatingAutosizingFactor', :float)
@@ -11183,7 +11189,8 @@ class HPXML < Object
              :capacity_description,         # [String] CapacityDescription (HPXML::CapacityDescriptionXXX)
              :efficiency_cop,               # [Double] Efficiency[Units="COP"]/Value (W/W)
              :gross_capacity,               # FUTURE: Not in HPXML schema, should move to additional_properties
-             :gross_efficiency_cop]         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_efficiency_cop,         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :input_power]                  # FUTURE: Not in HPXML schema, should move to additional_properties
     attr_accessor(*ATTRS)
 
     # Deletes the current object from the array.
@@ -11290,7 +11297,8 @@ class HPXML < Object
              :capacity_description,         # [String] CapacityDescription (HPXML::CapacityDescriptionXXX)
              :efficiency_cop,               # [Double] Efficiency[Units="COP"]/Value (W/W)
              :gross_capacity,               # FUTURE: Not in HPXML schema, should move to additional_properties
-             :gross_efficiency_cop]         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_efficiency_cop,         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :input_power]                  # FUTURE: Not in HPXML schema, should move to additional_properties
     attr_accessor(*ATTRS)
 
     # Deletes the current object from the array.

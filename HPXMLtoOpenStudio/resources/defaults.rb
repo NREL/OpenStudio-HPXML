@@ -2252,6 +2252,19 @@ module Defaults
       heat_pump.crankcase_heater_watts_isdefaulted = true
     end
 
+    # Maximum compressor operating temperature
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a? HPXML::CoolingSystem
+        next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a? HPXML::HeatPump
+        next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hvac_system.heat_pump_type
+      end
+      next unless hvac_system.compressor_maximum_temp.nil?
+
+      hvac_system.compressor_maximum_temp = 125.0 # From RESNET MINHERS Addendum 82
+      hvac_system.compressor_maximum_temp_isdefaulted = true
+    end
+
     # Pilot Light
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeFurnace,
@@ -2457,7 +2470,7 @@ module Defaults
             # Calculate heating capacity retention at 5F outdoor drybulb
             target_odb = 5.0
             max_capacity_47 = hvac_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-            hvac_system.heating_capacity_retention_fraction = (HVAC.interpolate_to_odb_table_point(hvac_system.heating_detailed_performance_data, HPXML::CapacityDescriptionMaximum, target_odb, :capacity) / max_capacity_47).round(5)
+            hvac_system.heating_capacity_retention_fraction = (HVAC.extrapolate_data_point_to_odb(hvac_system.heating_detailed_performance_data, :htg, HPXML::CapacityDescriptionMaximum, target_odb, :capacity) / max_capacity_47).round(5)
             hvac_system.heating_capacity_retention_fraction = 0.0 if hvac_system.heating_capacity_retention_fraction < 0
             hvac_system.heating_capacity_retention_temp = target_odb
             hvac_system.heating_capacity_retention_fraction_isdefaulted = true
