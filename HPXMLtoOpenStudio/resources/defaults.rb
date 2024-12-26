@@ -99,6 +99,7 @@ module Defaults
     # These need to be applied after sizing HVAC capacities/airflows
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
     apply_cfis_fan_power(hpxml_bldg)
+    apply_crankcase_heating(hpxml_bldg)
 
     cleanup_zones_spaces(hpxml_bldg)
 
@@ -2228,30 +2229,6 @@ module Defaults
       end
     end
 
-    # Crankcase heater power [Watts]
-    hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-      next unless cooling_system.crankcase_heater_watts.nil?
-
-      if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-        cooling_system.crankcase_heater_watts = 0.0
-      else
-        cooling_system.crankcase_heater_watts = 50 # From RESNET Publication No. 002-2017
-      end
-      cooling_system.crankcase_heater_watts_isdefaulted = true
-    end
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-      next unless heat_pump.crankcase_heater_watts.nil?
-
-      if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-        heat_pump.crankcase_heater_watts = 0.0
-      else
-        heat_pump.crankcase_heater_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0 : 50 # From RESNET Publication No. 002-2017
-      end
-      heat_pump.crankcase_heater_watts_isdefaulted = true
-    end
-
     # Pilot Light
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeFurnace,
@@ -2916,6 +2893,29 @@ module Defaults
 
       vent_fan.fan_power = (blower_flow_rate * fan_w_per_cfm).round(2)
       vent_fan.fan_power_isdefaulted = true
+    end
+  end
+
+  # Assigns the crankcase heater power for an HVAC system where the optional input has been omitted.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.apply_crankcase_heating(hpxml_bldg)
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a? HPXML::CoolingSystem
+        next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a? HPXML::HeatPump
+        next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hvac_system.heat_pump_type
+      end
+      next unless hvac_system.crankcase_heater_watts.nil?
+
+      if HVAC.is_room_dx_hvac_system(hvac_system)
+        hvac_system.crankcase_heater_watts = 0.0
+      else
+        # 10 W/ton of cooling capacity per RESNET MINHERS Addendum 82
+        hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+      end
+      hvac_system.crankcase_heater_watts_isdefaulted = true
     end
   end
 
