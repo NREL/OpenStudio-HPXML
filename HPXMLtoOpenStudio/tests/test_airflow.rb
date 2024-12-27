@@ -17,6 +17,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
   def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+    File.delete(File.join(File.dirname(__FILE__), 'in.schedules.csv')) if File.exist? File.join(File.dirname(__FILE__), 'in.schedules.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
   end
@@ -930,7 +931,15 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
   def test_operational_0_occupants
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-residents-0.xml'))
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    hpxml, hpxml_bldg = _create_hpxml('base-residents-0.xml')
+    hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
+                                    fan_location: HPXML::LocationBath,
+                                    used_for_local_ventilation: true)
+    hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
+                                    fan_location: HPXML::LocationKitchen,
+                                    used_for_local_ventilation: true)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check no natural ventilation or whole house fan
