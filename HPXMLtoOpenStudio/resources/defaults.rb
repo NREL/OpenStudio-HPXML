@@ -5345,6 +5345,9 @@ module Defaults
     when HPXML::HVACTypeMiniSplitAirConditioner,
          HPXML::HVACTypeHeatPumpMiniSplit
       return HPXML::HVACCompressorTypeVariableSpeed
+    when HPXML::HVACTypeHeatPumpGroundToAir
+      # TODO: default GSHP compressor type based on COP?
+      return HPXML::HVACCompressorTypeSingleStage
     when HPXML::HVACTypePTAC,
          HPXML::HVACTypeHeatPumpPTHP,
          HPXML::HVACTypeHeatPumpRoom,
