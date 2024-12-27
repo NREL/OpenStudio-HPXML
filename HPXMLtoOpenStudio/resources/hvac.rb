@@ -3273,6 +3273,9 @@ module HVAC
       end
     end
 
+    # FIXME: Need to set E+ max outdoor DB temp for compressor operation
+    # Currently being implemented for Coil:Cooling:DX object
+    # https://github.com/NREL/EnergyPlus/pull/10882
     clg_coil.setName(coil_name)
     clg_coil.setCondenserType('AirCooled')
     clg_coil.setCrankcaseHeaterCapacity(cooling_system.crankcase_heater_watts)
@@ -3416,7 +3419,6 @@ module HVAC
 
     htg_coil.setName(coil_name)
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
-    # FIXME: Need to create and set E+ max outdoor DB temp for compressor operation
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
     htg_coil.setDefrostControl('Timed')
     if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
