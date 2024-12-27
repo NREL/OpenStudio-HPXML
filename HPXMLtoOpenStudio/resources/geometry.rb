@@ -138,6 +138,11 @@ module Geometry
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.walls.each do |wall|
+      hpxml_id = wall.id
+      if wall.sameas_id
+        hpxml_sameas_id = wall.sameas_id
+        wall = wall.sameas
+      end
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if wall.azimuth.nil?
@@ -148,6 +153,9 @@ module Geometry
         end
       else
         azimuths = [wall.azimuth]
+      end
+      if hpxml_sameas_id
+        azimuths = azimuths.map { |a| (a + 180) % 360 }
       end
 
       surfaces = []
@@ -171,14 +179,17 @@ module Geometry
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, wall, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, wall, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, wall, hpxml_bldg) if hpxml_sameas_id.nil?
         if wall.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
+        surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
+        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
       end
 
       next if surfaces.empty?
+      next unless hpxml_sameas_id.nil?
 
       # Apply construction
       # The code below constructs a reasonable wall construction based on the
@@ -220,6 +231,12 @@ module Geometry
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.rim_joists.each do |rim_joist|
+      hpxml_id = rim_joist.id
+      if rim_joist.sameas_id
+        hpxml_sameas_id = rim_joist.sameas_id
+        rim_joist = rim_joist.sameas
+      end
+
       if rim_joist.azimuth.nil?
         if rim_joist.is_exterior
           azimuths = default_azimuths # Model as four directions for average exterior incident solar
@@ -228,6 +245,9 @@ module Geometry
         end
       else
         azimuths = [rim_joist.azimuth]
+      end
+      if hpxml_sameas_id
+        azimuths = azimuths.map { |a| (a + 180) % 360 }
       end
 
       surfaces = []
@@ -251,12 +271,16 @@ module Geometry
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, rim_joist, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, rim_joist, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, rim_joist, hpxml_bldg) if hpxml_sameas_id.nil?
         if rim_joist.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
+        surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
+        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
       end
+
+      next unless hpxml_sameas_id.nil?
 
       # Apply construction
 
@@ -303,6 +327,14 @@ module Geometry
     walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.floors.each do |floor|
+      hpxml_id = floor.id
+      if floor.sameas_id
+        is_ceiling = !floor.sameas.is_ceiling
+        hpxml_sameas_id = floor.sameas_id
+        floor = floor.sameas
+      else
+        is_ceiling = floor.is_ceiling
+      end
       next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       area = floor.net_area
@@ -314,7 +346,7 @@ module Geometry
         z_origin = foundation_top
       end
 
-      if floor.is_ceiling
+      if is_ceiling
         vertices = create_ceiling_vertices(length, width, z_origin, default_azimuths)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
@@ -325,7 +357,7 @@ module Geometry
       end
       surface.additionalProperties.setFeature('Tilt', 0.0)
       set_surface_interior(model, spaces, surface, floor, hpxml_bldg)
-      set_surface_exterior(model, spaces, surface, floor, hpxml_bldg)
+      set_surface_exterior(model, spaces, surface, floor, hpxml_bldg) if hpxml_sameas_id.nil?
       surface.setName(floor.id)
       if floor.is_interior
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
@@ -339,6 +371,9 @@ module Geometry
           end
         end
       end
+      surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
+      surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
+      next unless hpxml_sameas_id.nil?
 
       # Apply construction
 
@@ -445,8 +480,14 @@ module Geometry
       # The above-grade portion of these walls are modeled as EnergyPlus surfaces with standard adjacency.
       # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
-      int_fnd_walls = hpxml_bldg.foundation_walls.select { |fw| fw.is_interior && fw.interior_adjacent_to == foundation_type }
+      int_fnd_walls = hpxml_bldg.foundation_walls.select { |fw| (fw.is_interior && fw.interior_adjacent_to == foundation_type) || fw.sameas_id }
       int_fnd_walls.each do |fnd_wall|
+        hpxml_id = fnd_wall.id
+        if fnd_wall.sameas_id
+          hpxml_sameas_id = fnd_wall.sameas_id
+          fnd_wall = fnd_wall.sameas
+        end
+
         next unless fnd_wall.is_interior
 
         ag_height = fnd_wall.height - fnd_wall.depth_below_grade
@@ -460,6 +501,9 @@ module Geometry
         else
           azimuth = fnd_wall.azimuth
         end
+        if hpxml_sameas_id
+          azimuth = (azimuth + 180) % 360
+        end
 
         vertices = create_wall_vertices(length, ag_height, z_origin, azimuth)
         surface = OpenStudio::Model::Surface.new(vertices, model)
@@ -470,9 +514,13 @@ module Geometry
         surface.setName(fnd_wall.id)
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, fnd_wall, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg) if hpxml_sameas_id.nil?
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
         surface.setWindExposure(EPlus::SurfaceWindExposureNo)
+        surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
+        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
+
+        next unless hpxml_sameas_id.nil?
 
         # Apply construction
 
@@ -1051,6 +1099,7 @@ module Geometry
   def self.get_foundation_and_walls_top(hpxml_bldg)
     foundation_top = [hpxml_bldg.building_construction.unit_height_above_grade, 0].max
     hpxml_bldg.foundation_walls.each do |foundation_wall|
+      foundation_wall = foundation_wall.sameas if foundation_wall.sameas_id
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
       foundation_top = top if top > foundation_top
     end
@@ -1701,13 +1750,24 @@ module Geometry
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.set_surface_interior(model, spaces, surface, hpxml_surface, hpxml_bldg)
-    interior_adjacent_to = hpxml_surface.interior_adjacent_to
+    surface.setSpace(get_interior_space(model, spaces, hpxml_surface.interior_adjacent_to, hpxml_bldg))
+  end
+
+  # Return the OpenStudio Space based on the adjacent interior location of an HPXML Surface.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @param interior_adjacent_to [String] HPXML interior location
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [OpenStudio::Model::Space] the OpenStudio::Model::Space object based on the interior location
+  def self.get_interior_space(model, spaces, interior_adjacent_to, hpxml_bldg)
     if HPXML::conditioned_below_grade_locations.include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg))
+      return create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
     else
-      surface.setSpace(create_or_get_space(model, spaces, interior_adjacent_to, hpxml_bldg))
+      return create_or_get_space(model, spaces, interior_adjacent_to, hpxml_bldg)
     end
   end
 
@@ -1717,6 +1777,7 @@ module Geometry
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
