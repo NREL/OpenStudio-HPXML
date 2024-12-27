@@ -2543,11 +2543,11 @@ module HVAC
       # Cubic relationship fan power curve
       fan_power = max_fan_power * (fan_ratio**3)
     elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypeBPM
-      # bpm fan
+      # BPM fan
       index = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
       fan_power = max_fan_power * (fan_ratio**index)
     else
-      # psc fan
+      # PSC fan
       fan_power = max_fan_power * fan_ratio * (0.3 * fan_ratio + 0.7)
     end
     return fan_power
