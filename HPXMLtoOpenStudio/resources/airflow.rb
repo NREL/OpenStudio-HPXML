@@ -8,6 +8,7 @@ module Airflow
   AssumedInsideTemp = 73.5 # (F)
   Gravity = 32.174 # acceleration of gravity (ft/s2)
   UnventedSpaceACH = 0.1 # natural air changes per hour, assumption
+  ReferenceHeight = 8.202 # reference floor to ceiling height per ASHRAE 62.2 (ft)
 
   # Adds HPXML Air Infiltration and HPXML HVAC Distribution to the OpenStudio model.
   #
@@ -1748,7 +1749,7 @@ module Airflow
     vented_attic = hpxml_bldg.attics.find { |attic| attic.attic_type == HPXML::AtticTypeVented }
     if not vented_attic.vented_attic_sla.nil?
       if hpxml_header.apply_ashrae140_assumptions
-        vented_attic_const_ach = get_infiltration_ACH_from_SLA(vented_attic.vented_attic_sla, 8.202, 8.202, weather)
+        vented_attic_const_ach = get_infiltration_ACH_from_SLA(vented_attic.vented_attic_sla, ReferenceHeight, ReferenceHeight, weather)
       else
         vented_attic_sla = vented_attic.vented_attic_sla
       end
@@ -1756,7 +1757,7 @@ module Airflow
       if hpxml_header.apply_ashrae140_assumptions
         vented_attic_const_ach = vented_attic.vented_attic_ach
       else
-        vented_attic_sla = get_infiltration_SLA_from_ACH(vented_attic.vented_attic_ach, 8.202, 8.202, weather)
+        vented_attic_sla = get_infiltration_SLA_from_ACH(vented_attic.vented_attic_ach, ReferenceHeight, ReferenceHeight, weather)
       end
     end
 
@@ -2838,7 +2839,7 @@ module Airflow
   # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @return [Double] Normalized leakage
   def self.get_infiltration_NL_from_SLA(sla, infil_height)
-    return 1000.0 * sla * (infil_height / 8.202)**0.4
+    return 1000.0 * sla * (infil_height / ReferenceHeight)**0.4
   end
 
   # Returns the infiltration annual average ACH given a SLA.
@@ -2852,7 +2853,7 @@ module Airflow
   # @return [Double] Annual average air changes per hour
   def self.get_infiltration_ACH_from_SLA(sla, infil_height, infil_avg_ceil_height, weather)
     norm_leakage = get_infiltration_NL_from_SLA(sla, infil_height)
-    return norm_leakage * weather.data.WSF * 8.202 / infil_avg_ceil_height
+    return norm_leakage * weather.data.WSF * ReferenceHeight / infil_avg_ceil_height
   end
 
   # Returns the infiltration SLA given an annual average ACH.
@@ -2865,7 +2866,7 @@ module Airflow
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [Double] Specific leakage area
   def self.get_infiltration_SLA_from_ACH(ach, infil_height, infil_avg_ceil_height, weather)
-    return ach * (infil_avg_ceil_height / 8.202) / (1000.0 * weather.data.WSF * (infil_height / 8.202)**0.4)
+    return ach * (infil_avg_ceil_height / ReferenceHeight) / (1000.0 * weather.data.WSF * (infil_height / ReferenceHeight)**0.4)
   end
 
   # Returns the infiltration SLA given a ACH50.
@@ -2912,7 +2913,7 @@ module Airflow
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [Double] Infiltration airflow rate (cfm)
   def self.get_mech_vent_qinf_cfm(nl, weather, cfa)
-    return nl * weather.data.WSF * cfa * 8.202 / 60.0
+    return nl * weather.data.WSF * cfa * ReferenceHeight / 60.0
   end
 
   # Returns Qtot, the total required air exchange rate, per ASHRAE 62.2.

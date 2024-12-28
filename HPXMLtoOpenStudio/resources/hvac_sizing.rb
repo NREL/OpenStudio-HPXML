@@ -4340,7 +4340,7 @@ module HVACSizing
           ach = vented_attic.vented_attic_ach
         end
       end
-      ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, 8.202, weather) if ach.nil?
+      ach = Airflow.get_infiltration_ACH_from_SLA(sla, Airflow::ReferenceHeight, Airflow::ReferenceHeight, weather) if ach.nil?
     else # Unvented space
       ach = Airflow::UnventedSpaceACH
     end
