@@ -215,7 +215,6 @@ module Airflow
   # @return [Hash] Map with various infiltration key-value pairs (SLA, infiltration volume & height, etc.)
   def self.get_values_from_air_infiltration_measurements(hpxml_bldg, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    avg_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
     measurement = get_infiltration_measurement_of_interest(hpxml_bldg)
 
     infil_volume = measurement.infiltration_volume
@@ -223,6 +222,7 @@ module Airflow
     if infil_height.nil?
       infil_height = hpxml_bldg.inferred_infiltration_height(infil_volume)
     end
+    infil_avg_ceil_height = infil_volume / cfa
 
     sla, ach50, nach = nil
     if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure)
@@ -232,20 +232,20 @@ module Airflow
         achXX = measurement.air_leakage * 60.0 / infil_volume # Convert CFM to ACH
         ach50 = calc_air_leakage_at_diff_pressure(achXX, measurement.house_pressure, 50.0)
       end
-      sla = get_infiltration_SLA_from_ACH50(ach50, avg_ceiling_height)
-      nach = get_infiltration_ACH_from_SLA(sla, infil_height, avg_ceiling_height, weather)
+      sla = get_infiltration_SLA_from_ACH50(ach50, infil_avg_ceil_height)
+      nach = get_infiltration_ACH_from_SLA(sla, infil_height, infil_avg_ceil_height, weather)
     elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
       if measurement.unit_of_measure == HPXML::UnitsACHNatural
         nach = measurement.air_leakage
       elsif measurement.unit_of_measure == HPXML::UnitsCFMNatural
         nach = measurement.air_leakage * 60.0 / infil_volume # Convert CFM to ACH
       end
-      sla = get_infiltration_SLA_from_ACH(nach, infil_height, avg_ceiling_height, weather)
-      ach50 = get_infiltration_ACH50_from_SLA(sla, avg_ceiling_height)
+      sla = get_infiltration_SLA_from_ACH(nach, infil_height, infil_avg_ceil_height, weather)
+      ach50 = get_infiltration_ACH50_from_SLA(sla, infil_avg_ceil_height)
     elsif !measurement.effective_leakage_area.nil?
       sla = UnitConversions.convert(measurement.effective_leakage_area, 'in^2', 'ft^2') / cfa
-      ach50 = get_infiltration_ACH50_from_SLA(sla, avg_ceiling_height)
-      nach = get_infiltration_ACH_from_SLA(sla, infil_height, avg_ceiling_height, weather)
+      ach50 = get_infiltration_ACH50_from_SLA(sla, infil_avg_ceil_height)
+      nach = get_infiltration_ACH_from_SLA(sla, infil_height, infil_avg_ceil_height, weather)
     else
       fail 'Unexpected error.'
     end
@@ -255,7 +255,13 @@ module Airflow
     end
     a_ext = 1.0 if a_ext.nil?
 
-    return { sla: sla, ach50: ach50, nach: nach, volume: infil_volume, height: infil_height, a_ext: a_ext }
+    return { sla: sla,
+             ach50: ach50,
+             nach: nach,
+             volume: infil_volume,
+             height: infil_height,
+             avg_ceil_height: infil_avg_ceil_height,
+             a_ext: a_ext }
   end
 
   # TODO
@@ -1672,10 +1678,9 @@ module Airflow
 
     space = spaces[HPXML::LocationGarage]
     area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
-    average_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
     hor_lk_frac = 0.4
     neutral_level = 0.5
-    sla = get_infiltration_SLA_from_ACH50(ach50, average_ceiling_height)
+    sla = get_infiltration_SLA_from_ACH50(ach50, infil_values[:avg_ceil_height])
     ela = sla * area
     c_w_SG, c_s_SG = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, space)
     apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG, duct_lk_imbals)
@@ -2705,8 +2710,7 @@ module Airflow
       p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(hpxml_bldg.elevation), 'psi', 'atm')
       outside_air_density = UnitConversions.convert(p_atm, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
 
-      avg_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
-      sla = get_infiltration_SLA_from_ACH50(ach50, avg_ceiling_height)
+      sla = get_infiltration_SLA_from_ACH50(ach50, infil_values[:avg_ceil_height])
 
       cfa = hpxml_bldg.building_construction.conditioned_floor_area
       a_o = sla * cfa # Effective Leakage Area (ft2)
@@ -2843,11 +2847,12 @@ module Airflow
   #
   # @param sla [Double] Specific leakage area
   # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
+  # @param infil_avg_ceil_height [Double] Average floor to ceiling height (ft)
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [Double] Annual average air changes per hour
-  def self.get_infiltration_ACH_from_SLA(sla, infil_height, avg_ceiling_height, weather)
+  def self.get_infiltration_ACH_from_SLA(sla, infil_height, infil_avg_ceil_height, weather)
     norm_leakage = get_infiltration_NL_from_SLA(sla, infil_height)
-    return norm_leakage * weather.data.WSF * 8.202 / avg_ceiling_height
+    return norm_leakage * weather.data.WSF * 8.202 / infil_avg_ceil_height
   end
 
   # Returns the infiltration SLA given an annual average ACH.
@@ -2856,11 +2861,11 @@ module Airflow
   #
   # @param ach [Double] Annual average air changes per hour
   # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
-  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
+  # @param infil_avg_ceil_height [Double] Average floor to ceiling height (ft)
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [Double] Specific leakage area
-  def self.get_infiltration_SLA_from_ACH(ach, infil_height, avg_ceiling_height, weather)
-    return ach * (avg_ceiling_height / 8.202) / (1000.0 * weather.data.WSF * (infil_height / 8.202)**0.4)
+  def self.get_infiltration_SLA_from_ACH(ach, infil_height, infil_avg_ceil_height, weather)
+    return ach * (infil_avg_ceil_height / 8.202) / (1000.0 * weather.data.WSF * (infil_height / 8.202)**0.4)
   end
 
   # Returns the infiltration SLA given a ACH50.
@@ -2868,11 +2873,11 @@ module Airflow
   # Source: ANSI/RESNET/ICC 301-2022 Addendum C Appendix C2.2 Eq. 16
   #
   # @param ach50 [Double] Air changes per hour at 50 Pa
-  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
+  # @param infil_avg_ceil_height [Double] Average floor to ceiling height (ft)
   # @param n_i [Double] Infiltration test flow exponent
   # @return [Double] Specific leakage area
-  def self.get_infiltration_SLA_from_ACH50(ach50, avg_ceiling_height, n_i = InfilPressureExponent)
-    return ((ach50 * 0.283316 * 4.0**n_i) / (50.0**n_i * 60.0 * UnitConversions.convert(1.0, 'ft^2', 'in^2') / avg_ceiling_height))
+  def self.get_infiltration_SLA_from_ACH50(ach50, infil_avg_ceil_height, n_i = InfilPressureExponent)
+    return ((ach50 * 0.283316 * 4.0**n_i) / (50.0**n_i * 60.0 * UnitConversions.convert(1.0, 'ft^2', 'in^2') / infil_avg_ceil_height))
   end
 
   # Returns the infiltration ACH50 given a SLA.
@@ -2880,11 +2885,11 @@ module Airflow
   # Source: ANSI/RESNET/ICC 301-2022 Addendum C Appendix C2.2 Eq. 15
   #
   # @param sla [Double] Specific leakage area
-  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
+  # @param infil_avg_ceil_height [Double] Average floor to ceiling height (ft)
   # @param n_i [Double] Infiltration test flow exponent
   # @return [Double] Air changes per hour at 50 Pa
-  def self.get_infiltration_ACH50_from_SLA(sla, avg_ceiling_height, n_i = InfilPressureExponent)
-    return sla / (0.283316 * 4.0**n_i) * (50.0**n_i * 60.0 * UnitConversions.convert(1.0, 'ft^2', 'in^2') / avg_ceiling_height)
+  def self.get_infiltration_ACH50_from_SLA(sla, infil_avg_ceil_height, n_i = InfilPressureExponent)
+    return sla / (0.283316 * 4.0**n_i) * (50.0**n_i * 60.0 * UnitConversions.convert(1.0, 'ft^2', 'in^2') / infil_avg_ceil_height)
   end
 
   # TODO

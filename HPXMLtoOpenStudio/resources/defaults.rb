@@ -1095,6 +1095,7 @@ module Defaults
       ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
       year_built = hpxml_bldg.building_construction.year_built
       avg_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
+      infil_volume = infil_measurement.infiltration_volume
       iecc_cz = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
 
       # Duct location fractions
@@ -1148,7 +1149,7 @@ module Defaults
         fnd_type_fracs[foundation_type] /= sum_fnd_area unless sum_fnd_area == 0.0
       end
 
-      ach50 = get_infiltration_ach50(cfa, ncfl_ag, year_built, avg_ceiling_height, iecc_cz, fnd_type_fracs, duct_loc_fracs, infil_measurement.leakiness_description)
+      ach50 = get_infiltration_ach50(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz, fnd_type_fracs, duct_loc_fracs, infil_measurement.leakiness_description)
       infil_measurement.house_pressure = 50
       infil_measurement.house_pressure_isdefaulted = true
       infil_measurement.unit_of_measure = HPXML::UnitsACH
@@ -4767,14 +4768,15 @@ module Defaults
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl_ag [Double] Number of conditioned floors above grade
   # @param year_built [Integer] Year the dwelling unit is built
-  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
+  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft)
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
   # @param iecc_cz [String] IECC climate zone
   # @param fnd_type_fracs [Hash] Map of foundation type => area fraction
   # @param duct_loc_fracs [Hash] Map of duct location => area fraction
   # @param leakiness_description [String] Leakiness description to qualitatively describe the dwelling unit infiltration
   # @param air_sealed [Boolean] True if the dwelling unit was professionally air sealed (intended to be used by Home Energy Score)
   # @return [Double] Calculated ACH50 value
-  def self.get_infiltration_ach50(cfa, ncfl_ag, year_built, avg_ceiling_height, iecc_cz,
+  def self.get_infiltration_ach50(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz,
                                   fnd_type_fracs, duct_loc_fracs, leakiness_description = nil, is_sealed = false)
     # Constants
     c_floor_area = -0.002078
@@ -4873,7 +4875,9 @@ module Defaults
     # Specific Leakage Area
     sla = nl / (1000.0 * ncfl_ag**0.3)
 
-    ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, avg_ceiling_height)
+    # ACH50
+    infil_avg_ceil_height = infil_volume / cfa
+    ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, infil_avg_ceil_height)
 
     return ach50
   end
