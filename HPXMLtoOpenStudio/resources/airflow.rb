@@ -8,7 +8,7 @@ module Airflow
   AssumedInsideTemp = 73.5 # (F)
   Gravity = 32.174 # acceleration of gravity (ft/s2)
   UnventedSpaceACH = 0.1 # natural air changes per hour, assumption
-  ReferenceHeight = 8.202 # reference floor to ceiling height per ASHRAE 62.2 (ft)
+  ReferenceHeight = 8.202 # reference height per ASHRAE 62.2 (ft)
 
   # Adds HPXML Air Infiltration and HPXML HVAC Distribution to the OpenStudio model.
   #
