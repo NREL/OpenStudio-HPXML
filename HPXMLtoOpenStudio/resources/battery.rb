@@ -133,7 +133,7 @@ module Battery
     elcs.setNumberofCellsinSeries(number_of_cells_in_series)
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setBatteryMass(battery_mass)
-    elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency) # Note: This is currently unused in E+, so we use an EMS program below instead
+    elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency) if !is_ev # Note: This is currently unused in E+, so we use an EMS program below instead
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)

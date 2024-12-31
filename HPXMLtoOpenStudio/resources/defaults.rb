@@ -3181,10 +3181,13 @@ module Defaults
   def self.apply_vehicles(hpxml_bldg, schedules_file)
     default_values = get_eletric_vehicle_values()
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle
+      next unless vehicle.vehicle_type == HPXML::VehicleTypeBEV
 
       apply_battery(vehicle, default_values)
-
+      if vehicle.battery_type.nil?
+        vehicle.battery_type = default_values[:battery_type]
+        vehicle.battery_type_isdefaulted = true
+      end
       if vehicle.energy_efficiency.nil?
         vehicle.energy_efficiency = default_values[:energy_efficiency]
         vehicle.energy_efficiency_isdefaulted = true
@@ -3259,10 +3262,13 @@ module Defaults
         battery.location = default_values[:location]
         battery.location_isdefaulted = true
       end
-
       if battery.is_shared_system.nil?
         battery.is_shared_system = false
         battery.is_shared_system_isdefaulted = true
+      end
+      if battery.round_trip_efficiency.nil?
+        battery.round_trip_efficiency = default_values[:round_trip_efficiency]
+        battery.round_trip_efficiency_isdefaulted = true
       end
 
       apply_battery(battery, default_values)
@@ -3282,10 +3288,6 @@ module Defaults
     if battery.nominal_voltage.nil?
       battery.nominal_voltage = default_values[:nominal_voltage] # V
       battery.nominal_voltage_isdefaulted = true
-    end
-    if battery.round_trip_efficiency.nil?
-      battery.round_trip_efficiency = default_values[:round_trip_efficiency]
-      battery.round_trip_efficiency_isdefaulted = true
     end
     if battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
       # Calculate nominal capacity from usable capacity or rated power output if available
@@ -3313,7 +3315,7 @@ module Defaults
         battery.usable_capacity_ah_isdefaulted = true
       end
     end
-    return unless battery.rated_power_output.nil?
+    return unless battery.rated_power_output.nil? || battery.is_a?(HPXML::Vehicle) # EV battery rated power is set using other inputs in vehicle.rb
 
     # Calculate rated power from nominal capacity
     if not battery.nominal_capacity_kwh.nil?
@@ -5720,12 +5722,12 @@ module Defaults
   #
   # @return [Hash] map of EV properties to default values
   def self.get_eletric_vehicle_values()
-    return { lifetime_model: HPXML::BatteryLifetimeModelNone,
+    return { battery_type: HPXML::BatteryTypeLithiumIon,
+             lifetime_model: HPXML::BatteryLifetimeModelNone,
              miles_per_year: 10900,
              hours_per_week: 11.6,
              nominal_capacity_kwh: 63,
              nominal_voltage: 50.0,
-             round_trip_efficiency: 0.925,
              energy_efficiency: 0.22, # kwh/mile
              fraction_charged_home: 1.0,
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity

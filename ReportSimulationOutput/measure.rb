@@ -356,7 +356,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     total_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeTotalLoadsProgram }
     comp_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeComponentLoadsProgram }
     total_airflows_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeTotalAirflowsProgram }
-    unmet_driving_hrs_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeBatteryElectricVehicle }
+    unmet_driving_hrs_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeBEVDischargeProgram }
     heated_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('heated_zones').get)
     cooled_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('cooled_zones').get)
 
@@ -3056,7 +3056,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           next unless subcategory.start_with? obj_name
           fail 'Unexpected error: multiple matches.' unless end_use.nil?
 
-          ### FIXME: ensure loss program applies to the correct battery
           end_use = eut
         end
 
@@ -3148,7 +3147,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Resilience
 
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        return { RT::Battery => ['Electric Storage Charge Fraction'] }
+        if object.additionalProperties.getFeatureAsBoolean('is_ev').get
+          return { RT::Battery => ['Electric Storage Charge Fraction'] }
+        end
 
       elsif object.to_OtherEquipment.is_initialized
         if object_type == Constants::ObjectTypeBatteryLossesAdjustment

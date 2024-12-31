@@ -13,7 +13,7 @@ class Vehicle
   # @return [nil]
   def self.apply(runner, model, spaces, hpxml_bldg, schedules_file)
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.vehicle_type == Constants::ObjectTypeBatteryElectricVehicle
+      next unless vehicle.vehicle_type == HPXML::VehicleTypeBEV
 
       apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
     end
@@ -84,7 +84,7 @@ class Vehicle
     else
       ev_charger.additional_properties.space = Geometry.get_space_from_location(ev_charger.location, spaces)
       vehicle.location = ev_charger.location
-      vehicle.additional_properties.space = Geometry.get_space_from_location(vehicle.location, spaces)
+      vehicle.additional_properties.space = Geometry.get_space_from_location(vehicle.ev_charger.location, spaces)
     end
 
     # Get schedules to calculate effective discharge power
@@ -135,7 +135,6 @@ class Vehicle
     # Apply EMS program to adjust discharge power based on ambient temperature.
     model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
       next unless elcs.name.to_s.include? vehicle.id
-
       ev_elcd = nil
       model.getElectricLoadCenterDistributions.each do |elcd|
         if elcd.name.to_s.include? vehicle.id
@@ -189,15 +188,15 @@ class Vehicle
         model,
         name: 'ev_discharge_program'
       )
-      ev_discharge_program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBatteryElectricVehicle)
+      ev_discharge_program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBEVDischargeProgram)
       unmet_hr_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'unmet_driving_hours')
       unmet_hr_var.setName('unmet_driving_hours')
       unmet_hr_var.setTypeOfDataInVariable('Summed')
       unmet_hr_var.setUpdateFrequency('SystemTimestep')
       unmet_hr_var.setEMSProgramOrSubroutineName(ev_discharge_program)
       unmet_hr_var.setUnits('hr')
-      unmet_hr_var.additionalProperties.setFeature('HPXML_ID', vehicle.id) # Used by reporting measure
-      unmet_hr_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetDrivingHours) # Used by reporting measure
+      # unmet_hr_var.additionalProperties.setFeature('HPXML_ID', vehicle.id) # Used by reporting measure
+      # unmet_hr_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetDrivingHours) # Used by reporting measure
 
       # Power adjustment vs ambient temperature curve; derived from most recent data in Figure 9 of https://www.nrel.gov/docs/fy23osti/83916.pdf
       # This adjustment scales power demand based on ambient temeprature, and encompasses losses due to battery and space conditioning (i.e., discharging losses), as well as charging losses.
