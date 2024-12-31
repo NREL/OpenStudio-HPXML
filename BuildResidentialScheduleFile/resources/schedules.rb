@@ -543,6 +543,7 @@ class ScheduleGenerator
     shower_peak_flow = shower_activity_sch.max
     showers = shower_activity_sch.map { |flow| flow / shower_peak_flow }
     @schedules[SchedulesFile::Columns[:HotWaterShowers].name] = showers
+    @schedules[SchedulesFile::Columns[:HotWaterShowersMinutes].name] = count_nonzero(shower_activity_sch, @minutes_per_step)
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     sink_activity_sch = sink_activity_sch.rotate(-4 * 60 + random_offset) # 4 am shifting
@@ -625,6 +626,20 @@ class ScheduleGenerator
     new_array = [0] * new_array_size
     new_array_size.times do |j|
       new_array[j] = array[(j * group_size)..(j + 1) * group_size - 1].sum(0)
+    end
+    return new_array
+  end
+
+  # Counts the number of non-zero values in each group of size group_size in the input array
+  #
+  # @param array [Array] The input array to process
+  # @param group_size [Integer] The size of each group to count non-zero values in
+  # @return [Array] Array containing counts of non-zero values for each group
+  def count_nonzero(array, group_size)
+    new_array_size = array.size / group_size
+    new_array = [0] * new_array_size
+    new_array_size.times do |j|
+      new_array[j] = array[(j * group_size)..(j + 1) * group_size - 1].count { |x| x != 0 }
     end
     return new_array
   end
