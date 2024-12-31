@@ -3147,7 +3147,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Resilience
 
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        if object.additionalProperties.getFeatureAsBoolean('is_ev').get
+        if not object.additionalProperties.getFeatureAsBoolean('is_ev').get
           return { RT::Battery => ['Electric Storage Charge Fraction'] }
         end
 

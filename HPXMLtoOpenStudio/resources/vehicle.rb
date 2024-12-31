@@ -135,6 +135,7 @@ class Vehicle
     # Apply EMS program to adjust discharge power based on ambient temperature.
     model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
       next unless elcs.name.to_s.include? vehicle.id
+
       ev_elcd = nil
       model.getElectricLoadCenterDistributions.each do |elcd|
         if elcd.name.to_s.include? vehicle.id
