@@ -1023,7 +1023,7 @@ class SchedulesFile
     HotWaterClothesWasher: Column.new('hot_water_clothes_washer', false, true, :frac),
     HotWaterFixtures: Column.new('hot_water_fixtures', true, true, :frac),
     HotWaterShowers: Column.new('hot_water_showers', true, true, :frac),
-    HotWaterShowersMinutes: Column.new('hot_water_showers', true, true, :frac),
+    HotWaterShowersMinutes: Column.new('hot_water_showers_minutes', true, true, nil),
     HotWaterRecirculationPump: Column.new('hot_water_recirculation_pump', true, false, :frac),
     GeneralWaterUse: Column.new('general_water_use', true, false, :frac),
     Sleeping: Column.new('sleeping', false, false, nil),

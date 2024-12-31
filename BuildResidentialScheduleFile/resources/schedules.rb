@@ -2,7 +2,6 @@
 
 require 'csv'
 require 'matrix'
-
 # Collection of methods related to the generation of stochastic occupancy schedules.
 class ScheduleGenerator
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -539,11 +538,12 @@ class ScheduleGenerator
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     shower_activity_sch = shower_activity_sch.rotate(random_offset)
     shower_activity_sch = apply_monthly_offsets(array: shower_activity_sch, weekday_monthly_shift_dict: weekday_monthly_shift_dict, weekend_monthly_shift_dict: weekend_monthly_shift_dict)
+    shower_minutes = count_nonzero(shower_activity_sch, @minutes_per_step)
     shower_activity_sch = aggregate_array(shower_activity_sch, @minutes_per_step)
     shower_peak_flow = shower_activity_sch.max
     showers = shower_activity_sch.map { |flow| flow / shower_peak_flow }
     @schedules[SchedulesFile::Columns[:HotWaterShowers].name] = showers
-    @schedules[SchedulesFile::Columns[:HotWaterShowersMinutes].name] = count_nonzero(shower_activity_sch, @minutes_per_step)
+    @schedules[SchedulesFile::Columns[:HotWaterShowersMinutes].name] = shower_minutes
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     sink_activity_sch = sink_activity_sch.rotate(-4 * 60 + random_offset) # 4 am shifting
