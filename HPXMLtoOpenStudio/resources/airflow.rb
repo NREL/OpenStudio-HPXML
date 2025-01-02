@@ -1716,7 +1716,7 @@ module Airflow
     space = spaces[HPXML::LocationCrawlspaceVented]
     height = Geometry.get_height_of_spaces(spaces: [space])
     sla = vented_crawl.vented_crawlspace_sla
-    ach = get_infiltration_ACH_from_SLA(sla, height, height, weather)
+    ach = get_infiltration_ACH_from_SLA(sla, height, ReferenceHeight, weather)
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil, duct_lk_imbals)
   end
 
