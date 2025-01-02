@@ -59,14 +59,8 @@ module Airflow
     end
 
     # Apply ducts
-
     duct_lk_imbals = []
-    adiabatic_const = nil
-    duct_systems = create_duct_systems(model, spaces, hpxml_bldg, airloop_map)
-    check_duct_leakage(runner, hpxml_bldg)
-    duct_systems.each do |ducts, object|
-      adiabatic_const = apply_ducts(model, spaces, hpxml_bldg, ducts, object, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors, adiabatic_const)
-    end
+    apply_ducts(runner, model, spaces, hpxml_bldg, airloop_map, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors)
 
     # Apply infiltration/ventilation
     set_wind_speed_correction(model, hpxml_bldg)
@@ -902,12 +896,44 @@ module Airflow
     end
   end
 
+  # Applies all air distribution systems' ducts to the OpenStudio model.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param airloop_map [Hash] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects
+  # @param vent_fans [Hash] Map of vent fan types => list of HPXML VentilationFans
+  # @param cfis_data [Hash] Map with various CFIS-relative OpenStudio model objects
+  # @param fan_data [TODO] TODO
+  # @param duct_lk_imbals [Array] List of duct leakage imbalance information
+  # @param sensors [Hash] Map of :sensor_types => OpenStudio::Model::EnergyManagementSystemSensor objects
+  # @return [OpenStudio::Model::Construction] Adiabatic construction used by the duct model
+  def self.apply_ducts(runner, model, spaces, hpxml_bldg, airloop_map, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors)
+    check_duct_leakage(runner, hpxml_bldg)
+
+    # Apply ducts for each air distribution system
+    adiabatic_const = nil
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      duct_infos = create_duct_infos(model, hvac_distribution, spaces)
+      next if duct_infos.empty?
+
+      objects = hvac_distribution.hvac_systems.map { |hvac_system| airloop_map[hvac_system.id] }.select { |o| !o.nil? }.uniq
+      fail 'Unexpected error.' if objects.size != 1
+
+      object = objects[0]
+      adiabatic_const = apply_ducts_for_distribution_system(model, spaces, hpxml_bldg, duct_infos, object, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors, adiabatic_const)
+    end
+  end
+
   # Creates an EMS program to calculate duct losses for a given air distribution system.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param ducts [Array<Duct>] List of Airflow::Duct objects
+  # @param duct_infos [Array<Hash>] List of duct info Hashes
   # @param object [OpenStudio::Model::XXX] OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) object
   # @param vent_fans [Hash] Map of vent fan types => list of HPXML VentilationFans
   # @param cfis_data [Hash] Map with various CFIS-relative OpenStudio model objects
@@ -916,25 +942,28 @@ module Airflow
   # @param sensors [Hash] Map of :sensor_types => OpenStudio::Model::EnergyManagementSystemSensor objects
   # @param adiabatic_const [OpenStudio::Model::Construction or nil] Adiabatic construction used by the duct model, or nil if not yet created
   # @return [OpenStudio::Model::Construction] Adiabatic construction used by the duct model
-  def self.apply_ducts(model, spaces, hpxml_bldg, ducts, object, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors, adiabatic_const)
+  def self.apply_ducts_for_distribution_system(model, spaces, hpxml_bldg, duct_infos, object, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors, adiabatic_const)
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     conditioned_zone = conditioned_space.thermalZone.get
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
 
-    ducts.each do |duct|
-      if not duct.loc_schedule.nil?
-        # Pass MF space temperature schedule name
-        duct.location = duct.loc_schedule.name.to_s
-      elsif not duct.loc_space.nil?
-        duct.location = duct.loc_space.name.to_s
-        duct.zone = duct.loc_space.thermalZone.get
-      else # Outside/RoofDeck
-        duct.location = HPXML::LocationOutside
-        duct.zone = nil
+    duct_infos.each do |duct_info|
+      if not duct_info[:loc_schedule].nil?
+        # MF space temperature schedule name
+        duct_info[:location] = duct_info[:loc_schedule].name.to_s
+        duct_info[:zone] = nil
+      elsif not duct_info[:loc_space].nil?
+        # Thermal zone
+        duct_info[:location] = duct_info[:loc_space].name.to_s
+        duct_info[:zone] = duct_info[:loc_space].thermalZone.get
+      else
+        # Outside/RoofDeck
+        duct_info[:location] = HPXML::LocationOutside
+        duct_info[:zone] = nil
       end
     end
 
-    return if ducts.size == 0 # No ducts
+    return adiabatic_const if duct_infos.size == 0 # No ducts
 
     if object.is_a? OpenStudio::Model::AirLoopHVAC
       # Most system types
@@ -1056,26 +1085,26 @@ module Airflow
     duct_sensors[:ra_w] = [ra_w_var, ra_w_sensor]
 
     # Get unique set of duct locations
-    duct_locations = ducts.map { |duct| if duct.zone.nil? then duct.loc_schedule else duct.zone end }.uniq
+    duct_locations = duct_infos.map { |duct_info| if duct_info[:zone].nil? then duct_info[:loc_schedule] else duct_info[:zone] end }.uniq
 
     # Assign ducts to each duct location
-    duct_locations_ducts = {}
+    duct_locations_infos = {}
     duct_locations.each do |duct_location|
-      duct_locations_ducts[duct_location] = []
-      ducts.each do |duct|
-        next unless (duct_location.nil? && duct.zone.nil?) ||
-                    (!duct_location.nil? && !duct.zone.nil? && (duct.zone.name.to_s == duct_location.name.to_s)) ||
-                    (!duct_location.nil? && !duct.loc_schedule.nil? && (duct.loc_schedule.name.to_s == duct_location.name.to_s))
+      duct_locations_infos[duct_location] = []
+      duct_infos.each do |duct_info|
+        next unless (duct_location.nil? && duct_info[:zone].nil?) ||
+                    (!duct_location.nil? && !duct_info[:zone].nil? && (duct_info[:zone].name.to_s == duct_location.name.to_s)) ||
+                    (!duct_location.nil? && !duct_info[:loc_schedule].nil? && (duct_info[:loc_schedule].name.to_s == duct_location.name.to_s))
 
-        duct_locations_ducts[duct_location] << duct
+        duct_locations_infos[duct_location] << duct_info
       end
     end
 
     # Create one duct program for each duct location zone (plus an extra one for CFIS ducts from outside, if appropriate)
-    duct_locations_ducts.each_with_index do |(duct_location, duct_location_ducts), index|
+    duct_locations_infos.each_with_index do |(duct_location, duct_location_info), index|
       next if (not duct_location.nil?) && (duct_location.name.to_s == conditioned_zone.name.to_s)
 
-      apply_duct_location(model, spaces, hpxml_bldg, duct_location_ducts, object, index, duct_location, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors, duct_sensors, ra_duct_space)
+      apply_ducts_for_distribution_system_location(model, spaces, hpxml_bldg, duct_location_info, object, index, duct_location, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors, duct_sensors, ra_duct_space)
     end
 
     return adiabatic_const
@@ -1087,7 +1116,7 @@ module Airflow
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param ducts [Array<Duct>] List of Airflow::Duct objects
+  # @param duct_infos [TODO] TODO
   # @param object [OpenStudio::Model::XXX] OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) object
   # @param index [Integer] Index number of the current duct location
   # @param duct_location [TODO] TODO
@@ -1099,7 +1128,7 @@ module Airflow
   # @param duct_sensors [TODO] TODO
   # @param ra_duct_space [TODO] TODO
   # @return [nil]
-  def self.apply_duct_location(model, spaces, hpxml_bldg, ducts, object, index, duct_location, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors, duct_sensors, ra_duct_space)
+  def self.apply_ducts_for_distribution_system_location(model, spaces, hpxml_bldg, duct_infos, object, index, duct_location, vent_fans, cfis_data, fan_data, duct_lk_imbals, sensors, duct_sensors, ra_duct_space)
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     conditioned_zone = conditioned_space.thermalZone.get
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
@@ -1379,18 +1408,19 @@ module Airflow
     leakage_fracs = { HPXML::DuctTypeSupply => nil, HPXML::DuctTypeReturn => nil }
     leakage_cfm25s = { HPXML::DuctTypeSupply => nil, HPXML::DuctTypeReturn => nil }
     ua_values = { HPXML::DuctTypeSupply => 0, HPXML::DuctTypeReturn => 0 }
-    ducts.each do |duct|
-      if not duct.leakage_frac.nil?
-        leakage_fracs[duct.side] = 0 if leakage_fracs[duct.side].nil?
-        leakage_fracs[duct.side] += duct.leakage_frac
-      elsif not duct.leakage_cfm25.nil?
-        leakage_cfm25s[duct.side] = 0 if leakage_cfm25s[duct.side].nil?
-        leakage_cfm25s[duct.side] += duct.leakage_cfm25
-      elsif not duct.leakage_cfm50.nil?
-        leakage_cfm25s[duct.side] = 0 if leakage_cfm25s[duct.side].nil?
-        leakage_cfm25s[duct.side] += calc_air_leakage_at_diff_pressure(duct.leakage_cfm50, 50.0, 25.0)
+    duct_infos.each do |duct_info|
+      side = duct_info[:side]
+      if not duct_info[:leakage_frac].nil?
+        leakage_fracs[side] = 0 if leakage_fracs[side].nil?
+        leakage_fracs[side] += duct_info[:leakage_frac]
+      elsif not duct_info[:leakage_cfm25].nil?
+        leakage_cfm25s[side] = 0 if leakage_cfm25s[side].nil?
+        leakage_cfm25s[side] += duct_info[:leakage_cfm25]
+      elsif not duct_info[:leakage_cfm50].nil?
+        leakage_cfm25s[side] = 0 if leakage_cfm25s[side].nil?
+        leakage_cfm25s[side] += calc_air_leakage_at_diff_pressure(duct_info[:leakage_cfm50], 50.0, 25.0)
       end
-      ua_values[duct.side] += duct.area / duct.effective_rvalue
+      ua_values[side] += duct_info[:area] / duct_info[:effective_rvalue]
     end
 
     # Check if the duct location is a vented space
@@ -2981,56 +3011,17 @@ module Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param airloop_map [Hash] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects
-  # @return [Hash] Map of list of Airflow::Duct objects => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) object
-  def self.create_duct_systems(model, spaces, hpxml_bldg, airloop_map)
-    duct_systems = {}
-    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-      air_ducts = create_ducts(model, hvac_distribution, spaces)
-      next if air_ducts.empty?
-
-      # Connect AirLoopHVACs to ducts
-      added_ducts = false
-      hvac_distribution.hvac_systems.each do |hvac_system|
-        next if airloop_map[hvac_system.id].nil?
-
-        object = airloop_map[hvac_system.id]
-        if duct_systems[air_ducts].nil?
-          duct_systems[air_ducts] = object
-          added_ducts = true
-        elsif duct_systems[air_ducts] != object
-          # Multiple air loops associated with this duct system, treat
-          # as separate duct systems.
-          air_ducts2 = create_ducts(model, hvac_distribution, spaces)
-          duct_systems[air_ducts2] = object
-          added_ducts = true
-        end
-      end
-      if not added_ducts
-        fail 'Unexpected error adding ducts to model.'
-      end
-    end
-    return duct_systems
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hvac_distribution [HPXML::HVACDistribution] HPXML HVAC Distribution object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return [Array<Duct>] list of initialized Duct class objects from the airflow resource file
-  def self.create_ducts(model, hvac_distribution, spaces)
-    air_ducts = []
+  # @return [Array<Hash>] List of duct info Hashes
+  def self.create_duct_infos(model, hvac_distribution, spaces)
+    duct_infos = []
 
     # Duct leakage (supply/return => [value, units])
     leakage_to_outside = { HPXML::DuctTypeSupply => [0.0, nil],
                            HPXML::DuctTypeReturn => [0.0, nil] }
     hvac_distribution.duct_leakage_measurements.each do |duct_leakage_measurement|
-      next unless [HPXML::UnitsCFM25, HPXML::UnitsCFM50, HPXML::UnitsPercent].include?(duct_leakage_measurement.duct_leakage_units) && (duct_leakage_measurement.duct_leakage_total_or_to_outside == 'to outside')
+      next unless [HPXML::UnitsCFM25, HPXML::UnitsCFM50, HPXML::UnitsPercent].include?(duct_leakage_measurement.duct_leakage_units) && (duct_leakage_measurement.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside)
       next if duct_leakage_measurement.duct_type.nil?
 
       leakage_to_outside[duct_leakage_measurement.duct_type] = [duct_leakage_measurement.duct_leakage_value, duct_leakage_measurement.duct_leakage_units]
@@ -3047,7 +3038,7 @@ module Airflow
       total_unconditioned_duct_area[ducts.duct_type] += ducts.duct_surface_area * ducts.duct_surface_area_multiplier
     end
 
-    # Create duct objects
+    # Create duct hashes
     hvac_distribution.ducts.each do |ducts|
       next if HPXML::conditioned_locations_this_unit.include? ducts.duct_location
       next if ducts.duct_type.nil?
@@ -3070,18 +3061,21 @@ module Airflow
         fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
-      air_ducts << Duct.new(ducts.duct_type, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm25, duct_leakage_cfm50,
-                            ducts.duct_surface_area * ducts.duct_surface_area_multiplier, ducts.duct_effective_r_value, ducts.duct_buried_insulation_level)
+      duct_infos << { side: ducts.duct_type,
+                      loc_space: duct_loc_space,
+                      loc_schedule: duct_loc_schedule,
+                      leakage_frac: duct_leakage_frac,
+                      leakage_cfm25: duct_leakage_cfm25,
+                      leakage_cfm50: duct_leakage_cfm50,
+                      area: ducts.duct_surface_area * ducts.duct_surface_area_multiplier,
+                      effective_rvalue: ducts.duct_effective_r_value,
+                      buried_level: ducts.duct_buried_insulation_level }
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
     [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_side|
       next unless (leakage_to_outside[duct_side][0] > 0) && (total_unconditioned_duct_area[duct_side] == 0)
 
-      duct_area = 0.0
-      duct_effective_r_value = 99 # arbitrary
-      duct_loc_space = nil # outside
-      duct_loc_schedule = nil # outside
       duct_leakage_value = leakage_to_outside[duct_side][0]
       duct_leakage_units = leakage_to_outside[duct_side][1]
 
@@ -3096,35 +3090,17 @@ module Airflow
         fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
-      air_ducts << Duct.new(duct_side, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm25, duct_leakage_cfm50, duct_area,
-                            duct_effective_r_value, HPXML::DuctBuriedInsulationNone)
+      duct_infos << { side: duct_side,
+                      loc_space: nil, # outside
+                      loc_schedule: nil, # outside
+                      leakage_frac: duct_leakage_frac,
+                      leakage_cfm25: duct_leakage_cfm25,
+                      leakage_cfm50: duct_leakage_cfm50,
+                      area: 0.0,
+                      effective_rvalue: 99, # Arbitrary
+                      buried_level: HPXML::DuctBuriedInsulationNone }
     end
 
-    return air_ducts
+    return duct_infos
   end
-end
-
-# TODO
-class Duct
-  # @param side [String] Whether the duct is on the supply or return side (HPXML::DuctTypeXXX)
-  # @param loc_space [OpenStudio::Model::Space] The space where duct is located
-  # @param loc_schedule [OpenStudio::Model::ScheduleConstant] The temperature schedule for where the duct is located, if not in a space
-  # @param leakage_frac [TODO] TODO
-  # @param leakage_cfm25 [TODO] TODO
-  # @param leakage_cfm50 [TODO] TODO
-  # @param area [TODO] TODO
-  # @param effective_rvalue [Double] Duct effective R-value, accounting for air films and adjusted for round/buried ducts (hr-ft2-F/Btu)
-  # @param buried_level [String] How deeply the duct is buried in loose-fill insulation (HPXML::DuctBuriedInsulationXXX)
-  def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
-    @side = side
-    @loc_space = loc_space
-    @loc_schedule = loc_schedule
-    @leakage_frac = leakage_frac
-    @leakage_cfm25 = leakage_cfm25
-    @leakage_cfm50 = leakage_cfm50
-    @area = area
-    @effective_rvalue = effective_rvalue
-    @buried_level = buried_level
-  end
-  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :leakage_cfm50, :area, :effective_rvalue, :zone, :location, :buried_level)
 end
