@@ -4199,7 +4199,7 @@ module HVACSizing
       elsif m.duct_leakage_units == HPXML::UnitsCFM25
         cfms[m.duct_type] += m.duct_leakage_value
       elsif m.duct_leakage_units == HPXML::UnitsCFM50
-        cfms[m.duct_type] += Airflow.calc_air_leakage_at_diff_pressure(m.duct_leakage_value, 50.0, 25.0)
+        cfms[m.duct_type] += Airflow.calc_infiltration_at_diff_pressure(m.duct_leakage_value, 50.0, 25.0)
       end
     end
 
