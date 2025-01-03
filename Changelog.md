@@ -4,6 +4,7 @@ __New Features__
 - HVAC modeling updates:
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional EER or EER2 inputs for central air conditioners/heat pumps and mini-splits.
+  - Allows optional maximum compressor operating temperature input for all DX cooling systems.
 
 __Bugfixes__
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
