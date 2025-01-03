@@ -1707,9 +1707,10 @@ module Airflow
 
     space = spaces[HPXML::LocationGarage]
     area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
+    volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
     hor_lk_frac = 0.4 # DOE-2 Default
     neutral_level = 0.5 # DOE-2 Default
-    sla = get_infiltration_SLA_from_ACH50(ach50, infil_values[:avg_ceil_height])
+    sla = get_infiltration_SLA_from_ACH50(ach50, volume / area)
     ela = sla * area
     c_w_SG, c_s_SG = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, space)
     apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG, duct_lk_imbals)
