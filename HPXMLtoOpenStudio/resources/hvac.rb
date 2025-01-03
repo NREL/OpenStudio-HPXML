@@ -2539,15 +2539,13 @@ module HVAC
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [Double] Fan power at any speed or mode
   def self.calculate_fan_power_from_curve(max_fan_power, fan_ratio, hvac_system)
-    if hvac_system.fan_motor_type.nil?
-      # Cubic relationship fan power curve
-      fan_power = max_fan_power * (fan_ratio**3)
-    elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypeBPM
+    if hvac_system.fan_motor_type == HPXML::HVACFanMotorTypeBPM
       # BPM fan
       index = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
       fan_power = max_fan_power * (fan_ratio**index)
     else
-      # PSC fan
+      # PSC fan or fan_motor_type = nil
+      # For system types that fan_motor_type is not specified, the fan_ratio is 1 and either equation is fine.
       fan_power = max_fan_power * fan_ratio * (0.3 * fan_ratio + 0.7)
     end
     return fan_power
