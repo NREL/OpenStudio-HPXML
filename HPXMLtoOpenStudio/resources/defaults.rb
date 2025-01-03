@@ -870,8 +870,9 @@ module Defaults
     cond_crawl_volume = hpxml_bldg.inferred_conditioned_crawlspace_volume()
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     if hpxml_bldg.building_construction.average_ceiling_height.nil?
-      # ASHRAE 62.2 default for average floor to ceiling height
-      hpxml_bldg.building_construction.average_ceiling_height = 8.2
+      # Note: We do not try to calculate it from CFA & ConditionedBuildingVolume since
+      # that is not a reliable assumption if there is a, e.g., conditioned crawlspace.
+      hpxml_bldg.building_construction.average_ceiling_height = 8.2 # ASHRAE 62.2 default
       hpxml_bldg.building_construction.average_ceiling_height_isdefaulted = true
     end
     if hpxml_bldg.building_construction.conditioned_building_volume.nil?
