@@ -2886,15 +2886,12 @@ module HVAC
   def self.extrapolate_data_points(data_array, mode, hp_temp)
     # Set of data used for table lookup
     data_array.each do |data|
-      outdoor_dry_bulbs = []
       if mode == :clg
         # Extrapolate to 60F and maximum HP operating temperature
-        outdoor_dry_bulbs << 60.0
-        outdoor_dry_bulbs << hp_temp
+        outdoor_dry_bulbs = [60.0, hp_temp]
       else
         # Extrapolate to minimum HP operating temperature and 60F
-        outdoor_dry_bulbs << hp_temp
-        outdoor_dry_bulbs << 60.0
+        outdoor_dry_bulbs = [hp_temp, 60.0]
       end
 
       capacity_description = data[0].capacity_description
