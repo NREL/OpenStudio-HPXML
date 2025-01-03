@@ -2899,7 +2899,7 @@ module HVAC
         low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, false)
         low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, false)
 
-        outdoor_dry_bulbs << [low_odb_at_zero_cop, low_odb_at_zero_capacity, 55.0].max # Min cooling ODB
+        outdoor_dry_bulbs << [low_odb_at_zero_cop, low_odb_at_zero_capacity, 60.0].max # Min cooling ODB
         outdoor_dry_bulbs << [high_odb_at_zero_cop, high_odb_at_zero_capacity, hp_temp, weather_temp].min # Max cooling ODB
       else
         # Calculate ODB temperature at which COP or capacity is zero, so we don't extrapolate beyond that and get negative values
@@ -2924,6 +2924,7 @@ module HVAC
         new_dp.outdoor_temperature = target_odb
 
         # Extrapolate net capacity and input power per RESNET MINHERS Addendum 82.
+        new_dp.capacity_description = capacity_description
         new_dp.capacity = extrapolate_data_point_to_odb(data, mode, capacity_description, target_odb, :capacity)
         new_dp.input_power = extrapolate_data_point_to_odb(data, mode, capacity_description, target_odb, :input_power)
         new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
@@ -3064,6 +3065,7 @@ module HVAC
           new_dp.efficiency_cop = (1 / (new_eir_normalized * eir_rated))
           new_dp.outdoor_temperature = odb_diff / cop_diff * (new_dp.efficiency_cop - dp.efficiency_cop) + dp.outdoor_temperature
           new_dp.capacity = cap_diff / odb_diff * (new_dp.outdoor_temperature - dp.outdoor_temperature) + dp.capacity
+          new_dp.capacity_description = dp.capacity_description
           data << new_dp
         end
       end

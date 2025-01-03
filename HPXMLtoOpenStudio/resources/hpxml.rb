@@ -11153,15 +11153,31 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
+
       outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
       outdoor_temps.each do |outdoor_temp|
-        num_min = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
-        num_max = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
-        if (num_min != 1) || (num_max != 1)
+        min_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
+        max_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
+        # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
+        if (min_dps.size != 1) || (max_dps.size != 1)
           errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is incomplete; there must be exactly one minimum and one maximum capacity datapoint."
+        else
+          min_capacity = min_dps[0].capacity.nil? ? min_dps[0].capacity_fraction_of_nominal : min_dps[0].capacity
+          max_capacity = max_dps[0].capacity.nil? ? max_dps[0].capacity_fraction_of_nominal : max_dps[0].capacity
+          min_cop = min_dps[0].efficiency_cop
+          max_cop = max_dps[0].efficiency_cop
+
+          # Check power at minimum capacity <= power at maximum capacity
+          if min_capacity / min_cop > max_capacity / max_cop
+            errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power at minimum capacity must be less than power at maximum capacity."
+          end
+          # Check minimum capacity <= maximum capacity
+          if min_capacity > max_capacity
+            errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Maximum capacity must be greater than minimum capacity."
+          end
         end
       end
+
       return errors
     end
 
@@ -11262,15 +11278,31 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
+
       outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
       outdoor_temps.each do |outdoor_temp|
-        num_min = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
-        num_max = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
-        if (num_min != 1) || (num_max != 1)
+        min_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
+        max_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
+        # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
+        if (min_dps.size != 1) || (max_dps.size != 1)
           errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is incomplete; there must be exactly one minimum and one maximum capacity datapoint."
+        else
+          min_capacity = min_dps[0].capacity.nil? ? min_dps[0].capacity_fraction_of_nominal : min_dps[0].capacity
+          max_capacity = max_dps[0].capacity.nil? ? max_dps[0].capacity_fraction_of_nominal : max_dps[0].capacity
+          min_cop = min_dps[0].efficiency_cop
+          max_cop = max_dps[0].efficiency_cop
+
+          # Check power at minimum capacity <= power at maximum capacity
+          if min_capacity / min_cop > max_capacity / max_cop
+            errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power at minimum capacity must be less than power at maximum capacity."
+          end
+          # Check minimum capacity <= maximum capacity
+          if min_capacity > max_capacity
+            errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Maximum capacity must be greater than minimum capacity."
+          end
         end
       end
+
       return errors
     end
 
