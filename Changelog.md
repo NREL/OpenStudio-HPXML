@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- Allows modeling electric vehicle batteries and chargers. 
 
 __Bugfixes__
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
