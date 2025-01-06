@@ -54,8 +54,7 @@ class Vehicle
     return charging_schedule, discharging_schedule
   end
 
-  # Apply an electric vehicle to the model using the battery.rb Battery class, which assigns OpenStudio ElectricLoadCenterStorageLiIonNMCBattery, ElectricLoadCenterDistribution, OtherEquipment, and EMS objects.
-  # Custom adjustments for EV operation are made with an EMS object within this class and in the Battery class.
+  # Apply an electric vehicle to the model using the battery.rb Battery class, which assigns OpenStudio ElectricLoadCenterStorageLiIonNMCBattery and ElectricLoadCenterDistribution objects.
   # An EMS program models the effect of ambient temperature on the effective power output.
   # An EMS program writes a 'discharge offset' variable to omit this from aggregate home electricity outputs.
   # If no charging/discharging schedule is provided, then the electric vehicle is not modeled.
@@ -81,11 +80,8 @@ class Vehicle
     if ev_charger.nil?
       runner.registerWarning('Electric vehicle specified with no charger provided; battery will not be modeled.')
       return
-    else
-      ev_charger.additional_properties.space = Geometry.get_space_from_location(ev_charger.location, spaces)
-      vehicle.location = ev_charger.location
-      vehicle.additional_properties.space = Geometry.get_space_from_location(vehicle.ev_charger.location, spaces)
     end
+    vehicle.location = ev_charger.location
 
     # Get schedules to calculate effective discharge power
     charging_schedule, discharging_schedule = get_ev_charging_schedules(runner, model, vehicle, schedules_file)
@@ -115,11 +111,9 @@ class Vehicle
 
     # Check for discrepancy between inputted and calculated hours per week
     sch_hours_per_week = annual_driving_hours / UnitConversions.convert(1, 'yr', 'day') * 7
-    hours_differ = sch_hours_per_week.round(1) != vehicle.hours_per_week.round(1)
-    if hours_differ
-      if !(vehicle.hours_per_week_isdefaulted || vehicle.ev_charging_weekday_fractions_isdefaulted || vehicle.ev_charging_weekend_fractions_isdefaulted)
-        runner.registerWarning("Electric vehicle hours per week inputted (#{vehicle.hours_per_week.round(1)}) do not match the hours per week calculated from the discharging schedule (#{sch_hours_per_week.round(1)}). The inputted hours per week value will be ignored.")
-      end
+    hours_differ = (sch_hours_per_week - vehicle.hours_per_week).abs
+    if hours_differ > 0.1
+      runner.registerWarning("Electric vehicle hours per week inputted (#{vehicle.hours_per_week.round(1)}) do not match the hours per week calculated from the discharging schedule (#{sch_hours_per_week.round(1)}). The inputted hours per week value will be ignored.")
       vehicle.hours_per_week = sch_hours_per_week
     end
 
@@ -136,14 +130,7 @@ class Vehicle
     model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
       next unless elcs.name.to_s.include? vehicle.id
 
-      ev_elcd = nil
-      model.getElectricLoadCenterDistributions.each do |elcd|
-        if elcd.name.to_s.include? vehicle.id
-          ev_elcd = elcd
-          break
-        end
-      end
-
+      ev_elcd = model.getElectricLoadCenterDistributions.find { |elcd| elcd.name.to_s.include?(vehicle.id) }
       eff_charge_power = ev_elcd.designStorageControlChargePower
       min_soc = ev_elcd.minimumStorageStateofChargeFraction
       discharging_schedule = ev_elcd.storageDischargePowerFractionSchedule.get
@@ -159,7 +146,6 @@ class Vehicle
         model_object: ev_elcd,
         comp_type_and_control: ['Electrical Storage', 'Power Charge Rate']
       )
-
       temp_sensor = Model.add_ems_sensor(
         model,
         name: 'site_temp',
@@ -196,8 +182,6 @@ class Vehicle
       unmet_hr_var.setUpdateFrequency('SystemTimestep')
       unmet_hr_var.setEMSProgramOrSubroutineName(ev_discharge_program)
       unmet_hr_var.setUnits('hr')
-      # unmet_hr_var.additionalProperties.setFeature('HPXML_ID', vehicle.id) # Used by reporting measure
-      # unmet_hr_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetDrivingHours) # Used by reporting measure
 
       # Power adjustment vs ambient temperature curve; derived from most recent data in Figure 9 of https://www.nrel.gov/docs/fy23osti/83916.pdf
       # This adjustment scales power demand based on ambient temeprature, and encompasses losses due to battery and space conditioning (i.e., discharging losses), as well as charging losses.
@@ -216,18 +200,14 @@ class Vehicle
       ev_discharge_program.addLine('  EndIf')
       ev_discharge_program.addLine("  If #{discharge_sch_sensor.name} > 0.0")
       ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{eff_discharge_power} * power_mult * #{discharge_sch_sensor.name}")
-      ev_discharge_program.addLine("    Set #{charge_power_act.name} = 0")
-      ev_discharge_program.addLine("      If #{soc_sensor.name} <= #{min_soc}")
-      ev_discharge_program.addLine("        Set #{unmet_hr_var.name} = #{discharge_sch_sensor.name}")
-      ev_discharge_program.addLine('      Else')
-      ev_discharge_program.addLine("        Set #{unmet_hr_var.name} = 0")
-      ev_discharge_program.addLine('      EndIf')
-      ev_discharge_program.addLine("  ElseIf #{charge_sch_sensor.name} > 0.0")
       ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power} * #{charge_sch_sensor.name}")
-      ev_discharge_program.addLine("    Set #{discharge_power_act.name} = 0")
-      ev_discharge_program.addLine("    Set #{unmet_hr_var.name} = 0")
+      ev_discharge_program.addLine("    If #{soc_sensor.name} <= #{min_soc}")
+      ev_discharge_program.addLine("      Set #{unmet_hr_var.name} = #{discharge_sch_sensor.name}")
+      ev_discharge_program.addLine('    Else')
+      ev_discharge_program.addLine("      Set #{unmet_hr_var.name} = 0")
+      ev_discharge_program.addLine('    EndIf')
       ev_discharge_program.addLine('  Else')
-      ev_discharge_program.addLine("    Set #{charge_power_act.name} = 0")
+      ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power} * #{charge_sch_sensor.name}")
       ev_discharge_program.addLine("    Set #{discharge_power_act.name} = 0")
       ev_discharge_program.addLine("    Set #{unmet_hr_var.name} = 0")
       ev_discharge_program.addLine('  EndIf')

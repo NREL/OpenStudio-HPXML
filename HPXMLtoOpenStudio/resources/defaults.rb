@@ -5728,7 +5728,7 @@ module Defaults
     return { battery_type: HPXML::BatteryTypeLithiumIon,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
              miles_per_year: 10900,
-             hours_per_week: 11.6,
+             hours_per_week: 8.88,
              nominal_capacity_kwh: 63,
              nominal_voltage: 50.0,
              energy_efficiency: 0.22, # kwh/mile

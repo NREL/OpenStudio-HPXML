@@ -1047,7 +1047,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
-                  'include_timeseries_resilience' => true, }
+                  'include_timeseries_resilience' => true }
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
