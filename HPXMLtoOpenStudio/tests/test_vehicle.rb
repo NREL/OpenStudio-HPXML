@@ -95,6 +95,14 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
     end
   end
 
+  def test_ev_charger_no_battery
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-ev-charger-no-battery.xml'))
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    assert_equal(0, model.getElectricLoadCenterStorageLiIonNMCBatterys.size)
+    assert_equal(0, model.getElectricLoadCenterDistributions.size)
+  end
+
   def test_ev_battery
     # EV battery w/ no schedules
     args_hash = {}

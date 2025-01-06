@@ -6940,45 +6940,41 @@ module HPXMLFile
                              number_of_bedrooms_served: number_of_bedrooms_served)
   end
 
-  # Set the electric vehicle properties, including:
-  # - rated power output
+  # Set the electric vehicle and electric vehicle charger properties, including:
   # - nominal and usable capacity
   # - driving efficiency
   # - miles driven per year
   # - hours driven per week
   # - fraction charged at home
-  # - EV charger connection
+  # - EV charger reference
+  # - EV charger location
+  # - EV charger charging power
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_electric_vehicle(hpxml_bldg, args)
-    if args[:ev_battery_present] != true
-      return
-    end
+    return unless args[:ev_battery_present] || args[:ev_charger_present]
 
     charger_id = nil
     if args[:ev_charger_present]
-      if args[:ev_charger_location].nil?
-        args[:ev_charger_location] = 'outside'
-      end
-      location = get_location(args[:ev_charger_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
-
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
-                                 location: location,
+                                 location: args[:ev_charger_location],
                                  charging_power: args[:ev_charger_power])
     end
 
-    ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV }
-    hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
-                            nominal_capacity_kwh: args[:ev_battery_capacity],
-                            usable_capacity_kwh: args[:ev_battery_usable_capacity],
-                            energy_efficiency: args[:ev_energy_efficiency],
-                            miles_per_year: args[:ev_miles_per_year],
-                            hours_per_week: args[:ev_hours_per_week],
-                            fraction_charged_home: args[:ev_fraction_charged_home],
-                            ev_charger_idref: charger_id)
+    if args[:ev_battery_present]
+      ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV }
+      hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
+                              nominal_capacity_kwh: args[:ev_battery_capacity],
+                              usable_capacity_kwh: args[:ev_battery_usable_capacity],
+                              energy_efficiency: args[:ev_energy_efficiency],
+                              miles_per_year: args[:ev_miles_per_year],
+                              hours_per_week: args[:ev_hours_per_week],
+                              fraction_charged_home: args[:ev_fraction_charged_home],
+                              ev_charger_idref: charger_id)
+    end
   end
 
   # Set the lighting properties, including:

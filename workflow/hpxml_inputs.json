@@ -1010,6 +1010,10 @@
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
     "ev_battery_present": true
   },
+  "sample_files/base-ev-charger-no-battery.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "ev_charger_present": true
+  },
   "sample_files/base-battery-ev.xml": {
     "parent_hpxml": "sample_files/base-battery-ev-no-charger.xml",
     "ev_battery_capacity": 100,
@@ -3513,6 +3517,7 @@
     "parent_hpxml": "sample_files/base-schedules-simple.xml",
     "hot_water_distribution_system_type": "Standard",
     "ev_battery_present": false,
+    "ev_charger_present": false,
     "extra_refrigerator_present": true,
     "extra_refrigerator_rated_annual_kwh": 700,
     "freezer_present": true,
