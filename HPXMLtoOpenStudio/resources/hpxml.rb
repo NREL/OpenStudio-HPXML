@@ -11206,6 +11206,7 @@ class HPXML < Object
              :efficiency_cop,               # [Double] Efficiency[Units="COP"]/Value (W/W)
              :gross_capacity,               # FUTURE: Not in HPXML schema, should move to additional_properties
              :gross_efficiency_cop,         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_input_power,            # FUTURE: Not in HPXML schema, should move to additional_properties
              :input_power]                  # FUTURE: Not in HPXML schema, should move to additional_properties
     attr_accessor(*ATTRS)
 
@@ -11330,6 +11331,7 @@ class HPXML < Object
              :efficiency_cop,               # [Double] Efficiency[Units="COP"]/Value (W/W)
              :gross_capacity,               # FUTURE: Not in HPXML schema, should move to additional_properties
              :gross_efficiency_cop,         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_input_power,            # FUTURE: Not in HPXML schema, should move to additional_properties
              :input_power]                  # FUTURE: Not in HPXML schema, should move to additional_properties
     attr_accessor(*ATTRS)
 

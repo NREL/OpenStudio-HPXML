@@ -2876,6 +2876,7 @@ module HVAC
     fan_power = calculate_fan_power_from_curve(hvac_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, hvac_system)
     dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
     dp.input_power = dp.capacity / dp.efficiency_cop # Btu/hr
+    dp.gross_input_power = dp.gross_capacity / dp.gross_efficiency_cop # Btu/hr
   end
 
   # Adds additional detailed data points at the min/max outdoor temperatures that cover the
@@ -2894,66 +2895,87 @@ module HVAC
     data_array.each_with_index do |data, speed|
       user_odbs = data.map { |dp| dp.outdoor_temperature }
 
-      extrapolate_passes = []
+      # Determine min/max ODB temperatures to cover full range of equipment operation
+      outdoor_dry_bulbs = []
       if mode == :clg
-        # Extrapolate to 60F and minimum of (max HP operating temperature and max weather ODB)
-        if 60 < user_odbs[0]
-          extrapolate_passes << { start: user_odbs[0].floor, end: 60, step: -1 }
-        end
-        max_temp = [hp_temp, weather_temp].min
-        if max_temp > user_odbs[-1]
-          extrapolate_passes << { start: user_odbs[-1].ceil, end: max_temp.ceil, step: 1 }
-        end
+        # Calculate ODB temperature at which power or capacity is zero
+        high_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, true)
+        high_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, true)
+        outdoor_dry_bulbs << [high_odb_at_zero_power, high_odb_at_zero_capacity, hp_temp, weather_temp].min # Max cooling ODB
+
+        low_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, false)
+        low_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, false)
+        outdoor_dry_bulbs << [low_odb_at_zero_power, low_odb_at_zero_capacity, 60.0].max # Min cooling ODB
       else
-        # Extrapolate to maximum of (min HP operating temperature and min weather ODB) and 60F
-        if 60 > user_odbs[-1]
-          extrapolate_passes << { start: user_odbs[-1].ceil, end: 60, step: 1 }
-        end
-        min_temp = [hp_temp, weather_temp].max
-        if min_temp < user_odbs[0]
-          extrapolate_passes << { start: user_odbs[0].floor, end: min_temp.floor, step: -1 }
-        end
+        # Calculate ODB temperature at which power or capacity is zero
+        low_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, false)
+        low_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, false)
+        outdoor_dry_bulbs << [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_temp, weather_temp].max # Min heating ODB
+
+        high_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, true)
+        high_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, true)
+        outdoor_dry_bulbs << [high_odb_at_zero_power, high_odb_at_zero_capacity, 60.0].min # Max heating ODB
       end
 
+      # Extrapolate net capacity and input power at those outdoor drybulb temperatures per RESNET MINHERS Addendum 82.
       capacity_description = data[0].capacity_description
-      extrapolate_passes.each do |pass|
-        start_odb, end_odb, step_odb = pass[:start], pass[:end], pass[:step]
+      outdoor_dry_bulbs.each do |target_odb|
+        next if user_odbs.include? target_odb
 
-        # Step towards the end ODB; stop if the extrapolated value becomes <= 0
-        dp_to_add = nil
-        start_odb.step(end_odb, step_odb) { |target_odb|
-          if mode == :clg
-            new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
-          else
-            new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
-          end
-          new_dp.outdoor_temperature = target_odb
-          new_dp.capacity_description = capacity_description
-
-          # Extrapolate net capacity and input power per RESNET MINHERS Addendum 82.
-          new_dp.capacity = extrapolate_data_point_to_odb(data, mode, capacity_description, target_odb, :capacity)
-          new_dp.input_power = extrapolate_data_point_to_odb(data, mode, capacity_description, target_odb, :input_power)
-          if new_dp.capacity <= 0 || new_dp.input_power <= 0
-            break
-          end
-
-          new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
-          convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
-
-          if new_dp.gross_capacity <= 0 || new_dp.gross_efficiency_cop < 0
-            break
-          end
-
-          dp_to_add = new_dp
-        }
-
-        if not dp_to_add.nil?
-          data << dp_to_add
+        if mode == :clg
+          new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
+        else
+          new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
         end
+        new_dp.outdoor_temperature = target_odb
+
+        new_dp.capacity = extrapolate_data_point_to_odb(data, mode, capacity_description, target_odb, :capacity)
+        new_dp.input_power = extrapolate_data_point_to_odb(data, mode, capacity_description, target_odb, :input_power)
+        new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
+        convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+
+        data << new_dp
       end
     end
 
     add_data_point_adaptive_step_size(data_array, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+  end
+
+  # TODO
+  #
+  # @param data [TODO] TODO
+  # @param user_odbs [TODO] TODO
+  # @param property [TODO] TODO
+  # @param find_high [TODO] TODO
+  # @return [TODO] TODO
+  def self.calculate_odb_at_zero_power_or_capacity(data, user_odbs, property, find_high)
+    if find_high
+      odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[-1] }
+      odb_dp2 = data.find { |dp| dp.outdoor_temperature == user_odbs[-2] }
+    else
+      odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[0] }
+      odb_dp2 = data.find { |dp| dp.outdoor_temperature == user_odbs[1] }
+    end
+
+    slope = (odb_dp1.send(property) - odb_dp2.send(property)) / (odb_dp1.outdoor_temperature - odb_dp2.outdoor_temperature)
+
+    # Datapoints don't trend toward zero COP?
+    if (find_high && slope >= 0)
+      return 999999.0
+    elsif (!find_high && slope <= 0)
+      return -999999.0
+    end
+
+    intercept = odb_dp2.send(property) - (slope * odb_dp2.outdoor_temperature)
+    target_odb = -intercept / slope
+
+    # Return a slightly larger (or smaller, for cooling) ODB so things don't blow up
+    delta_odb = 1.0
+    if find_high
+      return target_odb - delta_odb
+    else
+      return target_odb + delta_odb
+    end
   end
 
   # Extrapolates the given performance property for the specified outdoor drybulb temperature
