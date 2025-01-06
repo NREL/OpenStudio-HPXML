@@ -230,10 +230,10 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?
       next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
     end
-    if !hpxml_bldg.vehicles.empty? && hpxml_bldg.header.schedules_filepaths.empty? && !vehicle.ev_charger_idref.nil?
+    if !hpxml_bldg.vehicles.empty? && hpxml_bldg.header.schedules_filepaths.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil?
       next if message.include? 'Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.'
     end
-    if !hpxml_bldg.vehicles.empty? && vehicle.ev_charger_idref.nil?
+    if !hpxml_bldg.vehicles.empty? && hpxml_bldg.vehicles[0].ev_charger_idref.nil?
       next if message.include? 'Electric vehicle specified with no charger provided; battery will not be modeled.'
     end
     if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }.empty?
