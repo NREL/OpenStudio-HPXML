@@ -11169,7 +11169,7 @@ class HPXML < Object
 
           # Check power at minimum capacity <= power at maximum capacity
           if min_capacity / min_cop > max_capacity / max_cop
-            errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power at minimum capacity must be less than power at maximum capacity."
+            errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power (capacity / COP) at minimum capacity must be less than power at maximum capacity."
           end
           # Check minimum capacity <= maximum capacity
           if min_capacity > max_capacity
@@ -11295,7 +11295,7 @@ class HPXML < Object
 
           # Check power at minimum capacity <= power at maximum capacity
           if min_capacity / min_cop > max_capacity / max_cop
-            errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power at minimum capacity must be less than power at maximum capacity."
+            errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power (capacity / COP) at minimum capacity must be less than power at maximum capacity."
           end
           # Check minimum capacity <= maximum capacity
           if min_capacity > max_capacity

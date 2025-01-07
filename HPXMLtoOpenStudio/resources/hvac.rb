@@ -2985,7 +2985,7 @@ module HVAC
   # - Heating, Min ODB: Linear from lowest two temperatures where heating performance is provided
   # - Heating, Max ODB: Constant (same values as 47°F heating performance)
   #
-  # @param detailed_performance_data [TODO] TODO
+  # @param detailed_performance_data [HPXML::CoolingDetailedPerformanceData or HPXML::HeatingDetailedPerformanceData] Array of detailed performance datapoints at a given speed
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param capacity_description [String] The capacity description (HPXML::CapacityDescriptionXXX)
   # @param target_odb [Double] The target outdoor drybulb temperature to extrapolate to (F)
@@ -3020,10 +3020,10 @@ module HVAC
     slope = (right_dp.send(property) - left_dp.send(property)) / (right_odb - left_odb)
     val = (target_odb - left_odb) * slope + left_dp.send(property)
 
-    # FIXME: Move logic to OS-ERI instead of OS-HPXML?
     if mode == :clg && target_odb < 82
       # Ensure no less than 50% of the value at 82F
-      dp_82F = data.find { |dp| dp.outdoor_temperature == 82.0 } # FIXME: Not guaranteed to have this datapoint; require it?
+      # FIXME: Need interpretation from RESNET on how this case should be handled
+      dp_82F = data.find { |dp| dp.outdoor_temperature == 82.0 }
       val = [val, 0.5 * dp_82F.send(property)].max
     elsif mode == :htg && target_odb > 47
       # Use same value as 47F performance (override linear extrapolation)

@@ -5,6 +5,9 @@ __New Features__
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional EER or EER2 inputs for central air conditioners/heat pumps and mini-splits.
   - Allows optional maximum compressor operating temperature input for all DX cooling systems.
+  - **Breaking Change**: Detailed performance datapoints must now use `OutdoorTemperature` values of:
+    - Heating: 7F, 17F, and 5F (plus an optional 60F and an optional user-specified temperature <5F)
+    - Cooling: 82F and 95F (plus an optional 60F and an optional user-specified temperature >95F)
 
 __Bugfixes__
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.

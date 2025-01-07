@@ -3234,7 +3234,7 @@ Currently detailed performance data can only be provided for variable-speed HVAC
 Detailed Cooling Performance Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For air-source HVAC systems with detailed cooling performance data, two or more pairs of minimum/maximum capacity data are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
+For air-source HVAC systems with detailed cooling performance data, pairs of performance datapoints are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
@@ -3245,8 +3245,9 @@ For air-source HVAC systems with detailed cooling performance data, two or more 
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] One of the minimum/maximum datapoint pairs must occur at the 95F rated outdoor temperature condition.
-         The other datapoint pairs can be at any temperature.
+  .. [#] Pairs of detailed performance datapoints at outdoor temperatures of 82F and 95F are required.
+         Additional optional pairs are allowed at outdoor temperatures of 60F and a user-specified temperature greater than 95F.
+         Datapoints at additional outdoor temperatures are not currently supported.
   .. [#] If Capacity is provided, the nominal capacity (``CoolingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
   .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
@@ -3259,7 +3260,7 @@ Note that when detailed cooling performance data is provided, some other inputs 
 Detailed Heating Performance Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For air-source HVAC systems with detailed heating performance data, two or more pairs of minimum/maximum capacity data are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
+For air-source HVAC systems with detailed heating performance data, pairs of performance datapoints are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
@@ -3270,8 +3271,9 @@ For air-source HVAC systems with detailed heating performance data, two or more 
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] One of the minimum/maximum datapoint pairs must occur at the 47F rated outdoor temperature condition.
-         The other datapoint pairs can be at any temperature.
+  .. [#] Pairs of detailed performance datapoints at outdoor temperatures of 47F, 17F, and 5F are required.
+         Additional optional pairs are allowed at outdoor temperatures of 60F and a user-specified temperature less than 5F.
+         Datapoints at additional outdoor temperatures are not currently supported.
   .. [#] If Capacity is provided, the nominal capacity (``HeatingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
   .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
