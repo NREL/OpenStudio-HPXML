@@ -132,7 +132,7 @@ class ScheduleGenerator
     @prngs = {}
     @prngs[:main] = Random.new(@random_seed)
     [:hygiene, :dw, :cw, :cd, :ev, :cooking].each do |key|
-      @prngs[key] = Random.new(@prngs[:main].new_seed)
+      @prngs[key] = @prngs[:main]
     end
 
     @num_occupants = args[:geometry_num_occupants].to_i
@@ -226,6 +226,22 @@ class ScheduleGenerator
     end
 
     return mkc_activity_schedules
+  end
+
+  # Get initial probabilities for each occupancy type and day type.
+  #
+  # @return [Hash] Map of occupancy type ID to weekday/weekend initial probabilities
+  def get_initial_probabilities()
+    initial_probabilities = {}
+    # get weekday/weekend initial probabilities for 4 occupancy types
+    for occ_id in 0..3
+      initial_probabilities[occ_id] = {}
+      init_prob_file_weekday_file_path = "#{@resources_path}/weekday/mkv_chain_initial_prob_cluster_#{occ_id}.csv"
+      initial_probabilities[occ_id][:weekday] = CSV.read(init_prob_file_weekday_file_path).map { |x| x[0].to_f }
+      init_prob_file_weekend_file_path = "#{@resources_path}/weekend/mkv_chain_initial_prob_cluster_#{occ_id}.csv"
+      initial_probabilities[occ_id][:weekend] = CSV.read(init_prob_file_weekend_file_path).map { |x| x[0].to_f }
+    end
+    return initial_probabilities
   end
 
   # Get markov-chain transition matrices for each occupancy type and day type.
@@ -804,29 +820,13 @@ class ScheduleGenerator
     return schedules_csv_data
   end
 
-  # Get initial probabilities for each occupancy type and day type.
-  #
-  # @return [Hash] Map of occupancy type ID to weekday/weekend initial probabilities
-  def get_initial_probabilities()
-    initial_probabilities = {}
-    # get weekday/weekend initial probabilities for 4 occupancy types
-    for occ_id in 0..3
-      initial_probabilities[occ_id] = {}
-      init_prob_file_weekday_file_path = "#{@resources_path}/weekday/mkv_chain_initial_prob_cluster_#{occ_id}.csv"
-      initial_probabilities[occ_id][:weekday] = CSV.read(init_prob_file_weekday_file_path).map { |x| x[0].to_f }
-      init_prob_file_weekend_file_path = "#{@resources_path}/weekend/mkv_chain_initial_prob_cluster_#{occ_id}.csv"
-      initial_probabilities[occ_id][:weekend] = CSV.read(init_prob_file_weekend_file_path).map { |x| x[0].to_f }
-    end
-    return initial_probabilities
-  end
-
   # Initialize daily schedule data for plug loads, TV usage, and ceiling fans.
   #
   # @param default_schedules_csv_data [Hash] Default schedule data from CSV
   # @param schedules_csv_data [Hash] Custom schedule data from CSV
   # @param weather [WeatherFile] Weather object containing temperature data
   # @return [Hash] Map of schedule types to their weekday, weekend, and monthly values
-  def initialize_daily_schedules(default_schedules_csv_data, schedules_csv_data, weather)
+  def get_plugload_daily_schedules(default_schedules_csv_data, schedules_csv_data, weather)
     {
       plug_loads_other: {
         # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
@@ -908,7 +908,7 @@ class ScheduleGenerator
   # @return [void] Updates @schedules with plug loads and ceiling fan schedules
   def fill_plug_loads_schedule(mkc_activity_schedules, weather)
     # Initialize base schedules
-    daily_schedules = initialize_daily_schedules(@default_schedules_csv_data, @schedules_csv_data, weather)
+    daily_schedules = get_plugload_daily_schedules(@default_schedules_csv_data, @schedules_csv_data, weather)
 
     # Generate minute-level schedules
     plug_loads_other = Array.new(@total_days_in_year * @steps_in_day, 0.0)
@@ -1027,7 +1027,7 @@ class ScheduleGenerator
     #      ii. if more events, offset by fixed wait time and goto c
     #   d. if more cluster, go to 4.
 
-    sink_activity_probable_mins = initialize_sink_probable_minutes(mkc_activity_schedules, @mkc_steps_in_a_year)
+    sink_activity_probable_mins = get_sink_probable_minutes(mkc_activity_schedules)
     sink_activity_sch = [0] * @mins_in_year
 
     # Load probability distributions and constants
@@ -1036,7 +1036,7 @@ class ScheduleGenerator
     hourly_onset_prob = Schedule.validate_values(Constants::SinkHourlyOnsetProb, 24, 'sink_hourly_onset_prob')
 
     # Calculate clusters and flow rate
-    cluster_per_day = calculate_clusters_per_day(@num_occupants)
+    cluster_per_day = calculate_sink_clusters_per_day(@num_occupants)
     sink_flow_rate = gaussian_rand(@prngs[:hygiene], Constants::SinkFlowRateMean, Constants::SinkFlowRateStd)
 
     # Generate sink events for each day
@@ -1079,7 +1079,7 @@ class ScheduleGenerator
   #
   # @param mkc_activity_schedules [Array<Array<Integer>>] Array of occupant activity schedules from Markov chain simulation
   # @return [Array<Integer>] Array indicating minutes when sink activity is possible (1) or not (0)
-  def initialize_sink_probable_minutes(mkc_activity_schedules)
+  def get_sink_probable_minutes(mkc_activity_schedules)
     # Initialize array marking minutes when sink activity is possible
     # (when at least one occupant is not sleeping and not absent)
     sink_activity_probable_mins = [0] * @mkc_steps_in_a_year
@@ -1100,7 +1100,7 @@ class ScheduleGenerator
   # Calculate the number of sink clusters per day based on number of occupants.
   #
   # @return [Integer] Number of sink clusters per day
-  def calculate_clusters_per_day()
+  def calculate_sink_clusters_per_day()
     # Lookup avg_sink_clusters_per_hh from constants and adjust for number of occupants
     avg_sink_clusters_per_hh = Constants::SinkAvgSinkClustersPerHH
     # Eq based on cluster scaling in Building America DHW Event Schedule Generator
