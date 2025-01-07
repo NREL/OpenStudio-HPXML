@@ -444,7 +444,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
       when 'hvac-detailed-performance-bad-odbs'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
-        # For heating, test ODB > 5
+        # For heating, test invalid ODB
         hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.add(
           outdoor_temperature: 7.0,
           capacity_description: HPXML::CapacityDescriptionMinimum,
@@ -458,7 +458,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
           efficiency_cop: 2.1
         )
         # For cooling, test multiple pairs at the same ODB
-        for i in 1..2
+        for _i in 1..2
           hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.add(
             outdoor_temperature: 105.0,
             capacity_description: HPXML::CapacityDescriptionMinimum,

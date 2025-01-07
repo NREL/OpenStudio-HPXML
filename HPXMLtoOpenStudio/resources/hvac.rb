@@ -2526,7 +2526,7 @@ module HVAC
 
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
-      power_fraction = calculate_fan_power_from_curve(1.0, fan_ratio, hvac_system)
+      power_fraction = (fan_watts_per_cfm == 0) ? 1.0 : calculate_fan_power_from_curve(1.0, fan_ratio, hvac_system)
       fan.addSpeed(fan_ratio.round(5), power_fraction.round(5))
     end
 
@@ -2542,14 +2542,14 @@ module HVAC
   def self.calculate_fan_power_from_curve(max_fan_power, fan_ratio, hvac_system)
     if hvac_system.fan_motor_type.nil?
       # For system types that fan_motor_type is not specified, the fan_ratio should be 1
-      fail 'Missing fan motor type for systems where more than one speed is modeled' unless fan_ratio == 1.0
+      fail 'Missing fan motor type for systems where more than one speed is modeled' unless (fan_ratio == 1.0 || max_fan_power == 0.0)
 
       fan_power = max_fan_power
     elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypeBPM
       # BPM fan
       pow = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
       fan_power = max_fan_power * (fan_ratio**pow)
-    else
+    elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC
       # PSC fan
       fan_power = max_fan_power * fan_ratio * (0.3 * fan_ratio + 0.7)
     end
@@ -3094,8 +3094,7 @@ module HVAC
     # single speed cutler curve coefficients
     if mode == :clg
       rated_t_i = HVAC::AirSourceCoolRatedIWB
-      # Added two data points to be held constant outside the range 57F to 72F
-      indoor_t = [40.0, 57.0, rated_t_i, 72.0, 90.0]
+      indoor_t = [57.0, rated_t_i, 72.0]
     else
       rated_t_i = HVAC::AirSourceHeatRatedIDB
       indoor_t = [60.0, rated_t_i, 80.0]
@@ -3124,23 +3123,21 @@ module HVAC
           data_tmp << dp_new
           if mode == :clg
             dp_new.indoor_wetbulb = t_i
-            # Cooling variations  shall be held constant for Tiwb less than 57°F and greater than 72°F, and for Todb less than 75°F
-            curve_t_i = [[t_i, 57].max, 72].min
+            # Cooling variations shall be held constant for Tiwb less than 57°F and greater than 72°F, and for Todb less than 75°F
             curve_t_o = [dp_new.outdoor_temperature, 75].max
           else
             dp_new.indoor_temperature = t_i
-            curve_t_i = t_i
             curve_t_o = dp_new.outdoor_temperature
           end
           # capacity FT curve output
-          cap_ft_curve_output = MathTools.biquadratic(curve_t_i, curve_t_o, cap_ft_spec_ss)
+          cap_ft_curve_output = MathTools.biquadratic(t_i, curve_t_o, cap_ft_spec_ss)
           cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, curve_t_o, cap_ft_spec_ss)
           cap_correction_factor = cap_ft_curve_output / cap_ft_curve_output_rated
           # corrected capacity hash, with two temperature independent variables
           dp_new.gross_capacity *= cap_correction_factor
 
           # eir FT curve output
-          eir_ft_curve_output = MathTools.biquadratic(curve_t_i, curve_t_o, eir_ft_spec_ss)
+          eir_ft_curve_output = MathTools.biquadratic(t_i, curve_t_o, eir_ft_spec_ss)
           eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, curve_t_o, eir_ft_spec_ss)
           eir_correction_factor = eir_ft_curve_output / eir_ft_curve_output_rated
           dp_new.gross_efficiency_cop /= eir_correction_factor
