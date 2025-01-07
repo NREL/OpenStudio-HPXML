@@ -145,37 +145,38 @@ class ScheduleGenerator
     @weekday_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekday')
     @weekend_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekend')
 
-    mkc_activity_schedules = simulate_occupant_activities(args)
+    mkc_activity_schedules = simulate_occupant_activities()
     # shape of mkc_activity_schedules is [n, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
     @ev_occupant_number = get_ev_occupant_number(mkc_activity_schedules)
     occupancy_schedules = generate_occupancy_schedules(mkc_activity_schedules)
+    fill_plug_loads_schedule(mkc_activity_schedules, weather)
+    fill_lighting_schedule(mkc_activity_schedules, args)
+
     sink_activity_sch = generate_sink_schedule(mkc_activity_schedules)
     shower_activity_sch, bath_activity_sch = generate_bath_shower_schedules(mkc_activity_schedules)
-    dw_activity_sch = generate_dishwasher_schedule(mkc_activity_schedules)
-    cw_activity_sch = generate_clothes_washer_schedule(mkc_activity_schedules)
+    dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
+    cw_hot_water_sch = generate_clothes_washer_schedule(mkc_activity_schedules)
     dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
     cw_power_sch, cd_power_sch = generate_clothes_washer_dryer_power_schedules(mkc_activity_schedules)
     cooking_power_sch = generate_cooking_power_schedule(mkc_activity_schedules)
 
     # Process hygiene schedules
-    showers = random_shift_and_normalize(shower_activity_sch, :hygiene)
-    sinks = random_shift_and_normalize(sink_activity_sch, :hygiene)
-    baths = random_shift_and_normalize(bath_activity_sch, :hygiene)
+    showers = random_shift_and_normalize(shower_activity_sch, @prngs[:hygiene])
+    sinks = random_shift_and_normalize(sink_activity_sch, @prngs[:hygiene])
+    baths = random_shift_and_normalize(bath_activity_sch, @prngs[:hygiene])
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
 
     # Process appliance and occupancy schedules
     @schedules.merge!({
-      SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_activity_sch, :dw),
-      SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_activity_sch, :cw),
-      SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch, :cooking),
-      SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch, :cw),
-      SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch, :cd),
-      SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch, :dw),
+      SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch, @prngs[:dw]),
+      SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch, @prngs[:cw]),
+      SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch, @prngs[:cooking]),
+      SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch, @prngs[:cw]),
+      SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch, @prngs[:cd]),
+      SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch, @prngs[:dw]),
       SchedulesFile::Columns[:Occupants].name => occupancy_schedules[:away_schedule].map { |i| 1.0 - i },
       SchedulesFile::Columns[:HotWaterFixtures].name => fixtures.map { |flow| flow / fixtures.max }
     })
-    fill_plug_loads_schedule(mkc_activity_schedules, weather)
-    fill_lighting_schedule(mkc_activity_schedules, args)
     fill_ev_schedules(mkc_activity_schedules, occupancy_schedules[:ev_occupant_presence])
     if @debug
       @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
@@ -184,13 +185,13 @@ class ScheduleGenerator
     return true
   end
 
-  def simulate_occupant_activities(args)
+  def simulate_occupant_activities()
     mkc_activity_schedules = [] # holds the markov-chain state for each of the seven simulated states for each occupant.
     # States are: 'sleeping', 'shower', 'laundry', 'cooking', 'dishwashing', 'absent', 'nothingAtHome'
 
     occupancy_types_probabilities = Schedule.validate_values(Constants::OccupancyTypesProbabilities, 4, 'occupancy types probabilities')
-    initial_probabilities = get_initial_probabilities(args)
-    transition_matrices = get_transition_matrices(args)
+    initial_probabilities = get_initial_probabilities()
+    transition_matrices = get_transition_matrices()
     for _n in 1..@num_occupants
       occ_type_id = weighted_random(@prngs[:main], occupancy_types_probabilities)
       @total_days_in_year.times do |day|
@@ -1198,7 +1199,7 @@ class ScheduleGenerator
     dw_flow_rate_mean = Constants::HotWaterDishwasherFlowRateMean
     dw_flow_rate_std = Constants::HotWaterDishwasherFlowRateStd
     dw_minutes_between_event_gap = Constants::HotWaterDishwasherMinutesBetweenEventGap
-    dw_activity_sch = [0] * @mins_in_year
+    dw_hot_water_sch = [0] * @mins_in_year
     m = 0
     dw_flow_rate = gaussian_rand(@prngs[:dw], dw_flow_rate_mean, dw_flow_rate_std)
 
@@ -1217,7 +1218,7 @@ class ScheduleGenerator
           int_duration = duration.ceil
           flow_rate = dw_flow_rate * duration / int_duration
           int_duration.times do
-            dw_activity_sch[start_minute + m] = flow_rate
+            dw_hot_water_sch[start_minute + m] = flow_rate
             m += 1
             if start_minute + m >= @mins_in_year then break end
           end
@@ -1234,7 +1235,7 @@ class ScheduleGenerator
       step += step_jump
     end
 
-    return dw_activity_sch
+    return dw_hot_water_sch
   end
 
   # Generate the clothes washer schedule based on occupant activities.
@@ -1246,7 +1247,7 @@ class ScheduleGenerator
     cw_flow_rate_mean = Constants::HotWaterClothesWasherFlowRateMean
     cw_flow_rate_std = Constants::HotWaterClothesWasherFlowRateStd
     cw_minutes_between_event_gap = Constants::HotWaterClothesWasherMinutesBetweenEventGap
-    cw_activity_sch = [0] * @mins_in_year # this is the clothes_washer water draw schedule
+    cw_hot_water_sch = [0] * @mins_in_year # this is the clothes_washer water draw schedule
     cw_load_size_probability = Schedule.validate_values(Constants::HotWaterClothesWasherLoadSizeProbability, 4, 'hot_water_clothes_washer_load_size_probability')
 
     cw_flow_rate = gaussian_rand(@prngs[:cw], cw_flow_rate_mean, cw_flow_rate_std)
@@ -1269,7 +1270,7 @@ class ScheduleGenerator
             int_duration = duration.ceil
             flow_rate = cw_flow_rate * duration.to_f / int_duration
             int_duration.times do
-              cw_activity_sch[start_minute + m] = flow_rate
+              cw_hot_water_sch[start_minute + m] = flow_rate
               m += 1
               if start_minute + m >= @mins_in_year then break end
             end
@@ -1288,7 +1289,7 @@ class ScheduleGenerator
       end
       step += step_jump
     end
-    return cw_activity_sch
+    return cw_hot_water_sch
   end
 
   # @param mkc_activity_schedules [Array<Array<Integer>>] Markov chain activity schedules for each occupant
@@ -1399,10 +1400,10 @@ class ScheduleGenerator
   # @param schedule [Array<Float>] Array of minute-level schedule values
   # @param prng_key [Symbol] Key for random number generator to use
   # @return [Array<Float>] Normalized schedule with random time shift applied
-  def random_shift_and_normalize(schedule, prng_key)
+  def random_shift_and_normalize(schedule, prng)
     offset_range = 30
     # Apply random offset
-    random_offset = (@prngs[prng_key].rand * 2 * offset_range).to_i - offset_range
+    random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     schedule = schedule.rotate(random_offset)
 
     # Apply monthly offsets and aggregate
