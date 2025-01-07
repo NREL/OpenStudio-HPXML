@@ -520,7 +520,7 @@
               </BatteryElectricVehicle>
             </VehicleType>
             <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
-            <HoursDrivenPerWeek>8.8</HoursDrivenPerWeek>
+            <HoursDrivenPerWeek>14.0</HoursDrivenPerWeek>
             <FuelEconomyCombined>
               <Units>kWh/mile</Units>
               <Value>0.25</Value>
