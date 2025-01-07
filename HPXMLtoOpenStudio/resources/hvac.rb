@@ -2548,7 +2548,7 @@ module HVAC
       # BPM fan
       pow = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
       fan_power = max_fan_power * (fan_ratio**pow)
-    else
+    elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC
       # PSC fan
       fan_power = max_fan_power * fan_ratio * (0.3 * fan_ratio + 0.7)
     end
