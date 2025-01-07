@@ -233,6 +233,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if !hpxml_bldg.vehicles.empty? && hpxml_bldg.header.schedules_filepaths.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil?
       next if message.include? 'Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.'
     end
+    if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.header.schedules_filepaths.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil? && hpxml_bldg.vehicles[0].ev_charging_weekday_fractions.nil?
+      next if message.include? 'Electric vehicle hours per week inputted (8.8) do not match the hours per week calculated from the discharging schedule (21.0). The inputted hours per week value will be ignored.'
+    end
     if !hpxml_bldg.vehicles.empty? && hpxml_bldg.vehicles[0].ev_charger_idref.nil?
       next if message.include? 'Electric vehicle specified with no charger provided; battery will not be modeled.'
     end

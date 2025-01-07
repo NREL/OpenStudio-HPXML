@@ -1019,7 +1019,7 @@
     "ev_battery_capacity": 100,
     "ev_battery_usable_capacity": 80,
     "ev_miles_per_year": 10000,
-    "ev_hours_per_week": 14,
+    "ev_hours_per_week": 8.8,
     "ev_energy_efficiency": 0.25,
     "ev_charger_present": true,
     "ev_charger_power": 7000,
