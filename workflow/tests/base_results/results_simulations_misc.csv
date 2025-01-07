@@ -74,7 +74,7 @@ base-dhw-desuperheater-2-speed.xml,0.0,0.0,1354.7,998.0,11183.2,2566.2,1942.4,28
 base-dhw-desuperheater-gshp.xml,0.0,0.0,1354.7,998.0,11183.2,2566.2,3488.5,2295.3,3488.5,22.915,16.703,0.0
 base-dhw-desuperheater-hpwh.xml,0.0,0.0,1354.6,997.9,11086.8,2544.1,1865.5,3357.6,3357.6,24.086,19.331,0.0
 base-dhw-desuperheater-tankless.xml,0.0,0.0,1354.7,998.0,11132.7,2554.6,1803.8,3296.0,3296.0,0.0,18.776,0.0
-base-dhw-desuperheater-var-speed.xml,0.0,0.0,1354.7,998.0,11184.3,2566.5,1942.4,2646.8,2646.8,0.0,19.178,0.0
+base-dhw-desuperheater-var-speed.xml,0.0,0.0,1354.7,998.0,11184.3,2566.5,1942.4,2646.7,2646.7,0.0,19.178,0.0
 base-dhw-desuperheater.xml,0.0,0.0,1354.7,998.0,11184.0,2566.4,1942.4,3308.2,3308.2,0.0,18.884,0.0
 base-dhw-dwhr.xml,0.0,0.0,1354.7,998.0,10014.2,2297.9,2014.7,3594.2,3594.2,23.664,18.729,0.0
 base-dhw-indirect-detailed-setpoints.xml,0.0,0.0,1154.5,855.2,9364.0,2148.8,1295.0,1163.3,1295.0,16.438,0.0,0.0
@@ -234,7 +234,7 @@ base-hvac-central-ac-only-1-speed-seer2.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,
 base-hvac-central-ac-only-1-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3573.1,3573.1,0.0,18.449,0.0
 base-hvac-central-ac-only-2-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3103.2,3103.2,0.0,18.999,0.0
 base-hvac-central-ac-only-var-speed-detailed-performance-autosize.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.3,4115.7,4115.7,0.0,18.852,0.0
-base-hvac-central-ac-only-var-speed-detailed-performance.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1955.2,3621.6,3621.6,0.0,17.79,0.0
+base-hvac-central-ac-only-var-speed-detailed-performance.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1955.2,3621.2,3621.2,0.0,17.788,0.0
 base-hvac-central-ac-only-var-speed-max-power-ratio-schedule.xml,0.0,20.0,1354.7,998.0,11171.6,2563.5,1945.2,3256.9,3256.9,0.0,22.116,0.0
 base-hvac-central-ac-only-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,2926.7,2926.7,0.0,18.827,0.0
 base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7172.7,3725.2,7172.7,24.959,18.769,0.0
@@ -265,7 +265,7 @@ base-hvac-furnace-coal-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2041.7,1785.
 base-hvac-furnace-elec-central-ac-1-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7934.6,3717.0,7934.6,23.664,18.729,0.0
 base-hvac-furnace-elec-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,8085.9,1785.3,8085.9,23.792,0.0,0.0
 base-hvac-furnace-gas-central-ac-2-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2053.1,3232.5,3232.5,23.71,19.252,0.0
-base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml,0.0,20.0,1354.7,998.0,11171.6,2563.5,2058.7,3383.3,3383.3,23.71,22.122,0.0
+base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml,0.0,20.0,1354.7,998.0,11171.6,2563.5,2058.7,3383.1,3383.1,23.71,22.122,0.0
 base-hvac-furnace-gas-central-ac-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2053.1,3035.5,3035.5,23.71,19.087,0.0
 base-hvac-furnace-gas-only-autosize-factor.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2035.0,1785.3,2035.0,22.151,0.0,0.0
 base-hvac-furnace-gas-only-detailed-setpoints.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1979.1,1803.8,1979.1,18.128,0.0,0.0
@@ -289,7 +289,7 @@ base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xm
 base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,6468.1,3239.8,6468.1,25.382,18.59,0.0
 base-hvac-install-quality-furnace-gas-central-ac-1-speed.xml,0.0,3.0,1354.7,998.0,11171.6,2563.5,2025.2,3895.9,3895.9,25.042,18.107,0.0
 base-hvac-install-quality-furnace-gas-central-ac-2-speed.xml,0.0,3.0,1354.7,998.0,11171.6,2563.5,2022.4,3537.0,3537.0,25.045,18.055,0.0
-base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml,0.0,1.0,1354.7,998.0,11171.5,2563.5,2022.4,3287.4,3287.4,25.045,18.614,0.0
+base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml,0.0,1.0,1354.7,998.0,11171.5,2563.5,2022.4,3287.2,3287.2,25.045,18.614,0.0
 base-hvac-install-quality-furnace-gas-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2016.9,1785.3,2016.9,25.159,0.0,0.0
 base-hvac-install-quality-ground-to-air-heat-pump.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,3776.8,3098.4,3776.8,24.108,17.552,0.0
 base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3091.2,3091.2,0.0,14.269,0.0
