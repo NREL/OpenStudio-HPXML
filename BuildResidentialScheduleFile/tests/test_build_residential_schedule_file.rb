@@ -345,7 +345,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
                            year: @year,
                            output_path: @tmp_schedule_file_path)
     assert_in_epsilon(6201, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:EVBatteryCharging].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(125, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:EVBatteryDischarging].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(729.9, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:EVBatteryDischarging].name, schedules: sf.tmp_schedules), @tol)
   end
 
   def test_multiple_buildings
