@@ -6,7 +6,6 @@
 require 'openstudio'
 require 'pathname'
 require 'oga'
-require 'byebug'
 Dir["#{File.dirname(__FILE__)}/resources/*.rb"].each do |resource_file|
   require resource_file
 end
@@ -117,7 +116,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     args[:hpxml_output_path] = hpxml_output_path
 
-    byebug
     # random seed
     if not args[:schedules_random_seed].nil?
       args[:random_seed] = args[:schedules_random_seed]
@@ -146,7 +144,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
         epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
         weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
       end
-      byebug
       # deterministically vary schedules across building units
       args[:random_seed] *= (i + 1)
 

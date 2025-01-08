@@ -64,7 +64,6 @@ class ScheduleGenerator
   def create(args:,
              weather:)
     @schedules = {}
-
     ScheduleGenerator.export_columns.each do |col_name|
       @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     end
@@ -162,7 +161,9 @@ class ScheduleGenerator
 
     # Process hygiene schedules
     showers = random_shift_and_normalize(shower_activity_sch, @prngs[:hygiene])
-    sinks = random_shift_and_normalize(sink_activity_sch, @prngs[:hygiene])
+    # TODO: remove the rotate. This is only here to verify the generated schedule is identical to previous version.
+    # This is a bug (copy-paste error) that should be fixed.
+    sinks = random_shift_and_normalize(sink_activity_sch.rotate(-4 * 60), @prngs[:hygiene])
     baths = random_shift_and_normalize(bath_activity_sch, @prngs[:hygiene])
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
 
@@ -178,8 +179,8 @@ class ScheduleGenerator
       SchedulesFile::Columns[:HotWaterFixtures].name => fixtures.map { |flow| flow / fixtures.max }
     })
     fill_ev_schedules(mkc_activity_schedules, occupancy_schedules[:ev_occupant_presence])
+    @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
     if @debug
-      @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
       @schedules[SchedulesFile::Columns[:Sleeping].name] = occupancy_schedules[:sleep_schedule] if @debug
     end
     return true
@@ -194,6 +195,7 @@ class ScheduleGenerator
     transition_matrices = get_transition_matrices()
     for _n in 1..@num_occupants
       occ_type_id = weighted_random(@prngs[:main], occupancy_types_probabilities)
+      simulated_values = []
       @total_days_in_year.times do |day|
         today = @sim_start_day + day
         day_type = [0, 6].include?(today.wday) ? :weekend : :weekday
@@ -782,6 +784,7 @@ class ScheduleGenerator
   # @param markov_chain_simulation_result [Array<Matrix>] Array of matrices containing Markov chain simulation results for each occupant
   # @return [void] Updates @schedules with EV battery charging and discharging schedules
   def fill_ev_schedules(markov_chain_simulation_result, ev_occupant_presence)
+    @schedules[SchedulesFile::Columns[:EVOccupant].name] = ev_occupant_presence
     if @hpxml_bldg.vehicles.to_a.empty?
       return
     end
@@ -795,7 +798,6 @@ class ScheduleGenerator
     agg_discharging_schedule = aggregate_array(discharging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
     @schedules[SchedulesFile::Columns[:EVBatteryCharging].name] = agg_charging_schedule
     @schedules[SchedulesFile::Columns[:EVBatteryDischarging].name] = agg_discharging_schedule
-    @schedules[SchedulesFile::Columns[:EVOccupant].name] = ev_occupant_presence
   end
 
   # Get the weekday/weekend schedule fractions for TV plug loads and monthly multipliers for interior lighting, dishwasher, clothes washer/dryer, cooking range, and other/TV plug loads.
@@ -1037,9 +1039,8 @@ class ScheduleGenerator
     hourly_onset_prob = Schedule.validate_values(Constants::SinkHourlyOnsetProb, 24, 'sink_hourly_onset_prob')
 
     # Calculate clusters and flow rate
-    cluster_per_day = calculate_sink_clusters_per_day(@num_occupants)
+    cluster_per_day = calculate_sink_clusters_per_day()
     sink_flow_rate = gaussian_rand(@prngs[:hygiene], Constants::SinkFlowRateMean, Constants::SinkFlowRateStd)
-
     # Generate sink events for each day
     @total_days_in_year.times do |day|
       cluster_per_day.times do
@@ -1142,15 +1143,16 @@ class ScheduleGenerator
     while step < @mkc_steps_in_a_year
       shower_state = sum_across_occupants(mkc_activity_schedules, 1, step)
       start_min = step * 15
-      m = 0
       step_jump = 1
       shower_state.to_i.times do
-        if @prngs[:hygiene].rand <= Constants::BathToShowerRatio
+        r = @prngs[:hygiene].rand
+        if r <= Constants::BathToShowerRatio
           # Fill bath event
           duration = gaussian_rand(@prngs[:hygiene], Constants::BathDurationMean, Constants::BathDurationStd)
           int_duration = duration.ceil
           # since we are rounding duration to integer minute, we compensate by scaling flow rate
           flow_rate = bath_flow_rate * duration / int_duration
+          m = 0
           int_duration.times do
             break if (start_min + m) >= @mins_in_year
             bath_sch[start_min + m] += flow_rate
@@ -1159,6 +1161,7 @@ class ScheduleGenerator
         else
           # Fill shower events
           num_events = sample_activity_cluster_size(@prngs[:hygiene], @cluster_size_prob_map, 'shower')
+          m = 0
           num_events.times do
             duration = sample_event_duration(@prngs[:hygiene], @event_duration_prob_map, 'shower')
             int_duration = duration.ceil
@@ -1179,7 +1182,6 @@ class ScheduleGenerator
       end
       step += step_jump
     end
-
     return shower_sch, bath_sch
   end
 
