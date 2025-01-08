@@ -8,14 +8,14 @@ require 'rake/testtask'
 
 desc 'Run all tests'
 Rake::TestTask.new('test_all') do |t|
-  t.test_files = Dir['HPXMLtoOpenStudio/tests/test_validation.rb']
+  t.test_files = Dir['*/tests/*.rb']
   t.warning = false
   t.verbose = true
 end
 
 desc 'Run measure unit tests'
 Rake::TestTask.new('test_measures') do |t|
-  t.test_files = Dir['*/tests/*.rb'] - Dir['workflow/tests/*.rb']
+  t.test_files = Dir['HPXMLtoOpenStudio/tests/test_validation']
   t.warning = false
   t.verbose = true
 end
