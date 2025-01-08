@@ -44,7 +44,8 @@ jobs:
           git diff --exit-code --ignore-cr-at-eol workflow/*.xml
           echo "Checking for schedule CSV differences..."
           echo "If differences are found below, then HPXMLs need to be regenerated using: openstudio tasks.rb update_hpxmls"
-          git diff --stat --exit-code --ignore-cr-at-eol HPXMLtoOpenStudio/resources/schedule_files/*.csv
+          git diff --stat --ignore-cr-at-eol HPXMLtoOpenStudio/resources/schedule_files/*.csv
+          git diff --exit-code --ignore-cr-at-eol HPXMLtoOpenStudio/resources/schedule_files/*.csv
 
       - name: Run measure unit tests
         run: |
