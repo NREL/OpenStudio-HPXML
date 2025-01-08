@@ -169,15 +169,15 @@ class ScheduleGenerator
 
     # Process appliance and occupancy schedules
     @schedules.merge!({
-      SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch, @prngs[:dw]),
-      SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch, @prngs[:cw]),
-      SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch, @prngs[:cooking]),
-      SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch, @prngs[:cw]),
-      SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch, @prngs[:cd]),
-      SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch, @prngs[:dw]),
-      SchedulesFile::Columns[:Occupants].name => occupancy_schedules[:away_schedule].map { |i| 1.0 - i },
-      SchedulesFile::Columns[:HotWaterFixtures].name => fixtures.map { |flow| flow / fixtures.max }
-    })
+                        SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch, @prngs[:dw]),
+                        SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch, @prngs[:cw]),
+                        SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch, @prngs[:cooking]),
+                        SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch, @prngs[:cw]),
+                        SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch, @prngs[:cd]),
+                        SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch, @prngs[:dw]),
+                        SchedulesFile::Columns[:Occupants].name => occupancy_schedules[:away_schedule].map { |i| 1.0 - i },
+                        SchedulesFile::Columns[:HotWaterFixtures].name => fixtures.map { |flow| flow / fixtures.max }
+                      })
     fill_ev_schedules(mkc_activity_schedules, occupancy_schedules[:ev_occupant_presence])
     @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
     if @debug
@@ -875,7 +875,6 @@ class ScheduleGenerator
     interior_lighting_schedule.map { |s| s / max_value }
   end
 
-
   # Generate occupancy schedules for sleeping, away, idle, EV presence and total occupancy.
   #
   # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
@@ -958,10 +957,10 @@ class ScheduleGenerator
 
     # Normalize schedules
     @schedules.merge!({
-      SchedulesFile::Columns[:PlugLoadsOther].name => normalize(plug_loads_other),
-      SchedulesFile::Columns[:PlugLoadsTV].name => normalize(plug_loads_tv),
-      SchedulesFile::Columns[:CeilingFan].name => normalize(ceiling_fan)
-    })
+                        SchedulesFile::Columns[:PlugLoadsOther].name => normalize(plug_loads_other),
+                        SchedulesFile::Columns[:PlugLoadsTV].name => normalize(plug_loads_tv),
+                        SchedulesFile::Columns[:CeilingFan].name => normalize(ceiling_fan)
+                      })
   end
 
   # Calculate the percentage of occupants that are actively present and awake.
@@ -974,7 +973,6 @@ class ScheduleGenerator
     away_percentage = sum_across_occupants(mkc_activity_schedules, 5, index_15).to_f / @num_occupants
     1 - (away_percentage + sleep_percentage)
   end
-
 
   # Fill the lighting schedule based on occupant activities.
   #
@@ -1005,11 +1003,10 @@ class ScheduleGenerator
     # Normalize and copy to garage
     normalized_lighting = normalize(lighting_interior)
     @schedules.merge!({
-      SchedulesFile::Columns[:LightingInterior].name => normalized_lighting,
-      SchedulesFile::Columns[:LightingGarage].name => normalized_lighting
-    })
+                        SchedulesFile::Columns[:LightingInterior].name => normalized_lighting,
+                        SchedulesFile::Columns[:LightingGarage].name => normalized_lighting
+                      })
   end
-
 
   # Generate the sink schedule based on occupant activities.
   #
@@ -1155,6 +1152,7 @@ class ScheduleGenerator
           m = 0
           int_duration.times do
             break if (start_min + m) >= @mins_in_year
+
             bath_sch[start_min + m] += flow_rate
             m += 1
           end
@@ -1168,11 +1166,13 @@ class ScheduleGenerator
             flow_rate = shower_flow_rate * duration / int_duration
             int_duration.times do
               break if (start_min + m) >= @mins_in_year
+
               shower_sch[start_min + m] += flow_rate
               m += 1
             end
             Constants::ShowerMinutesBetweenEventGap.times do
               break if (start_min + m) >= @mins_in_year
+
               m += 1
             end
             break if start_min + m >= @mins_in_year
@@ -1287,6 +1287,7 @@ class ScheduleGenerator
           end
         end
         if start_minute + m >= @mins_in_year then break end
+
         step_jump = [step_jump, 1 + (m / 15)].max
       end
       step += step_jump
@@ -1410,8 +1411,8 @@ class ScheduleGenerator
 
     # Apply monthly offsets and aggregate
     schedule = apply_monthly_offsets(array: schedule,
-                                   weekday_monthly_shift_dict: @weekday_monthly_shift_dict,
-                                   weekend_monthly_shift_dict: @weekend_monthly_shift_dict)
+                                     weekday_monthly_shift_dict: @weekday_monthly_shift_dict,
+                                     weekend_monthly_shift_dict: @weekend_monthly_shift_dict)
     schedule = aggregate_array(schedule, @minutes_per_step)
 
     # Normalize by peak value

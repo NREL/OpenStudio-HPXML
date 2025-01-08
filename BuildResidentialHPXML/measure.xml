@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>101e9fab-adad-4257-b230-7a3d983ecdec</version_id>
-  <version_modified>2025-01-06T18:20:23Z</version_modified>
+  <version_id>5876c89a-892c-46a5-a5a1-23f76abbb950</version_id>
+  <version_modified>2025-01-08T16:09:57Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -7680,19 +7680,7 @@
       <filename>version.txt</filename>
       <filetype>txt</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0E8669F5</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-ev-battery.osm</filename>
-      <filetype>osm</filetype>
-      <usage_type>test</usage_type>
-      <checksum>74DE2DE6</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-ev-battery.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B9BA3162</checksum>
+      <checksum>93016553</checksum>
     </file>
     <file>
       <filename>test_build_residential_hpxml.rb</filename>

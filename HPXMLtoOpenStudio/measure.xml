@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>1ca34a50-b6b7-4bba-97d9-3902a77d5002</version_id>
-  <version_modified>2025-01-07T16:06:16Z</version_modified>
+  <version_id>e397f069-546d-4361-8e62-4895004a4765</version_id>
+  <version_modified>2025-01-08T16:10:03Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -321,7 +321,7 @@
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CA857318</checksum>
+      <checksum>7EB7C28F</checksum>
     </file>
     <file>
       <filename>data/zipcode_weather_stations.csv</filename>
@@ -609,7 +609,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>13A82194</checksum>
+      <checksum>1E79C0B2</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -670,12 +670,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>93120E27</checksum>
-    </file>
-    <file>
-      <filename>in.schedules.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0074F80E</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
