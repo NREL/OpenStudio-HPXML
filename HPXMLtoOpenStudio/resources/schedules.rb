@@ -1134,6 +1134,7 @@ class SchedulesFile
         column = Columns.values.find { |c| c.name == col_name }
 
         values = col[1..-1].reject { |v| v.nil? }
+        puts "[#{schedules_path}] col name=#{col_name}, type=#{column.type}, min=#{values.min}, max=#{values.max}"
 
         begin
           values = values.map { |v| Float(v) }

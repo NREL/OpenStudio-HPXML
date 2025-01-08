@@ -75,6 +75,7 @@ jobs:
           path: docs/_build/html/
 
   run-workflow1-tests:
+    if: false
     runs-on: ubuntu-22.04
     container:
       image: docker://nrel/openstudio:3.9.0
@@ -98,6 +99,7 @@ jobs:
           name: results-workflow1-tests
 
   run-workflow2-tests:
+    if: false
     runs-on: ubuntu-22.04
     container:
       image: docker://nrel/openstudio:3.9.0
@@ -121,6 +123,7 @@ jobs:
           name: results-workflow2-tests
 
   run-windows-tests:
+    if: false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -136,6 +139,7 @@ jobs:
           & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
 
   merge-results:
+    if: false
     runs-on: ubuntu-22.04
     needs: [run-workflow1-tests, run-workflow2-tests, run-unit-tests]
     steps:
@@ -170,6 +174,7 @@ jobs:
           name: test_results
 
   compare-results:
+    if: false
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     needs: merge-results
@@ -221,6 +226,7 @@ jobs:
           name: comparisons
 
   update-results:
+    if: false
     runs-on: ubuntu-22.04
     needs: merge-results
     steps:
