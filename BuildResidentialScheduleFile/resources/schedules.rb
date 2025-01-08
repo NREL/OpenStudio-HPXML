@@ -179,9 +179,9 @@ class ScheduleGenerator
                         SchedulesFile::Columns[:HotWaterFixtures].name => fixtures.map { |flow| flow / fixtures.max }
                       })
     fill_ev_schedules(mkc_activity_schedules, occupancy_schedules[:ev_occupant_presence])
-    @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
     if @debug
-      @schedules[SchedulesFile::Columns[:Sleeping].name] = occupancy_schedules[:sleep_schedule] if @debug
+      @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
+      @schedules[SchedulesFile::Columns[:Sleeping].name] = occupancy_schedules[:sleep_schedule]
     end
     return true
   end
@@ -784,7 +784,6 @@ class ScheduleGenerator
   # @param markov_chain_simulation_result [Array<Matrix>] Array of matrices containing Markov chain simulation results for each occupant
   # @return [void] Updates @schedules with EV battery charging and discharging schedules
   def fill_ev_schedules(markov_chain_simulation_result, ev_occupant_presence)
-    @schedules[SchedulesFile::Columns[:EVOccupant].name] = ev_occupant_presence
     if @hpxml_bldg.vehicles.to_a.empty?
       return
     end
@@ -796,6 +795,7 @@ class ScheduleGenerator
     charging_schedule, discharging_schedule = get_ev_battery_schedule(away_schedule, hours_per_year)
     agg_charging_schedule = aggregate_array(charging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
     agg_discharging_schedule = aggregate_array(discharging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
+    @schedules[SchedulesFile::Columns[:EVOccupant].name] = ev_occupant_presence
     @schedules[SchedulesFile::Columns[:EVBatteryCharging].name] = agg_charging_schedule
     @schedules[SchedulesFile::Columns[:EVBatteryDischarging].name] = agg_discharging_schedule
   end
