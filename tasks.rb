@@ -21,12 +21,15 @@ def create_hpxmls
   schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
   schema_validator = XMLValidator.get_xml_validator(schema_path)
 
-  schedules_regenerated = []
+  # Delete all stochastic schedule files (they will be regenerated below)
+  stochastic_sched_basename = 'occupancy-stochastic'
+  stochastic_csvs = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'schedule_files', "#{stochastic_sched_basename}*.csv")
+  Dir.glob(stochastic_csvs).each { |file| File.delete(file) }
 
   puts "Generating #{json_inputs.size} HPXML files..."
 
-  json_inputs.keys.each_with_index do |hpxml_filename, i|
-    puts "[#{i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
+  json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
+    puts "[#{hpxml_i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
     abs_hpxml_files << File.absolute_path(hpxml_path)
 
@@ -72,14 +75,29 @@ def create_hpxmls
       end
 
       # Re-generate stochastic schedule CSV?
-      csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? 'occupancy-stochastic' }
-      if (not csv_path.nil?) && (not schedules_regenerated.include? csv_path)
+      prev_csv_path = nil
+      csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? stochastic_sched_basename }
+      if hpxml_path.include?('base-schedules-detailed-occupancy-stochastic-10-mins.xml') ||
+         hpxml_path.include?('base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml')
+        # These sample files test simulation timesteps that differ from the stochastic schedule timestep. If we
+        # call the BuildResidentialScheduleFile measure below, it will generate a stochastic schedule that matches
+        # the simulation timestep; so we'll avoid the call and just use the stochastic schedule generated from
+        # another HPXML file.
+        csv_path = nil
+      end
+      if not csv_path.nil?
         sch_args = { 'hpxml_path' => hpxml_path,
                      'output_csv_path' => csv_path,
                      'hpxml_output_path' => hpxml_path,
                      'building_id' => "MyBuilding#{suffix}" }
         measures['BuildResidentialScheduleFile'] = [sch_args]
-        schedules_regenerated << csv_path
+
+        # Rename existing file (if found) for later comparison
+        csv_path = File.expand_path(File.join(File.dirname(hpxml_path), csv_path))
+        if File.exist? csv_path
+          prev_csv_path = csv_path + '.prev'
+          File.rename(csv_path, prev_csv_path)
+        end
       end
 
       # Apply measure
@@ -94,6 +112,17 @@ def create_hpxmls
         puts "\nError: Did not successfully generate #{hpxml_filename}."
         exit!
       end
+
+      # Make sure newly generated schedule CSV matches previously generated schedule CSV
+      next if prev_csv_path.nil?
+
+      csv_data = File.read(csv_path)
+      prev_csv_data = File.read(prev_csv_path)
+      if csv_data != prev_csv_data
+        puts "Error: Two different schedule CSVs (see #{File.basename(csv_path)} vs #{File.basename(prev_csv_path)}) were generated for the same filename."
+        exit!
+      end
+      File.delete(prev_csv_path)
     end
 
     hpxml = HPXML.new(hpxml_path: hpxml_path)
