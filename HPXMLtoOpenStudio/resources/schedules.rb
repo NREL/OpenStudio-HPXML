@@ -1142,11 +1142,7 @@ class SchedulesFile
         end
 
         if @schedules.keys.include? col_name
-          if col2path[col_name] == schedules_path
-            @runner.registerWarning("Schedule column name '#{col_name}' is duplicated in #{schedules_path}. Using the last definition.")
-          else
-            @runner.registerWarning("Schedule column name '#{col_name}' already exist in #{col2path[col_name]}. Overwriting with #{schedules_path}.")
-          end
+          fail "Schedule column name '#{col_name}' is duplicated. [context: #{schedules_path}]"
         end
 
         if column.type == :frac
