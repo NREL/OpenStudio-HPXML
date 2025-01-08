@@ -15,7 +15,7 @@ end
 
 desc 'Run measure unit tests'
 Rake::TestTask.new('test_measures') do |t|
-  t.test_files = Dir['HPXMLtoOpenStudio/tests/test_validation']
+  t.test_files = Dir['HPXMLtoOpenStudio/tests/test_validation.rb']
   t.warning = false
   t.verbose = true
 end
