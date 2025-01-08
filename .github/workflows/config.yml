@@ -40,9 +40,11 @@ jobs:
           openstudio tasks.rb update_hpxmls
           git config --global --add safe.directory $(realpath .)
           echo "Checking for HPXML differences..."
+          echo "If differences are found below, then HPXMLs need to be regenerated using: openstudio tasks.rb update_hpxmls"
           git diff --exit-code --ignore-cr-at-eol workflow/*.xml
           echo "Checking for schedule CSV differences..."
-          git diff --exit-code --ignore-cr-at-eol HPXMLtoOpenStudio/resources/schedule_files/*.csv
+          echo "If differences are found below, then HPXMLs need to be regenerated using: openstudio tasks.rb update_hpxmls"
+          git diff --stat --exit-code --ignore-cr-at-eol HPXMLtoOpenStudio/resources/schedule_files/*.csv
 
       - name: Run measure unit tests
         run: |
@@ -77,7 +79,6 @@ jobs:
           path: docs/_build/html/
 
   run-workflow1-tests:
-    if: false
     runs-on: ubuntu-22.04
     container:
       image: docker://nrel/openstudio:3.9.0
@@ -101,7 +102,6 @@ jobs:
           name: results-workflow1-tests
 
   run-workflow2-tests:
-    if: false
     runs-on: ubuntu-22.04
     container:
       image: docker://nrel/openstudio:3.9.0
@@ -125,7 +125,6 @@ jobs:
           name: results-workflow2-tests
 
   run-windows-tests:
-    if: false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -141,7 +140,6 @@ jobs:
           & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
 
   merge-results:
-    if: false
     runs-on: ubuntu-22.04
     needs: [run-workflow1-tests, run-workflow2-tests, run-unit-tests]
     steps:
@@ -176,7 +174,7 @@ jobs:
           name: test_results
 
   compare-results:
-    if: false
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     needs: merge-results
     steps:
@@ -227,7 +225,6 @@ jobs:
           name: comparisons
 
   update-results:
-    if: false
     runs-on: ubuntu-22.04
     needs: merge-results
     steps:
