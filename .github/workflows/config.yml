@@ -175,7 +175,6 @@ jobs:
 
   compare-results:
     if: false
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     needs: merge-results
     steps:
