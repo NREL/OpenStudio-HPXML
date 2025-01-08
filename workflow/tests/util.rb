@@ -227,32 +227,25 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_bldg.windows.empty?
       next if message.include? 'No windows specified, the model will not include window heat transfer.'
     end
-    check_battery_log = true
-    hpxml_bldg.batteries.each do |_battery|
-      next unless hpxml_bldg.pv_systems.empty? && hpxml_bldg.header.schedules_filepaths.empty?
+    if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?
       next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
-
-      check_battery_log = false
     end
-    # Battery with no schedule
-    hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.vehicle_type == HPXML::VehicleTypeBEV
-      next unless hpxml_bldg.header.schedules_filepaths.empty?
-      next unless not vehicle.ev_charger_idref.nil?
+    if !hpxml_bldg.vehicles.empty? && hpxml_bldg.header.schedules_filepaths.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil?
       next if message.include? 'Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.'
-
-      check_battery_log = false
     end
-    # Battery with no charger
-    hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.vehicle_type == HPXML::VehicleTypeBEV
-      next unless vehicle.ev_charger_idref.nil?
+    if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.header.schedules_filepaths.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil? && hpxml_bldg.vehicles[0].ev_charging_weekday_fractions.nil?
+      next if message.include? 'Electric vehicle hours per week inputted (14.0) do not match the hours per week calculated from the discharging schedule (21.0). The inputted hours per week value will be ignored.'
+      next if message.include? 'A total of 1066.0 driving hours could not be met due to insufficient vehicle charge. This issue may result from a combination EV battery parameters, charging power, and driving or discharging schedules.'
+    end
+    if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil? && !hpxml_bldg.vehicles[0].ev_charging_weekday_fractions.nil?
+      next if message.include? 'Electric vehicle hours per week inputted (14.0) do not match the hours per week calculated from the discharging schedule (8.9). The inputted hours per week value will be ignored.'
+    end
+    if !hpxml_bldg.vehicles.empty? && hpxml_bldg.vehicles[0].ev_charger_idref.nil?
       next if message.include? 'Electric vehicle specified with no charger provided; battery will not be modeled.'
-
-      check_battery_log = false
     end
-    next if check_battery_log
-
+    if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }.empty?
+      next if message.include? 'Electric vehicle was specified as a plug load and as a battery, vehicle charging will be modeled as a plug load.'
+    end
     if hpxml_path.include? 'base-location-capetown-zaf.xml'
       next if message.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
       next if message.include? 'Could not find a marginal Electricity rate.'

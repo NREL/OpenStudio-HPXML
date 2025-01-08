@@ -390,7 +390,6 @@
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
             <SystemIdentifier id='EVCharger1'/>
-            <Location>outside</Location>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>

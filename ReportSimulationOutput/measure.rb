@@ -3157,7 +3157,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       end
-
     end
 
     return {}

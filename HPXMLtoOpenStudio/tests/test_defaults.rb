@@ -3507,10 +3507,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_pv_system_values(default_hpxml_bldg, 0.96, 0.14, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
 
     # Test defaults w/ year modules manufactured
-    pv.year_modules_manufactured = 2010
+    pv.year_modules_manufactured = Date.today.year - 10
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_pv_system_values(default_hpxml_bldg, 0.96, 0.198, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
+    _test_default_pv_system_values(default_hpxml_bldg, 0.96, 0.182, false, HPXML::LocationRoof, HPXML::PVTrackingTypeFixed, HPXML::PVModuleTypeStandard, 135)
   end
 
   def test_batteries
@@ -3613,6 +3613,118 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_battery_values(default_hpxml_bldg.batteries[0], 10.0, nil, 9.0, nil, 5000.0, HPXML::LocationGarage, nil, 0.925)
+  end
+
+  def test_vehicles
+    # Test inputs not overridden by defaults
+    hpxml, hpxml_bldg = _create_hpxml('base-battery-ev.xml')
+    hpxml_bldg.vehicles[0].battery_type = HPXML::BatteryTypeLithiumIon
+    hpxml_bldg.vehicles[0].nominal_capacity_kwh = 45.0
+    hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
+    hpxml_bldg.vehicles[0].usable_capacity_kwh = 34.0
+    hpxml_bldg.vehicles[0].usable_capacity_ah = nil
+    hpxml_bldg.vehicles[0].miles_per_year = 5000
+    hpxml_bldg.vehicles[0].hours_per_week = 10
+    hpxml_bldg.vehicles[0].energy_efficiency = 0.18
+    hpxml_bldg.vehicles[0].fraction_charged_home = 0.75
+    hpxml_bldg.vehicles[0].ev_charging_weekday_fractions = ConstantDaySchedule
+    hpxml_bldg.vehicles[0].ev_charging_weekend_fractions = ConstantDaySchedule
+    hpxml_bldg.vehicles[0].ev_charging_monthly_multipliers = ConstantMonthSchedule
+    hpxml_bldg.ev_chargers[0].location = HPXML::LocationOutside
+    hpxml_bldg.ev_chargers[0].charging_power = 1600
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 45.0, nil, 34.0, nil, 5000, 10, 0.18, 0.75, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, 1600, HPXML::LocationOutside)
+
+    # Test w/ Ah instead of kWh
+    hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].nominal_capacity_ah = 987.0
+    hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].usable_capacity_ah = 876.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 987.0, nil, 876.0, 5000, 10, 0.18, 0.75, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, 1600, HPXML::LocationOutside)
+
+    # Test defaults
+    hpxml, hpxml_bldg = _create_hpxml('base-battery-ev.xml')
+    hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
+    hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].usable_capacity_ah = nil
+    hpxml_bldg.vehicles[0].miles_per_year = nil
+    hpxml_bldg.vehicles[0].hours_per_week = nil
+    hpxml_bldg.vehicles[0].energy_efficiency = nil
+    hpxml_bldg.vehicles[0].fraction_charged_home = nil
+    hpxml_bldg.vehicles[0].ev_charging_weekday_fractions = nil
+    hpxml_bldg.vehicles[0].ev_charging_weekend_fractions = nil
+    hpxml_bldg.vehicles[0].ev_charging_monthly_multipliers = nil
+    hpxml_bldg.ev_chargers[0].location = nil
+    hpxml_bldg.ev_chargers[0].charging_power = nil
+    default_wkdy_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -0.4611, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.4201, -0.4231, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+    default_wknd_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -0.3946, 0.0, 0.0, 0.0, 0.0, -0.3897, -0.3991, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+    default_mth_mult = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 63.0, nil, 50.4, nil, 10900, 8.88, 0.22, 1.0, default_wkdy_sch, default_wknd_sch, default_mth_mult, 5690, HPXML::LocationGarage)
+
+    # Test defaults w/ nominal kWh
+    hpxml_bldg.vehicles[0].nominal_capacity_kwh = 45.0
+    hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
+    hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].usable_capacity_ah = nil
+    hpxml_bldg.vehicles[0].rated_power_output = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 45.0, nil, 36.0, nil, 10900, 8.88, 0.22, 1.0, default_wkdy_sch, default_wknd_sch, default_mth_mult, 5690, HPXML::LocationGarage)
+
+    # Test defaults w/ usable kWh
+    hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
+    hpxml_bldg.vehicles[0].usable_capacity_kwh = 36.0
+    hpxml_bldg.vehicles[0].usable_capacity_ah = nil
+    hpxml_bldg.vehicles[0].rated_power_output = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 45.0, nil, 36.0, nil, 10900, 8.88, 0.22, 1.0, default_wkdy_sch, default_wknd_sch, default_mth_mult, 5690, HPXML::LocationGarage)
+
+    # Test defaults w/ nominal Ah
+    hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].nominal_capacity_ah = 280.0
+    hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].usable_capacity_ah = nil
+    hpxml_bldg.vehicles[0].rated_power_output = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 280.0, nil, 224.0, 10900, 8.88, 0.22, 1.0, default_wkdy_sch, default_wknd_sch, default_mth_mult, 5690, HPXML::LocationGarage)
+
+    # Test defaults w/ usable Ah
+    hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
+    hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].usable_capacity_ah = 224.0
+    hpxml_bldg.vehicles[0].rated_power_output = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 280.0, nil, 224.0, 10900, 8.88, 0.22, 1.0, default_wkdy_sch, default_wknd_sch, default_mth_mult, 5690, HPXML::LocationGarage)
+
+    # Test defaults w/ schedule file
+    hpxml, hpxml_bldg = _create_hpxml('base-battery-ev-scheduled.xml')
+    hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
+    hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
+    hpxml_bldg.vehicles[0].usable_capacity_ah = nil
+    hpxml_bldg.vehicles[0].miles_per_year = nil
+    hpxml_bldg.vehicles[0].hours_per_week = nil
+    hpxml_bldg.vehicles[0].energy_efficiency = nil
+    hpxml_bldg.vehicles[0].fraction_charged_home = nil
+    hpxml_bldg.vehicles[0].ev_charging_weekday_fractions = nil
+    hpxml_bldg.vehicles[0].ev_charging_weekend_fractions = nil
+    hpxml_bldg.vehicles[0].ev_charging_monthly_multipliers = nil
+    hpxml_bldg.ev_chargers[0].location = nil
+    hpxml_bldg.ev_chargers[0].charging_power = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 63.0, nil, 50.4, nil, 10900, 8.88, 0.22, 1.0, nil, nil, nil, 5690, HPXML::LocationGarage)
   end
 
   def test_generators
@@ -5732,6 +5844,51 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       assert_equal(lifetime_model, battery.lifetime_model)
     end
     assert_equal(round_trip_efficiency, battery.round_trip_efficiency)
+  end
+
+  def _test_default_vehicle_values(vehicle, ev_charger, battery_type, nominal_capacity_kwh, nominal_capacity_ah, usable_capacity_kwh, usable_capacity_ah, miles_per_year, hours_per_week, energy_efficiency, fraction_charged_home, weekday_sch, weekend_sch, usage_multiplier, charger_power, location)
+    assert_equal(battery_type, HPXML::BatteryTypeLithiumIon)
+    if nominal_capacity_kwh.nil?
+      assert_nil(vehicle.nominal_capacity_kwh)
+    else
+      assert_equal(nominal_capacity_kwh, vehicle.nominal_capacity_kwh)
+    end
+    if nominal_capacity_ah.nil?
+      assert_nil(vehicle.nominal_capacity_ah)
+    else
+      assert_equal(nominal_capacity_ah, vehicle.nominal_capacity_ah)
+    end
+    if usable_capacity_kwh.nil?
+      assert_nil(vehicle.usable_capacity_kwh)
+    else
+      assert_equal(usable_capacity_kwh, vehicle.usable_capacity_kwh)
+    end
+    if usable_capacity_ah.nil?
+      assert_nil(vehicle.usable_capacity_ah)
+    else
+      assert_equal(usable_capacity_ah, vehicle.usable_capacity_ah)
+    end
+    assert_equal(miles_per_year, vehicle.miles_per_year)
+    assert_equal(hours_per_week, vehicle.hours_per_week)
+    assert_equal(energy_efficiency, vehicle.energy_efficiency)
+    assert_equal(fraction_charged_home, vehicle.fraction_charged_home)
+    if weekday_sch.nil?
+      assert_nil(weekday_sch, vehicle.ev_charging_weekday_fractions)
+    else
+      assert_equal(weekday_sch, vehicle.ev_charging_weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(weekend_sch, vehicle.ev_charging_weekend_fractions)
+    else
+      assert_equal(weekend_sch, vehicle.ev_charging_weekend_fractions)
+    end
+    if usage_multiplier.nil?
+      assert_nil(usage_multiplier, vehicle.ev_charging_monthly_multipliers)
+    else
+      assert_equal(usage_multiplier, vehicle.ev_charging_monthly_multipliers)
+    end
+    assert_equal(charger_power, ev_charger.charging_power)
+    assert_equal(location, ev_charger.location)
   end
 
   def _test_default_generator_values(hpxml_bldg, is_shared_system)

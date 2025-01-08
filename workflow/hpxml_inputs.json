@@ -1010,6 +1010,10 @@
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
     "ev_battery_present": true
   },
+  "sample_files/base-ev-charger-no-battery.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "ev_charger_present": true
+  },
   "sample_files/base-battery-ev.xml": {
     "parent_hpxml": "sample_files/base-battery-ev-no-charger.xml",
     "ev_battery_capacity": 100,
@@ -1029,9 +1033,6 @@
     "parent_hpxml": "sample_files/base-battery-ev.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery-ev-low-charge.csv"
   },
-  "sample_files/base-battery-ev-lifetime-model.xml": {
-    "parent_hpxml": "sample_files/base-battery-ev-scheduled.xml"
-  },
   "sample_files/base-battery-ev-plug-load-ev.xml": {
     "parent_hpxml": "sample_files/base-battery-ev-scheduled.xml",
     "misc_plug_loads_vehicle_present": true,
@@ -1040,6 +1041,7 @@
   "sample_files/base-pv-battery-and-ev.xml": {
     "parent_hpxml": "sample_files/base-pv-battery.xml",
     "ev_battery_present": true,
+    "ev_hours_per_week": 21,
     "ev_charger_present": true,
     "ev_charger_location": "outside",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery-ev.csv"
@@ -3516,6 +3518,7 @@
     "parent_hpxml": "sample_files/base-schedules-simple.xml",
     "hot_water_distribution_system_type": "Standard",
     "ev_battery_present": false,
+    "ev_charger_present": false,
     "extra_refrigerator_present": true,
     "extra_refrigerator_rated_annual_kwh": 700,
     "freezer_present": true,

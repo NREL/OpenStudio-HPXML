@@ -483,6 +483,7 @@
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>
+            <HoursDrivenPerWeek>21.0</HoursDrivenPerWeek>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>

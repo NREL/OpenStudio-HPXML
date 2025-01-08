@@ -133,7 +133,6 @@ module Battery
     elcs.setNumberofCellsinSeries(number_of_cells_in_series)
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setBatteryMass(battery_mass)
-    elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency) if !is_ev # Note: This is currently unused in E+, so we use an EMS program below instead
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)
@@ -149,25 +148,23 @@ module Battery
     elcs.additionalProperties.setFeature('is_ev', is_ev)
 
     if is_ev
+      elcs.setDCtoDCChargingEfficiency(1.0) # Charging efficiency is captured in the ev_discharge_program
       # EVs always get their own ELCD, not PV
       elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
       elcd.setName("#{obj_name} elec load center dist")
       elcd.setElectricalBussType('AlternatingCurrentWithStorage')
       elcs.setInitialFractionalStateofCharge(maximum_storage_state_of_charge_fraction)
     else
+      elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency) # Note: This is currently unused in E+, so we use an EMS program below instead
       elcs.setInitialFractionalStateofCharge(0.0)
       elcds = model.getElectricLoadCenterDistributions
       elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
       # Use PV ELCD if present
-      elcds.each do |elcd_|
-        next unless elcd_.name.to_s.include? 'PVSystem'
-
-        elcd = elcd_
+      elcd = elcds.find { |elcd| elcd.name.to_s.include?('PVSystem') }
+      if elcd
         elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
         elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
-        break
-      end
-      if elcds.empty?
+      else
         elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
         elcd.setName("#{obj_name} elec load center dist")
         elcd.setElectricalBussType('AlternatingCurrentWithStorage')
