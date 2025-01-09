@@ -26,6 +26,15 @@ def create_hpxmls
   stochastic_csvs = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'schedule_files', "#{stochastic_sched_basename}*.csv")
   Dir.glob(stochastic_csvs).each { |file| File.delete(file) }
 
+  # Specify list of sample files that should not regenerate schedule CSVs. These files test simulation timesteps
+  # that differ from the stochastic schedule timestep. If we were to call the BuildResidentialScheduleFile
+  # measure, it will generate a stochastic schedule that matches the simulation timestep; so we skip it and just
+  # use the stochastic schedule generated from another HPXML file.
+  schedule_skip_list = [
+    'base-schedules-detailed-occupancy-stochastic-10-mins.xml',
+    'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml'
+  ]
+
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
@@ -77,15 +86,7 @@ def create_hpxmls
       # Re-generate stochastic schedule CSV?
       prev_csv_path = nil
       csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? stochastic_sched_basename }
-      if hpxml_path.include?('base-schedules-detailed-occupancy-stochastic-10-mins.xml') ||
-         hpxml_path.include?('base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml')
-        # These sample files test simulation timesteps that differ from the stochastic schedule timestep. If we
-        # call the BuildResidentialScheduleFile measure below, it will generate a stochastic schedule that matches
-        # the simulation timestep; so we'll avoid the call and just use the stochastic schedule generated from
-        # another HPXML file.
-        csv_path = nil
-      end
-      if not csv_path.nil?
+      if (not csv_path.nil?) && !schedule_skip_list.include?(File.basename(hpxml_path))
         sch_args = { 'hpxml_path' => hpxml_path,
                      'output_csv_path' => csv_path,
                      'hpxml_output_path' => hpxml_path,
