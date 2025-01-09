@@ -2947,7 +2947,7 @@ module HVACSizing
       entering_temp = hvac_heating_ap.design_hw
       hvac_heating_speed = get_nominal_speed(hvac_heating_ap, false)
       if [HPXML::HVACCompressorTypeSingleStage].include? hvac_heating.compressor_type
-        hvac_sizings.Heat_Airflow = hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed] * UnitConversions.convert(hvac_sizings.Heat_Load_Tot, 'Btu/hr', 'ton')
+        hvac_sizings.Heat_Airflow = hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed] * UnitConversions.convert(hvac_sizings.Heat_Load, 'Btu/hr', 'ton')
         htg_cap_curve_value = calc_gshp_htg_curve_value(hvac_heating_ap.heat_cap_curve_spec[hvac_heating_speed], mj.heat_setpoint, entering_temp, hvac_sizings.Heat_Airflow)
         hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load / htg_cap_curve_value
         # For single stage compressor, when heating capacity is much larger than cooling capacity,
