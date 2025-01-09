@@ -1,6 +1,8 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- Output updates:
+  - Adds "Unmet Hours: Showers (hr)" and "Unmet Hours: Showers (%)" to characterize unmet water heating loads.
 
 __Bugfixes__
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.

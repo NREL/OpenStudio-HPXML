@@ -54,7 +54,7 @@
         <extension>
           <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv</SchedulesFilePath>
           <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv</SchedulesFilePath>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-30-mins.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/stochastic-3-occupants-30-mins.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
