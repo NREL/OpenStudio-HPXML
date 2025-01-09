@@ -177,7 +177,7 @@ end
 # Apply OpenStudio measures and arguments (i.e., "run" method) corresponding to a provided Hash.
 # Optionally, save an OpenStudio Workflow based on the provided Hash.
 #
-# @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String, Array<String>] Parent directory path of all OpenStudio-HPXML measures
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -211,8 +211,7 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
   # Call each measure in the specified order
   measures.keys.each do |measure_subdir|
     # Gather measure arguments and call measure
-    full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
-    check_file_exists(full_measure_path, runner)
+    full_measure_path = get_full_measure_path(measures_dir, measure_subdir, runner)
     measure = get_measure_instance(full_measure_path)
     measures[measure_subdir].each do |args|
       next unless measure_type == measure.class.superclass.name.to_s
@@ -229,6 +228,21 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
   end
 
   return true
+end
+
+# Get the full path to a measure.rb file given the measure directory name(s).
+#
+# @param measures_dir [String, Array<String>] Parent directory path(s) of OpenStudio-HPXML measures
+# @param measure_name [String] Name of the OpenStudio measure directory
+# @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+# @return [String] Full path to the measure.rb file
+def get_full_measure_path(measures_dir, measure_name, runner)
+  measures_dirs = measures_dir.is_a?(Array) ? measures_dir : [measures_dir]
+  measures_dirs.each do |dir|
+    full_measure_path = File.join(dir, measure_name, 'measure.rb')
+    return full_measure_path if File.exist?(full_measure_path)
+  end
+  register_error("Cannot find measure #{measure_name} in any of the measures_dirs: #{measures_dirs.join(', ')}.", runner)
 end
 
 # Apply OpenStudio measures and arguments (i.e., "energyPlusOutputRequests" method) corresponding to a provided Hash.
