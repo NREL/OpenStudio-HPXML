@@ -8,6 +8,11 @@ module HVAC
   AirSourceCoolRatedOWB = 75.0 # degF, Rated outdoor wetbulb for air-source systems, cooling
   AirSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for air-source systems, cooling
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
+  GroundSourceHeatRatedWET = 70.0 # degF, Rated water entering temperature for ground-source systems, heating
+  GroundSourceHeatRatedIDB = 70.0 # degF, Rated indoor drybulb for ground-source systems, heating
+  GroundSourceCoolRatedWET = 85.0 # degF, Rated water entering temperature for ground-source systems, cooling
+  GroundSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for ground-source systems, cooling
+  GroundSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for ground-source systems, cooling
   CrankcaseHeaterTemp = 50.0 # degF
 
   # Adds any HVAC Systems to the OpenStudio model.
@@ -576,7 +581,7 @@ module HVAC
     geothermal_loop.num_bore_holes *= unit_multiplier
 
     # Cooling Coil
-    if heat_pump.compressor_type = HPXML::HVACCompressorTypeSingleStage
+    if [HPXML::HVACCompressorTypeSingleStage].include? heat_pump.compressor_type
       clg_total_cap_curve = Model.add_curve_quad_linear(
         model,
         name: "#{obj_name} clg total cap curve",
@@ -622,7 +627,7 @@ module HVAC
       htg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(60, 'F', 'C'))
       htg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(70, 'F', 'C'))
       htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
-    else
+    elsif [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? heat_pump.compressor_type
       num_speeds = hp_ap.cool_capacity_ratios.size
       # TODO: Curve placeholder
       plf_fplr_curve = Model.add_curve_quadratic(
@@ -2216,7 +2221,8 @@ module HVAC
     hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
     hp_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, hp_ap.heat_rated_airflow_rate)
 
-    if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
+    case heat_pump.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
 
       # E+ equation fit coil coefficients generated following approach in Tang's thesis:
       # See Appendix B of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
@@ -2241,8 +2247,10 @@ module HVAC
       # Heating Curves
       hp_ap.heat_cap_curve_spec = [[-3.75031847962047, -2.18062040443483, 6.8363364819032, 0.188376814356582, 0.0869274802923634]]
       hp_ap.heat_power_curve_spec = [[-8.4754723813072, 8.10952801956388, 1.38771494628738, -0.33766445915032, 0.0223085217874051]]
+      cool_cop_ratios = [1.0]
+      heat_cop_ratios = [1.0]
 
-    elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
+    when HPXML::HVACCompressorTypeTwoStage
       # Cooling Curves
       # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
       # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
@@ -2281,7 +2289,10 @@ module HVAC
                                  [0.1535, -0.3215, 1.1679]]
       # FIXME: Rated condition is the same as DX coil E+ conditions, so followed the same approach here, please review
       set_cool_rated_shrs_gross(heat_pump)
-    elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+      cool_cop_ratios = [1.102827763, 1.0]
+      heat_cop_ratios = [1.161791639, 1.0]
+    when HPXML::HVACCompressorTypeTwoStage
       # TODO: Add variable speed system performance curves
     end
 
@@ -2289,16 +2300,15 @@ module HVAC
     # Fan power to overcome the static pressure adjustment
     rated_fan_watts_per_cfm = 0.5 * heat_pump.fan_watts_per_cfm # Calculate rated fan power by assuming the power to overcome the ductwork is approximately 50% of the total fan power (ANSI/RESNET/ICC 301 says 0.2 W/cfm is the fan power associated with ductwork, but we don't know if that was a PSC or BPM fan)
     rated_pump_watts_per_ton = 30.0 # ANSI/RESNET/ICC 301, estimated pump power required to overcome the internal resistance of the ground-water heat exchanger under AHRI test conditions for a closed loop system
+    power_f = rated_fan_watts_per_cfm * hp_ap.cool_rated_cfm_per_ton[-1] / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
+    power_p = rated_pump_watts_per_ton / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
+    cool_eir_rated = UnitConversions.convert(((hp_ap.cool_capacity_ratios[-1] - UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.cooling_efficiency_eer - power_f - power_p), 'Wh', 'Btu')
+    heat_eir_rated = (hp_ap.heat_capacity_ratios[-1] + UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.heating_efficiency_cop - UnitConversions.convert(power_f + power_p, 'Wh', 'Btu')
     hp_ap.cool_rated_cops = []
     hp_ap.heat_rated_cops = []
-    hp_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, i|
-      power_f = rated_fan_watts_per_cfm * hp_ap.cool_rated_cfm_per_ton[i] / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
-      power_p = rated_pump_watts_per_ton / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
-      # Fixme: Need to get eer/cop at each speed
-      cool_eir = UnitConversions.convert(((capacity_ratio - UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.cooling_efficiency_eer - power_f - power_p), 'Wh', 'Btu')
-      heat_eir = (capacity_ratio + UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.heating_efficiency_cop - UnitConversions.convert(power_f + power_p, 'Wh', 'Btu')
-      hp_ap.cool_rated_cops << 1.0 / cool_eir
-      hp_ap.heat_rated_cops << 1.0 / heat_eir
+    for i in 0..(cool_cop_ratios.size - 1)
+      hp_ap.cool_rated_cops << 1.0 / cool_eir_rated * cool_cop_ratios[i]
+      hp_ap.heat_rated_cops << 1.0 / heat_eir_rated * heat_cop_ratios[i]
     end
   end
 
