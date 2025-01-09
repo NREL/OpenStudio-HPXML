@@ -648,7 +648,8 @@ module HVAC
         cap_ft_curve = Model.add_curve_biquadratic(
           model,
           name: "Cool-CAP-fT#{i + 1}",
-          coeff: hp_ap.cool_cap_ft_spec[i]
+          coeff: hp_ap.cool_cap_ft_spec[i],
+          min_x: -100, max_x: 100, min_y: -100, max_y: 100
         )
         cap_faf_curve = Model.add_curve_quadratic(
           model,
@@ -665,7 +666,8 @@ module HVAC
         eir_ft_curve = Model.add_curve_biquadratic(
           model,
           name: "Cool-EIR-fT#{i + 1}",
-          coeff: hp_ap.cool_eir_ft_spec[i]
+          coeff: hp_ap.cool_eir_ft_spec[i],
+          min_x: -100, max_x: 100, min_y: -100, max_y: 100
         )
         eir_faf_curve = Model.add_curve_quadratic(
           model,
@@ -714,7 +716,8 @@ module HVAC
         cap_ft_curve = Model.add_curve_biquadratic(
           model,
           name: "Heat-CAP-fT#{i + 1}",
-          coeff: hp_ap.heat_cap_ft_spec[i]
+          coeff: hp_ap.heat_cap_ft_spec[i],
+          min_x: -100, max_x: 100, min_y: -100, max_y: 100
         )
         cap_faf_curve = Model.add_curve_quadratic(
           model,
@@ -731,7 +734,8 @@ module HVAC
         eir_ft_curve = Model.add_curve_biquadratic(
           model,
           name: "Heat-EIR-fT#{i + 1}",
-          coeff: hp_ap.heat_eir_ft_spec[i]
+          coeff: hp_ap.heat_eir_ft_spec[i],
+          min_x: -100, max_x: 100, min_y: -100, max_y: 100
         )
         eir_faf_curve = Model.add_curve_quadratic(
           model,
@@ -2261,14 +2265,14 @@ module HVAC
                                 [0.4423161030, 0.0346534683, 0.0000043691, 0.0046060534, -0.0001393465, -0.0002316000]]
       hp_ap.cool_eir_ft_spec = [[1.0242580586, -0.0549907581, 0.0017735749, 0.0186562274, 0.0008900852, -0.0016973518],
                                 [1.0763155558, -0.0396246303, 0.0010677382, 0.0074160145, 0.0006781567, -0.0009009811]]
-      hp_ap.cool_cap_faf_spec = [[-0.0000007, 0.0003, 0.1047],
-                                 [-0.0238, 0.1688, 0.8551]]
-      hp_ap.cool_eir_faf_spec = [[0.000001, 0.0008, 0.9064],
-                                 [-0.0044, 0.0436, 0.1408]]
-      hp_ap.cool_cap_fwf_spec = [[-0.129, 0.2903, 0.8387],
-                                 [-0.14, 0.325, 0.815]]
-      hp_ap.cool_eir_fwf_spec = [[0.5924, -1.3055, 1.7131],
-                                 [0.4678, -1.055, 1.5872]]
+      hp_ap.cool_cap_faf_spec = [[0.9064, 0.0793, 0.0143],
+                                 [0.8551, 0.1688, -0.0238]]
+      hp_ap.cool_eir_faf_spec = [[0.7931, 0.2623, -0.0552],
+                                 [0.8241, 0.1523, 0.0234]]
+      hp_ap.cool_cap_fwf_spec = [[0.8387, 0.2903, -0.129],
+                                 [0.815, 0.325, -0.14]]
+      hp_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
+                                 [1.5872, -1.055, 0.4678]]
       # Heating Curves
       # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
       # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
@@ -2279,14 +2283,14 @@ module HVAC
                                 [0.6668920089, -0.0015817909, 0.0000027692, 0.0189198107, -0.0000372655, -0.0000393615]]
       hp_ap.heat_eir_ft_spec = [[0.8057698794, 0.0316014252, 0.0000380531, -0.0228123504, 0.0004336379, -0.0004522084],
                                 [0.8046419585, 0.0233384227, 0.0000376912, -0.0170224134, 0.0003382804, -0.0002368130]]
-      hp_ap.heat_cap_faf_spec = [[0.000002, 0.0011, 0.8649],
-                                 [0.0143, 0.1593, 0.8264]]
-      hp_ap.heat_eir_faf_spec = [[-0.0000001, -0.0004, 0.2622],
-                                 [0.0288, -0.2856, 1.2568]]
-      hp_ap.heat_cap_fwf_spec = [[-0.2139, 0.5027, 0.7112],
-                                 [-0.168, 0.399, 0.769]]
-      hp_ap.heat_eir_fwf_spec = [[0.3201, -0.6658, 1.3457],
-                                 [0.1535, -0.3215, 1.1679]]
+      hp_ap.heat_cap_faf_spec = [[0.8649, 0.1112, 0.0238],
+                                 [0.8264, 0.1593, 0.0143]]
+      hp_ap.heat_eir_faf_spec = [[1.2006, -0.1943, -0.0062],
+                                 [1.2568, -0.2856, 0.0288]]
+      hp_ap.heat_cap_fwf_spec = [[0.7112, 0.5027, -0.2139],
+                                 [0.769, 0.399, -0.168]]
+      hp_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
+                                 [1.1679, -0.3215, 0.1535]]
       # FIXME: Rated condition is the same as DX coil E+ conditions, so followed the same approach here, please review
       set_cool_rated_shrs_gross(heat_pump)
       # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
