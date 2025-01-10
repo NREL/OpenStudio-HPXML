@@ -4608,7 +4608,7 @@ Whether the second heating system is a new panel load addition to an existing se
 
 **Electric Panel: Mechanical Ventilation Power**
 
-Specifies the panel load mechanical ventilation  power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load mechanical ventilation power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
 
 - **Name:** ``electric_panel_load_mech_vent_power``
 - **Type:** ``Double``

@@ -435,34 +435,39 @@
         <ElectricPanels>
           <ElectricPanel>
             <SystemIdentifier id='ElectricPanel1'/>
-            <extension>
-              <PanelLoads>
-                <PanelLoad>
-                  <LoadType>heating</LoadType>
-                  <AttachedToSystem idref='HeatingSystem1'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <LoadType>cooling</LoadType>
-                  <AttachedToSystem idref='CoolingSystem1'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <LoadType>hot water</LoadType>
-                  <AttachedToSystem idref='WaterHeatingSystem1'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <LoadType>clothes dryer</LoadType>
-                  <AttachedToSystem idref='ClothesDryer1'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <LoadType>dishwasher</LoadType>
-                  <AttachedToSystem idref='Dishwasher1'/>
-                </PanelLoad>
-                <PanelLoad>
-                  <LoadType>range/oven</LoadType>
-                  <AttachedToSystem idref='CookingRange1'/>
-                </PanelLoad>
-              </PanelLoads>
-            </extension>
+            <BranchCircuits/>
+            <DemandLoads>
+              <DemandLoad>
+                <SystemIdentifier id='DemandLoad1'/>
+                <LoadType>heating</LoadType>
+                <AttachedToComponent idref='HeatingSystem1'/>
+              </DemandLoad>
+              <DemandLoad>
+                <SystemIdentifier id='DemandLoad2'/>
+                <LoadType>cooling</LoadType>
+                <AttachedToComponent idref='CoolingSystem1'/>
+              </DemandLoad>
+              <DemandLoad>
+                <SystemIdentifier id='DemandLoad3'/>
+                <LoadType>hot water</LoadType>
+                <AttachedToComponent idref='WaterHeatingSystem1'/>
+              </DemandLoad>
+              <DemandLoad>
+                <SystemIdentifier id='DemandLoad4'/>
+                <LoadType>clothes dryer</LoadType>
+                <AttachedToComponent idref='ClothesDryer1'/>
+              </DemandLoad>
+              <DemandLoad>
+                <SystemIdentifier id='DemandLoad5'/>
+                <LoadType>dishwasher</LoadType>
+                <AttachedToComponent idref='Dishwasher1'/>
+              </DemandLoad>
+              <DemandLoad>
+                <SystemIdentifier id='DemandLoad6'/>
+                <LoadType>range/oven</LoadType>
+                <AttachedToComponent idref='CookingRange1'/>
+              </DemandLoad>
+            </DemandLoads>
           </ElectricPanel>
         </ElectricPanels>
       </Systems>

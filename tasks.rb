@@ -1944,46 +1944,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                    rh_setpoint: 0.5,
                                    fraction_served: 0.25,
                                    location: HPXML::LocationConditionedSpace)
-    elsif ['base-detailed-electric-panel-real-home.xml'].include? hpxml_file
-      hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
-                                        distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                        air_type: HPXML::AirTypeRegularVelocity)
-      hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                      duct_leakage_units: HPXML::UnitsCFM25,
-                                                                      duct_leakage_value: 75,
-                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-      hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                      duct_leakage_units: HPXML::UnitsCFM25,
-                                                                      duct_leakage_value: 25,
-                                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-      hpxml_bldg.hvac_distributions[-1].ducts.add(id: 'Ducts3',
-                                                  duct_type: HPXML::DuctTypeSupply,
-                                                  duct_insulation_r_value: 4,
-                                                  duct_location: HPXML::LocationAtticUnvented,
-                                                  duct_surface_area: 150)
-      hpxml_bldg.hvac_distributions[-1].ducts.add(id: 'Ducts4',
-                                                  duct_type: HPXML::DuctTypeReturn,
-                                                  duct_insulation_r_value: 0,
-                                                  duct_location: HPXML::LocationAtticUnvented,
-                                                  duct_surface_area: 50)
-      hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
-                                distribution_system_idref: hpxml_bldg.hvac_distributions[-1].id,
-                                heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
-                                heat_pump_fuel: HPXML::FuelTypeElectricity,
-                                heating_capacity: 36000,
-                                cooling_capacity: 36000,
-                                fraction_heat_load_served: 0.43,
-                                fraction_cool_load_served: 0.43,
-                                heating_efficiency_hspf: 10,
-                                cooling_efficiency_seer: 22,
-                                heating_capacity_retention_fraction: 0.6,
-                                heating_capacity_retention_temp: 17,
-                                compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
-      panel_loads = hpxml_bldg.electric_panels[0].panel_loads
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                      system_idrefs: [hpxml_bldg.heat_pumps[-1].id])
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
-                      system_idrefs: [hpxml_bldg.heat_pumps[-1].id])
     end
     if ['base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml',
         'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-airflow.xml',

@@ -2723,7 +2723,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_mech_vent_power', false)
     arg.setDisplayName('Electric Panel: Mechanical Ventilation Power')
-    arg.setDescription("Specifies the panel load mechanical ventilation  power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
+    arg.setDescription("Specifies the panel load mechanical ventilation power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#panel-loads'>Panel Loads</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -7164,168 +7164,200 @@ module HPXMLFile
     hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
                                    voltage: args[:electric_panel_service_voltage],
                                    max_current_rating: args[:electric_panel_service_rating],
-                                   headroom_breaker_spaces: headroom_breaker_spaces,
-                                   total_breaker_spaces: total_breaker_spaces)
+                                   headroom: headroom_breaker_spaces,
+                                   rated_total_spaces: total_breaker_spaces)
 
-    panel_loads = hpxml_bldg.electric_panels[0].panel_loads
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    demand_loads = hpxml_bldg.electric_panels[0].demand_loads
 
     hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.primary_system
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                        power: args[:electric_panel_load_heating_system_power],
-                        addition: args[:electric_panel_load_heating_system_addition],
-                        system_idrefs: [heating_system.id])
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeHeating,
+                         power: args[:electric_panel_load_heating_system_power],
+                         is_new_load: args[:electric_panel_load_heating_system_addition],
+                         component_idrefs: [heating_system.id])
       else
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                        power: args[:electric_panel_load_heating_system_2_power],
-                        addition: args[:electric_panel_load_heating_system_2_addition],
-                        system_idrefs: [heating_system.id])
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeHeating,
+                         power: args[:electric_panel_load_heating_system_2_power],
+                         is_new_load: args[:electric_panel_load_heating_system_2_addition],
+                         component_idrefs: [heating_system.id])
       end
     end
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
-                      power: args[:electric_panel_load_cooling_system_power],
-                      addition: args[:electric_panel_load_cooling_system_addition],
-                      system_idrefs: [cooling_system.id])
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypeCooling,
+                       power: args[:electric_panel_load_cooling_system_power],
+                       is_new_load: args[:electric_panel_load_cooling_system_addition],
+                       component_idrefs: [cooling_system.id])
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating,
-                      power: args[:electric_panel_load_heat_pump_heating_power],
-                      voltage: args[:electric_panel_load_heat_pump_voltage],
-                      addition: args[:electric_panel_load_heat_pump_addition],
-                      system_idrefs: [heat_pump.id])
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling,
-                      power: args[:electric_panel_load_heat_pump_cooling_power],
-                      voltage: args[:electric_panel_load_heat_pump_voltage],
-                      addition: args[:electric_panel_load_heat_pump_addition],
-                      system_idrefs: [heat_pump.id])
+      if not args[:electric_panel_load_heat_pump_voltage].nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: args[:electric_panel_load_heat_pump_voltage],
+                            component_idrefs: [heat_pump.id])
+      end
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypeHeating,
+                       power: args[:electric_panel_load_heat_pump_heating_power],
+                       is_new_load: args[:electric_panel_load_heat_pump_addition],
+                       component_idrefs: [heat_pump.id])
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypeCooling,
+                       power: args[:electric_panel_load_heat_pump_cooling_power],
+                       is_new_load: args[:electric_panel_load_heat_pump_addition],
+                       component_idrefs: [heat_pump.id])
     end
 
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
 
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
-                      power: args[:electric_panel_load_water_heater_power],
-                      voltage: args[:electric_panel_load_water_heater_voltage],
-                      addition: args[:electric_panel_load_water_heater_addition],
-                      system_idrefs: [water_heating_system.id])
+      if not args[:electric_panel_load_water_heater_voltage].nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: args[:electric_panel_load_water_heater_voltage],
+                            component_idrefs: [water_heating_system.id])
+      end
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                       power: args[:electric_panel_load_water_heater_power],
+                       is_new_load: args[:electric_panel_load_water_heater_addition],
+                       component_idrefs: [water_heating_system.id])
     end
 
     hpxml_bldg.clothes_dryers.each do |clothes_dryer|
       next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
 
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                      power: args[:electric_panel_load_clothes_dryer_power],
-                      voltage: args[:electric_panel_load_clothes_dryer_voltage],
-                      addition: args[:electric_panel_load_clothes_dryer_addition],
-                      system_idrefs: [clothes_dryer.id])
+      if not args[:electric_panel_load_clothes_dryer_voltage].nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: args[:electric_panel_load_clothes_dryer_voltage],
+                            component_idrefs: [clothes_dryer.id])
+      end
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                       power: args[:electric_panel_load_clothes_dryer_power],
+                       is_new_load: args[:electric_panel_load_clothes_dryer_addition],
+                       component_idrefs: [clothes_dryer.id])
     end
 
     hpxml_bldg.dishwashers.each do |dishwasher|
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher,
-                      power: args[:electric_panel_load_dishwasher_power],
-                      addition: args[:electric_panel_load_dishwasher_addition],
-                      system_idrefs: [dishwasher.id])
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypeDishwasher,
+                       power: args[:electric_panel_load_dishwasher_power],
+                       is_new_load: args[:electric_panel_load_dishwasher_addition],
+                       component_idrefs: [dishwasher.id])
     end
 
     hpxml_bldg.cooking_ranges.each do |cooking_range|
       next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
 
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
-                      power: args[:electric_panel_load_cooking_range_power],
-                      voltage: args[:electric_panel_load_cooking_range_voltage],
-                      addition: args[:electric_panel_load_cooking_range_addition],
-                      system_idrefs: [cooking_range.id])
+      if not args[:electric_panel_load_cooking_range_voltage].nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: args[:electric_panel_load_cooking_range_voltage],
+                            component_idrefs: [cooking_range.id])
+      end
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypeRangeOven,
+                       power: args[:electric_panel_load_cooking_range_power],
+                       is_new_load: args[:electric_panel_load_cooking_range_addition],
+                       component_idrefs: [cooking_range.id])
     end
 
-    kitchen_bath_fan_ids = []
     hpxml_bldg.ventilation_fans.each do |ventilation_fan|
-      next if !ventilation_fan.panel_loads.nil?
-      next if ![HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
-
-      kitchen_bath_fan_ids << ventilation_fan.id
-    end
-    if not kitchen_bath_fan_ids.empty?
-      power = args[:electric_panel_load_kitchen_fans_power] if !args[:electric_panel_load_kitchen_fans_power].nil?
-      power += args[:electric_panel_load_bathroom_fans_power] if !args[:electric_panel_load_bathroom_fans_power].nil?
-
-      addition = true if (!args[:electric_panel_load_kitchen_fans_addition].nil? && args[:electric_panel_load_kitchen_fans_addition])
-      addition = true if (!args[:electric_panel_load_bathroom_fans_addition].nil? && args[:electric_panel_load_bathroom_fans_addition])
-
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
-                      power: power,
-                      addition: addition,
-                      system_idrefs: kitchen_bath_fan_ids)
-    end
-    hpxml_bldg.ventilation_fans.each do |ventilation_fan|
-      if ventilation_fan.fan_type == args[:mech_vent_fan_type]
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
-                        power: args[:electric_panel_load_mech_vent_power],
-                        addition: args[:electric_panel_load_mech_vent_fan_addition],
-                        system_idrefs: [ventilation_fan.id])
+      if ventilation_fan.fan_location == HPXML::LocationKitchen
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeMechVent,
+                         power: args[:electric_panel_load_kitchen_fans_power],
+                         is_new_load: args[:electric_panel_load_kitchen_fans_addition],
+                         component_idrefs: [ventilation_fan.id])
+      elsif ventilation_fan.fan_location == HPXML::LocationBath
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeMechVent,
+                         power: args[:electric_panel_load_bathroom_fans_power],
+                         is_new_load: args[:electric_panel_load_bathroom_fans_addition],
+                         component_idrefs: [ventilation_fan.id])
+      elsif ventilation_fan.fan_type == args[:mech_vent_fan_type]
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeMechVent,
+                         power: args[:electric_panel_load_mech_vent_power],
+                         is_new_load: args[:electric_panel_load_mech_vent_fan_addition],
+                         component_idrefs: [ventilation_fan.id])
       elsif ventilation_fan.fan_type == args[:mech_vent_2_fan_type]
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
-                        power: args[:electric_panel_load_mech_vent_2_power],
-                        addition: args[:electric_panel_load_mech_vent_2_addition],
-                        system_idrefs: [ventilation_fan.id])
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeMechVent,
+                         power: args[:electric_panel_load_mech_vent_2_power],
+                         is_new_load: args[:electric_panel_load_mech_vent_2_addition],
+                         component_idrefs: [ventilation_fan.id])
       elsif ventilation_fan.used_for_seasonal_cooling_load_reduction
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeMechVent,
-                        power: args[:electric_panel_load_whole_house_fan_power],
-                        addition: args[:electric_panel_load_whole_house_fan_addition],
-                        system_idrefs: [ventilation_fan.id])
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeMechVent,
+                         power: args[:electric_panel_load_whole_house_fan_power],
+                         is_new_load: args[:electric_panel_load_whole_house_fan_addition],
+                         component_idrefs: [ventilation_fan.id])
       end
     end
 
     hpxml_bldg.permanent_spas.each do |permanent_spa|
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaPump,
-                      power: args[:permanent_spa_pump_panel_load_watts],
-                      addition: args[:permanent_spa_pump_panel_load_addition],
-                      system_idrefs: [permanent_spa.pump_id])
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypePermanentSpaPump,
+                       power: args[:permanent_spa_pump_panel_load_watts],
+                       is_new_load: args[:permanent_spa_pump_panel_load_addition],
+                       component_idrefs: [permanent_spa.pump_id])
 
       next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
 
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
-                      power: args[:permanent_spa_heater_panel_load_watts],
-                      addition: args[:permanent_spa_heater_panel_load_addition],
-                      system_idrefs: [permanent_spa.heater_id])
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
+                       power: args[:permanent_spa_heater_panel_load_watts],
+                       is_new_load: args[:permanent_spa_heater_panel_load_addition],
+                       component_idrefs: [permanent_spa.heater_id])
     end
 
     hpxml_bldg.pools.each do |pool|
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolPump,
-                      power: args[:electric_panel_load_pool_pump_power],
-                      addition: args[:electric_panel_load_pool_pump_addition],
-                      system_idrefs: [pool.pump_id])
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypePoolPump,
+                       power: args[:electric_panel_load_pool_pump_power],
+                       is_new_load: args[:electric_panel_load_pool_pump_addition],
+                       component_idrefs: [pool.pump_id])
 
       next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
 
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypePoolHeater,
-                      power: args[:electric_panel_load_pool_heater_power],
-                      addition: args[:electric_panel_load_pool_heater_addition],
-                      system_idrefs: [pool.heater_id])
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypePoolHeater,
+                       power: args[:electric_panel_load_pool_heater_power],
+                       is_new_load: args[:electric_panel_load_pool_heater_addition],
+                       component_idrefs: [pool.heater_id])
     end
 
     hpxml_bldg.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeWellPump,
-                        power: args[:electric_panel_load_misc_plug_loads_well_pump_power],
-                        addition: args[:electric_panel_load_misc_plug_loads_well_pump_addition],
-                        system_idrefs: [plug_load.id])
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeWellPump,
+                         power: args[:electric_panel_load_misc_plug_loads_well_pump_power],
+                         is_new_load: args[:electric_panel_load_misc_plug_loads_well_pump_addition],
+                         component_idrefs: [plug_load.id])
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
-        panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
-                        power: args[:electric_panel_load_misc_plug_loads_vehicle_power],
-                        voltage: args[:electric_panel_load_misc_plug_loads_vehicle_voltage],
-                        addition: args[:electric_panel_load_misc_plug_loads_vehicle_addition],
-                        system_idrefs: [plug_load.id])
+        if not args[:electric_panel_load_misc_plug_loads_vehicle_voltage].nil?
+          branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                              voltage: args[:electric_panel_load_misc_plug_loads_vehicle_voltage],
+                              component_idrefs: [plug_load.id])
+        end
+        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                         type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                         power: args[:electric_panel_load_misc_plug_loads_vehicle_power],
+                         is_new_load: args[:electric_panel_load_misc_plug_loads_vehicle_addition],
+                         component_idrefs: [plug_load.id])
       end
     end
 
     if !args[:electric_panel_load_other_power].nil? || !args[:electric_panel_load_other_addition].nil?
-      panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther,
-                      power: args[:electric_panel_load_other_power],
-                      addition: args[:electric_panel_load_other_addition],
-                      system_idrefs: [])
+      demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                       type: HPXML::ElectricPanelLoadTypeOther,
+                       power: args[:electric_panel_load_other_power],
+                       is_new_load: args[:electric_panel_load_other_addition],
+                       component_idrefs: [])
     end
   end
 
