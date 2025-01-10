@@ -13,7 +13,7 @@ require 'fileutils'
 #
 # @param rundir [String] The run directory containing all simulation output files
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
-# @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param debug [Boolean] If true, reports info statements from the runner results
 # @param run_measures_only [Boolean] True applies only OpenStudio Model measures, skipping IDF generation and the simulation
 # @param skip_simulation [Boolean] True applies the OpenStudio Model measures and generates the IDF, but skips the simulation
@@ -177,7 +177,7 @@ end
 # Apply OpenStudio measures and arguments (i.e., "run" method) corresponding to a provided Hash.
 # Optionally, save an OpenStudio Workflow based on the provided Hash.
 #
-# @param measures_dir [String, Array<String>] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -232,7 +232,7 @@ end
 
 # Get the full path to a measure.rb file given the measure directory name(s).
 #
-# @param measures_dir [String, Array<String>] Parent directory path(s) of OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param measure_name [String] Name of the OpenStudio measure directory
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @return [String] Full path to the measure.rb file
@@ -247,7 +247,7 @@ end
 
 # Apply OpenStudio measures and arguments (i.e., "energyPlusOutputRequests" method) corresponding to a provided Hash.
 #
-# @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -278,7 +278,7 @@ end
 # Register an info statement to the OpenStudio Runner about calling measures with arguments.
 #
 # @param measure_args [Hash] Map of provided measure arguments to values
-# @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @return [nil]
 def print_measure_call(measure_args, measure_dir, runner)
