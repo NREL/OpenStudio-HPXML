@@ -2230,19 +2230,6 @@ module Defaults
       end
     end
 
-    # Maximum compressor operating temperature
-    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
-      if hvac_system.is_a? HPXML::CoolingSystem
-        next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? hvac_system.cooling_system_type
-      elsif hvac_system.is_a? HPXML::HeatPump
-        next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hvac_system.heat_pump_type
-      end
-      next unless hvac_system.compressor_maximum_temp.nil?
-
-      hvac_system.compressor_maximum_temp = 125.0 # From RESNET MINHERS Addendum 82
-      hvac_system.compressor_maximum_temp_isdefaulted = true
-    end
-
     # Pilot Light
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeFurnace,

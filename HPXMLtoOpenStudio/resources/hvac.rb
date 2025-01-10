@@ -2098,7 +2098,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param fan [TODO] TODO
-  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature
+  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @return [nil]
   def self.add_fan_power_ems_program(model, fan, hp_min_temp)
     # Sensors
@@ -2817,10 +2817,10 @@ module HVAC
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
-  # @param hp_temp [Double] Minimum (for heating) or maximum (for cooling) heat pump compressor operating temperature
   # @param weather_temp [Double] Minimum (for heating) or maximum (for cooling) outdoor drybulb temperature
+  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @return [nil]
-  def self.process_neep_detailed_performance(hvac_system, mode, max_rated_fan_cfm, hp_temp, weather_temp)
+  def self.process_neep_detailed_performance(hvac_system, mode, max_rated_fan_cfm, weather_temp, hp_min_temp = nil)
     detailed_performance_data_name = (mode == :clg) ? 'cooling_detailed_performance_data' : 'heating_detailed_performance_data'
     detailed_performance_data = hvac_system.send(detailed_performance_data_name)
     hvac_ap = hvac_system.additional_properties
@@ -2857,7 +2857,7 @@ module HVAC
       end
     end
 
-    extrapolate_data_points(data_array, mode, hp_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+    extrapolate_data_points(data_array, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     correct_ft_cap_eir(data_array, mode)
   end
 
@@ -2884,13 +2884,13 @@ module HVAC
   #
   # @param data_array [TODO] TODO
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
-  # @param hp_temp [Double] Minimum (for heating) or maximum (for cooling) heat pump compressor operating temperature
+  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @param weather_temp [Double] Minimum (for heating) or maximum (for cooling) outdoor drybulb temperature
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @param cfm_per_ton [Array<Double>] Rated CFM/ton at each speed
   # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
   # @return [nil]
-  def self.extrapolate_data_points(data_array, mode, hp_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+  def self.extrapolate_data_points(data_array, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     # Set of data used for table lookup
     data_array.each_with_index do |data, speed|
       user_odbs = data.map { |dp| dp.outdoor_temperature }
@@ -2901,7 +2901,7 @@ module HVAC
         # Calculate ODB temperature at which power or capacity is zero
         high_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, true)
         high_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, true)
-        outdoor_dry_bulbs << [high_odb_at_zero_power, high_odb_at_zero_capacity, hp_temp, weather_temp].min # Max cooling ODB
+        outdoor_dry_bulbs << [high_odb_at_zero_power, high_odb_at_zero_capacity, weather_temp].min # Max cooling ODB
 
         low_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, false)
         low_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, false)
@@ -2910,7 +2910,7 @@ module HVAC
         # Calculate ODB temperature at which power or capacity is zero
         low_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, false)
         low_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, false)
-        outdoor_dry_bulbs << [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_temp, weather_temp].max # Min heating ODB
+        outdoor_dry_bulbs << [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_min_temp, weather_temp].max # Min heating ODB
 
         high_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, true)
         high_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, true)
@@ -3175,7 +3175,7 @@ module HVAC
         clg_ap.cool_rated_capacities_gross << gross_capacity
       end
     else
-      process_neep_detailed_performance(cooling_system, :clg, max_rated_fan_cfm, cooling_system.compressor_maximum_temp, weather_max_drybulb)
+      process_neep_detailed_performance(cooling_system, :clg, max_rated_fan_cfm, weather_max_drybulb)
     end
 
     clg_coil = nil
@@ -3284,9 +3284,6 @@ module HVAC
       end
     end
 
-    # FIXME: Need to set E+ max outdoor DB temp for compressor operation
-    # Currently being implemented for Coil:Cooling:DX object
-    # https://github.com/NREL/EnergyPlus/pull/10882
     clg_coil.setName(coil_name)
     clg_coil.setCondenserType('AirCooled')
     clg_coil.setCrankcaseHeaterCapacity(cooling_system.crankcase_heater_watts)
@@ -3326,7 +3323,7 @@ module HVAC
         htg_ap.heat_rated_capacities_gross << gross_capacity
       end
     else
-      process_neep_detailed_performance(heating_system, :htg, max_rated_fan_cfm, htg_ap.hp_min_temp, weather_min_drybulb)
+      process_neep_detailed_performance(heating_system, :htg, max_rated_fan_cfm, weather_min_drybulb, htg_ap.hp_min_temp)
     end
 
     htg_coil = nil
