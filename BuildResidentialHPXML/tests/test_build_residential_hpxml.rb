@@ -942,11 +942,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationAttic
     when 'extra-ev-battery.xml'
-      args['ev_battery_present'] = true
+      args['vehicle_type'] = HPXML::VehicleTypeBEV
       args['ev_charger_present'] = true
       args['ev_charger_location'] = HPXML::LocationGarage
     when 'extra-two-batteries.xml'
-      args['ev_battery_present'] = true
+      args['vehicle_type'] = HPXML::VehicleTypeBEV
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationAttic
     when 'extra-detailed-performance-autosize.xml'

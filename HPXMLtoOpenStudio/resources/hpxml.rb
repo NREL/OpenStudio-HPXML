@@ -9366,7 +9366,8 @@ class HPXML < Object
              :vehicle_type,                     # [String] VehicleType (HPXML::VehicleTypeXXX)
              :miles_per_year,                   # [Double] MilesDrivenPerYear (miles)
              :hours_per_week,                   # [Double] HoursDrivenPerWeek (hours)
-             :energy_efficiency,                # [Double] FuelEconomyCombined[Units="kWh/mile"]/Value (kWh/mile)
+             :fuel_economy,                     # [Double] FuelEconomyCombined/Value
+             :fuel_economy_units,               # [String] FuelEconomyCombined/Units
              :fraction_charged_home,            # [Double] VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage (frac)
              :ev_charger_idref,                 # [String] VehicleType/BatteryElectricVehicle/ConnectedCharger/@idref
              :ev_charging_weekday_fractions,    # [String] VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions
@@ -9453,11 +9454,9 @@ class HPXML < Object
       # Vehicle
       XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_per_year, :float, @miles_per_year_isdefaulted) unless @miles_per_year.nil?
       XMLHelper.add_element(vehicle, 'HoursDrivenPerWeek', @hours_per_week, :float, @hours_per_week_isdefaulted) unless @hours_per_week.nil?
-      if not @energy_efficiency.nil?
-        fuel_econonmy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined')
-        XMLHelper.add_element(fuel_econonmy, 'Units', UnitsKwhPerMile, :string)
-        XMLHelper.add_element(fuel_econonmy, 'Value', @energy_efficiency, :float, @energy_efficiency_isdefaulted)
-      end
+      fuel_econonmy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined')
+      XMLHelper.add_element(fuel_econonmy, 'Units', @fuel_economy_units, :string, @fuel_economy_units_isdefaulted) unless @fuel_economy.nil?
+      XMLHelper.add_element(fuel_econonmy, 'Value', @fuel_economy, :float, @fuel_economy_isdefaulted) unless @fuel_economy_units.nil?
     end
 
     # Populates the HPXML object(s) from the XML document.
@@ -9470,7 +9469,8 @@ class HPXML < Object
       @id = HPXML::get_id(vehicle)
       @miles_per_year = XMLHelper.get_value(vehicle, 'MilesDrivenPeryear', :float)
       @hours_per_week = XMLHelper.get_value(vehicle, 'HoursDrivenPerWeek', :float)
-      @energy_efficiency = XMLHelper.get_value(vehicle, "FuelEconomyCombined[Units='#{UnitsKwhPerMile}']/Value", :float)
+      @fuel_economy = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Value', :float)
+      @fuel_economy_units = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Units', :string)
       @vehicle_type = XMLHelper.get_child_name(vehicle, 'VehicleType')
       battery_prefix = "VehicleType/#{@vehicle_type}/Battery"
       @battery_type = XMLHelper.get_value(vehicle, "#{battery_prefix}/BatteryType", :string)

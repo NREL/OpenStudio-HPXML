@@ -516,6 +516,7 @@
                 <Battery/>
               </BatteryElectricVehicle>
             </VehicleType>
+            <FuelEconomyCombined/>
           </Vehicle>
         </Vehicles>
       </Systems>

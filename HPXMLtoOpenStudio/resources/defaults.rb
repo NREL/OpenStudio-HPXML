@@ -3189,9 +3189,13 @@ module Defaults
         vehicle.battery_type = default_values[:battery_type]
         vehicle.battery_type_isdefaulted = true
       end
-      if vehicle.energy_efficiency.nil?
-        vehicle.energy_efficiency = default_values[:energy_efficiency]
-        vehicle.energy_efficiency_isdefaulted = true
+      if vehicle.fuel_economy.nil?
+        vehicle.fuel_economy = default_values[:fuel_economy]
+        vehicle.fuel_economy_isdefaulted = true
+      end
+      if vehicle.fuel_economy_units.nil?
+        vehicle.fuel_economy_units = default_values[:fuel_economy_units]
+        vehicle.fuel_economy_units_isdefaulted = true
       end
       if vehicle.miles_per_year.nil?
         vehicle.miles_per_year = default_values[:miles_per_year]
@@ -5731,7 +5735,8 @@ module Defaults
              hours_per_week: 8.88,
              nominal_capacity_kwh: 63,
              nominal_voltage: 50.0,
-             energy_efficiency: 0.22, # kwh/mile
+             fuel_economy: 0.22,
+             fuel_economy_units: 'kwh/mile',
              fraction_charged_home: 1.0,
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity
   end

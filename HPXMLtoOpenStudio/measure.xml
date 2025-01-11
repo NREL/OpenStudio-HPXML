@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>a7b3851b-d8b5-4a0a-9e40-792c5eda9248</version_id>
-  <version_modified>2025-01-10T00:54:42Z</version_modified>
+  <version_id>20599bea-b769-4507-8d28-82b917e8b524</version_id>
+  <version_modified>2025-01-11T01:02:51Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -333,7 +333,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1C0DCAA1</checksum>
+      <checksum>805867A8</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -363,7 +363,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B7E4A547</checksum>
+      <checksum>F2684E58</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -645,7 +645,7 @@
       <filename>vehicle.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>028C6F1E</checksum>
+      <checksum>A355B556</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
@@ -678,6 +678,12 @@
       <checksum>93120E27</checksum>
     </file>
     <file>
+      <filename>in.schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0074F80E</checksum>
+    </file>
+    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -693,7 +699,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B5CFB6A5</checksum>
+      <checksum>7714B944</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>

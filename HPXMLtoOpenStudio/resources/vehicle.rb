@@ -119,7 +119,7 @@ class Vehicle
 
     # Calculate effective discharge power and rated power output
     # Scale the effective discharge power by 2.25 to assign the rated discharge power. This value reflects the maximum power adjustment allowed in the EMS EV discharge program at -17.8 C.
-    ev_annl_energy = vehicle.energy_efficiency * vehicle.miles_per_year # kWh/year
+    ev_annl_energy = vehicle.fuel_economy * vehicle.miles_per_year # kWh/year
     eff_discharge_power = UnitConversions.convert(ev_annl_energy / annual_driving_hours, 'kw', 'w') # W
     vehicle.rated_power_output = eff_discharge_power * 2.25
 
