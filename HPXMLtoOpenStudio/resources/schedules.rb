@@ -1511,24 +1511,25 @@ class SchedulesFile
     end
   end
 
-  # Create separate charging (positive) and discharging (negative) detailed schedules from the battery schedule.
+  # Assign seperate detailed battery charging and discharging schedules
+  # If charging/discharging columns exist, they will be used as-is.
+  # If a single column (e.g., 'battery' or 'ev_battery') is provided instead, it will be split into two columns based on the sign.
   #
   # @return [nil]
   def create_battery_charging_discharging_schedules
-    battery_col_name = Columns[:Battery].name
-    ev_battery_col_name = Columns[:EVBattery].name
-
-    return if !@schedules.keys.include?(battery_col_name) && !@schedules.keys.include?(ev_battery_col_name)
-
-    if @schedules.keys.include?(battery_col_name)
-      charging_col = SchedulesFile::Columns[:BatteryCharging].name
-      discharging_col = SchedulesFile::Columns[:BatteryDischarging].name
-      split_signed_column(battery_col_name, charging_col, discharging_col)
+    battery_col_hashes = [:Battery, :EVBattery].map do |battery_type|
+      { col: SchedulesFile::Columns[battery_type].name, charging_col: SchedulesFile::Columns[:"#{battery_type}Charging"].name, discharging_col: SchedulesFile::Columns[:"#{battery_type}Discharging"].name }
     end
-    if @schedules.keys.include?(ev_battery_col_name)
-      charging_col = SchedulesFile::Columns[:EVBatteryCharging].name
-      discharging_col = SchedulesFile::Columns[:EVBatteryDischarging].name
-      split_signed_column(ev_battery_col_name, charging_col, discharging_col)
+
+    battery_col_hashes.each do |battery_cols|
+      next unless @schedules.keys.include?(battery_cols[:col])
+
+      if @schedules.keys.include?(battery_cols[:charging_col]) && @schedules.keys.include?(battery_cols[:discharging_col])
+        @schedules.delete(battery_cols[:col])
+        next
+      end
+
+      split_signed_column(battery_cols[:col], battery_cols[:charging_col], battery_cols[:discharging_col])
     end
   end
 
