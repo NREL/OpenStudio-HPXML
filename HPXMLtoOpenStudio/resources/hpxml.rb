@@ -9454,9 +9454,9 @@ class HPXML < Object
       # Vehicle
       XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_per_year, :float, @miles_per_year_isdefaulted) unless @miles_per_year.nil?
       XMLHelper.add_element(vehicle, 'HoursDrivenPerWeek', @hours_per_week, :float, @hours_per_week_isdefaulted) unless @hours_per_week.nil?
-      fuel_econonmy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined')
-      XMLHelper.add_element(fuel_econonmy, 'Units', @fuel_economy_units, :string, @fuel_economy_units_isdefaulted) unless @fuel_economy.nil?
-      XMLHelper.add_element(fuel_econonmy, 'Value', @fuel_economy, :float, @fuel_economy_isdefaulted) unless @fuel_economy_units.nil?
+      fuel_econonmy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined') unless @fuel_economy_units.nil? and @fuel_economy.nil?
+      XMLHelper.add_element(fuel_econonmy, 'Units', @fuel_economy_units, :string, @fuel_economy_units_isdefaulted) unless @fuel_economy_units.nil?
+      XMLHelper.add_element(fuel_econonmy, 'Value', @fuel_economy, :float, @fuel_economy_isdefaulted) unless @fuel_economy.nil?
     end
 
     # Populates the HPXML object(s) from the XML document.

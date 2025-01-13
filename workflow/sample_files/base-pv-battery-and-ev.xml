@@ -484,7 +484,6 @@
               </BatteryElectricVehicle>
             </VehicleType>
             <HoursDrivenPerWeek>21.0</HoursDrivenPerWeek>
-            <FuelEconomyCombined/>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>

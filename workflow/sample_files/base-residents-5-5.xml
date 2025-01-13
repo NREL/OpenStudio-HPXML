@@ -432,7 +432,6 @@
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>
-            <FuelEconomyCombined/>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>

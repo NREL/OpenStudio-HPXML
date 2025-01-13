@@ -5736,7 +5736,7 @@ module Defaults
              nominal_capacity_kwh: 63,
              nominal_voltage: 50.0,
              fuel_economy: 0.22,
-             fuel_economy_units: 'kwh/mile',
+             fuel_economy_units: HPXML::UnitsKwhPerMile,
              fraction_charged_home: 1.0,
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity
   end

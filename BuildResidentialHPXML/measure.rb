@@ -2719,7 +2719,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('miles')
     args << arg
 
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_hours_driven_per_week', false)
     arg.setDisplayName('Vehicle: Hours Driven Per Week')
     arg.setDescription('The weekly hours the vehicle is driven.')
@@ -6948,9 +6947,10 @@ module HPXMLFile
                              number_of_bedrooms_served: number_of_bedrooms_served)
   end
 
-  # Set the electric vehicle and electric vehicle charger properties, including:
-  # - nominal and usable capacity
-  # - driving efficiency
+  # Set the vehicle and electric vehicle charger properties, including:
+  # - vehicle battery nominal and usable capacity
+  # - fuel economy
+  # - fuel economy units
   # - miles driven per year
   # - hours driven per week
   # - fraction charged at home
