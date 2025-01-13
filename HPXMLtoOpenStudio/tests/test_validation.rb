@@ -27,7 +27,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
   end
 
   def teardown
-    # File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
     File.delete(@tmp_csv_path) if File.exist? @tmp_csv_path
     FileUtils.rm_rf(@tmp_output_path)
     File.delete(File.join(File.dirname(__FILE__), 'in.schedules.csv')) if File.exist? File.join(File.dirname(__FILE__), 'in.schedules.csv')

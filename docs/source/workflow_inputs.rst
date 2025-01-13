@@ -4614,45 +4614,57 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``SystemIdentifier``                                                     id                                           Yes                      Unique identifier
   ``Voltage``                                                              string   V          See [#]_                 No        240
   ``MaxCurrentRating``                                                     double   A                                   No        200
-  ``extension/HeadroomBreakerSpaces`` or ``extension/TotalBreakerSpaces``  integer                                      No        See [#]_
-  ``extension/PanelLoads``                                                 element                                      No        See [#]_       Individual electric panel loads
+  ``BranchCircuits``                                                       element                                      No        See [#]_       Individual branch circuits
+  ``DemandLoads``                                                          element                                      No        See [#]_       Individual demand loads
   =======================================================================  =======  =========  =======================  ========  =============  ============================================
 
   .. [#] Voltage choices are "120" or "240".
-  .. [#] If neither extension/HeadroomBreakerSpaces nor extension/TotalBreakerSpaces provided, the following default value representing an electric panel with 3 open breaker spaces will be used: extension/HeadroomBreakerSpaces = 3.
-  .. [#] See :ref:`panel_loads`.
+  .. [#] See :ref:`branch_circuits`.
+  .. [#] See :ref:`demand_loads`.
 
 See :ref:`annual_outputs` for descriptions of how the calculated capacities and breaker spaces appear in the output files.
 
-.. _panel_loads:
+.. _branch_circuits:
 
-Panel Loads
-~~~~~~~~~~~
+Branch Circuits
+~~~~~~~~~~~~~~~
 
-Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
+TODO entered in ``BranchCircuits``.
+
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  Element                                                                  Type     Units      Constraints              Required  Default        Notes
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  ``Headroom`` or ``RatedTotalSpaces``                                     integer                                      No        See [#]_
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+
+  .. [#] If neither Headroom nor RatedTotalSpaces provided, the following default value representing an electric panel with 3 open breaker spaces will be used: Headroom = 3.
+
+Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
-  ``LoadType``                                    string                    See [#]_     Yes
-  ``PowerRating``                                 double    W                            No        See [#]_
   ``Voltage``                                     string    V               See [#]_     No        See [#]_
-  ``BreakerSpaces``                               integer                                No        See [#]_   Number of occupied breaker spaces
-  ``NewLoad``                                     boolean                                No        false      Whether, in the context of NEC calculations, the panel load is new
-  ``AttachedToSystem``                            idref                     See [#]_     See [#]_  See [#]_   ID of attached system; multiple are allowed [#]_
+  ``MaxCurrentRating``                            double    A                            No        See [#]_
+  ``OccupiedSpaces``                              integer                                No        See [#]_   Number of occupied breaker spaces
+  ``AttachedToComponent``                         idref                     See [#]_     See [#]_  See [#]_   ID of attached component; multiple are allowed [#]_
+  ``AttachedToElectricPanel``                     idref                     See [#]_     See [#]_  See [#]_   ID of attached electric panel (i.e., a subpanel)
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] LoadType choices are "heating", "cooling", "hot water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
-  .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
-         If no corresponding Voltage is specified, the other Voltage classification will be used.
   .. [#] Voltage choices are "120" or "240".
-  .. [#] If Voltage not provided, defaults as follows:
-
-         \- **heating, cooling, hot water, clothes dryer, range/oven, permanent spa heater, permanent spa pump, pool heater, pool pump, well pump**: 240 (120 if **cooling** references a room air conditioner)
-
-         \- **mech vent, dishwasher, electric vehicle charging, lighting, kitchen, laundry, other**: 120
-
-  .. [#] If BreakerSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of systems referenced by AttachedToSystem.
+  .. [#] If Voltage not provided, defaults based on optional referenced components as follows:
+         
+         - No referenced components, non-electric heating systems, room air conditioners, dishwashers, ventilation fans, or plug loads: 120
+         
+         - All other referenced components: 240
+  
+  .. [#] If MaxCurrentRating not provided, defaults based on Voltage as follows:
+  
+         \- **120**: 20
+         
+         \- **240**: 50
+         
+  .. [#] If OccupiedSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of components referenced by AttachedToComponent.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
          Breaker spaces will be recalculated based on the new Voltage classification.
          Breaker spaces are calculated based on PowerRating and Voltage as follows:
@@ -4666,8 +4678,39 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
          where
          
          MaxAmps = 50
-         
-  .. [#] Depending on the LoadType, AttachedToSystem must reference:
+  
+  .. [#] Provide a AttachedToComponent element for each referenced component.
+  .. [#] Provide a AttachedToElectricPanel element for each reference subpanel.
+
+.. _demand_loads:
+
+Demand Loads
+~~~~~~~~~~~~
+
+TODO entered in ``DemandLoads``.
+
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  Element                                                                  Type     Units      Constraints              Required  Default        Notes
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  ``BuildingType``                                                         string              dwelling unit            Yes                      
+  ``DemandLoadType``                                                       string              service                  Yes
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+
+Individual electric demand loads entered in ``DemandLoads/DemandLoad``.
+
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``LoadType``                                    string                    See [#]_     Yes
+  ``PowerRating``                                 double    W                            No        See [#]_
+  ``IsNewLoad``                                   boolean                                No        false      Whether, in the context of NEC calculations, the demand load is new
+  ``AttachedToComponent``                         idref                     See [#]_     See [#]_  See [#]_   ID of attached component; multiple are allowed [#]_
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+
+  .. [#] LoadType choices are "heating", "cooling", "hot water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
+  .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on Voltage and properties of components referenced by AttachedToComponent.
+         If no corresponding Voltage is specified, the other Voltage classification will be used.         
+  .. [#] Depending on the LoadType, AttachedToComponent must reference:
 
          \- **heating**: ``HeatingSystem`` or ``HeatPump``
 
@@ -4696,8 +4739,8 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
          \- **electric vehicle charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
 
   .. [#] Not allowed if LoadType is "lighting", "kitchen", "laundry", or "other"; otherwise, required.
-  .. [#] A panel load is created for any system not already referenced by a panel load.
-         Panel loads for the following panel load types are always created if they don't already exist:
+  .. [#] A demand load is created for any system not already referenced by a demand load.
+         Demand loads for the following demand load types are always created if they don't already exist:
 
          \- **lighting**
 
@@ -4707,7 +4750,7 @@ Individual electric panel loads entered in ``extension/PanelLoads/PanelLoad``.
 
          \- **other**
   
-  .. [#] Provide a AttachedToSystem element for each referenced system.
+  .. [#] Provide a AttachedToComponent element for each referenced component.
 
 .. _panels_default:
 
