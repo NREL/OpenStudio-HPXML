@@ -265,7 +265,8 @@
       <sch:assert role='ERROR' test='count(h:Systems/h:WaterHeating/h:WaterFixture) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/WaterHeating/WaterFixture</sch:assert> <!-- See [WaterFixture] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:SolarThermal/h:SolarThermalSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/SolarThermal/SolarThermalSystem</sch:assert> <!-- See [SolarThermalSystem] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:Photovoltaics/h:PVSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/Photovoltaics/PVSystem</sch:assert> <!-- See [PVSystem] -->
-      <sch:assert role='ERROR' test='count(h:Systems/h:Batteries/h:Battery[h:extension/h:IsEV="false"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/Batteries/Battery</sch:assert> <!-- See [Battery] -->
+      <sch:assert role='ERROR' test='count(h:Systems/h:Batteries/h:Battery) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/Batteries/Battery</sch:assert> <!-- See [Battery] -->
+      <sch:assert role='ERROR' test='count(h:Systems/h:Vehicles/h:Vehicle) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/Vehicles/Vehicle</sch:assert> <!-- See [Vehicle] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:extension/h:Generators/h:Generator) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/extension/Generators/Generator</sch:assert> <!-- See [Generator] -->
       <sch:assert role='ERROR' test='count(h:Appliances/h:ClothesWasher) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Appliances/ClothesWasher</sch:assert> <!-- See [ClothesWasher] -->
       <sch:assert role='ERROR' test='count(h:Appliances/h:ClothesDryer) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Appliances/ClothesDryer</sch:assert> <!-- See [ClothesDryer] -->
@@ -2506,6 +2507,7 @@
       <sch:assert role='ERROR' test='count(h:MilesDrivenPerYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MilesDrivenPerYear</sch:assert>
       <sch:assert role='ERROR' test='count(h:HoursDrivenPerWeek) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HoursDrivenPerWeek</sch:assert>
       <sch:assert role='ERROR' test='count(h:FuelEconomyCombined[h:Units="kWh/mile"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FuelEconomyCombined[Units="kWh/mile"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='h:FuelEconomyCombined[h:Units="kWh/mile"] or not(h:FuelEconomyCombined/h:Units)'>Expected FuelEconomyCombined/Units to be "kWh/mile"</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -2513,12 +2515,13 @@
     <sch:title>[BatteryElectricVehicle]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Vehicles/h:Vehicle/h:VehicleType/h:BatteryElectricVehicle'>
       <sch:assert role='ERROR' test='count(h:Battery) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Battery</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Battery/h:NominalCapacity[h:Units="kWh" or h:Units="Ah"]/h:Value) &gt;= 0'>Expected 0 or more element(s) for xpath: NominalCapacity[Units="kWh" or Units="Ah"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Battery/h:UsableCapacity[h:Units="kWh" or h:Units="Ah"]/h:Value) &gt;= 0'>Expected 0 or more element(s) for xpath: UsableCapacity[Units="kWh" or Units="Ah"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Battery/h:BatteryType[text()="Li-ion"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Battery/BatteryType[text()="Li-ion"]</sch:assert>
+      <sch:assert role='ERROR' test='h:Battery/h:BatteryType[text()="Li-ion"] or not(h:Battery/h:BatteryType)'>Expected Battery/BatteryType to be "Li-ion"</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Battery/h:NominalCapacity[h:Units="kWh" or h:Units="Ah"]/h:Value) &gt;= 0'>Expected 0 or more element(s) for xpath: Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Battery/h:UsableCapacity[h:Units="kWh" or h:Units="Ah"]/h:Value) &gt;= 0'>Expected 0 or more element(s) for xpath: Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value</sch:assert>
       <sch:assert role='ERROR' test='number(h:Battery/h:UsableCapacity[h:Units="kWh"]/h:Value) &lt; number(h:Battery/h:NominalCapacity[h:Units="kWh"]/h:Value) or not(h:Battery/h:UsableCapacity[h:Units="kWh"]/h:Value) or not(h:Battery/h:NominalCapacity[h:Units="kWh"]/h:Value)'>Expected UsableCapacity to be less than NominalCapacity</sch:assert>
       <sch:assert role='ERROR' test='number(h:Battery/h:UsableCapacity[h:Units="Ah"]/h:Value) &lt; number(h:Battery/h:NominalCapacity[h:Units="Ah"]/h:Value) or not(h:Battery/h:UsableCapacity[h:Units="Ah"]/h:Value) or not(h:Battery/h:NominalCapacity[h:Units="Ah"]/h:Value)'>Expected UsableCapacity to be less than NominalCapacity</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Battery/h:NominalVoltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NominalVoltage</sch:assert>
-      <sch:assert role='ERROR' test='not(h:FractionChargedLocation/h:Location) or h:FractionChargedLocation/h:Location[text()="Home"]'>Expected FractionChargedLocation/Location to be 'Home'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Battery/h:NominalVoltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Battery/NominalVoltage</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionChargedLocation[h:Location="Home"]/h:Percentage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FractionChargedLocation[Location="Home"]/Percentage</sch:assert>
       <sch:assert role='ERROR' test='count(h:ConnectedCharger) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ConnectedCharger</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
@@ -2533,6 +2536,7 @@
     <sch:title>[ElectricVehicleCharger]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:ElectricVehicleChargers/h:ElectricVehicleCharger'>
       <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert>
+      <sch:assert role='ERROR' test='h:Location[text()="garage" or text()="outside"] or not(h:Location)'>Expected Location to be 'garage' or 'outside'</sch:assert>
       <sch:assert role='ERROR' test='count(h:ChargingPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ChargingPower</sch:assert>
     </sch:rule>
   </sch:pattern>
