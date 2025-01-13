@@ -5983,17 +5983,17 @@ module Defaults
   # @return [Double or Integer] power rating or number of breaker spaces
   def self.get_default_panels_value(runner, default_panels_csv_data, load_name, voltage, amps, column, watts = nil)
     if not default_panels_csv_data[load_name].keys.include?(voltage)
-      warning = "PanelLoad/Voltage (#{voltage}) for '#{load_name}' is not specified in default_panels.csv; "
+      warning = "Voltage (#{voltage}) for '#{load_name}' is not specified in default_panels.csv; "
       if column == 'PowerRating'
         if voltage == HPXML::ElectricPanelVoltage120
           new_voltage = HPXML::ElectricPanelVoltage240
         elsif voltage == HPXML::ElectricPanelVoltage240
           new_voltage = HPXML::ElectricPanelVoltage120
         end
-        warning += "PanelLoad/PowerRating will be assigned according to Voltage=#{new_voltage}."
+        warning += "PowerRating will be assigned according to Voltage=#{new_voltage}."
         value = default_panels_csv_data[load_name][new_voltage][column]
       elsif column == 'BreakerSpaces'
-        warning += "PanelLoad/BreakerSpaces will be recalculated using Voltage=#{voltage}."
+        warning += "BreakerSpaces will be recalculated using Voltage=#{voltage}."
         value = get_breaker_spaces_from_power_watts_and_voltage(watts, voltage, amps)
       end
       runner.registerWarning(warning)
