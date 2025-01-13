@@ -40,41 +40,47 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_equal(13 - 8, electric_panel.breaker_spaces_headroom)
 
     # Upgrade
-    electric_panel.headroom_breaker_spaces = nil
-    electric_panel.total_breaker_spaces = 12
-    panel_loads = electric_panel.panel_loads
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
-    pl.power = 17942
-    pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }
-    pl.power = 17942
-    pl.addition = true
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
-                    power: 4500,
-                    voltage: HPXML::ElectricPanelVoltage240,
-                    breaker_spaces: 2,
-                    addition: true,
-                    system_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                    power: 5760,
-                    voltage: HPXML::ElectricPanelVoltage120,
-                    breaker_spaces: 2,
-                    addition: true,
-                    system_idrefs: [hpxml_bldg.clothes_dryers[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
-                    power: 12000,
-                    voltage: HPXML::ElectricPanelVoltage240,
-                    breaker_spaces: 2,
-                    addition: true,
-                    system_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    electric_panel.headroom = nil
+    electric_panel.rated_total_spaces = 12
+    branch_circuits = electric_panel.branch_circuits
+    demand_loads = electric_panel.demand_loads
+    dl = demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeHeating }
+    dl.power = 17942
+    dl.is_new_load = true
+    dl = demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeCooling }
+    dl.power = 17942
+    dl.is_new_load = true
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                     type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                     power: 4500,
+                     is_new_load: true,
+                     component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        occupied_spaces: 2)
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                     type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                     power: 5760,
+                     is_new_load: true,
+                     component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage120,
+                        occupied_spaces: 2)
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                     type: HPXML::ElectricPanelLoadTypeRangeOven,
+                     power: 12000,
+                     is_new_load: true,
+                     component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        occupied_spaces: 2)
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
-                    power: 1650,
-                    voltage: HPXML::ElectricPanelVoltage120,
-                    breaker_spaces: 1,
-                    addition: true,
-                    system_idrefs: [hpxml_bldg.plug_loads[-1].id])
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                     type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                     power: 1650,
+                     is_new_load: true,
+                     component_idrefs: [hpxml_bldg.plug_loads[-1].id])
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     electric_panel = hpxml_bldg.electric_panels[0]
@@ -92,17 +98,21 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
 
     hpxml.header.panel_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023LoadBased]
-    panel_loads = hpxml_bldg.electric_panels[0].panel_loads
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating, power: 0, system_idrefs: [hpxml_bldg.heating_systems[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling, power: 0, system_idrefs: [hpxml_bldg.cooling_systems[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater, power: 0, system_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer, power: 0, system_idrefs: [hpxml_bldg.clothes_dryers[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeDishwasher, power: 0, system_idrefs: [hpxml_bldg.dishwashers[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven, power: 0, system_idrefs: [hpxml_bldg.cooking_ranges[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting, power: 500)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen, power: 1000) # +2 breaker spaces
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry, power: 1500) # +1 breaker spaces
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeOther, power: 2000) # +1 breaker spaces
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    branch_circuits.add(id: 'Kitchen', occupied_spaces: 2)
+    branch_circuits.add(id: 'Laundry', occupied_spaces: 1)
+    branch_circuits.add(id: 'Other', occupied_spaces: 1)
+    demand_loads = hpxml_bldg.electric_panels[0].demand_loads
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeHeating, power: 0, component_idrefs: [hpxml_bldg.heating_systems[0].id])
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeCooling, power: 0, component_idrefs: [hpxml_bldg.cooling_systems[0].id])
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeWaterHeater, power: 0, component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeClothesDryer, power: 0, component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeDishwasher, power: 0, component_idrefs: [hpxml_bldg.dishwashers[0].id])
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeRangeOven, power: 0, component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeLighting, power: 500)
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeKitchen, power: 1000)
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeLaundry, power: 1500)
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}", type: HPXML::ElectricPanelLoadTypeOther, power: 2000)
 
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -125,16 +135,16 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295, 1)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295, 1)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
 
     test_name = 'Electric furnace only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-furnace-elec-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295 + 10766, 2)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295 + 10766, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
 
     test_name = 'Large electric furnace only'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-furnace-elec-only.xml', test_name)
@@ -142,24 +152,24 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 393 + 14355, 4)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 393 + 14355, 4)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
 
     test_name = 'Gas furnace + central air conditioner'
     hpxml, _hpxml_bldg = _create_hpxml('base.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295, 1)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 3998, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295, 1)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 3998, 2)
 
     test_name = 'Electric furnace + central air conditioner'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-furnace-elec-central-ac-1-speed.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295 + 10551, 2)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 3998, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295 + 10551, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 3998, 2)
 
     test_name = 'Large electric furnace + central air conditioner'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-furnace-elec-central-ac-1-speed.xml', test_name)
@@ -167,16 +177,16 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 393 + 14067, 4)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 3998, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 393 + 14067, 4)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 3998, 2)
 
     test_name = 'Central air conditioner only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-central-ac-only-1-speed.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0, 0)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 3998, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 3998, 2)
 
     test_name = 'Large central air conditioner only'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-central-ac-only-1-speed.xml', test_name)
@@ -184,24 +194,24 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0, 0)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 800 + 7604, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 800 + 7604, 2)
 
     test_name = 'Gas boiler only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96, 1)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96, 1)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
 
     test_name = 'Electric boiler only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-boiler-elec-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 82 + 10766, 2)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 82 + 10766, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
 
     test_name = 'Large electric boiler only'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-elec-only.xml', test_name)
@@ -209,16 +219,16 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 82 + 14355, 4)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 82 + 14355, 4)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0, 0)
 
     test_name = 'Gas boiler + central air conditioner'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96, 1)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 3998, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96, 1)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 3998, 2)
 
     test_name = 'Electric boiler + central air conditioner'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml', test_name)
@@ -226,8 +236,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96 + 11468, 2)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 3998, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96 + 11468, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 3998, 2)
 
     test_name = 'Large electric boiler + central air conditioner'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml', test_name)
@@ -236,8 +246,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96 + 15291, 4)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 3998, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96 + 15291, 4)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 3998, 2)
 
     test_name = 'ASHP w/out backup'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml', test_name)
@@ -245,40 +255,40 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801, 4)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801, 4)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 4)
 
     test_name = 'ASHP w/integrated electric backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801 + 10551, 6)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801 + 10551, 6)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 6)
 
     test_name = 'ASHP w/integrated gas backup switchover'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801, 3)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5801, 3)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5801, 3)
 
     test_name = 'ASHP w/separate gas backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 210 + 3096 + 96, 3)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 225 + 3096, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 210 + 3096 + 96, 3)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 225 + 3096, 2)
 
     test_name = 'ASHP w/separate gas backup switchover'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 210 + 3096 + 96, 3)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 225 + 3096, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 210 + 3096 + 96, 3)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 225 + 3096, 2)
 
     test_name = 'Ducted MSHP w/out backup'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted.xml', test_name)
@@ -286,48 +296,48 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5801, 2)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5801, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5801, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5801, 2)
 
     test_name = 'Ducted MSHP w/integrated electric backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5801 + 10551, 6)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5801, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5801 + 10551, 6)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5801, 6)
 
     test_name = 'Ducted MSHP w/integrated gas backup switchover'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5801, 3)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5801, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5801, 3)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5801, 3)
 
     test_name = 'Ductless MSHP w/out backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 84 + 5801, 2)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 84 + 5801, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 84 + 5801, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 84 + 5801, 2)
 
     test_name = 'Ductless MSHP w/separate electric backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 42 + 3096 + 17584, 6)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 42 + 3096, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 42 + 3096 + 17584, 6)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 42 + 3096, 2)
 
     test_name = 'Ductless MSHP w/separate gas backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 42 + 3096 + 655, 3)
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 42 + 3096, 0)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 42 + 3096 + 655, 3)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 42 + 3096, 2)
   end
 
   def test_water_heater_configurations
@@ -339,28 +349,28 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 5500, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 5500, 2)
 
     test_name = 'Electric tankless'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tankless-electric.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 24000, 4)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 24000, 4)
 
     test_name = 'HPWH w/backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 4500, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 4500, 2)
 
     test_name = 'HPWH w/out backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-capacities.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 1064, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 1064, 2)
   end
 
   def test_clothes_dryer_configurations
@@ -372,25 +382,30 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760, 2)
 
     test_name = 'HP clothes dryer'
     hpxml, _hpxml_bldg = _create_hpxml('base-appliances-modified.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 860, 2)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 860, 2)
 
     test_name = '120v HP clothes dryer'
     hpxml, hpxml_bldg = _create_hpxml('base-appliances-modified.xml', test_name)
-    panel_loads = hpxml_bldg.electric_panels[0].panel_loads
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                    voltage: HPXML::ElectricPanelVoltage120,
-                    system_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    demand_loads = hpxml_bldg.electric_panels[0].demand_loads
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage120,
+                        component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+                     type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                     component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 996, 1)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 996, 1)
   end
 
   def test_ventilation_fans_configurations
@@ -402,22 +417,30 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 60, 1)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 60, 2)
 
     test_name = 'Exhaust fan'
     hpxml, _hpxml_bldg = _create_hpxml('base-mechvent-exhaust.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_panel_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 30, 1)
+    _test_demand_load_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 30, 1)
   end
 
-  def _test_panel_load_power_and_breaker_spaces(hpxml_bldg, type, power, breaker_spaces)
-    panel_loads = hpxml_bldg.electric_panels[0].panel_loads
-    pl = panel_loads.select { |pl| pl.type == type }
+  def _test_demand_load_power_and_breaker_spaces(hpxml_bldg, type, power, occupied_spaces)
+    demand_loads = hpxml_bldg.electric_panels[0].demand_loads
+    dls = demand_loads.select { |dl| dl.type == type }
 
-    assert_in_epsilon(power, pl.map { |pl| pl.power }.sum(0.0), 0.001)
-    assert_equal(breaker_spaces, pl.map { |pl| pl.breaker_spaces }.sum(0.0))
+    pw = 0
+    os = 0
+    dls.each do |dl|
+      pw += dl.power
+      dl.components.each do |component|
+        os += component.branch_circuit.occupied_spaces
+      end
+    end
+    assert_in_epsilon(power, pw, 0.001)
+    assert_equal(occupied_spaces, os)
   end
 
   def _create_hpxml(hpxml_name, test_name = nil)

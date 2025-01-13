@@ -1414,40 +1414,42 @@ class ReportSimulationOutputTest < Minitest::Test
     # Upgrade
     hpxml_bldg = hpxml.buildings[0]
     electric_panel = hpxml_bldg.electric_panels[0]
-    electric_panel.total_breaker_spaces = 12
-    panel_loads = electric_panel.panel_loads
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }
-    pl.power = 17942
-    pl.addition = true
-    pl = panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }
-    pl.power = 17942
-    pl.addition = true
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
-                    power: 4500,
-                    voltage: HPXML::ElectricPanelVoltage240,
-                    breaker_spaces: 2,
-                    addition: true,
-                    system_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                    power: 5760,
-                    voltage: HPXML::ElectricPanelVoltage120,
-                    breaker_spaces: 2,
-                    addition: true,
-                    system_idrefs: [hpxml_bldg.clothes_dryers[0].id])
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
-                    power: 12000,
-                    voltage: HPXML::ElectricPanelVoltage240,
-                    breaker_spaces: 2,
-                    addition: true,
-                    system_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    electric_panel.rated_total_spaces = 12
+    branch_circuits = electric_panel.branch_circuits
+    demand_loads = electric_panel.demand_loads
+    dl = demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeHeating }
+    dl.power = 17942
+    dl.is_new_load = true
+    dl = demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeCooling }
+    dl.power = 17942
+    dl.is_new_load = true
+    demand_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                     power: 4500,
+                     is_new_load: true,
+                     component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        occupied_spaces: 2)
+    demand_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                     power: 5760,
+                     is_new_load: true,
+                     component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage120,
+                        occupied_spaces: 2)
+    demand_loads.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
+                     power: 12000,
+                     is_new_load: true,
+                     component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        occupied_spaces: 2)
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging)
-    panel_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
-                    power: 1650,
-                    voltage: HPXML::ElectricPanelVoltage120,
-                    breaker_spaces: 1,
-                    addition: true,
-                    system_idrefs: [hpxml_bldg.plug_loads[-1].id])
+    demand_loads.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                     power: 1650,
+                     is_new_load: true,
+                     component_idrefs: [hpxml_bldg.plug_loads[-1].id])
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
 
     args_hash = { 'hpxml_path' => @tmp_hpxml_path,
