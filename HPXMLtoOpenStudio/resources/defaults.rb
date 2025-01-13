@@ -3397,40 +3397,40 @@ module Defaults
       end
 
       if demand_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther } == 0
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+        branch_circuits.add(id: 'Other',
                             occupied_spaces: get_default_panels_value(runner, default_panels_csv_data, 'other', HPXML::ElectricPanelVoltage120, 20, 'BreakerSpaces'),
                             occupied_spaces_isdefaulted: true)
-        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+        demand_loads.add(id: 'Other',
                          type: HPXML::ElectricPanelLoadTypeOther,
                          type_isdefaulted: true,
                          component_idrefs: [])
       end
 
       if demand_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLighting } == 0
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+        branch_circuits.add(id: 'Lighting',
                             occupied_spaces: get_default_panels_value(runner, default_panels_csv_data, 'lighting', HPXML::ElectricPanelVoltage120, 20, 'BreakerSpaces'),
                             occupied_spaces_isdefaulted: true)
-        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+        demand_loads.add(id: 'Lighting',
                          type: HPXML::ElectricPanelLoadTypeLighting,
                          type_isdefaulted: true,
                          component_idrefs: [])
       end
 
       if demand_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeKitchen } == 0
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+        branch_circuits.add(id: 'Kitchen',
                             occupied_spaces: get_default_panels_value(runner, default_panels_csv_data, 'kitchen', HPXML::ElectricPanelVoltage120, 20, 'BreakerSpaces'),
                             occupied_spaces_isdefaulted: true)
-        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+        demand_loads.add(id: 'Kitchen',
                          type: HPXML::ElectricPanelLoadTypeKitchen,
                          type_isdefaulted: true,
                          component_idrefs: [])
       end
 
       if demand_loads.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLaundry } == 0
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+        branch_circuits.add(id: 'Laundry',
                             occupied_spaces: get_default_panels_value(runner, default_panels_csv_data, 'laundry', HPXML::ElectricPanelVoltage120, 20, 'BreakerSpaces'),
                             occupied_spaces_isdefaulted: true)
-        demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
+        demand_loads.add(id: 'Laundry',
                          type: HPXML::ElectricPanelLoadTypeLaundry,
                          type_isdefaulted: true,
                          component_idrefs: [])
@@ -3475,7 +3475,7 @@ module Defaults
         electric_panel.max_current_rating_isdefaulted = true
       end
       if electric_panel.headroom.nil? && electric_panel.rated_total_spaces.nil?
-        electric_panel.headroom = electric_panel_default_values[:headroom_breaker_spaces]
+        electric_panel.headroom = electric_panel_default_values[:headroom]
         electric_panel.headroom_isdefaulted = true
       end
 
@@ -5956,7 +5956,7 @@ module Defaults
   def self.get_electric_panel_values()
     return { panel_voltage: HPXML::ElectricPanelVoltage240,
              max_current_rating: 200.0, # A
-             headroom_breaker_spaces: 3 }
+             headroom: 3 }
   end
 
   # Gets the default voltage for a panel load based on load type and attached system.
@@ -5970,12 +5970,8 @@ module Defaults
         if component.heating_system_fuel == HPXML::FuelTypeElectricity
           return HPXML::ElectricPanelVoltage240
         end
-
-        return HPXML::ElectricPanelVoltage120
       elsif component.is_a?(HPXML::CoolingSystem)
-        if component.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
-          return HPXML::ElectricPanelVoltage120
-        end
+        next if component.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
 
         return HPXML::ElectricPanelVoltage240
       end

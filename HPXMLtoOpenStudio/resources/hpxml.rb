@@ -9628,7 +9628,7 @@ class HPXML < Object
       @voltage = XMLHelper.get_value(electric_panel, 'Voltage', :string)
       @max_current_rating = XMLHelper.get_value(electric_panel, 'MaxCurrentRating', :float)
       @headroom = XMLHelper.get_value(electric_panel, 'BranchCircuits/Headroom', :integer)
-      @rated_total_spaces = XMLHelper.get_value(electric_panel, 'BranchCircuits/RatedSpaces', :integer)
+      @rated_total_spaces = XMLHelper.get_value(electric_panel, 'BranchCircuits/RatedTotalSpaces', :integer)
       @branch_circuits.from_doc(electric_panel)
       @building_type = XMLHelper.get_value(electric_panel, 'DemandLoads/BuildingType', :string)
       @demand_load_type = XMLHelper.get_value(electric_panel, 'DemandLoads/DemandLoadType', :string)
