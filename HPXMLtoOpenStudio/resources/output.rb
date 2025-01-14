@@ -1049,55 +1049,55 @@ module Outputs
       electric_panel.demand_loads.each do |demand_load|
         if demand_load.type == HPXML::ElectricPanelLoadTypeHeating
           demand_load.components.each do |component|
-            htg += component.branch_circuit.occupied_spaces * unit_multiplier
+            htg += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypeCooling
           demand_load.components.each do |component|
-            clg += component.branch_circuit.occupied_spaces * unit_multiplier
+            clg += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypeWaterHeater
           demand_load.components.each do |component|
-            hw += component.branch_circuit.occupied_spaces * unit_multiplier
+            hw += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypeClothesDryer
           demand_load.components.each do |component|
-            cd += component.branch_circuit.occupied_spaces * unit_multiplier
+            cd += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypeDishwasher
           demand_load.components.each do |component|
-            dw += component.branch_circuit.occupied_spaces * unit_multiplier
+            dw += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypeRangeOven
           demand_load.components.each do |component|
-            ov += component.branch_circuit.occupied_spaces * unit_multiplier
+            ov += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypeMechVent
           demand_load.components.each do |component|
-            vf += component.branch_circuit.occupied_spaces * unit_multiplier
+            vf += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypePermanentSpaHeater
           demand_load.components.each do |component|
-            sh += component.branch_circuit.occupied_spaces * unit_multiplier
+            sh += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypePermanentSpaPump
           demand_load.components.each do |component|
-            sp += component.branch_circuit.occupied_spaces * unit_multiplier
+            sp += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypePoolHeater
           demand_load.components.each do |component|
-            ph += component.branch_circuit.occupied_spaces * unit_multiplier
+            ph += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypePoolPump
           demand_load.components.each do |component|
-            pp += component.branch_circuit.occupied_spaces * unit_multiplier
+            pp += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypeWellPump
           demand_load.components.each do |component|
-            wp += component.branch_circuit.occupied_spaces * unit_multiplier
+            wp += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         elsif demand_load.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging
           demand_load.components.each do |component|
-            ev += component.branch_circuit.occupied_spaces * unit_multiplier
+            ev += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
           end
         end
       end
