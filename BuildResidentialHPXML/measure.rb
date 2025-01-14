@@ -6975,6 +6975,7 @@ module HPXMLFile
     if args[:vehicle_type] == HPXML::VehicleTypeBEV
       ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV }
       hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
+                              vehicle_type: args[:vehicle_type],
                               nominal_capacity_kwh: args[:vehicle_battery_capacity],
                               usable_capacity_kwh: args[:vehicle_battery_usable_capacity],
                               fuel_economy: args[:vehicle_fuel_economy_combined],
