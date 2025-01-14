@@ -115,6 +115,10 @@ class HPXML < Object
   DuctTypeSupply = 'supply'
   DWHRFacilitiesConnectedAll = 'all'
   DWHRFacilitiesConnectedOne = 'one'
+  ElectricPanelLoadCalculationBuildingTypeDwellingUnit = 'dwelling unit'
+  # ElectricPanelLoadCalculationBuildingTypeWholeBuilding = 'whole building'
+  ElectricPanelLoadCalculationDemandLoadTypeServiceFeeder = 'service / feeder'
+  # ElectricPanelLoadCalculationDemandLoadTypeBranchCircuit = 'branch circuit'
   ElectricPanelLoadCalculationType2023LoadBased = '2023 Load-Based'
   ElectricPanelLoadCalculationType2023MeterBased = '2023 Meter-Based'
   # ElectricPanelLoadCalculationType2026LoadBased = '2026 Load-Based'
@@ -913,7 +917,9 @@ class HPXML < Object
              :defrost_model_type,                          # [String] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/DefrostModelType (HPXML::AdvancedResearchDefrostModelTypeXXX)
              :hvac_onoff_thermostat_deadband,              # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature (F)
              :heat_pump_backup_heating_capacity_increment, # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement (Btu/hr)
-             :panel_calculation_types]                     # [Array<String>] SoftwareInfo/extension/PanelCalculationType
+             :electric_panel_calculations_building_type,   # [String] SoftwareInfo/extension/ElectricPanelCalculations/BuildingType
+             :electric_panel_calculations_demand_load_type, # [String] SoftwareInfo/extension/ElectricPanelCalculations/DemandLoadType
+             :electric_panel_calculations_types] # [Array<String>] SoftwareInfo/extension/ElectricPanelCalculations/Type
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
@@ -990,11 +996,13 @@ class HPXML < Object
           XMLHelper.add_element(advanced_research_features, 'HeatPumpBackupCapacityIncrement', @heat_pump_backup_heating_capacity_increment, :float, @heat_pump_backup_heating_capacity_increment_isdefaulted) unless @heat_pump_backup_heating_capacity_increment.nil?
         end
       end
-      if (not @panel_calculation_types.nil?) && (not @panel_calculation_types.empty?)
+      if (not @electric_panel_calculations_building_type.nil?) || (not @electric_panel_calculations_demand_load_type.nil?) || (not @electric_panel_calculations_types.nil?) && (not @electric_panel_calculations_types.empty?)
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-        panel_calculation_types = XMLHelper.add_element(extension, 'PanelCalculationTypes')
-        @panel_calculation_types.each do |panel_calculation_type|
-          XMLHelper.add_element(panel_calculation_types, 'Type', panel_calculation_type, :string)
+        electric_panel_calculations = XMLHelper.add_element(extension, 'ElectricPanelCalculations')
+        XMLHelper.add_element(electric_panel_calculations, 'BuildingType', @electric_panel_calculations_building_type, :string, @electric_panel_calculations_building_type_isdefaulted) unless @electric_panel_calculations_building_type.nil?
+        XMLHelper.add_element(electric_panel_calculations, 'DemandLoadType', electric_panel_calculations_demand_load_type, :string, @electric_panel_calculations_demand_load_type_isdefaulted) unless @electric_panel_calculations_demand_load_type.nil?
+        @electric_panel_calculations_types.each do |electric_panel_calculations_type|
+          XMLHelper.add_element(electric_panel_calculations, 'Type', electric_panel_calculations_type, :string)
         end
       end
       @emissions_scenarios.to_doc(hpxml)
@@ -1032,7 +1040,9 @@ class HPXML < Object
       @heat_pump_backup_heating_capacity_increment = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
-      @panel_calculation_types = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/PanelCalculationTypes/Type', :string)
+      @electric_panel_calculations_building_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ElectricPanelCalculations/BuildingType', :string)
+      @electric_panel_calculations_demand_load_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ElectricPanelCalculations/DemandLoadType', :string)
+      @electric_panel_calculations_types = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/ElectricPanelCalculations/Type', :string)
       @emissions_scenarios.from_doc(hpxml)
       @utility_bill_scenarios.from_doc(hpxml)
       @unavailable_periods.from_doc(hpxml)
@@ -9527,10 +9537,8 @@ class HPXML < Object
     ATTRS = [:id,                      # [String] SystemIdentifier/@id
              :voltage,                 # [String] Voltage
              :max_current_rating,      # [Double] MaxCurrentRating
-             :headroom,                # [Integer] BranchCircuits/Headroom
-             :rated_total_spaces,      # [Integer] BranchCircuits/RatedTotalSpaces
-             :building_type,           # [Integer] DemandLoads/BuildingType
-             :demand_load_type,        # [Integer] DemandLoads/DemandLoadType
+             :headroom,                # [Integer] Headroom
+             :rated_total_spaces,      # [Integer] RatedTotalSpaces
              :capacity_types,          # [Array<String>] extension/Outputs/Capacity/Type
              :capacity_total_watts,    # [Array<Double>] extension/Outputs/Capacity/TotalWatts
              :capacity_total_amps,     # [Array<Double>] extension/Outputs/Capacity/TotalAmps
@@ -9586,13 +9594,9 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(electric_panel, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_element(electric_panel, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_isdefaulted) unless @max_current_rating.nil?
-      branch_circuits = XMLHelper.create_elements_as_needed(electric_panel, ['BranchCircuits'])
-      XMLHelper.add_element(branch_circuits, 'Headroom', @headroom, :integer, @headroom_isdefaulted) unless @headroom.nil?
-      XMLHelper.add_element(branch_circuits, 'RatedTotalSpaces', @rated_total_spaces, :integer, @rated_total_spaces_isdefaulted) unless @rated_total_spaces.nil?
+      XMLHelper.add_element(electric_panel, 'Headroom', @headroom, :integer, @headroom_isdefaulted) unless @headroom.nil?
+      XMLHelper.add_element(electric_panel, 'RatedTotalSpaces', @rated_total_spaces, :integer, @rated_total_spaces_isdefaulted) unless @rated_total_spaces.nil?
       @branch_circuits.to_doc(electric_panel)
-      demand_loads = XMLHelper.create_elements_as_needed(electric_panel, ['DemandLoads'])
-      XMLHelper.add_element(demand_loads, 'BuildingType', @building_type, :string, @building_type_isdefaulted) unless @building_type.nil?
-      XMLHelper.add_element(demand_loads, 'DemandLoadType', @demand_load_type, :string, @demand_load_type_isdefaulted) unless @demand_load_type.nil?
       @demand_loads.to_doc(electric_panel)
       if (not @capacity_types.nil?) && (not @capacity_types.empty?)
         outputs = XMLHelper.create_elements_as_needed(electric_panel, ['extension', 'Outputs'])
@@ -9627,11 +9631,9 @@ class HPXML < Object
       @id = HPXML::get_id(electric_panel)
       @voltage = XMLHelper.get_value(electric_panel, 'Voltage', :string)
       @max_current_rating = XMLHelper.get_value(electric_panel, 'MaxCurrentRating', :float)
-      @headroom = XMLHelper.get_value(electric_panel, 'BranchCircuits/Headroom', :integer)
-      @rated_total_spaces = XMLHelper.get_value(electric_panel, 'BranchCircuits/RatedTotalSpaces', :integer)
+      @headroom = XMLHelper.get_value(electric_panel, 'Headroom', :integer)
+      @rated_total_spaces = XMLHelper.get_value(electric_panel, 'RatedTotalSpaces', :integer)
       @branch_circuits.from_doc(electric_panel)
-      @building_type = XMLHelper.get_value(electric_panel, 'DemandLoads/BuildingType', :string)
-      @demand_load_type = XMLHelper.get_value(electric_panel, 'DemandLoads/DemandLoadType', :string)
       @demand_loads.from_doc(electric_panel)
       @capacity_types = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/Type', :string)
       @capacity_total_watts = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/TotalWatts', :float)
@@ -9698,7 +9700,7 @@ class HPXML < Object
 
       list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles
       if @component_idrefs.size > list.size
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for demand load '#{@id}'."
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for branch circuit '#{@id}'."
       end
 
       return list
@@ -9774,7 +9776,7 @@ class HPXML < Object
       @max_current_rating = XMLHelper.get_value(branch_circuit, 'MaxCurrentRating', :float)
       @occupied_spaces = XMLHelper.get_value(branch_circuit, 'OccupiedSpaces', :integer)
       @component_idrefs = HPXML::get_idrefs(branch_circuit, 'AttachedToComponent')
-      @panel_idrefs = HPXML::get_idrefs(branch_circuit, 'AttachedToElectricPanel')
+      @panel_idref = HPXML::get_idref(XMLHelper.get_element(branch_circuit, 'AttachedToElectricPanel'))
     end
   end
 

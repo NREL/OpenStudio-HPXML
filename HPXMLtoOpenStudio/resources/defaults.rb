@@ -240,6 +240,17 @@ module Defaults
         unavailable_period.natvent_availability_isdefaulted = true
       end
     end
+
+    if not hpxml_header.electric_panel_calculations_types.empty?
+      if hpxml_header.electric_panel_calculations_building_type.nil?
+        hpxml_header.electric_panel_calculations_building_type = HPXML::ElectricPanelLoadCalculationBuildingTypeDwellingUnit
+        hpxml_header.electric_panel_calculations_building_type_isdefaulted = true
+      end
+      if hpxml_header.electric_panel_calculations_demand_load_type.nil?
+        hpxml_header.electric_panel_calculations_demand_load_type = HPXML::ElectricPanelLoadCalculationDemandLoadTypeServiceFeeder
+        hpxml_header.electric_panel_calculations_demand_load_type_isdefaulted = true
+      end
+    end
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::BuildingHeader object

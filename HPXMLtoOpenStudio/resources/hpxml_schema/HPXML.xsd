@@ -6625,29 +6625,24 @@
 					<xs:documentation>[A]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="IsMainPanel" type="HPXMLBoolean">
+			<xs:element minOccurs="0" name="Headroom" type="IntegerGreaterThanOrEqualToZero">
 				<xs:annotation>
-					<xs:documentation>True if it is the main panel.</xs:documentation>
+					<xs:documentation/>
 				</xs:annotation>
 			</xs:element>
+			<xs:element minOccurs="0" name="RatedTotalSpaces" type="IntegerGreaterThanZero"/>
 			<xs:element minOccurs="0" name="BranchCircuits">
 				<xs:complexType>
-					<xs:sequence minOccurs="1">
-						<xs:element minOccurs="0" name="Headroom" type="IntegerGreaterThanOrEqualToZero"/>
-						<xs:element minOccurs="0" name="RatedTotalSpaces" type="IntegerGreaterThanZero"/>
-						<xs:element maxOccurs="unbounded" minOccurs="0" name="BranchCircuit" type="BranchCircuitType"/>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="1" name="BranchCircuit" type="BranchCircuitType"/>
 					</xs:sequence>
-					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="DemandLoads">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="BuildingType" type="DemandLoadsBuildingType"/>
-						<xs:element minOccurs="0" name="DemandLoadType" type="DemandLoadsDemandLoadType"/>
-						<xs:element maxOccurs="unbounded" minOccurs="0" name="DemandLoad" type="DemandLoadType"/>
+						<xs:element maxOccurs="unbounded" minOccurs="1" name="DemandLoad" type="DemandLoadType"/>
 					</xs:sequence>
-					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
@@ -12012,8 +12007,7 @@
 	</xs:complexType>
 	<xs:simpleType name="DemandLoadsDemandLoadType_simple">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="service"/>
-			<xs:enumeration value="feeder"/>
+			<xs:enumeration value="service / feeder"/>
 			<xs:enumeration value="branch circuit"/>
 		</xs:restriction>
 	</xs:simpleType>

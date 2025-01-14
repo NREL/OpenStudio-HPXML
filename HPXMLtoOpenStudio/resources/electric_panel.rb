@@ -10,25 +10,28 @@ module ElectricPanel
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports load-based capacities and breaker spaces
   # @return [nil]
   def self.calculate(hpxml_header, hpxml_bldg, electric_panel)
-    capacity_types = []
-    capacity_total_watts = []
-    capacity_total_amps = []
-    capacity_headroom_amps = []
-    hpxml_header.panel_calculation_types.each do |panel_calculation_type|
-      next unless panel_calculation_type.include?('Load-Based')
+    if hpxml_header.electric_panel_calculations_building_type == HPXML::ElectricPanelLoadCalculationBuildingTypeDwellingUnit &&
+       hpxml_header.electric_panel_calculations_demand_load_type == HPXML::ElectricPanelLoadCalculationDemandLoadTypeServiceFeeder
+      capacity_types = []
+      capacity_total_watts = []
+      capacity_total_amps = []
+      capacity_headroom_amps = []
+      hpxml_header.electric_panel_calculations_types.each do |electric_panel_calculations_type|
+        next unless electric_panel_calculations_type.include?('Load-Based')
 
-      load_based_capacity_values = LoadBasedCapacityValues.new
-      calculate_load_based(hpxml_bldg, electric_panel, load_based_capacity_values, panel_calculation_type)
+        load_based_capacity_values = LoadBasedCapacityValues.new
+        calculate_load_based(hpxml_bldg, electric_panel, load_based_capacity_values, electric_panel_calculations_type)
 
-      capacity_types << panel_calculation_type
-      capacity_total_watts << load_based_capacity_values.LoadBased_CapacityW.round(1)
-      capacity_total_amps << load_based_capacity_values.LoadBased_CapacityA.round
-      capacity_headroom_amps << load_based_capacity_values.LoadBased_HeadRoomA.round
+        capacity_types << electric_panel_calculations_type
+        capacity_total_watts << load_based_capacity_values.LoadBased_CapacityW.round(1)
+        capacity_total_amps << load_based_capacity_values.LoadBased_CapacityA.round
+        capacity_headroom_amps << load_based_capacity_values.LoadBased_HeadRoomA.round
+      end
+      electric_panel.capacity_types = capacity_types
+      electric_panel.capacity_total_watts = capacity_total_watts
+      electric_panel.capacity_total_amps = capacity_total_amps
+      electric_panel.capacity_headroom_amps = capacity_headroom_amps
     end
-    electric_panel.capacity_types = capacity_types
-    electric_panel.capacity_total_watts = capacity_total_watts
-    electric_panel.capacity_total_amps = capacity_total_amps
-    electric_panel.capacity_headroom_amps = capacity_headroom_amps
 
     breaker_spaces_values = BreakerSpacesValues.new
     calculate_breaker_spaces(electric_panel, breaker_spaces_values)
@@ -127,8 +130,8 @@ module ElectricPanel
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
   # @param demand_loads [Array<HPXML::DemandLoad>] List of panel load objects
   # @return [nil]
-  def self.calculate_load_based(hpxml_bldg, electric_panel, demand_loads, panel_calculation_type)
-    if panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2023LoadBased
+  def self.calculate_load_based(hpxml_bldg, electric_panel, demand_loads, electric_panel_calculations_type)
+    if electric_panel_calculations_type == HPXML::ElectricPanelLoadCalculationType2023LoadBased
       htg_existing = get_panel_load_heating(hpxml_bldg, electric_panel, addition: false)
       htg_new = get_panel_load_heating(hpxml_bldg, electric_panel, addition: true)
       clg_existing = electric_panel.demand_loads.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && !panel_load.is_new_load }.map { |pl| pl.power }.sum(0.0)
@@ -155,7 +158,7 @@ module ElectricPanel
 
       demand_loads.LoadBased_CapacityA = demand_loads.LoadBased_CapacityW / Float(electric_panel.voltage)
       demand_loads.LoadBased_HeadRoomA = electric_panel.max_current_rating - demand_loads.LoadBased_CapacityA
-    elsif panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2026LoadBased
+    elsif electric_panel_calculations_type == HPXML::ElectricPanelLoadCalculationType2026LoadBased
       # TODO
     end
   end
@@ -176,8 +179,8 @@ module ElectricPanel
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
   # @param peak_fuels [Hash] Map of peak building electricity outputs
   # @return [Array<Double, Double, Double>] The capacity (W), the capacity (A), and headroom (A)
-  def self.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, panel_calculation_type)
-    if panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2023MeterBased
+  def self.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, electric_panel_calculations_type)
+    if electric_panel_calculations_type == HPXML::ElectricPanelLoadCalculationType2023MeterBased
       htg_new = get_panel_load_heating(hpxml_bldg, electric_panel, addition: true)
       clg_new = electric_panel.demand_loads.select { |demand_load| demand_load.type == HPXML::ElectricPanelLoadTypeCooling && demand_load.is_new_load }.map { |pl| pl.power }.sum(0.0)
 
@@ -192,7 +195,7 @@ module ElectricPanel
       capacity_a = capacity_w / Float(electric_panel.voltage)
       headroom_a = electric_panel.max_current_rating - capacity_a
       return capacity_w, capacity_a, headroom_a
-    elsif panel_calculation_type == HPXML::ElectricPanelLoadCalculationType2026MeterBased
+    elsif electric_panel_calculations_type == HPXML::ElectricPanelLoadCalculationType2026MeterBased
       # TODO
     end
   end

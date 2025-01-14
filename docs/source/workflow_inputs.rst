@@ -365,19 +365,25 @@ You can create an additional column in the CSV file to define another unavailabl
 
   It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.
 
+.. _hpxml_electric_panel_calculations:
+
 HPXML Electric Panel Calculations
 *********************************
 
-One or more electric panel calculation types (e.g., 2023 NEC 220.83) can be entered as an ``/HPXML/SoftwareInfo/extension/PanelCalculationTypes/Type``.
+One or more electric panel calculation types (e.g., 2023 NEC 220.83) can be entered as an ``/HPXML/SoftwareInfo/extension/ElectricPanelCalculations/Type``.
 If not entered, electric panel loads will not be calculated.
 
-  ====================================  ========  =======  =============  ========  ================  ===========
-  Element                               Type      Units    Constraints    Required  Default           Description
-  ====================================  ========  =======  =============  ========  ================  ===========
-  ``Type``                              string             See [#]_       Yes                         Panel calculation type
-  ====================================  ========  =======  =============  ========  ================  ===========
+  ====================================  ========  =======  ================  ========  ================  ===========
+  Element                               Type      Units    Constraints       Required  Default           Description
+  ====================================  ========  =======  ================  ========  ================  ===========
+  ``BuildingType``                      string             See [#]_          No        dwelling unit            
+  ``DemandLoadType``                    string             See [#]_          No        service / feeder
+  ``Type``                              string             See [#]_          Yes                         Electric panel calculation vintage/method; multiple are allowed
+  ====================================  ========  =======  ================  ========  ================  ===========
 
-  .. [#] Type choices are '2023 Load-Based' and '2023 Meter-Based', and are described as follows:
+  .. [#] BuildingType choices are "dwelling unit".
+  .. [#] DemandLoadType choices are "service / feeder".
+  .. [#] Type choices are "2023 Load-Based" and "2023 Meter-Based", and are described as follows:
 
          \- **2023 Load-Based**: Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
 
@@ -444,6 +450,7 @@ For these simulations:
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
+- :ref:`hpxml_electric_panel_calculations` are not currently supported.
 - :ref:`hpxml_batteries` are not currently supported.
 - :ref:`hpxml_utility_bill_scenarios` using *detailed* :ref:`electricity_rates` are not supported.
 
@@ -4614,11 +4621,13 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``SystemIdentifier``                                                     id                                           Yes                      Unique identifier
   ``Voltage``                                                              string   V          See [#]_                 No        240
   ``MaxCurrentRating``                                                     double   A                                   No        200
+  ``Headroom`` or ``RatedTotalSpaces``                                     integer                                      No        See [#]_
   ``BranchCircuits``                                                       element                                      No        See [#]_       Individual branch circuits
   ``DemandLoads``                                                          element                                      No        See [#]_       Individual demand loads
   =======================================================================  =======  =========  =======================  ========  =============  ============================================
 
   .. [#] Voltage choices are "120" or "240".
+  .. [#] If neither Headroom nor RatedTotalSpaces provided, the following default value representing an electric panel with 3 open breaker spaces will be used: Headroom = 3.
   .. [#] See :ref:`branch_circuits`.
   .. [#] See :ref:`demand_loads`.
 
@@ -4628,16 +4637,6 @@ See :ref:`annual_outputs` for descriptions of how the calculated capacities and 
 
 Branch Circuits
 ~~~~~~~~~~~~~~~
-
-TODO entered in ``BranchCircuits``.
-
-  =======================================================================  =======  =========  =======================  ========  =============  ============================================
-  Element                                                                  Type     Units      Constraints              Required  Default        Notes
-  =======================================================================  =======  =========  =======================  ========  =============  ============================================
-  ``Headroom`` or ``RatedTotalSpaces``                                     integer                                      No        See [#]_
-  =======================================================================  =======  =========  =======================  ========  =============  ============================================
-
-  .. [#] If neither Headroom nor RatedTotalSpaces provided, the following default value representing an electric panel with 3 open breaker spaces will be used: Headroom = 3.
 
 Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
 
@@ -4687,16 +4686,7 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
 Demand Loads
 ~~~~~~~~~~~~
 
-TODO entered in ``DemandLoads``.
-
-  =======================================================================  =======  =========  =======================  ========  =============  ============================================
-  Element                                                                  Type     Units      Constraints              Required  Default        Notes
-  =======================================================================  =======  =========  =======================  ========  =============  ============================================
-  ``BuildingType``                                                         string              dwelling unit            Yes                      
-  ``DemandLoadType``                                                       string              service                  Yes
-  =======================================================================  =======  =========  =======================  ========  =============  ============================================
-
-Individual electric demand loads entered in ``DemandLoads/DemandLoad``.
+Individual demand loads entered in ``DemandLoads/DemandLoad``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes

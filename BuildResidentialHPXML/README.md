@@ -4421,11 +4421,11 @@ Maximum power output of the second PV system. For a shared system, this is the t
 
 <br/>
 
-**Electric Panel: Load Calculation Types**
+**Electric Panel: Calculation Types**
 
-Types of electric panel load calculations. Possible types are: 2023 Load-Based, 2023 Meter-Based. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.
+Types of electric panel demand load calculations. Possible types are: 2023 Load-Based, 2023 Meter-Based. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.
 
-- **Name:** ``electric_panel_load_calculation_types``
+- **Name:** ``electric_panel_calculations_types``
 - **Type:** ``String``
 
 - **Required:** ``false``

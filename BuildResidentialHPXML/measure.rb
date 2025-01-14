@@ -2628,9 +2628,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(4000)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_calculation_types', false)
-    arg.setDisplayName('Electric Panel: Load Calculation Types')
-    arg.setDescription("Types of electric panel load calculations. Possible types are: #{HPXML::ElectricPanelLoadCalculationType2023LoadBased}, #{HPXML::ElectricPanelLoadCalculationType2023MeterBased}. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.")
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_calculations_types', false)
+    arg.setDisplayName('Electric Panel: Calculation Types')
+    arg.setDescription("Types of electric panel demand load calculations. Possible types are: #{HPXML::ElectricPanelLoadCalculationType2023LoadBased}, #{HPXML::ElectricPanelLoadCalculationType2023MeterBased}. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.")
     args << arg
 
     electric_panel_voltage_choices = OpenStudio::StringVector.new
@@ -4845,8 +4845,8 @@ module HPXMLFile
       end
     end
 
-    if not args[:electric_panel_load_calculation_types].nil?
-      hpxml.header.panel_calculation_types = args[:electric_panel_load_calculation_types].split(',').map(&:strip)
+    if not args[:electric_panel_calculations_types].nil?
+      hpxml.header.electric_panel_calculations_types = args[:electric_panel_calculations_types].split(',').map(&:strip)
     end
 
     errors.each do |error|
@@ -7153,7 +7153,7 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_electric_panel(hpxml_bldg, args)
-    return if args[:electric_panel_load_calculation_types].nil?
+    return if args[:electric_panel_calculations_types].nil?
 
     if args[:electric_panel_breaker_spaces_type] == 'total'
       total_breaker_spaces = args[:electric_panel_breaker_spaces]

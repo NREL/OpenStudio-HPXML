@@ -97,7 +97,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path) }
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
 
-    hpxml.header.panel_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023LoadBased]
+    hpxml.header.electric_panel_calculations_types = [HPXML::ElectricPanelLoadCalculationType2023LoadBased]
     branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
     branch_circuits.add(id: 'Kitchen', occupied_spaces: 2)
     branch_circuits.add(id: 'Laundry', occupied_spaces: 1)
@@ -446,6 +446,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
   def _create_hpxml(hpxml_name, test_name = nil)
     puts "Testing #{test_name}..." if !test_name.nil?
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
+    hpxml.header.electric_panel_calculations_building_type = HPXML::ElectricPanelLoadCalculationBuildingTypeDwellingUnit
+    hpxml.header.electric_panel_calculations_demand_load_type = HPXML::ElectricPanelLoadCalculationDemandLoadTypeServiceFeeder
     hpxml_bldg = hpxml.buildings[0]
     if hpxml_bldg.electric_panels.size == 0
       hpxml_bldg.electric_panels.add(id: 'ElectricPanel')

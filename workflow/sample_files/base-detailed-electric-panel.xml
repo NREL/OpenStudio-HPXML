@@ -11,10 +11,10 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <PanelCalculationTypes>
+      <ElectricPanelCalculations>
         <Type>2023 Load-Based</Type>
         <Type>2023 Meter-Based</Type>
-      </PanelCalculationTypes>
+      </ElectricPanelCalculations>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
@@ -452,9 +452,7 @@
             <SystemIdentifier id='ElectricPanel1'/>
             <Voltage>240</Voltage>
             <MaxCurrentRating>100.0</MaxCurrentRating>
-            <BranchCircuits>
-              <Headroom>5</Headroom>
-            </BranchCircuits>
+            <Headroom>5</Headroom>
             <DemandLoads>
               <DemandLoad>
                 <SystemIdentifier id='ElectricPanel1_DemandLoad1'/>
