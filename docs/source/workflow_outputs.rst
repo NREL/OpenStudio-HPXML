@@ -93,7 +93,7 @@ Annual energy outputs are listed below.
   ====================================  ===========================
   Type                                  Notes
   ====================================  ===========================
-  Energy Use: Total (MBtu)              Total energy consumption; includes any home battery charging/discharging, excludes electric vehicle discharging
+  Energy Use: Total (MBtu)              Total energy consumption; includes any home battery charging/discharging and EV charging
   Energy Use: Net (MBtu)                Subtracts any power produced by PV or generators
   ====================================  ===========================
 
@@ -105,7 +105,7 @@ Fuel uses are listed below.
   ====================================  ===========================
   Type                                  Notes
   ====================================  ===========================
-  Fuel Use: Electricity: Total (MBtu)   Total electricity consumption, includes any home battery charging/discharging, excludes electric vehicle discharging
+  Fuel Use: Electricity: Total (MBtu)   Total electricity consumption, includes any home battery charging/discharging and EV charging
   Fuel Use: Electricity: Net (MBtu)     Subtracts any power produced by PV or generators
   Fuel Use: Natural Gas: Total (MBtu)
   Fuel Use: Fuel Oil: Total (MBtu)      Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
@@ -154,7 +154,6 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
   End Use: Electricity: Ceiling Fan (MBtu)
   End Use: Electricity: Television (MBtu)
   End Use: Electricity: Plug Loads (MBtu)                           Excludes independently reported plug loads (e.g., well pump)
-  End Use: Electricity: Electric Vehicle Charging (MBtu)
   End Use: Electricity: Well Pump (MBtu)
   End Use: Electricity: Pool Heater (MBtu)
   End Use: Electricity: Pool Pump (MBtu)
@@ -163,6 +162,7 @@ So the sum of all end uses for a given fuel (e.g., sum of all "End Use: Natural 
   End Use: Electricity: PV (MBtu)                                   Negative value for any power produced
   End Use: Electricity: Generator (MBtu)                            Negative value for any power produced
   End Use: Electricity: Battery (MBtu)                              Positive value for charging (including efficiency losses); negative value for discharging
+  End Use: Electricity: Electric Vehicle Charging (MBtu)
   End Use: Natural Gas: Heating (MBtu)                              Excludes heat pump backup
   End Use: Natural Gas: Heating Heat Pump Backup (MBtu)
   End Use: Natural Gas: Hot Water (MBtu)
@@ -251,7 +251,7 @@ Results for each emissions scenario defined in the HPXML file are listed as show
   =======================================================================  ==================================================================
   Type                                                                     Notes
   =======================================================================  ==================================================================
-  Emissions: <EmissionsType>: <ScenarioName>: Total (lb)                   Scenario total emissions, includes any home battery charging/discharging, excludes electric vehicle discharging
+  Emissions: <EmissionsType>: <ScenarioName>: Total (lb)                   Scenario total emissions, includes any home battery charging/discharging and EV charging
   Emissions: <EmissionsType>: <ScenarioName>: Net (lb)                     Subtracts any power produced by PV or generators
   =======================================================================  ==================================================================
 
@@ -263,7 +263,7 @@ Results for each emissions scenario defined in the HPXML file are listed as show
   =======================================================================  ==================================================================
   Type                                                                     Notes
   =======================================================================  ==================================================================
-  Emissions: <EmissionsType>: <ScenarioName>: Electricity: Total (lb)      Scenario total emissions for Electricity only, includes any home battery charging/discharging, excludes electric vehicle discharging
+  Emissions: <EmissionsType>: <ScenarioName>: Electricity: Total (lb)      Scenario total emissions for Electricity only, includes any home battery charging/discharging and EV charging
   Emissions: <EmissionsType>: <ScenarioName>: Electricity: Net (lb)        Subtracts any power produced by PV or generators
   Emissions: <EmissionsType>: <ScenarioName>: Natural Gas: Total (lb)      Scenario emissions for Natural Gas only
   Emissions: <EmissionsType>: <ScenarioName>: Fuel Oil: Total (lb)         Scenario emissions for Fuel Oil only
@@ -321,9 +321,11 @@ Annual unmet hours are listed below.
   =========================  =====
   Unmet Hours: Heating (hr)  Number of hours where the heating setpoint is not maintained.
   Unmet Hours: Cooling (hr)  Number of hours where the cooling setpoint is not maintained.
+  Unmet Hours: Driving (hr)  Number of hours where the driving schedule of electric vehicles is not met
   =========================  =====
 
-These numbers reflect the number of hours during the heating/cooling season when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
+The unmet heating and cooling numbers reflect the number of hours during the heating/cooling season when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
+The unmet driving numbers include any time in which the discharge schedule is exceeds 0 while the EV battery's state of charge is at its minimum level.
 
 Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~

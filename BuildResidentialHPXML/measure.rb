@@ -2709,7 +2709,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     fuel_economy_units_choices << HPXML::UnitsKwhPerMile
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('vehicle_fuel_economy_units', fuel_economy_units_choices, false)
-    arg.setDisplayName('Electric Vehicle: Combined Fuel Economy Units')
+    arg.setDisplayName('Vehicle: Combined Fuel Economy Units')
     arg.setDescription("The combined fuel economy units of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     args << arg
 

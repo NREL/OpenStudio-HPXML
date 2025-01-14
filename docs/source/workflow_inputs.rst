@@ -746,9 +746,9 @@ The column names available in the schedule CSV files are:
          During the shedding events, the main heat pump is limited to running below the specified fraction of rated power, and the backup system is locked out.
          When the comfort constraints are violated, both heat pump and backup systems are allowed to run at full load to recover the indoor temperature until reaching setpoint.
 
-  .. [#] This column takes precedence over ``battery_charging`` and ``battery_discharging``, if provided.
+  .. [#] If provided, ``battery_charging`` and ``battery_discharging`` take precedence over this column.
 
-  .. [#] This column takes precedence over ``ev_battery_charging`` and ``ev_battery_discharging``, if provided.
+  .. [#] If provided, ``ev_battery_charging`` and ``ev_battery_discharging`` take precedence over this column.
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -4638,39 +4638,33 @@ If not entered, the simulation will not include batteries.
   A battery in a home without PV or charging/discharging schedules is assumed to operate as backup and is not modeled.
 
 HPXML Vehicles
-***************
+**************
 
-A single electric vehicle can be entered as a ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle``. This element is used to describe vehicle-level inputs, with more specific EV and battery inputs described in ``Vehicle/VehicleType/BatteryElectricVehicle/Battery``.
-If not entered, the simulation will not include electric vehicles.
+A vehicle can can be entered in ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle``. Currently only a battery electric vehicle can be modeled with ``/Vehicle/VehicleType/BatteryElectricVehicle``.
+This provides detailed modeling of electric vehicles (batteries and charging/discharging) as an alternative to the simple EV charging in :ref:`plug_loads`.
+If not entered, the simulation will not include a detailed electric vehicle model.
 
-  ====================================================  =======  ========  ============  ========  ========  ============================================
-  Element                                               Type     Units      Constraints  Required  Default   Notes
-  ====================================================  =======  ========  ============  ========  ========  ============================================
-  ``SystemIdentifier``                                  id                               Yes                 Unique identifier
-  ``MilesDrivenPerYear``                                double   miles      >= 0         No        10,900    Number of miles driven per year
-  ``HoursDrivenPerWeek``                                double   hours      >= 0         No        11.6      Number of hours driven per week
-  ``FuelEconomyCombined[Units="kWh/mile"]/Value``       double   kWh/mile   > 0          No        0.22      The vehicle efficiency in kWh/mile
-  ====================================================  =======  ========  ============  ========  ========  ============================================
+  ===============================================================================================  ======  =========  =======================  ========  ===========  ======================================
+  Element                                                                                          Type    Units      Constraints              Required  Default      Notes
+  ===============================================================================================  ======  =========  =======================  ========  ===========  ======================================
+  ``SystemIdentifier``                                                                             id                                          Yes                    Unique identifier
+  ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        10,900       Number of miles driven per year
+  ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        11.6         Number of hours driven per week
+  ``FuelEconomyCombined/Units``                                                                    string             > 0                      No        kWh/mile     The vehicle combined fuel economy units
+  ``FuelEconomyCombined/Value``                                                                    double             > 0                      No        0.22         The vehicle combined fuel economy value
+  ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        1.0          Unique identifier
+  ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                     ID of connected EV charger [#]_
+  ``VehicleType/BatteryElectricVehicle/Battery/BatteryType``                                       string                                      No        Li-ion [#]_  EV battery type
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double  kWh or Ah  >= 0                     No        See [#]_
+  ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No
+  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions``                        array                                       No        See [#]_     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions``                        array                                       No                     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_     12 comma-separated monthly multipliers
+  ===============================================================================================  ======  =========  =======================  ========  ===========  ======================================
 
-Battery Electric Vehicle
-~~~~~~~~~~~~~~~~~~~~~~~~
-A battery electric vehicle is entered in ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle/VehicleType/BatteryElectricVehicle``. This provides inputs specific to EVs and its battery.
-If not entered, the simulation will not include an electric vehicle.
-
-  ============================================================  =======  =========  =======================  ========  ===========  ======================================
-  Element                                                       Type     Units      Constraints              Required  Default      Notes
-  ============================================================  =======  =========  =======================  ========  ===========  ======================================
-  ``FractionChargedLocation[Location="Home"]/Percentage``       double   frac       >= 0                     No        1.0          Unique identifier
-  ``ConnectedCharger``                                          idref                                        Yes                    ID of connected EV charger
-  ``Battery/BatteryType``                                       string                                       No        Li-ion [#]_  EV battery type
-  ``Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double   kWh or Ah  >= 0                     No        See [#]_
-  ``Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double   kWh or Ah  >= 0, < NominalCapacity  No        See [#]_
-  ``Battery/NominalVoltage``                                    double   V          >= 0                     No
-  ``extension/WeekdayScheduleFractions``                        array                                        No        See [#]_     24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``                        array                                        No                     24 comma-separated weekday fractions
-  ``extension/MonthlyScheduleMultipliers``                      array                                        No        See [#]_     12 comma-separated monthly multipliers
-  ============================================================  =======  =========  =======================  ========  ===========  ======================================
-
+  .. [#] ConnectedCharger must reference an ``ElectricVehicleCharger``.
+  .. [#] If a connected charger is not provided, then detailed electric vehicle charging will not be modeled.
   .. [#] Only the "Li-ion" battery type is supported.
   .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
   .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
@@ -4679,7 +4673,7 @@ If not entered, the simulation will not include an electric vehicle.
 
  .. note::
 
-  If an EV is also specified with PlugLoadType "electric vehicle charging", then EV charging will be modeled as a plug load.
+  If a PlugLoadType for "electric vehicle charging" is also specified, then a warning will be provided and the EV charging plug load will take precedence.
 
   EV battery charging and discharging can be scheduled using :ref:`schedules_detailed` or with ``WeekdayScheduleFractions``, ``WeekendScheduleFractions``, and ``MonthlyScheduleMultipliers``.
   Positive schedule values control timing and magnitude of charging storage.

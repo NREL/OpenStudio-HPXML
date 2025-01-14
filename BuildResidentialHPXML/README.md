@@ -4558,7 +4558,7 @@ The combined fuel economy of the vehicle. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Electric Vehicle: Combined Fuel Economy Units**
+**Vehicle: Combined Fuel Economy Units**
 
 The combined fuel economy units of the vehicle. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
 
