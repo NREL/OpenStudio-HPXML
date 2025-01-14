@@ -430,44 +430,44 @@ Electric Panel
 Electric panel demand loads, calculated capacities, and tabulated breaker spaces are listed below.
 Demand loads, load-based capacities, and occupied spaces can also be found in the ``in.xml`` file.
 
-  ===========================================================================  ====================
-  Type                                                                         Notes
-  ===========================================================================  ====================
-  Electric Panel Demand Load Power: Heating (W)                                Sum of heating system and heat pump heating demand loads
-  Electric Panel Demand Load Power: Cooling (W)                                Sum of cooling system and heat pump cooling demand loads
-  Electric Panel Demand Load Power: Hot Water (W)                              Sum of water heating system demand loads
-  Electric Panel Demand Load Power: Clothes Dryer (W)                          Sum of clothes dryer demand loads
-  Electric Panel Demand Load Power: Dishwasher (W)                             Sum of dishwasher demand loads
-  Electric Panel Demand Load Power: Range/Oven (W)                             Sum of range/oven demand loads
-  Electric Panel Demand Load Power: Mech Vent (W)                              Sum of mechanical ventilation demand loads
-  Electric Panel Demand Load Power: Permanent Spa Heater (W)                   Sum of permanent spa heater demand loads
-  Electric Panel Demand Load Power: Permanent Spa Pump (W)                     Sum of permanent spa pump demand loads
-  Electric Panel Demand Load Power: Pool Heater (W)                            Sum of pool heater demand loads
-  Electric Panel Demand Load Power: Pool Pump (W)                              Sum of pool pump demand loads
-  Electric Panel Demand Load Power: Well Pump (W)                              Sum of well pump demand loads
-  Electric Panel Demand Load Power: Electric Vehicle Charging (W)              Sum of electric vehicle charging demand loads
-  Electric Panel Demand Load Power: Other (W)                                  Sum of other demand loads
-  Electric Panel Demand Load Occupied Spaces: Heating (W)                      Sum of heating system and heat pump heating occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Cooling (W)                      Sum of cooling system and heat pump cooling occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Hot Water (W)                    Sum of water heating system occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Clothes Dryer (W)                Sum of clothes dryer occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Dishwasher (W)                   Sum of dishwasher occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Range/Oven (W)                   Sum of range/oven occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Mech Vent (W)                    Sum of mechanical ventilation occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Permanent Spa Heater (W)         Sum of permanent spa heater occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Permanent Spa Pump (W)           Sum of permanent spa pump occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Pool Heater (W)                  Sum of pool heater occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Pool Pump (W)                    Sum of pool pump occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Well Pump (W)                    Sum of well pump occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Electric Vehicle Charging (W)    Sum of electric vehicle charging occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Other (W)                        Sum of other occupied breaker spaces
-  Electric Panel Demand Load Occupied Spaces: Total Count (#)                  Total rated number of breaker spaces on the panel
-  Electric Panel Demand Load Occupied Spaces: Occupied Count (#)               Total number of occupied breaker spaces on the panel
-  Electric Panel Demand Load Occupied Spaces: Headroom Count (#)               Total breaker spaces minus occupied breaker spaces
-  Electric Panel Demand Load Capacity: <Type>: Total (W)                       Calculated NEC demand load capacity
-  Electric Panel Demand Load Capacity: <Type>: Total (A)                       Total (W) divided by panel voltage
-  Electric Panel Demand Load Capacity: <Type>: Headroom (A)                    Panel max current rating (A) minus Total (A)
-  ===========================================================================  ====================
+  ================================================================================  ====================
+  Type                                                                              Notes
+  ================================================================================  ====================
+  Electric Panel Demand Load Power: Heating (W)                                     Sum of heating system and heat pump heating demand loads
+  Electric Panel Demand Load Power: Cooling (W)                                     Sum of cooling system and heat pump cooling demand loads
+  Electric Panel Demand Load Power: Hot Water (W)                                   Sum of water heating system demand loads
+  Electric Panel Demand Load Power: Clothes Dryer (W)                               Sum of clothes dryer demand loads
+  Electric Panel Demand Load Power: Dishwasher (W)                                  Sum of dishwasher demand loads
+  Electric Panel Demand Load Power: Range/Oven (W)                                  Sum of range/oven demand loads
+  Electric Panel Demand Load Power: Mech Vent (W)                                   Sum of mechanical ventilation demand loads
+  Electric Panel Demand Load Power: Permanent Spa Heater (W)                        Sum of permanent spa heater demand loads
+  Electric Panel Demand Load Power: Permanent Spa Pump (W)                          Sum of permanent spa pump demand loads
+  Electric Panel Demand Load Power: Pool Heater (W)                                 Sum of pool heater demand loads
+  Electric Panel Demand Load Power: Pool Pump (W)                                   Sum of pool pump demand loads
+  Electric Panel Demand Load Power: Well Pump (W)                                   Sum of well pump demand loads
+  Electric Panel Demand Load Power: Electric Vehicle Charging (W)                   Sum of electric vehicle charging demand loads
+  Electric Panel Demand Load Power: Other (W)                                       Sum of other demand loads
+  Electric Panel Demand Load Occupied Spaces: Heating Count                         Sum of heating system and heat pump heating occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Cooling Count                         Sum of cooling system and heat pump cooling occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Hot Water Count                       Sum of water heating system occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Clothes Dryer Count                   Sum of clothes dryer occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Dishwasher Count                      Sum of dishwasher occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Range/Oven Count                      Sum of range/oven occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Mech Vent Count                       Sum of mechanical ventilation occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Permanent Spa Heater Count            Sum of permanent spa heater occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Permanent Spa Pump Count              Sum of permanent spa pump occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Pool Heater Count                     Sum of pool heater occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Pool Pump Count                       Sum of pool pump occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Well Pump Count                       Sum of well pump occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Electric Vehicle Charging Count       Sum of electric vehicle charging occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Other Count                           Sum of other occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Total Count                           Total rated number of spaces on the panel
+  Electric Panel Demand Load Occupied Spaces: Occupied Count (#)                    Total number of occupied spaces on the panel
+  Electric Panel Demand Load Occupied Spaces: Headroom Count (#)                    Total rated spaces minus occupied spaces
+  Electric Panel Demand Load Capacity: <Type>: Total (W)                            Calculated NEC demand load capacity
+  Electric Panel Demand Load Capacity: <Type>: Total (A)                            Total (W) divided by panel voltage
+  Electric Panel Demand Load Capacity: <Type>: Headroom (A)                         Panel max current rating (A) minus Total (A)
+  ================================================================================  ====================
 
 .. note::
 

@@ -241,7 +241,7 @@ module Defaults
       end
     end
 
-    if not hpxml_header.electric_panel_calculations_types.empty?
+    if (not hpxml_header.electric_panel_calculations_types.nil?) && (not hpxml_header.electric_panel_calculations_types.empty?)
       if hpxml_header.electric_panel_calculations_building_type.nil?
         hpxml_header.electric_panel_calculations_building_type = HPXML::ElectricPanelLoadCalculationBuildingTypeDwellingUnit
         hpxml_header.electric_panel_calculations_building_type_isdefaulted = true
