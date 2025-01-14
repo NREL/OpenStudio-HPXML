@@ -462,8 +462,8 @@ Demand loads, load-based capacities, and occupied spaces can also be found in th
   Electric Panel Demand Load Occupied Spaces: Electric Vehicle Charging Count       Sum of electric vehicle charging occupied spaces
   Electric Panel Demand Load Occupied Spaces: Other Count                           Sum of other occupied spaces
   Electric Panel Demand Load Occupied Spaces: Total Count                           Total rated number of spaces on the panel
-  Electric Panel Demand Load Occupied Spaces: Occupied Count (#)                    Total number of occupied spaces on the panel
-  Electric Panel Demand Load Occupied Spaces: Headroom Count (#)                    Total rated spaces minus occupied spaces
+  Electric Panel Demand Load Occupied Spaces: Occupied Count                        Total number of occupied spaces on the panel
+  Electric Panel Demand Load Occupied Spaces: Headroom Count                        Total rated spaces minus occupied spaces
   Electric Panel Demand Load Capacity: <Type>: Total (W)                            Calculated NEC demand load capacity
   Electric Panel Demand Load Capacity: <Type>: Total (A)                            Total (W) divided by panel voltage
   Electric Panel Demand Load Capacity: <Type>: Headroom (A)                         Panel max current rating (A) minus Total (A)
