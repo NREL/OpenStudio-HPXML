@@ -4640,7 +4640,7 @@ If not entered, the simulation will not include batteries.
 HPXML Vehicles
 **************
 
-A vehicle can can be entered in ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle``. Currently only a battery electric vehicle can be modeled with ``/Vehicle/VehicleType/BatteryElectricVehicle``.
+A vehicle can be entered in ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle``. Currently only a battery electric vehicle can be modeled with ``/Vehicle/VehicleType/BatteryElectricVehicle``.
 This provides detailed modeling of electric vehicles (batteries and charging/discharging) as an alternative to the simple EV charging in :ref:`plug_loads`.
 If not entered, the simulation will not include a detailed electric vehicle model.
 

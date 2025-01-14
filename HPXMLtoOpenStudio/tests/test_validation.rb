@@ -1851,7 +1851,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'schedule-file-max-power-ratio-with-single-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-two-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'],
-                              'ev-charging-methods' => ['Electric vehicle was specified as a plug load and as a battery, vehicle charging will be modeled as a plug load.'] }
+                              'ev-charging-methods' => ['Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'],
+                              'vehicle-phev' => ["Unexpected vehicle type 'PlugInHybridElectricVehicle'. Detailed vehicle charging will not be modeled."] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
@@ -2005,6 +2006,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
       when 'ev-charging-methods'
         hpxml, hpxml_bldg = _create_hpxml('base-battery-ev-plug-load-ev.xml')
+      when 'vehicle-phev'
+        hpxml, hpxml_bldg = _create_hpxml('base-battery-ev-scheduled.xml')
+        hpxml_bldg.vehicles[0].vehicle_type = 'PlugInHybridElectricVehicle'
       else
         fail "Unhandled case: #{warning_case}."
       end

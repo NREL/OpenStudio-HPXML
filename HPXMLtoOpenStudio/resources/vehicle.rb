@@ -13,8 +13,10 @@ class Vehicle
   # @return [nil]
   def self.apply(runner, model, spaces, hpxml_bldg, schedules_file)
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.vehicle_type == HPXML::VehicleTypeBEV
-
+      if vehicle.vehicle_type != HPXML::VehicleTypeBEV
+        runner.registerWarning("Unexpected vehicle type '#{vehicle.vehicle_type}'. Detailed vehicle charging will not be modeled.")
+        next
+      end
       apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
     end
   end
@@ -70,7 +72,7 @@ class Vehicle
   def self.apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
     model.getElectricEquipments.sort.each do |ee|
       if ee.endUseSubcategory.start_with? Constants::ObjectTypeMiscElectricVehicleCharging
-        runner.registerWarning('Electric vehicle was specified as a plug load and as a battery, vehicle charging will be modeled as a plug load.')
+        runner.registerWarning('Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.')
         return
       end
     end
@@ -78,19 +80,13 @@ class Vehicle
     # Assign charging and vehicle space
     ev_charger = vehicle.ev_charger
     if ev_charger.nil?
-      runner.registerWarning('Electric vehicle specified with no charger provided; battery will not be modeled.')
+      runner.registerWarning('Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.')
       return
     end
     vehicle.location = ev_charger.location
 
-    # Get schedules to calculate effective discharge power
-    charging_schedule, discharging_schedule = get_ev_charging_schedules(runner, model, vehicle, schedules_file)
-    if charging_schedule.nil? && discharging_schedule.nil?
-      runner.registerWarning('Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.')
-      return
-    end
-
     # Calculate annual driving hours
+    charging_schedule, discharging_schedule = get_ev_charging_schedules(runner, model, vehicle, schedules_file)
     if discharging_schedule.to_ScheduleFile.is_initialized
       dis_sch = discharging_schedule.to_ScheduleFile.get
       col = dis_sch.columnNumber - 1
