@@ -4646,8 +4646,8 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   ``Voltage``                                     string    V               See [#]_     No        See [#]_
   ``MaxCurrentRating``                            double    A                            No        See [#]_
   ``OccupiedSpaces``                              integer                                No        See [#]_   Number of occupied breaker spaces
-  ``AttachedToComponent``                         idref                     See [#]_     See [#]_  See [#]_   ID of attached component; multiple are allowed [#]_
-  ``AttachedToElectricPanel``                     idref                     See [#]_     See [#]_  See [#]_   ID of attached electric panel (i.e., a subpanel)
+  ``AttachedToComponent``                         idref                                  No                   ID of attached component; multiple are allowed [#]_
+  ``AttachedToElectricPanel``                     idref                     See [#]_     No                   ID of attached electric panel (i.e., a subpanel) [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] Voltage choices are "120" or "240".
@@ -4679,7 +4679,8 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          MaxAmps = 50
   
   .. [#] Provide a AttachedToComponent element for each referenced component.
-  .. [#] Provide a AttachedToElectricPanel element for each reference subpanel.
+  .. [#] AttachedToElectricPanel must reference a ``ElectricPanel``.
+  .. [#] Provide a AttachedToElectricPanel element for a referenced subpanel.
 
 .. _demand_loads:
 
@@ -4729,7 +4730,7 @@ Individual demand loads entered in ``DemandLoads/DemandLoad``.
          \- **electric vehicle charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
 
   .. [#] Not allowed if LoadType is "lighting", "kitchen", "laundry", or "other"; otherwise, required.
-  .. [#] A demand load is created for any system not already referenced by a demand load.
+  .. [#] A demand load is created for any electric component not already referenced by a demand load.
          Demand loads for the following demand load types are always created if they don't already exist:
 
          \- **lighting**
