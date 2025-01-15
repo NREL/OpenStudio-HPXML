@@ -2901,27 +2901,37 @@ module HVAC
         # Calculate ODB temperature at which power or capacity is zero
         high_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, true)
         high_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, true)
-        outdoor_dry_bulbs << [high_odb_at_zero_power, high_odb_at_zero_capacity, weather_temp].min # Max cooling ODB
+        max_odb = [high_odb_at_zero_power, high_odb_at_zero_capacity, weather_temp].min # Max cooling ODB
+        if max_odb > user_odbs.max
+          outdoor_dry_bulbs << max_odb
+        end
 
         low_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, false)
         low_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, false)
-        outdoor_dry_bulbs << [low_odb_at_zero_power, low_odb_at_zero_capacity, 60.0].max # Min cooling ODB
+        min_odb = [low_odb_at_zero_power, low_odb_at_zero_capacity, 60.0].max # Min cooling ODB
+        if min_odb < user_odbs.min
+          outdoor_dry_bulbs << min_odb
+        end
       else
         # Calculate ODB temperature at which power or capacity is zero
         low_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, false)
         low_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, false)
-        outdoor_dry_bulbs << [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_min_temp, weather_temp].max # Min heating ODB
+        min_odb = [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_min_temp, weather_temp].max # Min heating ODB
+        if min_odb < user_odbs.min
+          outdoor_dry_bulbs << min_odb
+        end
 
         high_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, true)
         high_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, true)
-        outdoor_dry_bulbs << [high_odb_at_zero_power, high_odb_at_zero_capacity, 60.0].min # Max heating ODB
+        max_odb = [high_odb_at_zero_power, high_odb_at_zero_capacity, 60.0].min # Max heating ODB
+        if max_odb > user_odbs.max
+          outdoor_dry_bulbs << max_odb
+        end
       end
 
       # Extrapolate net capacity and input power at those outdoor drybulb temperatures per RESNET MINHERS Addendum 82.
       capacity_description = data[0].capacity_description
       outdoor_dry_bulbs.each do |target_odb|
-        next if user_odbs.include? target_odb
-
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
         else
@@ -3022,7 +3032,8 @@ module HVAC
 
     if mode == :clg && target_odb < 82
       # Ensure no less than 50% of the value at 82F
-      # FIXME: Need interpretation from RESNET on how this case should be handled
+      # FIXME: Placeholer code. Need interpretation from RESNET on how this case should be handled.
+      # FIXME: See https://github.com/NREL/OpenStudio-HPXML/pull/1904#discussion_r1915689274
       dp_82F = data.find { |dp| dp.outdoor_temperature == 82.0 }
       val = [val, 0.5 * dp_82F.send(property)].max
     elsif mode == :htg && target_odb > 47
