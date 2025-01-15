@@ -2502,12 +2502,13 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[Vehicle]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Vehicles/h:Vehicle'>
-      <sch:assert role='ERROR' test='count(h:MilesDrivenPerYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MilesDrivenPerYear</sch:assert>
-      <sch:assert role='ERROR' test='count(h:HoursDrivenPerWeek) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HoursDrivenPerWeek</sch:assert>
-      <sch:assert role='ERROR' test='count(h:FuelEconomyCombined[h:Units="kWh/mile"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FuelEconomyCombined[Units="kWh/mile"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='h:FuelEconomyCombined[h:Units="kWh/mile"] or not(h:FuelEconomyCombined/h:Units)'>Expected FuelEconomyCombined/Units to be "kWh/mile"</sch:assert>
+    <sch:title>[Vehicles]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Vehicles'>
+      <sch:assert role='ERROR' test='count(h:Vehicle/h:VehicleType/h:BatteryElectricVehicle) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Vehicle/VehicleType/BatteryElectricVehicle</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Vehicle/h:MilesDrivenPerYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Vehicle/MilesDrivenPerYear</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Vehicle/h:HoursDrivenPerWeek) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Vehicle/HoursDrivenPerWeek</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Vehicle/h:FuelEconomyCombined[h:Units="kWh/mile"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Vehicle/FuelEconomyCombined[Units="kWh/mile"]/Value</sch:assert>
+      <sch:assert role='ERROR' test='h:Vehicle/h:FuelEconomyCombined[h:Units="kWh/mile"] or not(h:Vehicle/h:FuelEconomyCombined/h:Units)'>Expected Vehicle/FuelEconomyCombined/Units to be "kWh/mile"</sch:assert>
     </sch:rule>
   </sch:pattern>
 
