@@ -3062,7 +3062,6 @@ module HVAC
         n_pt = (eir_diff.abs / tol).ceil() - 1
         next if n_pt < 1
 
-        new_cops = []
         for j in 1..n_pt
           if mode == :clg
             new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
@@ -3077,7 +3076,6 @@ module HVAC
           new_dp.capacity_description = dp.capacity_description
           convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
           data << new_dp
-          new_cops << new_dp.efficiency_cop
         end
       end
     end
