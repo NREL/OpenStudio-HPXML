@@ -3238,7 +3238,7 @@ For air-source HVAC systems with detailed cooling performance data, pairs of per
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] Pairs of detailed performance datapoints at outdoor temperatures of 82F and 95F are required.
-         Additional optional pairs are allowed at outdoor temperatures of 60F and a user-specified temperature greater than 95F.
+         An additional optional pair is allowed at a user-specified temperature greater than 95F.
          Datapoints at additional outdoor temperatures are not currently supported.
   .. [#] If Capacity is provided, the nominal capacity (``CoolingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
@@ -3264,7 +3264,7 @@ For air-source HVAC systems with detailed heating performance data, pairs of per
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] Pairs of detailed performance datapoints at outdoor temperatures of 47F, 17F, and 5F are required.
-         Additional optional pairs are allowed at outdoor temperatures of 60F and a user-specified temperature less than 5F.
+         An additional optional pair is allowed at a user-specified temperature less than 5F.
          Datapoints at additional outdoor temperatures are not currently supported.
   .. [#] If Capacity is provided, the nominal capacity (``HeatingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
