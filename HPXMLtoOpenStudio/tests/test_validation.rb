@@ -1155,7 +1155,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'emissions-wrong-rows' => ['Emissions File has invalid number of rows'],
                             'geothermal-loop-multiple-attached-hps' => ["Multiple heat pumps found attached to geothermal loop 'GeothermalLoop1'."],
                             'heat-pump-backup-system-load-fraction' => ['Heat pump backup system cannot have a fraction heat load served specified.'],
-                            'hvac-cooling-detailed-performance-incomplete-pair' => ['Cooling detailed performance data for outdoor temperature = 60.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
+                            'hvac-cooling-detailed-performance-incomplete-pair' => ['Cooling detailed performance data for outdoor temperature = 105.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
                             'hvac-cooling-detailed-performance-invalid-data' => ['Cooling detailed performance data for outdoor temperature = 82.0 is invalid; Power (capacity / COP) at minimum capacity must be less than power at maximum capacity.',
                                                                                  'Cooling detailed performance data for outdoor temperature = 95.0 is invalid; Maximum capacity must be greater than minimum capacity.'],
                             'hvac-heating-detailed-performance-incomplete-pair' => ['Heating detailed performance data for outdoor temperature = -2.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
@@ -1350,7 +1350,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'hvac-cooling-detailed-performance-incomplete-pair'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
         hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.add(
-          outdoor_temperature: 60.0,
+          outdoor_temperature: 105.0,
           capacity_description: HPXML::CapacityDescriptionMinimum,
           capacity: 15000.0,
           efficiency_cop: 7
