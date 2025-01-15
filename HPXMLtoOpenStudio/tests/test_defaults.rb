@@ -3617,7 +3617,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
   def test_vehicles
     # Test inputs not overridden by defaults
-    hpxml, hpxml_bldg = _create_hpxml('base-battery-ev.xml')
+    hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger.xml')
     hpxml_bldg.vehicles[0].battery_type = HPXML::BatteryTypeLithiumIon
     hpxml_bldg.vehicles[0].nominal_capacity_kwh = 45.0
     hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
@@ -3650,7 +3650,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 987.0, nil, 876.0, 5000, 10, 0.18, HPXML::UnitsKwhPerMile, 0.75, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, 1600, HPXML::LocationOutside)
 
     # Test defaults
-    hpxml, hpxml_bldg = _create_hpxml('base-battery-ev.xml')
+    hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger.xml')
     hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
     hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
     hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
@@ -3720,7 +3720,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 280.0, nil, 224.0, 10900, 8.88, 0.22, HPXML::UnitsKwhPerMile, 1.0, default_wkdy_sch_charge, default_wknd_sch_charge, default_mth_mult_charge, default_wkdy_sch_discharge, default_wknd_sch_discharge, default_mth_mult_discharge, 5690, HPXML::LocationGarage)
 
     # Test defaults w/ schedule file
-    hpxml, hpxml_bldg = _create_hpxml('base-battery-ev-scheduled.xml')
+    hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
     hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
     hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
     hpxml_bldg.vehicles[0].usable_capacity_kwh = nil

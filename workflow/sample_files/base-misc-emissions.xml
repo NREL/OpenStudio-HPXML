@@ -106,7 +106,7 @@
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/battery-ev.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/vehicle-ev.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>

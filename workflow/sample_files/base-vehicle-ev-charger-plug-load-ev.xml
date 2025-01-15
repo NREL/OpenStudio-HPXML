@@ -52,7 +52,7 @@
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/battery-ev.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/vehicle-ev.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -685,6 +685,14 @@
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
           </extension>
+        </PlugLoad>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoad3'/>
+          <PlugLoadType>electric vehicle charging</PlugLoadType>
+          <Load>
+            <Units>kWh/year</Units>
+            <Value>3000.0</Value>
+          </Load>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

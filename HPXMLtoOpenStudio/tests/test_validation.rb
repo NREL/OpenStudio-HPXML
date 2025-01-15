@@ -1972,8 +1972,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekendScheduleFractions']
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']
       when 'schedule-file-and-weekday-weekend-multipliers-ev'
-        hpxml, hpxml_bldg = _create_hpxml('base-battery-ev.xml')
-        hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/battery-ev.csv')
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger.xml')
+        hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/vehicle-ev.csv')
         hpxml_bldg.vehicles[0].nominal_capacity_kwh = 500
         hpxml_bldg.vehicles[0].ev_charging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekdayScheduleFractions']
         hpxml_bldg.vehicles[0].ev_charging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekendScheduleFractions']
@@ -2011,9 +2011,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
       when 'ev-charging-methods'
-        hpxml, hpxml_bldg = _create_hpxml('base-battery-ev-plug-load-ev.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-plug-load-ev.xml')
       when 'vehicle-phev'
-        hpxml, hpxml_bldg = _create_hpxml('base-battery-ev-scheduled.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
         hpxml_bldg.vehicles[0].vehicle_type = 'PlugInHybridElectricVehicle'
       else
         fail "Unhandled case: #{warning_case}."

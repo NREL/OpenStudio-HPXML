@@ -899,14 +899,14 @@ class ReportSimulationOutputTest < Minitest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, unmet_hours_cols)
-    if xml_file.include? 'base-battery-ev-undercharged'
+    if xml_file.include? 'base-vehicle-ev-charger-undercharged'
       assert(File.readlines(run_log).any? { |line| line.include?('A total of 1066.0 driving hours could not be met') })
     end
   end
 
   def test_timeseries_hourly_unmet_hours
     check_timeseries_hourly_unmet_hours('base-hvac-undersized.xml', ["Unmet Hours: #{UHT::Heating}", "Unmet Hours: #{UHT::Cooling}"])
-    check_timeseries_hourly_unmet_hours('base-battery-ev-undercharged.xml', ["Unmet Hours: #{UHT::Driving}"])
+    check_timeseries_hourly_unmet_hours('base-vehicle-ev-charger-undercharged.xml', ["Unmet Hours: #{UHT::Driving}"])
   end
 
   def test_timeseries_hourly_zone_temperatures
