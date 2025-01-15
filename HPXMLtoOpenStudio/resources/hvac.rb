@@ -2851,19 +2851,14 @@ module HVAC
       hvac_ap.heat_rated_cops = []
     end
 
-    data_array.each_with_index do |data, speed|
-      data.each do |dp|
-        convert_data_point_net_to_gross(dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
-      end
-    end
-
     extrapolate_data_points(data_array, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     correct_ft_cap_eir(data_array, mode)
   end
 
-  # TODO
+  # Converts net (i.e., including fan power) capacities/COPs to gross values (i.e., excluding
+  # fan power) for a HVAC performance datapoint.
   #
-  # @param dp [TODO] The detailed performance data point of interest
+  # @param dp [HPXML::CoolingDetailedPerformanceData or HPXML::HeatingDetailedPerformanceData] The detailed performance data point of interest
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @param cfm_per_ton [Double] Rated CFM/ton
@@ -2894,6 +2889,11 @@ module HVAC
     # Set of data used for table lookup
     data_array.each_with_index do |data, speed|
       user_odbs = data.map { |dp| dp.outdoor_temperature }
+
+      # Calculate gross values to determine min/max ODB temperatures next
+      data.each do |dp|
+        convert_data_point_net_to_gross(dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+      end
 
       # Determine min/max ODB temperatures to cover full range of equipment operation
       outdoor_dry_bulbs = []
@@ -3036,8 +3036,8 @@ module HVAC
 
   # Adds datapoints at intermediate outdoor drybulb temperatures to ensure EIR performance is appropriately
   # calculated over the full range of equipment operation. An adaptive step size is used to ensure we
-  # reasonably reflect the COP curve without adding too many points and incurring a runtime penalty.
-  # See https://github.com/NREL/EnergyPlus/issues/10169 for some additional background.
+  # reasonably reflect the extrapolation of net power/capacity curves without adding too many points and
+  # incurring a runtime penalty.
   #
   # @param data_array [TODO] TODO
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
@@ -3053,9 +3053,6 @@ module HVAC
         next unless i < (data_sorted.size - 1)
 
         dp2 = data_sorted[i + 1]
-        cap_diff = dp2.capacity - dp.capacity
-        odb_diff = dp2.outdoor_temperature - dp.outdoor_temperature
-        cop_diff = dp2.efficiency_cop - dp.efficiency_cop
         if mode == :clg
           eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB }.efficiency_cop
         else
@@ -3063,22 +3060,24 @@ module HVAC
         end
         eir_diff = ((1 / dp2.efficiency_cop) / eir_rated) - ((1 / dp.efficiency_cop) / eir_rated)
         n_pt = (eir_diff.abs / tol).ceil() - 1
-        eir_interval = eir_diff / (n_pt + 1)
         next if n_pt < 1
 
-        for i in 1..n_pt
+        new_cops = []
+        for j in 1..n_pt
           if mode == :clg
             new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
           else
             new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
           end
-          new_eir_normalized = (1 / dp.efficiency_cop) / eir_rated + eir_interval * i
-          new_dp.efficiency_cop = (1 / (new_eir_normalized * eir_rated))
-          new_dp.outdoor_temperature = odb_diff / cop_diff * (new_dp.efficiency_cop - dp.efficiency_cop) + dp.outdoor_temperature
-          new_dp.capacity = cap_diff / odb_diff * (new_dp.outdoor_temperature - dp.outdoor_temperature) + dp.capacity
+          # Interpolate based on net power and capacity per RESNET MINHERS Addendum 82.
+          new_dp.input_power = dp.input_power + Float(j) / (n_pt + 1) * (dp2.input_power - dp.input_power)
+          new_dp.capacity = dp.capacity + Float(j) / (n_pt + 1) * (dp2.capacity - dp.capacity)
+          new_dp.outdoor_temperature = dp.outdoor_temperature + Float(j) / (n_pt + 1) * (dp2.outdoor_temperature - dp.outdoor_temperature)
+          new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
           new_dp.capacity_description = dp.capacity_description
           convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
           data << new_dp
+          new_cops << new_dp.efficiency_cop
         end
       end
     end
