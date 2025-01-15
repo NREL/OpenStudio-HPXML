@@ -3209,20 +3209,30 @@ module Defaults
         vehicle.fraction_charged_home = default_values[:fraction_charged_home]
         vehicle.fraction_charged_home_isdefaulted = true
       end
-      schedules_file_includes_ev_combined = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:EVBattery].name))
-      schedules_file_includes_ev_indiv = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryDischarging].name) && schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryDischarging].name))
-      schedules_file_includes_ev = schedules_file_includes_ev_combined || schedules_file_includes_ev_indiv
+      schedules_file_includes_ev = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryDischarging].name) && schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryDischarging].name))
       if vehicle.ev_charging_weekday_fractions.nil? && !schedules_file_includes_ev
-        vehicle.ev_charging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['WeekdayScheduleFractions']
+        vehicle.ev_charging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekdayScheduleFractions']
         vehicle.ev_charging_weekday_fractions_isdefaulted = true
       end
       if vehicle.ev_charging_weekend_fractions.nil? && !schedules_file_includes_ev
-        vehicle.ev_charging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['WeekendScheduleFractions']
+        vehicle.ev_charging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekendScheduleFractions']
         vehicle.ev_charging_weekend_fractions_isdefaulted = true
       end
       if vehicle.ev_charging_monthly_multipliers.nil? && !schedules_file_includes_ev
-        vehicle.ev_charging_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['MonthlyScheduleMultipliers']
+        vehicle.ev_charging_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['MonthlyScheduleMultipliers']
         vehicle.ev_charging_monthly_multipliers_isdefaulted = true
+      end
+      if vehicle.ev_discharging_weekday_fractions.nil? && !schedules_file_includes_ev
+        vehicle.ev_discharging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['WeekdayScheduleFractions']
+        vehicle.ev_discharging_weekday_fractions_isdefaulted = true
+      end
+      if vehicle.ev_discharging_weekend_fractions.nil? && !schedules_file_includes_ev
+        vehicle.ev_discharging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['WeekendScheduleFractions']
+        vehicle.ev_discharging_weekend_fractions_isdefaulted = true
+      end
+      if vehicle.ev_discharging_monthly_multipliers.nil? && !schedules_file_includes_ev
+        vehicle.ev_discharging_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['MonthlyScheduleMultipliers']
+        vehicle.ev_discharging_monthly_multipliers_isdefaulted = true
       end
       ev_charger = nil
       if not vehicle.ev_charger_idref.nil?
@@ -3974,17 +3984,17 @@ module Defaults
           plug_load.frac_latent = 0.0
           plug_load.frac_latent_isdefaulted = true
         end
-        schedules_file_includes_plug_loads_vehicle = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:EVBattery].name))
+        schedules_file_includes_plug_loads_vehicle = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsVehicle].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['WeekdayScheduleFractions']
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['WeekendScheduleFractions']
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['WeekendScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBattery].name]['MonthlyScheduleMultipliers']
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       when HPXML::PlugLoadTypeWellPump

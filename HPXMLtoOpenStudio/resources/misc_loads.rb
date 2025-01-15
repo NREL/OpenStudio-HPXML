@@ -65,9 +65,7 @@ module MiscLoads
     when HPXML::PlugLoadTypeTelevision
       col_name = SchedulesFile::Columns[:PlugLoadsTV].name
     when HPXML::PlugLoadTypeElectricVehicleCharging
-      col_name = SchedulesFile::Columns[:EVBattery].name
-      plug_load.weekday_fractions, _ = Schedule.split_signed_charging_schedule(plug_load.weekday_fractions) if !plug_load.weekday_fractions.nil?
-      plug_load.weekend_fractions, _ = Schedule.split_signed_charging_schedule(plug_load.weekend_fractions) if !plug_load.weekend_fractions.nil?
+      col_name = SchedulesFile::Columns[:PlugLoadsVehicle].name
     when HPXML::PlugLoadTypeWellPump
       col_name = SchedulesFile::Columns[:PlugLoadsWellPump].name
     end

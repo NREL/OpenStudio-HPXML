@@ -1031,6 +1031,7 @@ class SchedulesFile
     CeilingFan: Column.new('ceiling_fan', true, true, :frac),
     PlugLoadsOther: Column.new('plug_loads_other', true, true, :frac),
     PlugLoadsTV: Column.new('plug_loads_tv', true, true, :frac),
+    PlugLoadsVehicle: Column.new('plug_loads_vehicle', true, false, :frac),
     PlugLoadsWellPump: Column.new('plug_loads_well_pump', true, false, :frac),
     FuelLoadsGrill: Column.new('fuel_loads_grill', true, false, :frac),
     FuelLoadsLighting: Column.new('fuel_loads_lighting', true, false, :frac),
@@ -1052,7 +1053,6 @@ class SchedulesFile
     Battery: Column.new('battery', false, false, :neg_one_to_one),
     BatteryCharging: Column.new('battery_charging', true, false, nil),
     BatteryDischarging: Column.new('battery_discharging', true, false, nil),
-    EVBattery: Column.new('ev_battery', false, false, :neg_one_to_one),
     EVBatteryCharging: Column.new('ev_battery_charging', true, false, nil),
     EVBatteryDischarging: Column.new('ev_battery_discharging', true, false, nil),
     SpaceHeating: Column.new('space_heating', true, false, nil),
@@ -1511,25 +1511,12 @@ class SchedulesFile
     end
   end
 
-  # Assign seperate detailed battery charging and discharging schedules
-  # If charging/discharging columns exist, they will be used as-is.
-  # If a single column (e.g., 'battery' or 'ev_battery') is provided instead, it will be split into two columns based on the sign.
+  # Create separate charging (positive) and discharging (negative) detailed schedules from the home battery schedule.
   #
   # @return [nil]
   def create_battery_charging_discharging_schedules
-    battery_col_hashes = [:Battery, :EVBattery].map do |battery_type|
-      { col: SchedulesFile::Columns[battery_type].name, charging_col: SchedulesFile::Columns[:"#{battery_type}Charging"].name, discharging_col: SchedulesFile::Columns[:"#{battery_type}Discharging"].name }
-    end
-
-    battery_col_hashes.each do |battery_cols|
-      next unless @schedules.keys.include?(battery_cols[:col])
-
-      if @schedules.keys.include?(battery_cols[:charging_col]) && @schedules.keys.include?(battery_cols[:discharging_col])
-        @schedules.delete(battery_cols[:col])
-        next
-      end
-
-      split_signed_column(battery_cols[:col], battery_cols[:charging_col], battery_cols[:discharging_col])
+    if @schedules.keys.include?(SchedulesFile::Columns[:Battery].name)
+      split_signed_column(SchedulesFile::Columns[:Battery].name, SchedulesFile::Columns[:BatteryCharging].name, SchedulesFile::Columns[:BatteryDischarging].name)
     end
   end
 

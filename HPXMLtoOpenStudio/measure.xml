@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b037a307-ab67-4971-9b3b-116d5b731eb6</version_id>
-  <version_modified>2025-01-14T20:21:44Z</version_modified>
+  <version_id>237414e6-f9d9-476f-98dc-f01dc96947b0</version_id>
+  <version_modified>2025-01-15T00:24:48Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -261,7 +261,7 @@
       <filename>data/default_schedules.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>89D66017</checksum>
+      <checksum>E26752D1</checksum>
     </file>
     <file>
       <filename>data/ev_national_average_schedules.csv</filename>
@@ -333,7 +333,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DE14106D</checksum>
+      <checksum>1AD2DEF3</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -363,7 +363,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9CB0E51C</checksum>
+      <checksum>35A66E0B</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -447,7 +447,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DB888D7E</checksum>
+      <checksum>F66475DC</checksum>
     </file>
     <file>
       <filename>model.rb</filename>
@@ -615,7 +615,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CB703FA5</checksum>
+      <checksum>3C3707AD</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -645,7 +645,7 @@
       <filename>vehicle.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E49A8C65</checksum>
+      <checksum>BB253CEA</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
@@ -678,12 +678,6 @@
       <checksum>93120E27</checksum>
     </file>
     <file>
-      <filename>in.schedules.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0074F80E</checksum>
-    </file>
-    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -699,7 +693,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>2C46FF09</checksum>
+      <checksum>76E3B2F2</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -771,7 +765,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>5DB1F814</checksum>
+      <checksum>EB3476DB</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>
