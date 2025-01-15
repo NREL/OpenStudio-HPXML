@@ -6632,16 +6632,22 @@
 			</xs:element>
 			<xs:element minOccurs="0" name="RatedTotalSpaces" type="IntegerGreaterThanZero"/>
 			<xs:element minOccurs="0" name="BranchCircuits">
+				<xs:annotation>
+					<xs:documentation>FIXME</xs:documentation>
+				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" minOccurs="1" name="BranchCircuit" type="BranchCircuitType"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element minOccurs="0" name="DemandLoads">
+			<xs:element minOccurs="0" name="ServiceFeeders">
+				<xs:annotation>
+					<xs:documentation>FIXME</xs:documentation>
+				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element maxOccurs="unbounded" minOccurs="1" name="DemandLoad" type="DemandLoadType"/>
+						<xs:element maxOccurs="unbounded" minOccurs="1" name="ServiceFeeder" type="ServiceFeederType"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
@@ -6658,7 +6664,11 @@
 					<xs:documentation>[A]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="OccupiedSpaces" type="BranchCircuitOccupiedSpaces"/>
+			<xs:element minOccurs="0" name="OccupiedSpaces" type="BranchCircuitOccupiedSpaces">
+				<xs:annotation>
+					<xs:documentation>Number of occupied breaker spaces.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element minOccurs="0" name="AttachedToComponent" type="LocalReference" maxOccurs="unbounded"/>
 			<xs:element minOccurs="0" name="AttachedToElectricPanel" type="LocalReference">
 				<xs:annotation>
@@ -6668,7 +6678,7 @@
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
-	<xs:complexType name="DemandLoadType">
+	<xs:complexType name="ServiceFeederType">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
 			<xs:element minOccurs="0" name="LoadType" type="DemandLoadLoadType"/>
@@ -6677,7 +6687,12 @@
 					<xs:documentation>[W]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="IsNewLoad" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="IsNewLoad" type="HPXMLBoolean">
+				<xs:annotation>
+					<xs:documentation>In the context of an NEC calculation, whether the load is an addition or not.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="NumberofAppliances" type="IntegerGreaterThanOrEqualToZero"/>
 			<xs:element minOccurs="0" name="AttachedToComponent" type="LocalReference" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>

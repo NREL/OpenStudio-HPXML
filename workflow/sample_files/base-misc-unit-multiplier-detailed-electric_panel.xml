@@ -11,10 +11,12 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <ElectricPanelCalculations>
-        <Type>2023 Load-Based</Type>
-        <Type>2023 Meter-Based</Type>
-      </ElectricPanelCalculations>
+      <ElectricPanelLoadCalculations>
+        <ServiceFeeders>
+          <Type>2023 Existing Dwelling Load-Based</Type>
+          <Type>2023 Existing Dwelling Meter-Based</Type>
+        </ServiceFeeders>
+      </ElectricPanelLoadCalculations>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
@@ -435,38 +437,38 @@
         <ElectricPanels>
           <ElectricPanel>
             <SystemIdentifier id='ElectricPanel1'/>
-            <DemandLoads>
-              <DemandLoad>
-                <SystemIdentifier id='ElectricPanel1_DemandLoad1'/>
+            <ServiceFeeders>
+              <ServiceFeeder>
+                <SystemIdentifier id='ElectricPanel1_ServiceFeeder1'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1'/>
-              </DemandLoad>
-              <DemandLoad>
-                <SystemIdentifier id='ElectricPanel1_DemandLoad2'/>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ElectricPanel1_ServiceFeeder2'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1'/>
-              </DemandLoad>
-              <DemandLoad>
-                <SystemIdentifier id='ElectricPanel1_DemandLoad3'/>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ElectricPanel1_ServiceFeeder3'/>
                 <LoadType>hot water</LoadType>
                 <AttachedToComponent idref='WaterHeatingSystem1'/>
-              </DemandLoad>
-              <DemandLoad>
-                <SystemIdentifier id='ElectricPanel1_DemandLoad4'/>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ElectricPanel1_ServiceFeeder4'/>
                 <LoadType>clothes dryer</LoadType>
                 <AttachedToComponent idref='ClothesDryer1'/>
-              </DemandLoad>
-              <DemandLoad>
-                <SystemIdentifier id='ElectricPanel1_DemandLoad5'/>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ElectricPanel1_ServiceFeeder5'/>
                 <LoadType>dishwasher</LoadType>
                 <AttachedToComponent idref='Dishwasher1'/>
-              </DemandLoad>
-              <DemandLoad>
-                <SystemIdentifier id='ElectricPanel1_DemandLoad6'/>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ElectricPanel1_ServiceFeeder6'/>
                 <LoadType>range/oven</LoadType>
                 <AttachedToComponent idref='CookingRange1'/>
-              </DemandLoad>
-            </DemandLoads>
+              </ServiceFeeder>
+            </ServiceFeeders>
           </ElectricPanel>
         </ElectricPanels>
       </Systems>

@@ -115,14 +115,8 @@ class HPXML < Object
   DuctTypeSupply = 'supply'
   DWHRFacilitiesConnectedAll = 'all'
   DWHRFacilitiesConnectedOne = 'one'
-  ElectricPanelLoadCalculationBuildingTypeDwellingUnit = 'dwelling unit'
-  # ElectricPanelLoadCalculationBuildingTypeWholeBuilding = 'whole building'
-  ElectricPanelLoadCalculationDemandLoadTypeServiceFeeder = 'service / feeder'
-  # ElectricPanelLoadCalculationDemandLoadTypeBranchCircuit = 'branch circuit'
-  ElectricPanelLoadCalculationType2023LoadBased = '2023 Load-Based'
-  ElectricPanelLoadCalculationType2023MeterBased = '2023 Meter-Based'
-  # ElectricPanelLoadCalculationType2026LoadBased = '2026 Load-Based'
-  # ElectricPanelLoadCalculationType2026MeterBased = '2026 Meter-Based'
+  ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased = '2023 Existing Dwelling Load-Based'
+  ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased = '2023 Existing Dwelling Meter-Based'
   ElectricPanelLoadTypeHeating = 'heating'
   ElectricPanelLoadTypeCooling = 'cooling'
   ElectricPanelLoadTypeWaterHeater = 'hot water'
@@ -917,9 +911,7 @@ class HPXML < Object
              :defrost_model_type,                          # [String] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/DefrostModelType (HPXML::AdvancedResearchDefrostModelTypeXXX)
              :hvac_onoff_thermostat_deadband,              # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature (F)
              :heat_pump_backup_heating_capacity_increment, # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement (Btu/hr)
-             :electric_panel_calculations_building_type,   # [String] SoftwareInfo/extension/ElectricPanelCalculations/BuildingType
-             :electric_panel_calculations_demand_load_type, # [String] SoftwareInfo/extension/ElectricPanelCalculations/DemandLoadType
-             :electric_panel_calculations_types] # [Array<String>] SoftwareInfo/extension/ElectricPanelCalculations/Type
+             :service_feeders_load_calculation_types]      # [Array<String>] SoftwareInfo/extension/ElectricPanelLoadCalculations/ServiceFeeders/Type
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
@@ -996,13 +988,12 @@ class HPXML < Object
           XMLHelper.add_element(advanced_research_features, 'HeatPumpBackupCapacityIncrement', @heat_pump_backup_heating_capacity_increment, :float, @heat_pump_backup_heating_capacity_increment_isdefaulted) unless @heat_pump_backup_heating_capacity_increment.nil?
         end
       end
-      if (not @electric_panel_calculations_building_type.nil?) || (not @electric_panel_calculations_demand_load_type.nil?) || (not @electric_panel_calculations_types.nil?) && (not @electric_panel_calculations_types.empty?)
+      if (not @service_feeders_load_calculation_types.nil?) && (not @service_feeders_load_calculation_types.empty?)
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-        electric_panel_calculations = XMLHelper.add_element(extension, 'ElectricPanelCalculations')
-        XMLHelper.add_element(electric_panel_calculations, 'BuildingType', @electric_panel_calculations_building_type, :string, @electric_panel_calculations_building_type_isdefaulted) unless @electric_panel_calculations_building_type.nil?
-        XMLHelper.add_element(electric_panel_calculations, 'DemandLoadType', electric_panel_calculations_demand_load_type, :string, @electric_panel_calculations_demand_load_type_isdefaulted) unless @electric_panel_calculations_demand_load_type.nil?
-        @electric_panel_calculations_types.each do |electric_panel_calculations_type|
-          XMLHelper.add_element(electric_panel_calculations, 'Type', electric_panel_calculations_type, :string)
+        electric_panel_load_calculations = XMLHelper.create_elements_as_needed(extension, ['ElectricPanelLoadCalculations'])
+        service_feeders = XMLHelper.add_element(electric_panel_load_calculations, 'ServiceFeeders')
+        @service_feeders_load_calculation_types.each do |service_feeders_load_calculation_type|
+          XMLHelper.add_element(service_feeders, 'Type', service_feeders_load_calculation_type, :string)
         end
       end
       @emissions_scenarios.to_doc(hpxml)
@@ -1040,9 +1031,7 @@ class HPXML < Object
       @heat_pump_backup_heating_capacity_increment = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
-      @electric_panel_calculations_building_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ElectricPanelCalculations/BuildingType', :string)
-      @electric_panel_calculations_demand_load_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ElectricPanelCalculations/DemandLoadType', :string)
-      @electric_panel_calculations_types = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/ElectricPanelCalculations/Type', :string)
+      @service_feeders_load_calculation_types = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/ElectricPanelLoadCalculations/ServiceFeeders/Type', :string)
       @emissions_scenarios.from_doc(hpxml)
       @utility_bill_scenarios.from_doc(hpxml)
       @unavailable_periods.from_doc(hpxml)
@@ -6444,15 +6433,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -6786,15 +6775,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -7150,15 +7139,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -8346,15 +8335,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -8750,15 +8739,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeder
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -9529,11 +9518,11 @@ class HPXML < Object
   class ElectricPanel < BaseElement
     def initialize(hpxml_element, *args, **kwargs)
       @branch_circuits = BranchCircuits.new(hpxml_element)
-      @demand_loads = DemandLoads.new(hpxml_element)
+      @service_feeders = ServiceFeeders.new(hpxml_element)
       super(hpxml_element, *args, **kwargs)
     end
     CLASS_ATTRS = [:branch_circuits,
-                   :demand_loads]
+                   :service_feeders]
     ATTRS = [:id,                      # [String] SystemIdentifier/@id
              :voltage,                 # [String] Voltage
              :max_current_rating,      # [Double] MaxCurrentRating
@@ -9577,7 +9566,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       errors += @branch_circuits.check_for_errors
-      errors += @demand_loads.check_for_errors
+      errors += @service_feeders.check_for_errors
       return errors
     end
 
@@ -9597,7 +9586,7 @@ class HPXML < Object
       XMLHelper.add_element(electric_panel, 'Headroom', @headroom, :integer, @headroom_isdefaulted) unless @headroom.nil?
       XMLHelper.add_element(electric_panel, 'RatedTotalSpaces', @rated_total_spaces, :integer, @rated_total_spaces_isdefaulted) unless @rated_total_spaces.nil?
       @branch_circuits.to_doc(electric_panel)
-      @demand_loads.to_doc(electric_panel)
+      @service_feeders.to_doc(electric_panel)
       if (not @capacity_types.nil?) && (not @capacity_types.empty?)
         outputs = XMLHelper.create_elements_as_needed(electric_panel, ['extension', 'Outputs'])
         XMLHelper.add_attribute(outputs, 'dataSource', 'software')
@@ -9634,7 +9623,7 @@ class HPXML < Object
       @headroom = XMLHelper.get_value(electric_panel, 'Headroom', :integer)
       @rated_total_spaces = XMLHelper.get_value(electric_panel, 'RatedTotalSpaces', :integer)
       @branch_circuits.from_doc(electric_panel)
-      @demand_loads.from_doc(electric_panel)
+      @service_feeders.from_doc(electric_panel)
       @capacity_types = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/Type', :string)
       @capacity_total_watts = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/TotalWatts', :float)
       @capacity_total_amps = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/TotalAmps', :float)
@@ -9780,13 +9769,13 @@ class HPXML < Object
     end
   end
 
-  # Array of HPXML::DemandLoad objects.
-  class DemandLoads < BaseArrayElement
+  # Array of HPXML::ServiceFeeder objects.
+  class ServiceFeeders < BaseArrayElement
     # Adds a new object, with the specified keyword arguments, to the array.
     #
     # @return [nil]
     def add(**kwargs)
-      self << DemandLoad.new(@parent_object, **kwargs)
+      self << ServiceFeeder.new(@parent_object, **kwargs)
     end
 
     # Populates the HPXML object(s) from the XML document.
@@ -9796,14 +9785,14 @@ class HPXML < Object
     def from_doc(electric_panel)
       return if electric_panel.nil?
 
-      XMLHelper.get_elements(electric_panel, 'DemandLoads/DemandLoad').each do |demand_load|
-        self << DemandLoad.new(@parent_object, demand_load)
+      XMLHelper.get_elements(electric_panel, 'ServiceFeeders/ServiceFeeder').each do |service_feeder|
+        self << ServiceFeeder.new(@parent_object, service_feeder)
       end
     end
   end
 
-  # Object for /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/DemandLoads/DemandLoad.
-  class DemandLoad < BaseElement
+  # Object for /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder.
+  class ServiceFeeder < BaseElement
     ATTRS = [:id, # [String] SystemIdentifier/@id
              :type,           # [String] LoadType
              :power,          # [Double] PowerRating
@@ -9888,7 +9877,7 @@ class HPXML < Object
     # @return [nil]
     def delete
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.delete(self)
+        electric_panel.service_feeders.delete(self)
       end
     end
 
@@ -9908,16 +9897,16 @@ class HPXML < Object
     def to_doc(electric_panel)
       return if nil?
 
-      demand_loads = XMLHelper.create_elements_as_needed(electric_panel, ['DemandLoads'])
-      demand_load = XMLHelper.add_element(demand_loads, 'DemandLoad')
-      sys_id = XMLHelper.add_element(demand_load, 'SystemIdentifier')
+      service_feeders = XMLHelper.create_elements_as_needed(electric_panel, ['ServiceFeeders'])
+      service_feeder = XMLHelper.add_element(service_feeders, 'ServiceFeeder')
+      sys_id = XMLHelper.add_element(service_feeder, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(demand_load, 'LoadType', @type, :string, @type_isdefaulted) unless @type.nil?
-      XMLHelper.add_element(demand_load, 'PowerRating', @power, :float, @power_isdefaulted) unless @power.nil?
-      XMLHelper.add_element(demand_load, 'IsNewLoad', @is_new_load, :boolean, @is_new_load_isdefaulted) unless @is_new_load.nil?
+      XMLHelper.add_element(service_feeder, 'LoadType', @type, :string, @type_isdefaulted) unless @type.nil?
+      XMLHelper.add_element(service_feeder, 'PowerRating', @power, :float, @power_isdefaulted) unless @power.nil?
+      XMLHelper.add_element(service_feeder, 'IsNewLoad', @is_new_load, :boolean, @is_new_load_isdefaulted) unless @is_new_load.nil?
       if (not @component_idrefs.nil?) && (not @component_idrefs.empty?)
         @component_idrefs.each do |component_idref|
-          component = XMLHelper.add_element(demand_load, 'AttachedToComponent')
+          component = XMLHelper.add_element(service_feeder, 'AttachedToComponent')
           XMLHelper.add_attribute(component, 'idref', component_idref)
           XMLHelper.add_attribute(component, 'dataSource', 'software') if @component_idrefs_isdefaulted
         end
@@ -9926,16 +9915,16 @@ class HPXML < Object
 
     # Populates the HPXML object(s) from the XML document.
     #
-    # @param demand_load [Oga::XML::Element] The current DemandLoad XML element
+    # @param service_feeder [Oga::XML::Element] The current ServiceFeeder XML element
     # @return [nil]
-    def from_doc(demand_load)
-      return if demand_load.nil?
+    def from_doc(service_feeder)
+      return if service_feeder.nil?
 
-      @id = HPXML::get_id(demand_load)
-      @type = XMLHelper.get_value(demand_load, 'LoadType', :string)
-      @power = XMLHelper.get_value(demand_load, 'PowerRating', :float)
-      @is_new_load = XMLHelper.get_value(demand_load, 'IsNewLoad', :boolean)
-      @component_idrefs = HPXML::get_idrefs(demand_load, 'AttachedToComponent')
+      @id = HPXML::get_id(service_feeder)
+      @type = XMLHelper.get_value(service_feeder, 'LoadType', :string)
+      @power = XMLHelper.get_value(service_feeder, 'PowerRating', :float)
+      @is_new_load = XMLHelper.get_value(service_feeder, 'IsNewLoad', :boolean)
+      @component_idrefs = HPXML::get_idrefs(service_feeder, 'AttachedToComponent')
     end
   end
 
@@ -10351,15 +10340,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -10496,15 +10485,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -10940,15 +10929,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -11418,15 +11407,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def pump_demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def pump_service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@pump_id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@pump_id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -11454,15 +11443,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def heater_demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def heater_service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@heater_id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@heater_id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -11634,15 +11623,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def pump_demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def pump_service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@pump_id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@pump_id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -11670,15 +11659,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def heater_demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def heater_service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@heater_id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@heater_id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 
@@ -11906,15 +11895,15 @@ class HPXML < Object
 
     # Returns any demand loads that the component may be attached to.
     #
-    # @return [Array<HPXML::DemandLoad>] List of demand load objects
-    def demand_loads
+    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.demand_loads.each do |demand_load|
-          next if demand_load.component_idrefs.empty?
-          next unless demand_load.component_idrefs.include?(@id)
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
 
-          list << demand_load
+          list << service_feeder
         end
       end
 

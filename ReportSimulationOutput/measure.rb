@@ -133,7 +133,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_panel_summary', false)
     arg.setDisplayName('Generate Annual Output: Electric Panel Summary')
-    arg.setDescription('Generates electric panel loads, capacities, and breaker spaces.')
+    arg.setDescription('Generates electric panel calculated loads.')
     arg.setDefaultValue(true)
     args << arg
 
