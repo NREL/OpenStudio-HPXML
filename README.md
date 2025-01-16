@@ -48,6 +48,7 @@ This repository contains several OpenStudio measures:
 OpenStudio-HPXML is used by a number of software products or organizations, including:
 
 - [BEopt](https://beopt.nrel.gov)
+- [Clarity Heat Pump Toolkit](https://psdconsulting.com/solutions/)
 - [Energy Rating Index (ERI)](https://github.com/NREL/OpenStudio-ERI)
 - [Home Energy Score](https://www.homeenergyscore.gov)
 - [OptiMiser](https://optimiserenergy.com)

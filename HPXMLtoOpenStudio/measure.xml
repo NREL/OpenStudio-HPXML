@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5c0b6313-0c89-4943-99cf-f9e2e85a45e6</version_id>
-  <version_modified>2025-01-10T20:25:12Z</version_modified>
+  <version_id>d18a84bf-1334-4af0-b413-afcb12d9ef73</version_id>
+  <version_modified>2025-01-16T23:01:25Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B338E6CD</checksum>
+      <checksum>7B9BE6BF</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
