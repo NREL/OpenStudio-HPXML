@@ -2664,9 +2664,8 @@ if ARGV[0].to_sym == :update_measures
   # This will ensure that the BuildResidentialHPXML measure.xml is appropriately updated.
   # Without this, the BuildResidentialHPXML measure has no differences and so OpenStudio
   # would skip updating it.
-  version_rb_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/version.rb')
   version_txt_path = File.join(File.dirname(__FILE__), 'BuildResidentialHPXML/resources/version.txt')
-  File.write(version_txt_path, Digest::MD5.file(version_rb_path).hexdigest)
+  File.write(version_txt_path, Digest::MD5.hexdigest(Version::OS_HPXML_Version))
 
   # Update measures XMLs
   puts 'Updating measure.xmls...'
