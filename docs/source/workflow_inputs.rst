@@ -387,6 +387,8 @@ If not entered, electric panel loads will not be calculated.
 
          If running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling" calculation types, load calculations will be performed on each individual dwelling unit and then summed across units of the building.
 
+See :ref:`panel_outputs` for descriptions of how calculated loads appear in the output files.
+
 .. _hpxml_building:
 
 HPXML Building
@@ -4628,7 +4630,7 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] See :ref:`branch_circuits`.
   .. [#] See :ref:`service_feeders`.
 
-See :ref:`annual_outputs` for descriptions of how the calculated capacities and breaker spaces appear in the output files.
+See :ref:`panel_outputs` for descriptions of how breaker spaces and calculated loads appear in the output files.
 
 .. _branch_circuits:
 
