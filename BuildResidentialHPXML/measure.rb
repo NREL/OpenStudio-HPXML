@@ -7147,7 +7147,8 @@ module HPXMLFile
   # Set the electric panel properties, including:
   # - service voltage
   # - max current service rating
-  # - individual panel loads
+  # - individual branch circuits
+  # - individual service feeders
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value

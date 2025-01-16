@@ -6431,9 +6431,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -6773,9 +6773,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -7137,9 +7137,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -8333,9 +8333,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -8737,9 +8737,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -9658,15 +9658,15 @@ class HPXML < Object
 
   # Object for /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/BranchCircuits/BranchCircuit.
   class BranchCircuit < BaseElement
-    ATTRS = [:id, # [String] SystemIdentifier/@id
-             :voltage, # [String] Voltage
+    ATTRS = [:id,                 # [String] SystemIdentifier/@id
+             :voltage,            # [String] Voltage
              :max_current_rating, # [Double] MaxCurrentRating
-             :occupied_spaces, # [Integer] OccupiedSpaces
-             :component_idrefs, # [Array<String>] AttachedToComponent/@idref
-             :panel_idref] # [String] AttachedToElectricPanel/@idref
+             :occupied_spaces,    # [Integer] OccupiedSpaces
+             :component_idrefs,   # [Array<String>] AttachedToComponent/@idref
+             :panel_idref]        # [String] AttachedToElectricPanel/@idref
     attr_accessor(*ATTRS)
 
-    # Returns the components attached to the demand load.
+    # Returns the components attached to the branch circuit.
     #
     # @return [Array<HPXML::XXX>] The attached components
     def components
@@ -9793,14 +9793,14 @@ class HPXML < Object
 
   # Object for /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder.
   class ServiceFeeder < BaseElement
-    ATTRS = [:id, # [String] SystemIdentifier/@id
-             :type,           # [String] LoadType
-             :power,          # [Double] PowerRating
+    ATTRS = [:id,                # [String] SystemIdentifier/@id
+             :type,              # [String] LoadType
+             :power,             # [Double] PowerRating
              :is_new_load,       # [Boolean] IsNewLoad
              :component_idrefs]  # [Array<String>] AttachedToComponent/@idref
     attr_accessor(*ATTRS)
 
-    # Returns the components attached to the demand load.
+    # Returns the components attached to the service feeder.
     #
     # @return [Array<HPXML::XXX>] The attached components
     def components
@@ -9822,51 +9822,51 @@ class HPXML < Object
       plug_load_vehicles = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) && plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
 
       if !heating_systems.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating].include?(@type)
       end
       if !cooling_systems.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeCooling].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeCooling].include?(@type)
       end
       if !heat_pumps.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
       end
       if !water_heating_systems.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeWaterHeater].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeWaterHeater].include?(@type)
       end
       if !clothes_dryers.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeClothesDryer].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeClothesDryer].include?(@type)
       end
       if !dishwashers.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeDishwasher].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeDishwasher].include?(@type)
       end
       if !cooking_ranges.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeRangeOven].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeRangeOven].include?(@type)
       end
       if !ventilation_fans.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeMechVent].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeMechVent].include?(@type)
       end
       if !permanent_spa_pumps.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypePermanentSpaPump].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypePermanentSpaPump].include?(@type)
       end
       if !permanent_spa_heaters.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypePermanentSpaHeater].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypePermanentSpaHeater].include?(@type)
       end
       if !pool_pumps.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypePoolPump].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypePoolPump].include?(@type)
       end
       if !pool_heaters.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypePoolHeater].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypePoolHeater].include?(@type)
       end
       if !plug_load_well_pumps.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeWellPump].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeWellPump].include?(@type)
       end
       if !plug_load_vehicles.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for demand load '#{@id}'" if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
       end
 
       list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles
       if @component_idrefs.size > list.size
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for demand load '#{@id}'."
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for service feeder '#{@id}'."
       end
 
       return list
@@ -10338,9 +10338,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -10483,9 +10483,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -10927,9 +10927,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -11405,9 +11405,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def pump_service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -11441,9 +11441,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def heater_service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -11621,9 +11621,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def pump_service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -11657,9 +11657,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def heater_service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
@@ -11893,9 +11893,9 @@ class HPXML < Object
       return
     end
 
-    # Returns any demand loads that the component may be attached to.
+    # Returns any service feeders that the component may be attached to.
     #
-    # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|

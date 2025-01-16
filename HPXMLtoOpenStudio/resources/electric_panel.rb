@@ -7,7 +7,6 @@ module ElectricPanel
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
-  # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports load-based capacities and breaker spaces
   # @return [nil]
   def self.calculate(hpxml_header, hpxml_bldg, electric_panel)
     capacity_types = []
@@ -38,10 +37,10 @@ module ElectricPanel
     electric_panel.breaker_spaces_headroom = breaker_spaces_values.BreakerSpaces_HeadRoom
   end
 
-  # Get the heating system attached to the given panel load.
+  # Get the heating system attached to the given service feeder.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param [HPXML::PanelLoad] Object that defines a single electric panel load
+  # @param [HPXML::ServiceFeeder] Object that defines a single electric panel service feeder
   # @return [HPXML::HeatingSystem] The heating system referenced by the panel load
   def self.get_panel_load_heating_system(hpxml_bldg, service_feeder)
     hpxml_bldg.heating_systems.each do |heating_system|
@@ -52,10 +51,10 @@ module ElectricPanel
     return
   end
 
-  # Get the heat pump attached to the given panel load.
+  # Get the heat pump attached to the given service feeder.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param [HPXML::PanelLoad] Object that defines a single electric panel load
+  # @param [HPXML::ServiceFeeder] Object that defines a single electric panel service feeder
   # @return [HPXML::HeatPump] The heat pump referenced by the panel load
   def self.get_panel_load_heat_pump(hpxml_bldg, service_feeder)
     hpxml_bldg.heat_pumps.each do |heat_pump|
@@ -74,7 +73,7 @@ module ElectricPanel
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
   # @param addition [nil or Boolean] Whether we are getting all, existing, or new heating loads
-  # @return [Double] The electric panel's
+  # @return [Double] The electric panel's heating load (W)
   def self.get_panel_load_heating(hpxml_bldg, electric_panel, addition: nil)
     htg = 0.0
     electric_panel.service_feeders.each do |service_feeder|
@@ -125,7 +124,8 @@ module ElectricPanel
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
-  # @param service_feeders [Array<HPXML::ServiceFeeder>] List of panel load objects
+  # @param service_feeders [Array<HPXML::ServiceFeeder>] List of service feeder objects
+  # @param service_feeders_load_calculation_type [String] the load calculation type
   # @return [nil]
   def self.calculate_load_based(hpxml_bldg, electric_panel, service_feeders, service_feeders_load_calculation_type)
     if service_feeders_load_calculation_type == HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased
@@ -158,12 +158,12 @@ module ElectricPanel
     end
   end
 
-  # TODO
+  # Get the discounted load given the total load, threshold, and demand factor.
   #
   # @param [Double] load (W)
   # @param [Double] threshold (W)
   # @param [Double] demand factor (frac)
-  # @return [Double] TODO
+  # @return [Double] the discounted load (W)
   def self.discount_load(load, threshold, demand_factor)
     return 1.0 * [threshold, load].min + demand_factor * [0, load - threshold].max
   end
@@ -173,6 +173,7 @@ module ElectricPanel
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
   # @param peak_fuels [Hash] Map of peak building electricity outputs
+  # @param service_feeders_load_calculation_type [String] the load calculation type
   # @return [Array<Double, Double, Double>] The capacity (W), the capacity (A), and headroom (A)
   def self.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, service_feeders_load_calculation_typ)
     if service_feeders_load_calculation_typ == HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased
@@ -196,7 +197,7 @@ module ElectricPanel
   # Calculate the number of panel breaker spaces corresponding to total, occupied, and headroom.
   #
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
-  # @param [Array<HPXML::PanelLoad>] List of panel load objects
+  # @param [Array<HPXML::ServiceFeeder>] List of service feeder objects
   # @return [nil]
   def self.calculate_breaker_spaces(electric_panel, service_feeders)
     occupied = electric_panel.branch_circuits.map { |branch_circuit| branch_circuit.occupied_spaces }.sum(0.0)
@@ -212,7 +213,7 @@ module ElectricPanel
   end
 end
 
-# Object with calculated panel load capacity
+# Object with calculated load
 class LoadBasedCapacityValues
   LOADBASED_ATTRS = [:LoadBased_CapacityW,
                      :LoadBased_CapacityA,

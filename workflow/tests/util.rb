@@ -46,9 +46,6 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
       elsif hpxml_bldg.heat_pumps.count { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir } > 0
         # FUTURE: GSHPs currently don't give desired results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-      elsif hpxml.header.electric_panel_calculations_types.size > 0
-        # FUTURE: Electric panel load calculations currently don't work with whole SFA/MF buildings
-        return
       elsif hpxml_bldg.batteries.size > 0
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
@@ -1104,7 +1101,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
       abs_frac_tol = nil
-    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:') || key.include?('Electric Panel Load:') || key.include?('Electric Panel Capacity: Load-Based') || key.include?('Electric Panel Breaker Spaces:')
+    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:') || key.include?('Electric Panel Load:') || key.include?('Electric Panel Breaker Spaces:')
       # Check that there is no difference
       abs_delta_tol = 0
       abs_frac_tol = nil
@@ -1127,8 +1124,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
    'Temperature:',
    'Utility Bills:',
    'HVAC Zone Design Load:',
-   'HVAC Space Design Load:',
-   'Electric Panel Capacity: Meter-Based'].each do |key|
+   'HVAC Space Design Load:'].each do |key|
     annual_results_1x.delete_if { |k, _v| k.start_with? key }
     annual_results_10x.delete_if { |k, _v| k.start_with? key }
     monthly_results_1x.delete_if { |k, _v| k.start_with? key }

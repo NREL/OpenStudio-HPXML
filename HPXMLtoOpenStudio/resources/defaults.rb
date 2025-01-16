@@ -3164,9 +3164,9 @@ module Defaults
 
   # Assigns default values for omitted optional inputs in the HPXML::ElectricPanel objects.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param unit_num [Integer] Dwelling unit number
-  # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports panel loads/capacities
   # @return [nil]
   def self.apply_electric_panels(runner, hpxml_header, hpxml_bldg)
     default_panels_csv_data = get_panels_csv_data()
@@ -3393,14 +3393,14 @@ module Defaults
         end
       end
 
-      service_feeders.each do |demand_load|
-        if demand_load.power.nil?
-          demand_load.power = get_demand_load_power_default_values(runner, hpxml_bldg, demand_load, default_panels_csv_data)
-          demand_load.power_isdefaulted = true
+      service_feeders.each do |service_feeder|
+        if service_feeder.power.nil?
+          service_feeder.power = get_service_feeder_power_default_values(runner, hpxml_bldg, service_feeder, default_panels_csv_data)
+          service_feeder.power_isdefaulted = true
         end
-        if demand_load.is_new_load.nil?
-          demand_load.is_new_load = false
-          demand_load.is_new_load_isdefaulted = true
+        if service_feeder.is_new_load.nil?
+          service_feeder.is_new_load = false
+          service_feeder.is_new_load_isdefaulted = true
         end
       end
 
@@ -5886,6 +5886,7 @@ module Defaults
   #
   # @param watts [Double] power rating (W)
   # @param voltage [String] '120' or '240'
+  # @param max_amps [Double] maximum amperage (A)
   # @return [Integer] the number of breaker spaces
   def self.get_breaker_spaces_from_power_watts_and_voltage(watts, voltage, max_amps = 50)
     return 0 if watts == 0
@@ -5907,10 +5908,9 @@ module Defaults
              headroom: 3 }
   end
 
-  # Gets the default voltage for a panel load based on load type and attached system.
+  # Gets the default voltage for a branch circuit based on attached component.
   #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param panel_load [HPXML::PanelLoad] Object that defines a single electric panel load
+  # @param branch_circuit [HPXML::BranchCircuit] Object that defines a single electric panel branch circuit
   # @return [String] '120' or '240'
   def self.get_branch_circuit_voltage_default_values(branch_circuit)
     branch_circuit.components.each do |component|
@@ -5934,13 +5934,16 @@ module Defaults
     return HPXML::ElectricPanelVoltage120
   end
 
-  # TODO
+  # Gets the default max amps for a branch circuit based on voltage.
+  #
+  # @param branch_circuit [HPXML::BranchCircuit] Object that defines a single electric panel branch circuit
+  # @return [Double] maximum amperage
   def self.get_branch_circuit_amps_default_values(branch_circuit)
     if branch_circuit.voltage == HPXML::ElectricPanelVoltage120
-      return 20
+      return 20.0
     end
 
-    return 50
+    return 50.0
   end
 
   # Gets the default power rating capacity for each panel load.
@@ -5978,9 +5981,10 @@ module Defaults
   #  - Breaker Spaces: recalculate using the specified Voltage classification
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @return [Hash] { load_name => { voltage => power_rating, ... }, ... }
+  # @param default_panels_csv_data [Hash] { load_name => { voltage => power_rating, ... }, ... }
   # @param load_name [String] load name specified in default_panels.csv
   # @param voltage [String] '120' or '240'
+  # @param amps [Double] maximum amperage
   # @param column [String] 'PowerRating' or 'BreakerSpaces'
   # @param watts [Double] power rating (W)
   # @return [Double or Integer] power rating or number of breaker spaces
@@ -6008,15 +6012,16 @@ module Defaults
     end
   end
 
-  # Gets the default power rating for a panel load based on load type, voltage, and attached systems.
+  # Gets the default power rating for a service feeder based on load type, voltage, amps, and attached components.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param panel_load [HPXML::PanelLoad] Object that defines a single electric panel load
-  # @return [Hash] Map of property type => value
-  def self.get_demand_load_power_default_values(runner, hpxml_bldg, demand_load, default_panels_csv_data)
-    type = demand_load.type
-    component_ids = demand_load.component_idrefs
+  # @param service_feeder [HPXML::ServiceFeeder] Object that defines a single electric panel service feeder
+  # @param default_panels_csv_data [Hash] { load_name => { voltage => power_rating, ... }, ... }
+  # @return [Double] power rating (W)
+  def self.get_service_feeder_power_default_values(runner, hpxml_bldg, service_feeder, default_panels_csv_data)
+    type = service_feeder.type
+    component_ids = service_feeder.component_idrefs
 
     watts = 0
 
@@ -6206,11 +6211,13 @@ module Defaults
     return watts.round
   end
 
-  # Gets the default breaker spaces for a panel load based on load type, power rating, voltage, and attached systems.
+  # Gets the default breaker spaces for a branch circuit based on power rating, voltage, amps, and attached components.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param panel_load [HPXML::PanelLoad] Object that defines a single electric panel load
-  # @return [Hash] Map of property type => value
+  # @param branch_circuit [HPXML::BranchCircuit] Object that defines a single electric panel branch circuit
+  # @param default_panels_csv_data [Hash] { load_name => { voltage => power_rating, ... }, ... }
+  # @return [Integer] number of breaker spaces
   def self.get_branch_circuit_occupied_spaces_default_values(runner, hpxml_bldg, branch_circuit, default_panels_csv_data)
     voltage = branch_circuit.voltage
     amps = branch_circuit.max_current_rating
