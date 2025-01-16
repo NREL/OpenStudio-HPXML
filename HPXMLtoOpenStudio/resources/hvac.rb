@@ -2836,7 +2836,6 @@ module HVAC
       end
     end
 
-    # convert net to gross, adds more data points for table lookup, etc.
     if mode == :clg
       cfm_per_ton = hvac_ap.cool_rated_cfm_per_ton
       hvac_ap.cooling_performance_data_array = data_array
@@ -2874,8 +2873,13 @@ module HVAC
     dp.gross_input_power = dp.gross_capacity / dp.gross_efficiency_cop # Btu/hr
   end
 
-  # Adds additional detailed data points at the min/max outdoor temperatures that cover the
-  # full range of equipment operation.
+  # Extrapolate data points at the min/max outdoor drybulb temperatures to cover the full range of
+  # equipment operation. Extrapolates net capacity and input power per RESNET MINHERS Addendum 82:
+  # - Cooling, Min ODB: Linear from 82F and 95F, but no less than 50% power of the 82F value
+  # - Cooling, Max ODB: Linear from 82F and 95F
+  # - Heating, Min ODB: Linear from lowest two temperatures
+  # - Heating, Max ODB: Constant (same values as 47F)
+
   #
   # @param data_array [TODO] TODO
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
@@ -2888,49 +2892,53 @@ module HVAC
   def self.extrapolate_data_points(data_array, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     # Set of data used for table lookup
     data_array.each_with_index do |data, speed|
+      capacity_description = data[0].capacity_description
       user_odbs = data.map { |dp| dp.outdoor_temperature }
 
-      # Calculate gross values to determine min/max ODB temperatures next
+      # Calculate gross values for all datapoints
       data.each do |dp|
         convert_data_point_net_to_gross(dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
       end
 
-      # Determine min/max ODB temperatures to cover full range of equipment operation
+      # Ensure we don't create datapoints at ODB temperatures with zero/negative gross capacities or powers
+      delta_odb = 1.0 # Use a slightly larger (or smaller) ODB so things don't blow up
+      high_odb_at_zero_power = extrapolate_data_point(data, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :negative) - delta_odb
+      high_odb_at_zero_capacity = extrapolate_data_point(data, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :negative) - delta_odb
+      low_odb_at_zero_power = extrapolate_data_point(data, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :positive) + delta_odb
+      low_odb_at_zero_capacity = extrapolate_data_point(data, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :positive) + delta_odb
+
+      # Determine min/max ODB temperatures to extrapolate to, to cover full range of equipment operation.
+      # Note: Since we create the TableLookup object using ExtrapolationMethod='constant', we do not
+      # need to create additional datapoints just to maintain constant performance.
       outdoor_dry_bulbs = []
       if mode == :clg
-        # Calculate ODB temperature at which power or capacity is zero
-        high_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, true)
-        high_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, true)
-        max_odb = [high_odb_at_zero_power, high_odb_at_zero_capacity, weather_temp].min # Max cooling ODB
+        # Max cooling ODB temperature
+        max_odb = [high_odb_at_zero_power, high_odb_at_zero_capacity, weather_temp].min
         if max_odb > user_odbs.max
           outdoor_dry_bulbs << max_odb
         end
 
-        low_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, false)
-        low_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, false)
-        min_odb = [low_odb_at_zero_power, low_odb_at_zero_capacity, 60.0].max # Min cooling ODB
+        # Min cooling ODB temperature
+        dp82f = data.find { |dp| dp.outdoor_temperature == 82.0 }
+        dp95f = data.find { |dp| dp.outdoor_temperature == 95.0 }
+        min_power = 0.5 * dp82f.input_power
+        odb_at_min_power = MathTools.interp2(min_power, dp82f.input_power, dp95f.input_power, 82.0, 95.0)
+        min_odb = [odb_at_min_power, low_odb_at_zero_power, low_odb_at_zero_capacity, 60.0].max
         if min_odb < user_odbs.min
           outdoor_dry_bulbs << min_odb
         end
       else
-        # Calculate ODB temperature at which power or capacity is zero
-        low_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, false)
-        low_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, false)
-        min_odb = [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_min_temp, weather_temp].max # Min heating ODB
+        # Min heating ODB temperature
+        min_odb = [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_min_temp, weather_temp].max
         if min_odb < user_odbs.min
           outdoor_dry_bulbs << min_odb
         end
 
-        high_odb_at_zero_power = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_input_power, true)
-        high_odb_at_zero_capacity = calculate_odb_at_zero_power_or_capacity(data, user_odbs, :gross_capacity, true)
-        max_odb = [high_odb_at_zero_power, high_odb_at_zero_capacity, 60.0].min # Max heating ODB
-        if max_odb > user_odbs.max
-          outdoor_dry_bulbs << max_odb
-        end
+        # Max heating OBD temperature
+        # No need to extrapolate since, per Addendum 82, performance is constant above 47F.
       end
 
-      # Extrapolate net capacity and input power at those outdoor drybulb temperatures per RESNET MINHERS Addendum 82.
-      capacity_description = data[0].capacity_description
+      # Add new datapoint at min/max ODB temperatures
       outdoor_dry_bulbs.each do |target_odb|
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
@@ -2939,8 +2947,8 @@ module HVAC
         end
         new_dp.outdoor_temperature = target_odb
 
-        new_dp.capacity = extrapolate_data_point_to_odb(data, mode, capacity_description, target_odb, :capacity)
-        new_dp.input_power = extrapolate_data_point_to_odb(data, mode, capacity_description, target_odb, :input_power)
+        new_dp.capacity = extrapolate_data_point(data, capacity_description, :outdoor_temperature, target_odb, :capacity)
+        new_dp.input_power = extrapolate_data_point(data, capacity_description, :outdoor_temperature, target_odb, :input_power)
         new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
         convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
 
@@ -2988,58 +2996,46 @@ module HVAC
     end
   end
 
-  # Extrapolates the given performance property for the specified outdoor drybulb temperature
-  # per RESNET MINHERS Addendum 82:
-  # - Cooling, Min ODB: Linear from 82°F and 95°F cooling performance, but no less than 50% of the value at 82°F
-  # - Cooling, Max ODB: Linear from 82°F and 95°F cooling performance
-  # - Heating, Min ODB: Linear from lowest two temperatures where heating performance is provided
-  # - Heating, Max ODB: Constant (same values as 47°F heating performance)
+  # Extrapolates the given performance property for the specified target value and property.
   #
-  # @param detailed_performance_data [HPXML::CoolingDetailedPerformanceData or HPXML::HeatingDetailedPerformanceData] Array of detailed performance datapoints at a given speed
-  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
+  # @param datapoints [HPXML::CoolingDetailedPerformanceData or HPXML::HeatingDetailedPerformanceData] Array of detailed performance datapoints at a given speed
   # @param capacity_description [String] The capacity description (HPXML::CapacityDescriptionXXX)
-  # @param target_odb [Double] The target outdoor drybulb temperature to extrapolate to (F)
-  # @param property [Symbol] The datapoint property to extrapolate (e.g., :capacity)
-  # @return [Double] The extrapolated value
-  def self.extrapolate_data_point_to_odb(detailed_performance_data, mode, capacity_description, target_odb, property)
-    data = detailed_performance_data.select { |dp| dp.capacity_description == capacity_description }
+  # @param target_property [Symbol] The datapoint property for the target value (e.g., :outdoor_temperature)
+  # @param target_value [Double] The target value to extrapolate to (F)
+  # @param property [Symbol] The datapoint property to extrapolate (e.g., :capacity, :efficiency_cop, etc.)
+  # @param slope_requirement [Symbol] The slope requirement (:positive or :negative)
+  # @return [Double] The extrapolated value (F)
+  def self.extrapolate_data_point(datapoints, capacity_description, target_property, target_value, property, slope_requirement = nil)
+    datapoints = datapoints.select { |dp| dp.capacity_description == capacity_description }
 
-    target_dp = data.find { |dp| dp.outdoor_temperature == target_odb }
+    target_dp = datapoints.find { |dp| dp.send(target_property) == target_value }
     if not target_dp.nil?
       return target_dp.send(property)
     end
 
-    # Property can be :capacity, :efficiency_cop, etc.
-    user_odbs = data.map { |dp| dp.outdoor_temperature }.uniq.sort
+    user_odbs = datapoints.map { |dp| dp.send(target_property) }.uniq.sort
 
-    right_odb = user_odbs.find { |e| e > target_odb }
-    left_odb = user_odbs.reverse.find { |e| e < target_odb }
-    if right_odb.nil?
-      # extrapolation
-      right_odb = user_odbs[-1]
-      left_odb = user_odbs[-2]
-    elsif left_odb.nil?
-      # extrapolation
-      right_odb = user_odbs[1]
-      left_odb = user_odbs[0]
+    high_odb = user_odbs.find { |e| e > target_value }
+    low_odb = user_odbs.reverse.find { |e| e < target_value }
+    if high_odb.nil?
+      high_odb = user_odbs[-1]
+      low_odb = user_odbs[-2]
+    elsif low_odb.nil?
+      high_odb = user_odbs[1]
+      low_odb = user_odbs[0]
     end
-    right_dp = data.find { |dp| dp.outdoor_temperature == right_odb }
-    left_dp = data.find { |dp| dp.outdoor_temperature == left_odb }
+    high_dp = datapoints.find { |dp| dp.send(target_property) == high_odb }
+    low_dp = datapoints.find { |dp| dp.send(target_property) == low_odb }
 
-    # Linearly extrapolate
-    slope = (right_dp.send(property) - left_dp.send(property)) / (right_odb - left_odb)
-    val = (target_odb - left_odb) * slope + left_dp.send(property)
+    val = MathTools.interp2(target_value, low_odb, high_odb, low_dp.send(property), high_dp.send(property))
 
-    if mode == :clg && target_odb < 82
-      # Ensure no less than 50% of the value at 82F
-      # FIXME: Placeholer code. Need interpretation from RESNET on how this case should be handled.
-      # FIXME: See https://github.com/NREL/OpenStudio-HPXML/pull/1904#discussion_r1915689274
-      dp_82F = data.find { |dp| dp.outdoor_temperature == 82.0 }
-      val = [val, 0.5 * dp_82F.send(property)].max
-    elsif mode == :htg && target_odb > 47
-      # Use same value as 47F performance (override linear extrapolation)
-      dp_47F = data.find { |dp| dp.outdoor_temperature == 47.0 }
-      val = dp_47F.send(property)
+    if not slope_requirement.nil?
+      slope = (high_dp.send(property) - low_dp.send(property)) / (high_dp.send(target_property) - low_dp.send(target_property))
+      if (slope_requirement == :negative) && (slope >= 0)
+        return 999999.0
+      elsif (slope_requirement == :positive) && (slope <= 0)
+        return -999999.0
+      end
     end
 
     return val

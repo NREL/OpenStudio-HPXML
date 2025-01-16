@@ -2434,7 +2434,8 @@ module Defaults
             # Calculate heating capacity retention at 5F outdoor drybulb
             target_odb = 5.0
             max_capacity_47 = hvac_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-            hvac_system.heating_capacity_retention_fraction = (HVAC.extrapolate_data_point_to_odb(hvac_system.heating_detailed_performance_data, :htg, HPXML::CapacityDescriptionMaximum, target_odb, :capacity) / max_capacity_47).round(5)
+            max_capacity_5 = HVAC.extrapolate_data_point(hvac_system.heating_detailed_performance_data, HPXML::CapacityDescriptionMaximum, :outdoor_temperature, target_odb, :capacity)
+            hvac_system.heating_capacity_retention_fraction = (max_capacity_5 / max_capacity_47).round(5)
             hvac_system.heating_capacity_retention_fraction = 0.0 if hvac_system.heating_capacity_retention_fraction < 0
             hvac_system.heating_capacity_retention_temp = target_odb
             hvac_system.heating_capacity_retention_fraction_isdefaulted = true
