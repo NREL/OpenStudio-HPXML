@@ -3533,50 +3533,50 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                         component_idrefs: [hpxml_bldg.cooling_systems[0].id])
 
     # Test demand load inputs not overridden by defaults
-    demand_loads = electric_panel.demand_loads
-    htg_load = demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeHeating }
+    service_feeders = electric_panel.service_feeders
+    htg_load = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }
     htg_load.power = 1000
     htg_load.is_new_load = true
-    clg_load = demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeCooling }
+    clg_load = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }
     clg_load.power = 2000
     clg_load.is_new_load = true
-    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
-                     type: HPXML::ElectricPanelLoadTypeWaterHeater,
-                     power: 3000,
-                     is_new_load: true,
-                     component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
-                     type: HPXML::ElectricPanelLoadTypeClothesDryer,
-                     power: 4000,
-                     is_new_load: true,
-                     component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                        power: 3000,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
+    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                        power: 4000,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     hpxml_bldg.dishwashers.add(id: 'Dishwasher')
-    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
-                     type: HPXML::ElectricPanelLoadTypeDishwasher,
-                     power: 5000,
-                     is_new_load: true,
-                     component_idrefs: [hpxml_bldg.dishwashers[0].id])
-    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
-                     type: HPXML::ElectricPanelLoadTypeRangeOven,
-                     power: 6000,
-                     is_new_load: true,
-                     component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
-    vf_load = demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeMechVent }
+    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeDishwasher,
+                        power: 5000,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.dishwashers[0].id])
+    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeRangeOven,
+                        power: 6000,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    vf_load = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeMechVent }
     vf_load.power = 7000
     vf_load.is_new_load = true
-    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
-                     type: HPXML::ElectricPanelLoadTypeLighting,
-                     power: 8000,
-                     is_new_load: true)
-    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
-                     type: HPXML::ElectricPanelLoadTypeKitchen,
-                     power: 9000,
-                     is_new_load: true)
-    demand_loads.add(id: "DemandLoad#{demand_loads.size + 1}",
-                     type: HPXML::ElectricPanelLoadTypeLaundry,
-                     power: 10000,
-                     is_new_load: true)
-    oth_load = demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeOther }
+    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeLighting,
+                        power: 8000,
+                        is_new_load: true)
+    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeKitchen,
+                        power: 9000,
+                        is_new_load: true)
+    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeLaundry,
+                        power: 10000,
+                        is_new_load: true)
+    oth_load = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeOther }
     oth_load.power = 11000
     oth_load.is_new_load = true
 
@@ -3584,22 +3584,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     electric_panel = default_hpxml_bldg.electric_panels[0]
     branch_circuits = electric_panel.branch_circuits
-    demand_loads = electric_panel.demand_loads
+    service_feeders = electric_panel.service_feeders
     _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage120, 200.0, 5, nil)
     _test_default_branch_circuit_values(branch_circuits[0], HPXML::ElectricPanelVoltage120, 20.0, 1)
     _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage240, 50.0, 2)
     _test_default_branch_circuit_values(branch_circuits[2], HPXML::ElectricPanelVoltage240, 50.0, 2)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeHeating }, 1000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeCooling }, 2000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeWaterHeater }, 3000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeClothesDryer }, 4000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeDishwasher }, 5000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeRangeOven }, 6000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeMechVent }, 7000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeLighting }, 8000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeKitchen }, 9000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeLaundry }, 10000, true)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeOther }, 11000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 1000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }, 2000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeWaterHeater }, 3000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeClothesDryer }, 4000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeDishwasher }, 5000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeRangeOven }, 6000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeMechVent }, 7000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeLighting }, 8000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeKitchen }, 9000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeLaundry }, 10000, true)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeOther }, 11000, true)
 
     # Test w/ RatedTotalSpaces instead of Headroom
     hpxml_bldg.electric_panels[0].headroom = nil
@@ -3620,30 +3620,30 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       branch_circuit.max_current_rating = nil
       branch_circuit.occupied_spaces = nil
     end
-    electric_panel.demand_loads.each do |demand_load|
-      demand_load.power = nil
-      demand_load.is_new_load = nil
+    electric_panel.service_feeders.each do |service_feeder|
+      service_feeder.power = nil
+      service_feeder.is_new_load = nil
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     electric_panel = default_hpxml_bldg.electric_panels[0]
     branch_circuits = electric_panel.branch_circuits
-    demand_loads = electric_panel.demand_loads
+    service_feeders = electric_panel.service_feeders
     _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage240, 200.0, 3, nil)
     _test_default_branch_circuit_values(branch_circuits[0], HPXML::ElectricPanelVoltage120, 20.0, 0)
     _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage120, 20.0, 0)
     _test_default_branch_circuit_values(branch_circuits[2], HPXML::ElectricPanelVoltage240, 50.0, 2)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeHeating }, 428.0, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeCooling }, 2794.0, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeWaterHeater }, 0, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeClothesDryer }, 0, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeDishwasher }, 1200, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeRangeOven }, 0, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeMechVent }, 30, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeLighting }, 3684, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeKitchen }, 3000, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeLaundry }, 1500, false)
-    _test_default_demand_load_values(demand_loads.find { |dl| dl.type == HPXML::ElectricPanelLoadTypeOther }, 0, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 428.0, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }, 2794.0, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeWaterHeater }, 0, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeClothesDryer }, 0, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeDishwasher }, 1200, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeRangeOven }, 0, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeMechVent }, 30, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeLighting }, 3684, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeKitchen }, 3000, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeLaundry }, 1500, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeOther }, 0, false)
   end
 
   def test_batteries
@@ -5845,16 +5845,16 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_demand_load_values(demand_load, power, is_new_load)
+  def _test_default_service_feeder_values(service_feeder, power, is_new_load)
     if power.nil?
-      assert_nil(demand_load.power)
+      assert_nil(service_feeder.power)
     else
-      assert_equal(power, demand_load.power)
+      assert_equal(power, service_feeder.power)
     end
     if is_new_load.nil?
-      assert_nil(demand_load.is_new_load)
+      assert_nil(service_feeder.is_new_load)
     else
-      assert_equal(is_new_load, demand_load.is_new_load)
+      assert_equal(is_new_load, service_feeder.is_new_load)
     end
   end
 

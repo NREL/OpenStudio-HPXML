@@ -8740,7 +8740,7 @@ class HPXML < Object
     # Returns any demand loads that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of demand load objects
-    def service_feeder
+    def service_feeders
       list = []
       @parent_object.electric_panels.each do |electric_panel|
         electric_panel.service_feeders.each do |service_feeder|

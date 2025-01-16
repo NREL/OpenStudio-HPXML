@@ -370,24 +370,22 @@ You can create an additional column in the CSV file to define another unavailabl
 HPXML Electric Panel Calculations
 *********************************
 
-One or more electric panel calculation types (e.g., 2023 NEC 220.83) can be entered as an ``/HPXML/SoftwareInfo/extension/ElectricPanelCalculations/Type``.
+One or more electric panel calculation types (e.g., 2023 NEC 220.83) can be entered in ``/HPXML/SoftwareInfo/extension/ElectricPanelCalculations/ServiceFeeders``.
 If not entered, electric panel loads will not be calculated.
 
   ====================================  ========  =======  ================  ========  ================  ===========
   Element                               Type      Units    Constraints       Required  Default           Description
   ====================================  ========  =======  ================  ========  ================  ===========
-  ``BuildingType``                      string             See [#]_          No        dwelling unit            
-  ``DemandLoadType``                    string             See [#]_          No        service / feeder
   ``Type``                              string             See [#]_          Yes                         Electric panel calculation vintage/method; multiple are allowed
   ====================================  ========  =======  ================  ========  ================  ===========
 
-  .. [#] BuildingType choices are "dwelling unit".
-  .. [#] DemandLoadType choices are "service / feeder".
-  .. [#] Type choices are "2023 Load-Based" and "2023 Meter-Based", and are described as follows:
+  .. [#] Type choices are "2023 Existing Dwelling Load-Based" and "2023 Existing Dwelling Meter-Based", and are described as follows:
 
-         \- **2023 Load-Based**: Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
+         \- **2023 Existing Dwelling Load-Based**: Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
 
-         \- **2023 Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
+         \- **2023 Existing Dwelling Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
+
+         If running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling" calculation types, load calculations will be performed on each individual dwelling unit and then summed across units of the building.
 
 .. _hpxml_building:
 
@@ -450,7 +448,6 @@ For these simulations:
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
-- :ref:`hpxml_electric_panel_calculations` are not currently supported.
 - :ref:`hpxml_batteries` are not currently supported.
 - :ref:`hpxml_utility_bill_scenarios` using *detailed* :ref:`electricity_rates` are not supported.
 
@@ -4623,13 +4620,13 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``MaxCurrentRating``                                                     double   A                                   No        200
   ``Headroom`` or ``RatedTotalSpaces``                                     integer                                      No        See [#]_
   ``BranchCircuits``                                                       element                                      No        See [#]_       Individual branch circuits
-  ``DemandLoads``                                                          element                                      No        See [#]_       Individual demand loads
+  ``ServiceFeeders``                                                       element                                      No        See [#]_       Individual service feeders
   =======================================================================  =======  =========  =======================  ========  =============  ============================================
 
   .. [#] Voltage choices are "120" or "240".
   .. [#] If neither Headroom nor RatedTotalSpaces provided, the following default value representing an electric panel with 3 open breaker spaces will be used: Headroom = 3.
   .. [#] See :ref:`branch_circuits`.
-  .. [#] See :ref:`demand_loads`.
+  .. [#] See :ref:`service_feeders`.
 
 See :ref:`annual_outputs` for descriptions of how the calculated capacities and breaker spaces appear in the output files.
 
@@ -4682,19 +4679,19 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   .. [#] AttachedToElectricPanel must reference a ``ElectricPanel``.
   .. [#] Provide a AttachedToElectricPanel element for a referenced subpanel.
 
-.. _demand_loads:
+.. _service_feeders:
 
-Demand Loads
-~~~~~~~~~~~~
+Service Feeders
+~~~~~~~~~~~~~~~
 
-Individual demand loads entered in ``DemandLoads/DemandLoad``.
+Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``LoadType``                                    string                    See [#]_     Yes
   ``PowerRating``                                 double    W                            No        See [#]_
-  ``IsNewLoad``                                   boolean                                No        false      Whether, in the context of NEC calculations, the demand load is new
+  ``IsNewLoad``                                   boolean                                No        false      Whether, in the context of NEC calculations, the load is new
   ``AttachedToComponent``                         idref                     See [#]_     See [#]_  See [#]_   ID of attached component; multiple are allowed [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
@@ -4730,8 +4727,8 @@ Individual demand loads entered in ``DemandLoads/DemandLoad``.
          \- **electric vehicle charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
 
   .. [#] Not allowed if LoadType is "lighting", "kitchen", "laundry", or "other"; otherwise, required.
-  .. [#] A demand load is created for any electric component not already referenced by a demand load.
-         Demand loads for the following demand load types are always created if they don't already exist:
+  .. [#] A service feeder is created for any electric component not already referenced by a service feeder.
+         Service feeders for the following load types are always created if they don't already exist:
 
          \- **lighting**
 

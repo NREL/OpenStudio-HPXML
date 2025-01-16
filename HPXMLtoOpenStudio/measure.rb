@@ -271,11 +271,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @return [nil]
   def process_whole_sfa_mf_inputs(hpxml)
     if hpxml.header.whole_sfa_or_mf_building_sim && (hpxml.buildings.size > 1)
-      if hpxml.header.electric_panel_calculations_types.size > 0
-        fail 'Calculating electric panel loads for whole SFA/MF buildings is not currently supported.'
-      end
-    end
-    if hpxml.header.whole_sfa_or_mf_building_sim && (hpxml.buildings.size > 1)
       if hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.batteries.size }.sum > 0
         # FUTURE: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
         # Batteries use "TrackFacilityElectricDemandStoreExcessOnSite"; to support modeling of batteries in whole
