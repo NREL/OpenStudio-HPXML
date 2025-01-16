@@ -3013,29 +3013,37 @@ module HVAC
       return target_dp.send(property)
     end
 
-    user_odbs = datapoints.map { |dp| dp.send(target_property) }.uniq.sort
+    user_vals = datapoints.map { |dp| dp.send(target_property) }.uniq.sort
 
-    high_odb = user_odbs.find { |e| e > target_value }
-    low_odb = user_odbs.reverse.find { |e| e < target_value }
-    if high_odb.nil?
-      high_odb = user_odbs[-1]
-      low_odb = user_odbs[-2]
-    elsif low_odb.nil?
-      high_odb = user_odbs[1]
-      low_odb = user_odbs[0]
+    high_val = user_vals.find { |v| v > target_value }
+    low_val = user_vals.reverse.find { |v| v < target_value }
+    if user_vals.size == 1
+      high_val = low_val if high_val.nil?
+      low_val = high_val if low_val.nil?
+    elsif high_val.nil?
+      high_val = user_vals[-1]
+      low_val = user_vals[-2]
+    elsif low_val.nil?
+      high_val = user_vals[1]
+      low_val = user_vals[0]
     end
-    high_dp = datapoints.find { |dp| dp.send(target_property) == high_odb }
-    low_dp = datapoints.find { |dp| dp.send(target_property) == low_odb }
+    high_dp = datapoints.find { |dp| dp.send(target_property) == high_val }
+    low_dp = datapoints.find { |dp| dp.send(target_property) == low_val }
 
-    val = MathTools.interp2(target_value, low_odb, high_odb, low_dp.send(property), high_dp.send(property))
+    # puts "#{datapoints.map{ |dp| dp.send(target_property)}}, #{high_val}, #{low_val}"
+    val = MathTools.interp2(target_value, low_val, high_val, low_dp.send(property), high_dp.send(property))
 
     if not slope_requirement.nil?
       slope = (high_dp.send(property) - low_dp.send(property)) / (high_dp.send(target_property) - low_dp.send(target_property))
-      if (slope_requirement == :negative) && (slope >= 0)
+      if (slope_requirement == :negative) && (slope >= 0 || slope.nan?)
         return 999999.0
-      elsif (slope_requirement == :positive) && (slope <= 0)
+      elsif (slope_requirement == :positive) && (slope.to_f <= 0 || slope.nan?)
         return -999999.0
       end
+    end
+
+    if val.nan?
+      fail 'Unexpected error'
     end
 
     return val
