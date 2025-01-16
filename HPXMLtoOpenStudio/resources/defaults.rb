@@ -5888,7 +5888,7 @@ module Defaults
   # @param voltage [String] '120' or '240'
   # @param max_amps [Double] maximum amperage (A)
   # @return [Integer] the number of breaker spaces
-  def self.get_breaker_spaces_from_power_watts_and_voltage(watts, voltage, max_amps = 50)
+  def self.get_breaker_spaces_from_power_watts_and_voltage(watts, voltage, max_amps)
     return 0 if watts == 0
 
     # Note that default_panels.csv has a Breaker Spaces column manually populated based on the following calculation.
@@ -5984,11 +5984,11 @@ module Defaults
   # @param default_panels_csv_data [Hash] { load_name => { voltage => power_rating, ... }, ... }
   # @param load_name [String] load name specified in default_panels.csv
   # @param voltage [String] '120' or '240'
-  # @param amps [Double] maximum amperage
+  # @param max_current_rating [Double] maximum amperage
   # @param column [String] 'PowerRating' or 'BreakerSpaces'
   # @param watts [Double] power rating (W)
   # @return [Double or Integer] power rating or number of breaker spaces
-  def self.get_default_panels_value(runner, default_panels_csv_data, load_name, voltage, amps, column, watts = nil)
+  def self.get_default_panels_value(runner, default_panels_csv_data, load_name, voltage, max_current_rating, column, watts = nil)
     if not default_panels_csv_data[load_name].keys.include?(voltage)
       warning = "Voltage (#{voltage}) for '#{load_name}' is not specified in default_panels.csv; "
       if column == 'PowerRating'
@@ -6001,7 +6001,7 @@ module Defaults
         value = default_panels_csv_data[load_name][new_voltage][column]
       elsif column == 'BreakerSpaces'
         warning += "BreakerSpaces will be recalculated using Voltage=#{voltage}."
-        value = get_breaker_spaces_from_power_watts_and_voltage(watts, voltage, amps)
+        value = get_breaker_spaces_from_power_watts_and_voltage(watts, voltage, max_current_rating)
       end
       runner.registerWarning(warning)
       return value
@@ -6220,7 +6220,7 @@ module Defaults
   # @return [Integer] number of breaker spaces
   def self.get_branch_circuit_occupied_spaces_default_values(runner, hpxml_bldg, branch_circuit, default_panels_csv_data)
     voltage = branch_circuit.voltage
-    amps = branch_circuit.max_current_rating
+    max_current_rating = branch_circuit.max_current_rating
     component_ids = branch_circuit.component_idrefs
 
     breaker_spaces = 0
@@ -6231,7 +6231,7 @@ module Defaults
       next if heating_system.fraction_heat_load_served == 0
 
       if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-        breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(heating_system.service_feeders[0].power, voltage, amps)
+        breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(heating_system.service_feeders[0].power, voltage, max_current_rating)
       else
         breaker_spaces += 1 # 120v fan or pump
       end
@@ -6244,7 +6244,7 @@ module Defaults
       if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
         if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-          breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(heat_pump.service_feeders[0].power, voltage, amps)
+          breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(heat_pump.service_feeders[0].power, voltage, max_current_rating)
         else
           breaker_spaces += 1 # 120v fan
         end
@@ -6256,7 +6256,7 @@ module Defaults
         end
       end
 
-      breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')), voltage, amps) # ODU; all residential HP ODU should not exceed 12 kW in electrical load and therefore requires only one 240v circuit (2 breaker spaces)
+      breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(HVAC.get_dx_heating_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr')), voltage, max_current_rating) # ODU; all residential HP ODU should not exceed 12 kW in electrical load and therefore requires only one 240v circuit (2 breaker spaces)
     end
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
@@ -6264,7 +6264,7 @@ module Defaults
       next if cooling_system.is_shared_system
       next if cooling_system.fraction_cool_load_served == 0
 
-      breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(cooling_system.service_feeders[0].power, voltage, amps)
+      breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(cooling_system.service_feeders[0].power, voltage, max_current_rating)
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
@@ -6272,7 +6272,7 @@ module Defaults
       next if heat_pump.fraction_cool_load_served == 0
 
       if heat_pump.fraction_heat_load_served == 0
-        breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(HVAC.get_dx_cooling_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr')), voltage, amps) # ODU; the ~2 we missed adding to heating
+        breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(HVAC.get_dx_cooling_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr')), voltage, max_current_rating) # ODU; the ~2 we missed adding to heating
       end
     end
 
@@ -6282,9 +6282,9 @@ module Defaults
       next if water_heating_system.is_shared_system
 
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-        breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(water_heating_system.service_feeders[0].power, voltage, amps)
+        breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(water_heating_system.service_feeders[0].power, voltage, max_current_rating)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-        breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(water_heating_system.service_feeders[0].power, voltage, amps)
+        breaker_spaces += get_breaker_spaces_from_power_watts_and_voltage(water_heating_system.service_feeders[0].power, voltage, max_current_rating)
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
         if hpxml_bldg.building_construction.number_of_bathrooms == 1
           load_name = 'wh_tankless1'
@@ -6293,7 +6293,7 @@ module Defaults
         else # 3+
           load_name = 'wh_tankless3'
         end
-        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, load_name, voltage, amps, 'BreakerSpaces', water_heating_system.service_feeders[0].power)
+        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, load_name, voltage, max_current_rating, 'BreakerSpaces', water_heating_system.service_feeders[0].power)
       end
     end
 
@@ -6306,26 +6306,26 @@ module Defaults
       else # HP
         load_name = 'dryer_hp'
       end
-      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, load_name, voltage, amps, 'BreakerSpaces', clothes_dryer.service_feeders[0].power)
+      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, load_name, voltage, max_current_rating, 'BreakerSpaces', clothes_dryer.service_feeders[0].power)
     end
 
     hpxml_bldg.dishwashers.each do |dishwasher|
       next if !component_ids.include?(dishwasher.id)
 
-      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'dishwasher', voltage, amps, 'BreakerSpaces', dishwasher.service_feeders[0].power)
+      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'dishwasher', voltage, max_current_rating, 'BreakerSpaces', dishwasher.service_feeders[0].power)
     end
 
     hpxml_bldg.cooking_ranges.each do |cooking_range|
       next if !component_ids.include?(cooking_range.id)
       next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
 
-      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven', voltage, amps, 'BreakerSpaces', cooking_range.service_feeders[0].power)
+      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven', voltage, max_current_rating, 'BreakerSpaces', cooking_range.service_feeders[0].power)
     end
 
     hpxml_bldg.ventilation_fans.each do |ventilation_fan|
       next if !component_ids.include?(ventilation_fan.id)
 
-      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'mechvent', voltage, amps, 'BreakerSpaces', ventilation_fan.service_feeders[0].power)
+      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'mechvent', voltage, max_current_rating, 'BreakerSpaces', ventilation_fan.service_feeders[0].power)
     end
 
     hpxml_bldg.permanent_spas.each do |permanent_spa|
@@ -6333,16 +6333,16 @@ module Defaults
       next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
 
       if permanent_spa.heater_type == HPXML::HeaterTypeElectricResistance
-        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'spaheater', voltage, amps, 'BreakerSpaces', permanent_spa.service_feeders[0].power)
+        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'spaheater', voltage, max_current_rating, 'BreakerSpaces', permanent_spa.service_feeders[0].power)
       elsif permanent_spa.heater_type == HPXML::HeaterTypeHeatPump
-        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'spaheater_hp', voltage, amps, 'BreakerSpaces', permanent_spa.service_feeders[0].power)
+        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'spaheater_hp', voltage, max_current_rating, 'BreakerSpaces', permanent_spa.service_feeders[0].power)
       end
     end
 
     hpxml_bldg.permanent_spas.each do |permanent_spa|
       next if !component_ids.include?(permanent_spa.pump_id)
 
-      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'spapump', voltage, amps, 'BreakerSpaces', permanent_spa.service_feeders[0].power)
+      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'spapump', voltage, max_current_rating, 'BreakerSpaces', permanent_spa.service_feeders[0].power)
     end
 
     hpxml_bldg.pools.each do |pool|
@@ -6350,16 +6350,16 @@ module Defaults
       next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
 
       if pool.heater_type == HPXML::HeaterTypeElectricResistance
-        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'poolheater', voltage, amps, 'BreakerSpaces', pool.service_feeders[0].power)
+        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'poolheater', voltage, max_current_rating, 'BreakerSpaces', pool.service_feeders[0].power)
       elsif pool.heater_type == HPXML::HeaterTypeHeatPump
-        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'poolheater_hp', voltage, amps, 'BreakerSpaces', pool.service_feeders[0].power)
+        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'poolheater_hp', voltage, max_current_rating, 'BreakerSpaces', pool.service_feeders[0].power)
       end
     end
 
     hpxml_bldg.pools.each do |pool|
       next if !component_ids.include?(pool.pump_id)
 
-      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'poolpump', voltage, amps, 'BreakerSpaces', pool.service_feeders[0].power)
+      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'poolpump', voltage, max_current_rating, 'BreakerSpaces', pool.service_feeders[0].power)
     end
 
     hpxml_bldg.plug_loads.each do |plug_load|
@@ -6367,9 +6367,9 @@ module Defaults
       next if !component_ids.include?(plug_load.id)
 
       if hpxml_bldg.building_construction.number_of_bedrooms <= 3
-        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'wellpump_small', voltage, amps, 'BreakerSpaces', plug_load.service_feeders[0].power)
+        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'wellpump_small', voltage, max_current_rating, 'BreakerSpaces', plug_load.service_feeders[0].power)
       else
-        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'wellpump_large', voltage, amps, 'BreakerSpaces', plug_load.service_feeders[0].power)
+        breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'wellpump_large', voltage, max_current_rating, 'BreakerSpaces', plug_load.service_feeders[0].power)
       end
     end
 
@@ -6377,7 +6377,7 @@ module Defaults
       next if plug_load.plug_load_type != HPXML::PlugLoadTypeElectricVehicleCharging
       next if !component_ids.include?(plug_load.id)
 
-      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', voltage, amps, 'BreakerSpaces', plug_load.service_feeders[0].power)
+      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', voltage, max_current_rating, 'BreakerSpaces', plug_load.service_feeders[0].power)
     end
 
     return breaker_spaces

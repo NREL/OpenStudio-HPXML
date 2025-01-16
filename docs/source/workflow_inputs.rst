@@ -4652,9 +4652,9 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   .. [#] Voltage choices are "120" or "240".
   .. [#] If Voltage not provided, defaults based on optional referenced components as follows:
          
-         - No referenced components, non-electric heating systems, room air conditioners, dishwashers, ventilation fans, or plug loads: 120
+         - **No referenced components, non-electric heating systems, room air conditioners, dishwashers, ventilation fans, plug loads**: 120
          
-         - All other referenced components: 240
+         - **All other referenced components**: 240
   
   .. [#] If MaxCurrentRating not provided, defaults based on Voltage as follows:
   
@@ -4664,18 +4664,14 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          
   .. [#] If OccupiedSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of components referenced by AttachedToComponent.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
-         Breaker spaces will be recalculated based on the new Voltage classification.
-         Breaker spaces are calculated based on PowerRating and Voltage as follows:
+         Occupied breaker spaces will be recalculated based on the new Voltage classification.
+         Occupied breaker spaces are calculated based on PowerRating, Voltage, and MaxCurrentRating as follows:
          
          RequiredAmperage = PowerRating / Voltage
          
-         NumBranches = ceiling(RequiredAmperage / MaxAmps)
+         NumBranches = ceiling(RequiredAmperage / MaxCurrentRating)
          
          NumBreakers = NumBranches * (Voltage / 120)
-         
-         where
-         
-         MaxAmps = 50
   
   .. [#] Provide a AttachedToComponent element for each referenced component.
   .. [#] AttachedToElectricPanel must reference a ``ElectricPanel``.
@@ -4699,14 +4695,14 @@ Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
 
   .. [#] LoadType choices are "heating", "cooling", "hot water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
   .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on Voltage and properties of components referenced by AttachedToComponent.
-         If no corresponding Voltage is specified, the other Voltage classification will be used.         
+         If no corresponding Voltage is specified, the other Voltage classification will be used.
   .. [#] Depending on the LoadType, AttachedToComponent must reference:
 
          \- **heating**: ``HeatingSystem`` or ``HeatPump``
 
          \- **cooling**: ``CoolingSystem`` or ``HeatPump``
 
-         \- **hot qater**: ``WaterHeatingSystem``
+         \- **hot water**: ``WaterHeatingSystem``
 
          \- **clothes dryer**: ``ClothesDryer``
 
@@ -4747,8 +4743,8 @@ Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
 Default Panels
 ~~~~~~~~~~~~~~
 
-If power rating capacities or breaker spaces are not provided, then they are defaulted.
-Default values may be based on voltage, system type, and other properties such as number of bedrooms or bathrooms.
+If power rating or occupied breaker spaces are not provided, then they are defaulted.
+Default values may be based on power rating, voltage, amperage, component type, and other component properties such as number of bedrooms or bathrooms.
 They can also be found at ``HPXMLtoOpenStudio/resources/data/default_panels.csv``.
 
 .. csv-table::
@@ -4756,8 +4752,13 @@ They can also be found at ``HPXMLtoOpenStudio/resources/data/default_panels.csv`
    :header-rows: 1
 
 Mechanical ventilation loads may be assigned power ratings based on fan count and W (if available), otherwise 3000 W.
-Loads with power ratings of "auto" are calculated based on estimates for `input` capacity (using regressions involving `output` capacity and efficiency if direct expansion), blower fans (using fan W/cfm and airflow cfm), pumps, etc.
-Loads with breaker spaces of "auto" therefore vary based on calculated power ratings.
+Loads with power ratings of "auto" are calculated based on estimates for:
+
+- input capacities (using regressions involving rated output capacities and efficiencies if direct expansion)
+- blower fans (using fan W/cfm multiplied by airflow cfm)
+- hydronic pumps (using electric auxiliary energy kWh/yr divided by 2.08)
+
+Loads with occupied breaker spaces of "auto" therefore vary based on calculated power ratings.
 
 .. _hpxml_batteries:
 
