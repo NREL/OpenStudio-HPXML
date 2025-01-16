@@ -1709,8 +1709,6 @@
     <sch:title>[HeatingDetailedPerformanceData]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:HeatingDetailedPerformanceData'>
       <sch:assert role='ERROR' test='count(../h:CompressorType[text()="variable speed"]) = 1'>Expected 1 element(s) for xpath: ../CompressorType[text()="variable speed"]</sch:assert>
-      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=60 and h:CapacityDescription="minimum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=60 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
-      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=60 and h:CapacityDescription="maximum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=60 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=47 and h:CapacityDescription="minimum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=47 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=47 and h:CapacityDescription="maximum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=47 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <!-- FIXME: Require 17F once our defaulting code adds this data point -->
@@ -1720,7 +1718,7 @@
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=5 and h:CapacityDescription="maximum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=5 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature &lt; 5 and h:CapacityDescription="minimum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature&lt;5 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature &lt; 5 and h:CapacityDescription="maximum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature&lt;5 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
-      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[(h:OutdoorTemperature &gt; 60) or (h:OutdoorTemperature &lt; 60 and h:OutdoorTemperature &gt; 47) or (h:OutdoorTemperature &lt; 47 and h:OutdoorTemperature &gt; 17) or (h:OutdoorTemperature &lt; 17 and h:OutdoorTemperature &gt; 5)]) = 0'>Expected PerformanceDataPoint/OutdoorTemperature to be 60, 47, 17, 5, or &lt;5</sch:assert>
+      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[(h:OutdoorTemperature &gt; 47) or (h:OutdoorTemperature &lt; 47 and h:OutdoorTemperature &gt; 17) or (h:OutdoorTemperature &lt; 17 and h:OutdoorTemperature &gt; 5)]) = 0'>Expected PerformanceDataPoint/OutdoorTemperature to be 47, 17, 5, or &lt;5</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1736,7 +1734,7 @@
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=82 and h:CapacityDescription="maximum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=82 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=60 and h:CapacityDescription="minimum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=60 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=60 and h:CapacityDescription="maximum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=60 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
-      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[(h:OutdoorTemperature &lt; 60) or (h:OutdoorTemperature &lt; 95 and h:OutdoorTemperature &gt; 82) or (h:OutdoorTemperature &lt; 82 and h:OutdoorTemperature &gt; 60)]) = 0'>Expected PerformanceDataPoint/OutdoorTemperature to be 60, 82, 95, or &gt;95</sch:assert>
+      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[(h:OutdoorTemperature &lt; 82) or (h:OutdoorTemperature &gt; 82 and h:OutdoorTemperature &lt; 95)]) = 0'>Expected PerformanceDataPoint/OutdoorTemperature to be 82, 95, or &gt;95</sch:assert>
     </sch:rule>
   </sch:pattern>
 

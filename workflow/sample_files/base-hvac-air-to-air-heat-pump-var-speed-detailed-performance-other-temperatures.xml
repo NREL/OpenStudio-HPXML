@@ -401,44 +401,8 @@
                     <Value>3.53</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>60.0</OutdoorTemperature>
-                  <Capacity>14400.0</Capacity>
-                  <CapacityDescription>minimum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>6.7</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>60.0</OutdoorTemperature>
-                  <Capacity>42000.0</Capacity>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>3.9</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
               </CoolingDetailedPerformanceData>
               <HeatingDetailedPerformanceData>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>60.0</OutdoorTemperature>
-                  <Capacity>13000.0</Capacity>
-                  <CapacityDescription>minimum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>5.1</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>60.0</OutdoorTemperature>
-                  <Capacity>38000.0</Capacity>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>3.6</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>47.0</OutdoorTemperature>
                   <Capacity>10000.0</Capacity>

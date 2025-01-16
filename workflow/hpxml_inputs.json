@@ -2201,16 +2201,16 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml",
     "hvac_perf_data_capacity_type": "Absolute capacities",
-    "hvac_perf_data_heating_outdoor_temperatures": "60.0, 47.0, 17.0, 5.0, -5",
-    "hvac_perf_data_heating_min_speed_capacities": "13000, 10000, 4200, 1900, 800",
-    "hvac_perf_data_heating_max_speed_capacities": "38000, 36000, 24800, 19900, 12000",
-    "hvac_perf_data_heating_min_speed_cops": "5.1, 4.73, 1.84, 0.81, 0.66",
-    "hvac_perf_data_heating_max_speed_cops": "3.6, 3.44, 2.66, 2.28, 2.01",
-    "hvac_perf_data_cooling_outdoor_temperatures": "105.0, 95.0, 82.0, 60.0",
-    "hvac_perf_data_cooling_min_speed_capacities": "9900, 11700, 13200, 14400",
-    "hvac_perf_data_cooling_max_speed_capacities": "29000, 36000, 40000, 42000",
-    "hvac_perf_data_cooling_min_speed_cops": "3.8, 4.47, 6.34, 6.7",
-    "hvac_perf_data_cooling_max_speed_cops": "2.4, 2.71, 3.53, 3.9"
+    "hvac_perf_data_heating_outdoor_temperatures": "47.0, 17.0, 5.0, -5",
+    "hvac_perf_data_heating_min_speed_capacities": "10000, 4200, 1900, 800",
+    "hvac_perf_data_heating_max_speed_capacities": "36000, 24800, 19900, 12000",
+    "hvac_perf_data_heating_min_speed_cops": "4.73, 1.84, 0.81, 0.66",
+    "hvac_perf_data_heating_max_speed_cops": "3.44, 2.66, 2.28, 2.01",
+    "hvac_perf_data_cooling_outdoor_temperatures": "105.0, 95.0, 82.0",
+    "hvac_perf_data_cooling_min_speed_capacities": "9900, 11700, 13200",
+    "hvac_perf_data_cooling_max_speed_capacities": "29000, 36000, 40000",
+    "hvac_perf_data_cooling_min_speed_cops": "3.8, 4.47, 6.34",
+    "hvac_perf_data_cooling_max_speed_cops": "2.4, 2.71, 3.53"
   },
   "sample_files/base-hvac-autosize.xml": {
     "parent_hpxml": "sample_files/base.xml",
