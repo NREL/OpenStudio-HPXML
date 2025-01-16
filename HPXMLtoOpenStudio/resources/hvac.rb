@@ -3046,7 +3046,7 @@ module HVAC
   # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
   # @return [nil]
   def self.add_data_point_adaptive_step_size(data_array, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
-    tol = 0.1 # Good balance between runtime performance and accuracy
+    tol = 0.2 # Good balance between runtime performance and accuracy
     data_array.each_with_index do |data, speed|
       data_sorted = data.sort_by { |dp| dp.outdoor_temperature }
       data_sorted.each_with_index do |dp, i|
