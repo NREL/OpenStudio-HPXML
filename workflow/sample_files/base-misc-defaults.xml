@@ -381,7 +381,6 @@
             <SystemIdentifier id='ElectricVehicle1'/>
             <VehicleType>
               <BatteryElectricVehicle>
-                <Battery/>
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>

@@ -2515,7 +2515,6 @@
   <sch:pattern>
     <sch:title>[BatteryElectricVehicle]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Vehicles/h:Vehicle/h:VehicleType/h:BatteryElectricVehicle'>
-      <sch:assert role='ERROR' test='count(h:Battery) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Battery</sch:assert>
       <sch:assert role='ERROR' test='count(h:Battery/h:BatteryType[text()="Li-ion"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Battery/BatteryType[text()="Li-ion"]</sch:assert>
       <sch:assert role='ERROR' test='h:Battery/h:BatteryType[text()="Li-ion"] or not(h:Battery/h:BatteryType)'>Expected Battery/BatteryType to be "Li-ion"</sch:assert>
       <sch:assert role='ERROR' test='count(h:Battery/h:NominalCapacity[h:Units="kWh" or h:Units="Ah"]/h:Value) &gt;= 0'>Expected 0 or more element(s) for xpath: Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value</sch:assert>

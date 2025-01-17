@@ -9419,7 +9419,9 @@ class HPXML < Object
       case @vehicle_type
       when HPXML::VehicleTypeBEV
         # Battery
-        battery = XMLHelper.add_element(vehicle_type, 'Battery')
+        unless [@battery_type.nil?, @nominal_capacity_kwh.nil?, @nominal_capacity_ah.nil?, @usable_capacity_kwh.nil?, @usable_capacity_ah.nil?, @nominal_voltage.nil?, @lifetime_model.nil?].all?
+          battery = XMLHelper.add_element(vehicle_type, 'Battery')
+        end
         XMLHelper.add_element(battery, 'BatteryType', @battery_type, :string, @battery_type_isdefaulted) unless @battery_type.nil?
         if not @nominal_capacity_kwh.nil?
           nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
