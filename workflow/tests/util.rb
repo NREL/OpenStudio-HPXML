@@ -234,11 +234,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.'
     end
     if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.header.schedules_filepaths.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil? && hpxml_bldg.vehicles[0].ev_charging_weekday_fractions.nil?
-      next if message.include? 'Electric vehicle hours per week inputted (14.0) do not match the hours per week calculated from the discharging schedule (21.0). The inputted hours per week value will be ignored.'
       next if message.include? 'A total of 1066.0 driving hours could not be met due to insufficient vehicle charge. This issue may result from a combination EV battery parameters, charging power, and driving or discharging schedules.'
-    end
-    if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil? && !hpxml_bldg.vehicles[0].ev_charging_weekday_fractions.nil?
-      next if message.include? 'Electric vehicle hours per week inputted (14.0) do not match the hours per week calculated from the discharging schedule (8.9). The inputted hours per week value will be ignored.'
     end
     if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }.empty?
       next if message.include? 'Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'

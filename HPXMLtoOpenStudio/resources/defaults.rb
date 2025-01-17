@@ -3209,7 +3209,7 @@ module Defaults
         vehicle.fraction_charged_home = default_values[:fraction_charged_home]
         vehicle.fraction_charged_home_isdefaulted = true
       end
-      schedules_file_includes_ev = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryDischarging].name) && schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryDischarging].name))
+      schedules_file_includes_ev = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryDischarging].name) && schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryCharging].name))
       if vehicle.ev_charging_weekday_fractions.nil? && !schedules_file_includes_ev
         vehicle.ev_charging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekdayScheduleFractions']
         vehicle.ev_charging_weekday_fractions_isdefaulted = true

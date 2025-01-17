@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Collection of methods for adding vehicle-related OpenStudio objects, built on the Battery class
-class Vehicle
+module Vehicle
   # Adds any HPXML Vehicles to the OpenStudio model.
   # Currently only models electric vehicles.
   #
@@ -21,14 +21,14 @@ class Vehicle
     end
   end
 
-  # Retrieves EV charging and discharging schedules
+  # Generates and returns the EV charging and discharging schedules
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param vehicle [HPXML::Vehicle] Object that defines a single electric vehicle
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @return [Array<OpenStudio::Model::ScheduleRuleset or OpenStudio::Model::ScheduleFile>] The charging and discharging schedules, either as a ScheduleRuleset or as a ScheduleFile
-  def self.get_ev_charging_schedules(runner, model, vehicle, schedules_file)
+  # @return [OpenStudio::Model::ScheduleFile or MonthWeekdayWeekendSchedule] the charging and discharging schedules
+  def self.get_ev_schedules(runner, model, vehicle, schedules_file)
     charging_schedule, discharging_schedule = nil, nil
     charging_col, discharging_col = SchedulesFile::Columns[:EVBatteryCharging].name, SchedulesFile::Columns[:EVBatteryDischarging].name
     if not schedules_file.nil?
@@ -40,15 +40,10 @@ class Vehicle
       charging_schedule = model.getScheduleRulesets.find { |s| s.name.to_s == charge_name }
       discharging_schedule = model.getScheduleRulesets.find { |s| s.name.to_s == discharge_name }
       if charging_schedule.nil? || discharging_schedule.nil?
-        # weekday_charge, weekday_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_charging_weekday_fractions)
-        # weekend_charge, weekend_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_charging_weekend_fractions)
-
         weekday_charge, weekend_charge = vehicle.ev_charging_weekday_fractions, vehicle.ev_charging_weekend_fractions
         weekday_discharge, weekend_discharge = vehicle.ev_discharging_weekday_fractions, vehicle.ev_discharging_weekend_fractions
-        charging_schedule = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, false)
-        charging_schedule = charging_schedule.schedule
-        discharging_schedule = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, false)
-        discharging_schedule = discharging_schedule.schedule
+        charging_schedule = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
+        discharging_schedule = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
       end
     else
       runner.registerWarning("Both schedule file and weekday fractions provided for '#{charging_col}'; weekday fractions will be ignored.") if !vehicle.ev_charging_weekday_fractions.nil?
@@ -62,10 +57,29 @@ class Vehicle
     return charging_schedule, discharging_schedule
   end
 
+  # Retrieves EV charging and discharging OpenStudio schedule objects
+  #
+  # @param charging_schedule [OpenStudio::Model::ScheduleFile or MonthWeekdayWeekendSchedule] EV charging schedule
+  # @param discharging_schedule [OpenStudio::Model::ScheduleFile or MonthWeekdayWeekendSchedule] EV discharging schedule
+  # @return [Array<OpenStudio::Model::ScheduleXXX>] The charging and discharging schedules, either ScheduleRulesets or ScheduleFiles
+  def self.get_ev_OS_schedules(charging_schedule, discharging_schedule)
+    os_charging_schedule, os_discharging_schedule = nil, nil
+    if charging_schedule.is_a? MonthWeekdayWeekendSchedule
+      os_charging_schedule = charging_schedule.schedule
+    elsif charging_schedule.is_a? OpenStudio::Model::ScheduleFile
+      os_charging_schedule = charging_schedule
+    end
+    if discharging_schedule.is_a? MonthWeekdayWeekendSchedule
+      os_discharging_schedule = discharging_schedule.schedule
+    elsif discharging_schedule.is_a? OpenStudio::Model::ScheduleFile
+      os_discharging_schedule = discharging_schedule
+    end
+
+    return os_charging_schedule, os_discharging_schedule
+  end
+
   # Apply an electric vehicle to the model using the battery.rb Battery class, which assigns OpenStudio ElectricLoadCenterStorageLiIonNMCBattery and ElectricLoadCenterDistribution objects.
-  # An EMS program models the effect of ambient temperature on the effective power output.
-  # An EMS program writes a 'discharge offset' variable to omit this from aggregate home electricity outputs.
-  # If no charging/discharging schedule is provided, then the electric vehicle is not modeled.
+  # An EMS program models the effect of ambient temperature on the effective power output, scales power with the fraction charged at home, and calculates the unmet driving hours.
   # Bi-directional charging is not currently implemented
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -91,42 +105,21 @@ class Vehicle
     end
     vehicle.location = ev_charger.location
 
-    # Calculate annual driving hours
-    charging_schedule, discharging_schedule = get_ev_charging_schedules(runner, model, vehicle, schedules_file)
-    if discharging_schedule.to_ScheduleFile.is_initialized
-      dis_sch = discharging_schedule.to_ScheduleFile.get
-      col = dis_sch.columnNumber - 1
-      discharge_vals = dis_sch.csvFile.get.getColumnAsStringVector(col).map(&:to_f)[1..]
-
-      # Scale based on timestep and schedule length
-      timestep_hours = dis_sch.minutesperItem.get.to_f / 60.0
-      driving_hrs = discharge_vals.sum * timestep_hours
-      schedule_hours = discharge_vals.size * timestep_hours
-      annual_driving_hours = driving_hrs / schedule_hours * UnitConversions.convert(1, 'yr', 'hr')
-    elsif discharging_schedule.to_ScheduleRuleset.is_initialized
-      model_year = model.yearDescription.get.assumedYear
-      year_start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('January'), 1, model_year)
-      year_end_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('December'), 31, model_year)
-      discharge_day_schs = discharging_schedule.to_ScheduleRuleset.get.getDaySchedules(year_start_date, year_end_date)
-      annual_driving_hours = discharge_day_schs.sum { |day_sch| day_sch.timeSeries.values.sum }
-    end
-
-    # Check for discrepancy between inputted and calculated hours per week
-    sch_hours_per_week = annual_driving_hours / UnitConversions.convert(1, 'yr', 'day') * 7
-    hours_differ = (sch_hours_per_week - vehicle.hours_per_week).abs
-    if hours_differ > 0.1
-      runner.registerWarning("Electric vehicle hours per week inputted (#{vehicle.hours_per_week.round(1)}) do not match the hours per week calculated from the discharging schedule (#{sch_hours_per_week.round(1)}). The inputted hours per week value will be ignored.")
-      vehicle.hours_per_week = sch_hours_per_week
-    end
-
-    # Calculate effective discharge power and rated power output
-    # Scale the effective discharge power by 2.25 to assign the rated discharge power. This value reflects the maximum power adjustment allowed in the EMS EV discharge program at -17.8 C.
+    # Calculate hours/week and effective discharge power
+    charging_schedule, discharging_schedule = get_ev_schedules(runner, model, vehicle, schedules_file)
     ev_annl_energy = vehicle.fuel_economy * vehicle.miles_per_year # kWh/year
-    eff_discharge_power = UnitConversions.convert(ev_annl_energy / annual_driving_hours, 'kw', 'w') # W
+    if discharging_schedule.is_a? OpenStudio::Model::ScheduleFile
+      eff_discharge_power = schedules_file.calc_design_level_from_daily_kwh(col_name: discharging_schedule.name.to_s, daily_kwh: ev_annl_energy / 365)
+    elsif discharging_schedule.is_a? MonthWeekdayWeekendSchedule
+      eff_discharge_power = discharging_schedule.calc_design_level_from_daily_kwh(ev_annl_energy / 365)
+    end
+
+    # Scale the effective discharge power by 2.25 to assign the rated discharge power. This value reflects the maximum power adjustment allowed in the EMS EV discharge program at -17.8 C.
     vehicle.rated_power_output = eff_discharge_power * 2.25
 
     # Apply vehicle battery to model
-    Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
+    os_charging_schedule, os_discharging_schedule = get_ev_OS_schedules(charging_schedule, discharging_schedule)
+    Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, os_charging_schedule, os_discharging_schedule)
 
     # Apply EMS program to adjust discharge power based on ambient temperature.
     model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
@@ -201,7 +194,7 @@ class Vehicle
       ev_discharge_program.addLine('    Set site_temp_adj = 37.609')
       ev_discharge_program.addLine('  EndIf')
       ev_discharge_program.addLine("  If #{discharge_sch_sensor.name} > 0.0")
-      ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{eff_discharge_power} * power_mult * #{discharge_sch_sensor.name}")
+      ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{eff_discharge_power} * #{vehicle.fraction_charged_home} * power_mult * #{discharge_sch_sensor.name}")
       ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power} * #{charge_sch_sensor.name}")
       ev_discharge_program.addLine("    If #{soc_sensor.name} <= #{min_soc}")
       ev_discharge_program.addLine("      Set #{unmet_hr_var.name} = #{discharge_sch_sensor.name}")
