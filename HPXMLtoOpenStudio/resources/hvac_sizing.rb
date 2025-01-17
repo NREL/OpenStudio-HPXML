@@ -3018,7 +3018,7 @@ module HVACSizing
   #
   # @param outdoor_temp [Double] Outdoor drybulb temperature (F)
   # @param indoor_temp [Double] Indoor drybulb (heating) or wetbulb (cooling) temperature (F)
-  # @param mode [Symbol] Heating or cooling
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Double] Heat pump adjustment factor (capacity fraction)
   def self.adjust_indoor_condition_var_speed(outdoor_temp, indoor_temp, mode)
     if mode == :clg
@@ -3037,7 +3037,7 @@ module HVACSizing
   #
   # @param outdoor_temp [Double] Outdoor drybulb temperature (F)
   # @param hvac_sys [HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC system of interest
-  # @param mode [Symbol] Heating or cooling
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Double] Heat pump adjustment factor (capacity fraction)
   def self.adjust_outdoor_condition_var_speed(outdoor_temp, hvac_sys, mode)
     rated_odb = (mode == :clg) ? HVAC::AirSourceCoolRatedODB : HVAC::AirSourceHeatRatedODB
@@ -3056,14 +3056,12 @@ module HVACSizing
       max_rated_dp = detailed_performance_data.find { |dp| dp.outdoor_temperature == rated_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
       if max_rated_dp.capacity.nil?
         property = :capacity_fraction_of_nominal
-        # Should use nominal instead of maximum
         capacity_nominal = 1.0
       else
         property = :capacity
-        # Should use nominal instead of maximum
         capacity_nominal = (mode == :clg) ? hvac_sys.cooling_capacity : hvac_sys.heating_capacity
       end
-      odb_adj = HVAC.interpolate_to_odb_table_point(detailed_performance_data, HPXML::CapacityDescriptionMaximum, outdoor_temp, property) / capacity_nominal
+      odb_adj = HVAC.extrapolate_data_point(detailed_performance_data, HPXML::CapacityDescriptionMaximum, :outdoor_temperature, outdoor_temp, property) / capacity_nominal
     end
     return odb_adj
   end

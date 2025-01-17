@@ -252,9 +252,9 @@ module HVAC
     is_heatpump = false
 
     if (not cooling_system.nil?)
-      is_onoff_thermostat_ddb = hpxml_header.hvac_onoff_thermostat_deadband.to_f > 0.0
+      has_deadband_control = hpxml_header.hvac_onoff_thermostat_deadband.to_f > 0.0
       # Error-checking
-      if is_onoff_thermostat_ddb
+      if has_deadband_control
         if not [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? cooling_system.compressor_type
           # Throw error and stop simulation, because the setpoint schedule is already shifted, user will get wrong results otherwise.
           runner.registerError('On-off thermostat deadband currently is only supported for single speed or two speed air source systems.')
@@ -265,7 +265,7 @@ module HVAC
         end
       end
     else
-      is_onoff_thermostat_ddb = false
+      has_deadband_control = false
     end
 
     if not cooling_system.nil?
@@ -353,7 +353,7 @@ module HVAC
     fan_cfms = []
     if not cooling_system.nil?
       # Cooling Coil
-      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm, weather.data.AnnualMaxDrybulb, is_onoff_thermostat_ddb)
+      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm, weather.data.AnnualMaxDrybulb, has_deadband_control)
 
       clg_cfm = cooling_system.cooling_airflow_cfm
       clg_ap.cool_fan_speed_ratios.each do |r|
@@ -381,6 +381,7 @@ module HVAC
         htg_ap.heat_fan_speed_ratios.each do |r|
           fan_cfms << htg_cfm * r
         end
+
         # Defrost calculations
         if hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
           q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, hpxml_bldg.building_construction.number_of_units,
@@ -391,7 +392,7 @@ module HVAC
         end
 
         # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather.data.AnnualMinDrybulb, hpxml_header.defrost_model_type, p_dot_defrost, is_onoff_thermostat_ddb)
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather.data.AnnualMinDrybulb, hpxml_header.defrost_model_type, p_dot_defrost, has_deadband_control)
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, hpxml_header, runner, hpxml_bldg)
@@ -462,9 +463,9 @@ module HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     # supp coil control in staging EMS
-    add_two_speed_staging_ems_program(model, air_loop_unitary, htg_supp_coil, control_zone, is_onoff_thermostat_ddb, cooling_system)
+    add_two_speed_staging_ems_program(model, air_loop_unitary, htg_supp_coil, control_zone, has_deadband_control, cooling_system)
 
-    add_supplemental_coil_ems_program(model, htg_supp_coil, control_zone, htg_coil, is_onoff_thermostat_ddb, cooling_system)
+    add_supplemental_coil_ems_program(model, htg_supp_coil, control_zone, htg_coil, has_deadband_control, cooling_system)
 
     add_variable_speed_power_ems_program(runner, model, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
@@ -1099,7 +1100,7 @@ module HVAC
         elsif weather.header.StateProvinceRegion.downcase == 'nv'
           heating_load_frac = 0.0
         else
-          fail 'Unexpected weather file for ASHRAE 140 run.'
+          fail 'Unexpected location for ASHRAE 140 run.'
         end
       end
       hvac_sequential_load_fracs = { htg: [heating_load_frac],
@@ -2097,7 +2098,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param fan [TODO] TODO
-  # @param hp_min_temp [TODO] TODO
+  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @return [nil]
   def self.add_fan_power_ems_program(model, fan, hp_min_temp)
     # Sensors
@@ -2816,10 +2817,10 @@ module HVAC
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
-  # @param weather_temp [Double] weather_minimum drybulb temperature
-  # @param compressor_lockout_temp [Double] Compressor Lock-out temperature or minimum heat pump compressor operating temperature
+  # @param weather_temp [Double] Minimum (for heating) or maximum (for cooling) outdoor drybulb temperature
+  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @return [nil]
-  def self.process_neep_detailed_performance(hvac_system, mode, max_rated_fan_cfm, weather_temp, compressor_lockout_temp = nil)
+  def self.process_neep_detailed_performance(hvac_system, mode, max_rated_fan_cfm, weather_temp, hp_min_temp = nil)
     detailed_performance_data_name = (mode == :clg) ? 'cooling_detailed_performance_data' : 'heating_detailed_performance_data'
     detailed_performance_data = hvac_system.send(detailed_performance_data_name)
     hvac_ap = hvac_system.additional_properties
@@ -2835,7 +2836,6 @@ module HVAC
       end
     end
 
-    # convert net to gross, adds more data points for table lookup, etc.
     if mode == :clg
       cfm_per_ton = hvac_ap.cool_rated_cfm_per_ton
       hvac_ap.cooling_performance_data_array = data_array
@@ -2849,67 +2849,115 @@ module HVAC
       hvac_ap.heat_rated_capacities_net = []
       hvac_ap.heat_rated_cops = []
     end
-    # convert net to gross
-    data_array.each_with_index do |data, speed|
-      data.each do |dp|
-        this_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * cfm_per_ton[speed]
-        fan_ratio = this_cfm / max_rated_fan_cfm
-        fan_power = calculate_fan_power_from_curve(hvac_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, hvac_system)
-        dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
-      end
-    end
-    extrapolate_data_points(data_array, mode, compressor_lockout_temp, weather_temp)
-    add_data_point_adaptive_step_size(data_array, mode)
+
+    extrapolate_data_points(data_array, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     correct_ft_cap_eir(data_array, mode)
   end
 
-  # Adds additional detailed data points at the min/max outdoor temperatures that cover the
-  # full range of equipment operation.
+  # Converts net (i.e., including fan power) capacities/COPs to gross values (i.e., excluding
+  # fan power) for a HVAC performance datapoint.
+  #
+  # @param dp [HPXML::CoolingDetailedPerformanceData or HPXML::HeatingDetailedPerformanceData] The detailed performance data point of interest
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
+  # @param cfm_per_ton [Double] Rated CFM/ton
+  # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
+  # @return [nil]
+  def self.convert_data_point_net_to_gross(dp, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+    hvac_ap = hvac_system.additional_properties
+    this_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * cfm_per_ton
+    fan_ratio = this_cfm / max_rated_fan_cfm
+    fan_power = calculate_fan_power_from_curve(hvac_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, hvac_system)
+    dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
+    dp.input_power = dp.capacity / dp.efficiency_cop # Btu/hr
+    dp.gross_input_power = dp.gross_capacity / dp.gross_efficiency_cop # Btu/hr
+  end
+
+  # Extrapolate data points at the min/max outdoor drybulb temperatures to cover the full range of
+  # equipment operation. Extrapolates net capacity and input power per RESNET MINHERS Addendum 82:
+  # - Cooling, Min ODB: Linear from 82F and 95F, but no less than 50% power of the 82F value
+  # - Cooling, Max ODB: Linear from 82F and 95F
+  # - Heating, Min ODB: Linear from lowest two temperatures
+  # - Heating, Max ODB: Constant (same values as 47F)
+
   #
   # @param data_array [TODO] TODO
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
-  # @param compressor_lockout_temp [TODO] TODO
-  # @param weather_temp [TODO] TODO
+  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
+  # @param weather_temp [Double] Minimum (for heating) or maximum (for cooling) outdoor drybulb temperature
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
+  # @param cfm_per_ton [Array<Double>] Rated CFM/ton at each speed
+  # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
   # @return [nil]
-  def self.extrapolate_data_points(data_array, mode, compressor_lockout_temp, weather_temp)
+  def self.extrapolate_data_points(data_array, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     # Set of data used for table lookup
-    data_array.each do |data|
-      user_odbs = data.map { |dp| dp.outdoor_temperature }
-      # Determine min/max ODB temperatures to cover full range of equipment operation
-      if mode == :clg
-        outdoor_dry_bulbs = []
-        # Calculate ODB temperature at which COP or capacity is zero
-        high_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, true)
-        high_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, true)
-        low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, false)
-        low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, false)
-        outdoor_dry_bulbs << [low_odb_at_zero_cop, low_odb_at_zero_capacity, 55.0].max # Min cooling ODB
-        outdoor_dry_bulbs << [high_odb_at_zero_cop, high_odb_at_zero_capacity, weather_temp].min # Max cooling ODB
-      else
-        outdoor_dry_bulbs = []
-        # Calculate ODB temperature at which COP or capacity is zero
-        low_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, false)
-        low_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, false)
-        high_odb_at_zero_cop = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_efficiency_cop, true)
-        high_odb_at_zero_capacity = calculate_odb_at_zero_cop_or_capacity(data, user_odbs, :gross_capacity, true)
-        outdoor_dry_bulbs << [low_odb_at_zero_cop, low_odb_at_zero_capacity, compressor_lockout_temp, weather_temp].max # Min heating ODB
-        outdoor_dry_bulbs << [high_odb_at_zero_cop, high_odb_at_zero_capacity, 60.0].min # Max heating ODB
-      end
+    data_array.each_with_index do |data, speed|
       capacity_description = data[0].capacity_description
-      outdoor_dry_bulbs.each do |target_odb|
-        next if user_odbs.include? target_odb
+      user_odbs = data.map { |dp| dp.outdoor_temperature }
 
+      # Calculate gross values for all datapoints
+      data.each do |dp|
+        convert_data_point_net_to_gross(dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+      end
+
+      # Ensure we don't create datapoints at ODB temperatures with zero/negative gross capacities or powers
+      delta_odb = 1.0 # Use a slightly larger (or smaller) ODB so things don't blow up
+      high_odb_at_zero_power = extrapolate_data_point(data, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :negative) - delta_odb
+      high_odb_at_zero_capacity = extrapolate_data_point(data, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :negative) - delta_odb
+      low_odb_at_zero_power = extrapolate_data_point(data, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :positive) + delta_odb
+      low_odb_at_zero_capacity = extrapolate_data_point(data, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :positive) + delta_odb
+
+      # Determine min/max ODB temperatures to extrapolate to, to cover full range of equipment operation.
+      # Note: Since we create the TableLookup object using ExtrapolationMethod='constant', we do not
+      # need to create additional datapoints just to maintain constant performance.
+      outdoor_dry_bulbs = []
+      if mode == :clg
+        # Max cooling ODB temperature
+        max_odb = [high_odb_at_zero_power, high_odb_at_zero_capacity, weather_temp].min
+        if max_odb > user_odbs.max
+          outdoor_dry_bulbs << max_odb
+        end
+
+        # Min cooling ODB temperature
+        dp82f = data.find { |dp| dp.outdoor_temperature == 82.0 }
+        dp95f = data.find { |dp| dp.outdoor_temperature == 95.0 }
+        min_power = 0.5 * dp82f.input_power
+        odb_at_min_power = MathTools.interp2(min_power, dp82f.input_power, dp95f.input_power, 82.0, 95.0)
+        odb_at_min_power = -999999.0 if dp82f.input_power >= dp95f.input_power # Exclude if power increasing at lower ODB temperatures
+        min_odb = [odb_at_min_power, low_odb_at_zero_power, low_odb_at_zero_capacity, 50.0].max
+        if min_odb < user_odbs.min
+          outdoor_dry_bulbs << min_odb
+        end
+      else
+        # Min heating ODB temperature
+        min_odb = [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_min_temp, weather_temp].max
+        if min_odb < user_odbs.min
+          outdoor_dry_bulbs << min_odb
+        end
+
+        # Max heating OBD temperature
+        # No need to extrapolate since, per Addendum 82, performance is constant above 47F.
+      end
+
+      # Add new datapoint at min/max ODB temperatures
+      outdoor_dry_bulbs.each do |target_odb|
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
         else
           new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
         end
         new_dp.outdoor_temperature = target_odb
-        new_dp.gross_capacity = interpolate_to_odb_table_point(data, capacity_description, target_odb, :gross_capacity)
-        new_dp.gross_efficiency_cop = interpolate_to_odb_table_point(data, capacity_description, target_odb, :gross_efficiency_cop)
+
+        new_dp.capacity = extrapolate_data_point(data, capacity_description, :outdoor_temperature, target_odb, :capacity)
+        new_dp.input_power = extrapolate_data_point(data, capacity_description, :outdoor_temperature, target_odb, :input_power)
+        new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
+        convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+
         data << new_dp
       end
     end
+
+    add_data_point_adaptive_step_size(data_array, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
   end
 
   # TODO
@@ -2919,7 +2967,7 @@ module HVAC
   # @param property [TODO] TODO
   # @param find_high [TODO] TODO
   # @return [TODO] TODO
-  def self.calculate_odb_at_zero_cop_or_capacity(data, user_odbs, property, find_high)
+  def self.calculate_odb_at_zero_power_or_capacity(data, user_odbs, property, find_high)
     if find_high
       odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[-1] }
       odb_dp2 = data.find { |dp| dp.outdoor_temperature == user_odbs[-2] }
@@ -2949,78 +2997,100 @@ module HVAC
     end
   end
 
-  # TODO
+  # Extrapolates the given performance property for the specified target value and property.
   #
-  # @param detailed_performance_data [TODO] TODO
-  # @param capacity_description [TODO] TODO
-  # @param target_odb [TODO] TODO
-  # @param property [TODO] TODO
-  # @return [TODO] TODO
-  def self.interpolate_to_odb_table_point(detailed_performance_data, capacity_description, target_odb, property)
-    data = detailed_performance_data.select { |dp| dp.capacity_description == capacity_description }
+  # @param datapoints [HPXML::CoolingDetailedPerformanceData or HPXML::HeatingDetailedPerformanceData] Array of detailed performance datapoints at a given speed
+  # @param capacity_description [String] The capacity description (HPXML::CapacityDescriptionXXX)
+  # @param target_property [Symbol] The datapoint property for the target value (e.g., :outdoor_temperature)
+  # @param target_value [Double] The target value to extrapolate to (F)
+  # @param property [Symbol] The datapoint property to extrapolate (e.g., :capacity, :efficiency_cop, etc.)
+  # @param slope_requirement [Symbol] The slope requirement (:positive or :negative)
+  # @return [Double] The extrapolated value (F)
+  def self.extrapolate_data_point(datapoints, capacity_description, target_property, target_value, property, slope_requirement = nil)
+    datapoints = datapoints.select { |dp| dp.capacity_description == capacity_description }
 
-    target_dp = data.find { |dp| dp.outdoor_temperature == target_odb }
+    target_dp = datapoints.find { |dp| dp.send(target_property) == target_value }
     if not target_dp.nil?
       return target_dp.send(property)
     end
 
-    # Property can be :capacity, :efficiency_cop, etc.
-    user_odbs = data.map { |dp| dp.outdoor_temperature }.uniq.sort
+    user_vals = datapoints.map { |dp| dp.send(target_property) }.uniq.sort
 
-    right_odb = user_odbs.find { |e| e > target_odb }
-    left_odb = user_odbs.reverse.find { |e| e < target_odb }
-    if right_odb.nil?
-      # extrapolation
-      right_odb = user_odbs[-1]
-      left_odb = user_odbs[-2]
-    elsif left_odb.nil?
-      # extrapolation
-      right_odb = user_odbs[1]
-      left_odb = user_odbs[0]
+    high_val = user_vals.find { |v| v > target_value }
+    low_val = user_vals.reverse.find { |v| v < target_value }
+    if user_vals.size == 1
+      high_val = low_val if high_val.nil?
+      low_val = high_val if low_val.nil?
+    elsif high_val.nil?
+      high_val = user_vals[-1]
+      low_val = user_vals[-2]
+    elsif low_val.nil?
+      high_val = user_vals[1]
+      low_val = user_vals[0]
     end
-    right_dp = data.find { |dp| dp.outdoor_temperature == right_odb }
-    left_dp = data.find { |dp| dp.outdoor_temperature == left_odb }
+    high_dp = datapoints.find { |dp| dp.send(target_property) == high_val }
+    low_dp = datapoints.find { |dp| dp.send(target_property) == low_val }
 
-    slope = (right_dp.send(property) - left_dp.send(property)) / (right_odb - left_odb)
-    val = (target_odb - left_odb) * slope + left_dp.send(property)
+    # puts "#{datapoints.map{ |dp| dp.send(target_property)}}, #{high_val}, #{low_val}"
+    val = MathTools.interp2(target_value, low_val, high_val, low_dp.send(property), high_dp.send(property))
+
+    if not slope_requirement.nil?
+      slope = (high_dp.send(property) - low_dp.send(property)) / (high_dp.send(target_property) - low_dp.send(target_property))
+      if (slope_requirement == :negative) && (slope >= 0 || slope.nan?)
+        return 999999.0
+      elsif (slope_requirement == :positive) && (slope.to_f <= 0 || slope.nan?)
+        return -999999.0
+      end
+    end
+
+    if val.nan?
+      fail 'Unexpected error'
+    end
+
     return val
   end
 
-  # TODO
+  # Adds datapoints at intermediate outdoor drybulb temperatures to ensure EIR performance is appropriately
+  # calculated over the full range of equipment operation. An adaptive step size is used to ensure we
+  # reasonably reflect the extrapolation of net power/capacity curves without adding too many points and
+  # incurring a runtime penalty.
   #
   # @param data_array [TODO] TODO
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
-  # @param tol [TODO] TODO
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
+  # @param cfm_per_ton [Array<Double>] Rated CFM/ton at each speed
+  # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
   # @return [nil]
-  def self.add_data_point_adaptive_step_size(data_array, mode, tol = 0.1)
-    data_array.each do |data|
+  def self.add_data_point_adaptive_step_size(data_array, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+    tol = 0.2 # Good balance between runtime performance and accuracy
+    data_array.each_with_index do |data, speed|
       data_sorted = data.sort_by { |dp| dp.outdoor_temperature }
       data_sorted.each_with_index do |dp, i|
         next unless i < (data_sorted.size - 1)
 
-        cap_diff = data_sorted[i + 1].gross_capacity - dp.gross_capacity
-        odb_diff = data_sorted[i + 1].outdoor_temperature - dp.outdoor_temperature
-        cop_diff = data_sorted[i + 1].gross_efficiency_cop - dp.gross_efficiency_cop
+        dp2 = data_sorted[i + 1]
         if mode == :clg
-          eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB }.gross_efficiency_cop
+          eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB }.efficiency_cop
         else
-          eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB }.gross_efficiency_cop
+          eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB }.efficiency_cop
         end
-        eir_diff = ((1 / data_sorted[i + 1].gross_efficiency_cop) / eir_rated) - ((1 / dp.gross_efficiency_cop) / eir_rated)
+        eir_diff = ((1 / dp2.efficiency_cop) / eir_rated) - ((1 / dp.efficiency_cop) / eir_rated)
         n_pt = (eir_diff.abs / tol).ceil() - 1
-        eir_interval = eir_diff / (n_pt + 1)
         next if n_pt < 1
 
-        for i in 1..n_pt
+        for j in 1..n_pt
           if mode == :clg
             new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
           else
             new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
           end
-          new_eir_normalized = (1 / dp.gross_efficiency_cop) / eir_rated + eir_interval * i
-          new_dp.gross_efficiency_cop = (1 / (new_eir_normalized * eir_rated))
-          new_dp.outdoor_temperature = odb_diff / cop_diff * (new_dp.gross_efficiency_cop - dp.gross_efficiency_cop) + dp.outdoor_temperature
-          new_dp.gross_capacity = cap_diff / odb_diff * (new_dp.outdoor_temperature - dp.outdoor_temperature) + dp.gross_capacity
+          # Interpolate based on net power and capacity per RESNET MINHERS Addendum 82.
+          new_dp.input_power = dp.input_power + Float(j) / (n_pt + 1) * (dp2.input_power - dp.input_power)
+          new_dp.capacity = dp.capacity + Float(j) / (n_pt + 1) * (dp2.capacity - dp.capacity)
+          new_dp.outdoor_temperature = dp.outdoor_temperature + Float(j) / (n_pt + 1) * (dp2.outdoor_temperature - dp.outdoor_temperature)
+          new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
+          new_dp.capacity_description = dp.capacity_description
+          convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
           data << new_dp
         end
       end
@@ -3098,8 +3168,8 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
-  # @param max_rated_fan_cfm [TODO] TODO
-  # @param weather_max_drybulb [TODO] TODO
+  # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
+  # @param weather_max_drybulb [Double] Maximum outdoor drybulb temperature
   # @param has_deadband_control [Boolean] Whether to apply on off thermostat deadband
   # @return [TODO] TODO
   def self.create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm, weather_max_drybulb, has_deadband_control = false)
@@ -3244,9 +3314,9 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
-  # @param max_rated_fan_cfm [TODO] TODO
-  # @param weather_min_drybulb [TODO] TODO
-  # @param defrost_model_type [TODO] TODO
+  # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
+  # @param weather_min_drybulb [Double] Minimum outdoor drybulb temperature
+  # @param defrost_model_type [String] Defrost model type (HPXML::AdvancedResearchDefrostModelTypeXXX)
   # @param p_dot_defrost [TODO] TODO
   # @param has_deadband_control [Boolean] Whether to apply on off thermostat deadband
   # @return [TODO] TODO
@@ -3345,7 +3415,7 @@ module HVAC
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[0]))
-        defrost_time_fraction = 0.1 if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced # 6min/hr
+        defrost_time_fraction = 0.1 if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced # 6 min/hr
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
@@ -3364,7 +3434,7 @@ module HVAC
         stage.setGrossRatedHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
         stage.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[i]))
         htg_coil.addStage(stage)
-        defrost_time_fraction = 0.06667 if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced # 4min/hr
+        defrost_time_fraction = 0.06667 if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced # 4 min/hr
       end
     end
 
@@ -3510,13 +3580,13 @@ module HVAC
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or OpenStudio::Model::CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
-  # @param is_onoff_thermostat_ddb [Boolean] Whether to apply on off thermostat deadband
+  # @param has_deadband_control [Boolean] Whether to apply on off thermostat deadband
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
   # @return [nil]
-  def self.add_supplemental_coil_ems_program(model, htg_supp_coil, control_zone, htg_coil, is_onoff_thermostat_ddb, cooling_system)
+  def self.add_supplemental_coil_ems_program(model, htg_supp_coil, control_zone, htg_coil, has_deadband_control, cooling_system)
     return if htg_supp_coil.nil?
     return unless cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
-    return unless is_onoff_thermostat_ddb
+    return unless has_deadband_control
     return if htg_supp_coil.is_a? OpenStudio::Model::CoilHeatingElectricMultiStage
 
     # Sensors
@@ -3761,12 +3831,12 @@ module HVAC
   # @param unitary_system [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or OpenStudio::Model::CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
-  # @param is_onoff_thermostat_ddb [Boolean] Whether to apply on off thermostat deadband
+  # @param has_deadband_control [Boolean] Whether to apply on off thermostat deadband
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
   # @return [nil]
-  def self.add_two_speed_staging_ems_program(model, unitary_system, htg_supp_coil, control_zone, is_onoff_thermostat_ddb, cooling_system)
+  def self.add_two_speed_staging_ems_program(model, unitary_system, htg_supp_coil, control_zone, has_deadband_control, cooling_system)
     # Note: Currently only available in 1 min time step
-    return unless is_onoff_thermostat_ddb
+    return unless has_deadband_control
     return unless cooling_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
 
     number_of_timestep_logged = 5 # wait 5 mins to check demand

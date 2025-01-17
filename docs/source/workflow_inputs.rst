@@ -3226,21 +3226,23 @@ Currently detailed performance data can only be provided for variable-speed HVAC
 Detailed Cooling Performance Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For air-source HVAC systems with detailed cooling performance data, two or more pairs of minimum/maximum capacity data are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
+For air-source HVAC systems with detailed cooling performance data, pairs of performance datapoints are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Cooling capacity or capacity fraction at the specified outdoor temperature
-  ``CapacityDescription``                         string                    See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
-  ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Cooling capacity (or fraction) at the specified outdoor temperature
+  ``CapacityDescription``                         string                    See [#]_     Yes                  Cooling capacity description
+  ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] One of the minimum/maximum datapoint pairs must occur at the 95F rated outdoor temperature condition.
-         The other datapoint pairs can be at any temperature.
+  .. [#] Pairs of detailed performance datapoints at outdoor temperatures of 82F and 95F are required.
+         An additional optional pair is allowed at a user-specified temperature greater than 95F.
+         Datapoints at additional outdoor temperatures are not currently supported.
   .. [#] If Capacity is provided, the nominal capacity (``CoolingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
+  .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
 
 In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
 Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
@@ -3250,21 +3252,23 @@ Note that when detailed cooling performance data is provided, some other inputs 
 Detailed Heating Performance Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For air-source HVAC systems with detailed heating performance data, two or more pairs of minimum/maximum capacity data are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
+For air-source HVAC systems with detailed heating performance data, pairs of performance datapoints are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Heating capacity or capacity fraction at the specified outdoor temperature
-  ``CapacityDescription``                         string                    See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
-  ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Heating capacity (or fraction) at the specified outdoor temperature
+  ``CapacityDescription``                         string                    See [#]_     Yes                  Heating capacity description
+  ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] One of the minimum/maximum datapoint pairs must occur at the 47F rated outdoor temperature condition.
-         The other datapoint pairs can be at any temperature.
+  .. [#] Pairs of detailed performance datapoints at outdoor temperatures of 47F, 17F, and 5F are required.
+         An additional optional pair is allowed at a user-specified temperature less than 5F.
+         Datapoints at additional outdoor temperatures are not currently supported.
   .. [#] If Capacity is provided, the nominal capacity (``HeatingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
+  .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
 
 In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
 Note that when detailed cooling performance data is provided, some other inputs (like HSPF and HeatingCapacityRetention) are ignored.
