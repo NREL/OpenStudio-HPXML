@@ -126,6 +126,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # Write updated HPXML object (w/ defaults) to file for inspection
       XMLHelper.write_file(hpxml.to_doc, args[:hpxml_defaults_path])
 
+      # When modeling whole SFA/MF buildings, remove shared systems upfront
+      # from the HPXML object; handle them at the end once the full model
+      # has been created.
+      shared_systems_map = {}
+      if hpxml.header.whole_sfa_or_mf_building_sim
+        shared_systems_map = hpxml.delete_shared_systems_serving_multiple_dwelling_units()
+      end
+
       # Create OpenStudio unit model(s)
       hpxml_osm_map = {}
       hpxml.buildings.each do |hpxml_bldg|
@@ -141,9 +149,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
       end
 
-      # Merge unit models into final model
       if hpxml.buildings.size > 1
+        # Merge unit models into final model
         Model.merge_unit_models(model, hpxml_osm_map)
+
+        # Apply shared systems
+        HVAC.apply_shared_systems(runner, model, hpxml, hpxml_osm_map, shared_systems_map)
       end
 
       # Create EnergyPlus outputs
