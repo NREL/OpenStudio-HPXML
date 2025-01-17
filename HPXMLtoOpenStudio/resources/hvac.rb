@@ -568,8 +568,8 @@ module HVAC
 
     htg_cfm = heat_pump.heating_airflow_cfm
     clg_cfm = heat_pump.cooling_airflow_cfm
-    htg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? htg_cfm : (htg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
-    clg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? clg_cfm : (clg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
+    htg_cfm_rated = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * hp_ap.heat_capacity_ratios[-1] * hp_ap.heat_rated_cfm_per_ton[-1]
+    clg_cfm_rated = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * hp_ap.cool_capacity_ratios[-1] * hp_ap.cool_rated_cfm_per_ton[-1]
 
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = EPlus::FluidWater
@@ -654,7 +654,7 @@ module HVAC
         cap_faf_curve = Model.add_curve_quadratic(
           model,
           name: "Cool-CAP-fAF#{i + 1}",
-          coeff: hp_ap.cool_cap_faf_spec[i],
+          coeff: hp_ap.cool_cap_fflow_spec[i],
           min_x: 0, max_x: 2, min_y: 0, max_y: 2
         )
         cap_fwf_curve = Model.add_curve_quadratic(
@@ -672,7 +672,7 @@ module HVAC
         eir_faf_curve = Model.add_curve_quadratic(
           model,
           name: "Cool-EIR-fAF#{i + 1}",
-          coeff: hp_ap.cool_eir_faf_spec[i],
+          coeff: hp_ap.cool_eir_fflow_spec[i],
           min_x: 0, max_x: 2, min_y: 0, max_y: 2
         )
         eir_fwf_curve = Model.add_curve_quadratic(
@@ -722,7 +722,7 @@ module HVAC
         cap_faf_curve = Model.add_curve_quadratic(
           model,
           name: "Heat-CAP-fAF#{i + 1}",
-          coeff: hp_ap.heat_cap_faf_spec[i],
+          coeff: hp_ap.heat_cap_fflow_spec[i],
           min_x: 0, max_x: 2, min_y: 0, max_y: 2
         )
         cap_fwf_curve = Model.add_curve_quadratic(
@@ -740,7 +740,7 @@ module HVAC
         eir_faf_curve = Model.add_curve_quadratic(
           model,
           name: "Heat-EIR-fAF#{i + 1}",
-          coeff: hp_ap.heat_eir_faf_spec[i],
+          coeff: hp_ap.heat_eir_fflow_spec[i],
           min_x: 0, max_x: 2, min_y: 0, max_y: 2
         )
         eir_fwf_curve = Model.add_curve_quadratic(
@@ -2265,10 +2265,10 @@ module HVAC
                                 [0.4423161030, 0.0346534683, 0.0000043691, 0.0046060534, -0.0001393465, -0.0002316000]]
       hp_ap.cool_eir_ft_spec = [[1.0242580586, -0.0549907581, 0.0017735749, 0.0186562274, 0.0008900852, -0.0016973518],
                                 [1.0763155558, -0.0396246303, 0.0010677382, 0.0074160145, 0.0006781567, -0.0009009811]]
-      hp_ap.cool_cap_faf_spec = [[0.9064, 0.0793, 0.0143],
-                                 [0.8551, 0.1688, -0.0238]]
-      hp_ap.cool_eir_faf_spec = [[0.7931, 0.2623, -0.0552],
-                                 [0.8241, 0.1523, 0.0234]]
+      hp_ap.cool_cap_fflow_spec = [[0.9064, 0.0793, 0.0143],
+                                   [0.8551, 0.1688, -0.0238]]
+      hp_ap.cool_eir_fflow_spec = [[0.7931, 0.2623, -0.0552],
+                                   [0.8241, 0.1523, 0.0234]]
       hp_ap.cool_cap_fwf_spec = [[0.8387, 0.2903, -0.129],
                                  [0.815, 0.325, -0.14]]
       hp_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
@@ -2283,10 +2283,10 @@ module HVAC
                                 [0.6668920089, -0.0015817909, 0.0000027692, 0.0189198107, -0.0000372655, -0.0000393615]]
       hp_ap.heat_eir_ft_spec = [[0.8057698794, 0.0316014252, 0.0000380531, -0.0228123504, 0.0004336379, -0.0004522084],
                                 [0.8046419585, 0.0233384227, 0.0000376912, -0.0170224134, 0.0003382804, -0.0002368130]]
-      hp_ap.heat_cap_faf_spec = [[0.8649, 0.1112, 0.0238],
-                                 [0.8264, 0.1593, 0.0143]]
-      hp_ap.heat_eir_faf_spec = [[1.2006, -0.1943, -0.0062],
-                                 [1.2568, -0.2856, 0.0288]]
+      hp_ap.heat_cap_fflow_spec = [[0.8649, 0.1112, 0.0238],
+                                   [0.8264, 0.1593, 0.0143]]
+      hp_ap.heat_eir_fflow_spec = [[1.2006, -0.1943, -0.0062],
+                                   [1.2568, -0.2856, 0.0288]]
       hp_ap.heat_cap_fwf_spec = [[0.7112, 0.5027, -0.2139],
                                  [0.769, 0.399, -0.168]]
       hp_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
@@ -5072,8 +5072,8 @@ module HVAC
         end
       elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit
         num_speeds = clg_or_htg_coil.speeds.size
-        cap_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
-        eir_pow_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+        cap_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.totalCoolingCapacityFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
+        eir_pow_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.energyInputRatioFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
       elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
         num_speeds = 1
         cap_fff_curves = [clg_or_htg_coil.totalCoolingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
@@ -5119,8 +5119,8 @@ module HVAC
         end
       elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit
         num_speeds = clg_or_htg_coil.speeds.size
-        cap_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
-        eir_pow_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+        cap_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.totalHeatingCapacityFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
+        eir_pow_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.energyInputRatioFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
       elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit
         num_speeds = 1
         cap_fff_curves = [clg_or_htg_coil.heatingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
@@ -5293,6 +5293,8 @@ module HVAC
       clg_cfm = cooling_system.cooling_airflow_cfm
       if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized || clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
         cool_airflow_rated_defect_ratio = [UnitConversions.convert(clg_cfm, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
+      elsif clg_coil.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
+        cool_airflow_rated_defect_ratio = clg_coil.speeds.zip(clg_ap.cool_fan_speed_ratios).map { |speed, speed_ratio| UnitConversions.convert(clg_cfm * speed_ratio, 'cfm', 'm^3/s') / speed.referenceUnitRatedAirFlowRate - 1.0 }
       elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
         cool_airflow_rated_defect_ratio = clg_coil.stages.zip(clg_ap.cool_fan_speed_ratios).map { |stage, speed_ratio| UnitConversions.convert(clg_cfm * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
       end
@@ -5304,6 +5306,8 @@ module HVAC
       htg_cfm = heating_system.heating_airflow_cfm
       if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
         heat_airflow_rated_defect_ratio = [UnitConversions.convert(htg_cfm, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0]
+      elsif htg_coil.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
+        heat_airflow_rated_defect_ratio = htg_coil.speeds.zip(htg_ap.heat_fan_speed_ratios).map { |speed, speed_ratio| UnitConversions.convert(htg_cfm * speed_ratio, 'cfm', 'm^3/s') / speed.referenceUnitRatedAirFlow - 1.0 }
       elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
         heat_airflow_rated_defect_ratio = htg_coil.stages.zip(htg_ap.heat_fan_speed_ratios).map { |stage, speed_ratio| UnitConversions.convert(htg_cfm * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
       end

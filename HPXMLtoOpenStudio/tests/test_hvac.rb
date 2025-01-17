@@ -1041,7 +1041,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_ground_to_air_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-1-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -1495,7 +1495,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_install_quality_ground_to_air_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-ground-to-air-heat-pump.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-ground-to-air-heat-pump-1-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
