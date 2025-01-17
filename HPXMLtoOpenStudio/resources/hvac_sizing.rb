@@ -2950,18 +2950,18 @@ module HVACSizing
         hvac_sizings.Heat_Airflow = hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed] * UnitConversions.convert(hvac_sizings.Heat_Load, 'Btu/hr', 'ton')
         htg_cap_curve_value = calc_gshp_htg_curve_value(hvac_heating_ap.heat_cap_curve_spec[hvac_heating_speed], mj.heat_setpoint, entering_temp, hvac_sizings.Heat_Airflow)
         hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load / htg_cap_curve_value
-        # For single stage compressor, when heating capacity is much larger than cooling capacity,
-        # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
-        # Fixme: Assume this shouldn't be applied to var speed system, but should this apply to two speed?
-        if hvac_sizings.Heat_Capacity >= 1.5 * hvac_sizings.Cool_Capacity
-          hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load * 0.75
-        end
       elsif [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? hvac_heating.compressor_type
         htg_cap_curve_value = MathTools.biquadratic(mj.heat_setpoint, entering_temp, hvac_heating_ap.heat_cap_ft_spec[hvac_heating_speed])
         hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load / htg_cap_curve_value
       end
       hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
       if hvac_sizings.Cool_Capacity > 0
+        # For single stage compressor, when heating capacity is much larger than cooling capacity,
+        # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
+        # Fixme: Assume this shouldn't be applied to var speed system, but should this apply to two speed?
+        if hvac_sizings.Heat_Capacity >= 1.5 * hvac_sizings.Cool_Capacity && ([HPXML::HVACCompressorTypeSingleStage].include? hvac_heating.compressor_type)
+          hvac_sizings.Heat_Capacity *= 0.75
+        end
         hvac_sizings.Cool_Capacity = [hvac_sizings.Cool_Capacity, hvac_sizings.Heat_Capacity].max
         hvac_sizings.Heat_Capacity = hvac_sizings.Cool_Capacity
 
