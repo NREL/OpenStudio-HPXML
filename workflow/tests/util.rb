@@ -140,11 +140,12 @@ def _get_simulation_annual_results(annual_csv_path, bills_csv_path, panel_csv_pa
   end
 
   # Grab all outputs from reporting measure CSV panel results
-  results = {}
-  CSV.foreach(panel_csv_path) do |row|
-    next if row.nil? || (row.size < 2)
+  if File.exist? panel_csv_path
+    CSV.foreach(panel_csv_path) do |row|
+      next if row.nil? || (row.size < 2)
 
-    results[row[0]] = Float(row[1])
+      results[row[0]] = Float(row[1])
+    end
   end
 
   return results

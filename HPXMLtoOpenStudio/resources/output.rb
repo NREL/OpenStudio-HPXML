@@ -1077,19 +1077,19 @@ module Outputs
           end
         elsif service_feeder.type == HPXML::ElectricPanelLoadTypePermanentSpaHeater
           service_feeder.components.each do |component|
-            sh += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
+            sh += component.heater_branch_circuit.occupied_spaces * unit_multiplier unless component.heater_branch_circuit.nil?
           end
         elsif service_feeder.type == HPXML::ElectricPanelLoadTypePermanentSpaPump
           service_feeder.components.each do |component|
-            sp += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
+            sp += component.pump_branch_circuit.occupied_spaces * unit_multiplier unless component.pump_branch_circuit.nil?
           end
         elsif service_feeder.type == HPXML::ElectricPanelLoadTypePoolHeater
           service_feeder.components.each do |component|
-            ph += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
+            ph += component.heater_branch_circuit.occupied_spaces * unit_multiplier unless component.heater_branch_circuit.nil?
           end
         elsif service_feeder.type == HPXML::ElectricPanelLoadTypePoolPump
           service_feeder.components.each do |component|
-            pp += component.branch_circuit.occupied_spaces * unit_multiplier unless component.branch_circuit.nil?
+            pp += component.pump_branch_circuit.occupied_spaces * unit_multiplier unless component.pump_branch_circuit.nil?
           end
         elsif service_feeder.type == HPXML::ElectricPanelLoadTypeWellPump
           service_feeder.components.each do |component|

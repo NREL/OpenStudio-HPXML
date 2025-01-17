@@ -427,6 +427,30 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 30, 1)
   end
 
+  def test_sample_files
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    epw_path = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'weather', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'))
+    weather = WeatherFile.new(epw_path: epw_path, runner: nil)
+
+    Dir["#{@sample_files_path}/*.xml"].each do |hpxml|
+      hpxml_name = File.basename(hpxml)
+      hpxml, hpxml_bldg = _create_hpxml(hpxml_name, hpxml_name)
+      hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased]
+
+      Defaults.apply(runner, hpxml, hpxml_bldg, weather)
+      electric_panel = hpxml_bldg.electric_panels[0]
+
+      assert_operator(electric_panel.capacity_total_watts[0], :>, 0.0)
+      assert_operator(electric_panel.capacity_total_amps[0], :>, 0.0)
+      assert_operator(electric_panel.capacity_headroom_amps[0], :>, 0.0)
+      assert_operator(electric_panel.breaker_spaces_total, :>, 0)
+      assert_operator(electric_panel.breaker_spaces_occupied, :>, 0)
+      assert_operator(electric_panel.breaker_spaces_headroom, :>, 0)
+    end
+  end
+
+  private
+
   def _test_service_feeder_power_and_breaker_spaces(hpxml_bldg, type, power, occupied_spaces)
     service_feeders = hpxml_bldg.electric_panels[0].service_feeders
     sfs = service_feeders.select { |sf| sf.type == type }
