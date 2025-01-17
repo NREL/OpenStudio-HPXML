@@ -2923,6 +2923,7 @@ module HVAC
         dp95f = data.find { |dp| dp.outdoor_temperature == 95.0 }
         min_power = 0.5 * dp82f.input_power
         odb_at_min_power = MathTools.interp2(min_power, dp82f.input_power, dp95f.input_power, 82.0, 95.0)
+        odb_at_min_power = -999999.0 if dp82f.input_power >= dp95f.input_power # Exclude if power increasing at lower ODB temperatures
         min_odb = [odb_at_min_power, low_odb_at_zero_power, low_odb_at_zero_capacity, 60.0].max
         if min_odb < user_odbs.min
           outdoor_dry_bulbs << min_odb
