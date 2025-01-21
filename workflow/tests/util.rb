@@ -1134,7 +1134,8 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
    'Temperature:',
    'Utility Bills:',
    'HVAC Zone Design Load:',
-   'HVAC Space Design Load:'].each do |key|
+   'HVAC Space Design Load:',
+   'Electric Panel Load: 2023 Existing Dwelling Meter-Based:'].each do |key|
     annual_results_1x.delete_if { |k, _v| k.start_with? key }
     annual_results_10x.delete_if { |k, _v| k.start_with? key }
     monthly_results_1x.delete_if { |k, _v| k.start_with? key }
