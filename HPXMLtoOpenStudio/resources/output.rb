@@ -1352,13 +1352,28 @@ module Outputs
 
     # Meter-based capacities
     if not peak_fuels.nil?
+      return results_out if hpxml_header.whole_sfa_or_mf_building_sim && (hpxml_bldgs.size > 1)
+
       hpxml_header.service_feeders_load_calculation_types.each do |service_feeders_load_calculation_type|
         next unless service_feeders_load_calculation_type.include?('Meter-Based')
 
+        capacity_total_watt = 0.0
+        capacity_total_amp = 0.0
+        capacity_headroom_amp = 0.0
+        hpxml_bldgs.each do |hpxml_bldg|
+          hpxml_bldg.electric_panels.each do |electric_panel|
+            ctw, cta, cha = ElectricPanel.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, service_feeders_load_calculation_type)
+
+            capacity_total_watt += ctw
+            capacity_total_amp += cta
+            capacity_headroom_amp += cha
+          end
+        end
+
         results_out << [line_break]
-        results_out << ["Electric Panel Load: #{service_feeders_load_calculation_type}: Total Load (W)", hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, service_feeders_load_calculation_type)[0] }.sum(0.0) }.sum(0.0).round(1)]
-        results_out << ["Electric Panel Load: #{service_feeders_load_calculation_type}: Total Capacity (A)", hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, service_feeders_load_calculation_type)[1] }.sum(0.0) }.sum(0.0).round(1)]
-        results_out << ["Electric Panel Load: #{service_feeders_load_calculation_type}: Headroom Capacity (A)", hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| ElectricPanel.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, service_feeders_load_calculation_type)[2] }.sum(0.0) }.sum(0.0).round(1)]
+        results_out << ["Electric Panel Load: #{service_feeders_load_calculation_type}: Total Load (W)", capacity_total_watt.round(1)]
+        results_out << ["Electric Panel Load: #{service_feeders_load_calculation_type}: Total Capacity (A)", capacity_total_amp.round(1)]
+        results_out << ["Electric Panel Load: #{service_feeders_load_calculation_type}: Headroom Capacity (A)", capacity_headroom_amp.round(1)]
       end
     end
 

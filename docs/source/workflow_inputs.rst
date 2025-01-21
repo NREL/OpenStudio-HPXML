@@ -385,7 +385,8 @@ If not entered, electric panel loads will not be calculated.
 
          \- **2023 Existing Dwelling Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
 
-         If running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling" calculation types, load calculations will be performed on each individual dwelling unit and then summed across units of the building.
+         If running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling Load-Based" calculation types, load calculations will be performed on each individual dwelling unit and then summed across units of the building.
+         Running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling Meter-Based" calculation types is not supported.
 
 See :ref:`panel_outputs` for descriptions of how calculated loads appear in the output files.
 

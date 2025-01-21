@@ -175,8 +175,8 @@ module ElectricPanel
   # @param peak_fuels [Hash] Map of peak building electricity outputs
   # @param service_feeders_load_calculation_type [String] the load calculation type
   # @return [Array<Double, Double, Double>] The capacity (W), the capacity (A), and headroom (A)
-  def self.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, service_feeders_load_calculation_typ)
-    if service_feeders_load_calculation_typ == HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased
+  def self.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, service_feeders_load_calculation_type)
+    if service_feeders_load_calculation_type == HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased
       htg_new = get_panel_load_heating(hpxml_bldg, electric_panel, addition: true)
       clg_new = electric_panel.service_feeders.select { |service_feeder| service_feeder.type == HPXML::ElectricPanelLoadTypeCooling && service_feeder.is_new_load }.map { |pl| pl.power }.sum(0.0)
 
