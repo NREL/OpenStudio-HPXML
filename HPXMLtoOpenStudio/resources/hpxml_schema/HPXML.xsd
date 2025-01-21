@@ -6627,23 +6627,31 @@
 			</xs:element>
 			<xs:element minOccurs="0" name="Headroom" type="IntegerGreaterThanOrEqualToZero">
 				<xs:annotation>
-					<xs:documentation/>
+					<xs:documentation>The number of open breaker spaces.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="RatedTotalSpaces" type="IntegerGreaterThanZero"/>
+			<xs:element minOccurs="0" name="RatedTotalSpaces" type="IntegerGreaterThanZero">
+				<xs:annotation>
+					<xs:documentation>The rated number of breaker spaces.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element minOccurs="0" name="BranchCircuits">
 				<xs:annotation>
-					<xs:documentation>FIXME</xs:documentation>
+					<xs:documentation>Records the branch circuit layout and breaker usage of the electrical panel.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element maxOccurs="unbounded" minOccurs="1" name="BranchCircuit" type="BranchCircuitType"/>
+						<xs:element maxOccurs="unbounded" minOccurs="1" name="BranchCircuit" type="BranchCircuitType">
+							<xs:annotation>
+								<xs:documentation>Each branch circuit is protected by an overcurrent protection device. However, a breaker can protect more than one branch circuit. For example, a tandem breaker takes up one breaker space but serves two branch circuits. Each BranchCircuit records the attributes of a branch circuit, including the voltage served, max current rating, number of breaker spaces occupied, and what system(s) it is connected to.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="ServiceFeeders">
 				<xs:annotation>
-					<xs:documentation>FIXME</xs:documentation>
+					<xs:documentation>Records the electrical loads of major electric and other specific systems for sizing the service entrance conductors (wires going into the main electrical panel from the utility pole) or the feeder conductors (wires between electrical panels) according to the National Electrical Code. This calculation is known as the service load or feeder load calculation. The electrical load refers to the nominal or nameplate power rating of a device in Volt-Amps or Watts. It can be calculated as the product of voltage and full load amp (FLA) or rated load amp (RLA). Minimum circuit amp (MCA) or maximum overcurrent rating can be used but are more conservative than FLA or RLA.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
@@ -6684,7 +6692,7 @@
 			<xs:element minOccurs="0" name="LoadType" type="DemandLoadLoadType"/>
 			<xs:element minOccurs="0" name="PowerRating" type="HPXMLDouble">
 				<xs:annotation>
-					<xs:documentation>[W]</xs:documentation>
+					<xs:documentation>Volt-Amps [VA] or Watts [W]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" name="IsNewLoad" type="HPXMLBoolean">
