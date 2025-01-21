@@ -138,6 +138,23 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0, 0)
     _test_service_feeder_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2011, 1)
 
+    test_name = '240v room air conditioner only'
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-room-ac-only.xml', test_name)
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    service_feeders = hpxml_bldg.electric_panels[0].service_feeders
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        component_idrefs: [hpxml_bldg.cooling_systems[0].id])
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeCooling,
+                        component_idrefs: [hpxml_bldg.cooling_systems[0].id])
+
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_service_feeder_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0, 0)
+    _test_service_feeder_power_and_breaker_spaces(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 4022, 2)
+
     test_name = 'Gas furnace only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-furnace-gas-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
