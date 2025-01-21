@@ -402,7 +402,7 @@ base-misc-loads-large-uncommon2.xml
 base-misc-loads-none.xml
 base-misc-neighbor-shading.xml
 base-misc-shielding-of-home.xml
-base-misc-unit-multiplier-detailed-electric_panel.xml
+base-misc-unit-multiplier-detailed-electric-panel.xml
 base-misc-unit-multiplier.xml
 base-misc-usage-multiplier.xml
 base-pv-battery-ah.xml
