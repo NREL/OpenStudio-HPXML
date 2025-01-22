@@ -842,6 +842,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'dhw-setpoint-low' => ['Hot water setpoint should typically be greater than or equal to 110 deg-F.'],
                               'erv-atre-low' => ['Adjusted total recovery efficiency should typically be at least half of the adjusted sensible recovery efficiency.'],
                               'erv-tre-low' => ['Total recovery efficiency should typically be at least half of the sensible recovery efficiency.'],
+                              'ev-charging-methods' => ['Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'],
                               'fuel-load-type-other' => ["Fuel load type 'other' is not currently handled, the fuel load will not be modeled."],
                               'garage-ventilation' => ['Ventilation fans for the garage are not currently modeled.'],
                               'heat-pump-low-backup-switchover-temp' => ['BackupHeatingSwitchoverTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
@@ -904,6 +905,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'slab-large-exposed-perimeter' => ['Slab exposed perimeter is more than twice the slab area, this may indicate an input error.'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'unit-multiplier' => ['NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'],
+                              'vehicle-phev' => ["Vehicle type 'PlugInHybridElectricVehicle' is not currently handled, the vehicle will not be modeled."],
                               'window-exterior-shading-types' => ["Exterior shading type is 'external overhangs', but overhangs are explicitly defined; exterior shading type will be ignored.",
                                                                   "Exterior shading type is 'building', but neighbor buildings are explicitly defined; exterior shading type will be ignored."],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
@@ -947,6 +949,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'erv-tre-low'
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-erv.xml')
         hpxml_bldg.ventilation_fans[0].total_recovery_efficiency = 0.1
+      when 'ev-charging-methods'
+        hpxml, _hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-plug-load-ev.xml')
       when 'garage-ventilation'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.ventilation_fans.add(id: 'VentilationFan1',
@@ -1065,6 +1069,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'unit-multiplier'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.building_construction.number_of_units = 5
+      when 'vehicle-phev'
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
+        hpxml_bldg.vehicles[0].vehicle_type = 'PlugInHybridElectricVehicle'
       when 'window-exterior-shading-types'
         hpxml, _hpxml_bldg = _create_hpxml('base-enclosure-windows-shading-types-detailed.xml')
       when 'wrong-units'
@@ -1857,9 +1864,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'schedule-file-and-operating-mode' => ["Both 'water_heater_operating_mode' schedule file and operating mode provided; the latter will be ignored."],
                               'schedule-file-max-power-ratio-with-single-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-two-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
-                              'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'],
-                              'ev-charging-methods' => ['Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'],
-                              'vehicle-phev' => ["Unexpected vehicle type 'PlugInHybridElectricVehicle'. Detailed vehicle charging will not be modeled."] }
+                              'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
@@ -2014,11 +2019,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'schedule-file-max-power-ratio-with-separate-backup-system'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
-      when 'ev-charging-methods'
-        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-plug-load-ev.xml')
-      when 'vehicle-phev'
-        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
-        hpxml_bldg.vehicles[0].vehicle_type = 'PlugInHybridElectricVehicle'
       else
         fail "Unhandled case: #{warning_case}."
       end

@@ -2685,7 +2685,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('vehicle_type', false)
     arg.setDisplayName('Vehicle: Type')
     arg.setDescription('The type of vehicle present at the home.')
-    arg.setDefaultValue('none')
+    arg.setDefaultValue(Constants::None)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_battery_capacity', false)
@@ -2700,17 +2700,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('kWh')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fuel_economy_combined', false)
-    arg.setDisplayName('Vehicle: Combined Fuel Economy')
-    arg.setDescription("The combined fuel economy of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
-    args << arg
-
     fuel_economy_units_choices = OpenStudio::StringVector.new
     fuel_economy_units_choices << HPXML::UnitsKwhPerMile
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('vehicle_fuel_economy_units', fuel_economy_units_choices, false)
     arg.setDisplayName('Vehicle: Combined Fuel Economy Units')
     arg.setDescription("The combined fuel economy units of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fuel_economy_combined', false)
+    arg.setDisplayName('Vehicle: Combined Fuel Economy')
+    arg.setDescription("The combined fuel economy of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_miles_driven_per_year', false)
@@ -6972,9 +6972,8 @@ module HPXMLFile
                                  charging_power: args[:ev_charger_power])
     end
 
-    if args[:vehicle_type] == HPXML::VehicleTypeBEV
-      ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV }
-      hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
+    if args[:vehicle_type] != Constants::None
+      hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
                               vehicle_type: args[:vehicle_type],
                               nominal_capacity_kwh: args[:vehicle_battery_capacity],
                               usable_capacity_kwh: args[:vehicle_battery_usable_capacity],

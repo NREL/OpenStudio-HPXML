@@ -14,9 +14,10 @@ module Vehicle
   def self.apply(runner, model, spaces, hpxml_bldg, schedules_file)
     hpxml_bldg.vehicles.each do |vehicle|
       if vehicle.vehicle_type != HPXML::VehicleTypeBEV
-        runner.registerWarning("Unexpected vehicle type '#{vehicle.vehicle_type}'. Detailed vehicle charging will not be modeled.")
+        # Warning issued by Schematron validator
         next
       end
+
       apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
     end
   end
@@ -90,19 +91,8 @@ module Vehicle
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
-    model.getElectricEquipments.sort.each do |ee|
-      if ee.endUseSubcategory.start_with? Constants::ObjectTypeMiscElectricVehicleCharging
-        runner.registerWarning('Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.')
-        return
-      end
-    end
-
     # Assign charging and vehicle space
     ev_charger = vehicle.ev_charger
-    if ev_charger.nil?
-      runner.registerWarning('Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.')
-      return
-    end
     vehicle.location = ev_charger.location
 
     # Calculate hours/week and effective discharge power

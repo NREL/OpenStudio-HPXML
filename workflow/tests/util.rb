@@ -230,14 +230,17 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?
       next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
     end
-    if !hpxml_bldg.vehicles.empty? && hpxml_bldg.vehicles[0].ev_charger_idref.nil?
+    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && vehicle.ev_charger_idref.nil? }
       next if message.include? 'Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.'
     end
-    if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.header.schedules_filepaths.empty? && !hpxml_bldg.vehicles[0].ev_charger_idref.nil? && hpxml_bldg.vehicles[0].ev_charging_weekday_fractions.nil?
+    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? && vehicle.ev_charging_weekday_fractions.nil? } && !hpxml_bldg.header.schedules_filepaths.empty?
       next if message.include? 'A total of 1058.0 driving hours could not be met due to insufficient vehicle charge. This issue may result from a combination EV battery parameters, charging power, and driving or discharging schedules.'
     end
-    if !hpxml_bldg.vehicles.empty? && !hpxml_bldg.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }.empty?
+    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV } && hpxml_bldg.plug_loads.any? { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
       next if message.include? 'Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'
+    end
+    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type != HPXML::VehicleTypeBEV }
+      next if message.include?('Vehicle type') && message.include?('is not currently handled, the vehicle will not be modeled')
     end
     if hpxml_path.include? 'base-location-capetown-zaf.xml'
       next if message.include? 'OS Message: Minutes field (60) on line 9 of EPW file'

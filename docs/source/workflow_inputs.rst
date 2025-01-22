@@ -426,7 +426,7 @@ For these simulations:
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
-- :ref:`hpxml_batteries` are not currently supported.
+- :ref:`hpxml_batteries` and :ref:`hpxml_vehicles` are not currently supported.
 - :ref:`hpxml_utility_bill_scenarios` using *detailed* :ref:`electricity_rates` are not supported.
 
 .. _building_site:
@@ -4630,10 +4630,13 @@ If not entered, the simulation will not include batteries.
 
   A battery in a home without PV or charging/discharging schedules is assumed to operate as backup and is not modeled.
 
+.. _hpxml_vehicles:
+
 HPXML Vehicles
 **************
 
-A vehicle can be entered in ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle``. Currently only a battery electric vehicle can be modeled with ``/Vehicle/VehicleType/BatteryElectricVehicle``.
+A single battery electric vehicle can be entered in ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle``.
+All other vehicle types are currently not modeled.
 This provides detailed modeling of electric vehicles (batteries and charging/discharging) as an alternative to the simple EV charging in :ref:`plug_loads`.
 If not entered, the simulation will not include a detailed electric vehicle model.
 
@@ -4651,9 +4654,12 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double  kWh or Ah  >= 0                     No        See [#]_
   ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_
   ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No
-  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions``                        array                                       No        See [#]_     24 comma-separated weekday fractions
-  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions``                        array                                       No                     24 comma-separated weekday fractions
-  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_     12 comma-separated monthly multipliers
+  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleChargingFractions``                array                                       No        See [#]_     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleChargingFractions``                array                                       No                     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleChargingMultipliers``              array                                       No        See [#]_     12 comma-separated monthly multipliers
+  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleDischargingFractions``             array                                       No        See [#]_     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleDischargingFractions``             array                                       No                     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleDischargingMultipliers``           array                                       No        See [#]_     12 comma-separated monthly multipliers
   ===============================================================================================  ======  =========  =======================  ========  ===========  ======================================
 
   .. [#] ConnectedCharger must reference an ``ElectricVehicleCharger``.
@@ -4661,8 +4667,10 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   .. [#] Only the "Li-ion" battery type is supported.
   .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
   .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If WeekdayScheduleChargingFractions or WeekendScheduleChargingFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If MonthlyScheduleChargingMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If WeekdayScheduleDischargingFractions or WeekendScheduleDischargingFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If MonthlyScheduleDischargingMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
 
  .. note::
 

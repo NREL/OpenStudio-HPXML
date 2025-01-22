@@ -2344,6 +2344,19 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.batteries[0].usable_capacity_kwh = nil
     end
 
+    # ------------- #
+    # HPXML Vehicle #
+    # ------------- #
+
+    if ['base-vehicle-multiple.xml'].include? hpxml_file
+      hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
+                              vehicle_type: HPXML::VehicleTypeHybrid,
+                              fuel_economy_units: HPXML::UnitsMPG,
+                              fuel_economy: 44.0,
+                              miles_per_year: 15000.0,
+                              hours_per_week: 10.0)
+    end
+
     # ---------------- #
     # HPXML Appliances #
     # ---------------- #

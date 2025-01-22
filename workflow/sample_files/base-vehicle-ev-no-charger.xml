@@ -510,7 +510,7 @@
         </WaterHeating>
         <Vehicles>
           <Vehicle>
-            <SystemIdentifier id='ElectricVehicle1'/>
+            <SystemIdentifier id='Vehicle1'/>
             <VehicleType>
               <BatteryElectricVehicle/>
             </VehicleType>
