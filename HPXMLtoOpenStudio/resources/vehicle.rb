@@ -93,6 +93,10 @@ module Vehicle
   def self.apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
     # Assign charging and vehicle space
     ev_charger = vehicle.ev_charger
+    if ev_charger.nil?
+      return
+    end
+
     vehicle.location = ev_charger.location
 
     # Calculate hours/week and effective discharge power
