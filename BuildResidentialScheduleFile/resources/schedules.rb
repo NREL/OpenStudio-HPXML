@@ -149,6 +149,8 @@ class ScheduleGenerator
     # shape of mkc_activity_schedules is [n, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
     @ev_occupant_number = get_ev_occupant_number(mkc_activity_schedules)
     occupancy_schedules = generate_occupancy_schedules(mkc_activity_schedules)
+    @schedules[SchedulesFile::Columns[:Occupants].name] = occupancy_schedules[:away_schedule].map { |i| 1.0 - i }
+
     fill_plug_loads_schedule(mkc_activity_schedules, weather)
     fill_lighting_schedule(mkc_activity_schedules, args)
     # Generate schedules for each class of enduse
@@ -190,12 +192,7 @@ class ScheduleGenerator
     sinks = random_shift_and_normalize(sink_activity_sch, random_offset)
     baths = random_shift_and_normalize(bath_activity_sch, random_offset)
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
-
-    # Process appliance and occupancy schedules
-    @schedules.merge!({
-                        SchedulesFile::Columns[:Occupants].name => occupancy_schedules[:away_schedule].map { |i| 1.0 - i },
-                        SchedulesFile::Columns[:HotWaterFixtures].name => fixtures.map { |flow| flow / fixtures.max }
-                      })
+    @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = fixtures.map { |flow| flow / fixtures.max }
     fill_ev_schedules(mkc_activity_schedules, occupancy_schedules[:ev_occupant_presence])
     if @debug
       @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
