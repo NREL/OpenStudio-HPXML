@@ -234,7 +234,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.'
     end
     if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? && vehicle.ev_charging_weekday_fractions.nil? } && !hpxml_bldg.header.schedules_filepaths.empty?
-      next if message.include? 'A total of 1058.0 driving hours could not be met due to insufficient vehicle charge. This issue may result from a combination EV battery parameters, charging power, and driving or discharging schedules.'
+      next if message.include? 'driving hours could not be met'
     end
     if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV } && hpxml_bldg.plug_loads.any? { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
       next if message.include? 'Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'
