@@ -91,9 +91,15 @@ module Vehicle
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
+    if hpxml_bldg.plug_loads.any? { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
+      # Warning issued by Schematron validator
+      return
+    end
+
     # Assign charging and vehicle space
     ev_charger = vehicle.ev_charger
     if ev_charger.nil?
+      # Warning issued by Schematron validator
       return
     end
 
