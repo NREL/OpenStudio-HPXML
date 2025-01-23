@@ -2,6 +2,7 @@
 
 require 'csv'
 require 'matrix'
+require 'byebug'
 # Collection of methods related to the generation of stochastic occupancy schedules.
 class ScheduleGenerator
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -158,7 +159,7 @@ class ScheduleGenerator
     # Apply random offset to schdules to avoid synchronization
     offset_range = 30  # +- 30 minutes offset
     random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
-
+    byebug
     if !@hpxml_bldg.dishwashers.to_a.empty?
       dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
       dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
@@ -931,56 +932,48 @@ class ScheduleGenerator
     # Initialize base schedules
     daily_schedules = get_plugload_daily_schedules(@default_schedules_csv_data, @schedules_csv_data, weather)
 
-    # Generate minute-level schedules
-    plug_loads_other = Array.new(@total_days_in_year * @steps_in_day, 0.0)
-    plug_loads_tv = Array.new(@total_days_in_year * @steps_in_day, 0.0)
-    ceiling_fan = Array.new(@total_days_in_year * @steps_in_day, 0.0)
+    # Generate schedules for each plug load type if it exists
+    if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'other' }
+      plug_loads_other = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_other)
+      @schedules[SchedulesFile::Columns[:PlugLoadsOther].name] = normalize(plug_loads_other)
+    end
 
+    if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'TV other' }
+      plug_loads_tv = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_tv)
+      @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = normalize(plug_loads_tv)
+    end
+
+    if @hpxml_bldg.ceiling_fans.to_a.empty?
+      ceiling_fan = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :ceiling_fan)
+        @schedules[SchedulesFile::Columns[:CeilingFan].name] = normalize(ceiling_fan)
+    end
+  end
+
+  def generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, schedule_type)
+    schedule = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       month = today.month
       is_weekday = ![0, 6].include?(today.wday)
-
       @steps_in_day.times do |step|
         minute = day * 1440 + step * @minutes_per_step
         index_15 = (minute / 15).to_i
-
         # Calculate occupancy percentage
         active_occupancy_percentage = calculate_active_occupancy(mkc_activity_schedules, index_15)
-
         schedule_index = day * @steps_in_day + step
-
-        # Update each schedule type
-        plug_loads_other[schedule_index] = get_value_from_daily_sch(
-          daily_schedules[:plug_loads_other][:weekday],
-          daily_schedules[:plug_loads_other][:weekend],
-          daily_schedules[:plug_loads_other][:monthly],
-          month, is_weekday, minute, active_occupancy_percentage
-        )
-
-        plug_loads_tv[schedule_index] = get_value_from_daily_sch(
-          daily_schedules[:plug_loads_tv][:weekday],
-          daily_schedules[:plug_loads_tv][:weekend],
-          daily_schedules[:plug_loads_tv][:monthly],
-          month, is_weekday, minute, active_occupancy_percentage
-        )
-
-        ceiling_fan[schedule_index] = get_value_from_daily_sch(
-          daily_schedules[:ceiling_fan][:weekday],
-          daily_schedules[:ceiling_fan][:weekend],
-          daily_schedules[:ceiling_fan][:monthly],
+        # Update schedule based on daily schedules and occupancy
+        schedule[schedule_index] = get_value_from_daily_sch(
+          daily_schedules[schedule_type][:weekday],
+          daily_schedules[schedule_type][:weekend],
+          daily_schedules[schedule_type][:monthly],
           month, is_weekday, minute, active_occupancy_percentage
         )
       end
     end
-
-    # Normalize schedules
-    @schedules.merge!({
-                        SchedulesFile::Columns[:PlugLoadsOther].name => normalize(plug_loads_other),
-                        SchedulesFile::Columns[:PlugLoadsTV].name => normalize(plug_loads_tv),
-                        SchedulesFile::Columns[:CeilingFan].name => normalize(ceiling_fan)
-                      })
+      return schedule
   end
+
+
 
   # Calculate the percentage of occupants that are actively present and awake.
   #
@@ -1019,12 +1012,11 @@ class ScheduleGenerator
       end
     end
 
-    # Normalize and copy to garage
     normalized_lighting = normalize(lighting_interior)
-    @schedules.merge!({
-                        SchedulesFile::Columns[:LightingInterior].name => normalized_lighting,
-                        SchedulesFile::Columns[:LightingGarage].name => normalized_lighting
-                      })
+    @schedules[SchedulesFile::Columns[:LightingInterior].name] = normalized_lighting
+    if @hpxml_bldg.has_location(HPXML::LocationGarage)
+      @schedules[SchedulesFile::Columns[:LightingGarage].name] = normalized_lighting
+    end
   end
 
   # Generate the sink schedule based on occupant activities.
