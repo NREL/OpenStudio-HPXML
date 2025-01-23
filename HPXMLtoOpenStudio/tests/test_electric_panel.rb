@@ -439,28 +439,32 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 5500, 2)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 5500)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeWaterHeater], 2)
 
     test_name = 'Electric tankless'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tankless-electric.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 24000, 4)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 24000)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeWaterHeater], 4)
 
     test_name = 'HPWH w/backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 4500, 2)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 4500)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeWaterHeater], 2)
 
     test_name = 'HPWH w/out backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-capacities.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 1064, 2)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 1064)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeWaterHeater], 2)
   end
 
   def test_clothes_dryer_configurations
@@ -472,14 +476,16 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760, 2)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 2)
 
     test_name = 'HP clothes dryer'
     hpxml, _hpxml_bldg = _create_hpxml('base-appliances-modified.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 860, 2)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 860)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 2)
 
     test_name = '120v HP clothes dryer'
     hpxml, hpxml_bldg = _create_hpxml('base-appliances-modified.xml', test_name)
@@ -495,7 +501,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 996, 1)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 996)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 1)
   end
 
   def test_ventilation_fans_configurations
@@ -507,14 +514,16 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 60, 2)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 60)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeMechVent], 2)
 
     test_name = 'Exhaust fan'
     hpxml, _hpxml_bldg = _create_hpxml('base-mechvent-exhaust.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 30, 1)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 30)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeMechVent], 1)
   end
 
   def test_sample_files
