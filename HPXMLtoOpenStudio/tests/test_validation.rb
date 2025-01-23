@@ -254,6 +254,17 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                         'Expected only SystemIdentifier specified',
                                                                         'Expected only SystemIdentifier specified',
                                                                         'Expected only SystemIdentifier specified'],
+                            'multifamily-common-space-whole-sfa-or-mf-building-sim-false' => ['Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true'],
                             'multifamily-reference-appliance' => ['There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
@@ -756,6 +767,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.buildings[1].floors[0].area = 20
         hpxml.buildings[1].rim_joists[1].area = 10
         hpxml.buildings[2].walls[1].area = 20
+      when 'multifamily-common-space-whole-sfa-or-mf-building-sim-false'
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-common-spaces.xml')
+        hpxml.header.whole_sfa_or_mf_building_sim = false
       when 'multifamily-reference-appliance'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
