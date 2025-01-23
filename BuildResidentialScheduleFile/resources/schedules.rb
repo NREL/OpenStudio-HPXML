@@ -2,7 +2,6 @@
 
 require 'csv'
 require 'matrix'
-require 'byebug'
 # Collection of methods related to the generation of stochastic occupancy schedules.
 class ScheduleGenerator
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -159,7 +158,6 @@ class ScheduleGenerator
     # Apply random offset to schdules to avoid synchronization
     offset_range = 30  # +- 30 minutes offset
     random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
-    byebug
     if !@hpxml_bldg.dishwashers.to_a.empty?
       dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
       dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
