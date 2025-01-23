@@ -70,7 +70,7 @@ def create_hpxmls
     num_apply_measures = 1
     if hpxml_path.include?('whole-building.xml')
       num_apply_measures = 6
-    elsif hpxml_path.include?('whole-building-common-spaces.xml')
+    elsif hpxml_path.include?('whole-building-common-spaces')
       num_apply_measures = 8
     end
 
@@ -83,7 +83,7 @@ def create_hpxmls
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
-      elsif hpxml_path.include?('base-bldgtype-mf-whole-building-common-spaces.xml')
+      elsif hpxml_path.include?('base-bldgtype-mf-whole-building-common-spaces')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv")
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
@@ -2547,7 +2547,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   end
 
   # Logic to apply at whole building level, need to be outside hpxml_bldg loop
-  if ['base-bldgtype-mf-whole-building-common-spaces.xml'].include? hpxml_file
+  if ['base-bldgtype-mf-whole-building-common-spaces.xml',
+      'base-bldgtype-mf-whole-building-common-spaces-reverse.xml'].include? hpxml_file
     # basement floor, building0: conditioned, building1: unconditioned
     for i in 0..1
       hpxml.buildings[i].foundation_walls.each do |fnd_wall|
@@ -2636,6 +2637,35 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml.buildings[i].ovens[0].delete
       hpxml.buildings[i].plug_loads.reverse.each do |plug_load|
         plug_load.delete
+      end
+    end
+    if hpxml_file == 'base-bldgtype-mf-whole-building-common-spaces-reverse.xml'
+      surface_id_processed = []
+      hpxml.buildings.each do |bldg|
+        (bldg.walls + bldg.foundation_walls + bldg.rim_joists + bldg.floors).each do |surface|
+          next if surface.sameas_id.nil?
+          next if surface_id_processed.include? surface.id
+
+          sameas_obj = surface.sameas
+          surface_id_processed << surface.id
+          surface_id_processed << sameas_obj.id
+          # clone the hpxml object
+          fully_described_surface = sameas_obj.dup
+          fully_described_surface.exterior_adjacent_to = (fully_described_surface.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace) ? HPXML::LocationOtherHousingUnit : HPXML::LocationOtherMultifamilyBufferSpace
+          if surface.is_a? HPXML::Floor
+            fully_described_surface.floor_or_ceiling = (fully_described_surface.floor_or_ceiling == HPXML::FloorOrCeilingFloor) ? HPXML::FloorOrCeilingCeiling : HPXML::FloorOrCeilingFloor
+          end
+          sameas_surface = surface.dup
+          # modify ids
+          fully_described_surface.id = surface.id
+          sameas_surface.id = sameas_obj.id
+          sameas_surface.sameas_id = surface.id
+          # copy attribute values
+          surface.class::ATTRS.each do |attribute|
+            sameas_obj.send("#{attribute}=", sameas_surface.send(attribute))
+            surface.send("#{attribute}=", fully_described_surface.send(attribute))
+          end
+        end
       end
     end
   end
