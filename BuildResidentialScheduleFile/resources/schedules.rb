@@ -2,7 +2,6 @@
 
 require 'csv'
 require 'matrix'
-
 # Collection of methods related to the generation of stochastic occupancy schedules.
 class ScheduleGenerator
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -64,9 +63,6 @@ class ScheduleGenerator
   def create(args:,
              weather:)
     @schedules = {}
-    ScheduleGenerator.export_columns.each do |col_name|
-      @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
-    end
 
     if @column_names.nil?
       @column_names = SchedulesFile::Columns.values.map { |c| c.name }
@@ -127,11 +123,16 @@ class ScheduleGenerator
     @default_schedules_csv_data = Defaults.get_schedules_csv_data()
     @schedules_csv_data = get_schedules_csv_data()
 
-    # initialize a set of random number generators for each class of enduse
+    # Use independent random number generators for each class of enduse so that when certain
+    # enduses are removed/added in an upgrade run, the schedules for the other enduses are not affected
+    # New class of enduses can be be added to the enduse_types list at the without loss of backwards
+    # compatibility (i.e. ability to generate same schedules for existing enduses with a given seed)
     @prngs = {}
     @prngs[:main] = Random.new(@random_seed)
-    [:hygiene, :dw, :cw, :cd, :ev, :cooking].each do |key|
-      @prngs[key] = @prngs[:main]
+    seed_generator = Random.new(@random_seed)
+    enduse_types = [:hygiene, :dw, :cw, :cd, :ev, :cooking]
+    enduse_types.each do |key|
+      @prngs[key] = Random.new(seed_generator.rand(2**32))
     end
 
     @num_occupants = args[:geometry_num_occupants].to_i
@@ -150,31 +151,49 @@ class ScheduleGenerator
     occupancy_schedules = generate_occupancy_schedules(mkc_activity_schedules)
     fill_plug_loads_schedule(mkc_activity_schedules, weather)
     fill_lighting_schedule(mkc_activity_schedules, args)
-
+    # Generate schedules for each class of enduse
     sink_activity_sch = generate_sink_schedule(mkc_activity_schedules)
     shower_activity_sch, bath_activity_sch = generate_bath_shower_schedules(mkc_activity_schedules)
-    dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
-    cw_hot_water_sch = generate_clothes_washer_schedule(mkc_activity_schedules)
-    dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
-    cw_power_sch, cd_power_sch = generate_clothes_washer_dryer_power_schedules(mkc_activity_schedules)
-    cooking_power_sch = generate_cooking_power_schedule(mkc_activity_schedules)
 
-    # Process hygiene schedules
-    showers = random_shift_and_normalize(shower_activity_sch, @prngs[:hygiene])
-    # TODO: remove the rotate. This is only here to verify the generated schedule is identical to previous version.
-    # This is a bug (copy-paste error) that should be fixed.
-    sinks = random_shift_and_normalize(sink_activity_sch.rotate(-4 * 60), @prngs[:hygiene])
-    baths = random_shift_and_normalize(bath_activity_sch, @prngs[:hygiene])
+    # Apply random offset to schdules to avoid synchronization
+    offset_range = 30  # +- 30 minutes offset
+    random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
+
+    if !@hpxml_bldg.dishwashers.to_a.empty?
+      dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
+      dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
+      @schedules.merge!({
+                          SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch, random_offset),
+                          SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch, random_offset)
+                        })
+    end
+    if !@hpxml_bldg.clothes_washers.to_a.empty?
+      cw_hot_water_sch = generate_clothes_washer_schedule(mkc_activity_schedules)
+      cw_power_sch, cd_power_sch = generate_clothes_washer_dryer_power_schedules(mkc_activity_schedules)
+      @schedules.merge!({
+                          SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch, random_offset),
+                          SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch, random_offset)
+                        })
+      if !@hpxml_bldg.clothes_dryers.to_a.empty?
+        @schedules.merge!({
+                            SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch, random_offset)
+                          })
+      end
+    end
+    if !@hpxml_bldg.cooking_ranges.to_a.empty?
+      cooking_power_sch = generate_cooking_power_schedule(mkc_activity_schedules)
+      @schedules.merge!({
+                          SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch, random_offset)
+                        })
+    end
+
+    showers = random_shift_and_normalize(shower_activity_sch, random_offset)
+    sinks = random_shift_and_normalize(sink_activity_sch, random_offset)
+    baths = random_shift_and_normalize(bath_activity_sch, random_offset)
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
 
     # Process appliance and occupancy schedules
     @schedules.merge!({
-                        SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch, @prngs[:dw]),
-                        SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch, @prngs[:cw]),
-                        SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch, @prngs[:cooking]),
-                        SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch, @prngs[:cw]),
-                        SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch, @prngs[:cd]),
-                        SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch, @prngs[:dw]),
                         SchedulesFile::Columns[:Occupants].name => occupancy_schedules[:away_schedule].map { |i| 1.0 - i },
                         SchedulesFile::Columns[:HotWaterFixtures].name => fixtures.map { |flow| flow / fixtures.max }
                       })
@@ -1401,12 +1420,9 @@ class ScheduleGenerator
   # Apply random time shift and normalize schedule values.
   #
   # @param schedule [Array<Float>] Array of minute-level schedule values
-  # @param prng_key [Symbol] Key for random number generator to use
+  # @param random_offset [Integer] Random offset in minutesto apply to the schedule
   # @return [Array<Float>] Normalized schedule with random time shift applied
-  def random_shift_and_normalize(schedule, prng)
-    offset_range = 30
-    # Apply random offset
-    random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
+  def random_shift_and_normalize(schedule, random_offset)
     schedule = schedule.rotate(random_offset)
 
     # Apply monthly offsets and aggregate
