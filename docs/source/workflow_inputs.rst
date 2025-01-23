@@ -4752,14 +4752,15 @@ They can also be found at ``HPXMLtoOpenStudio/resources/data/default_panels.csv`
    :file: ../../HPXMLtoOpenStudio/resources/data/default_panels.csv
    :header-rows: 1
 
-Mechanical ventilation loads may be assigned power ratings based on fan count and W (if available), otherwise 3000 W.
+Mechanical ventilation loads may be assigned power ratings based on fan count and W (if available) otherwise 3000 W.
 Loads with power ratings of "auto" are calculated based on estimates for:
 
 - input capacities (using regressions involving rated output capacities and efficiencies if direct expansion)
 - blower fans (using fan W/cfm multiplied by airflow cfm)
 - hydronic pumps (using electric auxiliary energy kWh/yr divided by 2.08)
 
-Loads with occupied breaker spaces of "auto" therefore vary based on calculated power ratings.
+Loads with occupied breaker spaces of "auto" vary based on calculated power ratings.
+Room air conditioners connected to a 120v branch circuit are assumed to occupy 0 breaker spaces.
 
 .. _hpxml_batteries:
 

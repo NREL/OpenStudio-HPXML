@@ -6057,11 +6057,13 @@ module Defaults
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
           if heat_pump.simultaneous_backup # sum; backup > compressor
+
             watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), heat_pump.branch_circuit.voltage)
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
               watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
             end
           else # max; switchover
+
             if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
               watts += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), heat_pump.branch_circuit.voltage),
                         UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
@@ -6251,23 +6253,11 @@ module Defaults
       next if !component_ids.include?(heat_pump.id)
       next if heat_pump.fraction_heat_load_served == 0
 
-      if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-
-        if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-          watts = heat_pump.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }.map { |sf| sf.power }.sum(0.0)
-          breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)
-        else
-          breaker_spaces += 1 # 120v fan
-        end
-      elsif heat_pump.backup_type == HPXML::HeatPumpBackupTypeSeparate
-        # no op
-      else # none
-        if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
-          breaker_spaces += 2 # top discharge
-        end
+      if not heat_pump.distribution_system.nil?
+        breaker_spaces += 2 # 240v fan
       end
-
-      breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(12000, voltage, max_current_rating) # ODU; all residential HP ODU should not exceed 12 kW in electrical load and therefore requires only one 240v circuit (2 breaker spaces)
+      watts = heat_pump.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }.map { |sf| sf.power }.sum(0.0)
+      breaker_spaces += [2, get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)].max
     end
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
@@ -6275,18 +6265,27 @@ module Defaults
       next if cooling_system.is_shared_system
       next if cooling_system.fraction_cool_load_served == 0
 
-      watts = cooling_system.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }.map { |sf| sf.power }.sum(0.0)
-      breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)
+      if (cooling_system.cooling_system_type != HPXML::HVACTypeRoomAirConditioner) || (voltage == HPXML::ElectricPanelVoltage240)
+        watts = cooling_system.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }.map { |sf| sf.power }.sum(0.0)
+        breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)
+      end
+
+      if (not cooling_system.distribution_system.nil?) && (cooling_system.attached_heating_system.nil? || cooling_system.attached_heating_system.distribution_system.nil?)
+        breaker_spaces += 2 # 240v fan
+      end
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next if !component_ids.include?(heat_pump.id)
       next if heat_pump.fraction_cool_load_served == 0
 
-      if heat_pump.fraction_heat_load_served == 0
-        watts = heat_pump.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }.map { |sf| sf.power }.sum(0.0)
-        breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating) # ODU; the ~2 we missed adding to heating
+      next unless heat_pump.fraction_heat_load_served == 0
+
+      if not heat_pump.distribution_system.nil?
+        breaker_spaces += 2 # 240v fan
       end
+      watts = heat_pump.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }.map { |sf| sf.power }.sum(0.0)
+      breaker_spaces += [2, get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)].max
     end
 
     hpxml_bldg.water_heating_systems.each do |water_heating_system|

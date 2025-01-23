@@ -6689,7 +6689,7 @@
 	<xs:complexType name="ServiceFeederType">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
-			<xs:element minOccurs="0" name="LoadType" type="DemandLoadLoadType"/>
+			<xs:element minOccurs="0" name="LoadType" type="ServiceFeederLoadType"/>
 			<xs:element minOccurs="0" name="PowerRating" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Volt-Amps [VA] or Watts [W]</xs:documentation>
@@ -11987,7 +11987,7 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="DemandLoadLoadType_simple">
+	<xs:simpleType name="ServiceFeederLoadType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="heating"/>
 			<xs:enumeration value="cooling"/>
@@ -11995,6 +11995,7 @@
 			<xs:enumeration value="clothes dryer"/>
 			<xs:enumeration value="dishwasher"/>
 			<xs:enumeration value="range/oven"/>
+			<xs:enumeration value="refrigeration"/>
 			<xs:enumeration value="mech vent"/>
 			<xs:enumeration value="permanent spa heater"/>
 			<xs:enumeration value="permanent spa pump"/>
@@ -12008,9 +12009,9 @@
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:complexType name="DemandLoadLoadType">
+	<xs:complexType name="ServiceFeederLoadType">
 		<xs:simpleContent>
-			<xs:extension base="DemandLoadLoadType_simple">
+			<xs:extension base="ServiceFeederLoadType_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
