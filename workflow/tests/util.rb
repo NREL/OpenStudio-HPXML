@@ -233,7 +233,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && vehicle.ev_charger_idref.nil? }
       next if message.include? 'Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.'
     end
-    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? && vehicle.ev_charging_weekday_fractions.nil? } && !hpxml_bldg.header.schedules_filepaths.empty?
+    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? && vehicle.ev_weekday_fractions.nil? } && !hpxml_bldg.header.schedules_filepaths.empty?
       next if message.include? 'driving hours could not be met'
     end
     if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV } && hpxml_bldg.plug_loads.any? { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
