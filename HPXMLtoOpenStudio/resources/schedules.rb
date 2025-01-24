@@ -1053,9 +1053,9 @@ class SchedulesFile
     Battery: Column.new('battery', false, false, :neg_one_to_one),
     BatteryCharging: Column.new('battery_charging', true, false, nil),
     BatteryDischarging: Column.new('battery_discharging', true, false, nil),
-    ElectricVehicle: Column.new('electric_vehicle', false, true, :neg_one_to_one),
-    ElectricVehicleCharging: Column.new('electric_vehicle_charging', true, true, :frac),
-    ElectricVehicleDischarging: Column.new('electric_vehicle_discharging', true, true, :frac),
+    ElectricVehicle: Column.new('electric_vehicle', false, false, :neg_one_to_one),
+    ElectricVehicleCharging: Column.new('electric_vehicle_charging', true, false, :frac),
+    ElectricVehicleDischarging: Column.new('electric_vehicle_discharging', true, false, :frac),
     SpaceHeating: Column.new('space_heating', true, false, nil),
     SpaceCooling: Column.new('space_cooling', true, false, nil),
     HVACMaximumPowerRatio: Column.new('hvac_maximum_power_ratio', false, false, :frac),
@@ -1544,6 +1544,7 @@ class SchedulesFile
         @schedules[negative_col][i] = -1 * @schedules[column][i]
       end
     end
+    puts(@schedules[positive_col])
     @schedules.delete(column)
   end
 end
