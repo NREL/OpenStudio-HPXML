@@ -717,6 +717,7 @@ The column names available in the schedule CSV files are:
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                   No
   ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.  No
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                No
+  ``electric_vehicle``              -1 to 1  Electric vehicle schedule. Positive for charging, negative for discharging.       Yes
   ``electric_vehicle_charging``     frac     Electric vehicle charging schedule.                                               Yes
   ``electric_vehicle_discharging``  frac     Electric vehicle discharging schedule.                                            Yes
   ================================  =======  ================================================================================  ===============================
@@ -4650,12 +4651,9 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No                     Nominal voltage
   ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        0.8          Fraction of EV charging energy provided by home charger
   ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                     ID of connected EV charger [#]_
-  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleChargingFractions``                array                                       No        See [#]_     24 comma-separated weekday fractions
-  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleChargingFractions``                array                                       No                     24 comma-separated weekday fractions
-  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleChargingMultipliers``              array                                       No        See [#]_     12 comma-separated monthly multipliers
-  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleDischargingFractions``             array                                       No        See [#]_     24 comma-separated weekday fractions
-  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleDischargingFractions``             array                                       No                     24 comma-separated weekday fractions
-  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleDischargingMultipliers``           array                                       No        See [#]_     12 comma-separated monthly multipliers
+  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions``                        array                                       No        See [#]_     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions``                        array                                       No                     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_     12 comma-separated monthly multipliers
   ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        10,900       Number of miles driven per year
   ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        8.88         Number of hours driven per week
   ``FuelEconomyCombined[Units="kWh/mile]/Value``                                                   double             > 0                      No        0.22         The vehicle combined city and highway fuel economy
@@ -4664,12 +4662,10 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   .. [#] ConnectedCharger must reference an ``ElectricVehicleCharger``.
   .. [#] If a connected charger is not provided, then detailed electric vehicle charging will not be modeled.
   .. [#] Only the "Li-ion" battery type is supported.
-  .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
-  .. [#] If UsableCapacity not provided, defaults to 0.8 * NominalCapacity.
-  .. [#] If WeekdayScheduleChargingFractions or WeekendScheduleChargingFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
-  .. [#] If MonthlyScheduleChargingMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
-  .. [#] If WeekdayScheduleDischargingFractions or WeekendScheduleDischargingFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
-  .. [#] If MonthlyScheduleDischargingMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If NominalCapacity is not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
+  .. [#] If UsableCapacity is not provided, defaults to 0.8 * NominalCapacity.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If MonthlyScheduleMultipliers are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
 
  .. note::
 
@@ -4678,7 +4674,6 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   EV battery charging and discharging can be scheduled using :ref:`schedules_detailed` or with ``WeekdayScheduleFractions``, ``WeekendScheduleFractions``, and ``MonthlyScheduleMultipliers``.
   Positive schedule values control timing and magnitude of charging storage.
   Negative schedule values control timing and magnitude of discharging storage.
-  Simultaneous charging and discharging of the battery is not allowed.
   
   The effective discharge power is calculated using the vehicle ``FuelEconomyCombined``, ``MilesDrivenPerYear``, and the total discharge hours provided in the schedule.
   The discharge power is further influenced by the ambient temperature during simulation, and encompasses losses due to battery conditioning, vehicle conditioning, and charging losses.
