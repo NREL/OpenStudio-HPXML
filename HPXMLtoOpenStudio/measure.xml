@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>942e00b4-d3c6-4af0-9898-ef804dae2d89</version_id>
-  <version_modified>2025-01-23T01:37:30Z</version_modified>
+  <version_id>208f1ebb-1968-4929-8f0c-fc2127950beb</version_id>
+  <version_modified>2025-01-24T14:44:08Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -261,7 +261,7 @@
       <filename>data/default_schedules.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E26752D1</checksum>
+      <checksum>5EDDF5DD</checksum>
     </file>
     <file>
       <filename>data/ev_national_average_schedules.csv</filename>
@@ -321,7 +321,7 @@
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B7BED6D1</checksum>
+      <checksum>3FBE7B42</checksum>
     </file>
     <file>
       <filename>data/zipcode_weather_stations.csv</filename>
@@ -582,16 +582,16 @@
       <checksum>706A63BC</checksum>
     </file>
     <file>
-      <filename>schedule_files/vehicle-ev-low-charge.csv</filename>
+      <filename>schedule_files/vehicle-ev-undercharged.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5077B7E7</checksum>
+      <checksum>588337FA</checksum>
     </file>
     <file>
       <filename>schedule_files/vehicle-ev.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>78E4E0FE</checksum>
+      <checksum>EAA252BE</checksum>
     </file>
     <file>
       <filename>schedule_files/water-heater-operating-modes.csv</filename>
@@ -615,7 +615,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3C3707AD</checksum>
+      <checksum>A540B222</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -765,7 +765,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D2896BCF</checksum>
+      <checksum>9596CD0D</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>

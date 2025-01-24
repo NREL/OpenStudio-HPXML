@@ -86,9 +86,9 @@ hot_water_recirculation_pump_demand_control,RecirculationPumpWeekendScheduleFrac
 hot_water_recirculation_pump_temperature_control,RecirculationPumpWeekdayScheduleFractions,"0.067, 0.072, 0.074, 0.073, 0.069, 0.048, 0.011, 0.003, 0.009, 0.020, 0.030, 0.037, 0.043, 0.047, 0.050, 0.051, 0.044, 0.034, 0.026, 0.026, 0.030, 0.036, 0.045, 0.055",Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
 hot_water_recirculation_pump_temperature_control,RecirculationPumpWeekendScheduleFractions,"0.067, 0.072, 0.074, 0.073, 0.069, 0.048, 0.011, 0.003, 0.009, 0.020, 0.030, 0.037, 0.043, 0.047, 0.050, 0.051, 0.044, 0.034, 0.026, 0.026, 0.030, 0.036, 0.045, 0.055",Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
 hot_water_recirculation_pump,RecirculationPumpMonthlyScheduleMultipliers,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
-ev_battery_charging,WeekdayScheduleFractions,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
-ev_battery_charging,WeekendScheduleFractions,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
-ev_battery_charging,MonthlyScheduleMultipliers,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
-ev_battery_discharging,WeekdayScheduleFractions,"0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4611, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4201, 0.4231, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0",
-ev_battery_discharging,WeekendScheduleFractions,"0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3946, 0.0, 0.0, 0.0, 0.0, 0.3897, 0.3991, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0",
-ev_battery_discharging,MonthlyScheduleMultipliers,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
+electric_vehicle_charging,WeekdayScheduleFractions,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
+electric_vehicle_charging,WeekendScheduleFractions,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
+electric_vehicle_charging,MonthlyScheduleMultipliers,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
+electric_vehicle_discharging,WeekdayScheduleFractions,"0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4611, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4201, 0.4231, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0",
+electric_vehicle_discharging,WeekendScheduleFractions,"0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3946, 0.0, 0.0, 0.0, 0.0, 0.3897, 0.3991, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0",
+electric_vehicle_discharging,MonthlyScheduleMultipliers,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
