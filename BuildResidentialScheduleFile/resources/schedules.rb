@@ -125,12 +125,14 @@ class ScheduleGenerator
 
     # Use independent random number generators for each class of enduse so that when certain
     # enduses are removed/added in an upgrade run, the schedules for the other enduses are not affected
-    # New class of enduses can be be added to the enduse_types list at the without loss of backwards
+    # New class of enduses can be be added to the enduse_types list at the end without loss of backwards
     # compatibility (i.e. ability to generate same schedules for existing enduses with a given seed)
+    # For plug loads and lighting, the schedules are deterministically generated from occupancy schedule so separate
+    # prngs are not needed for them.
     @prngs = {}
     @prngs[:main] = Random.new(@random_seed)
     seed_generator = Random.new(@random_seed)
-    enduse_types = [:hygiene, :dw, :cw, :cd, :ev, :cooking]
+    enduse_types = [:hygiene, :dishwasher, :clothes_washer, :clothes_dryer, :ev, :cooking]
     enduse_types.each do |key|
       @prngs[key] = Random.new(seed_generator.rand(2**32))
     end
@@ -1209,7 +1211,7 @@ class ScheduleGenerator
     dw_minutes_between_event_gap = Constants::HotWaterDishwasherMinutesBetweenEventGap
     dw_hot_water_sch = [0] * @mins_in_year
     m = 0
-    dw_flow_rate = gaussian_rand(@prngs[:dw], dw_flow_rate_mean, dw_flow_rate_std)
+    dw_flow_rate = gaussian_rand(@prngs[:dishwasher], dw_flow_rate_mean, dw_flow_rate_std)
 
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
     # Fill in dw_water draw schedule
@@ -1218,11 +1220,11 @@ class ScheduleGenerator
       dish_state = sum_across_occupants(mkc_activity_schedules, 4, step, max_clip: 1)
       step_jump = 1
       if dish_state > 0
-        cluster_size = sample_activity_cluster_size(@prngs[:dw], @cluster_size_prob_map, 'hot_water_dishwasher')
+        cluster_size = sample_activity_cluster_size(@prngs[:dishwasher], @cluster_size_prob_map, 'hot_water_dishwasher')
         start_minute = step * 15
         m = 0
         cluster_size.times do
-          duration = sample_event_duration(@prngs[:dw], @event_duration_prob_map, 'hot_water_dishwasher')
+          duration = sample_event_duration(@prngs[:dishwasher], @event_duration_prob_map, 'hot_water_dishwasher')
           int_duration = duration.ceil
           flow_rate = dw_flow_rate * duration / int_duration
           int_duration.times do
@@ -1258,7 +1260,7 @@ class ScheduleGenerator
     cw_hot_water_sch = [0] * @mins_in_year # this is the clothes_washer water draw schedule
     cw_load_size_probability = Schedule.validate_values(Constants::HotWaterClothesWasherLoadSizeProbability, 4, 'hot_water_clothes_washer_load_size_probability')
 
-    cw_flow_rate = gaussian_rand(@prngs[:cw], cw_flow_rate_mean, cw_flow_rate_std)
+    cw_flow_rate = gaussian_rand(@prngs[:clothes_washer], cw_flow_rate_mean, cw_flow_rate_std)
 
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
     step = 0
@@ -1268,13 +1270,13 @@ class ScheduleGenerator
       clothes_state = sum_across_occupants(mkc_activity_schedules, 2, step, max_clip: 1)
       step_jump = 1
       if clothes_state > 0
-        num_loads = weighted_random(@prngs[:cw], cw_load_size_probability) + 1
+        num_loads = weighted_random(@prngs[:clothes_washer], cw_load_size_probability) + 1
         start_minute = step * 15
         m = 0
         num_loads.times do
-          cluster_size = sample_activity_cluster_size(@prngs[:cw], @cluster_size_prob_map, 'hot_water_clothes_washer')
+          cluster_size = sample_activity_cluster_size(@prngs[:clothes_washer], @cluster_size_prob_map, 'hot_water_clothes_washer')
           cluster_size.times do
-            duration = sample_event_duration(@prngs[:cw], @event_duration_prob_map, 'hot_water_clothes_washer')
+            duration = sample_event_duration(@prngs[:clothes_washer], @event_duration_prob_map, 'hot_water_clothes_washer')
             int_duration = duration.ceil
             flow_rate = cw_flow_rate * duration.to_f / int_duration
             int_duration.times do
@@ -1317,7 +1319,7 @@ class ScheduleGenerator
       dish_state = sum_across_occupants(mkc_activity_schedules, 4, step, max_clip: 1)
       step_jump = 1
       if (dish_state > 0) && (last_state == 0) # last_state == 0 prevents consecutive dishwasher power without gap
-        duration_15min, avg_power = sample_appliance_duration_power(@prngs[:dw], @appliance_power_dist_map, 'dishwasher')
+        duration_15min, avg_power = sample_appliance_duration_power(@prngs[:dishwasher], @appliance_power_dist_map, 'dishwasher')
 
         month = (start_time + step * 15 * 60).month
         duration_min = (duration_15min * 15 * hot_water_dishwasher_monthly_multiplier[month - 1]).to_i
@@ -1352,8 +1354,8 @@ class ScheduleGenerator
       clothes_state = sum_across_occupants(mkc_activity_schedules, 2, step, max_clip: 1)
       step_jump = 1
       if (clothes_state > 0) && (last_state == 0) # last_state == 0 prevents consecutive washer power without gap
-        cw_duration_15min, cw_avg_power = sample_appliance_duration_power(@prngs[:cw], @appliance_power_dist_map, 'clothes_washer')
-        cd_duration_15min, cd_avg_power = sample_appliance_duration_power(@prngs[:cd], @appliance_power_dist_map, 'clothes_dryer')
+        cw_duration_15min, cw_avg_power = sample_appliance_duration_power(@prngs[:clothes_washer], @appliance_power_dist_map, 'clothes_washer')
+        cd_duration_15min, cd_avg_power = sample_appliance_duration_power(@prngs[:clothes_dryer], @appliance_power_dist_map, 'clothes_dryer')
 
         month = (start_time + step * 15 * 60).month
         cd_duration_min = (cd_duration_15min * 15 * clothes_dryer_monthly_multiplier[month - 1]).to_i
