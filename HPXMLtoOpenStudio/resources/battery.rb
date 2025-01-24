@@ -143,7 +143,11 @@ module Battery
     end
     elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
     elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
-    elcs.additionalProperties.setFeature('is_ev', is_ev)
+    if is_ev
+      elcs.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeVehicle)
+    else
+      elcs.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBattery)
+    end
 
     if is_ev
       elcs.setDCtoDCChargingEfficiency(1.0) # Charging efficiency is captured in the ev_discharge_program
