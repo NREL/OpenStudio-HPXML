@@ -6257,7 +6257,7 @@ module Defaults
         breaker_spaces += 2 # 240v fan
       end
       watts = heat_pump.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }.map { |sf| sf.power }.sum(0.0)
-      breaker_spaces += [2, get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)].max
+      breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)
     end
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
@@ -6271,7 +6271,7 @@ module Defaults
       end
 
       if (not cooling_system.distribution_system.nil?) && (cooling_system.attached_heating_system.nil? || cooling_system.attached_heating_system.distribution_system.nil?)
-        breaker_spaces += 2 # 240v fan
+        breaker_spaces += 1 # 240v fan
       end
     end
 
@@ -6285,7 +6285,7 @@ module Defaults
         breaker_spaces += 2 # 240v fan
       end
       watts = heat_pump.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }.map { |sf| sf.power }.sum(0.0)
-      breaker_spaces += [2, get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)].max
+      breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)
     end
 
     hpxml_bldg.water_heating_systems.each do |water_heating_system|

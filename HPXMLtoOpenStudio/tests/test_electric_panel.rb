@@ -229,7 +229,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 0)
-    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 4)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
 
     test_name = 'Large central air conditioner only'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-central-ac-only-1-speed.xml', test_name)
@@ -240,7 +240,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 800 + 7657)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 0)
-    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 4)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
 
     test_name = 'Gas boiler only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml', test_name)
@@ -281,7 +281,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 1)
-    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 4)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
 
     test_name = 'Electric boiler + central air conditioner'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml', test_name)
@@ -292,7 +292,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96 + 11468)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 2)
-    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 4)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
 
     test_name = 'Large electric boiler + central air conditioner'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml', test_name)
@@ -304,7 +304,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96 + 15291)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 4)
-    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 4)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
 
     test_name = 'ASHP w/out backup'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml', test_name)
