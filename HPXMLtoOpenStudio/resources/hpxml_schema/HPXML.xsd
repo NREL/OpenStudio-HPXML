@@ -11975,6 +11975,7 @@
 	</xs:complexType>
 	<xs:simpleType name="BranchCircuitOccupiedSpaces_simple">
 		<xs:restriction base="xs:double">
+			<xs:enumeration value="0.0"/>
 			<xs:enumeration value="0.5"/>
 			<xs:enumeration value="1.0"/>
 			<xs:enumeration value="2.0"/>

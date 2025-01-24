@@ -2501,7 +2501,7 @@
       <sch:assert role='ERROR' test='h:Voltage[text()="120" or text()="240"] or not(h:Voltage)'>Expected Voltage to be '120' or '240'</sch:assert>
       <sch:assert role='ERROR' test='count(h:MaxCurrentRating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MaxCurrentRating</sch:assert>
       <sch:assert role='ERROR' test='number(h:MaxCurrentRating) &gt;= 0.0 or not(h:MaxCurrentRating)'>Expected MaxCurrentRating to be greater than or equal to 0.0</sch:assert>
-      <sch:assert role='ERROR' test='number(h:OccupiedSpaces) &gt;= 0 or not(h:OccupiedSpaces)'>Expected OccupiedSpaces to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:OccupiedSpaces) &gt;= 0.0 or not(h:OccupiedSpaces)'>Expected OccupiedSpaces to be greater than or equal to 0.0</sch:assert>
       <sch:assert role='ERROR' test='count(h:AttachedToComponent) &gt;= 0'>Expected 0 or more element(s) for xpath: AttachedToComponent</sch:assert>
       <sch:assert role='ERROR' test='count(h:AttachedToElectricPanel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToElectricPanel</sch:assert>
     </sch:rule>

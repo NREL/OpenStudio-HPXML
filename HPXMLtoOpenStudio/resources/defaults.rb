@@ -3368,7 +3368,9 @@ module Defaults
                             type: HPXML::ElectricPanelLoadTypeLighting,
                             type_isdefaulted: true,
                             component_idrefs: [])
-        # Breaker Spaces = 0 so we don't add a branch circuit
+        branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+                            occupied_spaces: get_default_panels_value(runner, default_panels_csv_data, 'lighting', 'BreakerSpaces', HPXML::ElectricPanelVoltage120),
+                            occupied_spaces_isdefaulted: true)
       end
 
       if service_feeders.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeKitchen } == 0

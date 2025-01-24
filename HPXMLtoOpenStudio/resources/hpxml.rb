@@ -9661,7 +9661,7 @@ class HPXML < Object
     ATTRS = [:id,                 # [String] SystemIdentifier/@id
              :voltage,            # [String] Voltage
              :max_current_rating, # [Double] MaxCurrentRating
-             :occupied_spaces,    # [Integer] OccupiedSpaces
+             :occupied_spaces,    # [Double] OccupiedSpaces
              :component_idrefs,   # [Array<String>] AttachedToComponent/@idref
              :panel_idref]        # [String] AttachedToElectricPanel/@idref
     attr_accessor(*ATTRS)
@@ -9739,7 +9739,7 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(branch_circuit, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
       XMLHelper.add_element(branch_circuit, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_isdefaulted) unless @max_current_rating.nil?
-      XMLHelper.add_element(branch_circuit, 'OccupiedSpaces', @occupied_spaces, :integer, @occupied_spaces_isdefaulted) unless @occupied_spaces.nil?
+      XMLHelper.add_element(branch_circuit, 'OccupiedSpaces', @occupied_spaces, :float, @occupied_spaces_isdefaulted) unless @occupied_spaces.nil?
       if (not @component_idrefs.nil?) && (not @component_idrefs.empty?)
         @component_idrefs.each do |component_idref|
           component = XMLHelper.add_element(branch_circuit, 'AttachedToComponent')
@@ -9763,7 +9763,7 @@ class HPXML < Object
       @id = HPXML::get_id(branch_circuit)
       @voltage = XMLHelper.get_value(branch_circuit, 'Voltage', :string)
       @max_current_rating = XMLHelper.get_value(branch_circuit, 'MaxCurrentRating', :float)
-      @occupied_spaces = XMLHelper.get_value(branch_circuit, 'OccupiedSpaces', :integer)
+      @occupied_spaces = XMLHelper.get_value(branch_circuit, 'OccupiedSpaces', :float)
       @component_idrefs = HPXML::get_idrefs(branch_circuit, 'AttachedToComponent')
       @panel_idref = HPXML::get_idref(XMLHelper.get_element(branch_circuit, 'AttachedToElectricPanel'))
     end
