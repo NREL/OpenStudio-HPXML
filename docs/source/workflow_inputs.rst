@@ -717,8 +717,8 @@ The column names available in the schedule CSV files are:
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                   No
   ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.  No
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                No
-  ``ev_battery_charging``           frac     Electric vehicle charging schedule.                                               No
-  ``ev_battery_discharging``        frac     Electric vehicle discharging schedule.                                            No
+  ``electric_vehicle_charging``     frac     Electric vehicle charging schedule.                                               Yes
+  ``electric_vehicle_discharging``  frac     Electric vehicle discharging schedule.                                            Yes
   ================================  =======  ================================================================================  ===============================
 
   .. [#] A detailed stochastic occupancy schedule CSV file can also be automatically generated for these columns; see the :ref:`usage_instructions` for the commands.
@@ -4640,33 +4640,32 @@ All other vehicle types are currently not modeled.
 This provides detailed modeling of electric vehicles (batteries and charging/discharging) as an alternative to the simple EV charging in :ref:`plug_loads`.
 If not entered, the simulation will not include a detailed electric vehicle model.
 
-  ===============================================================================================  ======  =========  =======================  ========  ===========  ======================================
+  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
   Element                                                                                          Type    Units      Constraints              Required  Default      Notes
-  ===============================================================================================  ======  =========  =======================  ========  ===========  ======================================
+  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
   ``SystemIdentifier``                                                                             id                                          Yes                    Unique identifier
-  ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        10,900       Number of miles driven per year
-  ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        11.6         Number of hours driven per week
-  ``FuelEconomyCombined/Units``                                                                    string             > 0                      No        kWh/mile     The vehicle combined fuel economy units
-  ``FuelEconomyCombined/Value``                                                                    double             > 0                      No        0.22         The vehicle combined fuel economy value
-  ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        1.0          Unique identifier
-  ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                     ID of connected EV charger [#]_
   ``VehicleType/BatteryElectricVehicle/Battery/BatteryType``                                       string                                      No        Li-ion [#]_  EV battery type
-  ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double  kWh or Ah  >= 0                     No        See [#]_
-  ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_
-  ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double  kWh or Ah  >= 0                     No        See [#]_     Nominal (total) capacity
+  ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_     Usable capacity
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No                     Nominal voltage
+  ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        0.8          Fraction of EV charging energy provided by home charger
+  ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                     ID of connected EV charger [#]_
   ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleChargingFractions``                array                                       No        See [#]_     24 comma-separated weekday fractions
   ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleChargingFractions``                array                                       No                     24 comma-separated weekday fractions
   ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleChargingMultipliers``              array                                       No        See [#]_     12 comma-separated monthly multipliers
   ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleDischargingFractions``             array                                       No        See [#]_     24 comma-separated weekday fractions
   ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleDischargingFractions``             array                                       No                     24 comma-separated weekday fractions
   ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleDischargingMultipliers``           array                                       No        See [#]_     12 comma-separated monthly multipliers
-  ===============================================================================================  ======  =========  =======================  ========  ===========  ======================================
+  ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        10,900       Number of miles driven per year
+  ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        8.88         Number of hours driven per week
+  ``FuelEconomyCombined[Units="kWh/mile]/Value``                                                   double             > 0                      No        0.22         The vehicle combined city and highway fuel economy
+  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
 
   .. [#] ConnectedCharger must reference an ``ElectricVehicleCharger``.
   .. [#] If a connected charger is not provided, then detailed electric vehicle charging will not be modeled.
   .. [#] Only the "Li-ion" battery type is supported.
   .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
-  .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
+  .. [#] If UsableCapacity not provided, defaults to 0.8 * NominalCapacity.
   .. [#] If WeekdayScheduleChargingFractions or WeekendScheduleChargingFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleChargingMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If WeekdayScheduleDischargingFractions or WeekendScheduleDischargingFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.

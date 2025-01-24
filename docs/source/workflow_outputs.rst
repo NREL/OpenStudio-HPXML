@@ -325,7 +325,7 @@ Annual unmet hours are listed below.
   =========================  =====
 
 The unmet heating and cooling numbers reflect the number of hours during the heating/cooling season when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
-The unmet driving numbers include any time in which the discharge schedule is exceeds 0 while the EV battery's state of charge is at its minimum level.
+The unmet driving number represents the total time in which the charging schedule fails to meet the demand from the driving schedule. This includes periods when the discharge schedule exceeds zero while the EV battery's state of charge is at its minimum level. Unmet driving hours indicate unrealized discharging events, resulting in reduced charging energy.
 
 Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
