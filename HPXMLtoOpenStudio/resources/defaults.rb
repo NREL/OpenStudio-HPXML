@@ -3180,7 +3180,7 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_vehicles(hpxml_bldg, schedules_file)
-    default_values = get_eletric_vehicle_values()
+    default_values = get_electric_vehicle_values()
     hpxml_bldg.vehicles.each do |vehicle|
       next unless vehicle.vehicle_type == HPXML::VehicleTypeBEV
 
@@ -3209,31 +3209,20 @@ module Defaults
         vehicle.fraction_charged_home = default_values[:fraction_charged_home]
         vehicle.fraction_charged_home_isdefaulted = true
       end
-      schedules_file_includes_ev = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryDischarging].name) && schedules_file.includes_col_name(SchedulesFile::Columns[:EVBatteryCharging].name))
-      if vehicle.ev_charging_weekday_fractions.nil? && !schedules_file_includes_ev
-        vehicle.ev_charging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekdayScheduleFractions']
-        vehicle.ev_charging_weekday_fractions_isdefaulted = true
+      schedules_file_includes_ev = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:ElectricVehicleCharging].name) && schedules_file.includes_col_name(SchedulesFile::Columns[:ElectricVehicleDischarging].name))
+      if vehicle.ev_weekday_fractions.nil? && !schedules_file_includes_ev
+        vehicle.ev_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['WeekdayScheduleFractions']
+        vehicle.ev_weekday_fractions_isdefaulted = true
       end
-      if vehicle.ev_charging_weekend_fractions.nil? && !schedules_file_includes_ev
-        vehicle.ev_charging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekendScheduleFractions']
-        vehicle.ev_charging_weekend_fractions_isdefaulted = true
+      if vehicle.ev_weekend_fractions.nil? && !schedules_file_includes_ev
+        vehicle.ev_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['WeekendScheduleFractions']
+        vehicle.ev_weekend_fractions_isdefaulted = true
       end
-      if vehicle.ev_charging_monthly_multipliers.nil? && !schedules_file_includes_ev
-        vehicle.ev_charging_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['MonthlyScheduleMultipliers']
-        vehicle.ev_charging_monthly_multipliers_isdefaulted = true
+      if vehicle.ev_monthly_multipliers.nil? && !schedules_file_includes_ev
+        vehicle.ev_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['MonthlyScheduleMultipliers']
+        vehicle.ev_monthly_multipliers_isdefaulted = true
       end
-      if vehicle.ev_discharging_weekday_fractions.nil? && !schedules_file_includes_ev
-        vehicle.ev_discharging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['WeekdayScheduleFractions']
-        vehicle.ev_discharging_weekday_fractions_isdefaulted = true
-      end
-      if vehicle.ev_discharging_weekend_fractions.nil? && !schedules_file_includes_ev
-        vehicle.ev_discharging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['WeekendScheduleFractions']
-        vehicle.ev_discharging_weekend_fractions_isdefaulted = true
-      end
-      if vehicle.ev_discharging_monthly_multipliers.nil? && !schedules_file_includes_ev
-        vehicle.ev_discharging_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['MonthlyScheduleMultipliers']
-        vehicle.ev_discharging_monthly_multipliers_isdefaulted = true
-      end
+
       ev_charger = nil
       if not vehicle.ev_charger_idref.nil?
         hpxml_bldg.ev_chargers.each do |charger|
@@ -5738,7 +5727,7 @@ module Defaults
   # and usable fraction for an electric vehicle and its battery.
   #
   # @return [Hash] map of EV properties to default values
-  def self.get_eletric_vehicle_values()
+  def self.get_electric_vehicle_values()
     return { battery_type: HPXML::BatteryTypeLithiumIon,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
              miles_per_year: 10900,

@@ -1053,8 +1053,9 @@ class SchedulesFile
     Battery: Column.new('battery', false, false, :neg_one_to_one),
     BatteryCharging: Column.new('battery_charging', true, false, nil),
     BatteryDischarging: Column.new('battery_discharging', true, false, nil),
-    EVBatteryCharging: Column.new('electric_vehicle_charging', true, false, nil),
-    EVBatteryDischarging: Column.new('electric_vehicle_discharging', true, false, nil),
+    ElectricVehicle: Column.new('electric_vehicle', false, false, :neg_one_to_one),
+    ElectricVehicleCharging: Column.new('electric_vehicle_charging', true, false, :frac),
+    ElectricVehicleDischarging: Column.new('electric_vehicle_discharging', true, false, :frac),
     SpaceHeating: Column.new('space_heating', true, false, nil),
     SpaceCooling: Column.new('space_cooling', true, false, nil),
     HVACMaximumPowerRatio: Column.new('hvac_maximum_power_ratio', false, false, :frac),
@@ -1511,12 +1512,18 @@ class SchedulesFile
     end
   end
 
-  # Create separate charging (positive) and discharging (negative) detailed schedules from the home battery schedule.
+  # Assign seperate detailed battery charging and discharging schedules
+  # If a single column (e.g., 'battery' or 'electric_vehicle') is provided, it will be split into two columns based on the sign.
   #
   # @return [nil]
   def create_battery_charging_discharging_schedules
-    if @schedules.keys.include?(SchedulesFile::Columns[:Battery].name)
-      split_signed_column(SchedulesFile::Columns[:Battery].name, SchedulesFile::Columns[:BatteryCharging].name, SchedulesFile::Columns[:BatteryDischarging].name)
+    battery_col_hashes = [:Battery, :ElectricVehicle].map do |battery_type|
+      { col: SchedulesFile::Columns[battery_type].name, charging_col: SchedulesFile::Columns[:"#{battery_type}Charging"].name, discharging_col: SchedulesFile::Columns[:"#{battery_type}Discharging"].name }
+    end
+    battery_col_hashes.each do |battery_cols|
+      next unless @schedules.keys.include?(battery_cols[:col])
+
+      split_signed_column(battery_cols[:col], battery_cols[:charging_col], battery_cols[:discharging_col])
     end
   end
 
