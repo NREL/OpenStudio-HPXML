@@ -436,6 +436,9 @@ class HPXML < Object
   UnitsKwhPerMile = 'kWh/mile'
   UnitsKwPerTon = 'kW/ton'
   UnitsMiles = 'miles'
+  UnitsMilePerKwh = 'mile/kWh'
+  UnitsMPG = 'mpg'
+  UnitsMPGe = 'mpge'
   UnitsPercent = 'Percent'
   UnitsPercentPerHour = '%/hr'
   UnitsSEER = 'SEER'
@@ -443,6 +446,10 @@ class HPXML < Object
   UnitsSLA = 'SLA'
   UnitsThermPerYear = 'therm/year'
   VehicleTypeBEV = 'BatteryElectricVehicle'
+  VehicleTypePHEV = 'PlugInHybridElectricVehicle'
+  VehicleTypeHybrid = 'HybridElectricVehicle'
+  VehicleTypeICE = 'InternalCombustionEngine'
+  VehicleTypeFCEV = 'FuelCellElectricVehicle'
   VerticalSurroundingsNoAboveOrBelow = 'no units above or below'
   VerticalSurroundingsAboveAndBelow = 'unit above and below'
   VerticalSurroundingsBelow = 'unit below'
@@ -9362,25 +9369,26 @@ class HPXML < Object
 
   # Object for /HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle.
   class Vehicle < BaseElement
-    ATTRS = [:id,                               # [String] SystemIdentifier/@id
-             :vehicle_type,                     # [String] VehicleType (HPXML::VehicleTypeXXX)
-             :miles_per_year,                   # [Double] MilesDrivenPerYear (miles)
-             :hours_per_week,                   # [Double] HoursDrivenPerWeek (hours)
-             :energy_efficiency,                # [Double] FuelEconomyCombined[Units="kWh/mile"]/Value (kWh/mile)
-             :fraction_charged_home,            # [Double] VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage (frac)
-             :ev_charger_idref,                 # [String] VehicleType/BatteryElectricVehicle/ConnectedCharger/@idref
-             :ev_charging_weekday_fractions,    # [String] VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions
-             :ev_charging_weekend_fractions,    # [String] VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions
-             :ev_charging_monthly_multipliers,  # [String] VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers
-             :battery_type,                     # [String] VehicleType/BatteryElectricVehicle/Battery/BatteryType (HPXML::BatteryTypeXXX)
-             :nominal_capacity_kwh,             # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh"]/Value (kWh)
-             :nominal_capacity_ah,              # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="Ah"]/Value (Ah)
-             :usable_capacity_kwh,              # [Double] VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh"]/Value (kWh)
-             :usable_capacity_ah,               # [Double] VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="Ah"]/Value (Ah)
-             :nominal_voltage,                  # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalVoltage (V)
-             :lifetime_model,                   # [String] VehicleType/BatteryElectricVehicle/Battery/extension/LifetimeModel (HPXML::BatteryLifetimeModelXXX)
-             :rated_power_output,               # [Double] (W)
-             :location]                         # [String]
+    ATTRS = [:id,                     # [String] SystemIdentifier/@id
+             :vehicle_type,           # [String] VehicleType (HPXML::VehicleTypeXXX)
+             :miles_per_year,         # [Double] MilesDrivenPerYear (miles)
+             :hours_per_week,         # [Double] HoursDrivenPerWeek (hours)
+             :fuel_economy,           # [Double] FuelEconomyCombined/Value
+             :fuel_economy_units,     # [String] FuelEconomyCombined/Units
+             :fraction_charged_home,  # [Double] VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage (frac)
+             :ev_charger_idref,       # [String] VehicleType/BatteryElectricVehicle/ConnectedCharger/@idref
+             :battery_type,           # [String] VehicleType/BatteryElectricVehicle/Battery/BatteryType (HPXML::BatteryTypeXXX)
+             :nominal_capacity_kwh,   # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh"]/Value (kWh)
+             :nominal_capacity_ah,    # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="Ah"]/Value (Ah)
+             :usable_capacity_kwh,    # [Double] VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh"]/Value (kWh)
+             :usable_capacity_ah,     # [Double] VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="Ah"]/Value (Ah)
+             :nominal_voltage,        # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalVoltage (V)
+             :lifetime_model,         # [String] VehicleType/BatteryElectricVehicle/Battery/extension/LifetimeModel (HPXML::BatteryLifetimeModelXXX)
+             :ev_weekday_fractions,   # [String] VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions
+             :ev_weekend_fractions,   # [String] VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions
+             :ev_monthly_multipliers, # [String] VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers
+             :rated_power_output,     # [Double] (W)
+             :location]               # [String]
     attr_accessor(*ATTRS)
 
     # Deletes the current object from the array.
@@ -9409,55 +9417,60 @@ class HPXML < Object
       vehicle = XMLHelper.add_element(vehicles, 'Vehicle')
       sys_id = XMLHelper.add_element(vehicle, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      ev_type = XMLHelper.add_element(vehicle, 'VehicleType')
-      electric_vehicle = XMLHelper.add_element(ev_type, HPXML::VehicleTypeBEV)
-      battery = XMLHelper.add_element(electric_vehicle, 'Battery')
+      vehicle_type_element = XMLHelper.add_element(vehicle, 'VehicleType')
+      vehicle_type = XMLHelper.add_element(vehicle_type_element, @vehicle_type)
 
-      # Battery
-      XMLHelper.add_element(battery, 'BatteryType', @battery_type, :string, @battery_type_isdefaulted) unless @battery_type.nil?
-      if not @nominal_capacity_kwh.nil?
-        nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
-        XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
-        XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
+      if [HPXML::VehicleTypeBEV, HPXML::VehicleTypePHEV, HPXML::VehicleTypeHybrid].include? @vehicle_type
+        # Battery
+        unless [@battery_type.nil?, @nominal_capacity_kwh.nil?, @nominal_capacity_ah.nil?, @usable_capacity_kwh.nil?, @usable_capacity_ah.nil?, @nominal_voltage.nil?, @lifetime_model.nil?].all?
+          battery = XMLHelper.add_element(vehicle_type, 'Battery')
+        end
+        XMLHelper.add_element(battery, 'BatteryType', @battery_type, :string, @battery_type_isdefaulted) unless @battery_type.nil?
+        if not @nominal_capacity_kwh.nil?
+          nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
+          XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
+          XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
+        end
+        if not @nominal_capacity_ah.nil?
+          nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
+          XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
+          XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
+        end
+        if not @usable_capacity_kwh.nil?
+          usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+          XMLHelper.add_element(usable_capacity, 'Units', UnitsKwh, :string)
+          XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
+        end
+        if not @usable_capacity_ah.nil?
+          usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+          XMLHelper.add_element(usable_capacity, 'Units', UnitsAh, :string)
+          XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
+        end
+        XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
+        XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
       end
-      if not @nominal_capacity_ah.nil?
-        nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
-        XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
-        XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
-      end
-      if not @usable_capacity_kwh.nil?
-        usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
-        XMLHelper.add_element(usable_capacity, 'Units', UnitsKwh, :string)
-        XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
-      end
-      if not @usable_capacity_ah.nil?
-        usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
-        XMLHelper.add_element(usable_capacity, 'Units', UnitsAh, :string)
-        XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
-      end
-      XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
-      XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
 
-      # Battery-Electric Vehicle
-      fraction_charged_location = XMLHelper.add_element(electric_vehicle, 'FractionChargedLocation') unless @fraction_charged_home.nil?
-      XMLHelper.add_element(fraction_charged_location, 'Location', HPXML::ElectricVehicleChargingLocation, :string) unless @fraction_charged_home.nil?
-      XMLHelper.add_element(fraction_charged_location, 'Percentage', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted) unless @fraction_charged_home.nil?
-      if not @ev_charger_idref.nil?
-        charger = XMLHelper.add_element(electric_vehicle, 'ConnectedCharger')
-        XMLHelper.add_attribute(charger, 'idref', @ev_charger_idref)
+      case @vehicle_type
+      when HPXML::VehicleTypeBEV
+        # Battery-Electric Vehicle
+        fraction_charged_location = XMLHelper.add_element(vehicle_type, 'FractionChargedLocation') unless @fraction_charged_home.nil?
+        XMLHelper.add_element(fraction_charged_location, 'Location', HPXML::ElectricVehicleChargingLocation, :string) unless @fraction_charged_home.nil?
+        XMLHelper.add_element(fraction_charged_location, 'Percentage', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted) unless @fraction_charged_home.nil?
+        if not @ev_charger_idref.nil?
+          charger = XMLHelper.add_element(vehicle_type, 'ConnectedCharger')
+          XMLHelper.add_attribute(charger, 'idref', @ev_charger_idref)
+        end
+        XMLHelper.add_extension(vehicle_type, 'WeekdayScheduleFractions', @ev_weekday_fractions, :string, @ev_weekday_fractions_isdefaulted) unless @ev_weekday_fractions.nil?
+        XMLHelper.add_extension(vehicle_type, 'WeekendScheduleFractions', @ev_weekend_fractions, :string, @ev_weekend_fractions_isdefaulted) unless @ev_weekend_fractions.nil?
+        XMLHelper.add_extension(vehicle_type, 'MonthlyScheduleMultipliers', @ev_monthly_multipliers, :string, @ev_monthly_multipliers_isdefaulted) unless @ev_monthly_multipliers.nil?
       end
-      XMLHelper.add_extension(electric_vehicle, 'WeekdayScheduleFractions', @ev_charging_weekday_fractions, :string, @ev_charging_weekday_fractions_isdefaulted) unless @ev_charging_weekday_fractions.nil?
-      XMLHelper.add_extension(electric_vehicle, 'WeekendScheduleFractions', @ev_charging_weekend_fractions, :string, @ev_charging_weekend_fractions_isdefaulted) unless @ev_charging_weekend_fractions.nil?
-      XMLHelper.add_extension(electric_vehicle, 'MonthlyScheduleMultipliers', @ev_charging_monthly_multipliers, :string, @ev_charging_monthly_multipliers_isdefaulted) unless @ev_charging_monthly_multipliers.nil?
 
       # Vehicle
       XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_per_year, :float, @miles_per_year_isdefaulted) unless @miles_per_year.nil?
       XMLHelper.add_element(vehicle, 'HoursDrivenPerWeek', @hours_per_week, :float, @hours_per_week_isdefaulted) unless @hours_per_week.nil?
-      if not @energy_efficiency.nil?
-        fuel_econonmy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined')
-        XMLHelper.add_element(fuel_econonmy, 'Units', UnitsKwhPerMile, :string)
-        XMLHelper.add_element(fuel_econonmy, 'Value', @energy_efficiency, :float, @energy_efficiency_isdefaulted)
-      end
+      fuel_economy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined') unless @fuel_economy_units.nil? && @fuel_economy.nil?
+      XMLHelper.add_element(fuel_economy, 'Units', @fuel_economy_units, :string, @fuel_economy_units_isdefaulted) unless @fuel_economy_units.nil?
+      XMLHelper.add_element(fuel_economy, 'Value', @fuel_economy, :float, @fuel_economy_isdefaulted) unless @fuel_economy.nil?
     end
 
     # Populates the HPXML object(s) from the XML document.
@@ -9470,21 +9483,24 @@ class HPXML < Object
       @id = HPXML::get_id(vehicle)
       @miles_per_year = XMLHelper.get_value(vehicle, 'MilesDrivenPeryear', :float)
       @hours_per_week = XMLHelper.get_value(vehicle, 'HoursDrivenPerWeek', :float)
-      @energy_efficiency = XMLHelper.get_value(vehicle, "FuelEconomyCombined[Units='#{UnitsKwhPerMile}']/Value", :float)
+      @fuel_economy = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Value', :float)
+      @fuel_economy_units = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Units', :string)
       @vehicle_type = XMLHelper.get_child_name(vehicle, 'VehicleType')
-      battery_prefix = "VehicleType/#{@vehicle_type}/Battery"
-      @battery_type = XMLHelper.get_value(vehicle, "#{battery_prefix}/BatteryType", :string)
-      @nominal_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
-      @nominal_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsAh}']/Value", :float)
-      @usable_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
-      @usable_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsAh}']/Value", :float)
-      @nominal_voltage = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalVoltage", :float)
-      @fraction_charged_home = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/FractionChargedLocation/Percentage", :float)
-      @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(vehicle, "VehicleType/#{@vehicle_type}/ConnectedCharger"))
-      @lifetime_model = XMLHelper.get_value(vehicle, "#{battery_prefix}/extension/LifetimeModel", :string)
-      @ev_charging_weekday_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekdayScheduleFractions", :string)
-      @ev_charging_weekend_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekendScheduleFractions", :string)
-      @ev_charging_monthly_multipliers = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/MonthlyScheduleMultipliers", :string)
+      if @vehicle_type == HPXML::VehicleTypeBEV
+        battery_prefix = "VehicleType/#{@vehicle_type}/Battery"
+        @battery_type = XMLHelper.get_value(vehicle, "#{battery_prefix}/BatteryType", :string)
+        @nominal_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
+        @nominal_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsAh}']/Value", :float)
+        @usable_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
+        @usable_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsAh}']/Value", :float)
+        @nominal_voltage = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalVoltage", :float)
+        @fraction_charged_home = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/FractionChargedLocation/Percentage", :float)
+        @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(vehicle, "VehicleType/#{@vehicle_type}/ConnectedCharger"))
+        @lifetime_model = XMLHelper.get_value(vehicle, "#{battery_prefix}/extension/LifetimeModel", :string)
+        @ev_weekday_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekdayScheduleFractions", :string)
+        @ev_weekend_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekendScheduleFractions", :string)
+        @ev_monthly_multipliers = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/MonthlyScheduleMultipliers", :string)
+      end
     end
 
     # Returns the EV charger for the vehicle.

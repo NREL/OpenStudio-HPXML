@@ -1033,6 +1033,7 @@ class SchedulesFile
     CeilingFan: Column.new('ceiling_fan', true, true, :frac),
     PlugLoadsOther: Column.new('plug_loads_other', true, true, :frac),
     PlugLoadsTV: Column.new('plug_loads_tv', true, true, :frac),
+    PlugLoadsVehicle: Column.new('plug_loads_vehicle', true, false, :frac),
     PlugLoadsWellPump: Column.new('plug_loads_well_pump', true, false, :frac),
     FuelLoadsGrill: Column.new('fuel_loads_grill', true, false, :frac),
     FuelLoadsLighting: Column.new('fuel_loads_lighting', true, false, :frac),
@@ -1054,9 +1055,9 @@ class SchedulesFile
     Battery: Column.new('battery', false, false, :neg_one_to_one),
     BatteryCharging: Column.new('battery_charging', true, false, nil),
     BatteryDischarging: Column.new('battery_discharging', true, false, nil),
-    EVBattery: Column.new('ev_battery', false, false, :neg_one_to_one),
-    EVBatteryCharging: Column.new('ev_battery_charging', true, false, nil),
-    EVBatteryDischarging: Column.new('ev_battery_discharging', true, false, nil),
+    ElectricVehicle: Column.new('electric_vehicle', false, false, :neg_one_to_one),
+    ElectricVehicleCharging: Column.new('electric_vehicle_charging', true, false, :frac),
+    ElectricVehicleDischarging: Column.new('electric_vehicle_discharging', true, false, :frac),
     SpaceHeating: Column.new('space_heating', true, false, nil),
     SpaceCooling: Column.new('space_cooling', true, false, nil),
     HVACMaximumPowerRatio: Column.new('hvac_maximum_power_ratio', false, false, :frac),
@@ -1516,24 +1517,18 @@ class SchedulesFile
     end
   end
 
-  # Create separate charging (positive) and discharging (negative) detailed schedules from the battery schedule.
+  # Assign seperate detailed battery charging and discharging schedules
+  # If a single column (e.g., 'battery' or 'electric_vehicle') is provided, it will be split into two columns based on the sign.
   #
   # @return [nil]
   def create_battery_charging_discharging_schedules
-    battery_col_name = Columns[:Battery].name
-    ev_battery_col_name = Columns[:EVBattery].name
-
-    return if !@schedules.keys.include?(battery_col_name) && !@schedules.keys.include?(ev_battery_col_name)
-
-    if @schedules.keys.include?(battery_col_name)
-      charging_col = SchedulesFile::Columns[:BatteryCharging].name
-      discharging_col = SchedulesFile::Columns[:BatteryDischarging].name
-      split_signed_column(battery_col_name, charging_col, discharging_col)
+    battery_col_hashes = [:Battery, :ElectricVehicle].map do |battery_type|
+      { col: SchedulesFile::Columns[battery_type].name, charging_col: SchedulesFile::Columns[:"#{battery_type}Charging"].name, discharging_col: SchedulesFile::Columns[:"#{battery_type}Discharging"].name }
     end
-    if @schedules.keys.include?(ev_battery_col_name)
-      charging_col = SchedulesFile::Columns[:EVBatteryCharging].name
-      discharging_col = SchedulesFile::Columns[:EVBatteryDischarging].name
-      split_signed_column(ev_battery_col_name, charging_col, discharging_col)
+    battery_col_hashes.each do |battery_cols|
+      next unless @schedules.keys.include?(battery_cols[:col])
+
+      split_signed_column(battery_cols[:col], battery_cols[:charging_col], battery_cols[:discharging_col])
     end
   end
 

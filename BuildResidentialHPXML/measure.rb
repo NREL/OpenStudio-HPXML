@@ -2676,45 +2676,58 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_battery_present', false)
-    arg.setDisplayName('Electric Vehicle: Present')
-    arg.setDescription('Whether there is an electric vehicle battery present. If the `misc_plug_loads_vehicle_present` argument is true, this argument is superseded and vehicle charging will be modeled as a plug load only.')
-    arg.setDefaultValue(false)
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('battery_num_bedrooms_served', false)
+    arg.setDisplayName('Battery: Number of Bedrooms Served')
+    arg.setDescription("Number of bedrooms served by the lithium ion battery. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared battery serving multiple dwelling units. Used to apportion battery charging/discharging to the unit of a SFA/MF building.")
+    arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_capacity', false)
-    arg.setDisplayName('Electric Vehicle: Nominal Battery Capacity')
-    arg.setDescription('The nominal capacity of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('vehicle_type', false)
+    arg.setDisplayName('Vehicle: Type')
+    arg.setDescription('The type of vehicle present at the home.')
+    arg.setDefaultValue(Constants::None)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_battery_capacity', false)
+    arg.setDisplayName('Vehicle: EV Battery Nominal Battery Capacity')
+    arg.setDescription("The nominal capacity of the vehicle battery, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     arg.setUnits('kWh')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_usable_capacity', false)
-    arg.setDisplayName('Electric Vehicle: Usable Battery Capacity')
-    arg.setDescription('The usable capacity of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_battery_usable_capacity', false)
+    arg.setDisplayName('Vehicle: EV Battery Usable Capacity')
+    arg.setDescription("The usable capacity of the vehicle battery, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     arg.setUnits('kWh')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_energy_efficiency', false)
-    arg.setDisplayName('Electric Vehicle: Energy Efficiency')
-    arg.setDescription('The efficiency of the EV. If not provided, the OS-HPXML default is used.')
-    arg.setUnits('kWh/mile')
+    fuel_economy_units_choices = OpenStudio::StringVector.new
+    fuel_economy_units_choices << HPXML::UnitsKwhPerMile
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('vehicle_fuel_economy_units', fuel_economy_units_choices, false)
+    arg.setDisplayName('Vehicle: Combined Fuel Economy Units')
+    arg.setDescription("The combined fuel economy units of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_miles_per_year', false)
-    arg.setDisplayName('Electric Vehicle: Miles Traveled')
-    arg.setDescription('The annual miles traveled by the EV.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fuel_economy_combined', false)
+    arg.setDisplayName('Vehicle: Combined Fuel Economy')
+    arg.setDescription("The combined fuel economy of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_miles_driven_per_year', false)
+    arg.setDisplayName('Vehicle: Miles Driven Per Year')
+    arg.setDescription("The annual miles the vehicle is driven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     arg.setUnits('miles')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_hours_per_week', false)
-    arg.setDisplayName('Electric Vehicle: Hours Driven per Week')
-    arg.setDescription('The weekly hours traveled by the EV.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_hours_driven_per_week', false)
+    arg.setDisplayName('Vehicle: Hours Driven Per Week')
+    arg.setDescription('The weekly hours the vehicle is driven.')
     arg.setUnits('hours')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_fraction_charged_home', false)
-    arg.setDisplayName('Electric Vehicle: Fraction Charged at Home')
-    arg.setDescription('The fraction charging energy provided by the at-home charger.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fraction_charged_home', false)
+    arg.setDisplayName('Vehicle: Fraction Charged at Home')
+    arg.setDescription('The fraction of charging energy provided by the at-home charger to the vehicle, only applies to electric vehicles.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_charger_present', false)
@@ -2724,8 +2737,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_charger_power', false)
-    arg.setDisplayName('Electric Vehicle Charger: Rated Charger Power Output')
-    arg.setDescription('The rated power output of the EV charger. If not provided, the OS-HPXML default is used.')
+    arg.setDisplayName('Electric Vehicle Charger: Rated Charging Power')
+    arg.setDescription("The rated power output of the EV charger. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -2735,13 +2748,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ev_charger_location', ev_charger_location_choices, false)
     arg.setDisplayName('Electric Vehicle Charger: Location')
-    arg.setDescription('The space type for the EV charger. If not provided, the OS-HPXML default is used.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('battery_num_bedrooms_served', false)
-    arg.setDisplayName('Battery: Number of Bedrooms Served')
-    arg.setDescription("Number of bedrooms served by the lithium ion battery. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared battery serving multiple dwelling units. Used to apportion battery charging/discharging to the unit of a SFA/MF building.")
-    arg.setUnits('#')
+    arg.setDescription("The space type for the EV charger. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
@@ -3272,7 +3279,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_vehicle_present', true)
     arg.setDisplayName('Misc Plug Loads: Vehicle Present')
-    arg.setDescription('Whether there is an electric vehicle. Specifying this argument will model EV charging as a plug load and take precendence over the `ev_battery_present` argument.')
+    arg.setDescription('Whether there is an electric vehicle.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -4003,7 +4010,7 @@ module HPXMLFile
     set_solar_thermal(hpxml_bldg, args, weather)
     set_pv_systems(hpxml_bldg, args, weather)
     set_battery(hpxml_bldg, args)
-    set_electric_vehicle(hpxml_bldg, args)
+    set_vehicle(hpxml_bldg, args)
     set_lighting(hpxml_bldg, args)
     set_dehumidifier(hpxml_bldg, args)
     set_clothes_washer(hpxml_bldg, args)
@@ -6940,9 +6947,10 @@ module HPXMLFile
                              number_of_bedrooms_served: number_of_bedrooms_served)
   end
 
-  # Set the electric vehicle and electric vehicle charger properties, including:
-  # - nominal and usable capacity
-  # - driving efficiency
+  # Set the vehicle and electric vehicle charger properties, including:
+  # - vehicle battery nominal and usable capacity
+  # - fuel economy
+  # - fuel economy units
   # - miles driven per year
   # - hours driven per week
   # - fraction charged at home
@@ -6953,8 +6961,8 @@ module HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
-  def self.set_electric_vehicle(hpxml_bldg, args)
-    return unless args[:ev_battery_present] || args[:ev_charger_present]
+  def self.set_vehicle(hpxml_bldg, args)
+    return unless args[:vehicle_type] || args[:ev_charger_present]
 
     charger_id = nil
     if args[:ev_charger_present]
@@ -6964,15 +6972,16 @@ module HPXMLFile
                                  charging_power: args[:ev_charger_power])
     end
 
-    if args[:ev_battery_present]
-      ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV }
-      hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
-                              nominal_capacity_kwh: args[:ev_battery_capacity],
-                              usable_capacity_kwh: args[:ev_battery_usable_capacity],
-                              energy_efficiency: args[:ev_energy_efficiency],
-                              miles_per_year: args[:ev_miles_per_year],
-                              hours_per_week: args[:ev_hours_per_week],
-                              fraction_charged_home: args[:ev_fraction_charged_home],
+    if args[:vehicle_type] != Constants::None
+      hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
+                              vehicle_type: args[:vehicle_type],
+                              nominal_capacity_kwh: args[:vehicle_battery_capacity],
+                              usable_capacity_kwh: args[:vehicle_battery_usable_capacity],
+                              fuel_economy: args[:vehicle_fuel_economy_combined],
+                              fuel_economy_units: args[:vehicle_fuel_economy_units],
+                              miles_per_year: args[:vehicle_miles_driven_per_year],
+                              hours_per_week: args[:vehicle_hours_driven_per_week],
+                              fraction_charged_home: args[:vehicle_fraction_charged_home],
                               ev_charger_idref: charger_id)
     end
   end
