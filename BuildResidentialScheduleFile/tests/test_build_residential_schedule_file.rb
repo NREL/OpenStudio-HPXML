@@ -55,16 +55,16 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     expected_values = {
       :Occupants => 6689,
       :LightingInterior => 2086,
-      :CookingRange => 534,
-      :Dishwasher => 213,
-      :ClothesWasher => 134,
-      :ClothesDryer => 151,
+      :CookingRange => 300.9,
+      :Dishwasher => 161.5,
+      :ClothesWasher => 67.7,
+      :ClothesDryer => 114.0,
       :CeilingFan => 3016,
       :PlugLoadsOther => 5388,
       :PlugLoadsTV => 1517,
-      :HotWaterDishwasher => 273,
-      :HotWaterClothesWasher => 346,
-      :HotWaterFixtures => 887,
+      :HotWaterDishwasher => 287.3,
+      :HotWaterClothesWasher => 322.6,
+      :HotWaterFixtures => 981.2,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
@@ -141,16 +141,17 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     expected_values = {
       :Occupants => 6689,
       :LightingInterior => 1992,
-      :CookingRange => 534,
-      :Dishwasher => 213,
-      :ClothesWasher => 134,
-      :ClothesDryer => 151,
+      :CookingRange => 300.9,
+      :Dishwasher => 161.5,
+      :ClothesWasher => 67.7,
+      :ClothesDryer => 114.0,
       :CeilingFan => 3016,
       :PlugLoadsOther => 5388,
       :PlugLoadsTV => 1517,
-      :HotWaterDishwasher => 273,
-      :HotWaterClothesWasher => 346,
-      :HotWaterFixtures => 887}
+      :HotWaterDishwasher => 287.3,
+      :HotWaterClothesWasher => 322.6,
+      :HotWaterFixtures => 981.2,
+    }
     assert_full_load_hrs_match(sf, expected_values, @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
 
@@ -298,16 +299,16 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     expected_values = {
       :Occupants => 6707,
       :LightingInterior => 2077,
-      :CookingRange => 534,
-      :Dishwasher => 213,
-      :ClothesWasher => 105,
-      :ClothesDryer => 151,
+      :CookingRange => 300.9,
+      :Dishwasher => 161.4,
+      :ClothesWasher => 64.3,
+      :ClothesDryer => 114.0,
       :CeilingFan => 3009,
       :PlugLoadsOther => 5393,
       :PlugLoadsTV => 1505,
-      :HotWaterDishwasher => 146,
-      :HotWaterClothesWasher => 154,
-      :HotWaterFixtures => 397,
+      :HotWaterDishwasher => 155.9,
+      :HotWaterClothesWasher => 138.4,
+      :HotWaterFixtures => 280.2,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
@@ -393,16 +394,15 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         expected_values = {
           :Occupants => 6689,
           :LightingInterior => 2086,
-          :CookingRange => 534,
-          :Dishwasher => 213,
-          :ClothesWasher => 134,
-          :ClothesDryer => 151,
+          :CookingRange => 300.9,
+          :Dishwasher => 161.5,
+          :ClothesWasher => 67.7,
           :CeilingFan => 3016,
           :PlugLoadsOther => 5388,
           :PlugLoadsTV => 1517,
-          :HotWaterDishwasher => 273,
-          :HotWaterClothesWasher => 346,
-          :HotWaterFixtures => 887,
+          :HotWaterDishwasher => 287.3,
+          :HotWaterClothesWasher => 322.6,
+          :HotWaterFixtures => 981.2,
         }
         assert_full_load_hrs_match(sf, expected_values, @tol)
       elsif hpxml_bldg.building_id == 'MyBuilding_2'
@@ -411,16 +411,15 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         expected_values = {
           :Occupants => 6072,
           :LightingInterior => 1765,
-          :CookingRange => 356,
-          :Dishwasher => 165,
-          :ClothesWasher => 101,
-          :ClothesDryer => 166,
+          :CookingRange => 336.4,
+          :Dishwasher => 297.4,
+          :ClothesWasher => 116.3,
           :CeilingFan => 3103,
           :PlugLoadsOther => 5292,
           :PlugLoadsTV => 1205,
-          :HotWaterDishwasher => 221,
-          :HotWaterClothesWasher => 266,
-          :HotWaterFixtures => 894,
+          :HotWaterDishwasher => 229.8,
+          :HotWaterClothesWasher => 246.5,
+          :HotWaterFixtures => 956.4,
         }
         assert_full_load_hrs_match(sf, expected_values, @tol)
       elsif hpxml_bldg.building_id == 'MyBuilding_3'
