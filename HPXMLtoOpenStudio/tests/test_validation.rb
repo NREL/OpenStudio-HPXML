@@ -1846,12 +1846,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                   "Both 'permanent_spa_heater' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and monthly multipliers provided; the latter will be ignored."],
-                              'schedule-file-and-weekday-weekend-multipliers-ev' => ["Both schedule file and weekday fractions provided for 'electric_vehicle_charging'; weekday fractions will be ignored.",
-                                                                                     "Both schedule file and weekday fractions provided for 'electric_vehicle_discharging'; weekday fractions will be ignored.",
-                                                                                     "Both schedule file and weekend fractions provided for 'electric_vehicle_charging'; weekend fractions will be ignored.",
-                                                                                     "Both schedule file and weekend fractions provided for 'electric_vehicle_discharging'; weekend fractions will be ignored.",
-                                                                                     "Both schedule file and monthly multipliers provided for 'electric_vehicle_charging'; monthly multipliers will be ignored.",
-                                                                                     "Both schedule file and monthly multipliers provided for 'electric_vehicle_discharging'; monthly multipliers will be ignored."],
+                              'schedule-file-and-weekday-weekend-multipliers-ev' => ["Both schedule file and weekday fractions provided for 'electric_vehicle'; weekday fractions will be ignored.",
+                                                                                     "Both schedule file and weekend fractions provided for 'electric_vehicle'; weekend fractions will be ignored.",
+                                                                                     "Both schedule file and monthly multipliers provided for 'electric_vehicle'; monthly multipliers will be ignored.",],
                               'schedule-file-and-refrigerators-freezer-coefficients' => ["Both 'refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
                                                                                          "Both 'refrigerator' schedule file and temperature coefficients provided; the latter will be ignored.",
                                                                                          "Both 'extra_refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
@@ -1984,12 +1981,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/vehicle-ev.csv')
         hpxml_bldg.vehicles[0].nominal_capacity_kwh = 500
-        hpxml_bldg.vehicles[0].ev_charging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekdayScheduleFractions']
-        hpxml_bldg.vehicles[0].ev_charging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['WeekendScheduleFractions']
-        hpxml_bldg.vehicles[0].ev_charging_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryCharging].name]['MonthlyScheduleMultipliers']
-        hpxml_bldg.vehicles[0].ev_discharging_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['WeekdayScheduleFractions']
-        hpxml_bldg.vehicles[0].ev_discharging_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['WeekendScheduleFractions']
-        hpxml_bldg.vehicles[0].ev_discharging_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:EVBatteryDischarging].name]['MonthlyScheduleMultipliers']
+        hpxml_bldg.vehicles[0].ev_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['WeekdayScheduleFractions']
+        hpxml_bldg.vehicles[0].ev_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['WeekendScheduleFractions']
+        hpxml_bldg.vehicles[0].ev_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['MonthlyScheduleMultipliers']
       when 'schedule-file-and-refrigerators-freezer-coefficients'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-stochastic.csv')

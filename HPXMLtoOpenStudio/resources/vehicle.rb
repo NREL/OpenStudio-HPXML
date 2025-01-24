@@ -31,28 +31,21 @@ module Vehicle
   # @return [OpenStudio::Model::ScheduleFile or MonthWeekdayWeekendSchedule] the charging and discharging schedules
   def self.get_ev_schedules(runner, model, vehicle, schedules_file)
     charging_schedule, discharging_schedule = nil, nil
-    charging_col, discharging_col = SchedulesFile::Columns[:EVBatteryCharging].name, SchedulesFile::Columns[:EVBatteryDischarging].name
+    charging_col, discharging_col = SchedulesFile::Columns[:ElectricVehicleCharging].name, SchedulesFile::Columns[:ElectricVehicleDischarging].name
     if not schedules_file.nil?
       charging_schedule = schedules_file.create_schedule_file(model, col_name: charging_col)
       discharging_schedule = schedules_file.create_schedule_file(model, col_name: discharging_col)
     end
     if charging_schedule.nil? && discharging_schedule.nil?
       charge_name, discharge_name = "#{vehicle.id} charging schedule", "#{vehicle.id} discharging schedule"
-      charging_schedule = model.getScheduleRulesets.find { |s| s.name.to_s == charge_name }
-      discharging_schedule = model.getScheduleRulesets.find { |s| s.name.to_s == discharge_name }
-      if charging_schedule.nil? || discharging_schedule.nil?
-        weekday_charge, weekend_charge = vehicle.ev_charging_weekday_fractions, vehicle.ev_charging_weekend_fractions
-        weekday_discharge, weekend_discharge = vehicle.ev_discharging_weekday_fractions, vehicle.ev_discharging_weekend_fractions
-        charging_schedule = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
-        discharging_schedule = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_charging_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
-      end
+      weekday_charge, weekday_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_weekday_fractions)
+      weekend_charge, weekend_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_weekend_fractions)
+      charging_schedule = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
+      discharging_schedule = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
     else
-      runner.registerWarning("Both schedule file and weekday fractions provided for '#{charging_col}'; weekday fractions will be ignored.") if !vehicle.ev_charging_weekday_fractions.nil?
-      runner.registerWarning("Both schedule file and weekday fractions provided for '#{discharging_col}'; weekday fractions will be ignored.") if !vehicle.ev_discharging_weekday_fractions.nil?
-      runner.registerWarning("Both schedule file and weekend fractions provided for '#{charging_col}'; weekend fractions will be ignored.") if !vehicle.ev_charging_weekend_fractions.nil?
-      runner.registerWarning("Both schedule file and weekend fractions provided for '#{discharging_col}'; weekend fractions will be ignored.") if !vehicle.ev_discharging_weekend_fractions.nil?
-      runner.registerWarning("Both schedule file and monthly multipliers provided for '#{charging_col}'; monthly multipliers will be ignored.") if !vehicle.ev_charging_monthly_multipliers.nil?
-      runner.registerWarning("Both schedule file and monthly multipliers provided for '#{discharging_col}'; monthly multipliers will be ignored.") if !vehicle.ev_discharging_monthly_multipliers.nil?
+      runner.registerWarning("Both schedule file and weekday fractions provided for '#{SchedulesFile::Columns[:ElectricVehicleCharging].name}'; weekday fractions will be ignored.") if !vehicle.ev_weekday_fractions.nil?
+      runner.registerWarning("Both schedule file and weekend fractions provided for '#{SchedulesFile::Columns[:ElectricVehicleCharging].name}'; weekend fractions will be ignored.") if !vehicle.ev_weekend_fractions.nil?
+      runner.registerWarning("Both schedule file and monthly multipliers provided for '#{SchedulesFile::Columns[:ElectricVehicleCharging].name}'; monthly multipliers will be ignored.") if !vehicle.ev_monthly_multipliers.nil?
     end
 
     return charging_schedule, discharging_schedule
