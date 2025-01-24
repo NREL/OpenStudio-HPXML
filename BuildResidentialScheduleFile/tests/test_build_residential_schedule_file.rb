@@ -59,7 +59,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       :Dishwasher => 161.5,
       :ClothesWasher => 67.7,
       :ClothesDryer => 114.0,
-      :CeilingFan => 3016,
       :PlugLoadsOther => 5388,
       :PlugLoadsTV => 1517,
       :HotWaterDishwasher => 287.3,
@@ -145,7 +144,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       :Dishwasher => 161.5,
       :ClothesWasher => 67.7,
       :ClothesDryer => 114.0,
-      :CeilingFan => 3016,
       :PlugLoadsOther => 5388,
       :PlugLoadsTV => 1517,
       :HotWaterDishwasher => 287.3,
@@ -187,13 +185,13 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       :Dishwasher => 161.5,
       :ClothesWasher => 67.7,
       :ClothesDryer => 114.0,
-      :CeilingFan => 3016,
       :PlugLoadsOther => 5388,
       :PlugLoadsTV => 1517,
       :HotWaterDishwasher => 287.3,
       :HotWaterClothesWasher => 322.6,
       :HotWaterFixtures => 981.2,
       :Sleeping => 3067,
+      :PresentOccupants => 46402,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
   end
@@ -227,7 +225,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       :Dishwasher => 161,
       :ClothesWasher => 64,
       :ClothesDryer => 113.9,
-      :CeilingFan => 3233,
       :PlugLoadsOther => 5388,
       :PlugLoadsTV => 1517,
       :HotWaterDishwasher => 304,
@@ -264,7 +261,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       :Dishwasher => 297,
       :ClothesWasher => 116,
       :ClothesDryer => 188,
-      :CeilingFan => 3276,
       :PlugLoadsOther => 5292,
       :PlugLoadsTV => 1205,
       :HotWaterDishwasher => 243,
@@ -303,7 +299,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       :Dishwasher => 161.4,
       :ClothesWasher => 64.3,
       :ClothesDryer => 114.0,
-      :CeilingFan => 3009,
       :PlugLoadsOther => 5393,
       :PlugLoadsTV => 1505,
       :HotWaterDishwasher => 155.9,
@@ -397,7 +392,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
           :CookingRange => 300.9,
           :Dishwasher => 161.5,
           :ClothesWasher => 67.7,
-          :CeilingFan => 3016,
           :PlugLoadsOther => 5388,
           :PlugLoadsTV => 1517,
           :HotWaterDishwasher => 287.3,
@@ -414,7 +408,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
           :CookingRange => 336.4,
           :Dishwasher => 297.4,
           :ClothesWasher => 116.3,
-          :CeilingFan => 3103,
           :PlugLoadsOther => 5292,
           :PlugLoadsTV => 1205,
           :HotWaterDishwasher => 229.8,
@@ -431,7 +424,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
           :CookingRange => 358.5,
           :Dishwasher => 207.2,
           :ClothesWasher => 126.4,
-          :CeilingFan => 3079,
           :PlugLoadsOther => 5314,
           :PlugLoadsTV => 1162,
           :HotWaterDishwasher => 232.1,
@@ -481,7 +473,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
           :CookingRange => 336.4,
           :Dishwasher => 297.4,
           :ClothesWasher => 116.3,
-          :CeilingFan => 3103,
           :PlugLoadsOther => 5292,
           :PlugLoadsTV => 1205,
           :HotWaterDishwasher => 229.8,
@@ -586,13 +577,15 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     mismatches = []
     suggested_values = {}
     missing_cols = []
-    # Calculate all actual values once
+    schedule_col_names = []
+    cols_to_ignore = Set.new(["Vacancy", "Power Outage", "No Space Heating", "No Space Cooling"])
     expected_values.each do |col_name, expected_value|
       unless SchedulesFile::Columns.key?(col_name.to_sym)
         puts "Error: Column '#{col_name}' not found in SchedulesFile::Columns"
         assert(false)
       end
       schedule_col_name = SchedulesFile::Columns[col_name.to_sym].name
+      schedule_col_names << schedule_col_name
       if !sf.tmp_schedules.key?(schedule_col_name)
         missing_cols << col_name
         next
@@ -609,8 +602,9 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         suggested_values[col_name] = "#{expected_value}"
       end
     end
-    unless (mismatches.empty? && missing_cols.empty?)
+    extra_cols = sf.tmp_schedules.keys.to_set - schedule_col_names.to_set - cols_to_ignore.to_set
 
+    unless (mismatches.empty? && missing_cols.empty? && extra_cols.empty?)
       if !mismatches.empty?
         puts "\nMismatches found:"
         mismatches.each do |mismatch|
@@ -621,6 +615,13 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       if !missing_cols.empty?
         puts "\nMissing columns:"
         missing_cols.each do |col_name|
+          puts "    :#{col_name}"
+        end
+      end
+
+      if !extra_cols.empty?
+        puts "\nUnexpected columns found in the schedule file"
+        extra_cols.each do |col_name|
           puts "    :#{col_name}"
         end
       end

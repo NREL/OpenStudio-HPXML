@@ -939,8 +939,7 @@ class ScheduleGenerator
       plug_loads_tv = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_tv)
       @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = normalize(plug_loads_tv)
     end
-
-    if @hpxml_bldg.ceiling_fans.to_a.empty?
+    if !@hpxml_bldg.ceiling_fans.to_a.empty?
       ceiling_fan = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :ceiling_fan)
         @schedules[SchedulesFile::Columns[:CeilingFan].name] = normalize(ceiling_fan)
     end
