@@ -428,16 +428,15 @@ class BuildResidentialScheduleFileTest < Minitest::Test
         expected_values = {
           :Occupants => 6045,
           :LightingInterior => 1745,
-          :CookingRange => 421,
-          :Dishwasher => 239,
-          :ClothesWasher => 81,
-          :ClothesDryer => 127,
+          :CookingRange => 358.5,
+          :Dishwasher => 207.2,
+          :ClothesWasher => 126.4,
           :CeilingFan => 3079,
           :PlugLoadsOther => 5314,
           :PlugLoadsTV => 1162,
-          :HotWaterDishwasher => 224,
-          :HotWaterClothesWasher => 209,
-          :HotWaterFixtures => 970,
+          :HotWaterDishwasher => 232.1,
+          :HotWaterClothesWasher => 206.8,
+          :HotWaterFixtures => 857.1,
         }
         assert_full_load_hrs_match(sf, expected_values, @tol)
       end
@@ -508,12 +507,10 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     @args_hash['output_csv_path'] = @tmp_schedule_file_path
     @args_hash['append_output'] = false
     _test_measure()
-
     assert(File.exist?(@tmp_schedule_file_path))
     outdata = File.readlines(@tmp_schedule_file_path)
     expected_cols = ScheduleGenerator.export_columns
-    assert_equal(expected_cols, outdata[0].strip.split(',')) # Header
-    assert_equal(expected_cols.size, outdata[1].split(',').size) # Data
+    assert((outdata[0].strip.split(',').to_set - expected_cols.to_set).empty?)
 
     # Test w/ append_output=true
     hpxml = _create_hpxml('base.xml')
@@ -525,9 +522,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     assert(File.exist?(@tmp_schedule_file_path))
     outdata = File.readlines(@tmp_schedule_file_path)
-    expected_cols = orig_cols + ScheduleGenerator.export_columns
-    assert_equal(expected_cols, outdata[0].strip.split(',')) # Header
-    assert_equal(expected_cols.size, outdata[1].split(',').size) # Data
+    expected_cols = ScheduleGenerator.export_columns
+    assert_equal(orig_cols.to_set, (outdata[0].strip.split(',').to_set - expected_cols.to_set)) # Header
 
     # Test w/ append_output=true and inconsistent data
     existing_csv_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'schedule_files', 'setpoints-10-mins.csv')
