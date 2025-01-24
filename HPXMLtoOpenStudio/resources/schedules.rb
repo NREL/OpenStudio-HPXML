@@ -1544,7 +1544,6 @@ class SchedulesFile
         @schedules[negative_col][i] = -1 * @schedules[column][i]
       end
     end
-    puts(@schedules[positive_col])
     @schedules.delete(column)
   end
 end

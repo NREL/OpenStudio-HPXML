@@ -2535,12 +2535,9 @@
       <sch:assert role='ERROR' test='h:Battery/h:extension/h:LifetimeModel[text()="None" or text()="KandlerSmith"] or not(h:Battery/h:extension/h:LifetimeModel)'>Expected Battery/extension/LifetimeModel to be 'None' or 'KandlerSmith'</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionChargedLocation[h:Location="Home"]/h:Percentage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FractionChargedLocation[Location="Home"]/Percentage</sch:assert>
       <sch:assert role='ERROR' test='count(h:ConnectedCharger) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ConnectedCharger</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleChargingFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleChargingFractions</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleChargingFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleChargingFractions</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleChargingMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleChargingMultipliers</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleDischargingFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleDischargingFractions</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleDischargingFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleDischargingFractions</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleDischargingMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleDischargingMultipliers</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:MilesDrivenPerYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../MilesDrivenPerYear</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:HoursDrivenPerWeek) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../HoursDrivenPerWeek</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:FuelEconomyCombined[h:Units="kWh/mile"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../FuelEconomyCombined[Units="kWh/mile"]/Value</sch:assert>
