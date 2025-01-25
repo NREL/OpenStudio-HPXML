@@ -24,10 +24,9 @@ module Battery
   # Add the HPXML Battery to the OpenStudio model.
   #
   # Apply a home battery or EV battery to the model using OpenStudio ElectricLoadCenterStorageLiIonNMCBattery, ElectricLoadCenterDistribution, ElectricLoadCenterStorageConverter, OtherEquipment, and EMS objects.
-  # Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.
-  # EV battery is not associated with a PV system and requires a charging/discharging schedule, otherwise it will not be modeled.
-  # The system may be shared, in which case nominal/usable capacity (kWh) and usable fraction are apportioned to the dwelling unit by total number of bedrooms served.
-  # A battery may share an ElectricLoadCenterDistribution object with PV; electric buss type and storage operation scheme are therefore changed.
+  # Home battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.
+  # Home battery systems may be shared, in which case nominal/usable capacity (kWh) and usable fraction are apportioned to the dwelling unit by total number of bedrooms served.
+  # A home battery may share an ElectricLoadCenterDistribution object with PV; electric buss type and storage operation scheme are therefore changed.
   # Round trip efficiency is (temporarily) applied as an EMS program b/c E+ input is not hooked up.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings

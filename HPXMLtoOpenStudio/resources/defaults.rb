@@ -3223,17 +3223,9 @@ module Defaults
         vehicle.ev_monthly_multipliers_isdefaulted = true
       end
 
-      ev_charger = nil
-      if not vehicle.ev_charger_idref.nil?
-        hpxml_bldg.ev_chargers.each do |charger|
-          next unless vehicle.ev_charger_idref == charger.id
+      next if vehicle.ev_charger.nil?
 
-          ev_charger = charger
-        end
-      end
-      next if ev_charger.nil?
-
-      apply_ev_charger(hpxml_bldg, ev_charger)
+      apply_ev_charger(hpxml_bldg, vehicle.ev_charger)
     end
   end
 

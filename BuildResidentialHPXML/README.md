@@ -4586,7 +4586,7 @@ The annual miles the vehicle is driven. If not provided, the OS-HPXML default (s
 
 **Vehicle: Hours Driven Per Week**
 
-The weekly hours the vehicle is driven.
+The weekly hours the vehicle is driven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
 
 - **Name:** ``vehicle_hours_driven_per_week``
 - **Type:** ``Double``
@@ -4599,7 +4599,7 @@ The weekly hours the vehicle is driven.
 
 **Vehicle: Fraction Charged at Home**
 
-The fraction of charging energy provided by the at-home charger to the vehicle, only applies to electric vehicles.
+The fraction of charging energy provided by the at-home charger to the vehicle, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
 
 - **Name:** ``vehicle_fraction_charged_home``
 - **Type:** ``Double``
