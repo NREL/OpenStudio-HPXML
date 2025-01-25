@@ -2565,7 +2565,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Fuels
 
     @fuels = {}
-    @fuels[FT::Elec] = Fuel.new(meters: ['Electricity:FacilityEVCharging'.upcase]) # PV is subtracted later
+    @fuels[FT::Elec] = Fuel.new(meters: ['Electricity:FacilityEVCharging'.upcase]) # Total Electricity; PV is subtracted later for Net Electricity output
     @fuels[FT::Gas] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
     @fuels[FT::Oil] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
     @fuels[FT::Propane] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"])

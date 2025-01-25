@@ -1193,7 +1193,7 @@ module Outputs
   # Creates custom output meters that are used across reporting measures.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [FIXME] Custom output meters
+  # @return [nil]
   def self.create_custom_meters(model)
     # Create custom meter w/ Facility:Electricity plus EV charging
     key_vars = []
