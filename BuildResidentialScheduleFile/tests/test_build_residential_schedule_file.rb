@@ -6,7 +6,6 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 # require 'csv'
 require_relative '../measure.rb'
-require 'byebug'
 
 class BuildResidentialScheduleFileTest < Minitest::Test
   def setup
