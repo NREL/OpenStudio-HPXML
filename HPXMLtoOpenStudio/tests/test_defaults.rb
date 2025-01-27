@@ -3708,6 +3708,20 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 280.0, nil, 224.0, 10900, 8.88, 0.22, HPXML::UnitsKwhPerMile, 0.8, default_ev_sch['WeekdayScheduleFractions'], default_ev_sch['WeekendScheduleFractions'], default_ev_sch['MonthlyScheduleMultipliers'], 5690, HPXML::LocationGarage)
 
+    # Test defaults w/ miles/year
+    hpxml_bldg.vehicles[0].miles_per_year = 5000
+    hpxml_bldg.vehicles[0].usable_capacity_ah = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 63.0, nil, 50.4, nil, 5000, 4.07, 0.22, HPXML::UnitsKwhPerMile, 0.8, default_ev_sch['WeekdayScheduleFractions'], default_ev_sch['WeekendScheduleFractions'], default_ev_sch['MonthlyScheduleMultipliers'], 5690, HPXML::LocationGarage)
+
+    # Test defaults w/ hours/week
+    hpxml_bldg.vehicles[0].miles_per_year = nil
+    hpxml_bldg.vehicles[0].hours_per_week = 5.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 63.0, nil, 50.4, nil, 6137.4, 5.0, 0.22, HPXML::UnitsKwhPerMile, 0.8, default_ev_sch['WeekdayScheduleFractions'], default_ev_sch['WeekendScheduleFractions'], default_ev_sch['MonthlyScheduleMultipliers'], 5690, HPXML::LocationGarage)
+
     # Test defaults w/ schedule file
     hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
     hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
@@ -5870,9 +5884,9 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(usable_capacity_ah, vehicle.usable_capacity_ah)
     end
-    assert_equal(miles_per_year, vehicle.miles_per_year)
-    assert_equal(hours_per_week, vehicle.hours_per_week)
-    assert_equal(fuel_economy, vehicle.fuel_economy)
+    assert_in_epsilon(miles_per_year, vehicle.miles_per_year, 0.01)
+    assert_in_epsilon(hours_per_week, vehicle.hours_per_week, 0.01)
+    assert_equal(fuel_economy, vehicle.fuel_economy, 0.01)
     assert_equal(fuel_economy_units, vehicle.fuel_economy_units)
     assert_equal(fraction_charged_home, vehicle.fraction_charged_home)
     if weekday_sch.nil?

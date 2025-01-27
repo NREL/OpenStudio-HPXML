@@ -4656,8 +4656,8 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions``                        array                                       No        See [#]_     24 comma-separated weekday fractions
   ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions``                        array                                       No                     24 comma-separated weekday fractions
   ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_     12 comma-separated monthly multipliers
-  ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        10,900       Number of miles driven per year
-  ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        8.88         Number of hours driven per week
+  ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        See [#]_     Number of miles driven per year
+  ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        See [#]_     Number of hours driven per week
   ``FuelEconomyCombined[Units="kWh/mile]/Value``                                                   double             > 0                      No        0.22         The vehicle combined city and highway fuel economy
   ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
 
@@ -4668,6 +4668,8 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   .. [#] If UsableCapacity is not provided, defaults to 0.8 * NominalCapacity.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If MilesDrivenPerYear is not provided, defaults to HoursDrivenPerWeek * 1,227.5, else 10,900 miles.
+  .. [#] If HoursDrivenPerWeek is not provided, defaults to MilesDrivenPerYear / 1,227.5, else 8.88 hours/week.
 
  .. note::
 
