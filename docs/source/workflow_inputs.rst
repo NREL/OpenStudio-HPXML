@@ -426,7 +426,7 @@ For these simulations:
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
-- :ref:`hpxml_batteries` are not currently supported.
+- :ref:`hpxml_batteries` and :ref:`hpxml_vehicles` are not currently supported.
 - :ref:`hpxml_utility_bill_scenarios` using *detailed* :ref:`electricity_rates` are not supported.
 
 .. _building_site:
@@ -679,50 +679,48 @@ They can be used to reflect real-world or stochastic occupancy.
 Detailed schedule inputs are provided via one or more CSV file that should be referenced in the HPXML file as ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/SchedulesFilePath`` elements.
 The column names available in the schedule CSV files are:
 
-  ================================  =======  =================================================================================  ===============================
-  Column Name                       Units    Description                                                                        Can Be Stochastically Generated [#]_
-  ================================  =======  =================================================================================  ===============================
-  ``occupants``                     frac     Occupant heat gain schedule.                                                       Yes
-  ``lighting_interior``             frac     Interior lighting energy use schedule.                                             Yes
-  ``lighting_exterior``             frac     Exterior lighting energy use schedule.                                             No
-  ``lighting_garage``               frac     Garage lighting energy use schedule.                                               Yes
-  ``lighting_exterior_holiday``     frac     Exterior holiday lighting energy use schedule.                                     No
-  ``cooking_range``                 frac     Cooking range & oven energy use schedule.                                          Yes
-  ``refrigerator``                  frac     Primary refrigerator energy use schedule.                                          No
-  ``extra_refrigerator``            frac     Non-primary refrigerator energy use schedule.                                      No
-  ``freezer``                       frac     Freezer energy use schedule.                                                       No
-  ``dishwasher``                    frac     Dishwasher energy use schedule.                                                    Yes
-  ``clothes_washer``                frac     Clothes washer energy use schedule.                                                Yes
-  ``clothes_dryer``                 frac     Clothes dryer energy use schedule.                                                 Yes
-  ``ceiling_fan``                   frac     Ceiling fan energy use schedule.                                                   Yes
-  ``plug_loads_other``              frac     Other plug load energy use schedule.                                               Yes
-  ``plug_loads_tv``                 frac     Television plug load energy use schedule.                                          Yes
-  ``plug_loads_vehicle``            frac     Electric vehicle plug load energy use schedule.                                    No
-  ``plug_loads_well_pump``          frac     Well pump plug load energy use schedule.                                           No
-  ``fuel_loads_grill``              frac     Grill fuel load energy use schedule.                                               No
-  ``fuel_loads_lighting``           frac     Lighting fuel load energy use schedule.                                            No
-  ``fuel_loads_fireplace``          frac     Fireplace fuel load energy use schedule.                                           No
-  ``pool_pump``                     frac     Pool pump energy use schedule.                                                     No
-  ``pool_heater``                   frac     Pool heater energy use schedule.                                                   No
-  ``permanent_spa_pump``            frac     Permanent spa pump energy use schedule.                                            No
-  ``permanent_spa_heater``          frac     Permanent spa heater energy use schedule.                                          No
-  ``hot_water_dishwasher``          frac     Dishwasher hot water use schedule.                                                 Yes
-  ``hot_water_clothes_washer``      frac     Clothes washer hot water use schedule.                                             Yes
-  ``hot_water_fixtures``            frac     Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
-  ``hot_water_recirculation_pump``  frac     Hot water recirculation pump schedule.                                             No
-  ``general_water_use``             frac     General water use internal gains.                                                  No
-  ``heating_setpoint``              F        Thermostat heating setpoint schedule.                                              No
-  ``cooling_setpoint``              F        Thermostat cooling setpoint schedule.                                              No
-  ``hvac_maximum_power_ratio``      frac     Variable speed system maximum power ratio schedule. [#]_                           No
-  ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                    No
-  ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
-  ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
-  ``battery_charging``              frac     Battery schedule. Positive for charging, negative for discharging. [#]_            No
-  ``battery_discharging``           frac     Battery schedule. Positive for charging, negative for discharging.                 No
-  ``ev_battery``                    -1 to 1  Battery schedule. Positive for charging, negative for discharging. [#]_            No
-  ``ev_battery_charging``           frac     Electric vehicle charging schedule.                                                No
-  ``ev_battery_discharging``        frac     Electric vehicle discharging schedule.                                             No
-  ================================  =======  =================================================================================  ===============================
+  ================================  =======  ================================================================================  ===============================
+  Column Name                       Units    Description                                                                       Can Be Stochastically Generated [#]_
+  ================================  =======  ================================================================================  ===============================
+  ``occupants``                     frac     Occupant heat gain schedule.                                                      Yes
+  ``lighting_interior``             frac     Interior lighting energy use schedule.                                            Yes
+  ``lighting_exterior``             frac     Exterior lighting energy use schedule.                                            No
+  ``lighting_garage``               frac     Garage lighting energy use schedule.                                              Yes
+  ``lighting_exterior_holiday``     frac     Exterior holiday lighting energy use schedule.                                    No
+  ``cooking_range``                 frac     Cooking range & oven energy use schedule.                                         Yes
+  ``refrigerator``                  frac     Primary refrigerator energy use schedule.                                         No
+  ``extra_refrigerator``            frac     Non-primary refrigerator energy use schedule.                                     No
+  ``freezer``                       frac     Freezer energy use schedule.                                                      No
+  ``dishwasher``                    frac     Dishwasher energy use schedule.                                                   Yes
+  ``clothes_washer``                frac     Clothes washer energy use schedule.                                               Yes
+  ``clothes_dryer``                 frac     Clothes dryer energy use schedule.                                                Yes
+  ``ceiling_fan``                   frac     Ceiling fan energy use schedule.                                                  Yes
+  ``plug_loads_other``              frac     Other plug load energy use schedule.                                              Yes
+  ``plug_loads_tv``                 frac     Television plug load energy use schedule.                                         Yes
+  ``plug_loads_vehicle``            frac     Electric vehicle plug load energy use schedule.                                   No
+  ``plug_loads_well_pump``          frac     Well pump plug load energy use schedule.                                          No
+  ``fuel_loads_grill``              frac     Grill fuel load energy use schedule.                                              No
+  ``fuel_loads_lighting``           frac     Lighting fuel load energy use schedule.                                           No
+  ``fuel_loads_fireplace``          frac     Fireplace fuel load energy use schedule.                                          No
+  ``pool_pump``                     frac     Pool pump energy use schedule.                                                    No
+  ``pool_heater``                   frac     Pool heater energy use schedule.                                                  No
+  ``permanent_spa_pump``            frac     Permanent spa pump energy use schedule.                                           No
+  ``permanent_spa_heater``          frac     Permanent spa heater energy use schedule.                                         No
+  ``hot_water_dishwasher``          frac     Dishwasher hot water use schedule.                                                Yes
+  ``hot_water_clothes_washer``      frac     Clothes washer hot water use schedule.                                            Yes
+  ``hot_water_fixtures``            frac     Fixtures (sinks, showers, baths) hot water use schedule.                          Yes
+  ``hot_water_recirculation_pump``  frac     Hot water recirculation pump schedule.                                            No
+  ``general_water_use``             frac     General water use internal gains.                                                 No
+  ``heating_setpoint``              F        Thermostat heating setpoint schedule.                                             No
+  ``cooling_setpoint``              F        Thermostat cooling setpoint schedule.                                             No
+  ``hvac_maximum_power_ratio``      frac     Variable speed system maximum power ratio schedule. [#]_                          No
+  ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                   No
+  ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.  No
+  ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                No
+  ``electric_vehicle``              -1 to 1  Electric vehicle schedule. Positive for charging, negative for discharging.       Yes
+  ``electric_vehicle_charging``     frac     Electric vehicle charging schedule.                                               Yes
+  ``electric_vehicle_discharging``  frac     Electric vehicle discharging schedule.                                            Yes
+  ================================  =======  ================================================================================  ===============================
 
   .. [#] A detailed stochastic occupancy schedule CSV file can also be automatically generated for these columns; see the :ref:`usage_instructions` for the commands.
          The stochastic occupancy schedules are generated using the methodology described in `Stochastic simulation of occupant-driven energy use in a bottom-up residential building stock model <https://www.sciencedirect.com/science/article/pii/S0306261922011540>`_.
@@ -745,10 +743,6 @@ The column names available in the schedule CSV files are:
          A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated (4F off the setpoint).
          During the shedding events, the main heat pump is limited to running below the specified fraction of rated power, and the backup system is locked out.
          When the comfort constraints are violated, both heat pump and backup systems are allowed to run at full load to recover the indoor temperature until reaching setpoint.
-
-  .. [#] This column takes precedence over ``battery_charging`` and ``battery_discharging``, if provided.
-
-  .. [#] This column takes precedence over ``ev_battery_charging`` and ``ev_battery_discharging``, if provided.
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -4637,54 +4631,49 @@ If not entered, the simulation will not include batteries.
 
   A battery in a home without PV or charging/discharging schedules is assumed to operate as backup and is not modeled.
 
+.. _hpxml_vehicles:
+
 HPXML Vehicles
-***************
+**************
 
-A single electric vehicle can be entered as a ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle``. This element is used to describe vehicle-level inputs, with more specific EV and battery inputs described in ``Vehicle/VehicleType/BatteryElectricVehicle/Battery``.
-If not entered, the simulation will not include electric vehicles.
+A single battery electric vehicle can be entered in ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle``.
+All other vehicle types are currently not modeled.
+This provides detailed modeling of electric vehicles (batteries and charging/discharging) as an alternative to the simple EV charging in :ref:`plug_loads`.
+If not entered, the simulation will not include a detailed electric vehicle model.
 
-  ====================================================  =======  ========  ============  ========  ========  ============================================
-  Element                                               Type     Units      Constraints  Required  Default   Notes
-  ====================================================  =======  ========  ============  ========  ========  ============================================
-  ``SystemIdentifier``                                  id                               Yes                 Unique identifier
-  ``MilesDrivenPerYear``                                double   miles      >= 0         No        10,900    Number of miles driven per year
-  ``HoursDrivenPerWeek``                                double   hours      >= 0         No        11.6      Number of hours driven per week
-  ``FuelEconomyCombined[Units="kWh/mile"]/Value``       double   kWh/mile   > 0          No        0.22      The vehicle efficiency in kWh/mile
-  ====================================================  =======  ========  ============  ========  ========  ============================================
+  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
+  Element                                                                                          Type    Units      Constraints              Required  Default      Notes
+  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
+  ``SystemIdentifier``                                                                             id                                          Yes                    Unique identifier
+  ``VehicleType/BatteryElectricVehicle/Battery/BatteryType``                                       string                                      No        Li-ion [#]_  EV battery type
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double  kWh or Ah  >= 0                     No        See [#]_     Nominal (total) capacity
+  ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_     Usable capacity
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No                     Nominal voltage
+  ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        0.8          Fraction of EV charging energy provided by home charger
+  ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                     ID of connected EV charger [#]_
+  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions``                        array                                       No        See [#]_     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions``                        array                                       No                     24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_     12 comma-separated monthly multipliers
+  ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        10,900       Number of miles driven per year
+  ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        8.88         Number of hours driven per week
+  ``FuelEconomyCombined[Units="kWh/mile]/Value``                                                   double             > 0                      No        0.22         The vehicle combined city and highway fuel economy
+  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
 
-Battery Electric Vehicle
-~~~~~~~~~~~~~~~~~~~~~~~~
-A battery electric vehicle is entered in ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle/VehicleType/BatteryElectricVehicle``. This provides inputs specific to EVs and its battery.
-If not entered, the simulation will not include an electric vehicle.
-
-  ============================================================  =======  =========  =======================  ========  ===========  ======================================
-  Element                                                       Type     Units      Constraints              Required  Default      Notes
-  ============================================================  =======  =========  =======================  ========  ===========  ======================================
-  ``FractionChargedLocation[Location="Home"]/Percentage``       double   frac       >= 0                     No        1.0          Unique identifier
-  ``ConnectedCharger``                                          idref                                        Yes                    ID of connected EV charger
-  ``Battery/BatteryType``                                       string                                       No        Li-ion [#]_  EV battery type
-  ``Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double   kWh or Ah  >= 0                     No        See [#]_
-  ``Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double   kWh or Ah  >= 0, < NominalCapacity  No        See [#]_
-  ``Battery/NominalVoltage``                                    double   V          >= 0                     No
-  ``extension/WeekdayScheduleFractions``                        array                                        No        See [#]_     24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``                        array                                        No                     24 comma-separated weekday fractions
-  ``extension/MonthlyScheduleMultipliers``                      array                                        No        See [#]_     12 comma-separated monthly multipliers
-  ============================================================  =======  =========  =======================  ========  ===========  ======================================
-
+  .. [#] ConnectedCharger must reference an ``ElectricVehicleCharger``.
+  .. [#] If a connected charger is not provided, then detailed electric vehicle charging will not be modeled.
   .. [#] Only the "Li-ion" battery type is supported.
-  .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
-  .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If NominalCapacity is not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
+  .. [#] If UsableCapacity is not provided, defaults to 0.8 * NominalCapacity.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
+  .. [#] If MonthlyScheduleMultipliers are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
 
  .. note::
 
-  If an EV is also specified with PlugLoadType "electric vehicle charging", then EV charging will be modeled as a plug load.
+  If a PlugLoadType for "electric vehicle charging" is also specified, then a warning will be provided and the EV charging plug load will take precedence.
 
   EV battery charging and discharging can be scheduled using :ref:`schedules_detailed` or with ``WeekdayScheduleFractions``, ``WeekendScheduleFractions``, and ``MonthlyScheduleMultipliers``.
   Positive schedule values control timing and magnitude of charging storage.
   Negative schedule values control timing and magnitude of discharging storage.
-  Simultaneous charging and discharging of the battery is not allowed.
   
   The effective discharge power is calculated using the vehicle ``FuelEconomyCombined``, ``MilesDrivenPerYear``, and the total discharge hours provided in the schedule.
   The discharge power is further influenced by the ambient temperature during simulation, and encompasses losses due to battery conditioning, vehicle conditioning, and charging losses.

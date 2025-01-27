@@ -371,7 +371,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     has_electricity_storage = false
-    if @end_uses.count { |_key, end_use| end_use.is_storage && end_use.variables.size > 0 } > 0
+    if @end_uses.count { |key, end_use| (end_use.is_storage && end_use.variables.size > 0) || (key == [FT::Elec, EUT::Vehicle] && end_use.variables.size > 0) } > 0
       has_electricity_storage = true
     end
 
@@ -384,6 +384,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
       end
     end
+
+    # Custom meter to include EV charging with facility electricity
+    ev_charging_key_var = ''
+    @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+      next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
+
+      ev_charging_key_var = ",#{elcs.name.to_s.upcase},Electric Storage Charge Energy"
+    end
+    result << OpenStudio::IdfObject.load("Meter:Custom,Electricity:FacilityEVCharging,Electricity,*,Electricity:Facility#{ev_charging_key_var};").get
+
     if has_electricity_production || has_electricity_storage
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricityProduced:Facility,runperiod;').get # Used for error checking
     end
@@ -391,16 +401,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       result << OpenStudio::IdfObject.load('Output:Meter,ElectricStorage:ElectricityProduced,runperiod;').get # Used for error checking
       if args[:include_timeseries_fuel_consumptions]
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricStorage:ElectricityProduced,#{args[:timeseries_frequency]};").get
-      end
-
-      # Request EV discharge energy for error checking
-      @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
-        next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
-
-        result << OpenStudio::IdfObject.load("Output:Variable,#{elcs.name.to_s.upcase},Electric Storage Discharge Energy,runperiod;").get
-        if args[:include_timeseries_fuel_consumptions]
-          result << OpenStudio::IdfObject.load("Output:Variable,#{elcs.name.to_s.upcase},Electric Storage Discharge Energy ,#{args[:timeseries_frequency]};").get
-        end
       end
 
       # Resilience
@@ -453,7 +453,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Fuel outputs (annual only)
     @peak_fuels.values.each do |peak_fuel|
-      result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,Electricity:Facility,Maximum;").get
+      result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,Electricity:FacilityEVCharging,Maximum;").get
     end
 
     # Peak Load outputs (annual only)
@@ -765,13 +765,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Fuel Uses
     @fuels.each do |fuel_type, fuel|
       fuel.annual_output = get_report_meter_data_annual(fuel.meters)
-      fuel.annual_output -= get_report_meter_data_annual(['ElectricStorage:ElectricityProduced']) if fuel_type == FT::Elec # We add Electric Storage onto the annual Electricity fuel meter
 
-      # Remove EV battery discharging
-      @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
-        next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
-
-        fuel.annual_output += get_report_variable_data_annual([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy']) if fuel_type == FT::Elec
+      if fuel_type == FT::Elec
+        @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+          if elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
+            # Add only charging energy of EV battery onto the annual Electricity fuel meter
+            fuel.annual_output += get_report_variable_data_annual([elcs.name.to_s.upcase], ['Electric Storage Charge Energy'])
+          else
+            # Add net home battery Electric Storage onto the annual Electricity fuel meter
+            fuel.annual_output -= get_report_variable_data_annual([elcs.name.to_s.upcase] * 2, ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'])
+          end
+        end
       end
 
       next unless args[:include_timeseries_fuel_consumptions]
@@ -780,16 +784,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       next unless fuel_type == FT::Elec
 
-      # We add Electric Storage onto the timeseries Electricity fuel meter
-      elec_storage_timeseries_output = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
-      fuel.timeseries_output = fuel.timeseries_output.zip(elec_storage_timeseries_output).map { |x, y| x - y }
-
-      # Remove timeseries EV battery discharging
       @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
-        next unless elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
-
-        ev_discharge_timeseries_output = get_report_variable_data_timeseries([elcs.name.to_s.upcase], ['Electric Storage Discharge Energy'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
-        fuel.timeseries_output = fuel.timeseries_output.zip(ev_discharge_timeseries_output).map { |x, y| x + y }
+        if elcs.additionalProperties.getFeatureAsBoolean('is_ev').get
+          # Add only charging energy of EV battery onto the timeseries Electricity fuel meter
+          ev_discharge_timeseries_output = get_report_variable_data_timeseries([elcs.name.to_s.upcase], ['Electric Storage Charge Energy'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
+          fuel.timeseries_output = fuel.timeseries_output.zip(ev_discharge_timeseries_output).map { |x, y| x + y }
+        else
+          # Add home battery Electric Storage onto the timeseries Electricity fuel meter
+          elec_storage_timeseries_output = get_report_variable_data_timeseries([elcs.name.to_s.upcase] * 2, ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
+          fuel.timeseries_output = fuel.timeseries_output.zip(elec_storage_timeseries_output).map { |x, y| x - y }
+        end
       end
     end
 
@@ -806,7 +810,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         months = ['Maximum of Months']
       end
       for month in months
-        val = get_tabular_data_value(peak_fuel.report.upcase, 'Meter', 'Custom Monthly Report', [month], 'ELECTRICITY:FACILITY {Maximum}', peak_fuel.annual_units)
+        val = get_tabular_data_value(peak_fuel.report.upcase, 'Meter', 'Custom Monthly Report', [month], 'ELECTRICITY:FACILITYEVCHARGING {Maximum}', peak_fuel.annual_units)
         peak_fuel.annual_output = [peak_fuel.annual_output.to_f, val].max
       end
     end
@@ -2519,8 +2523,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                                        is_negative: true)
     @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Battery]),
                                                      is_storage: true)
-    @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Vehicle]),
-                                                     is_storage: true)
+    @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Vehicle]))
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::Heating]))
     @end_uses[[FT::Gas, EUT::HeatingHeatPumpBackup]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::HeatingHeatPumpBackup]))
     @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::HotWater]))
@@ -2992,7 +2995,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         if object.additionalProperties.getFeatureAsBoolean('is_ev').get
-          return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Production Decrement Energy'] }
+          return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Charge Energy'] }
         else
           return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
         end

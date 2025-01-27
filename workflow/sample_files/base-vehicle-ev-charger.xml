@@ -51,9 +51,6 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
-        <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/battery-ev.csv</SchedulesFilePath>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -388,6 +385,13 @@
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
+          <Door>
+            <SystemIdentifier id='Door2'/>
+            <AttachedToWall idref='Wall1'/>
+            <Area>70.0</Area>
+            <Azimuth>180</Azimuth>
+            <RValue>4.4</RValue>
+          </Door>
         </Doors>
       </Enclosure>
       <Systems>
@@ -506,7 +510,7 @@
         </WaterHeating>
         <Vehicles>
           <Vehicle>
-            <SystemIdentifier id='ElectricVehicle1'/>
+            <SystemIdentifier id='Vehicle1'/>
             <VehicleType>
               <BatteryElectricVehicle>
                 <Battery>
@@ -519,6 +523,10 @@
                     <Value>80.0</Value>
                   </UsableCapacity>
                 </Battery>
+                <FractionChargedLocation>
+                  <Location>Home</Location>
+                  <Percentage>0.75</Percentage>
+                </FractionChargedLocation>
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>
@@ -678,14 +686,6 @@
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
           </extension>
-        </PlugLoad>
-        <PlugLoad>
-          <SystemIdentifier id='PlugLoad3'/>
-          <PlugLoadType>electric vehicle charging</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>3000.0</Value>
-          </Load>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

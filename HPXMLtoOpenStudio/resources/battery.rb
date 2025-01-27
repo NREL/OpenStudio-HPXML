@@ -11,8 +11,13 @@ module Battery
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply(runner, model, spaces, hpxml_bldg, schedules_file)
+    charging_schedule, discharging_schedule = nil, nil
+    if !schedules_file.nil?
+      charging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:BatteryCharging].name)
+      discharging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:BatteryDischarging].name)
+    end
     hpxml_bldg.batteries.each do |battery|
-      apply_battery(runner, model, spaces, hpxml_bldg, battery, schedules_file)
+      apply_battery(runner, model, spaces, hpxml_bldg, battery, charging_schedule, discharging_schedule)
     end
   end
 
@@ -30,21 +35,14 @@ module Battery
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param battery [HPXML::Battery, HPXML::Vehicle] Object that defines a single home battery or EV battery
-  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param charging_schedule [OpenStudio::Model::ScheduleXXX] The battery charging schedule
+  # @param discharging_schedule [OpenStudio::Model::ScheduleXXX] The battery discharging schedule
   # @return [nil]
-  def self.apply_battery(runner, model, spaces, hpxml_bldg, battery, schedules_file)
+  def self.apply_battery(runner, model, spaces, hpxml_bldg, battery, charging_schedule, discharging_schedule)
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     pv_systems = hpxml_bldg.pv_systems
     is_ev = battery.is_a?(HPXML::Vehicle)
-
-    charging_schedule, discharging_schedule = nil, nil
-    if !is_ev && !schedules_file.nil?
-      charging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:BatteryCharging].name)
-      discharging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:BatteryDischarging].name)
-    elsif is_ev
-      charging_schedule, discharging_schedule = Vehicle.get_ev_charging_schedules(runner, model, battery, schedules_file)
-    end
 
     if !is_ev && pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
       runner.registerWarning('Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.')
