@@ -4492,7 +4492,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     default_wp_sched = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]
     _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeTelevision, 620, 1.0, 0.0, 1.0, default_tv_sched['WeekdayScheduleFractions'], default_tv_sched['WeekendScheduleFractions'], default_tv_sched['MonthlyScheduleMultipliers'])
     _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeOther, 2457, 0.855, 0.045, 1.0, default_ot_sched['WeekdayScheduleFractions'], default_ot_sched['WeekendScheduleFractions'], default_ot_sched['MonthlyScheduleMultipliers'])
-    _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeElectricVehicleCharging, 1667, 0.0, 0.0, 1.0, default_ev_sched['WeekdayScheduleFractions'], default_ev_sched['WeekendScheduleFractions'], default_ev_sched['MonthlyScheduleMultipliers'])
+    _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeElectricVehicleCharging, 2368, 0.0, 0.0, 1.0, default_ev_sched['WeekdayScheduleFractions'], default_ev_sched['WeekendScheduleFractions'], default_ev_sched['MonthlyScheduleMultipliers'])
     _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeWellPump, 441, 0.0, 0.0, 1.0, default_wp_sched['WeekdayScheduleFractions'], default_wp_sched['WeekendScheduleFractions'], default_wp_sched['MonthlyScheduleMultipliers'])
   end
 
