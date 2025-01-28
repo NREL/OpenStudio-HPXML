@@ -3180,7 +3180,7 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_vehicles(hpxml_bldg, schedules_file)
-    default_values = get_electric_vehicle_values()
+    default_values = get_electric_vehicle_values
     hpxml_bldg.vehicles.each do |vehicle|
       next unless vehicle.vehicle_type == HPXML::VehicleTypeBEV
 
@@ -3205,8 +3205,10 @@ module Defaults
         vehicle.hours_per_week_isdefaulted = true
       elsif (not vehicle.hours_per_week.nil?) && vehicle.miles_per_year.nil?
         vehicle.miles_per_year = vehicle.hours_per_week * miles_to_hrs_per_week
+        vehicle.miles_per_year_isdefaulted = true
       elsif (not vehicle.miles_per_year.nil?) && vehicle.hours_per_week.nil?
         vehicle.hours_per_week = vehicle.miles_per_year / miles_to_hrs_per_week
+        vehicle.hours_per_week_isdefaulted = true
       end
       if vehicle.fraction_charged_home.nil?
         vehicle.fraction_charged_home = default_values[:fraction_charged_home]
@@ -5936,9 +5938,11 @@ module Defaults
   def self.get_electric_vehicle_charging_annual_energy()
     ev_charger_efficiency = 0.9
     ev_battery_efficiency = 0.9
-    vehicle_annual_miles_driven = 4500.0
-    vehicle_kWh_per_mile = 0.3
-    return vehicle_annual_miles_driven * vehicle_kWh_per_mile / (ev_charger_efficiency * ev_battery_efficiency)
+
+    # Use detailed vehicle model defaults
+    vehicle_defaults = get_electric_vehicle_values
+
+    return vehicle_defaults[:miles_per_year] * vehicle_defaults[:fuel_economy] * vehicle_defaults[:fraction_charged_home] / (ev_charger_efficiency * ev_battery_efficiency)
   end
 
   # Gets the default well pump annual energy use.
