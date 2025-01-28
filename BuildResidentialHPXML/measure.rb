@@ -2721,13 +2721,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_hours_driven_per_week', false)
     arg.setDisplayName('Vehicle: Hours Driven Per Week')
-    arg.setDescription('The weekly hours the vehicle is driven.')
+    arg.setDescription("The weekly hours the vehicle is driven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     arg.setUnits('hours')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fraction_charged_home', false)
     arg.setDisplayName('Vehicle: Fraction Charged at Home')
-    arg.setDescription('The fraction of charging energy provided by the at-home charger to the vehicle, only applies to electric vehicles.')
+    arg.setDescription("The fraction of charging energy provided by the at-home charger to the vehicle, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_charger_present', false)
