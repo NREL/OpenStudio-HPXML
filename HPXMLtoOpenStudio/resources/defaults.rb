@@ -6291,7 +6291,12 @@ module Defaults
       next if heat_pump.fraction_heat_load_served == 0
 
       if not heat_pump.distribution_system.nil?
-        breaker_spaces += 2 # 240v fan
+        if (heat_pump.backup_type.nil? && (heat_pump.heat_pump_type != HPXML::HVACTypeHeatPumpMiniSplit)) ||
+           (heat_pump.backup_type == HPXML::HeatPumpBackupTypeSeparate) && (heat_pump.backup_heating_fuel != HPXML::FuelTypeElectricity)
+          breaker_spaces += 2 # 240v fan or potential for electric backup
+        elsif (heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated) && (heat_pump.backup_heating_fuel != HPXML::FuelTypeElectricity)
+          breaker_spaces += 1 # 120v fan
+        end
       end
       watts = heat_pump.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }.map { |sf| sf.power }.sum(0.0)
       breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)
@@ -6319,7 +6324,12 @@ module Defaults
       next unless heat_pump.fraction_heat_load_served == 0
 
       if not heat_pump.distribution_system.nil?
-        breaker_spaces += 2 # 240v fan
+        if (heat_pump.backup_type.nil? && (heat_pump.heat_pump_type != HPXML::HVACTypeHeatPumpMiniSplit)) ||
+           (heat_pump.backup_type == HPXML::HeatPumpBackupTypeSeparate) && (heat_pump.backup_heating_fuel != HPXML::FuelTypeElectricity)
+          breaker_spaces += 2 # 240v fan or potential for electric backup
+        elsif (heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated) && (heat_pump.backup_heating_fuel != HPXML::FuelTypeElectricity)
+          breaker_spaces += 1 # 120v fan
+        end
       end
       watts = heat_pump.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }.map { |sf| sf.power }.sum(0.0)
       breaker_spaces += get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_current_rating)
