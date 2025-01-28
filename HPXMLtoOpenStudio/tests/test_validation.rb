@@ -263,6 +263,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'sum-space-floor-area' => ['Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
                             'sum-space-floor-area2' => ['Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
                             'vehicle-ev-multiple-BEV' => ['Expected 0 or 1 element(s) for xpath: Vehicle/VehicleType/BatteryElectricVehicle [context: /HPXML/Building/BuildingDetails/Systems/Vehicles, id: "MyBuilding"]'],
+                            'vehicle-ev-invalid-fuel-economy-units' => ['Expected ../../FuelEconomyCombined/Units to be "kWh/mile" [context: /HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle/VehicleType/BatteryElectricVehicle, id: "Vehicle1"]'],
                             'water-heater-location' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
                             'water-heater-location-other' => ["Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'water-heater-recovery-efficiency' => ['Expected RecoveryEfficiency to be greater than EnergyFactor'],
@@ -792,6 +793,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
         hpxml_bldg.vehicles.add(id: 'ElectricVehicle2',
                                 vehicle_type: HPXML::VehicleTypeBEV)
+      when 'vehicle-ev-invalid-fuel-economy-units'
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
+        hpxml_bldg.vehicles[0].fuel_economy_units = 'mpg'
       when 'water-heater-location'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].location = HPXML::LocationCrawlspaceVented
