@@ -311,6 +311,8 @@ Annual building loads are listed below.
 Note that the "Delivered" loads represent the energy delivered by the HVAC/DHW system; if a system is significantly undersized, there will be unmet load not reflected by these values.
 If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported load will be likewise reduced compared to a home that is fully conditioned.
 
+.. _annual_unmet_hours:
+
 Annual Unmet Hours
 ~~~~~~~~~~~~~~~~~~
 
@@ -331,6 +333,7 @@ Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Peak building electricity outputs are listed below.
+Values include any home battery charging/discharging and EV charging.
 
   ==================================  =============================================================
   Type                                Notes
@@ -634,7 +637,7 @@ Depending on the outputs requested, the file may include:
   Hot Water Uses               ``hotwater``         Water use for each end use type (in gallons).
   Total Loads                  ``loads``            Heating, cooling, and hot water loads (in kBtu).
   Component Loads              ``componentloads``   Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
-  Unmet Hours                  ``unmethours``       Heating and cooling unmet hours.
+  Unmet Hours                  ``unmethours``       Heating, cooling, and/or driving unmet hours.
   Zone Temperatures            ``temperatures``     Zone temperatures (in deg-F) for each space (e.g., conditioned space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
   Airflows                     ``airflows``         Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
   Weather                      ``weather``          Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.

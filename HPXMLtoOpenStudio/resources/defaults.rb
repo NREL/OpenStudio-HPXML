@@ -3197,13 +3197,16 @@ module Defaults
         vehicle.fuel_economy_units = default_values[:fuel_economy_units]
         vehicle.fuel_economy_units_isdefaulted = true
       end
-      if vehicle.miles_per_year.nil?
+      miles_to_hrs_per_week = default_values[:miles_per_year] / default_values[:hours_per_week]
+      if vehicle.miles_per_year.nil? && vehicle.hours_per_week.nil?
         vehicle.miles_per_year = default_values[:miles_per_year]
         vehicle.miles_per_year_isdefaulted = true
-      end
-      if vehicle.hours_per_week.nil?
         vehicle.hours_per_week = default_values[:hours_per_week]
         vehicle.hours_per_week_isdefaulted = true
+      elsif (not vehicle.hours_per_week.nil?) && vehicle.miles_per_year.nil?
+        vehicle.miles_per_year = vehicle.hours_per_week * miles_to_hrs_per_week
+      elsif (not vehicle.miles_per_year.nil?) && vehicle.hours_per_week.nil?
+        vehicle.hours_per_week = vehicle.miles_per_year / miles_to_hrs_per_week
       end
       if vehicle.fraction_charged_home.nil?
         vehicle.fraction_charged_home = default_values[:fraction_charged_home]
@@ -3223,17 +3226,9 @@ module Defaults
         vehicle.ev_monthly_multipliers_isdefaulted = true
       end
 
-      ev_charger = nil
-      if not vehicle.ev_charger_idref.nil?
-        hpxml_bldg.ev_chargers.each do |charger|
-          next unless vehicle.ev_charger_idref == charger.id
+      next if vehicle.ev_charger.nil?
 
-          ev_charger = charger
-        end
-      end
-      next if ev_charger.nil?
-
-      apply_ev_charger(hpxml_bldg, ev_charger)
+      apply_ev_charger(hpxml_bldg, vehicle.ev_charger)
     end
   end
 
@@ -4006,7 +4001,7 @@ module Defaults
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_well_pump
-          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]['WeekdayScheduleFractions']
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]['WeekendScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_well_pump
@@ -5753,8 +5748,7 @@ module Defaults
     end
 
     return { location: location,
-             charging_power: 5690, # Median L2 charging rate in EVWatts
-             charging_level: 2 }
+             charging_power: 5690 } # Median L2 charging rate in EVWatts
   end
 
   # Gets the default values for a dehumidifier

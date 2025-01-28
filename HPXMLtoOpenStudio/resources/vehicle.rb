@@ -43,33 +43,12 @@ module Vehicle
       charging_schedule = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
       discharging_schedule = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
     else
-      runner.registerWarning("Both schedule file and weekday fractions provided for '#{SchedulesFile::Columns[:ElectricVehicleCharging].name}'; weekday fractions will be ignored.") if !vehicle.ev_weekday_fractions.nil?
-      runner.registerWarning("Both schedule file and weekend fractions provided for '#{SchedulesFile::Columns[:ElectricVehicleCharging].name}'; weekend fractions will be ignored.") if !vehicle.ev_weekend_fractions.nil?
-      runner.registerWarning("Both schedule file and monthly multipliers provided for '#{SchedulesFile::Columns[:ElectricVehicleCharging].name}'; monthly multipliers will be ignored.") if !vehicle.ev_monthly_multipliers.nil?
+      runner.registerWarning("Both schedule file and weekday fractions provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; weekday fractions will be ignored.") if !vehicle.ev_weekday_fractions.nil?
+      runner.registerWarning("Both schedule file and weekend fractions provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; weekend fractions will be ignored.") if !vehicle.ev_weekend_fractions.nil?
+      runner.registerWarning("Both schedule file and monthly multipliers provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; monthly multipliers will be ignored.") if !vehicle.ev_monthly_multipliers.nil?
     end
 
     return charging_schedule, discharging_schedule
-  end
-
-  # Retrieves EV charging and discharging OpenStudio schedule objects
-  #
-  # @param charging_schedule [OpenStudio::Model::ScheduleFile or MonthWeekdayWeekendSchedule] EV charging schedule
-  # @param discharging_schedule [OpenStudio::Model::ScheduleFile or MonthWeekdayWeekendSchedule] EV discharging schedule
-  # @return [Array<OpenStudio::Model::ScheduleXXX>] The charging and discharging schedules, either ScheduleRulesets or ScheduleFiles
-  def self.get_ev_OS_schedules(charging_schedule, discharging_schedule)
-    os_charging_schedule, os_discharging_schedule = nil, nil
-    if charging_schedule.is_a? MonthWeekdayWeekendSchedule
-      os_charging_schedule = charging_schedule.schedule
-    elsif charging_schedule.is_a? OpenStudio::Model::ScheduleFile
-      os_charging_schedule = charging_schedule
-    end
-    if discharging_schedule.is_a? MonthWeekdayWeekendSchedule
-      os_discharging_schedule = discharging_schedule.schedule
-    elsif discharging_schedule.is_a? OpenStudio::Model::ScheduleFile
-      os_discharging_schedule = discharging_schedule
-    end
-
-    return os_charging_schedule, os_discharging_schedule
   end
 
   # Apply an electric vehicle to the model using the battery.rb Battery class, which assigns OpenStudio ElectricLoadCenterStorageLiIonNMCBattery and ElectricLoadCenterDistribution objects.
@@ -111,7 +90,8 @@ module Vehicle
     vehicle.rated_power_output = eff_discharge_power * 2.25
 
     # Apply vehicle battery to model
-    os_charging_schedule, os_discharging_schedule = get_ev_OS_schedules(charging_schedule, discharging_schedule)
+    os_charging_schedule = (charging_schedule.is_a?(MonthWeekdayWeekendSchedule) ? charging_schedule.schedule : charging_schedule)
+    os_discharging_schedule = (discharging_schedule.is_a?(MonthWeekdayWeekendSchedule) ? discharging_schedule.schedule : discharging_schedule)
     Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, os_charging_schedule, os_discharging_schedule)
 
     # Apply EMS program to adjust discharge power based on ambient temperature.
@@ -181,10 +161,10 @@ module Vehicle
       power_curve = power_curve[1..]
       ev_discharge_program.addLine("  Set power_mult = #{power_curve}")
       ev_discharge_program.addLine("  Set site_temp_adj = #{temp_sensor.name}")
-      ev_discharge_program.addLine("  If #{temp_sensor.name} < -17.778")
-      ev_discharge_program.addLine('    Set site_temp_adj = -17.778')
-      ev_discharge_program.addLine("  ElseIf #{temp_sensor.name} > 37.609")
-      ev_discharge_program.addLine('    Set site_temp_adj = 37.609')
+      ev_discharge_program.addLine("  If #{temp_sensor.name} < #{UnitConversions.convert(0, 'F', 'C').round(3)}")
+      ev_discharge_program.addLine("    Set site_temp_adj = #{UnitConversions.convert(0, 'F', 'C').round(3)}")
+      ev_discharge_program.addLine("  ElseIf #{temp_sensor.name} > #{UnitConversions.convert(100, 'F', 'C').round(3)}")
+      ev_discharge_program.addLine("    Set site_temp_adj = #{UnitConversions.convert(100, 'F', 'C').round(3)}")
       ev_discharge_program.addLine('  EndIf')
       ev_discharge_program.addLine("  If #{discharge_sch_sensor.name} > 0.0")
       ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{eff_discharge_power} * #{vehicle.fraction_charged_home} * power_mult * #{discharge_sch_sensor.name}")
