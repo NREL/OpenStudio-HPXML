@@ -335,7 +335,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   def test_ev_battery
     num_occupants = 1.0
 
-    hpxml = _create_hpxml('base-battery-ev.xml')
+    hpxml = _create_hpxml('base-vehicle-ev-charger.xml.xml')
     hpxml.buildings[0].building_occupancy.number_of_residents = num_occupants
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
