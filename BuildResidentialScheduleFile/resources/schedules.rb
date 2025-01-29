@@ -813,8 +813,8 @@ class ScheduleGenerator
     agg_charging_schedule = aggregate_array(charging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
     agg_discharging_schedule = aggregate_array(discharging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
     @schedules[SchedulesFile::Columns[:EVOccupant].name] = ev_occupant_presence
-    @schedules[SchedulesFile::Columns[:EVBatteryCharging].name] = agg_charging_schedule
-    @schedules[SchedulesFile::Columns[:EVBatteryDischarging].name] = agg_discharging_schedule
+    @schedules[SchedulesFile::Columns[:ElectricVehicleCharging].name] = agg_charging_schedule
+    @schedules[SchedulesFile::Columns[:ElectricVehicleDischarging].name] = agg_discharging_schedule
   end
 
   # Get the weekday/weekend schedule fractions for TV plug loads and monthly multipliers for interior lighting, dishwasher, clothes washer/dryer, cooking range, and other/TV plug loads.
