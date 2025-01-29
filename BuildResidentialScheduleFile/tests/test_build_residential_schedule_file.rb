@@ -335,7 +335,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   def test_ev_battery
     num_occupants = 1.0
 
-    hpxml = _create_hpxml('base-vehicle-ev-charger.xml.xml')
+    hpxml = _create_hpxml('base-vehicle-ev-charger.xml')
     hpxml.buildings[0].building_occupancy.number_of_residents = num_occupants
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
@@ -344,8 +344,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
                            output_path: @tmp_schedule_file_path)
-    assert_in_epsilon(6201, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:EVBatteryCharging].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(729.9, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:EVBatteryDischarging].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(6201, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ElectricVehicleCharging].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(729.9, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ElectricVehicleDischarging].name, schedules: sf.tmp_schedules), @tol)
   end
 
   def test_multiple_buildings
