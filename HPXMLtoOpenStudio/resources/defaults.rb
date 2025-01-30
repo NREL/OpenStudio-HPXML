@@ -5348,6 +5348,10 @@ module Defaults
     when HPXML::HVACTypeMiniSplitAirConditioner,
          HPXML::HVACTypeHeatPumpMiniSplit
       return HPXML::HVACCompressorTypeVariableSpeed
+    when HPXML::HVACTypeHeatPumpGroundToAir
+      # TODO: default GSHP compressor type based on COP?
+      # TODO: Leave it for now to avoid impacting desuperheater capability, update when var speed desuperheater is allowed in E+
+      return HPXML::HVACCompressorTypeSingleStage
     when HPXML::HVACTypePTAC,
          HPXML::HVACTypeHeatPumpPTHP,
          HPXML::HVACTypeHeatPumpRoom,
