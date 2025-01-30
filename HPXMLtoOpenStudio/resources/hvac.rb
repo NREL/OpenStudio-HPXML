@@ -1716,8 +1716,6 @@ module HVAC
 
     when HPXML::HVACCompressorTypeVariableSpeed
       clg_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton(cooling_system.compressor_type)
-      clg_ap.cooling_capacity_retention_temperature = 82.0
-      clg_ap.cooling_capacity_retention_fraction = 1.033 # From NEEP data
       clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[-1]
       clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
       clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
@@ -1735,17 +1733,37 @@ module HVAC
     when HPXML::HVACCompressorTypeSingleStage
       return [1.0]
     when HPXML::HVACCompressorTypeTwoStage
-      return [0.72, 1.0]
+      return [0.728, 1.0]
     when HPXML::HVACCompressorTypeVariableSpeed
-      is_ducted = !cooling_system.distribution_system_idref.nil?
-      if is_ducted
-        return [0.394, 1.0]
-      else
-        return [0.255, 1.0]
-      end
+      nominal_to_max_ratio = 0.934
+      _cops_95, cops_82 = get_var_speed_cool_cops_95F_82F(cooling_system)
+      min_cop_82, _nominal_cop_82, max_cop_82 = cops_82
+      min_capacity_ratio = 1.0 / nominal_to_max_ratio * (0.029 + 0.369 * max_cop_82 / min_cop_82)
+      return [min_capacity_ratio, 1.0, 1.0 / nominal_to_max_ratio]
     end
 
     fail 'Unable to get cooling capacity ratios.'
+  end
+
+  # Get net COP values at 95F and 82F for each speed based on RESNET Addendum approach
+  #
+  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
+  # @return [nil]
+  def self.get_var_speed_cool_cops_95F_82F(cooling_system)
+    nominal_cop_95 = cooling_system.cooling_efficiency_eer2 / 3.41214
+    min_cop_82 = get_cop_82_min(cooling_system.cooling_efficiency_seer2, cooling_system.cooling_efficiency_eer2)
+    # rated EIR@95F / max EIR@95F = max COP@95F / rated COP@95F
+    rated_eir_ratio_95 = 0.928
+    max_cop_95 = nominal_cop_95 * rated_eir_ratio_95
+    # min EIR@95F / min EIR@82F = min COP@82F / min COP@95F
+    min_eir_maint_95 = 1.315
+    min_cop_95 = min_cop_82 / min_eir_maint_95
+
+    # max EIR@95F / max EIR@82F = max COP@82F / max COP@95F
+    max_eir_maint_95 = 1.326
+    max_cop_82 = max_cop_95 * max_eir_maint_95
+    nominal_cop_82 = min_cop_82 + ((nominal_cop_95 - min_cop_95) / (max_cop_95 - min_cop_95) * (max_cop_82 - min_cop_82))
+    return [[min_cop_95, nominal_cop_95, max_cop_95], [min_cop_82, nominal_cop_82, max_cop_82]]
   end
 
   # TODO
@@ -1755,7 +1773,7 @@ module HVAC
   def self.set_heat_curves_dx_air_source(heating_system)
     htg_ap = heating_system.additional_properties
     htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heating_system.compressor_type)
-    htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system)
+    htg_ap.heat_capacity_ratios = get_heat_capacity_ratios_47F(heating_system)
     set_heat_c_d(heating_system)
 
     hspf = heating_system.heating_efficiency_hspf
@@ -1785,7 +1803,7 @@ module HVAC
     when HPXML::HVACCompressorTypeVariableSpeed
       htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type)
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
-      htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system)
+      htg_ap.heat_capacity_ratios = get_heat_capacity_ratios_47F(heating_system)
       htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
     end
   end
@@ -1796,33 +1814,71 @@ module HVAC
   # @return [nil]
   def self.set_heat_detailed_performance_data(heat_pump)
     hp_ap = heat_pump.additional_properties
-    is_ducted = !heat_pump.distribution_system_idref.nil?
-    hspf = heat_pump.heating_efficiency_hspf
 
     # Default data inputs based on NEEP data
     detailed_performance_data = heat_pump.heating_detailed_performance_data
-    heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heat_pump)
-    max_cap_maint_5 = 1.0 - (1.0 - heating_capacity_retention_fraction) * (HVAC::AirSourceHeatRatedODB - 5.0) /
-                            (HVAC::AirSourceHeatRatedODB - heating_capacity_retention_temp)
 
-    if is_ducted
-      a, b, c, d, e = 0.4348, 0.008923, 1.090, -0.1861, -0.07564
-    else
-      a, b, c, d, e = 0.1914, -1.822, 1.364, -0.07783, 2.221
-    end
-    max_cop_47 = a * hspf + b * max_cap_maint_5 + c * max_cap_maint_5**2 + d * max_cap_maint_5 * hspf + e
+    # Capacities @ 47F
     max_capacity_47 = heat_pump.heating_capacity * hp_ap.heat_capacity_ratios[-1]
+    nominal_capacity_47 = heat_pump.heating_capacity
     min_capacity_47 = heat_pump.heating_capacity * hp_ap.heat_capacity_ratios[0]
-    min_cop_47 = is_ducted ? max_cop_47 * (-0.0306 * hspf + 1.5385) : max_cop_47 * (-0.01698 * hspf + 1.5907)
-    max_capacity_5 = max_capacity_47 * max_cap_maint_5
-    max_cop_5 = is_ducted ? max_cop_47 * 0.587 : max_cop_47 * 0.671
-    min_capacity_5 = is_ducted ? min_capacity_47 * 1.106 : min_capacity_47 * 0.611
-    min_cop_5 = is_ducted ? min_cop_47 * 0.502 : min_cop_47 * 0.538
+
+    # COPs @ 47F
+    # COP@47F uses table interpolation from hspf2 and capacity retention of 17F
+    nominal_cop_47 = get_cop_47_rated(heat_pump.heating_efficiency_hspf2, heat_pump.heating_capacity_17F / heat_pump.heating_capacity)
+    # rated EIR@47F / max EIR@47F =  max COP@47F / rated COP@47F
+    rated_eir_ratio_47 = 0.939
+    max_cop_47 = nominal_cop_47 * rated_eir_ratio_47
+    # min EIR@47F / max EIR@47F =  max COP@47F / min COP@47F
+    min_eir_ratio_47 = 0.730
+    min_cop_47 = max_cop_47 / min_eir_ratio_47
+
+    # Capacities @ 17F
+    heat_capacity_ratios_17F = get_heat_capacity_ratios_17F(heat_pump)
+    max_capacity_17 = heat_pump.heating_capacity_17F * heat_capacity_ratios_17F[-1]
+    nominal_capacity_17 = heat_pump.heating_capacity_17F
+    min_capacity_17 = heat_pump.heating_capacity_17F * heat_capacity_ratios_17F[0]
+
+    # COPs @ 17F
+    # rated EIR@17F / rated EIR@47F = rated COP@47F / rated COP@17F
+    rated_eir_maint_17 = 1.351
+    nominal_cop_17 = nominal_cop_47 / rated_eir_maint_17
+    # rated EIR@17F / max EIR@17F = max COP@17F / rated COP@17F
+    rated_eir_ratio_17 = 0.902
+    max_cop_17 = nominal_cop_17 * rated_eir_ratio_17
+    # min EIR@17F / max EIR@17F = max COP@17F / min COP@17F
+    min_eir_ratio_17 = 0.798
+    min_cop_17 = max_cop_17 / min_eir_ratio_17
+
+    # Capacities @ 5F
+    heat_capacity_ratios_5F = get_heat_capacity_ratios_5F(heat_pump)
+    # max CAP@5F / max CAP@17F
+    max_cap_maint_5 = 0.866
+    max_capacity_5 = max_capacity_17 * max_cap_maint_5
+    nominal_capacity_5 = max_capacity_5 / heat_capacity_ratios_5F[-1]
+    min_capacity_5 = nominal_capacity_5 * heat_capacity_ratios_5F[0]
+
+    # COPs @ 5F
+    # max EIR@5F / max EIR@17F = max COP@17F / max COP@5F
+    max_eir_maint_5 = 1.164
+    max_cop_5 = max_cop_17 / max_eir_maint_5
+    # rated EIR@5F / max EIR@5F = max COP@5F / rated COP@5F
+    rated_eir_ratio_5 = 1.000
+    nominal_cop_5 = max_cop_5 / rated_eir_ratio_5
+    # min EIR@5F / max EIR@5F = max COP@5F / min COP@5F
+    min_eir_ratio_5 = 0.866
+    min_cop_5 = max_cop_5 / min_eir_ratio_5
 
     # performance data at 47F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_47.round(1),
                                   efficiency_cop: max_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 47,
+                                  isdefaulted: true)
+    # performance data at 47F, nominal speed
+    detailed_performance_data.add(capacity: nominal_capacity_47.round(1),
+                                  efficiency_cop: nominal_cop_47.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 47,
                                   isdefaulted: true)
     # performance data at 47F, minimum speed
@@ -1831,10 +1887,36 @@ module HVAC
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 47,
                                   isdefaulted: true)
+
+    # performance data at 17F, maximum speed
+    detailed_performance_data.add(capacity: max_capacity_17.round(1),
+                                  efficiency_cop: max_cop_17.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 17,
+                                  isdefaulted: true)
+    # performance data at 17F, nominal speed
+    detailed_performance_data.add(capacity: nominal_capacity_17.round(1),
+                                  efficiency_cop: nominal_cop_17.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
+                                  outdoor_temperature: 17,
+                                  isdefaulted: true)
+    # performance data at 17F, minimum speed
+    detailed_performance_data.add(capacity: min_capacity_17.round(1),
+                                  efficiency_cop: min_cop_17.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: 17,
+                                  isdefaulted: true)
+
     # performance data at 5F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_5.round(1),
                                   efficiency_cop: max_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 5,
+                                  isdefaulted: true)
+    # performance data at 5F, nominal speed
+    detailed_performance_data.add(capacity: nominal_capacity_5.round(1),
+                                  efficiency_cop: nominal_cop_5.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 5,
                                   isdefaulted: true)
     # performance data at 5F, minimum speed
@@ -1851,62 +1933,159 @@ module HVAC
   # @return [nil]
   def self.set_cool_detailed_performance_data(cooling_system)
     clg_ap = cooling_system.additional_properties
-    is_ducted = !cooling_system.distribution_system_idref.nil?
-    seer = cooling_system.cooling_efficiency_seer
 
     # Default data inputs based on NEEP data
     detailed_performance_data = cooling_system.cooling_detailed_performance_data
-    max_cap_maint_82 = 1.0 - (1.0 - clg_ap.cooling_capacity_retention_fraction) * (HVAC::AirSourceCoolRatedODB - 82.0) /
-                             (HVAC::AirSourceCoolRatedODB - clg_ap.cooling_capacity_retention_temperature)
 
-    max_cop_95 = is_ducted ? 0.1953 * seer : 0.06635 * seer + 1.8707
+    # Capacities @ 95F
     max_capacity_95 = cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[-1]
-    min_capacity_95 = max_capacity_95 / clg_ap.cool_capacity_ratios[-1] * clg_ap.cool_capacity_ratios[0]
-    min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)
-    max_capacity_82 = max_capacity_95 * max_cap_maint_82
-    max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.300 * max_cop_95)
-    min_capacity_82 = min_capacity_95 * 1.099
-    min_cop_82 = is_ducted ? (1.402 * min_cop_95) : (1.333 * min_cop_95)
+    nominal_capacity_95 = cooling_system.cooling_capacity
+    min_capacity_95 = cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[0]
+
+    # Capacities @ 82F
+    max_cap_maint_95 = 0.940
+    min_cap_maint_95 = 0.948
+    max_capacity_82 = max_capacity_95 / max_cap_maint_95
+    min_capacity_82 = min_capacity_95 / min_cap_maint_95
+    nominal_capacity_82 = min_capacity_82 + ((nominal_capacity_95 - min_capacity_95) / (max_capacity_95 - min_capacity_95) * (max_capacity_82 - min_capacity_82))
+
+    # COPs @ 95F
+    cops_95, cops_82 = get_var_speed_cool_cops_95F_82F(cooling_system)
 
     # performance data at 95F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_95.round(1),
-                                  efficiency_cop: max_cop_95.round(4),
+                                  efficiency_cop: cops_95[-1].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 95,
+                                  isdefaulted: true)
+    # performance data at 95F, nominal speed
+    detailed_performance_data.add(capacity: nominal_capacity_95.round(1),
+                                  efficiency_cop: cops_95[1].round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 95,
                                   isdefaulted: true)
     # performance data at 95F, minimum speed
     detailed_performance_data.add(capacity: min_capacity_95.round(1),
-                                  efficiency_cop: min_cop_95.round(4),
+                                  efficiency_cop: cops_95[0].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 95,
                                   isdefaulted: true)
     # performance data at 82F, maximum speed
     detailed_performance_data.add(capacity: max_capacity_82.round(1),
-                                  efficiency_cop: max_cop_82.round(4),
+                                  efficiency_cop: cops_82[-1].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 82,
+                                  isdefaulted: true)
+    # performance data at 82F, nominal speed
+    detailed_performance_data.add(capacity: nominal_capacity_82.round(1),
+                                  efficiency_cop: cops_82[1].round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 82,
                                   isdefaulted: true)
     # performance data at 82F, minimum speed
     detailed_performance_data.add(capacity: min_capacity_82.round(1),
-                                  efficiency_cop: min_cop_82.round(4),
+                                  efficiency_cop: cops_82[0].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 82,
                                   isdefaulted: true)
   end
 
-  # Returns the heating capacity ratios for the HVAC system.
+  # Returns the rated speed net COP value for the HVAC system at 47F, using table interpolation(based on HSPF2, Capacity maintenance at 17F) from RESNET Addendum.
+  #
+  # @param hspf2 [Double] The heating efficiency hspf2 of the hvac system
+  # @param rated_cap_maint_17F_47F [Double] The rated heating capacity at 17F / rated heating capacity at 47F
+  # @return [Double] Rated speed net COP value for the HVAC system at 47F
+  def self.get_cop_47_rated(hspf2, rated_cap_maint_17F_47F)
+    hspf2_array = [7.0, 9.25, 11.5, 13.75, 16]
+    rated_cap_maint_17F_47F_array = [0.5, 0.54, 0.62, 0.78, 1.10]
+    cop_47_array = [[2.702, 2.620, 2.493, 2.364, 2.182],
+                    [4.050, 3.832, 3.507, 3.168, 2.875],
+                    [5.796, 5.341, 4.663, 3.995, 3.564],
+                    [8.202, 7.265, 5.990, 4.845, 4.248],
+                    [11.689, 9.800, 7.529, 5.720, 4.928]]
+    x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }
+    y1, y2 = rated_cap_maint_17F_47F_array.min_by(2) { |x| (x - rated_cap_maint_17F_47F).abs }
+    x_indexes = [x1, x2].map { |x| hspf2_array.find_index(x) }
+    y_indexes = [y1, y2].map { |y| rated_cap_maint_17F_47F_array.find_index(y) }
+    fx1y1 = cop_47_array[x_indexes[0]][y_indexes[0]]
+    fx1y2 = cop_47_array[x_indexes[0]][y_indexes[1]]
+    fx2y1 = cop_47_array[x_indexes[1]][y_indexes[0]]
+    fx2y2 = cop_47_array[x_indexes[1]][y_indexes[1]]
+    return MathTools.interp4(hspf2, rated_cap_maint_17F_47F, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
+  end
+
+  # Returns the minimum speed net COP value for the HVAC system at 82F, using table interpolation(based on SEER2, SEER2/EER2) from RESNET Addendum.
+  #
+  # @param seer2 [Double] The cooling efficiency seer2 of the hvac system
+  # @param eer2 [Double] The cooling efficiency eer2 of the hvac system
+  # @return [Double] Minimum speed net COP value for the HVAC system at 82F
+  def self.get_cop_82_min(seer2, eer2)
+    seer2_eer2_ratio = seer2 / eer2
+    seer2_array = [14.0, 24.5, 35.0]
+    seer2_eer2_ratio_array = [1.000, 1.747, 2.120, 2.307, 2.400]
+    cop_82_array = [[4.047, 6.175, 14.240, 19.508, 23.029],
+                    [7.061, 10.289, 23.262, 31.842, 37.513],
+                    [10.058, 14.053, 30.962, 42.388, 49.863]]
+    x1, x2 = seer2_array.min_by(2) { |x| (x - seer2).abs }
+    y1, y2 = seer2_eer2_ratio_array.min_by(2) { |x| (x - seer2_eer2_ratio).abs }
+    x_indexes = [x1, x2].map { |x| seer2_array.find_index(x) }
+    y_indexes = [y1, y2].map { |y| seer2_eer2_ratio_array.find_index(y) }
+    fx1y1 = cop_82_array[x_indexes[0]][y_indexes[0]]
+    fx1y2 = cop_82_array[x_indexes[0]][y_indexes[1]]
+    fx2y1 = cop_82_array[x_indexes[1]][y_indexes[0]]
+    fx2y2 = cop_82_array[x_indexes[1]][y_indexes[1]]
+    return MathTools.interp4(seer2, seer2_eer2_ratio, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
+  end
+
+  # Returns the heating capacity ratios for the HVAC system at rated temperature (47F).
   #
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @return [Array<Double>] Ratio of heating capacity to heating cooling capacity for each speed
-  def self.get_heat_capacity_ratios(heat_pump)
+  # @return [Array<Double>] Ratio of heating capacity to rated heating capacity for each speed at 47F.
+  def self.get_heat_capacity_ratios_47F(heat_pump)
     case heat_pump.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
       return [1.0]
     when HPXML::HVACCompressorTypeTwoStage
-      return [0.72, 1.0]
+      return [0.712, 1.0]
     when HPXML::HVACCompressorTypeVariableSpeed
       nominal_to_max_ratio = 0.908
       return [0.272 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
+    end
+
+    fail 'Unable to get heating capacity ratios.'
+  end
+
+  # Returns the heating capacity ratios for the HVAC system at 17F.
+  #
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @return [Array<Double>] Ratio of heating capacity to rated heating capacity for each speed at 17F.
+  def self.get_heat_capacity_ratios_17F(heat_pump)
+    case heat_pump.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      return [1.0]
+    when HPXML::HVACCompressorTypeTwoStage
+      return [0.712, 1.0]
+    when HPXML::HVACCompressorTypeVariableSpeed
+      nominal_to_max_ratio = 0.817
+      return [0.341 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
+    end
+
+    fail 'Unable to get heating capacity ratios.'
+  end
+
+  # Returns the heating capacity ratios for the HVAC system at 5F.
+  #
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @return [Array<Double>] Ratio of heating capacity to rated heating rated capacity for each speed at 5F.
+  def self.get_heat_capacity_ratios_5F(heat_pump)
+    case heat_pump.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      return [1.0]
+    when HPXML::HVACCompressorTypeTwoStage
+      return [0.712, 1.0]
+    when HPXML::HVACCompressorTypeVariableSpeed
+      nominal_to_max_ratio = 0.988
+      return [0.321 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
     end
 
     fail 'Unable to get heating capacity ratios.'
@@ -1952,7 +2131,7 @@ module HVAC
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [411.0083, 344.1]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      return [400.0, 400.0]
+      return [400.0, 400.0, 400.0]
     else
       fail 'Compressor type not supported.'
     end
@@ -2713,14 +2892,11 @@ module HVAC
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @return [TODO] TODO
   def self.get_heating_capacity_retention(heat_pump)
-    if not heat_pump.heating_capacity_17F.nil?
-      heating_capacity_retention_temp = 17.0
-      heating_capacity_retention_fraction = heat_pump.heating_capacity == 0.0 ? 0.0 : heat_pump.heating_capacity_17F / heat_pump.heating_capacity
-    elsif not heat_pump.heating_capacity_retention_fraction.nil?
+    if not heat_pump.heating_capacity_retention_fraction.nil?
       heating_capacity_retention_temp = heat_pump.heating_capacity_retention_temp
       heating_capacity_retention_fraction = heat_pump.heating_capacity_retention_fraction
     else
-      fail 'Missing heating capacity retention or 17F heating capacity.'
+      fail 'Missing heating capacity retention.'
     end
     return heating_capacity_retention_temp, heating_capacity_retention_fraction
   end
@@ -5659,6 +5835,24 @@ module HVAC
     end
   end
 
+  # Calculates rated SEER2 (newer metric) from rated SEER (older metric).
+  #
+  # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
+  # Note that this is a regression based on products on the market, not a conversion.
+  #
+  # @param seer2 [Double] Cooling efficiency (Btu/Wh)
+  # @param is_ducted [Boolean] True if a ducted HVAC system
+  # @return [Double] SEER value (Btu/Wh)
+  def self.calc_seer2_from_seer(seer, is_ducted)
+    # Note: There are less common system types (packaged, small duct high velocity,
+    # and space-constrained) that we don't handle here.
+    if is_ducted # Ducted split system
+      return seer * 0.95
+    else # Ductless systems
+      return seer * 1.00
+    end
+  end
+
   # Calculates rated EER2 (newer metric) from rated EER (older metric).
   #
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
@@ -5692,6 +5886,24 @@ module HVAC
       return hspf2 / 0.85
     else # Ductless system
       return hspf2 / 0.90
+    end
+  end
+
+  # Calculates rated HSPF2 (newer metric) from rated HSPF (older metric).
+  #
+  # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
+  # This is based on a regression of products, not a translation.
+  #
+  # @param hspf2 [Double] Heating efficiency (Btu/Wh)
+  # @param is_ducted [Boolean] True if a ducted HVAC system
+  # @return [Double] HSPF value (Btu/Wh)
+  def self.calc_hspf2_from_hspf(hspf, is_ducted)
+    # Note: There are less common system types (packaged, small duct high velocity,
+    # and space-constrained) that we don't handle here.
+    if is_ducted # Ducted split system
+      return hspf * 0.85
+    else # Ductless system
+      return hspf * 0.90
     end
   end
 

@@ -1466,7 +1466,7 @@
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 1'>Expected 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeatingCapacity) + count(h:HeatingCapacity17F) = 0 or count(h:HeatingCapacity) + count(h:HeatingCapacity17F) = 2'>Expected 0 or 2 element(s) for xpath: HeatingCapacity | HeatingCapacity17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityRetention | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:HeatingCapacity17F) &lt;= number(h:HeatingCapacity) or not(h:HeatingCapacity17F) or not(h:HeatingCapacity)'>Expected HeatingCapacity17F to be less than or equal to HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
@@ -1516,7 +1516,7 @@
       <sch:assert role='ERROR' test='count(h:DistributionSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeatingCapacity) + count(h:HeatingCapacity17F) = 0 or count(h:HeatingCapacity) + count(h:HeatingCapacity17F) = 2'>Expected 0 or 2 element(s) for xpath: HeatingCapacity | HeatingCapacity17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityRetention | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:HeatingCapacity17F) &lt;= number(h:HeatingCapacity) or not(h:HeatingCapacity17F) or not(h:HeatingCapacity)'>Expected HeatingCapacity17F to be less than or equal to HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
@@ -1628,7 +1628,7 @@
       <sch:assert role='ERROR' test='count(h:DistributionSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DistributionSystem</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
-      <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeatingCapacity) + count(h:HeatingCapacity17F) = 0 or count(h:HeatingCapacity) + count(h:HeatingCapacity17F) = 2'>Expected 0 or 2 element(s) for xpath: HeatingCapacity | HeatingCapacity17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityRetention | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:HeatingCapacity17F) &lt;= number(h:HeatingCapacity) or not(h:HeatingCapacity17F) or not(h:HeatingCapacity)'>Expected HeatingCapacity17F to be less than or equal to HeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:CoolingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CoolingCapacity</sch:assert>
@@ -1711,9 +1711,8 @@
       <sch:assert role='ERROR' test='count(../h:CompressorType[text()="variable speed"]) = 1'>Expected 1 element(s) for xpath: ../CompressorType[text()="variable speed"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=47 and h:CapacityDescription="minimum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=47 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=47 and h:CapacityDescription="maximum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=47 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
-      <!-- FIXME: Require 17F once our defaulting code adds this data point -->
-      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=17 and h:CapacityDescription="minimum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=17 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
-      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=17 and h:CapacityDescription="maximum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=17 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
+      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=17 and h:CapacityDescription="minimum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=17 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
+      <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=17 and h:CapacityDescription="maximum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=17 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=5 and h:CapacityDescription="minimum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=5 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature=5 and h:CapacityDescription="maximum"]) = 1'>Expected 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature=5 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature &lt; 5 and h:CapacityDescription="minimum"]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature&lt;5 and CapacityDescription="minimum"]</sch:assert> <!-- See [PerformanceDataPoint] -->

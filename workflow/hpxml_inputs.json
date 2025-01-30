@@ -2025,7 +2025,7 @@
     "heat_pump_heating_autosizing_limit": 44000,
     "heat_pump_backup_heating_autosizing_limit": 28000
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-retention.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml": {
@@ -2846,7 +2846,7 @@
     "hvac_perf_data_cooling_min_speed_capacities": "0.29, 0.54",
     "hvac_perf_data_cooling_max_speed_capacities": "1.18, 1.11"
   },
-  "sample_files/base-hvac-mini-split-heat-pump-ductless-heating-capacity-17f.xml": {
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-heating-capacity-retention.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml": {
@@ -2953,7 +2953,7 @@
     "mech_vent_fan_power": 100,
     "mech_vent_num_units_served": 1
   },
-  "sample_files/base-hvac-pthp-heating-capacity-17f.xml": {
+  "sample_files/base-hvac-pthp-heating-capacity-retention.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml"
   },
   "sample_files/base-hvac-room-ac-only.xml": {

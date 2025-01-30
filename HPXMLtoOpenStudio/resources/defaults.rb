@@ -1848,7 +1848,7 @@ module Defaults
       end
     end
 
-    # Convert SEER2/EER/HSPF2 to SEER/EER2/HSPF
+    # Convert SEER/EER/HSPF to SEER2/EER2/HSPF2
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)
         next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -1857,11 +1857,11 @@ module Defaults
         next unless [HPXML::HVACTypeHeatPumpAirToAir,
                      HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
       end
-      if hvac_system.cooling_efficiency_seer.nil?
+      if hvac_system.cooling_efficiency_seer2.nil?
         is_ducted = !hvac_system.distribution_system_idref.nil?
-        hvac_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(hvac_system.cooling_efficiency_seer2, is_ducted).round(2)
-        hvac_system.cooling_efficiency_seer_isdefaulted = true
-        hvac_system.cooling_efficiency_seer2 = nil
+        hvac_system.cooling_efficiency_seer2 = HVAC.calc_seer2_from_seer(hvac_system.cooling_efficiency_seer, is_ducted).round(2)
+        hvac_system.cooling_efficiency_seer2_isdefaulted = true
+        hvac_system.cooling_efficiency_seer = nil
       end
       next unless hvac_system.cooling_efficiency_eer2.nil? && (not hvac_system.cooling_efficiency_eer.nil?)
 
@@ -1873,12 +1873,12 @@ module Defaults
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-      next unless heat_pump.heating_efficiency_hspf.nil?
+      next unless heat_pump.heating_efficiency_hspf2.nil?
 
       is_ducted = !heat_pump.distribution_system_idref.nil?
-      heat_pump.heating_efficiency_hspf = HVAC.calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2, is_ducted).round(2)
-      heat_pump.heating_efficiency_hspf_isdefaulted = true
-      heat_pump.heating_efficiency_hspf2 = nil
+      heat_pump.heating_efficiency_hspf2 = HVAC.calc_hspf2_from_hspf(heat_pump.heating_efficiency_hspf, is_ducted).round(2)
+      heat_pump.heating_efficiency_hspf2_isdefaulted = true
+      heat_pump.heating_efficiency_hspf = nil
     end
 
     # Convert EER to CEER
@@ -1931,18 +1931,6 @@ module Defaults
 
       heat_pump.compressor_type = get_hvac_compressor_type(heat_pump.heat_pump_type, heat_pump.cooling_efficiency_seer)
       heat_pump.compressor_type_isdefaulted = true
-    end
-
-    # Default HP heating capacity retention
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless heat_pump.heating_capacity_retention_fraction.nil?
-      next unless heat_pump.heating_capacity_17F.nil?
-      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
-      next unless heat_pump.heating_detailed_performance_data.empty? # set after hvac sizing
-
-      heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = get_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
-      heat_pump.heating_capacity_retention_fraction_isdefaulted = true
-      heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
 
     # Default HP compressor lockout temp
@@ -2261,8 +2249,7 @@ module Defaults
       next unless hvac_system.cooling_efficiency_eer.nil? && hvac_system.cooling_efficiency_eer2.nil?
 
       # Regressions based on Central ACs & HPs in ENERGY STAR product lists
-      seer = hvac_system.cooling_efficiency_seer
-      seer2 = (hvac_system.distribution_system_idref.nil? ? seer : seer * 0.95) # Temporary conversion, will be removed when model is based on SEER2
+      seer2 = hvac_system.cooling_efficiency_seer2
       case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
         eer2 = 0.73 * seer2 + 1.47
@@ -2421,6 +2408,7 @@ module Defaults
       if is_hp
         if hvac_system.heating_detailed_performance_data.empty?
           HVAC.set_heat_detailed_performance_data(hvac_system)
+          set_heating_capacity_17F(hvac_system)
         else
           # process capacity fraction of nominal
           hvac_system.heating_detailed_performance_data.each do |dp|
@@ -2430,16 +2418,10 @@ module Defaults
             dp.capacity_isdefaulted = true
           end
 
-          if hvac_system.heating_capacity_retention_fraction.nil? && hvac_system.heating_capacity_17F.nil?
-            # Calculate heating capacity retention at 5F outdoor drybulb
-            target_odb = 5.0
-            max_capacity_47 = hvac_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-            max_capacity_5 = HVAC.extrapolate_data_point(hvac_system.heating_detailed_performance_data, HPXML::CapacityDescriptionMaximum, :outdoor_temperature, target_odb, :capacity)
-            hvac_system.heating_capacity_retention_fraction = (max_capacity_5 / max_capacity_47).round(5)
-            hvac_system.heating_capacity_retention_fraction = 0.0 if hvac_system.heating_capacity_retention_fraction < 0
-            hvac_system.heating_capacity_retention_temp = target_odb
-            hvac_system.heating_capacity_retention_fraction_isdefaulted = true
-            hvac_system.heating_capacity_retention_temp_isdefaulted = true
+          if hvac_system.heating_capacity_17F.nil?
+            rated_capacity_17 = hvac_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
+            hvac_system.heating_capacity_17F = rated_capacity_17
+            hvac_system.heating_capacity_17F_isdefaulted = true
           end
           # override some properties based on detailed performance data
           heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
@@ -2450,6 +2432,33 @@ module Defaults
         end
       end
     end
+  end
+
+  # TODO
+  #
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @return [TODO] TODO
+  def self.set_heating_capacity_17F(heat_pump)
+    return unless heat_pump.heating_capacity_17F.nil?
+
+    if not heat_pump.heating_capacity_retention_fraction.nil?
+      retention_fraction = heat_pump.heating_capacity_retention_fraction
+      retention_temp = heat_pump.heating_capacity_retention_temp
+    else
+      retention_temp = 5.0
+      case heat_pump.compressor_type
+      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+        retention_fraction = 0.425
+      when HPXML::HVACCompressorTypeVariableSpeed
+        # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+        retention_fraction = (0.0461 * calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2) + 0.1594).round(4)
+      end
+    end
+    retention_fraction_17F = 1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0)
+    heat_pump.heating_capacity_17F = heat_pump.heating_capacity * retention_fraction_17F
+    heat_pump.heating_capacity_17F_isdefaulted = true
+    heat_pump.heating_capacity_retention_fraction = nil
+    heat_pump.heating_capacity_retention_temp = nil
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::HVACControl object
@@ -5638,23 +5647,6 @@ module Defaults
       fail "Unexpected control type #{control_type}."
     end
     return clg_wd_setpoints, clg_we_setpoints
-  end
-
-  # Gets the default heating capacity retention at 5F for a heat pump.
-  #
-  # @param compressor_type [String] Type of compressor (HPXML::HVACCompressorTypeXXX)
-  # @param hspf [Double] Heat pump efficiency
-  # @return [Array<Double, Double>] Temperature (F), heating capacity retention at the temperature (frac)
-  def self.get_heating_capacity_retention(compressor_type, hspf = nil)
-    retention_temp = 5.0
-    case compressor_type
-    when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
-      retention_fraction = 0.425
-    when HPXML::HVACCompressorTypeVariableSpeed
-      # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-      retention_fraction = (0.0461 * hspf + 0.1594).round(4)
-    end
-    return retention_temp, retention_fraction
   end
 
   # Gets the monthly ceiling fan operation schedule.
