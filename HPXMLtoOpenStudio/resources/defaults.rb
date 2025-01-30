@@ -1858,15 +1858,13 @@ module Defaults
                      HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
       end
       if hvac_system.cooling_efficiency_seer2.nil?
-        is_ducted = !hvac_system.distribution_system_idref.nil?
-        hvac_system.cooling_efficiency_seer2 = HVAC.calc_seer2_from_seer(hvac_system.cooling_efficiency_seer, is_ducted).round(2)
+        hvac_system.cooling_efficiency_seer2 = HVAC.calc_seer2_from_seer(hvac_system).round(2)
         hvac_system.cooling_efficiency_seer2_isdefaulted = true
         hvac_system.cooling_efficiency_seer = nil
       end
       next unless hvac_system.cooling_efficiency_eer2.nil? && (not hvac_system.cooling_efficiency_eer.nil?)
 
-      is_ducted = !hvac_system.distribution_system_idref.nil?
-      hvac_system.cooling_efficiency_eer2 = HVAC.calc_eer2_from_eer(hvac_system.cooling_efficiency_eer, is_ducted).round(2)
+      hvac_system.cooling_efficiency_eer2 = HVAC.calc_eer2_from_eer(hvac_system).round(2)
       hvac_system.cooling_efficiency_eer2_isdefaulted = true
       hvac_system.cooling_efficiency_eer = nil
     end
@@ -1875,8 +1873,7 @@ module Defaults
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
       next unless heat_pump.heating_efficiency_hspf2.nil?
 
-      is_ducted = !heat_pump.distribution_system_idref.nil?
-      heat_pump.heating_efficiency_hspf2 = HVAC.calc_hspf2_from_hspf(heat_pump.heating_efficiency_hspf, is_ducted).round(2)
+      heat_pump.heating_efficiency_hspf2 = HVAC.calc_hspf2_from_hspf(heat_pump).round(2)
       heat_pump.heating_efficiency_hspf2_isdefaulted = true
       heat_pump.heating_efficiency_hspf = nil
     end
@@ -2444,17 +2441,10 @@ module Defaults
     if not heat_pump.heating_capacity_retention_fraction.nil?
       retention_fraction = heat_pump.heating_capacity_retention_fraction
       retention_temp = heat_pump.heating_capacity_retention_temp
+      retention_fraction_17F = 1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0)
     else
-      retention_temp = 5.0
-      case heat_pump.compressor_type
-      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
-        retention_fraction = 0.425
-      when HPXML::HVACCompressorTypeVariableSpeed
-        # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-        retention_fraction = (0.0461 * calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2) + 0.1594).round(4)
-      end
+      retention_fraction_17F = HVAC.get_default_capacity_maint_17(heat_pump)
     end
-    retention_fraction_17F = 1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0)
     heat_pump.heating_capacity_17F = heat_pump.heating_capacity * retention_fraction_17F
     heat_pump.heating_capacity_17F_isdefaulted = true
     heat_pump.heating_capacity_retention_fraction = nil

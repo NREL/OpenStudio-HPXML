@@ -1611,8 +1611,8 @@ module HVAC
     when HPXML::HVACCompressorTypeVariableSpeed
       # Variable speed systems have constant flow ECM blowers, so the air handler can always achieve the design airflow rate by sacrificing blower power.
       # So we assume that there is only one corresponding airflow rate for each compressor speed.
-      eir_fflow_spec = [[1, 0, 0]] * 2
-      cap_fflow_spec = [[1, 0, 0]] * 2
+      eir_fflow_spec = [[1, 0, 0]] * 3
+      cap_fflow_spec = [[1, 0, 0]] * 3
     end
     return cap_fflow_spec, eir_fflow_spec
   end
@@ -1702,7 +1702,7 @@ module HVAC
         clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[0]
         clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
         clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
-        clg_ap.cool_rated_cops = [(0.2692 * cooling_system.cooling_efficiency_seer + 0.2706).round(2)] # Regression based on inverse model
+        clg_ap.cool_rated_cops = [(0.2692 * calc_seer_from_seer2(cooling_system) + 0.2706).round(2)] # Regression based on inverse model
       end
 
     when HPXML::HVACCompressorTypeTwoStage
@@ -1711,7 +1711,7 @@ module HVAC
       clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
       clg_ap.cool_cap_ft_spec, clg_ap.cool_eir_ft_spec = get_cool_cap_eir_ft_spec(cooling_system.compressor_type)
       clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
-      clg_ap.cool_rated_cops = [(0.2773 * cooling_system.cooling_efficiency_seer - 0.0018).round(2)] # Regression based on inverse model
+      clg_ap.cool_rated_cops = [(0.2773 * calc_seer_from_seer2(cooling_system) - 0.0018).round(2)] # Regression based on inverse model
       clg_ap.cool_rated_cops << clg_ap.cool_rated_cops[0] * 0.91 # COP ratio based on Dylan's data as seen in BEopt 2.8 options
 
     when HPXML::HVACCompressorTypeVariableSpeed
@@ -1776,7 +1776,7 @@ module HVAC
     htg_ap.heat_capacity_ratios = get_heat_capacity_ratios_47F(heating_system)
     set_heat_c_d(heating_system)
 
-    hspf = heating_system.heating_efficiency_hspf
+    hspf = calc_hspf_from_hspf2(heating_system)
     case heating_system.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
       heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heating_system)
@@ -1943,8 +1943,7 @@ module HVAC
     min_capacity_95 = cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[0]
 
     # Capacities @ 82F
-    max_cap_maint_95 = 0.940
-    min_cap_maint_95 = 0.948
+    min_cap_maint_95, max_cap_maint_95 = get_cool_capacity_maint_95()
     max_capacity_82 = max_capacity_95 / max_cap_maint_95
     min_capacity_82 = min_capacity_95 / min_cap_maint_95
     nominal_capacity_82 = min_capacity_82 + ((nominal_capacity_95 - min_capacity_95) / (max_capacity_95 - min_capacity_95) * (max_capacity_82 - min_capacity_82))
@@ -2035,6 +2034,30 @@ module HVAC
     fx2y1 = cop_82_array[x_indexes[1]][y_indexes[0]]
     fx2y2 = cop_82_array[x_indexes[1]][y_indexes[1]]
     return MathTools.interp4(seer2, seer2_eer2_ratio, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
+  end
+
+  # Returns the min and max speed capacity maintenance from 95F to 82F
+  # Maintenance = capacity@95F / capacity@82F
+  #
+  # @return [Array<Double>] Min and max speed capacity maintenance from 95F to 82F
+  def self.get_cool_capacity_maint_95()
+    return [0.948, 0.940]
+  end
+
+  # Returns the capacity maintenance from 17F to 47F, based on NEEP data for all var speed heat pump types, if autosizing and capacity retention is not provided
+  # Maintenance = capacity@17F / capacity@47F
+  #
+  # @return [Double] Capacity maintenance from 17F to 47F
+  def self.get_default_capacity_maint_17(heat_pump)
+    retention_temp = 5.0
+    case heat_pump.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+      retention_fraction = 0.425
+    when HPXML::HVACCompressorTypeVariableSpeed
+      # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+      retention_fraction = (0.0461 * calc_hspf_from_hspf2(heat_pump) + 0.1594).round(4)
+    end
+    return (1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0))
   end
 
   # Returns the heating capacity ratios for the HVAC system at rated temperature (47F).
@@ -2892,9 +2915,9 @@ module HVAC
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @return [TODO] TODO
   def self.get_heating_capacity_retention(heat_pump)
-    if not heat_pump.heating_capacity_retention_fraction.nil?
-      heating_capacity_retention_temp = heat_pump.heating_capacity_retention_temp
-      heating_capacity_retention_fraction = heat_pump.heating_capacity_retention_fraction
+    if not heat_pump.heating_capacity_17F.nil?
+      heating_capacity_retention_temp = 17.0
+      heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
     else
       fail 'Missing heating capacity retention.'
     end
@@ -4663,7 +4686,7 @@ module HVAC
     else
       case cooling_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
-        if cooling_system.cooling_efficiency_seer < 13.0
+        if calc_seer_from_seer2(cooling_system) < 13.0
           clg_ap.cool_c_d = 0.20
         else
           clg_ap.cool_c_d = 0.07
@@ -4693,7 +4716,7 @@ module HVAC
     else
       case heating_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
-        if heating_system.heating_efficiency_hspf < 7.0
+        if calc_hspf_from_hspf2(heating_system) < 7.0
           htg_ap.heat_c_d =  0.20
         else
           htg_ap.heat_c_d =  0.11
@@ -5822,16 +5845,16 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # Note that this is a regression based on products on the market, not a conversion.
   #
-  # @param seer2 [Double] Cooling efficiency (Btu/Wh)
-  # @param is_ducted [Boolean] True if a ducted HVAC system
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
   # @return [Double] SEER value (Btu/Wh)
-  def self.calc_seer_from_seer2(seer2, is_ducted)
+  def self.calc_seer_from_seer2(hvac_system)
     # Note: There are less common system types (packaged, small duct high velocity,
     # and space-constrained) that we don't handle here.
+    is_ducted = !hvac_system.distribution_system_idref.nil?
     if is_ducted # Ducted split system
-      return seer2 / 0.95
+      return hvac_system.cooling_efficiency_seer2 / 0.95
     else # Ductless systems
-      return seer2 / 1.00
+      return hvac_system.cooling_efficiency_seer2 / 1.00
     end
   end
 
@@ -5840,16 +5863,16 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # Note that this is a regression based on products on the market, not a conversion.
   #
-  # @param seer2 [Double] Cooling efficiency (Btu/Wh)
-  # @param is_ducted [Boolean] True if a ducted HVAC system
-  # @return [Double] SEER value (Btu/Wh)
-  def self.calc_seer2_from_seer(seer, is_ducted)
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
+  # @return [Double] SEER2 value (Btu/Wh)
+  def self.calc_seer2_from_seer(hvac_system)
     # Note: There are less common system types (packaged, small duct high velocity,
     # and space-constrained) that we don't handle here.
+    is_ducted = !hvac_system.distribution_system_idref.nil?
     if is_ducted # Ducted split system
-      return seer * 0.95
+      return hvac_system.cooling_efficiency_seer * 0.95
     else # Ductless systems
-      return seer * 1.00
+      return hvac_system.cooling_efficiency_seer * 1.00
     end
   end
 
@@ -5858,16 +5881,16 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # Note that this is a regression based on products on the market, not a conversion.
   #
-  # @param eer [Double] Cooling efficiency (Btu/Wh)
-  # @param is_ducted [Boolean] True if a ducted HVAC system
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
   # @return [Double] EER2 value (Btu/Wh)
-  def self.calc_eer2_from_eer(eer, is_ducted)
+  def self.calc_eer2_from_eer(hvac_system)
     # Note: There are less common system types (packaged, small duct high velocity,
     # and space-constrained) that we don't handle here.
+    is_ducted = !hvac_system.distribution_system_idref.nil?
     if is_ducted # Ducted split system
-      return eer * 0.95
+      return hvac_system.cooling_efficiency_eer * 0.95
     else # Ductless systems
-      return eer * 1.00
+      return hvac_system.cooling_efficiency_eer * 1.00
     end
   end
 
@@ -5876,16 +5899,16 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # This is based on a regression of products, not a translation.
   #
-  # @param hspf2 [Double] Heating efficiency (Btu/Wh)
-  # @param is_ducted [Boolean] True if a ducted HVAC system
+  # @param heat_pump [HPXML::HeatPump]  The HPXML Heat Pump system of interest
   # @return [Double] HSPF value (Btu/Wh)
-  def self.calc_hspf_from_hspf2(hspf2, is_ducted)
+  def self.calc_hspf_from_hspf2(heat_pump)
     # Note: There are less common system types (packaged, small duct high velocity,
     # and space-constrained) that we don't handle here.
+    is_ducted = !heat_pump.distribution_system_idref.nil?
     if is_ducted # Ducted split system
-      return hspf2 / 0.85
+      return heat_pump.heating_efficiency_hspf2 / 0.85
     else # Ductless system
-      return hspf2 / 0.90
+      return heat_pump.heating_efficiency_hspf2 / 0.90
     end
   end
 
@@ -5894,16 +5917,16 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # This is based on a regression of products, not a translation.
   #
-  # @param hspf2 [Double] Heating efficiency (Btu/Wh)
-  # @param is_ducted [Boolean] True if a ducted HVAC system
-  # @return [Double] HSPF value (Btu/Wh)
-  def self.calc_hspf2_from_hspf(hspf, is_ducted)
+  # @param heat_pump [HPXML::HeatPump]  The HPXML Heat Pump system of interest
+  # @return [Double] HSPF2 value (Btu/Wh)
+  def self.calc_hspf2_from_hspf(heat_pump)
     # Note: There are less common system types (packaged, small duct high velocity,
     # and space-constrained) that we don't handle here.
+    is_ducted = !heat_pump.distribution_system_idref.nil?
     if is_ducted # Ducted split system
-      return hspf * 0.85
+      return heat_pump.heating_efficiency_hspf * 0.85
     else # Ductless system
-      return hspf * 0.90
+      return heat_pump.heating_efficiency_hspf * 0.90
     end
   end
 

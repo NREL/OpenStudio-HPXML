@@ -3021,14 +3021,8 @@ module HVACSizing
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Double] Heat pump adjustment factor (capacity fraction)
   def self.adjust_indoor_condition_var_speed(outdoor_temp, indoor_temp, mode)
-    if mode == :clg
-      rated_indoor_temp = HVAC::AirSourceCoolRatedIWB
-      coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
-    elsif mode == :htg
-      rated_indoor_temp = HVAC::AirSourceHeatRatedIDB
-      capacity_retention_temp_1speed, capacity_retention_fraction_1speed = Defaults.get_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
-      coefficients_1speed = HVAC.get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, capacity_retention_temp_1speed, capacity_retention_fraction_1speed)[0][0]
-    end
+    coefficients_1speed = HVAC.get_resnet_cap_eir_ft_spec(mode)[0]
+    rated_indoor_temp = (mode == :clg) ? HVAC::AirSourceCoolRatedIWB : HVAC::AirSourceHeatRatedIDB
     return MathTools.biquadratic(indoor_temp, outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, outdoor_temp, coefficients_1speed)
   end
 
@@ -3045,12 +3039,15 @@ module HVACSizing
     if detailed_performance_data.empty?
       # Based on retention fraction and retention temperature
       if mode == :clg
-        capacity_retention_temperature = hvac_sys.additional_properties.cooling_capacity_retention_temperature
-        capacity_retention_fraction = hvac_sys.additional_properties.cooling_capacity_retention_fraction
+        _min_cap_maint_95, max_cap_maint_95 = HVAC.get_cool_capacity_maint_95()
+        # Review: Use max speed maintenance?
+        capacity_retention_fraction = 1 / max_cap_maint_95
+        capacity_retention_temperature = 82.0
       elsif mode == :htg
-        capacity_retention_temperature, capacity_retention_fraction = HVAC.get_heating_capacity_retention(hvac_sys)
+        capacity_retention_fraction = HVAC.get_default_capacity_maint_17(hvac_sys)
+        capacity_retention_temperature = 17.0
       end
-      odb_adj = (1.0 - capacity_retention_fraction) / (rated_odb - capacity_retention_temperature) * (outdoor_temp - rated_odb) + 1.0
+      odb_adj = 1.0 - (1.0 - capacity_retention_fraction) / (rated_odb - capacity_retention_temperature) * (rated_odb - outdoor_temp)
     else # there are detailed performance data
       # Based on detailed performance data
       max_rated_dp = detailed_performance_data.find { |dp| dp.outdoor_temperature == rated_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
