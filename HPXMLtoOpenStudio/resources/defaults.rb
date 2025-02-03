@@ -27,7 +27,7 @@ module Defaults
   # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI/RESNET/ICC 301
   # @return [Array<Hash, Hash>] Maps of HPXML::Zones => DesignLoadValues object, HPXML::Spaces => DesignLoadValues object
   def self.apply(runner, hpxml, hpxml_bldg, weather, schedules_file: nil, convert_shared_systems: true)
-    eri_version = hpxml.header.eri_calculation_version
+    eri_version = hpxml.header.eri_calculation_versions[0]
     if eri_version.nil?
       eri_version = 'latest'
     end
