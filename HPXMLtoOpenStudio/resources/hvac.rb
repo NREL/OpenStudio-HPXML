@@ -2048,16 +2048,22 @@ module HVAC
   # Maintenance = capacity@17F / capacity@47F
   #
   # @return [Double] Capacity maintenance from 17F to 47F
-  def self.get_default_capacity_maint_17(heat_pump)
-    retention_temp = 5.0
-    case heat_pump.compressor_type
-    when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
-      retention_fraction = 0.425
-    when HPXML::HVACCompressorTypeVariableSpeed
-      # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-      retention_fraction = (0.0461 * calc_hspf_from_hspf2(heat_pump) + 0.1594).round(4)
+  def self.get_capacity_maint_17(heat_pump)
+    if not heat_pump.heating_capacity_retention_fraction.nil?
+      retention_fraction = heat_pump.heating_capacity_retention_fraction
+      retention_temp = heat_pump.heating_capacity_retention_temp
+    else
+      retention_temp = 5.0
+      case heat_pump.compressor_type
+      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+        retention_fraction = 0.425
+      when HPXML::HVACCompressorTypeVariableSpeed
+        # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+        retention_fraction = (0.0461 * calc_hspf_from_hspf2(heat_pump) + 0.1594).round(4)
+      end
     end
-    return (1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0))
+    retention_fraction_17F = 1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0)
+    return retention_fraction_17F
   end
 
   # Returns the heating capacity ratios for the HVAC system at rated temperature (47F).
@@ -2915,11 +2921,11 @@ module HVAC
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @return [TODO] TODO
   def self.get_heating_capacity_retention(heat_pump)
+    heating_capacity_retention_temp = 17.0
     if not heat_pump.heating_capacity_17F.nil?
-      heating_capacity_retention_temp = 17.0
       heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
     else
-      fail 'Missing heating capacity retention.'
+      heating_capacity_retention_fraction = get_capacity_maint_17(heat_pump)
     end
     return heating_capacity_retention_temp, heating_capacity_retention_fraction
   end

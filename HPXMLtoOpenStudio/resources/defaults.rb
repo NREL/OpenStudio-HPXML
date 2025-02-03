@@ -2404,8 +2404,8 @@ module Defaults
       end
       if is_hp
         if hvac_system.heating_detailed_performance_data.empty?
-          HVAC.set_heat_detailed_performance_data(hvac_system)
           set_heating_capacity_17F(hvac_system)
+          HVAC.set_heat_detailed_performance_data(hvac_system)
         else
           # process capacity fraction of nominal
           hvac_system.heating_detailed_performance_data.each do |dp|
@@ -2438,13 +2438,7 @@ module Defaults
   def self.set_heating_capacity_17F(heat_pump)
     return unless heat_pump.heating_capacity_17F.nil?
 
-    if not heat_pump.heating_capacity_retention_fraction.nil?
-      retention_fraction = heat_pump.heating_capacity_retention_fraction
-      retention_temp = heat_pump.heating_capacity_retention_temp
-      retention_fraction_17F = 1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0)
-    else
-      retention_fraction_17F = HVAC.get_default_capacity_maint_17(heat_pump)
-    end
+    retention_fraction_17F = HVAC.get_capacity_maint_17(heat_pump)
     heat_pump.heating_capacity_17F = heat_pump.heating_capacity * retention_fraction_17F
     heat_pump.heating_capacity_17F_isdefaulted = true
     heat_pump.heating_capacity_retention_fraction = nil

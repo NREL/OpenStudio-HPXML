@@ -1514,10 +1514,14 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         heat_pump.pump_watts_per_ton = 100.0
       end
     end
-    if (not hpxml_file.include? ('heating-capacity-retention')) && (not hpxml_file.include? ('autosize')) && (not hpxml_file.include? ('detailed-performance')) && ((hpxml_file.include? 'air-to-air-heat-pump') || (hpxml_file.include? 'mini-split-heat-pump'))
-      hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
-      hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
-      hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
+    if (not hpxml_file.include? ('heating-capacity-retention')) && (not hpxml_file.include? ('autosize')) && ((hpxml_file.include? 'air-to-air-heat-pump') || (hpxml_file.include? 'mini-split-heat-pump'))
+      if not hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction.nil?
+        hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
+        hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
+        hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
+      elsif hpxml_file.include? ('detailed-performance')
+        hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * 0.6 if hpxml_bldg.heat_pumps.size > 0
+      end
     end
     if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
       # Handle chiller/cooling tower

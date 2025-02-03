@@ -3044,7 +3044,7 @@ module HVACSizing
         capacity_retention_fraction = 1 / max_cap_maint_95
         capacity_retention_temperature = 82.0
       elsif mode == :htg
-        capacity_retention_fraction = HVAC.get_default_capacity_maint_17(hvac_sys)
+        capacity_retention_fraction = HVAC.get_capacity_maint_17(hvac_sys)
         capacity_retention_temperature = 17.0
       end
       odb_adj = 1.0 - (1.0 - capacity_retention_fraction) / (rated_odb - capacity_retention_temperature) * (rated_odb - outdoor_temp)
