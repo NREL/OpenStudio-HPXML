@@ -518,43 +518,43 @@ For each conditioned zone (see :ref:`zones_spaces`), zone-level design loads are
 Zone design loads can also be found in the ``in.xml`` file.
 Additional detail related to zone design loads can be found in the :ref:`design_load_details`:.
 
-  =====================================================================  ====================
-  Type                                                                   Notes
-  =====================================================================  ====================
-  HVAC Zone Design Load: Heating: Total (Btu/h)                          Total heating design load
-  HVAC Zone Design Load: Heating: Ducts (Btu/h)                          Heating design load for ducts
-  HVAC Zone Design Load: Heating: Windows (Btu/h)                        Heating design load for windows
-  HVAC Zone Design Load: Heating: Skylights (Btu/h)                      Heating design load for skylights
-  HVAC Zone Design Load: Heating: Doors (Btu/h)                          Heating design load for doors
-  HVAC Zone Design Load: Heating: Walls (Btu/h)                          Heating design load for walls
-  HVAC Zone Design Load: Heating: Roofs (Btu/h)                          Heating design load for roofs
-  HVAC Zone Design Load: Heating: Floors (Btu/h)                         Heating design load for floors
-  HVAC Zone Design Load: Heating: Slabs (Btu/h)                          Heating design load for slabs
-  HVAC Zone Design Load: Heating: Ceilings (Btu/h)                       Heating design load for ceilings
-  HVAC Zone Design Load: Heating: Infiltration (Btu/h)                   Heating design load for infiltration
-  HVAC Zone Design Load: Heating: Ventilation (Btu/h)                    Heating design load for ventilation
-  HVAC Zone Design Load: Heating: Piping (Btu/h)                         Heating design load for hydronic piping
-  HVAC Zone Design Load: Cooling Sensible: Total (Btu/h)                 Total sensible cooling design load
-  HVAC Zone Design Load: Cooling Sensible: Ducts (Btu/h)                 Sensible cooling design load for ducts
-  HVAC Zone Design Load: Cooling Sensible: Windows (Btu/h)               Sensible cooling design load for windows
-  HVAC Zone Design Load: Cooling Sensible: Skylights (Btu/h)             Sensible cooling design load for skylights
-  HVAC Zone Design Load: Cooling Sensible: Doors (Btu/h)                 Sensible cooling design load for doors
-  HVAC Zone Design Load: Cooling Sensible: Walls (Btu/h)                 Sensible cooling design load for walls
-  HVAC Zone Design Load: Cooling Sensible: Roofs (Btu/h)                 Sensible cooling design load for roofs
-  HVAC Zone Design Load: Cooling Sensible: Floors (Btu/h)                Sensible cooling design load for floors
-  HVAC Zone Design Load: Cooling Sensible: Slabs (Btu/h)                 Sensible cooling design load for slabs
-  HVAC Zone Design Load: Cooling Sensible: Ceilings (Btu/h)              Sensible cooling design load for ceilings
-  HVAC Zone Design Load: Cooling Sensible: Infiltration (Btu/h)          Sensible cooling design load for infiltration
-  HVAC Zone Design Load: Cooling Sensible: Ventilation (Btu/h)           Sensible cooling design load for ventilation
-  HVAC Zone Design Load: Cooling Sensible: Internal Gains (Btu/h)        Sensible cooling design load for internal gains
-  HVAC Zone Design Load: Cooling Sensible: Blower Heat (Btu/h)           Sensible cooling design load for blower fan heat
-  HVAC Zone Design Load: Cooling Sensible: AED Excursion (Btu/h)         Sensible cooling design load for Adequate Exposure Diversity (AED) excursion
-  HVAC Zone Design Load: Cooling Latent: Total (Btu/h)                   Total latent cooling design load
-  HVAC Zone Design Load: Cooling Latent: Ducts (Btu/h)                   Latent cooling design load for ducts
-  HVAC Zone Design Load: Cooling Latent: Infiltration (Btu/h)            Latent cooling design load for infiltration
-  HVAC Zone Design Load: Cooling Latent: Ventilation (Btu/h)             Latent cooling design load for ventilation
-  HVAC Zone Design Load: Cooling Latent: Internal Gains (Btu/h)          Latent cooling design load for internal gains
-  =====================================================================  ====================
+  =====================================================================================  ====================
+  Type                                                                                   Notes
+  =====================================================================================  ====================
+  HVAC Zone Design Load: <ZoneID>: Heating: Total (Btu/h)                                Total heating design load
+  HVAC Zone Design Load: <ZoneID>: Heating: Ducts (Btu/h)                                Heating design load for ducts
+  HVAC Zone Design Load: <ZoneID>: Heating: Windows (Btu/h)                              Heating design load for windows
+  HVAC Zone Design Load: <ZoneID>: Heating: Skylights (Btu/h)                            Heating design load for skylights
+  HVAC Zone Design Load: <ZoneID>: Heating: Doors (Btu/h)                                Heating design load for doors
+  HVAC Zone Design Load: <ZoneID>: Heating: Walls (Btu/h)                                Heating design load for walls
+  HVAC Zone Design Load: <ZoneID>: Heating: Roofs (Btu/h)                                Heating design load for roofs
+  HVAC Zone Design Load: <ZoneID>: Heating: Floors (Btu/h)                               Heating design load for floors
+  HVAC Zone Design Load: <ZoneID>: Heating: Slabs (Btu/h)                                Heating design load for slabs
+  HVAC Zone Design Load: <ZoneID>: Heating: Ceilings (Btu/h)                             Heating design load for ceilings
+  HVAC Zone Design Load: <ZoneID>: Heating: Infiltration (Btu/h)                         Heating design load for infiltration
+  HVAC Zone Design Load: <ZoneID>: Heating: Ventilation (Btu/h)                          Heating design load for ventilation
+  HVAC Zone Design Load: <ZoneID>: Heating: Piping (Btu/h)                               Heating design load for hydronic piping
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Total (Btu/h)                       Total sensible cooling design load
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Ducts (Btu/h)                       Sensible cooling design load for ducts
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Windows (Btu/h)                     Sensible cooling design load for windows
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Skylights (Btu/h)                   Sensible cooling design load for skylights
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Doors (Btu/h)                       Sensible cooling design load for doors
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Walls (Btu/h)                       Sensible cooling design load for walls
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Roofs (Btu/h)                       Sensible cooling design load for roofs
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Floors (Btu/h)                      Sensible cooling design load for floors
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Slabs (Btu/h)                       Sensible cooling design load for slabs
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Ceilings (Btu/h)                    Sensible cooling design load for ceilings
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Infiltration (Btu/h)                Sensible cooling design load for infiltration
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Ventilation (Btu/h)                 Sensible cooling design load for ventilation
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Internal Gains (Btu/h)              Sensible cooling design load for internal gains
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: Blower Heat (Btu/h)                 Sensible cooling design load for blower fan heat
+  HVAC Zone Design Load: <ZoneID>: Cooling Sensible: AED Excursion (Btu/h)               Sensible cooling design load for Adequate Exposure Diversity (AED) excursion
+  HVAC Zone Design Load: <ZoneID>: Cooling Latent: Total (Btu/h)                         Total latent cooling design load
+  HVAC Zone Design Load: <ZoneID>: Cooling Latent: Ducts (Btu/h)                         Latent cooling design load for ducts
+  HVAC Zone Design Load: <ZoneID>: Cooling Latent: Infiltration (Btu/h)                  Latent cooling design load for infiltration
+  HVAC Zone Design Load: <ZoneID>: Cooling Latent: Ventilation (Btu/h)                   Latent cooling design load for ventilation
+  HVAC Zone Design Load: <ZoneID>: Cooling Latent: Internal Gains (Btu/h)                Latent cooling design load for internal gains
+  =====================================================================================  ====================
 
 .. _hvac_space_design_loads:
 
