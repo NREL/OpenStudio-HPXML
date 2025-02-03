@@ -57,6 +57,11 @@ def run_workflow(basedir, rundir, hpxml, debug, skip_validation, add_comp_loads,
       'timestep' => timestep_outputs }.each do |timeseries_output_freq, timeseries_outputs|
       next if (timeseries_outputs.empty? && timeseries_output_freq != 'none')
 
+      comma_output = timeseries_outputs.find { |o| o.include? ',' }
+      if not comma_output.nil?
+        fail "Timeseries output request '#{comma_output}' cannot include a comma."
+      end
+
       if timeseries_outputs.include? 'ALL'
         # Replace 'ALL' with all individual timeseries types
         timeseries_outputs.delete('ALL')

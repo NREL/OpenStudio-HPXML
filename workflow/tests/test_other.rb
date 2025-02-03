@@ -166,6 +166,16 @@ class WorkflowOtherTest < Minitest::Test
     end
   end
 
+  def test_run_simulation_timeseries_outputs_comma
+    # Check that the simulation produces timeseries with requested outputs
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --hourly 'Zone People Occupant Count,MainsWater:Facility'"
+    success = system(command, err: File::NULL)
+
+    refute(success)
+  end
+
   def test_run_simulation_mixed_timeseries_frequencies
     # Check that we can correctly skip the EnergyPlus simulation and reporting measures
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
