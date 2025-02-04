@@ -3801,7 +3801,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     # Test defaults before 301-2019 Addendum A
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
-    hpxml.header.eri_calculation_version = '2019'
+    hpxml.header.eri_calculation_versions = ['2019']
     hpxml_bldg.clothes_washers[0].is_shared_appliance = nil
     hpxml_bldg.clothes_washers[0].location = nil
     hpxml_bldg.clothes_washers[0].integrated_modified_energy_factor = nil
@@ -3856,7 +3856,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 3.01, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'])
 
     # Test defaults w/ electric clothes dryer before 301-2019 Addendum A
-    hpxml.header.eri_calculation_version = '2019'
+    hpxml.header.eri_calculation_versions = ['2019']
     hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeElectricity
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
@@ -3929,7 +3929,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_dishwasher_values(default_hpxml_bldg.dishwashers[0], false, HPXML::LocationConditionedSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0, default_dw_sched['WeekdayScheduleFractions'], default_dw_sched['WeekendScheduleFractions'], default_dw_sched['MonthlyScheduleMultipliers'])
 
     # Test defaults before 301-2019 Addendum A
-    hpxml.header.eri_calculation_version = '2019'
+    hpxml.header.eri_calculation_versions = ['2019']
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_dishwasher_values(default_hpxml_bldg.dishwashers[0], false, HPXML::LocationConditionedSpace, 467.0, 999, 999, 999, 999, 12, 1.0, default_dw_sched['WeekdayScheduleFractions'], default_dw_sched['WeekendScheduleFractions'], default_dw_sched['MonthlyScheduleMultipliers'])
@@ -3996,7 +3996,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 727.0, 1.0, nil, nil, nil, default_rf_sched['ConstantScheduleCoefficients'], default_rf_sched['TemperatureScheduleCoefficients'])
 
     # Test defaults before 301-2019 Addendum A
-    hpxml.header.eri_calculation_version = '2019'
+    hpxml.header.eri_calculation_versions = ['2019']
     hpxml_bldg.building_construction.number_of_bedrooms = 3
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
@@ -4129,7 +4129,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_cooking_range_values(default_hpxml_bldg.cooking_ranges[0], HPXML::LocationConditionedSpace, false, 1.0, defult_cr_sched['WeekdayScheduleFractions'], defult_cr_sched['WeekendScheduleFractions'], defult_cr_sched['MonthlyScheduleMultipliers'])
 
     # Test defaults before 301-2019 Addendum A
-    hpxml.header.eri_calculation_version = '2019'
+    hpxml.header.eri_calculation_versions = ['2019']
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_cooking_range_values(default_hpxml_bldg.cooking_ranges[0], HPXML::LocationConditionedSpace, false, 1.0, defult_cr_sched['WeekdayScheduleFractions'], defult_cr_sched['WeekendScheduleFractions'], defult_cr_sched['MonthlyScheduleMultipliers'])
@@ -4150,7 +4150,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_oven_values(default_hpxml_bldg.ovens[0], false)
 
     # Test defaults before 301-2019 Addendum A
-    hpxml.header.eri_calculation_version = '2019'
+    hpxml.header.eri_calculation_versions = ['2019']
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_oven_values(default_hpxml_bldg.ovens[0], false)
