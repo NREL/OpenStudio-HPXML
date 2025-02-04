@@ -2540,8 +2540,8 @@
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:MilesDrivenPerYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../MilesDrivenPerYear</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:HoursDrivenPerWeek) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../HoursDrivenPerWeek</sch:assert>
-      <sch:assert role='ERROR' test='count(../../h:FuelEconomyCombined[h:Units="kWh/mile"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../FuelEconomyCombined[Units="kWh/mile"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='../../h:FuelEconomyCombined[h:Units="kWh/mile"] or not(../../h:FuelEconomyCombined/h:Units)'>Expected ../../FuelEconomyCombined/Units to be "kWh/mile"</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:FuelEconomyCombined/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../FuelEconomyCombined/Value</sch:assert>
+      <sch:assert role='ERROR' test='../../h:FuelEconomyCombined[h:Units="kWh/mile" or h:Units="mile/kWh" or h:Units="mpge"] or not(../../h:FuelEconomyCombined/h:Units)'>Expected ../../FuelEconomyCombined/Units to be "kWh/mile" or "mile/kWh" or "mpge"</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='count(../../../../../h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="electric vehicle charging"]]) &gt;= 1'>Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.</sch:report>
       <sch:report role='WARN' test='count(h:ConnectedCharger) = 0'>Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.</sch:report>

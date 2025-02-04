@@ -973,22 +973,19 @@ module Schedule
     end
   end
 
-  # Splits a comma seperated schedule string into charging (positive) and discharging (negative) schedules
+  # Splits a comma separated schedule string into charging (positive) and discharging (negative) schedules
   #
-  # @param schedule_str [String] schedule with values seperated by commas
-  # @return [Array<String, String>] 24 hourly comma-seperated charging and discharging schedules
+  # @param schedule_str [String] schedule with values separated by commas
+  # @return [Array<String, String>] 24 hourly comma-separated charging and discharging schedules
   def self.split_signed_charging_schedule(schedule_str)
     charge_schedule, discharge_schedule = [], []
-    schedule_str.split(', ').each do |frac|
-      if frac.to_f > 0
-        charge_schedule.append(frac)
-        discharge_schedule.append(0)
-      elsif frac.to_f < 0
-        charge_schedule.append(0)
-        discharge_schedule.append((-frac.to_f).to_s)
-      else
-        charge_schedule.append(0)
-        discharge_schedule.append(0)
+    schedule_str.split(',').map(&:strip).map(&:to_f).each do |frac|
+      if frac >= 0
+        charge_schedule << frac.to_s
+        discharge_schedule << 0
+      elsif frac < 0
+        charge_schedule << 0
+        discharge_schedule << (-frac).to_s
       end
     end
     return charge_schedule.join(', '), discharge_schedule.join(', ')
@@ -1054,8 +1051,8 @@ class SchedulesFile
     BatteryCharging: Column.new('battery_charging', true, false, nil),
     BatteryDischarging: Column.new('battery_discharging', true, false, nil),
     ElectricVehicle: Column.new('electric_vehicle', false, false, :neg_one_to_one),
-    ElectricVehicleCharging: Column.new('electric_vehicle_charging', true, false, :frac),
-    ElectricVehicleDischarging: Column.new('electric_vehicle_discharging', true, false, :frac),
+    ElectricVehicleCharging: Column.new('electric_vehicle_charging', true, false, nil),
+    ElectricVehicleDischarging: Column.new('electric_vehicle_discharging', true, false, nil),
     SpaceHeating: Column.new('space_heating', true, false, nil),
     SpaceCooling: Column.new('space_cooling', true, false, nil),
     HVACMaximumPowerRatio: Column.new('hvac_maximum_power_ratio', false, false, :frac),
@@ -1512,7 +1509,7 @@ class SchedulesFile
     end
   end
 
-  # Assign seperate detailed battery charging and discharging schedules
+  # Assign separate detailed battery charging and discharging schedules
   # If a single column (e.g., 'battery' or 'electric_vehicle') is provided, it will be split into two columns based on the sign.
   #
   # @return [nil]

@@ -2702,10 +2702,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     fuel_economy_units_choices = OpenStudio::StringVector.new
     fuel_economy_units_choices << HPXML::UnitsKwhPerMile
+    fuel_economy_units_choices << HPXML::UnitsMilePerKwh
+    fuel_economy_units_choices << HPXML::UnitsMPGe
+    fuel_economy_units_choices << HPXML::UnitsMPG
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('vehicle_fuel_economy_units', fuel_economy_units_choices, false)
     arg.setDisplayName('Vehicle: Combined Fuel Economy Units')
-    arg.setDescription("The combined fuel economy units of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
+    arg.setDescription("The combined fuel economy units of the vehicle. Only '#{HPXML::UnitsKwhPerMile}', '#{HPXML::UnitsMilePerKwh}', or '#{HPXML::UnitsMPGe}' are allow for electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fuel_economy_combined', false)
@@ -6977,7 +6980,7 @@ module HPXMLFile
                               vehicle_type: args[:vehicle_type],
                               nominal_capacity_kwh: args[:vehicle_battery_capacity],
                               usable_capacity_kwh: args[:vehicle_battery_usable_capacity],
-                              fuel_economy: args[:vehicle_fuel_economy_combined],
+                              fuel_economy_combined: args[:vehicle_fuel_economy_combined],
                               fuel_economy_units: args[:vehicle_fuel_economy_units],
                               miles_per_year: args[:vehicle_miles_driven_per_year],
                               hours_per_week: args[:vehicle_hours_driven_per_week],

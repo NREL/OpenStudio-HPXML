@@ -12,7 +12,7 @@ module Battery
   # @return [nil]
   def self.apply(runner, model, spaces, hpxml_bldg, schedules_file)
     charging_schedule, discharging_schedule = nil, nil
-    if !schedules_file.nil?
+    if not schedules_file.nil?
       charging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:BatteryCharging].name)
       discharging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:BatteryDischarging].name)
     end

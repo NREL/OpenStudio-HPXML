@@ -716,10 +716,8 @@ The column names available in the schedule CSV files are:
   ``hvac_maximum_power_ratio``      frac     Variable speed system maximum power ratio schedule. [#]_                                       No
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                                No
   ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.               No
-  ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                             No
+  ``battery``                       -1 to 1  Battery availability schedule. Positive for charging, negative for discharging.                No
   ``electric_vehicle``              -1 to 1  Electric vehicle availability schedule. Positive for charging, negative for discharging. [#]_  No
-  ``electric_vehicle_charging``     frac     Electric vehicle charging availability schedule.                                               No
-  ``electric_vehicle_discharging``  frac     Electric vehicle discharging availability schedule.                                            No
   ================================  =======  =============================================================================================  ===============================
 
   .. [#] A detailed stochastic occupancy schedule CSV file can also be automatically generated for these columns; see the :ref:`usage_instructions` for the commands.
@@ -744,7 +742,8 @@ The column names available in the schedule CSV files are:
          During the shedding events, the main heat pump is limited to running below the specified fraction of rated power, and the backup system is locked out.
          When the comfort constraints are violated, both heat pump and backup systems are allowed to run at full load to recover the indoor temperature until reaching setpoint.
 
-  .. [#] Electric vehicle charging and discharging availability schedules represent times in which charging or discharging are possible, but may not necessarily occur. If a vehicle is fully charged during a scheduled charging event, there will be no charging load, likewise, if a vehicle battery is fully depleted during a discharging event, there will be no further discharging energy and the vehicle will accumulate unmet driving hours (see :ref:`annual_unmet_hours`). 
+  .. [#] Electric vehicle availability schedule represents times in which charging or discharging are possible, but may not necessarily occur.
+         If a vehicle is fully charged during a scheduled charging event, there will be no charging load, likewise, if a vehicle battery is fully depleted during a discharging event, there will be no further discharging energy and the vehicle will accumulate unmet driving hours (see :ref:`annual_unmet_hours`). 
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -4643,23 +4642,23 @@ All other vehicle types are currently not modeled.
 This provides detailed modeling of electric vehicles (batteries and charging/discharging) as an alternative to the simple EV charging in :ref:`plug_loads`.
 If not entered, the simulation will not include a detailed electric vehicle model.
 
-  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
-  Element                                                                                          Type    Units      Constraints              Required  Default      Notes
-  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
-  ``SystemIdentifier``                                                                             id                                          Yes                    Unique identifier
-  ``VehicleType/BatteryElectricVehicle/Battery/BatteryType``                                       string                                      No        Li-ion [#]_  EV battery type
-  ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double  kWh or Ah  >= 0                     No        See [#]_     Nominal (total) capacity
-  ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_     Usable capacity
-  ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No                     Nominal voltage
-  ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        0.8          Fraction of EV charging energy provided by home charger
-  ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                     ID of connected EV charger [#]_
-  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions``                        array                                       No        See [#]_     24 comma-separated weekday fractions
-  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions``                        array                                       No                     24 comma-separated weekday fractions
-  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_     12 comma-separated monthly multipliers
-  ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        See [#]_     Number of miles driven per year
-  ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        See [#]_     Number of hours driven per week
-  ``FuelEconomyCombined[Units="kWh/mile]/Value``                                                   double             > 0                      No        0.22         The vehicle combined city and highway fuel economy
-  ===============================================================================================  ======  =========  =======================  ========  ===========  =======================================================
+  ===============================================================================================  ======  =========  =======================  ========  =============  =======================================================
+  Element                                                                                          Type    Units      Constraints              Required  Default        Notes
+  ===============================================================================================  ======  =========  =======================  ========  =============  =======================================================
+  ``SystemIdentifier``                                                                             id                                          Yes                      Unique identifier
+  ``VehicleType/BatteryElectricVehicle/Battery/BatteryType``                                       string                                      No        Li-ion [#]_    EV battery type
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double  kWh or Ah  >= 0                     No        See [#]_       Nominal (total) capacity
+  ``VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh" or Units="Ah"]/Value``   double  kWh or Ah  >= 0, < NominalCapacity  No        See [#]_       Usable capacity
+  ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No                       Nominal voltage
+  ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        0.8            Fraction of EV charging energy provided by home charger
+  ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                       ID of connected EV charger [#]_
+  ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions``                        array                                       No        See [#]_       24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions``                        array                                       No                       24 comma-separated weekday fractions
+  ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_       12 comma-separated monthly multipliers
+  ``MilesDrivenPerYear``                                                                           double  miles      >= 0                     No        See [#]_       Number of miles driven per year
+  ``HoursDrivenPerWeek``                                                                           double  hours      >= 0                     No        See [#]_       Number of hours driven per week
+  ``FuelEconomyCombined[Units="kWh/mile" or Units="mile/kWh" or Units="mpge"]/Value``              double             > 0                      No        0.22 kWh/mile  The vehicle combined city and highway fuel economy
+  ===============================================================================================  ======  =========  =======================  ========  =============  =======================================================
 
   .. [#] ConnectedCharger must reference an ``ElectricVehicleCharger``.
   .. [#] If a connected charger is not provided, then detailed electric vehicle charging will not be modeled.
@@ -4668,8 +4667,8 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   .. [#] If UsableCapacity is not provided, defaults to 0.8 * NominalCapacity.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
-  .. [#] If MilesDrivenPerYear is not provided, defaults to HoursDrivenPerWeek * 1,227.5, else 10,900 miles.
-  .. [#] If HoursDrivenPerWeek is not provided, defaults to MilesDrivenPerYear / 1,227.5, else 8.88 hours/week.
+  .. [#] If MilesDrivenPerYear is not provided, defaults to HoursDrivenPerWeek * 1227.5, else 10900 miles.
+  .. [#] If HoursDrivenPerWeek is not provided, defaults to MilesDrivenPerYear / 1227.5, else 8.88 hours/week.
 
  .. note::
 
@@ -4693,7 +4692,7 @@ A single electric vehicle charger can be entered as a ``/HPXML/Building/Building
   ====================  ======  =====  ===========  ========  ========  ============================================
   ``SystemIdentifier``  id                          Yes                 Unique identifier
   ``Location``          string         See [#]_     No        See [#]_  Location of EV charger [#]_
-  ``ChargingPower``     double  W      > 0          No        5,690     Charger power output
+  ``ChargingPower``     double  W      > 0          No        5690      Charger power output
   ====================  ======  =====  ===========  ========  ========  ============================================
 
   .. [#] Location choices are "garage" or "outside".
@@ -5352,7 +5351,7 @@ If not entered, the simulation will not include that type of plug load.
          
          \- **well pump**: 50.8 / 0.127 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         \- **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9). If this plug load type is specified, it will take precedence over an EV specified with ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle/VehicleType/BatteryElectricVehicle``.
+         \- **electric vehicle charging**: 2368.4 (calculated using AnnualMiles * kWhPerMile * FractionChargedAtHome / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=10900, kWhPerMile=0.22, FractionChargedAtHome=0.8, ChargerEfficiency=0.9, and BatteryEfficiency=0.9). If this plug load type is specified, it will take precedence over an EV specified with ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle/VehicleType/BatteryElectricVehicle``.
          
          If NumberofResidents is provided, the following defaults are used instead:
          

@@ -22,35 +22,6 @@ module Vehicle
     end
   end
 
-  # Generates and returns the EV charging and discharging schedules
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param vehicle [HPXML::Vehicle] Object that defines a single electric vehicle
-  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @return [OpenStudio::Model::ScheduleFile or MonthWeekdayWeekendSchedule] the charging and discharging schedules
-  def self.get_ev_schedules(runner, model, vehicle, schedules_file)
-    charging_schedule, discharging_schedule = nil, nil
-    charging_col, discharging_col = SchedulesFile::Columns[:ElectricVehicleCharging].name, SchedulesFile::Columns[:ElectricVehicleDischarging].name
-    if not schedules_file.nil?
-      charging_schedule = schedules_file.create_schedule_file(model, col_name: charging_col)
-      discharging_schedule = schedules_file.create_schedule_file(model, col_name: discharging_col)
-    end
-    if charging_schedule.nil? && discharging_schedule.nil?
-      charge_name, discharge_name = "#{vehicle.id} charging schedule", "#{vehicle.id} discharging schedule"
-      weekday_charge, weekday_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_weekday_fractions)
-      weekend_charge, weekend_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_weekend_fractions)
-      charging_schedule = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
-      discharging_schedule = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
-    else
-      runner.registerWarning("Both schedule file and weekday fractions provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; weekday fractions will be ignored.") if !vehicle.ev_weekday_fractions.nil?
-      runner.registerWarning("Both schedule file and weekend fractions provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; weekend fractions will be ignored.") if !vehicle.ev_weekend_fractions.nil?
-      runner.registerWarning("Both schedule file and monthly multipliers provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; monthly multipliers will be ignored.") if !vehicle.ev_monthly_multipliers.nil?
-    end
-
-    return charging_schedule, discharging_schedule
-  end
-
   # Apply an electric vehicle to the model using the battery.rb Battery class, which assigns OpenStudio ElectricLoadCenterStorageLiIonNMCBattery and ElectricLoadCenterDistribution objects.
   # An EMS program models the effect of ambient temperature on the effective power output, scales power with the fraction charged at home, and calculates the unmet driving hours.
   # Bi-directional charging is not currently implemented
@@ -77,22 +48,43 @@ module Vehicle
 
     vehicle.location = ev_charger.location
 
-    # Calculate hours/week and effective discharge power
-    charging_schedule, discharging_schedule = get_ev_schedules(runner, model, vehicle, schedules_file)
-    ev_annl_energy = vehicle.fuel_economy * vehicle.miles_per_year # kWh/year
-    if discharging_schedule.is_a? OpenStudio::Model::ScheduleFile
+    if vehicle.fuel_economy_units == HPXML::UnitsKwhPerMile
+      kwh_per_mile = vehicle.fuel_economy_combined
+    elsif vehicle.fuel_economy_units == HPXML::UnitsMilePerKwh
+      kwh_per_mile = 1.0 / vehicle.fuel_economy_combined
+    elsif vehicle.fuel_economy_units == HPXML::UnitsMPGe
+      kwh_per_mile = 33.705 / vehicle.fuel_economy_combined # Per EPA, one gallon of gasoline is equal to 33.705 kWh
+    end
+    ev_annl_energy = kwh_per_mile * vehicle.miles_per_year # kWh/year
+    
+    # Create schedule
+    charging_schedule, discharging_schedule = nil, nil
+    if not schedules_file.nil?
+      charging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:ElectricVehicleCharging].name)
+      discharging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:ElectricVehicleDischarging].name)
       eff_discharge_power = schedules_file.calc_design_level_from_daily_kwh(col_name: discharging_schedule.name.to_s, daily_kwh: ev_annl_energy / 365)
-    elsif discharging_schedule.is_a? MonthWeekdayWeekendSchedule
-      eff_discharge_power = discharging_schedule.calc_design_level_from_daily_kwh(ev_annl_energy / 365)
+    end
+    if charging_schedule.nil? && discharging_schedule.nil?
+      charge_name, discharge_name = "#{vehicle.id} charging schedule", "#{vehicle.id} discharging schedule"
+      weekday_charge, weekday_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_weekday_fractions)
+      weekend_charge, weekend_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_weekend_fractions)
+      charging_schedule_obj = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
+      discharging_schedule_obj = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
+      eff_discharge_power = discharging_schedule_obj.calc_design_level_from_daily_kwh(ev_annl_energy / 365)
+      discharging_schedule = discharging_schedule_obj.schedule
+      charging_schedule = charging_schedule_obj.schedule
+    else
+      runner.registerWarning("Both schedule file and weekday fractions provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; weekday fractions will be ignored.") if !vehicle.ev_weekday_fractions.nil?
+      runner.registerWarning("Both schedule file and weekend fractions provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; weekend fractions will be ignored.") if !vehicle.ev_weekend_fractions.nil?
+      runner.registerWarning("Both schedule file and monthly multipliers provided for '#{SchedulesFile::Columns[:ElectricVehicle].name}'; monthly multipliers will be ignored.") if !vehicle.ev_monthly_multipliers.nil?
     end
 
-    # Scale the effective discharge power by 2.25 to assign the rated discharge power. This value reflects the maximum power adjustment allowed in the EMS EV discharge program at -17.8 C.
+    # Scale the effective discharge power by 2.25 to assign the rated discharge power.
+    # This value reflects the maximum power adjustment allowed in the EMS EV discharge program at -17.8 C.
     vehicle.rated_power_output = eff_discharge_power * 2.25
 
     # Apply vehicle battery to model
-    os_charging_schedule = (charging_schedule.is_a?(MonthWeekdayWeekendSchedule) ? charging_schedule.schedule : charging_schedule)
-    os_discharging_schedule = (discharging_schedule.is_a?(MonthWeekdayWeekendSchedule) ? discharging_schedule.schedule : discharging_schedule)
-    Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, os_charging_schedule, os_discharging_schedule)
+    Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, charging_schedule, discharging_schedule)
 
     # Apply EMS program to adjust discharge power based on ambient temperature.
     model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
@@ -152,7 +144,7 @@ module Vehicle
       unmet_hr_var.setUnits('hr')
 
       # Power adjustment vs ambient temperature curve; derived from most recent data in Figure 9 of https://www.nrel.gov/docs/fy23osti/83916.pdf
-      # This adjustment scales power demand based on ambient temeprature, and encompasses losses due to battery and space conditioning (i.e., discharging losses), as well as charging losses.
+      # This adjustment scales power demand based on ambient temperature, and encompasses losses due to battery and space conditioning (i.e., discharging losses), as well as charging losses.
       coefs = [1.412768, -3.910397E-02, 9.408235E-04, 8.971560E-06, -7.699244E-07, 1.265614E-08]
       power_curve = ''
       coefs.each_with_index do |coef, i|

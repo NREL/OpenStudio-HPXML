@@ -3625,7 +3625,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.vehicles[0].usable_capacity_ah = nil
     hpxml_bldg.vehicles[0].miles_per_year = 5000
     hpxml_bldg.vehicles[0].hours_per_week = 10
-    hpxml_bldg.vehicles[0].fuel_economy = 0.18
+    hpxml_bldg.vehicles[0].fuel_economy_combined = 0.18
     hpxml_bldg.vehicles[0].fuel_economy_units = HPXML::UnitsKwhPerMile
     hpxml_bldg.vehicles[0].fraction_charged_home = 0.75
     hpxml_bldg.vehicles[0].ev_weekday_fractions = ConstantDaySchedule
@@ -3646,6 +3646,20 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 987.0, nil, 876.0, 5000, 10, 0.18, HPXML::UnitsKwhPerMile, 0.75, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, 1600, HPXML::LocationOutside)
 
+    # Test w/ mile/kWh
+    hpxml_bldg.vehicles[0].fuel_economy_combined = 5.55
+    hpxml_bldg.vehicles[0].fuel_economy_units = HPXML::UnitsMilePerKwh
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 987.0, nil, 876.0, 5000, 10, 5.55, HPXML::UnitsMilePerKwh, 0.75, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, 1600, HPXML::LocationOutside)
+
+    # FIXME: Test w/ mpge
+    hpxml_bldg.vehicles[0].fuel_economy_combined = 107.0
+    hpxml_bldg.vehicles[0].fuel_economy_units = HPXML::UnitsMPGe
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 987.0, nil, 876.0, 5000, 10, 107, HPXML::UnitsMPGe, 0.75, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, 1600, HPXML::LocationOutside)
+
     # Test defaults
     hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger.xml')
     hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
@@ -3654,7 +3668,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.vehicles[0].usable_capacity_ah = nil
     hpxml_bldg.vehicles[0].miles_per_year = nil
     hpxml_bldg.vehicles[0].hours_per_week = nil
-    hpxml_bldg.vehicles[0].fuel_economy = nil
+    hpxml_bldg.vehicles[0].fuel_economy_combined = nil
     hpxml_bldg.vehicles[0].fuel_economy_units = nil
     hpxml_bldg.vehicles[0].fraction_charged_home = nil
     hpxml_bldg.vehicles[0].ev_weekday_fractions = nil
@@ -3730,7 +3744,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.vehicles[0].usable_capacity_ah = nil
     hpxml_bldg.vehicles[0].miles_per_year = nil
     hpxml_bldg.vehicles[0].hours_per_week = nil
-    hpxml_bldg.vehicles[0].fuel_economy = nil
+    hpxml_bldg.vehicles[0].fuel_economy_combined = nil
     hpxml_bldg.vehicles[0].fuel_economy_units = nil
     hpxml_bldg.vehicles[0].fraction_charged_home = nil
     hpxml_bldg.vehicles[0].ev_weekday_fractions = nil
@@ -4492,7 +4506,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     default_wp_sched = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]
     _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeTelevision, 620, 1.0, 0.0, 1.0, default_tv_sched['WeekdayScheduleFractions'], default_tv_sched['WeekendScheduleFractions'], default_tv_sched['MonthlyScheduleMultipliers'])
     _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeOther, 2457, 0.855, 0.045, 1.0, default_ot_sched['WeekdayScheduleFractions'], default_ot_sched['WeekendScheduleFractions'], default_ot_sched['MonthlyScheduleMultipliers'])
-    _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeElectricVehicleCharging, 2368, 0.0, 0.0, 1.0, default_ev_sched['WeekdayScheduleFractions'], default_ev_sched['WeekendScheduleFractions'], default_ev_sched['MonthlyScheduleMultipliers'])
+    _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeElectricVehicleCharging, 2368.4, 0.0, 0.0, 1.0, default_ev_sched['WeekdayScheduleFractions'], default_ev_sched['WeekendScheduleFractions'], default_ev_sched['MonthlyScheduleMultipliers'])
     _test_default_plug_load_values(default_hpxml_bldg, HPXML::PlugLoadTypeWellPump, 441, 0.0, 0.0, 1.0, default_wp_sched['WeekdayScheduleFractions'], default_wp_sched['WeekendScheduleFractions'], default_wp_sched['MonthlyScheduleMultipliers'])
   end
 
@@ -5862,7 +5876,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(round_trip_efficiency, battery.round_trip_efficiency)
   end
 
-  def _test_default_vehicle_values(vehicle, ev_charger, battery_type, nominal_capacity_kwh, nominal_capacity_ah, usable_capacity_kwh, usable_capacity_ah, miles_per_year, hours_per_week, fuel_economy, fuel_economy_units, fraction_charged_home, weekday_sch, weekend_sch, usage_multiplier, charger_power, location)
+  def _test_default_vehicle_values(vehicle, ev_charger, battery_type, nominal_capacity_kwh, nominal_capacity_ah, usable_capacity_kwh, usable_capacity_ah, miles_per_year, hours_per_week, fuel_economy_combined, fuel_economy_units, fraction_charged_home, weekday_sch, weekend_sch, usage_multiplier, charger_power, location)
     assert_equal(battery_type, HPXML::BatteryTypeLithiumIon)
     if nominal_capacity_kwh.nil?
       assert_nil(vehicle.nominal_capacity_kwh)
@@ -5886,7 +5900,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
     assert_in_epsilon(miles_per_year, vehicle.miles_per_year, 0.01)
     assert_in_epsilon(hours_per_week, vehicle.hours_per_week, 0.01)
-    assert_equal(fuel_economy, vehicle.fuel_economy, 0.01)
+    assert_equal(fuel_economy_combined, vehicle.fuel_economy_combined, 0.01)
     assert_equal(fuel_economy_units, vehicle.fuel_economy_units)
     assert_equal(fraction_charged_home, vehicle.fraction_charged_home)
     if weekday_sch.nil?

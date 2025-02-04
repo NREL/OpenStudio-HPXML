@@ -3190,11 +3190,9 @@ module Defaults
         vehicle.battery_type = default_values[:battery_type]
         vehicle.battery_type_isdefaulted = true
       end
-      if vehicle.fuel_economy.nil?
-        vehicle.fuel_economy = default_values[:fuel_economy]
-        vehicle.fuel_economy_isdefaulted = true
-      end
-      if vehicle.fuel_economy_units.nil?
+      if vehicle.fuel_economy_combined.nil? || vehicle.fuel_economy_units.nil?
+        vehicle.fuel_economy_combined = default_values[:fuel_economy_combined]
+        vehicle.fuel_economy_combined_isdefaulted = true
         vehicle.fuel_economy_units = default_values[:fuel_economy_units]
         vehicle.fuel_economy_units_isdefaulted = true
       end
@@ -5732,7 +5730,7 @@ module Defaults
              hours_per_week: 8.88,
              nominal_capacity_kwh: 63,
              nominal_voltage: 50.0,
-             fuel_economy: 0.22,
+             fuel_economy_combined: 0.22,
              fuel_economy_units: HPXML::UnitsKwhPerMile,
              fraction_charged_home: 0.8,
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity
@@ -5942,8 +5940,9 @@ module Defaults
 
     # Use detailed vehicle model defaults
     vehicle_defaults = get_electric_vehicle_values
+    kwh_per_year = vehicle_defaults[:miles_per_year] * vehicle_defaults[:fuel_economy_combined] * vehicle_defaults[:fraction_charged_home] / (ev_charger_efficiency * ev_battery_efficiency)
 
-    return vehicle_defaults[:miles_per_year] * vehicle_defaults[:fuel_economy] * vehicle_defaults[:fraction_charged_home] / (ev_charger_efficiency * ev_battery_efficiency)
+    return kwh_per_year.round(1)
   end
 
   # Gets the default well pump annual energy use.

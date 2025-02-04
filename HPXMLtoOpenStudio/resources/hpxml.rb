@@ -9376,7 +9376,7 @@ class HPXML < Object
              :vehicle_type,           # [String] VehicleType (HPXML::VehicleTypeXXX)
              :miles_per_year,         # [Double] MilesDrivenPerYear (miles)
              :hours_per_week,         # [Double] HoursDrivenPerWeek (hours)
-             :fuel_economy,           # [Double] FuelEconomyCombined/Value
+             :fuel_economy_combined,  # [Double] FuelEconomyCombined/Value
              :fuel_economy_units,     # [String] FuelEconomyCombined/Units
              :fraction_charged_home,  # [Double] VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage (frac)
              :ev_charger_idref,       # [String] VehicleType/BatteryElectricVehicle/ConnectedCharger/@idref
@@ -9424,38 +9424,36 @@ class HPXML < Object
       vehicle_type = XMLHelper.add_element(vehicle_type_element, @vehicle_type)
 
       if [HPXML::VehicleTypeBEV, HPXML::VehicleTypePHEV, HPXML::VehicleTypeHybrid].include? @vehicle_type
-        # Battery
-        unless [@battery_type.nil?, @nominal_capacity_kwh.nil?, @nominal_capacity_ah.nil?, @usable_capacity_kwh.nil?, @usable_capacity_ah.nil?, @nominal_voltage.nil?, @lifetime_model.nil?].all?
+        if (not @battery_type.nil?) || (not @nominal_capacity_kwh.nil?) || (not @nominal_capacity_ah.nil?) || (not @usable_capacity_kwh.nil?) || (not @usable_capacity_ah.nil?) || (not @nominal_voltage.nil?) || (not @lifetime_model.nil?)
           battery = XMLHelper.add_element(vehicle_type, 'Battery')
+          XMLHelper.add_element(battery, 'BatteryType', @battery_type, :string, @battery_type_isdefaulted) unless @battery_type.nil?
+          if not @nominal_capacity_kwh.nil?
+            nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
+            XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
+            XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
+          end
+          if not @nominal_capacity_ah.nil?
+            nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
+            XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
+            XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
+          end
+          if not @usable_capacity_kwh.nil?
+            usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+            XMLHelper.add_element(usable_capacity, 'Units', UnitsKwh, :string)
+            XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
+          end
+          if not @usable_capacity_ah.nil?
+            usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+            XMLHelper.add_element(usable_capacity, 'Units', UnitsAh, :string)
+            XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
+          end
+          XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
+          XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
         end
-        XMLHelper.add_element(battery, 'BatteryType', @battery_type, :string, @battery_type_isdefaulted) unless @battery_type.nil?
-        if not @nominal_capacity_kwh.nil?
-          nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
-          XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
-          XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
-        end
-        if not @nominal_capacity_ah.nil?
-          nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
-          XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
-          XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
-        end
-        if not @usable_capacity_kwh.nil?
-          usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
-          XMLHelper.add_element(usable_capacity, 'Units', UnitsKwh, :string)
-          XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
-        end
-        if not @usable_capacity_ah.nil?
-          usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
-          XMLHelper.add_element(usable_capacity, 'Units', UnitsAh, :string)
-          XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
-        end
-        XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
-        XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
       end
 
       case @vehicle_type
       when HPXML::VehicleTypeBEV
-        # Battery-Electric Vehicle
         fraction_charged_location = XMLHelper.add_element(vehicle_type, 'FractionChargedLocation') unless @fraction_charged_home.nil?
         XMLHelper.add_element(fraction_charged_location, 'Location', HPXML::ElectricVehicleChargingLocation, :string) unless @fraction_charged_home.nil?
         XMLHelper.add_element(fraction_charged_location, 'Percentage', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted) unless @fraction_charged_home.nil?
@@ -9468,12 +9466,13 @@ class HPXML < Object
         XMLHelper.add_extension(vehicle_type, 'MonthlyScheduleMultipliers', @ev_monthly_multipliers, :string, @ev_monthly_multipliers_isdefaulted) unless @ev_monthly_multipliers.nil?
       end
 
-      # Vehicle
       XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_per_year, :float, @miles_per_year_isdefaulted) unless @miles_per_year.nil?
       XMLHelper.add_element(vehicle, 'HoursDrivenPerWeek', @hours_per_week, :float, @hours_per_week_isdefaulted) unless @hours_per_week.nil?
-      fuel_economy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined') unless @fuel_economy_units.nil? && @fuel_economy.nil?
-      XMLHelper.add_element(fuel_economy, 'Units', @fuel_economy_units, :string, @fuel_economy_units_isdefaulted) unless @fuel_economy_units.nil?
-      XMLHelper.add_element(fuel_economy, 'Value', @fuel_economy, :float, @fuel_economy_isdefaulted) unless @fuel_economy.nil?
+      if (not @fuel_economy_units.nil?) && (not @fuel_economy_combined.nil?)
+        fuel_economy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined')
+        XMLHelper.add_element(fuel_economy, 'Units', @fuel_economy_units, :string, @fuel_economy_units_isdefaulted)
+        XMLHelper.add_element(fuel_economy, 'Value', @fuel_economy_combined, :float, @fuel_economy_combined_isdefaulted)
+      end
     end
 
     # Populates the HPXML object(s) from the XML document.
@@ -9486,7 +9485,7 @@ class HPXML < Object
       @id = HPXML::get_id(vehicle)
       @miles_per_year = XMLHelper.get_value(vehicle, 'MilesDrivenPeryear', :float)
       @hours_per_week = XMLHelper.get_value(vehicle, 'HoursDrivenPerWeek', :float)
-      @fuel_economy = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Value', :float)
+      @fuel_economy_combined = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Value', :float)
       @fuel_economy_units = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Units', :string)
       @vehicle_type = XMLHelper.get_child_name(vehicle, 'VehicleType')
       if @vehicle_type == HPXML::VehicleTypeBEV

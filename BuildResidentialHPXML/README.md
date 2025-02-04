@@ -4549,14 +4549,14 @@ The usable capacity of the vehicle battery, only applies to electric vehicles. I
 
 **Vehicle: Combined Fuel Economy Units**
 
-The combined fuel economy units of the vehicle. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+The combined fuel economy units of the vehicle. Only 'kWh/mile', 'mile/kWh', or 'mpge' are allow for electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
 
 - **Name:** ``vehicle_fuel_economy_units``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `kWh/mile`
+- **Choices:** `kWh/mile`, `mile/kWh`, `mpge`, `mpg`
 
 <br/>
 
