@@ -695,7 +695,7 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 
 - ``unmet_hours_cooling_hr``
 
-- ``unmet_hours_driving_hr``
+- ``unmet_hours_ev_driving_hr``
 
 - ``peak_electricity_winter_total_w``
 
