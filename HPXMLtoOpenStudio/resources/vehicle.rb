@@ -9,16 +9,17 @@ module Vehicle
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply(runner, model, spaces, hpxml_bldg, schedules_file)
+  def self.apply(runner, model, spaces, hpxml_bldg, hpxml_header, schedules_file)
     hpxml_bldg.vehicles.each do |vehicle|
       if vehicle.vehicle_type != HPXML::VehicleTypeBEV
         # Warning issued by Schematron validator
         next
       end
 
-      apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
+      apply_electric_vehicle(runner, model, spaces, hpxml_bldg, hpxml_header, vehicle, schedules_file)
     end
   end
 
@@ -30,10 +31,11 @@ module Vehicle
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param vehicle [HPXML::Vehicle] Object that defines a single electric vehicle
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_electric_vehicle(runner, model, spaces, hpxml_bldg, vehicle, schedules_file)
+  def self.apply_electric_vehicle(runner, model, spaces, hpxml_bldg, hpxml_header, vehicle, schedules_file)
     if hpxml_bldg.plug_loads.any? { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
       # Warning issued by Schematron validator
       return
@@ -59,17 +61,20 @@ module Vehicle
 
     # Create schedule
     charging_schedule, discharging_schedule = nil, nil
+    charging_col_name, discharging_col_name = SchedulesFile::Columns[:ElectricVehicleCharging].name, SchedulesFile::Columns[:ElectricVehicleDischarging].name
     if not schedules_file.nil?
-      charging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:ElectricVehicleCharging].name)
-      discharging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:ElectricVehicleDischarging].name)
+      charging_schedule = schedules_file.create_schedule_file(model, col_name: charging_col_name)
+      discharging_schedule = schedules_file.create_schedule_file(model, col_name: discharging_col_name)
       eff_discharge_power = schedules_file.calc_design_level_from_daily_kwh(col_name: discharging_schedule.name.to_s, daily_kwh: ev_annl_energy / 365)
     end
     if charging_schedule.nil? && discharging_schedule.nil?
+      charging_unavailable_periods = Schedule.get_unavailable_periods(runner, charging_col_name, hpxml_header.unavailable_periods)
+      discharging_unavailable_periods = Schedule.get_unavailable_periods(runner, discharging_col_name, hpxml_header.unavailable_periods)
       charge_name, discharge_name = "#{vehicle.id} charging schedule", "#{vehicle.id} discharging schedule"
       weekday_charge, weekday_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_weekday_fractions)
       weekend_charge, weekend_discharge = Schedule.split_signed_charging_schedule(vehicle.ev_weekend_fractions)
-      charging_schedule_obj = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
-      discharging_schedule_obj = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction)
+      charging_schedule_obj = MonthWeekdayWeekendSchedule.new(model, charge_name, weekday_charge, weekend_charge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: charging_unavailable_periods)
+      discharging_schedule_obj = MonthWeekdayWeekendSchedule.new(model, discharge_name, weekday_discharge, weekend_discharge, vehicle.ev_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: discharging_unavailable_periods)
       eff_discharge_power = discharging_schedule_obj.calc_design_level_from_daily_kwh(ev_annl_energy / 365)
       discharging_schedule = discharging_schedule_obj.schedule
       charging_schedule = charging_schedule_obj.schedule
