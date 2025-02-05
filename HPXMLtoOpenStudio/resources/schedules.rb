@@ -741,30 +741,48 @@ module Schedule
               hourly_values: [value] * 24
             )
           end
-        else # 3 outage rules
-          # first day
-          Model.add_schedule_ruleset_rule(
-            schedule,
-            start_date: date_s,
-            end_date: date_s,
-            hourly_values: (0..23).map { |h| (h < period.begin_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
-          )
+        else # 2 or 3 outage rules
+          if outage_days == 1 # 2 outage rules
+            # first day
+            Model.add_schedule_ruleset_rule(
+              schedule,
+              start_date: date_s,
+              end_date: date_s,
+              hourly_values: (0..23).map { |h| (h < period.begin_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+            )
 
-          # all other days
-          Model.add_schedule_ruleset_rule(
-            schedule,
-            start_date: OpenStudio::Date::fromDayOfYear(day_s + 1, year),
-            end_date: OpenStudio::Date::fromDayOfYear(day_e - 1, year),
-            hourly_values: [value] * 24
-          )
+            # last day
+            Model.add_schedule_ruleset_rule(
+              schedule,
+              start_date: date_e,
+              end_date: date_e,
+              hourly_values: (0..23).map { |h| (h >= period.end_hour) ? end_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+            )
+          else # 3 outage rules
+            # first day
+            Model.add_schedule_ruleset_rule(
+              schedule,
+              start_date: date_s,
+              end_date: date_s,
+              hourly_values: (0..23).map { |h| (h < period.begin_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+            )
 
-          # last day
-          Model.add_schedule_ruleset_rule(
-            schedule,
-            start_date: date_e,
-            end_date: date_e,
-            hourly_values: (0..23).map { |h| (h >= period.end_hour) ? end_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
-          )
+            # all other days
+            Model.add_schedule_ruleset_rule(
+              schedule,
+              start_date: OpenStudio::Date::fromDayOfYear(day_s + 1, year),
+              end_date: OpenStudio::Date::fromDayOfYear(day_e - 1, year),
+              hourly_values: [value] * 24
+            )
+
+            # last day
+            Model.add_schedule_ruleset_rule(
+              schedule,
+              start_date: date_e,
+              end_date: date_e,
+              hourly_values: (0..23).map { |h| (h >= period.end_hour) ? end_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+            )
+          end
         end
       end
     end
