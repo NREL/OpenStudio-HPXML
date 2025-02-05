@@ -2878,8 +2878,6 @@ module HVAC
     heating_capacity_retention_temp = 17.0
     if (not heat_pump.heating_capacity_17F.nil?) && (heat_pump.heating_capacity > 0.0)
       heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
-    elsif (heat_pump.heating_capacity == 0.0)
-      heating_capacity_retention_fraction = 0.0
     else
       if not heat_pump.heating_capacity_retention_fraction.nil?
         retention_fraction = heat_pump.heating_capacity_retention_fraction
