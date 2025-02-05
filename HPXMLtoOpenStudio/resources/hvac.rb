@@ -1825,7 +1825,7 @@ module HVAC
 
     # COPs @ 47F
     # COP@47F uses table interpolation from hspf2 and capacity retention of 17F
-    nominal_cop_47 = get_cop_47_rated(heat_pump.heating_efficiency_hspf2, heat_pump.heating_capacity_17F / heat_pump.heating_capacity)
+    nominal_cop_47 = get_cop_47_rated(heat_pump.heating_efficiency_hspf2, get_heating_capacity_retention_17F(heat_pump)[1])
     # rated EIR@47F / max EIR@47F =  max COP@47F / rated COP@47F
     rated_eir_ratio_47 = 0.939
     max_cop_47 = nominal_cop_47 * rated_eir_ratio_47
@@ -1946,7 +1946,11 @@ module HVAC
     min_cap_maint_95, max_cap_maint_95 = get_cool_capacity_maint_95()
     max_capacity_82 = max_capacity_95 / max_cap_maint_95
     min_capacity_82 = min_capacity_95 / min_cap_maint_95
-    nominal_capacity_82 = min_capacity_82 + ((nominal_capacity_95 - min_capacity_95) / (max_capacity_95 - min_capacity_95) * (max_capacity_82 - min_capacity_82))
+    if cooling_system.cooling_capacity > 0.0
+      nominal_capacity_82 = min_capacity_82 + ((nominal_capacity_95 - min_capacity_95) / (max_capacity_95 - min_capacity_95) * (max_capacity_82 - min_capacity_82))
+    else
+      nominal_capacity_82 = 0.0
+    end
 
     # COPs @ 95F
     cops_95, cops_82 = get_var_speed_cool_cops_95F_82F(cooling_system)
@@ -2004,8 +2008,8 @@ module HVAC
                     [11.689, 9.800, 7.529, 5.720, 4.928]]
     x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }
     y1, y2 = rated_cap_maint_17F_47F_array.min_by(2) { |x| (x - rated_cap_maint_17F_47F).abs }
-    x_indexes = [x1, x2].map { |x| hspf2_array.find_index(x) }
-    y_indexes = [y1, y2].map { |y| rated_cap_maint_17F_47F_array.find_index(y) }
+    x_indexes = [x1, x2].map { |x| hspf2_array.find_index(x) }.sort
+    y_indexes = [y1, y2].map { |y| rated_cap_maint_17F_47F_array.find_index(y) }.sort
     fx1y1 = cop_47_array[x_indexes[0]][y_indexes[0]]
     fx1y2 = cop_47_array[x_indexes[0]][y_indexes[1]]
     fx2y1 = cop_47_array[x_indexes[1]][y_indexes[0]]
@@ -2027,8 +2031,8 @@ module HVAC
                     [10.058, 14.053, 30.962, 42.388, 49.863]]
     x1, x2 = seer2_array.min_by(2) { |x| (x - seer2).abs }
     y1, y2 = seer2_eer2_ratio_array.min_by(2) { |x| (x - seer2_eer2_ratio).abs }
-    x_indexes = [x1, x2].map { |x| seer2_array.find_index(x) }
-    y_indexes = [y1, y2].map { |y| seer2_eer2_ratio_array.find_index(y) }
+    x_indexes = [x1, x2].map { |x| seer2_array.find_index(x) }.sort
+    y_indexes = [y1, y2].map { |y| seer2_eer2_ratio_array.find_index(y) }.sort
     fx1y1 = cop_82_array[x_indexes[0]][y_indexes[0]]
     fx1y2 = cop_82_array[x_indexes[0]][y_indexes[1]]
     fx2y1 = cop_82_array[x_indexes[1]][y_indexes[0]]
@@ -2872,8 +2876,10 @@ module HVAC
   # @return [TODO] TODO
   def self.get_heating_capacity_retention_17F(heat_pump)
     heating_capacity_retention_temp = 17.0
-    if not heat_pump.heating_capacity_17F.nil?
+    if (not heat_pump.heating_capacity_17F.nil?) && (heat_pump.heating_capacity > 0.0)
       heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+    elsif (heat_pump.heating_capacity == 0.0)
+      heating_capacity_retention_fraction = 0.0
     else
       if not heat_pump.heating_capacity_retention_fraction.nil?
         retention_fraction = heat_pump.heating_capacity_retention_fraction
