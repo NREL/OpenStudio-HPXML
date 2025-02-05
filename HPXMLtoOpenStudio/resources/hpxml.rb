@@ -118,7 +118,7 @@ class HPXML < Object
   ElectricResistanceDistributionRadiantCeiling = 'radiant ceiling'
   ElectricResistanceDistributionRadiantFloor = 'radiant floor'
   ElectricResistanceDistributionBaseboard = 'baseboard'
-  ElectricVehicleChargingLocation = 'Home'
+  ElectricVehicleChargingLocationHome = 'Home'
   ExteriorShadingTypeAwnings = 'awnings'
   ExteriorShadingTypeBuilding = 'building'
   ExteriorShadingTypeDeciduousTree = 'deciduous tree'
@@ -9302,6 +9302,7 @@ class HPXML < Object
   class ElectricVehicleCharger < BaseElement
     ATTRS = [:id,             # [String] SystemIdentifier/@id
              :location,       # [String] Location (HPXML::LocationXXX)
+             :charging_level, # [Integer] ChargingLevel (1-3)
              :charging_power] # [Double] ChargingPower (W)
     attr_accessor(*ATTRS)
 
@@ -9332,6 +9333,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(charger, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(charger, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
+      XMLHelper.add_element(charger, 'ChargingLevel', @charging_level, :integer, @charging_level_isdefaulted) unless @charging_level.nil?
       XMLHelper.add_element(charger, 'ChargingPower', @charging_power, :float, @charging_power_isdefaulted) unless @charging_power.nil?
     end
 
@@ -9344,6 +9346,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(charger)
       @location = XMLHelper.get_value(charger, 'Location', :string)
+      @charging_level = XMLHelper.get_value(charger, 'ChargingLevel', :integer)
       @charging_power = XMLHelper.get_value(charger, 'ChargingPower', :float)
     end
   end
@@ -9454,9 +9457,11 @@ class HPXML < Object
 
       case @vehicle_type
       when HPXML::VehicleTypeBEV
-        fraction_charged_location = XMLHelper.add_element(vehicle_type, 'FractionChargedLocation') unless @fraction_charged_home.nil?
-        XMLHelper.add_element(fraction_charged_location, 'Location', HPXML::ElectricVehicleChargingLocation, :string) unless @fraction_charged_home.nil?
-        XMLHelper.add_element(fraction_charged_location, 'Percentage', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted) unless @fraction_charged_home.nil?
+        if not @fraction_charged_home.nil?
+          fraction_charged_location = XMLHelper.add_element(vehicle_type, 'FractionChargedLocation')
+          XMLHelper.add_element(fraction_charged_location, 'Location', HPXML::ElectricVehicleChargingLocationHome, :string)
+          XMLHelper.add_element(fraction_charged_location, 'Percentage', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted)
+        end
         if not @ev_charger_idref.nil?
           charger = XMLHelper.add_element(vehicle_type, 'ConnectedCharger')
           XMLHelper.add_attribute(charger, 'idref', @ev_charger_idref)
@@ -9496,7 +9501,7 @@ class HPXML < Object
         @usable_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
         @usable_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsAh}']/Value", :float)
         @nominal_voltage = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalVoltage", :float)
-        @fraction_charged_home = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/FractionChargedLocation/Percentage", :float)
+        @fraction_charged_home = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/FractionChargedLocation[Location='#{HPXML::ElectricVehicleChargingLocationHome}']/Percentage", :float)
         @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(vehicle, "VehicleType/#{@vehicle_type}/ConnectedCharger"))
         @lifetime_model = XMLHelper.get_value(vehicle, "#{battery_prefix}/extension/LifetimeModel", :string)
         @ev_weekday_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekdayScheduleFractions", :string)

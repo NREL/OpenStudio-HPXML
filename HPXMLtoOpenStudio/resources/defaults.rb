@@ -3244,8 +3244,16 @@ module Defaults
       ev_charger.location = default_values[:location]
       ev_charger.location_isdefaulted = true
     end
+    if ev_charger.charging_level.nil? && ev_charger.charging_power.nil?
+      ev_charger.charging_level = default_values[:charging_level]
+      ev_charger.charging_level_isdefaulted = true
+    end
     if ev_charger.charging_power.nil?
-      ev_charger.charging_power = default_values[:charging_power]
+      if ev_charger.charging_level == 1
+        ev_charger.charging_power = default_values[:level1_charging_power]
+      elsif ev_charger.charging_level >= 2
+        ev_charger.charging_power = default_values[:level2_charging_power]
+      end
       ev_charger.charging_power_isdefaulted = true
     end
   end
@@ -5749,7 +5757,9 @@ module Defaults
     end
 
     return { location: location,
-             charging_power: 5690 } # Median L2 charging rate in EVWatts
+             charging_level: 2,
+             level1_charging_power: 1600,
+             level2_charging_power: 5690 } # Median L2 charging rate in EVWatts
   end
 
   # Gets the default values for a dehumidifier

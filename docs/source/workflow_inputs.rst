@@ -4661,43 +4661,42 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   ===============================================================================================  ======  =========  =======================  ========  =============  =======================================================
 
   .. [#] ConnectedCharger must reference an ``ElectricVehicleCharger``.
-  .. [#] If a connected charger is not provided, then detailed electric vehicle charging will not be modeled.
+  .. [#] If a connected charger is not provided, home electric vehicle charging will not be modeled.
   .. [#] Only the "Li-ion" battery type is supported.
-  .. [#] If NominalCapacity is not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
-  .. [#] If UsableCapacity is not provided, defaults to 0.8 * NominalCapacity.
+  .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.8 if UsableCapacity provided, else 63 kWh.
+  .. [#] If UsableCapacity not provided, defaults to 0.8 * NominalCapacity.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
-  .. [#] If MilesDrivenPerYear is not provided, defaults to HoursDrivenPerWeek * 1227.5, else 10900 miles.
-  .. [#] If HoursDrivenPerWeek is not provided, defaults to MilesDrivenPerYear / 1227.5, else 8.88 hours/week.
+  .. [#] If MilesDrivenPerYear not provided, defaults to HoursDrivenPerWeek * 1227.5, else 10900 miles.
+  .. [#] If HoursDrivenPerWeek not provided, defaults to MilesDrivenPerYear / 1227.5, else 8.88 hours/week.
 
  .. note::
+ 
+  Only EV charging that occurs at the home is modeled; charging that occurs at, e.g., work or public chargers is not captured.
 
   If a PlugLoadType for "electric vehicle charging" is also specified, then a warning will be provided and the EV charging plug load will take precedence.
 
-  EV battery charging and discharging can be scheduled using :ref:`schedules_detailed` or with ``WeekdayScheduleFractions``, ``WeekendScheduleFractions``, and ``MonthlyScheduleMultipliers``.
-  Positive schedule values control timing and magnitude of charging storage.
-  Negative schedule values control timing and magnitude of discharging storage.
-  
-  The effective discharge power is calculated using the vehicle ``FuelEconomyCombined``, ``MilesDrivenPerYear``, and the total discharge hours provided in the schedule.
+  The effective discharge power is calculated using the vehicle ``FuelEconomyCombined``, ``MilesDrivenPerYear``, and the schedule.
   The discharge power is further influenced by the ambient temperature during simulation, and encompasses losses due to battery conditioning, vehicle conditioning, and charging losses.
-  
 
 HPXML Electric Vehicle Chargers
 *******************************
 
 A single electric vehicle charger can be entered as a ``/HPXML/Building/BuildingDetails/Systems/ElectricVehicleChargers/ElectricVehicleCharger``.
 
-  ====================  ======  =====  ===========  ========  ========  ============================================
-  Element               Type    Units  Constraints  Required  Default   Notes
-  ====================  ======  =====  ===========  ========  ========  ============================================
-  ``SystemIdentifier``  id                          Yes                 Unique identifier
-  ``Location``          string         See [#]_     No        See [#]_  Location of EV charger [#]_
-  ``ChargingPower``     double  W      > 0          No        5690      Charger power output
-  ====================  ======  =====  ===========  ========  ========  ============================================
+  ====================  =======  =====  ===========  ========  ========  ============================================
+  Element               Type     Units  Constraints  Required  Default   Notes
+  ====================  =======  =====  ===========  ========  ========  ============================================
+  ``SystemIdentifier``  id                           Yes                 Unique identifier
+  ``Location``          string          See [#]_     No        See [#]_  Location of charger and attached EV when at home
+  ``ChargingLevel``     integer         >= 1, <= 3   No        See [#]_  Charger power level
+  ``ChargingPower``     double   W      > 0          No        See [#]_  Charger power output
+  ====================  =======  =====  ===========  ========  ========  ============================================
 
   .. [#] Location choices are "garage" or "outside".
-  .. [#] If Location is not provided, defaults to "garage" if a garage is present, otherwise "outside".
-  .. [#] Location also specifies the location of the attached electric vehicle.
+  .. [#] If Location not provided, defaults to "garage" if a garage is present, otherwise "outside".
+  .. [#] If neither ChargingLevel nor ChargingPower provided, defaults to level 2.
+  .. [#] If ChargingPower not provided, defaults to 1600 W if a level 1 charger, otherwise 5690 W (based on EVWatts).
 
 HPXML Generators
 ****************

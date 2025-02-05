@@ -2739,6 +2739,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    ev_charging_level_choices = OpenStudio::StringVector.new
+    ev_charging_level_choices << '1'
+    ev_charging_level_choices << '2'
+    ev_charging_level_choices << '3'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ev_charger_level', ev_charging_level_choices, false)
+    arg.setDisplayName('Electric Vehicle Charger: Charging Level')
+    arg.setDescription("The charging level of the EV charger. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_charger_power', false)
     arg.setDisplayName('Electric Vehicle Charger: Rated Charging Power')
     arg.setDescription("The rated power output of the EV charger. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.")
@@ -6972,6 +6982,7 @@ module HPXMLFile
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
                                  location: args[:ev_charger_location],
+                                 charging_level: args[:ev_charger_level],
                                  charging_power: args[:ev_charger_power])
     end
 

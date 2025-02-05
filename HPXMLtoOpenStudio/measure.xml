@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>1e6e4ecc-c633-4d53-ba12-23bd26f6e1ac</version_id>
-  <version_modified>2025-02-04T22:22:56Z</version_modified>
+  <version_id>284b08e3-9af3-49ac-a569-dbc16ddff456</version_id>
+  <version_modified>2025-02-05T01:20:34Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -195,7 +195,7 @@
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C96C7A56</checksum>
+      <checksum>820656A0</checksum>
     </file>
     <file>
       <filename>calendar.rb</filename>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8FE4492D</checksum>
+      <checksum>A524C70C</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -357,13 +357,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B0060C22</checksum>
+      <checksum>E7C5238F</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7FA96E6D</checksum>
+      <checksum>E36727BB</checksum>
     </file>
     <file>
       <filename>hpxml_schema/README.md</filename>
@@ -375,7 +375,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>84286045</checksum>
+      <checksum>6D661DE4</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -609,7 +609,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A5AFC1CC</checksum>
+      <checksum>51A343F7</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -639,7 +639,7 @@
       <filename>vehicle.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E5218BFB</checksum>
+      <checksum>A7BD3188</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
@@ -687,7 +687,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>66403D3F</checksum>
+      <checksum>39D60F07</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
