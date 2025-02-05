@@ -1514,15 +1514,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         heat_pump.pump_watts_per_ton = 100.0
       end
     end
-    if (not hpxml_file.include? ('heating-capacity-retention')) && (not hpxml_file.include? ('autosize')) && ((hpxml_file.include? 'air-to-air-heat-pump') || (hpxml_file.include? 'mini-split-heat-pump'))
-      if not hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction.nil?
-        hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
-        hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
-        hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
-      elsif hpxml_file.include? ('detailed-performance')
-        hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * 0.6 if hpxml_bldg.heat_pumps.size > 0
-      end
-    end
     if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
       # Handle chiller/cooling tower
       if hpxml_file.include? 'chiller'
@@ -1972,7 +1963,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
     end
-    if ['base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'].include? hpxml_file
+    if hpxml_file.include? 'heating-capacity-17f'
+      hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
+      hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
+      hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
+    end
+    if hpxml_file.include? 'base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'
       hpxml_bldg.geothermal_loops[0].shank_spacing = 2.5
     end
     if ['base-hvac-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file

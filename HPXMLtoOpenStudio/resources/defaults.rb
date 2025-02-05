@@ -2381,8 +2381,6 @@ module Defaults
 
       next unless hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
 
-      HVAC.drop_intermediate_speeds(hvac_system)
-
       hvac_ap = hvac_system.additional_properties
       if hvac_system.cooling_detailed_performance_data.empty?
         HVAC.set_cool_detailed_performance_data(hvac_system)
@@ -2399,7 +2397,7 @@ module Defaults
         cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
         cool_max_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
         cool_min_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
-        hvac_ap.cool_capacity_ratios = [cool_min_capacity / cool_rated_capacity, cool_max_capacity / cool_rated_capacity]
+        hvac_ap.cool_capacity_ratios = [cool_min_capacity / cool_rated_capacity, 1.0, cool_max_capacity / cool_rated_capacity]
         hvac_ap.cool_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.cool_capacity_ratios, hvac_ap.cool_rated_cfm_per_ton, hvac_ap.cool_rated_airflow_rate)
       end
       if is_hp
@@ -2415,6 +2413,8 @@ module Defaults
             dp.capacity_isdefaulted = true
           end
 
+          # FIXME: What if user provides capacity17F and it's different from the value at detailed performance data at 17F?
+          # The same question for capacity47F, Remove the HeatingCapacity17F and HeatingCapacity/CoolingCapacity at top level?
           if hvac_system.heating_capacity_17F.nil?
             rated_capacity_17 = hvac_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
             hvac_system.heating_capacity_17F = rated_capacity_17
@@ -2424,7 +2424,7 @@ module Defaults
           heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
           heat_max_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
           heat_min_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
-          hvac_ap.heat_capacity_ratios = [heat_min_capacity / heat_rated_capacity, heat_max_capacity / heat_rated_capacity]
+          hvac_ap.heat_capacity_ratios = [heat_min_capacity / heat_rated_capacity, 1.0, heat_max_capacity / heat_rated_capacity]
           hvac_ap.heat_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.heat_capacity_ratios, hvac_ap.heat_rated_cfm_per_ton, hvac_ap.heat_rated_airflow_rate)
         end
       end
@@ -2438,7 +2438,7 @@ module Defaults
   def self.set_heating_capacity_17F(heat_pump)
     return unless heat_pump.heating_capacity_17F.nil?
 
-    retention_fraction_17F = HVAC.get_capacity_maint_17(heat_pump)
+    _retention_temp, retention_fraction_17F = HVAC.get_heating_capacity_retention_17F(heat_pump)
     heat_pump.heating_capacity_17F = heat_pump.heating_capacity * retention_fraction_17F
     heat_pump.heating_capacity_17F_isdefaulted = true
     heat_pump.heating_capacity_retention_fraction = nil

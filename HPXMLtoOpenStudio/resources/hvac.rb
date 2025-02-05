@@ -1779,7 +1779,7 @@ module HVAC
     hspf = calc_hspf_from_hspf2(heating_system)
     case heating_system.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
-      heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heating_system)
+      heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention_17F(heating_system)
       htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
       if [HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? heating_system.heat_pump_type
         htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton_simple()
@@ -1792,7 +1792,7 @@ module HVAC
       end
 
     when HPXML::HVACCompressorTypeTwoStage
-      heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heating_system)
+      heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention_17F(heating_system)
       htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type)
       htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
@@ -2044,28 +2044,6 @@ module HVAC
     return [0.948, 0.940]
   end
 
-  # Returns the capacity maintenance from 17F to 47F, based on NEEP data for all var speed heat pump types, if autosizing and capacity retention is not provided
-  # Maintenance = capacity@17F / capacity@47F
-  #
-  # @return [Double] Capacity maintenance from 17F to 47F
-  def self.get_capacity_maint_17(heat_pump)
-    if not heat_pump.heating_capacity_retention_fraction.nil?
-      retention_fraction = heat_pump.heating_capacity_retention_fraction
-      retention_temp = heat_pump.heating_capacity_retention_temp
-    else
-      retention_temp = 5.0
-      case heat_pump.compressor_type
-      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
-        retention_fraction = 0.425
-      when HPXML::HVACCompressorTypeVariableSpeed
-        # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-        retention_fraction = (0.0461 * calc_hspf_from_hspf2(heat_pump) + 0.1594).round(4)
-      end
-    end
-    retention_fraction_17F = 1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0)
-    return retention_fraction_17F
-  end
-
   # Returns the heating capacity ratios for the HVAC system at rated temperature (47F).
   #
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
@@ -2118,36 +2096,6 @@ module HVAC
     end
 
     fail 'Unable to get heating capacity ratios.'
-  end
-
-  # For variable-speed systems, we only want to model min/max speeds in E+.
-  # Here we drop any intermediate speeds that we may have added for other purposes (e.g. hvac sizing).
-  #
-  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
-  # @return [nil]
-  def self.drop_intermediate_speeds(hvac_system)
-    return unless hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-
-    hvac_ap = hvac_system.additional_properties
-
-    while hvac_ap.cool_capacity_ratios.size > 2
-      hvac_ap.cool_cap_fflow_spec.delete_at(1)
-      hvac_ap.cool_eir_fflow_spec.delete_at(1)
-      hvac_ap.cool_plf_fplr_spec.delete_at(1)
-      hvac_ap.cool_rated_cfm_per_ton.delete_at(1)
-      hvac_ap.cool_capacity_ratios.delete_at(1)
-      hvac_ap.cool_fan_speed_ratios.delete_at(1)
-    end
-    if hvac_system.is_a? HPXML::HeatPump
-      while hvac_ap.heat_capacity_ratios.size > 2
-        hvac_ap.heat_cap_fflow_spec.delete_at(1)
-        hvac_ap.heat_eir_fflow_spec.delete_at(1)
-        hvac_ap.heat_plf_fplr_spec.delete_at(1)
-        hvac_ap.heat_rated_cfm_per_ton.delete_at(1)
-        hvac_ap.heat_capacity_ratios.delete_at(1)
-        hvac_ap.heat_fan_speed_ratios.delete_at(1)
-      end
-    end
   end
 
   # Returns assumed rated cooling CFM/ton for central DX systems.
@@ -2916,16 +2864,31 @@ module HVAC
     return [[oat_intercept + iat_intercept, iat_slope, 0, oat_slope, 0, 0]] * num_speeds
   end
 
-  # TODO
+  # Returns the capacity maintenance from 17F to 47F,
+  # Default based on NEEP data for all var speed heat pump types, if neither capacity 17F nor capacity retention is not provided
+  # Maintenance = capacity@17F / capacity@47F
   #
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @return [TODO] TODO
-  def self.get_heating_capacity_retention(heat_pump)
+  def self.get_heating_capacity_retention_17F(heat_pump)
     heating_capacity_retention_temp = 17.0
     if not heat_pump.heating_capacity_17F.nil?
       heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
     else
-      heating_capacity_retention_fraction = get_capacity_maint_17(heat_pump)
+      if not heat_pump.heating_capacity_retention_fraction.nil?
+        retention_fraction = heat_pump.heating_capacity_retention_fraction
+        retention_temp = heat_pump.heating_capacity_retention_temp
+      else
+        retention_temp = 5.0
+        case heat_pump.compressor_type
+        when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+          retention_fraction = 0.425
+        when HPXML::HVACCompressorTypeVariableSpeed
+          # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+          retention_fraction = (0.0461 * calc_hspf_from_hspf2(heat_pump) + 0.1594).round(4)
+        end
+      end
+      heating_capacity_retention_fraction = 1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0)
     end
     return heating_capacity_retention_temp, heating_capacity_retention_fraction
   end
@@ -3029,15 +2992,17 @@ module HVAC
     detailed_performance_data_name = (mode == :clg) ? 'cooling_detailed_performance_data' : 'heating_detailed_performance_data'
     detailed_performance_data = hvac_system.send(detailed_performance_data_name)
     hvac_ap = hvac_system.additional_properties
-    data_array = Array.new(2) { Array.new }
+    data_array = Array.new(3) { Array.new }
     detailed_performance_data.sort_by { |dp| dp.outdoor_temperature }.each do |data_point|
       # Only process min and max capacities at each outdoor drybulb
-      next unless [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? data_point.capacity_description
+      next unless [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionNominal, HPXML::CapacityDescriptionMaximum].include? data_point.capacity_description
 
       if data_point.capacity_description == HPXML::CapacityDescriptionMinimum
         data_array[0] << data_point
-      elsif data_point.capacity_description == HPXML::CapacityDescriptionMaximum
+      elsif data_point.capacity_description == HPXML::CapacityDescriptionNominal
         data_array[1] << data_point
+      elsif data_point.capacity_description == HPXML::CapacityDescriptionMaximum
+        data_array[2] << data_point
       end
     end
 
@@ -5757,6 +5722,7 @@ module HVAC
   def self.ensure_nonzero_sizing_values(hpxml_bldg)
     min_capacity = 1.0 # Btuh
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
+    speed_descriptions = [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionNominal, HPXML::CapacityDescriptionMaximum]
     hpxml_bldg.heating_systems.each do |htg_sys|
       htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
       htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max unless htg_sys.heating_airflow_cfm.nil?
@@ -5767,7 +5733,7 @@ module HVAC
       next unless not clg_sys.cooling_detailed_performance_data.empty?
 
       clg_sys.cooling_detailed_performance_data.each do |dp|
-        speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
+        speed = speed_descriptions.index(dp.capacity_description) + 1
         dp.capacity = [dp.capacity, min_capacity * speed].max
       end
     end
@@ -5783,7 +5749,7 @@ module HVAC
         hp_sys.heating_detailed_performance_data.each do |dp|
           next if dp.capacity.nil?
 
-          speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
+          speed = speed_descriptions.index(dp.capacity_description) + 1
           dp.capacity = [dp.capacity, min_capacity * speed].max
         end
       end
@@ -5792,7 +5758,7 @@ module HVAC
       hp_sys.cooling_detailed_performance_data.each do |dp|
         next if dp.capacity.nil?
 
-        speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
+        speed = speed_descriptions.index(dp.capacity_description) + 1
         dp.capacity = [dp.capacity, min_capacity * speed].max
       end
     end

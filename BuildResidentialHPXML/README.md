@@ -2648,6 +2648,17 @@ Minimum speed capacities of heating detailed performance data if available. Appl
 
 <br/>
 
+**HVAC Detailed Performance Data: Heating Nominal Speed Capacities**
+
+Nominal speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+
+- **Name:** ``hvac_perf_data_heating_nom_speed_capacities``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **HVAC Detailed Performance Data: Heating Maximum Speed Capacities**
 
 Maximum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
@@ -2664,6 +2675,17 @@ Maximum speed capacities of heating detailed performance data if available. Appl
 Minimum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_heating_min_speed_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC Detailed Performance Data: Heating Nominal Speed COPs**
+
+Nominal speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+
+- **Name:** ``hvac_perf_data_heating_nom_speed_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -2703,6 +2725,17 @@ Minimum speed capacities of cooling detailed performance data if available. Appl
 
 <br/>
 
+**HVAC Detailed Performance Data: Cooling Nominal Speed Capacities**
+
+Nominal speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+
+- **Name:** ``hvac_perf_data_cooling_nom_speed_capacities``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **HVAC Detailed Performance Data: Cooling Maximum Speed Capacities**
 
 Maximum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
@@ -2719,6 +2752,17 @@ Maximum speed capacities of cooling detailed performance data if available. Appl
 Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_cooling_min_speed_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC Detailed Performance Data: Cooling Nominal Speed COPs**
+
+Nominal speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+
+- **Name:** ``hvac_perf_data_cooling_nom_speed_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
