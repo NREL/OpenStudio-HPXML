@@ -1027,6 +1027,21 @@
     "ev_charger_power": 7000,
     "ev_charger_location": "garage"
   },
+  "sample_files/base-vehicle-ev-charger-level1.xml": {
+    "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
+    "ev_charger_level": 1,
+    "ev_charger_power": null
+  },
+  "sample_files/base-vehicle-ev-charger-miles-per-kwh.xml": {
+    "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
+    "vehicle_fuel_economy_combined": 4.0,
+    "vehicle_fuel_economy_units": "mile/kWh"
+  },
+  "sample_files/base-vehicle-ev-charger-mpge.xml": {
+    "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
+    "vehicle_fuel_economy_combined": 135.0,
+    "vehicle_fuel_economy_units": "mpge"
+  },
   "sample_files/base-vehicle-ev-charger-scheduled.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/vehicle-ev.csv"

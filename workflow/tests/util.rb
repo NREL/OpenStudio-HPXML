@@ -231,7 +231,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
     end
     if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && vehicle.ev_charger_idref.nil? }
-      next if message.include? 'Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.'
+      next if message.include? 'Electric vehicle specified with no charger provided; home EV charging will not be modeled.'
     end
     if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? && vehicle.ev_weekday_fractions.nil? } && !hpxml_bldg.header.schedules_filepaths.empty?
       next if message.include? 'driving hours could not be met'
@@ -1112,7 +1112,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       # Check that airflow rate difference is less than 0.2 cfm or less than 1.0%
       abs_delta_tol = 0.2
       abs_frac_tol = 0.01
-    elsif key.include?('Unmet Hours:') || key.include?('Unmet Driving Hours')
+    elsif key.include?('Unmet Hours:')
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
       abs_frac_tol = nil

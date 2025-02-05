@@ -268,6 +268,7 @@
       <sch:assert role='ERROR' test='count(h:Systems/h:Photovoltaics/h:PVSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/Photovoltaics/PVSystem</sch:assert> <!-- See [PVSystem] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:Batteries/h:Battery) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Systems/Batteries/Battery</sch:assert> <!-- See [Battery] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:Vehicles/h:Vehicle) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/Vehicles/Vehicle</sch:assert> <!-- See [Vehicle] -->
+      <sch:assert role='ERROR' test='count(h:Systems/h:ElectricVehicleChargers/h:ElectricVehicleCharger) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/ElectricVehicleChargers/ElectricVehicleCharger</sch:assert> <!-- See [ElectricVehicleCharger] -->
       <sch:assert role='ERROR' test='count(h:Systems/h:extension/h:Generators/h:Generator) &gt;= 0'>Expected 0 or more element(s) for xpath: Systems/extension/Generators/Generator</sch:assert> <!-- See [Generator] -->
       <sch:assert role='ERROR' test='count(h:Appliances/h:ClothesWasher) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Appliances/ClothesWasher</sch:assert> <!-- See [ClothesWasher] -->
       <sch:assert role='ERROR' test='count(h:Appliances/h:ClothesDryer) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Appliances/ClothesDryer</sch:assert> <!-- See [ClothesDryer] -->
@@ -2540,11 +2541,11 @@
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:MilesDrivenPerYear) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../MilesDrivenPerYear</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:HoursDrivenPerWeek) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../HoursDrivenPerWeek</sch:assert>
-      <sch:assert role='ERROR' test='count(../../h:FuelEconomyCombined[h:Units="kWh/mile"]/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../FuelEconomyCombined[Units="kWh/mile"]/Value</sch:assert>
-      <sch:assert role='ERROR' test='../../h:FuelEconomyCombined[h:Units="kWh/mile"] or not(../../h:FuelEconomyCombined/h:Units)'>Expected ../../FuelEconomyCombined/Units to be "kWh/mile"</sch:assert>
+      <sch:assert role='ERROR' test='count(../../h:FuelEconomyCombined/h:Value) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../../FuelEconomyCombined/Value</sch:assert>
+      <sch:assert role='ERROR' test='../../h:FuelEconomyCombined[h:Units="kWh/mile" or h:Units="mile/kWh" or h:Units="mpge"] or not(../../h:FuelEconomyCombined/h:Units)'>Expected ../../FuelEconomyCombined/Units to be "kWh/mile" or "mile/kWh" or "mpge"</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='count(../../../../../h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="electric vehicle charging"]]) &gt;= 1'>Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.</sch:report>
-      <sch:report role='WARN' test='count(h:ConnectedCharger) = 0'>Electric vehicle specified with no charger provided; detailed EV charging will not be modeled.</sch:report>
+      <sch:report role='WARN' test='count(h:ConnectedCharger) = 0'>Electric vehicle specified with no charger provided; home EV charging will not be modeled.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -2553,6 +2554,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:ElectricVehicleChargers/h:ElectricVehicleCharger'>
       <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert>
       <sch:assert role='ERROR' test='h:Location[text()="garage" or text()="outside"] or not(h:Location)'>Expected Location to be 'garage' or 'outside'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ChargingLevel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ChargingLevel</sch:assert>
       <sch:assert role='ERROR' test='count(h:ChargingPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ChargingPower</sch:assert>
     </sch:rule>
   </sch:pattern>

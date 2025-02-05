@@ -251,7 +251,7 @@ end
 module UHT
   Heating = 'Heating'
   Cooling = 'Cooling'
-  Driving = 'Driving'
+  Driving = 'EV Driving'
 end
 
 # Resilience Types (Constants for output reporting)
