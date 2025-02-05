@@ -3305,7 +3305,7 @@ module Defaults
       elsif not battery.usable_capacity_ah.nil?
         battery.nominal_capacity_ah = (battery.usable_capacity_ah / default_values[:usable_fraction]).round(2)
         battery.nominal_capacity_ah_isdefaulted = true
-      elsif not battery.rated_power_output.nil?
+      elsif battery.respond_to?(:rated_power_output) && (not battery.rated_power_output.nil?)
         battery.nominal_capacity_kwh = (UnitConversions.convert(battery.rated_power_output, 'W', 'kW') / 0.5).round(2)
         battery.nominal_capacity_kwh_isdefaulted = true
       else
@@ -3323,7 +3323,7 @@ module Defaults
         battery.usable_capacity_ah_isdefaulted = true
       end
     end
-    return unless battery.rated_power_output.nil? || battery.is_a?(HPXML::Vehicle) # EV battery rated power is set using other inputs in vehicle.rb
+    return unless battery.respond_to?(:rated_power_output) && battery.rated_power_output.nil?
 
     # Calculate rated power from nominal capacity
     if not battery.nominal_capacity_kwh.nil?

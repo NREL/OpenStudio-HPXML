@@ -697,7 +697,7 @@ The column names available in the schedule CSV files are:
   ``ceiling_fan``                   frac     Ceiling fan energy use schedule.                                                               Yes
   ``plug_loads_other``              frac     Other plug load energy use schedule.                                                           Yes
   ``plug_loads_tv``                 frac     Television plug load energy use schedule.                                                      Yes
-  ``plug_loads_vehicle``            frac     Electric vehicle plug load energy use schedule.                                                No
+  ``plug_loads_vehicle``            frac     Electric vehicle plug load energy use schedule. [#]_                                           No
   ``plug_loads_well_pump``          frac     Well pump plug load energy use schedule.                                                       No
   ``fuel_loads_grill``              frac     Grill fuel load energy use schedule.                                                           No
   ``fuel_loads_lighting``           frac     Lighting fuel load energy use schedule.                                                        No
@@ -717,7 +717,7 @@ The column names available in the schedule CSV files are:
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                                No
   ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.               No
   ``battery``                       -1 to 1  Battery availability schedule. Positive for charging, negative for discharging.                No
-  ``electric_vehicle``              -1 to 1  Electric vehicle availability schedule. Positive for charging, negative for discharging. [#]_  No
+  ``electric_vehicle``              -1 to 1  Electric vehicle schedule. Positive for charging, negative for discharging. [#]_               No
   ================================  =======  =============================================================================================  ===============================
 
   .. [#] A detailed stochastic occupancy schedule CSV file can also be automatically generated for these columns; see the :ref:`usage_instructions` for the commands.
@@ -736,14 +736,18 @@ The column names available in the schedule CSV files are:
 
          See :ref:`building_occupancy` and :ref:`building_site` for more information.
 
+  .. [#] For use with electric vehicles described using :ref:`plug_loads`.
+
   .. [#] This feature is an advanced research capability. This schedule allows modeling shedding controls for variable speed HVAC systems (instead of setpoint changes) to limit the power of HVAC per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_. 
          While any fraction value can be entered, this is primarily intended to reflect the AHRI capabilities, which has two levels of load shed: "General Curtailment" and "Critical Curtailment". 
          A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated (4F off the setpoint).
          During the shedding events, the main heat pump is limited to running below the specified fraction of rated power, and the backup system is locked out.
          When the comfort constraints are violated, both heat pump and backup systems are allowed to run at full load to recover the indoor temperature until reaching setpoint.
 
-  .. [#] Electric vehicle availability schedule represents times in which charging or discharging are possible, but may not necessarily occur.
-         If a vehicle is fully charged during a scheduled charging event, there will be no charging load, likewise, if a vehicle battery is fully depleted during a discharging event, there will be no further discharging energy and the vehicle will accumulate unmet driving hours (see :ref:`annual_unmet_hours`). 
+  .. [#] For use with electric vehicles described using :ref:`hpxml_vehicles`.
+         This schedule represents times in which EV charging is available or EV discharging occurs.
+         If a vehicle is fully charged during a scheduled charging event, there will be no charging load.
+         If a vehicle battery is fully depleted during a discharging event, there will be no further discharging energy and the vehicle will accumulate unmet EV driving hours (see :ref:`annual_unmet_hours`). 
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -5350,7 +5354,7 @@ If not entered, the simulation will not include that type of plug load.
          
          \- **well pump**: 50.8 / 0.127 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         \- **electric vehicle charging**: 2368.4 (calculated using AnnualMiles * kWhPerMile * FractionChargedAtHome / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=10900, kWhPerMile=0.22, FractionChargedAtHome=0.8, ChargerEfficiency=0.9, and BatteryEfficiency=0.9). If this plug load type is specified, it will take precedence over an EV specified with ``/HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle/VehicleType/BatteryElectricVehicle``.
+         \- **electric vehicle charging**: 2368.4 (calculated using AnnualMiles * kWhPerMile * FractionChargedAtHome / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=10900, kWhPerMile=0.22, FractionChargedAtHome=0.8, ChargerEfficiency=0.9, and BatteryEfficiency=0.9). If this plug load type is specified, it will take precedence over an EV specified in :ref:`hpxml_vehicles`.
          
          If NumberofResidents is provided, the following defaults are used instead:
          

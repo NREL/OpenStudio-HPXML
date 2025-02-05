@@ -48,7 +48,7 @@ module Vehicle
       return
     end
 
-    vehicle.location = ev_charger.location
+    vehicle.additional_properties.location = ev_charger.location
 
     if vehicle.fuel_economy_units == HPXML::UnitsKwhPerMile
       kwh_per_mile = vehicle.fuel_economy_combined
@@ -86,7 +86,7 @@ module Vehicle
 
     # Scale the effective discharge power by 2.25 to assign the rated discharge power.
     # This value reflects the maximum power adjustment allowed in the EMS EV discharge program at -17.8 C.
-    vehicle.rated_power_output = eff_discharge_power * 2.25
+    vehicle.additional_properties.rated_power_output = eff_discharge_power * 2.25
 
     # Apply vehicle battery to model
     Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, charging_schedule, discharging_schedule)

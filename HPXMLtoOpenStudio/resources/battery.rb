@@ -49,10 +49,11 @@ module Battery
     end
 
     obj_name = battery.id
+    location = (is_ev ? battery.additional_properties.location : battery.location)
+    rated_power_output = (is_ev ? battery.additional_properties.rated_power_output : battery.rated_power_output) # W
 
-    space = Geometry.get_space_from_location(battery.location, spaces)
+    space = Geometry.get_space_from_location(location, spaces)
 
-    rated_power_output = battery.rated_power_output # W
     if not battery.nominal_capacity_kwh.nil?
       if battery.usable_capacity_kwh.nil?
         fail "UsableCapacity and NominalCapacity for Battery '#{battery.id}' must be in the same units."
@@ -82,18 +83,14 @@ module Battery
       rated_power_output = rated_power_output * nbeds.to_f / battery.number_of_bedrooms_served.to_f
     end
 
-    if is_ev
-      charging_power = battery.ev_charger.charging_power
-    else
-      charging_power = rated_power_output
-    end
+    charging_power = (is_ev ? battery.ev_charger.charging_power : rated_power_output)
 
     nominal_capacity_kwh *= unit_multiplier
     usable_capacity_kwh *= unit_multiplier
     rated_power_output *= unit_multiplier
     charging_power *= unit_multiplier
 
-    is_outside = (battery.location == HPXML::LocationOutside)
+    is_outside = (location == HPXML::LocationOutside)
     if !is_outside && !is_ev
       frac_sens = 1.0
     else # Internal gains outside unit

@@ -318,16 +318,19 @@ Annual Unmet Hours
 
 Annual unmet hours are listed below.
 
-  =========================  =====
-  Type                       Notes
-  =========================  =====
-  Unmet Hours: Heating (hr)  Number of hours where the heating setpoint is not maintained.
-  Unmet Hours: Cooling (hr)  Number of hours where the cooling setpoint is not maintained.
-  Unmet Hours: Driving (hr)  Number of hours where the driving schedule of electric vehicles is not met
-  =========================  =====
+  ============================  =====
+  Type                          Notes
+  ============================  =====
+  Unmet Hours: Heating (hr)     Number of hours where the heating setpoint is not maintained. [#]_
+  Unmet Hours: Cooling (hr)     Number of hours where the cooling setpoint is not maintained.
+  Unmet Hours: EV Driving (hr)  Number of hours where the EV driving demand is not met. [#]_
+  ============================  =====
 
-The unmet heating and cooling numbers reflect the number of hours during the heating/cooling season when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
-The unmet driving number represents the total time in which the charging schedule fails to meet the demand from the driving schedule. This includes periods when the discharge schedule exceeds zero while the EV battery's state of charge is at its minimum level. Unmet driving hours indicate unrealized discharging events, resulting in reduced charging energy.
+  .. [#] The unmet heating and cooling numbers reflect the number of hours during the heating/cooling season when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
+
+  .. [#] The unmet EV driving number represents the total time in which the electric vehicle discharge schedule exceeds zero while the EV battery's state of charge is at its minimum level.
+         Unmet EV driving hours indicate unrealized driving events and reduced EV charging energy.
+         Unmet hours will only occur when using the detailed electric vehicle model in :ref:`hpxml_vehicles`, not the simple EV charging in :ref:`plug_loads`.
 
 Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -637,7 +640,7 @@ Depending on the outputs requested, the file may include:
   Hot Water Uses                      ``hotwater``         Water use for each end use type (in gallons).
   Total Loads                         ``loads``            Heating, cooling, and hot water loads (in kBtu).
   Component Loads                     ``componentloads``   Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
-  Unmet Hours                         ``unmethours``       Heating, cooling, and/or driving unmet hours.
+  Unmet Hours                         ``unmethours``       Heating, cooling, and/or EV driving unmet hours.
   Zone Temperatures                   ``temperatures``     Zone temperatures (in deg-F) for each space (e.g., conditioned space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
   Airflows                            ``airflows``         Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
   Weather                             ``weather``          Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.

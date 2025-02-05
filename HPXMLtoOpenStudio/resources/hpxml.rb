@@ -9392,9 +9392,7 @@ class HPXML < Object
              :lifetime_model,         # [String] VehicleType/BatteryElectricVehicle/Battery/extension/LifetimeModel (HPXML::BatteryLifetimeModelXXX)
              :ev_weekday_fractions,   # [String] VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions
              :ev_weekend_fractions,   # [String] VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions
-             :ev_monthly_multipliers, # [String] VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers
-             :rated_power_output,     # [Double] (W)
-             :location]               # [String]
+             :ev_monthly_multipliers] # [String] VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
 
     # Deletes the current object from the array.

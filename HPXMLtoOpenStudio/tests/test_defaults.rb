@@ -3689,7 +3689,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
     hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
     hpxml_bldg.vehicles[0].usable_capacity_ah = nil
-    hpxml_bldg.vehicles[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 45.0, nil, 36.0, nil, 10900, 8.88, 0.22, HPXML::UnitsKwhPerMile, 0.8, default_ev_sch['WeekdayScheduleFractions'], default_ev_sch['WeekendScheduleFractions'], default_ev_sch['MonthlyScheduleMultipliers'], 2, 5690, HPXML::LocationGarage)
@@ -3699,7 +3698,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
     hpxml_bldg.vehicles[0].usable_capacity_kwh = 36.0
     hpxml_bldg.vehicles[0].usable_capacity_ah = nil
-    hpxml_bldg.vehicles[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, 45.0, nil, 36.0, nil, 10900, 8.88, 0.22, HPXML::UnitsKwhPerMile, 0.8, default_ev_sch['WeekdayScheduleFractions'], default_ev_sch['WeekendScheduleFractions'], default_ev_sch['MonthlyScheduleMultipliers'], 2, 5690, HPXML::LocationGarage)
@@ -3709,7 +3707,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.vehicles[0].nominal_capacity_ah = 280.0
     hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
     hpxml_bldg.vehicles[0].usable_capacity_ah = nil
-    hpxml_bldg.vehicles[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 280.0, nil, 224.0, 10900, 8.88, 0.22, HPXML::UnitsKwhPerMile, 0.8, default_ev_sch['WeekdayScheduleFractions'], default_ev_sch['WeekendScheduleFractions'], default_ev_sch['MonthlyScheduleMultipliers'], 2, 5690, HPXML::LocationGarage)
@@ -3719,7 +3716,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.vehicles[0].nominal_capacity_ah = nil
     hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
     hpxml_bldg.vehicles[0].usable_capacity_ah = 224.0
-    hpxml_bldg.vehicles[0].rated_power_output = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 280.0, nil, 224.0, 10900, 8.88, 0.22, HPXML::UnitsKwhPerMile, 0.8, default_ev_sch['WeekdayScheduleFractions'], default_ev_sch['WeekendScheduleFractions'], default_ev_sch['MonthlyScheduleMultipliers'], 2, 5690, HPXML::LocationGarage)
