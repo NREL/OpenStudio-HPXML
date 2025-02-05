@@ -27,9 +27,10 @@ module Defaults
   # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI/RESNET/ICC 301
   # @return [Array<Hash, Hash>] Maps of HPXML::Zones => DesignLoadValues object, HPXML::Spaces => DesignLoadValues object
   def self.apply(runner, hpxml, hpxml_bldg, weather, schedules_file: nil, convert_shared_systems: true)
-    eri_version = hpxml.header.eri_calculation_version
-    if eri_version.nil?
+    if hpxml.header.eri_calculation_versions.nil? || hpxml.header.eri_calculation_versions.empty?
       eri_version = 'latest'
+    else
+      eri_version = hpxml.header.eri_calculation_versions[0]
     end
     if eri_version == 'latest'
       eri_version = Constants::ERIVersions[-1]
@@ -3189,11 +3190,9 @@ module Defaults
         vehicle.battery_type = default_values[:battery_type]
         vehicle.battery_type_isdefaulted = true
       end
-      if vehicle.fuel_economy.nil?
-        vehicle.fuel_economy = default_values[:fuel_economy]
-        vehicle.fuel_economy_isdefaulted = true
-      end
-      if vehicle.fuel_economy_units.nil?
+      if vehicle.fuel_economy_combined.nil? || vehicle.fuel_economy_units.nil?
+        vehicle.fuel_economy_combined = default_values[:fuel_economy_combined]
+        vehicle.fuel_economy_combined_isdefaulted = true
         vehicle.fuel_economy_units = default_values[:fuel_economy_units]
         vehicle.fuel_economy_units_isdefaulted = true
       end
@@ -3245,8 +3244,16 @@ module Defaults
       ev_charger.location = default_values[:location]
       ev_charger.location_isdefaulted = true
     end
+    if ev_charger.charging_level.nil? && ev_charger.charging_power.nil?
+      ev_charger.charging_level = default_values[:charging_level]
+      ev_charger.charging_level_isdefaulted = true
+    end
     if ev_charger.charging_power.nil?
-      ev_charger.charging_power = default_values[:charging_power]
+      if ev_charger.charging_level == 1
+        ev_charger.charging_power = default_values[:level1_charging_power]
+      elsif ev_charger.charging_level >= 2
+        ev_charger.charging_power = default_values[:level2_charging_power]
+      end
       ev_charger.charging_power_isdefaulted = true
     end
   end
@@ -3298,7 +3305,7 @@ module Defaults
       elsif not battery.usable_capacity_ah.nil?
         battery.nominal_capacity_ah = (battery.usable_capacity_ah / default_values[:usable_fraction]).round(2)
         battery.nominal_capacity_ah_isdefaulted = true
-      elsif not battery.rated_power_output.nil?
+      elsif battery.respond_to?(:rated_power_output) && (not battery.rated_power_output.nil?)
         battery.nominal_capacity_kwh = (UnitConversions.convert(battery.rated_power_output, 'W', 'kW') / 0.5).round(2)
         battery.nominal_capacity_kwh_isdefaulted = true
       else
@@ -3316,7 +3323,7 @@ module Defaults
         battery.usable_capacity_ah_isdefaulted = true
       end
     end
-    return unless battery.rated_power_output.nil? || battery.is_a?(HPXML::Vehicle) # EV battery rated power is set using other inputs in vehicle.rb
+    return unless battery.respond_to?(:rated_power_output) && battery.rated_power_output.nil?
 
     # Calculate rated power from nominal capacity
     if not battery.nominal_capacity_kwh.nil?
@@ -5731,7 +5738,7 @@ module Defaults
              hours_per_week: 8.88,
              nominal_capacity_kwh: 63,
              nominal_voltage: 50.0,
-             fuel_economy: 0.22,
+             fuel_economy_combined: 0.22,
              fuel_economy_units: HPXML::UnitsKwhPerMile,
              fraction_charged_home: 0.8,
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity
@@ -5750,7 +5757,9 @@ module Defaults
     end
 
     return { location: location,
-             charging_power: 5690 } # Median L2 charging rate in EVWatts
+             charging_level: 2,
+             level1_charging_power: 1600,
+             level2_charging_power: 5690 } # Median L2 charging rate in EVWatts
   end
 
   # Gets the default values for a dehumidifier
@@ -5941,8 +5950,9 @@ module Defaults
 
     # Use detailed vehicle model defaults
     vehicle_defaults = get_electric_vehicle_values
+    kwh_per_year = vehicle_defaults[:miles_per_year] * vehicle_defaults[:fuel_economy_combined] * vehicle_defaults[:fraction_charged_home] / (ev_charger_efficiency * ev_battery_efficiency)
 
-    return vehicle_defaults[:miles_per_year] * vehicle_defaults[:fuel_economy] * vehicle_defaults[:fraction_charged_home] / (ev_charger_efficiency * ev_battery_efficiency)
+    return kwh_per_year.round(1)
   end
 
   # Gets the default well pump annual energy use.

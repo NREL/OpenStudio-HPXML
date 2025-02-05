@@ -2352,7 +2352,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
                               vehicle_type: HPXML::VehicleTypeHybrid,
                               fuel_economy_units: HPXML::UnitsMPG,
-                              fuel_economy: 44.0,
+                              fuel_economy_combined: 44.0,
                               miles_per_year: 15000.0,
                               hours_per_week: 10.0)
     end

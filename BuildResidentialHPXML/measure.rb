@@ -2702,10 +2702,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     fuel_economy_units_choices = OpenStudio::StringVector.new
     fuel_economy_units_choices << HPXML::UnitsKwhPerMile
+    fuel_economy_units_choices << HPXML::UnitsMilePerKwh
+    fuel_economy_units_choices << HPXML::UnitsMPGe
+    fuel_economy_units_choices << HPXML::UnitsMPG
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('vehicle_fuel_economy_units', fuel_economy_units_choices, false)
     arg.setDisplayName('Vehicle: Combined Fuel Economy Units')
-    arg.setDescription("The combined fuel economy units of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
+    arg.setDescription("The combined fuel economy units of the vehicle. Only '#{HPXML::UnitsKwhPerMile}', '#{HPXML::UnitsMilePerKwh}', or '#{HPXML::UnitsMPGe}' are allow for electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fuel_economy_combined', false)
@@ -2734,6 +2737,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Electric Vehicle Charger: Present')
     arg.setDescription('Whether there is an electric vehicle charger present.')
     arg.setDefaultValue(false)
+    args << arg
+
+    ev_charging_level_choices = OpenStudio::StringVector.new
+    ev_charging_level_choices << '1'
+    ev_charging_level_choices << '2'
+    ev_charging_level_choices << '3'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ev_charger_level', ev_charging_level_choices, false)
+    arg.setDisplayName('Electric Vehicle Charger: Charging Level')
+    arg.setDescription("The charging level of the EV charger. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_charger_power', false)
@@ -6969,6 +6982,7 @@ module HPXMLFile
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
                                  location: args[:ev_charger_location],
+                                 charging_level: args[:ev_charger_level],
                                  charging_power: args[:ev_charger_power])
     end
 
@@ -6977,7 +6991,7 @@ module HPXMLFile
                               vehicle_type: args[:vehicle_type],
                               nominal_capacity_kwh: args[:vehicle_battery_capacity],
                               usable_capacity_kwh: args[:vehicle_battery_usable_capacity],
-                              fuel_economy: args[:vehicle_fuel_economy_combined],
+                              fuel_economy_combined: args[:vehicle_fuel_economy_combined],
                               fuel_economy_units: args[:vehicle_fuel_economy_units],
                               miles_per_year: args[:vehicle_miles_driven_per_year],
                               hours_per_week: args[:vehicle_hours_driven_per_week],
