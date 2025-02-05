@@ -812,9 +812,13 @@ class ScheduleGenerator
     charging_schedule, discharging_schedule = get_ev_battery_schedule(away_schedule, hours_per_year)
     agg_charging_schedule = aggregate_array(charging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
     agg_discharging_schedule = aggregate_array(discharging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
+
+    # The combined schedule is not a sum of the charging and discharging schedules because when charging and discharging
+    # both occur in a timestep, we don't want them to cancel out and draw no power from the building. So, whenever there
+    # is discharging, we use the full discharge in that timestep (without subtracting the charging).
+    combined_schedule = agg_charging_schedule.zip(agg_discharging_schedule).map { |charging, discharging| discharging > 0 ? -discharging : charging }
     @schedules[SchedulesFile::Columns[:EVOccupant].name] = ev_occupant_presence
-    @schedules[SchedulesFile::Columns[:ElectricVehicleCharging].name] = agg_charging_schedule
-    @schedules[SchedulesFile::Columns[:ElectricVehicleDischarging].name] = agg_discharging_schedule
+    @schedules[SchedulesFile::Columns[:ElectricVehicle].name] = combined_schedule
   end
 
   # Get the weekday/weekend schedule fractions for TV plug loads and monthly multipliers for interior lighting, dishwasher, clothes washer/dryer, cooking range, and other/TV plug loads.
