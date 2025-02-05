@@ -7,6 +7,7 @@ __New Features__
   - **Breaking Change**: Detailed performance datapoints must now use `OutdoorTemperature` values of:
     - Heating: 47F, 17F, and 5F (plus an optional user-specified temperature <5F)
     - Cooling: 82F and 95F (plus an optional user-specified temperature >95F)
+- Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 
 __Bugfixes__
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
