@@ -691,23 +691,23 @@ module Schedule
       begin_day_schedule = schedule.getDaySchedules(date_s, date_s)[0]
       end_day_schedule = schedule.getDaySchedules(date_e, date_e)[0]
 
-      outage_days = day_e - day_s
-      if outage_days == 0 # outage is less than 1 calendar day (need 1 outage rule)
+      unavail_days = day_e - day_s
+      if unavail_days == 0 # unavailable period is less than 1 calendar day (need 1 unavailable period rule)
         Model.add_schedule_ruleset_rule(
           schedule,
           start_date: date_s,
           end_date: date_e,
           hourly_values: (0..23).map { |h| (h < period.begin_hour) || (h >= period.end_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
         )
-      else # outage is at least 1 calendar day
-        if period.begin_hour == 0 && period.end_hour == 24 # 1 outage rule
+      else # unavailable period is at least 1 calendar day
+        if period.begin_hour == 0 && period.end_hour == 24 # 1 unavailable period rule
           Model.add_schedule_ruleset_rule(
             schedule,
             start_date: date_s,
             end_date: date_e,
             hourly_values: [value] * 24
           )
-        elsif (period.begin_hour == 0 && period.end_hour != 24) || (period.begin_hour != 0 && period.end_hour == 24) # 2 outage rules
+        elsif (period.begin_hour == 0 && period.end_hour != 24) || (period.begin_hour != 0 && period.end_hour == 24) # 2 unavailable period rules
           if period.begin_hour == 0 && period.end_hour != 24
             # last day
             Model.add_schedule_ruleset_rule(
@@ -741,8 +741,8 @@ module Schedule
               hourly_values: [value] * 24
             )
           end
-        else # 2 or 3 outage rules
-          if outage_days == 1 # 2 outage rules
+        else # 2 or 3 unavailable period rules
+          if unavail_days == 1 # 2 unavailable period rules
             # first day
             Model.add_schedule_ruleset_rule(
               schedule,
@@ -758,7 +758,7 @@ module Schedule
               end_date: date_e,
               hourly_values: (0..23).map { |h| (h >= period.end_hour) ? end_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
             )
-          else # 3 outage rules
+          else # 3 unavailable period rules
             # first day
             Model.add_schedule_ruleset_rule(
               schedule,
