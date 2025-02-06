@@ -1835,6 +1835,13 @@ module Defaults
     # Convert negative values (e.g., -1) to nil as appropriate
     # This is needed to support autosizing in OS-ERI, where the capacities are required inputs
     hpxml_bldg.hvac_systems.each do |hvac_system|
+      if hvac_system.respond_to?(:cooling_detailed_performance_data) && (not hvac_system.cooling_detailed_performance_data.empty?) && (hvac_system.respond_to?(:cooling_capacity) && hvac_system.cooling_capacity.nil?)
+        hvac_system.cooling_capacity = hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.capacity
+      end
+      if hvac_system.respond_to?(:heating_detailed_performance_data) && (not hvac_system.heating_detailed_performance_data.empty?) && (hvac_system.respond_to?(:heating_capacity) && hvac_system.heating_capacity.nil?)
+        hvac_system.heating_capacity = hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.capacity
+      end
+
       if hvac_system.respond_to?(:heating_capacity) && hvac_system.heating_capacity.to_f < 0
         hvac_system.heating_capacity = nil
       end
