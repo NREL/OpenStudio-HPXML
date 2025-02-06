@@ -3219,32 +3219,31 @@ HPXML HVAC Detailed Perf. Data
 Some air-source HVAC system types allow detailed heating/cooling performance data to be provided using the ``CoolingDetailedPerformanceData`` and ``HeatingDetailedPerformanceData`` elements, as described above.
 One source of detailed performance data is `NEEP's Cold Climate Air Source Heat Pump List <https://ashp.neep.org>`_.
 
-Currently detailed performance data can only be provided for variable-speed HVAC systems.
-
 .. _clg_detailed_perf_data:
 
 Detailed Cooling Performance Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For air-source HVAC systems with detailed cooling performance data, pairs of performance datapoints are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
+For air-source HVAC systems with detailed cooling performance data, performance datapoints are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Cooling capacity (or fraction) at the specified outdoor temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes                  Cooling capacity (or fraction) at the specified outdoor temperature
   ``CapacityDescription``                         string                    See [#]_     Yes                  Cooling capacity description
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] Pairs of detailed performance datapoints at outdoor temperatures of 82F and 95F are required.
-         An additional optional pair is allowed at a user-specified temperature greater than 95F.
+  .. [#] Detailed performance datapoints at outdoor temperatures of 82F and 95F are required.
+         An additional optional datapoint is allowed at a user-specified temperature greater than 95F.
          Datapoints at additional outdoor temperatures are not currently supported.
-  .. [#] If Capacity is provided, the nominal capacity (``CoolingCapacity``) must also be set in the parent object.
-  .. [#] CapacityDescription choices are "minimum" and "maximum".
+  .. [#] CapacityDescription choices are "minimum", "nominal", and "maximum".
+         For single stage equipment, one datapoint (using "nominal") must be provided at every outdoor temperature.
+         For two stage equipment, two datapoints (using "minimum" and "nominal") must be provided at every outdoor temperature.
+         For variable speed equipment, three datapoints (using "minimum", "nominal", and "maximum") must be provided at every outdoor temperature.
   .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
 
-In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
 Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
 
 .. _htg_detailed_perf_data:
@@ -3252,26 +3251,27 @@ Note that when detailed cooling performance data is provided, some other inputs 
 Detailed Heating Performance Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For air-source HVAC systems with detailed heating performance data, pairs of performance datapoints are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
+For air-source HVAC systems with detailed heating performance data, performance datapoints are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Heating capacity (or fraction) at the specified outdoor temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes                  Heating capacity (or fraction) at the specified outdoor temperature
   ``CapacityDescription``                         string                    See [#]_     Yes                  Heating capacity description
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] Pairs of detailed performance datapoints at outdoor temperatures of 47F, 17F, and 5F are required.
-         An additional optional pair is allowed at a user-specified temperature less than 5F.
+  .. [#] Detailed performance datapoints at outdoor temperatures of 47F, 17F, and 5F are required.
+         An additional optional datapoint is allowed at a user-specified temperature less than 5F.
          Datapoints at additional outdoor temperatures are not currently supported.
-  .. [#] If Capacity is provided, the nominal capacity (``HeatingCapacity``) must also be set in the parent object.
-  .. [#] CapacityDescription choices are "minimum" and "maximum".
+  .. [#] CapacityDescription choices are "minimum", "nominal", and "maximum".
+         For single stage equipment, one datapoint (using "nominal") must be provided at every outdoor temperature.
+         For two stage equipment, two datapoints (using "minimum" and "nominal") must be provided at every outdoor temperature.
+         For variable speed equipment, three datapoints (using "minimum", "nominal", and "maximum") must be provided at every outdoor temperature.
   .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
 
-In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
-Note that when detailed cooling performance data is provided, some other inputs (like HSPF and HeatingCapacityRetention) are ignored.
+Note that when detailed cooling performance data is provided, some other inputs (like HSPF) are ignored.
 
 .. _geothermal_loops:
 

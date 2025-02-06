@@ -4,9 +4,11 @@ __New Features__
 - HVAC modeling updates:
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional EER or EER2 inputs for central air conditioners/heat pumps and mini-splits.
-  - **Breaking Change**: Detailed performance datapoints must now use `OutdoorTemperature` values of:
-    - Heating: 47F, 17F, and 5F (plus an optional user-specified temperature <5F)
-    - Cooling: 82F and 95F (plus an optional user-specified temperature >95F)
+  - Updates to detailed performance datapoints:
+    - **Breaking Change**: `OutdoorTemperature` values must be 47F, 17F, and 5F (plus an optional user-specified temperature <5F) for heating
+    - **Breaking Change**: `OutdoorTemperature` values must be 82F and 95F (plus an optional user-specified temperature >95F) for cooling
+    - **Breaking Change**: Additional datapoints with `CapacityDescription`="nominal" must be provided for variable speed equipment
+    - Detailed performance datapoints can now be used for single stage and two stage equipment too.
 - Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 
 __Bugfixes__
