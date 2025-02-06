@@ -1776,7 +1776,6 @@ module HVAC
     htg_ap.heat_capacity_ratios = get_heat_capacity_ratios_47F(heating_system)
     set_heat_c_d(heating_system)
 
-    hspf = calc_hspf_from_hspf2(heating_system)
     case heating_system.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
       heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention_17F(heating_system)
@@ -1785,6 +1784,7 @@ module HVAC
         htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton_simple()
         htg_ap.heat_fan_speed_ratios = [1.0]
       else
+        hspf = calc_hspf_from_hspf2(heating_system)
         htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type)
         htg_ap.heat_rated_cops = [0.0353 * hspf**2 + 0.0331 * hspf + 0.9447] # Regression based on inverse model
         htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[0]
@@ -1792,6 +1792,7 @@ module HVAC
       end
 
     when HPXML::HVACCompressorTypeTwoStage
+      hspf = calc_hspf_from_hspf2(heating_system)
       heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention_17F(heating_system)
       htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type)
       htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
