@@ -2997,36 +2997,32 @@ module HVAC
     detailed_performance_data_name = (mode == :clg) ? 'cooling_detailed_performance_data' : 'heating_detailed_performance_data'
     detailed_performance_data = hvac_system.send(detailed_performance_data_name)
     hvac_ap = hvac_system.additional_properties
-    data_array = Array.new(3) { Array.new }
-    detailed_performance_data.sort_by { |dp| dp.outdoor_temperature }.each do |data_point|
-      # Only process min and max capacities at each outdoor drybulb
-      next unless [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionNominal, HPXML::CapacityDescriptionMaximum].include? data_point.capacity_description
 
-      if data_point.capacity_description == HPXML::CapacityDescriptionMinimum
-        data_array[0] << data_point
-      elsif data_point.capacity_description == HPXML::CapacityDescriptionNominal
-        data_array[1] << data_point
-      elsif data_point.capacity_description == HPXML::CapacityDescriptionMaximum
-        data_array[2] << data_point
-      end
+    datapoints_by_speed = { HPXML::CapacityDescriptionMinimum => [],
+                            HPXML::CapacityDescriptionNominal => [],
+                            HPXML::CapacityDescriptionMaximum => [] }
+    detailed_performance_data.sort_by { |dp| dp.outdoor_temperature }.each do |datapoint|
+      next if datapoints_by_speed[datapoint.capacity_description].nil?
+
+      datapoints_by_speed[datapoint.capacity_description] << datapoint
     end
 
     if mode == :clg
       cfm_per_ton = hvac_ap.cool_rated_cfm_per_ton
-      hvac_ap.cooling_performance_data_array = data_array
+      hvac_ap.cooling_datapoints_by_speed = datapoints_by_speed
       hvac_ap.cool_rated_capacities_gross = []
       hvac_ap.cool_rated_capacities_net = []
       hvac_ap.cool_rated_cops = []
     elsif mode == :htg
       cfm_per_ton = hvac_ap.heat_rated_cfm_per_ton
-      hvac_ap.heating_performance_data_array = data_array
+      hvac_ap.heating_datapoints_by_speed = datapoints_by_speed
       hvac_ap.heat_rated_capacities_gross = []
       hvac_ap.heat_rated_capacities_net = []
       hvac_ap.heat_rated_cops = []
     end
 
-    extrapolate_data_points(data_array, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
-    correct_ft_cap_eir(data_array, mode)
+    extrapolate_datapoints(datapoints_by_speed, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+    correct_ft_cap_eir(datapoints_by_speed, mode)
   end
 
   # Converts net (i.e., including fan power) capacities/COPs to gross values (i.e., excluding
@@ -3038,7 +3034,7 @@ module HVAC
   # @param cfm_per_ton [Double] Rated CFM/ton
   # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
   # @return [nil]
-  def self.convert_data_point_net_to_gross(dp, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+  def self.convert_datapoint_net_to_gross(dp, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     hvac_ap = hvac_system.additional_properties
     this_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_ratio = this_cfm / max_rated_fan_cfm
@@ -3054,9 +3050,8 @@ module HVAC
   # - Cooling, Max ODB: Linear from 82F and 95F
   # - Heating, Min ODB: Linear from lowest two temperatures
   # - Heating, Max ODB: Constant (same values as 47F)
-
   #
-  # @param data_array [TODO] TODO
+  # @param datapoints_by_speed [Hash] Map of capacity description => array of detailed performance datapoints
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @param weather_temp [Double] Minimum (for heating) or maximum (for cooling) outdoor drybulb temperature
@@ -3064,23 +3059,22 @@ module HVAC
   # @param cfm_per_ton [Array<Double>] Rated CFM/ton at each speed
   # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
   # @return [nil]
-  def self.extrapolate_data_points(data_array, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+  def self.extrapolate_datapoints(datapoints_by_speed, mode, hp_min_temp, weather_temp, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     # Set of data used for table lookup
-    data_array.each_with_index do |data, speed|
-      capacity_description = data[0].capacity_description
-      user_odbs = data.map { |dp| dp.outdoor_temperature }
+    datapoints_by_speed.each_with_index do |(capacity_description, datapoints), speed|
+      user_odbs = datapoints.map { |dp| dp.outdoor_temperature }
 
       # Calculate gross values for all datapoints
-      data.each do |dp|
-        convert_data_point_net_to_gross(dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+      datapoints.each do |dp|
+        convert_datapoint_net_to_gross(dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
       end
 
       # Ensure we don't create datapoints at ODB temperatures with zero/negative gross capacities or powers
       delta_odb = 1.0 # Use a slightly larger (or smaller) ODB so things don't blow up
-      high_odb_at_zero_power = extrapolate_data_point(data, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :negative) - delta_odb
-      high_odb_at_zero_capacity = extrapolate_data_point(data, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :negative) - delta_odb
-      low_odb_at_zero_power = extrapolate_data_point(data, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :positive) + delta_odb
-      low_odb_at_zero_capacity = extrapolate_data_point(data, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :positive) + delta_odb
+      high_odb_at_zero_power = extrapolate_datapoint(datapoints, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :negative) - delta_odb
+      high_odb_at_zero_capacity = extrapolate_datapoint(datapoints, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :negative) - delta_odb
+      low_odb_at_zero_power = extrapolate_datapoint(datapoints, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :positive) + delta_odb
+      low_odb_at_zero_capacity = extrapolate_datapoint(datapoints, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :positive) + delta_odb
 
       # Determine min/max ODB temperatures to extrapolate to, to cover full range of equipment operation.
       # Note: Since we create the TableLookup object using ExtrapolationMethod='constant', we do not
@@ -3094,8 +3088,8 @@ module HVAC
         end
 
         # Min cooling ODB temperature
-        dp82f = data.find { |dp| dp.outdoor_temperature == 82.0 }
-        dp95f = data.find { |dp| dp.outdoor_temperature == 95.0 }
+        dp82f = datapoints.find { |dp| dp.outdoor_temperature == 82.0 }
+        dp95f = datapoints.find { |dp| dp.outdoor_temperature == 95.0 }
         min_power = 0.5 * dp82f.input_power
         odb_at_min_power = MathTools.interp2(min_power, dp82f.input_power, dp95f.input_power, 82.0, 95.0)
         odb_at_min_power = -999999.0 if dp82f.input_power >= dp95f.input_power # Exclude if power increasing at lower ODB temperatures
@@ -3123,53 +3117,16 @@ module HVAC
         end
         new_dp.outdoor_temperature = target_odb
 
-        new_dp.capacity = extrapolate_data_point(data, capacity_description, :outdoor_temperature, target_odb, :capacity)
-        new_dp.input_power = extrapolate_data_point(data, capacity_description, :outdoor_temperature, target_odb, :input_power)
+        new_dp.capacity = extrapolate_datapoint(datapoints, capacity_description, :outdoor_temperature, target_odb, :capacity)
+        new_dp.input_power = extrapolate_datapoint(datapoints, capacity_description, :outdoor_temperature, target_odb, :input_power)
         new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
-        convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+        convert_datapoint_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
 
-        data << new_dp
+        datapoints << new_dp
       end
     end
 
-    add_data_point_adaptive_step_size(data_array, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
-  end
-
-  # TODO
-  #
-  # @param data [TODO] TODO
-  # @param user_odbs [TODO] TODO
-  # @param property [TODO] TODO
-  # @param find_high [TODO] TODO
-  # @return [TODO] TODO
-  def self.calculate_odb_at_zero_power_or_capacity(data, user_odbs, property, find_high)
-    if find_high
-      odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[-1] }
-      odb_dp2 = data.find { |dp| dp.outdoor_temperature == user_odbs[-2] }
-    else
-      odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[0] }
-      odb_dp2 = data.find { |dp| dp.outdoor_temperature == user_odbs[1] }
-    end
-
-    slope = (odb_dp1.send(property) - odb_dp2.send(property)) / (odb_dp1.outdoor_temperature - odb_dp2.outdoor_temperature)
-
-    # Datapoints don't trend toward zero COP?
-    if (find_high && slope >= 0)
-      return 999999.0
-    elsif (!find_high && slope <= 0)
-      return -999999.0
-    end
-
-    intercept = odb_dp2.send(property) - (slope * odb_dp2.outdoor_temperature)
-    target_odb = -intercept / slope
-
-    # Return a slightly larger (or smaller, for cooling) ODB so things don't blow up
-    delta_odb = 1.0
-    if find_high
-      return target_odb - delta_odb
-    else
-      return target_odb + delta_odb
-    end
+    add_datapoint_adaptive_step_size(datapoints_by_speed, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
   end
 
   # Extrapolates the given performance property for the specified target value and property.
@@ -3181,7 +3138,7 @@ module HVAC
   # @param property [Symbol] The datapoint property to extrapolate (e.g., :capacity, :efficiency_cop, etc.)
   # @param slope_requirement [Symbol] The slope requirement (:positive or :negative)
   # @return [Double] The extrapolated value (F)
-  def self.extrapolate_data_point(datapoints, capacity_description, target_property, target_value, property, slope_requirement = nil)
+  def self.extrapolate_datapoint(datapoints, capacity_description, target_property, target_value, property, slope_requirement = nil)
     datapoints = datapoints.select { |dp| dp.capacity_description == capacity_description }
 
     target_dp = datapoints.find { |dp| dp.send(target_property) == target_value }
@@ -3230,24 +3187,24 @@ module HVAC
   # reasonably reflect the extrapolation of net power/capacity curves without adding too many points and
   # incurring a runtime penalty.
   #
-  # @param data_array [TODO] TODO
+  # @param datapoints_by_speed [Hash] Map of capacity description => array of detailed performance datapoints
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @param cfm_per_ton [Array<Double>] Rated CFM/ton at each speed
   # @param max_rated_fan_cfm [Double] Maximum rated fan flow rate
   # @return [nil]
-  def self.add_data_point_adaptive_step_size(data_array, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
+  def self.add_datapoint_adaptive_step_size(datapoints_by_speed, mode, hvac_system, cfm_per_ton, max_rated_fan_cfm)
     tol = 0.2 # Good balance between runtime performance and accuracy
-    data_array.each_with_index do |data, speed|
-      data_sorted = data.sort_by { |dp| dp.outdoor_temperature }
-      data_sorted.each_with_index do |dp, i|
-        next unless i < (data_sorted.size - 1)
+    datapoints_by_speed.each_with_index do |(_capacity_description, datapoints), speed|
+      datapoints_sorted = datapoints.sort_by { |dp| dp.outdoor_temperature }
+      datapoints_sorted.each_with_index do |dp, i|
+        next unless i < (datapoints_sorted.size - 1)
 
-        dp2 = data_sorted[i + 1]
+        dp2 = datapoints_sorted[i + 1]
         if mode == :clg
-          eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB }.efficiency_cop
+          eir_rated = 1 / datapoints_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB }.efficiency_cop
         else
-          eir_rated = 1 / data_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB }.efficiency_cop
+          eir_rated = 1 / datapoints_sorted.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB }.efficiency_cop
         end
         eir_diff = ((1 / dp2.efficiency_cop) / eir_rated) - ((1 / dp.efficiency_cop) / eir_rated)
         n_pt = (eir_diff.abs / tol).ceil() - 1
@@ -3265,8 +3222,8 @@ module HVAC
           new_dp.outdoor_temperature = dp.outdoor_temperature + Float(j) / (n_pt + 1) * (dp2.outdoor_temperature - dp.outdoor_temperature)
           new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
           new_dp.capacity_description = dp.capacity_description
-          convert_data_point_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
-          data << new_dp
+          convert_datapoint_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+          datapoints << new_dp
         end
       end
     end
@@ -3274,10 +3231,10 @@ module HVAC
 
   # TODO
   #
-  # @param data_array [TODO] TODO
+  # @param datapoints_by_speed [Hash] Map of capacity description => array of detailed performance datapoints
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [nil]
-  def self.correct_ft_cap_eir(data_array, mode)
+  def self.correct_ft_cap_eir(datapoints_by_speed, mode)
     # Add sensitivity to indoor conditions
     # single speed cutler curve coefficients
     if mode == :clg
@@ -3287,9 +3244,11 @@ module HVAC
       rated_t_i = HVAC::AirSourceHeatRatedIDB
       indoor_t = [60.0, rated_t_i, 80.0]
     end
+
     cap_ft_spec_ss, eir_ft_spec_ss = get_resnet_cap_eir_ft_spec(mode)
-    data_array.each do |data|
-      data.each do |dp|
+
+    datapoints_by_speed.each do |_capacity_description, datapoints|
+      datapoints.each do |dp|
         if mode == :clg
           dp.indoor_wetbulb = rated_t_i
         else
@@ -3297,8 +3256,9 @@ module HVAC
         end
       end
     end
+
     # table lookup output values
-    data_array.each do |data|
+    datapoints_by_speed.each do |_capacity_description, datapoints|
       # create a new array to temporarily store expanded data points, to concat after the existing data loop
       array_tmp = Array.new
       indoor_t.each do |t_i|
@@ -3306,9 +3266,10 @@ module HVAC
         next if t_i == rated_t_i
 
         data_tmp = Array.new
-        data.each do |dp|
+        datapoints.each do |dp|
           dp_new = dp.dup
           data_tmp << dp_new
+
           if mode == :clg
             dp_new.indoor_wetbulb = t_i
             # Cooling variations shall be held constant for Tiwb less than 57°F and greater than 72°F, and for Todb less than 75°F
@@ -3317,10 +3278,12 @@ module HVAC
             dp_new.indoor_temperature = t_i
             curve_t_o = dp_new.outdoor_temperature
           end
+
           # capacity FT curve output
           cap_ft_curve_output = MathTools.biquadratic(t_i, curve_t_o, cap_ft_spec_ss)
           cap_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, curve_t_o, cap_ft_spec_ss)
           cap_correction_factor = cap_ft_curve_output / cap_ft_curve_output_rated
+
           # corrected capacity hash, with two temperature independent variables
           dp_new.gross_capacity *= cap_correction_factor
 
@@ -3333,7 +3296,7 @@ module HVAC
         array_tmp << data_tmp
       end
       array_tmp.each do |new_data|
-        data.concat(new_data)
+        datapoints.concat(new_data)
       end
     end
   end
@@ -3371,7 +3334,8 @@ module HVAC
     num_speeds = clg_ap.cool_rated_cfm_per_ton.size
     for i in 0..(num_speeds - 1)
       if not cooling_system.cooling_detailed_performance_data.empty?
-        speed_performance_data = clg_ap.cooling_performance_data_array[i].sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
+        capacity_description = clg_ap.cooling_datapoints_by_speed.keys[i]
+        speed_performance_data = clg_ap.cooling_datapoints_by_speed[capacity_description].sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
         var_wb = { name: 'wet_bulb_temp_in', min: -100, max: 100, values: speed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_wetbulb, 'F', 'C') }.uniq }
         var_db = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: speed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq }
         cap_ft_independent_vars = [var_wb, var_db]
@@ -3520,7 +3484,8 @@ module HVAC
     num_speeds = htg_ap.heat_rated_cfm_per_ton.size
     for i in 0..(num_speeds - 1)
       if not heating_system.heating_detailed_performance_data.empty?
-        speed_performance_data = htg_ap.heating_performance_data_array[i].sort_by { |dp| [dp.indoor_temperature, dp.outdoor_temperature] }
+        capacity_description = htg_ap.heating_datapoints_by_speed.keys[i]
+        speed_performance_data = htg_ap.heating_datapoints_by_speed[capacity_description].sort_by { |dp| [dp.indoor_temperature, dp.outdoor_temperature] }
         var_idb = { name: 'dry_bulb_temp_in', min: -100, max: 100, values: speed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_temperature, 'F', 'C') }.uniq }
         var_odb = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: speed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq }
         cap_ft_independent_vars = [var_idb, var_odb]
