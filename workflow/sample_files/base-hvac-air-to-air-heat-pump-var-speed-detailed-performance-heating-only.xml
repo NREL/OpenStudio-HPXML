@@ -51,6 +51,12 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
+        <extension>
+          <AdditionalProperties>
+            <HeatPump>YORK HMH7</HeatPump>
+            <HeatPumpAHRICert>208613158</HeatPumpAHRICert>
+          </AdditionalProperties>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -365,7 +371,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>47.0</OutdoorTemperature>
-                  <Capacity>37000.0</Capacity>
+                  <Capacity>36000.0</Capacity>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -383,7 +389,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>17.0</OutdoorTemperature>
-                  <Capacity>21000.0</Capacity>
+                  <Capacity>24800.0</Capacity>
                   <CapacityDescription>nominal</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -410,7 +416,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>5.0</OutdoorTemperature>
-                  <Capacity>10000.0</Capacity>
+                  <Capacity>19900.0</Capacity>
                   <CapacityDescription>nominal</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>

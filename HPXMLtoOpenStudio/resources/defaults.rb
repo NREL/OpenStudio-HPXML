@@ -1513,34 +1513,36 @@ module Defaults
 
     hpxml_bldg.windows.each do |window|
       if window.ufactor.nil? || window.shgc.nil?
-        # Frame/Glass provided instead, fill in more defaults as needed
-        if window.glass_type.nil?
-          window.glass_type = HPXML::WindowGlassTypeClear
-          window.glass_type_isdefaulted = true
-        end
-        if window.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(window.frame_type)
-          if window.glass_layers == HPXML::WindowLayersSinglePane
-            window.thermal_break = false
-            window.thermal_break_isdefaulted = true
-          elsif window.glass_layers == HPXML::WindowLayersDoublePane
-            window.thermal_break = true
-            window.thermal_break_isdefaulted = true
+        if window.glass_layers != HPXML::WindowLayersGlassBlock
+          # Frame/Glass provided instead, fill in more defaults as needed
+          if window.glass_type.nil?
+            window.glass_type = HPXML::WindowGlassTypeClear
+            window.glass_type_isdefaulted = true
           end
-        end
-        if window.gas_fill.nil?
-          if window.glass_layers == HPXML::WindowLayersDoublePane
-            if [HPXML::WindowGlassTypeLowE,
-                HPXML::WindowGlassTypeLowEHighSolarGain,
-                HPXML::WindowGlassTypeLowELowSolarGain].include? window.glass_type
+          if window.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(window.frame_type)
+            if window.glass_layers == HPXML::WindowLayersSinglePane
+              window.thermal_break = false
+              window.thermal_break_isdefaulted = true
+            elsif window.glass_layers == HPXML::WindowLayersDoublePane
+              window.thermal_break = true
+              window.thermal_break_isdefaulted = true
+            end
+          end
+          if window.gas_fill.nil?
+            if window.glass_layers == HPXML::WindowLayersDoublePane
+              if [HPXML::WindowGlassTypeLowE,
+                  HPXML::WindowGlassTypeLowEHighSolarGain,
+                  HPXML::WindowGlassTypeLowELowSolarGain].include? window.glass_type
+                window.gas_fill = HPXML::WindowGasArgon
+                window.gas_fill_isdefaulted = true
+              else
+                window.gas_fill = HPXML::WindowGasAir
+                window.gas_fill_isdefaulted = true
+              end
+            elsif window.glass_layers == HPXML::WindowLayersTriplePane
               window.gas_fill = HPXML::WindowGasArgon
               window.gas_fill_isdefaulted = true
-            else
-              window.gas_fill = HPXML::WindowGasAir
-              window.gas_fill_isdefaulted = true
             end
-          elsif window.glass_layers == HPXML::WindowLayersTriplePane
-            window.gas_fill = HPXML::WindowGasArgon
-            window.gas_fill_isdefaulted = true
           end
         end
         # Now lookup U/SHGC based on properties
@@ -1564,7 +1566,11 @@ module Defaults
       end
       if window.interior_shading_factor_winter.nil? || window.interior_shading_factor_summer.nil?
         if window.interior_shading_type.nil?
-          window.interior_shading_type = HPXML::InteriorShadingTypeLightCurtains # ANSI/RESNET/ICC 301-2022
+          if window.glass_layers == HPXML::WindowLayersGlassBlock
+            window.interior_shading_type = HPXML::InteriorShadingTypeNone
+          else
+            window.interior_shading_type = HPXML::InteriorShadingTypeLightCurtains # ANSI/RESNET/ICC 301-2022
+          end
           window.interior_shading_type_isdefaulted = true
         end
         if window.interior_shading_coverage_summer.nil? && window.interior_shading_type != HPXML::InteriorShadingTypeNone
@@ -1714,34 +1720,36 @@ module Defaults
       end
       next unless skylight.ufactor.nil? || skylight.shgc.nil?
 
-      # Frame/Glass provided instead, fill in more defaults as needed
-      if skylight.glass_type.nil?
-        skylight.glass_type = HPXML::WindowGlassTypeClear
-        skylight.glass_type_isdefaulted = true
-      end
-      if skylight.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(skylight.frame_type)
-        if skylight.glass_layers == HPXML::WindowLayersSinglePane
-          skylight.thermal_break = false
-          skylight.thermal_break_isdefaulted = true
-        elsif skylight.glass_layers == HPXML::WindowLayersDoublePane
-          skylight.thermal_break = true
-          skylight.thermal_break_isdefaulted = true
+      if skylight.glass_layers != HPXML::WindowLayersGlassBlock
+        # Frame/Glass provided instead, fill in more defaults as needed
+        if skylight.glass_type.nil?
+          skylight.glass_type = HPXML::WindowGlassTypeClear
+          skylight.glass_type_isdefaulted = true
         end
-      end
-      if skylight.gas_fill.nil?
-        if skylight.glass_layers == HPXML::WindowLayersDoublePane
-          if [HPXML::WindowGlassTypeLowE,
-              HPXML::WindowGlassTypeLowEHighSolarGain,
-              HPXML::WindowGlassTypeLowELowSolarGain].include? skylight.glass_type
+        if skylight.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(skylight.frame_type)
+          if skylight.glass_layers == HPXML::WindowLayersSinglePane
+            skylight.thermal_break = false
+            skylight.thermal_break_isdefaulted = true
+          elsif skylight.glass_layers == HPXML::WindowLayersDoublePane
+            skylight.thermal_break = true
+            skylight.thermal_break_isdefaulted = true
+          end
+        end
+        if skylight.gas_fill.nil?
+          if skylight.glass_layers == HPXML::WindowLayersDoublePane
+            if [HPXML::WindowGlassTypeLowE,
+                HPXML::WindowGlassTypeLowEHighSolarGain,
+                HPXML::WindowGlassTypeLowELowSolarGain].include? skylight.glass_type
+              skylight.gas_fill = HPXML::WindowGasArgon
+              skylight.gas_fill_isdefaulted = true
+            else
+              skylight.gas_fill = HPXML::WindowGasAir
+              skylight.gas_fill_isdefaulted = true
+            end
+          elsif skylight.glass_layers == HPXML::WindowLayersTriplePane
             skylight.gas_fill = HPXML::WindowGasArgon
             skylight.gas_fill_isdefaulted = true
-          else
-            skylight.gas_fill = HPXML::WindowGasAir
-            skylight.gas_fill_isdefaulted = true
           end
-        elsif skylight.glass_layers == HPXML::WindowLayersTriplePane
-          skylight.gas_fill = HPXML::WindowGasArgon
-          skylight.gas_fill_isdefaulted = true
         end
       end
       # Now lookup U/SHGC based on properties
@@ -2385,56 +2393,55 @@ module Defaults
       next unless [HPXML::HVACTypeCentralAirConditioner,
                    HPXML::HVACTypeMiniSplitAirConditioner,
                    HPXML::HVACTypeHeatPumpAirToAir,
-                   HPXML::HVACTypeHeatPumpMiniSplit].include? system_type
+                   HPXML::HVACTypeHeatPumpMiniSplit,
+                   HPXML::HVACTypeHeatPumpPTHP,
+                   HPXML::HVACTypeHeatPumpRoom].include? system_type
 
-      next unless hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      if hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
 
-      hvac_ap = hvac_system.additional_properties
-      if hvac_system.cooling_detailed_performance_data.empty?
-        HVAC.set_cool_detailed_performance_data(hvac_system)
-      else
-        # process capacity fraction of nominal
-        hvac_system.cooling_detailed_performance_data.each do |dp|
-          next unless dp.capacity.nil?
-
-          dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.cooling_capacity).round(3)
-          dp.capacity_isdefaulted = true
-        end
-
-        # override some properties based on detailed performance data
-        cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
-        cool_max_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
-        cool_min_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
-        hvac_ap.cool_capacity_ratios = [cool_min_capacity / cool_rated_capacity, 1.0, cool_max_capacity / cool_rated_capacity]
-        hvac_ap.cool_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.cool_capacity_ratios, hvac_ap.cool_rated_cfm_per_ton, hvac_ap.cool_rated_airflow_rate)
-      end
-      if is_hp
-        if hvac_system.heating_detailed_performance_data.empty?
-          set_heating_capacity_17F(hvac_system)
-          HVAC.set_heat_detailed_performance_data(hvac_system)
+        hvac_ap = hvac_system.additional_properties
+        if hvac_system.cooling_detailed_performance_data.empty?
+          HVAC.set_cool_detailed_performance_data(hvac_system)
         else
           # process capacity fraction of nominal
-          hvac_system.heating_detailed_performance_data.each do |dp|
+          hvac_system.cooling_detailed_performance_data.each do |dp|
             next unless dp.capacity.nil?
 
-            dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.heating_capacity).round(3)
+            dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.cooling_capacity).round(3)
             dp.capacity_isdefaulted = true
           end
 
-          # FIXME: What if user provides capacity17F and it's different from the value at detailed performance data at 17F?
-          # The same question for capacity47F, Remove the HeatingCapacity17F and HeatingCapacity/CoolingCapacity at top level?
-          if hvac_system.heating_capacity_17F.nil?
-            rated_capacity_17 = hvac_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
-            hvac_system.heating_capacity_17F = rated_capacity_17
-            hvac_system.heating_capacity_17F_isdefaulted = true
-          end
           # override some properties based on detailed performance data
-          heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
-          heat_max_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
-          heat_min_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
-          hvac_ap.heat_capacity_ratios = [heat_min_capacity / heat_rated_capacity, 1.0, heat_max_capacity / heat_rated_capacity]
-          hvac_ap.heat_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.heat_capacity_ratios, hvac_ap.heat_rated_cfm_per_ton, hvac_ap.heat_rated_airflow_rate)
+          cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
+          cool_max_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
+          cool_min_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
+          hvac_ap.cool_capacity_ratios = [cool_min_capacity / cool_rated_capacity, 1.0, cool_max_capacity / cool_rated_capacity]
+          hvac_ap.cool_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.cool_capacity_ratios, hvac_ap.cool_rated_cfm_per_ton, hvac_ap.cool_rated_airflow_rate)
         end
+        if is_hp
+          if hvac_system.heating_detailed_performance_data.empty?
+            set_heating_capacity_17F(hvac_system)
+            HVAC.set_heat_detailed_performance_data(hvac_system)
+          else
+            # process capacity fraction of nominal
+            hvac_system.heating_detailed_performance_data.each do |dp|
+              next unless dp.capacity.nil?
+
+              dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.heating_capacity).round(3)
+              dp.capacity_isdefaulted = true
+            end
+            set_heating_capacity_17F(hvac_system)
+
+            # override some properties based on detailed performance data
+            heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
+            heat_max_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
+            heat_min_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
+            hvac_ap.heat_capacity_ratios = [heat_min_capacity / heat_rated_capacity, 1.0, heat_max_capacity / heat_rated_capacity]
+            hvac_ap.heat_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.heat_capacity_ratios, hvac_ap.heat_rated_cfm_per_ton, hvac_ap.heat_rated_airflow_rate)
+          end
+        end
+      else
+        set_heating_capacity_17F(hvac_system) if is_hp
       end
     end
   end
@@ -2446,8 +2453,13 @@ module Defaults
   def self.set_heating_capacity_17F(heat_pump)
     return unless heat_pump.heating_capacity_17F.nil?
 
-    _retention_temp, retention_fraction_17F = HVAC.get_heating_capacity_retention_17F(heat_pump)
-    heat_pump.heating_capacity_17F = heat_pump.heating_capacity * retention_fraction_17F
+    if not heat_pump.heating_detailed_performance_data.empty?
+      rated_capacity_17 = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
+      heat_pump.heating_capacity_17F = rated_capacity_17
+    else
+      _retention_temp, retention_fraction_17F = HVAC.get_heating_capacity_retention_17F(heat_pump)
+      heat_pump.heating_capacity_17F = heat_pump.heating_capacity * retention_fraction_17F
+    end
     heat_pump.heating_capacity_17F_isdefaulted = true
     heat_pump.heating_capacity_retention_fraction = nil
     heat_pump.heating_capacity_retention_temp = nil
