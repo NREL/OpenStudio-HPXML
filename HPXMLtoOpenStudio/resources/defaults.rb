@@ -2459,7 +2459,7 @@ module Defaults
       heat_pump.heating_capacity_17F = rated_capacity_17
     else
       _retention_temp, retention_fraction_17F = HVAC.get_heating_capacity_retention_17F(heat_pump)
-      heat_pump.heating_capacity_17F = heat_pump.heating_capacity * retention_fraction_17F
+      heat_pump.heating_capacity_17F = (heat_pump.heating_capacity * retention_fraction_17F).round(1)
     end
     heat_pump.heating_capacity_17F_isdefaulted = true
     heat_pump.heating_capacity_retention_fraction = nil
