@@ -245,8 +245,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'missing-attached-to-space-wall' => ['Expected 1 element(s) for xpath: AttachedToSpace'],
                             'missing-attached-to-space-slab' => ['Expected 1 element(s) for xpath: AttachedToSpace'],
                             'missing-attached-to-zone' => ['Expected 1 element(s) for xpath: AttachedToZone'],
-                            'missing-capacity-detailed-performance' => ['Expected 1 element(s) for xpath: ../../../HeatingCapacity',
-                                                                        'Expected 1 element(s) for xpath: ../../../CoolingCapacity'],
                             'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: CFISControls/SupplementalFan'],
                             'missing-distribution-cfa-served' => ['Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts2"]'],
                             'missing-duct-area' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "Ducts2"]'],
@@ -771,10 +769,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'missing-attached-to-zone'
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.hvac_systems[0].attached_to_zone_idref = nil
-      when 'missing-capacity-detailed-performance'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml')
-        hpxml_bldg.heat_pumps[0].cooling_capacity = nil
-        hpxml_bldg.heat_pumps[0].heating_capacity = nil
       when 'missing-cfis-supplemental-fan'
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
         hpxml_bldg.ventilation_fans[1].delete

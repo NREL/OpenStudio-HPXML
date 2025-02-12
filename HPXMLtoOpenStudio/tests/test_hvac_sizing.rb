@@ -1053,20 +1053,18 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       hpxml_bldg.header.allow_increased_fixed_capacities = allow_increased_fixed_capacities
       htg_capacities_detailed = []
       clg_capacities_detailed = []
-      hpxml_bldg.heat_pumps[0].heating_capacity /= 10.0
       hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.each do |dp|
         dp.capacity /= 10.0
         htg_capacities_detailed << dp.capacity
       end
       hpxml_bldg.heat_pumps[0].backup_heating_capacity /= 10.0
-      hpxml_bldg.heat_pumps[0].cooling_capacity /= 10.0
       hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.each do |dp|
         dp.capacity /= 10.0
         clg_capacities_detailed << dp.capacity
       end
-      htg_cap = hpxml_bldg.heat_pumps[0].heating_capacity
+      htg_cap = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
       htg_bak_cap = hpxml_bldg.heat_pumps[0].backup_heating_capacity
-      clg_cap = hpxml_bldg.heat_pumps[0].cooling_capacity
+      clg_cap = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
       if allow_increased_fixed_capacities
