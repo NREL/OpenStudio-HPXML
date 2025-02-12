@@ -1165,6 +1165,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'emissions-wrong-rows' => ['Emissions File has invalid number of rows'],
                             'geothermal-loop-multiple-attached-hps' => ["Multiple heat pumps found attached to geothermal loop 'GeothermalLoop1'."],
                             'heat-pump-backup-system-load-fraction' => ['Heat pump backup system cannot have a fraction heat load served specified.'],
+                            'hvac-detailed-performance-inconsistent-capacities' => ['Expected ../../../HeatingCapacity to be equal to ../Capacity',
+                                                                                    'Expected ../../../HeatingCapacity17F to be equal to ../../PerformanceDataPoint[OutdoorTemperature=17 and CapacityDescription="nominal"]/Capacity',
+                                                                                    'Expected ../../../CoolingCapacity to be equal to ../Capacity'],
                             'hvac-cooling-detailed-performance-incomplete-pair' => ['Cooling detailed performance data for outdoor temperature = 105.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
                             'hvac-cooling-detailed-performance-invalid-data' => ['Cooling detailed performance data for outdoor temperature = 82.0 is invalid; Power (capacity / COP) at minimum capacity must be less than power at maximum capacity.',
                                                                                  'Cooling detailed performance data for outdoor temperature = 95.0 is invalid; Maximum capacity must be greater than minimum capacity.'],
@@ -1357,6 +1360,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'heat-pump-switchover-temp-elec-backup'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.heat_pumps[0].backup_heating_switchover_temp = 35.0
+      when 'hvac-detailed-performance-inconsistent-capacities'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
+        hpxml_bldg.heat_pumps[0].heating_capacity = 10000
+        hpxml_bldg.heat_pumps[0].cooling_capacity = 10000
+        hpxml_bldg.heat_pumps[0].heating_capacity_17F = 1000
       when 'hvac-cooling-detailed-performance-incomplete-pair'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
         hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.add(
