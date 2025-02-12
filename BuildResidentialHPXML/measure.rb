@@ -750,34 +750,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::WallTypeWoodStud)
     args << arg
 
-    wall_siding_type_choices = OpenStudio::StringVector.new
-    wall_siding_type_choices << HPXML::SidingTypeAluminum
-    wall_siding_type_choices << HPXML::SidingTypeAsbestos
-    wall_siding_type_choices << HPXML::SidingTypeBrick
-    wall_siding_type_choices << HPXML::SidingTypeCompositeShingle
-    wall_siding_type_choices << HPXML::SidingTypeFiberCement
-    wall_siding_type_choices << HPXML::SidingTypeMasonite
-    wall_siding_type_choices << HPXML::SidingTypeNone
-    wall_siding_type_choices << HPXML::SidingTypeStucco
-    wall_siding_type_choices << HPXML::SidingTypeSyntheticStucco
-    wall_siding_type_choices << HPXML::SidingTypeVinyl
-    wall_siding_type_choices << HPXML::SidingTypeWood
+    enclosure_wall_siding_choices = get_option_names('wall_siding.tsv')
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('wall_siding_type', wall_siding_type_choices, false)
-    arg.setDisplayName('Wall: Siding Type')
-    arg.setDescription("The siding type of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-walls'>HPXML Walls</a>) is used.")
-    args << arg
-
-    color_choices = OpenStudio::StringVector.new
-    color_choices << HPXML::ColorDark
-    color_choices << HPXML::ColorLight
-    color_choices << HPXML::ColorMedium
-    color_choices << HPXML::ColorMediumDark
-    color_choices << HPXML::ColorReflective
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('wall_color', color_choices, false)
-    arg.setDisplayName('Wall: Color')
-    arg.setDescription("The color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-walls'>HPXML Walls</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall_siding', enclosure_wall_siding_choices, false)
+    arg.setDisplayName('Enclosure: Wall Siding')
+    arg.setDescription("The siding type/color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-walls'>HPXML Walls</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('wall_assembly_r', true)
@@ -4925,8 +4902,6 @@ module HPXMLFile
       args[:geometry_roof_pitch] = 0.0
     end
 
-    get_option_properties(args, 'roof_material.tsv', args[:enclosure_roof_material])
-
     sorted_surfaces.each do |surface|
       next if surface.outsideBoundaryCondition != EPlus::BoundaryConditionOutdoors
       next if surface.surfaceType != EPlus::SurfaceTypeRoofCeiling
@@ -4939,6 +4914,8 @@ module HPXMLFile
       else
         azimuth = Geometry.get_surface_azimuth(surface, args[:geometry_unit_orientation])
       end
+
+      get_option_properties(args, 'roof_material.tsv', args[:enclosure_roof_material])
 
       hpxml_bldg.roofs.add(id: "Roof#{hpxml_bldg.roofs.size + 1}",
                            interior_adjacent_to: Geometry.get_surface_adjacent_to(surface),
@@ -4997,6 +4974,8 @@ module HPXMLFile
           exterior_adjacent_to = Geometry.get_surface_adjacent_to(adjacent_surface)
         end
       end
+
+      get_option_properties(args, 'wall_siding.tsv', args[:enclosure_wall_siding])
 
       if exterior_adjacent_to == HPXML::LocationOutside
         siding = args[:wall_siding_type]
@@ -5068,6 +5047,8 @@ module HPXMLFile
       if attic_locations.include? interior_adjacent_to
         wall_type = HPXML::WallTypeWoodStud
       end
+
+      get_option_properties(args, 'wall_siding.tsv', args[:enclosure_wall_siding])
 
       if exterior_adjacent_to == HPXML::LocationOutside && (not args[:wall_siding_type].nil?)
         if (attic_locations.include? interior_adjacent_to) && (args[:wall_siding_type] == HPXML::SidingTypeNone)
