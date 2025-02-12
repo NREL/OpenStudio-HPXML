@@ -211,9 +211,9 @@ base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xm
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml,1.0,3.0,0.0,1354.7,998.0,11171.5,2563.5,3700.7,3421.8,3700.7,22.974,18.37,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml,1.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,3812.8,3455.3,3812.8,30.34,16.13,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml,1.0,3.0,0.0,1354.7,998.0,11171.5,2563.5,3710.3,3479.9,3710.3,26.641,18.37,0.0
-base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,5429.3,3847.5,5429.3,24.861,18.133,0.0
+base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,5429.2,3847.4,5429.2,24.861,18.133,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-heating-only.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,5292.9,3314.8,5292.9,24.948,18.159,0.0
-base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,5429.3,3847.5,5429.3,24.861,18.133,0.0
+base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,5429.2,3847.4,5429.2,24.861,18.133,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,5207.4,3656.6,5207.4,24.671,18.034,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,162.5,0.0,0.0,1354.7,998.0,11171.7,2563.6,16987.7,4990.3,16987.7,61.36,17.91,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,32.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,6526.2,3701.6,6526.2,27.696,18.358,0.0
@@ -233,7 +233,7 @@ base-hvac-central-ac-only-1-speed-autosize-factor.xml,0.0,0.0,0.0,1354.7,998.0,1
 base-hvac-central-ac-only-1-speed-seer2.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3568.3,3568.3,0.0,18.449,0.0
 base-hvac-central-ac-only-1-speed.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3573.1,3573.1,0.0,18.449,0.0
 base-hvac-central-ac-only-2-speed.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3103.8,3103.8,0.0,19.005,0.0
-base-hvac-central-ac-only-var-speed-detailed-performance-autosize.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1943.4,3882.3,3882.3,0.0,18.618,0.0
+base-hvac-central-ac-only-var-speed-detailed-performance-autosize.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1943.4,3882.2,3882.2,0.0,18.618,0.0
 base-hvac-central-ac-only-var-speed-detailed-performance.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1955.2,3448.4,3448.4,0.0,17.784,0.0
 base-hvac-central-ac-only-var-speed-max-power-ratio-schedule.xml,0.0,4.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3666.0,3666.0,0.0,22.27,0.0
 base-hvac-central-ac-only-var-speed.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3113.9,3113.9,0.0,18.617,0.0
@@ -295,7 +295,7 @@ base-hvac-install-quality-ground-to-air-heat-pump.xml,0.0,0.0,0.0,1354.7,998.0,1
 base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,3070.4,3070.4,0.0,14.221,0.0
 base-hvac-install-quality-mini-split-heat-pump-ducted.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,4975.0,3099.7,4975.0,19.419,14.241,0.0
 base-hvac-mini-split-air-conditioner-only-ducted.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,2700.0,2700.0,0.0,14.047,0.0
-base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance-autosize.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1936.0,2581.7,2581.7,0.0,11.832,0.0
+base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance-autosize.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1936.0,2580.4,2580.4,0.0,11.827,0.0
 base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1955.2,2654.9,2654.9,0.0,11.825,0.0
 base-hvac-mini-split-air-conditioner-only-ductless.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1945.2,2512.5,2512.5,0.0,11.826,0.0
 base-hvac-mini-split-heat-pump-ducted-cooling-only.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1955.2,2562.6,2562.6,0.0,13.894,0.0
