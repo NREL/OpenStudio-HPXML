@@ -980,8 +980,6 @@ class SchedulesFile
   # periods CSV (e.g., heating), and/or C) EnergyPlus-specific schedules (e.g., battery_charging).
   Columns = {
     Occupants: Column.new('occupants', true, true, :frac),
-    EVOccupant: Column.new('ev_occupant', true, false, :int),
-    PresentOccupants: Column.new('present_occupants', true, false, :int),
     LightingInterior: Column.new('lighting_interior', true, true, :frac),
     LightingExterior: Column.new('lighting_exterior', true, false, :frac),
     LightingGarage: Column.new('lighting_garage', true, true, :frac),
@@ -1010,7 +1008,9 @@ class SchedulesFile
     HotWaterFixtures: Column.new('hot_water_fixtures', true, true, :frac),
     HotWaterRecirculationPump: Column.new('hot_water_recirculation_pump', true, false, :frac),
     GeneralWaterUse: Column.new('general_water_use', true, false, :frac),
-    Sleeping: Column.new('sleeping', false, false, nil),
+    Sleeping: Column.new('sleeping', false, false, nil), # only used to debug stochastic schedule generation
+    PresentOccupants: Column.new('present_occupants', false, false, :int), # only used to debug stochastic schedule generation
+    EVOccupant: Column.new('ev_occupant', false, false, nil), # only used to debug stochastic schedule generation
     HeatingSetpoint: Column.new('heating_setpoint', false, false, :setpoint),
     CoolingSetpoint: Column.new('cooling_setpoint', false, false, :setpoint),
     WaterHeaterSetpoint: Column.new('water_heater_setpoint', false, false, :setpoint),
@@ -1046,7 +1046,6 @@ class SchedulesFile
     return if schedules_paths.empty?
 
     @year = year
-    @runner = runner
     import(schedules_paths)
     create_battery_charging_discharging_schedules
     expand_schedules
@@ -1089,7 +1088,6 @@ class SchedulesFile
   def import(schedules_paths)
     num_hrs_in_year = Calendar.num_hours_in_year(@year)
     @schedules = {}
-    col2path = {}
     schedules_paths.each do |schedules_path|
       # Note: We don't use the CSV library here because it's slow for large files
       columns = File.readlines(schedules_path).map(&:strip).map { |r| r.split(',') }.transpose
@@ -1143,7 +1141,6 @@ class SchedulesFile
         end
 
         @schedules[col_name] = values
-        col2path[col_name] = schedules_path
       end
     end
   end
