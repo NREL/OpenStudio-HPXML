@@ -1763,8 +1763,8 @@
   <sch:pattern>
     <sch:title>[HeatingDetailedPerformanceDataPointCapacity17F]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:HeatingDetailedPerformanceData/h:PerformanceDataPoint[number(h:OutdoorTemperature)=17 and h:CapacityDescription="nominal"]'>
-      <sch:assert role='ERROR' test='(number(../../h:HeatingCapacity) &gt;= 0.99 * number(h:Capacity) or not (../../h:HeatingCapacity17F)) or not (h:Capacity)'>Expected ../../HeatingCapacity17F to be equal to Capacity</sch:assert>
-      <sch:assert role='ERROR' test='(number(../../h:HeatingCapacity) &lt;= 1.01 * number(h:Capacity) or not (../../h:HeatingCapacity17F)) or not (h:Capacity)'>Expected ../../HeatingCapacity17F to be equal to Capacity</sch:assert>
+      <sch:assert role='ERROR' test='(number(../../h:HeatingCapacity17F) &gt;= 0.99 * number(h:Capacity) or not (../../h:HeatingCapacity17F)) or not (h:Capacity)'>Expected ../../HeatingCapacity17F to be equal to Capacity</sch:assert>
+      <sch:assert role='ERROR' test='(number(../../h:HeatingCapacity17F) &lt;= 1.01 * number(h:Capacity) or not (../../h:HeatingCapacity17F)) or not (h:Capacity)'>Expected ../../HeatingCapacity17F to be equal to Capacity</sch:assert>
     </sch:rule>
   </sch:pattern>
 
