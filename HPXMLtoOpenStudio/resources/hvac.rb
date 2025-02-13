@@ -1762,7 +1762,7 @@ module HVAC
     # max EIR@95F / max EIR@82F = max COP@82F / max COP@95F
     max_eir_maint_95 = 1.326
     max_cop_82 = max_cop_95 * max_eir_maint_95
-    nominal_cop_82 = min_cop_82 + ((nominal_cop_95 - min_cop_95) / (max_cop_95 - min_cop_95) * (max_cop_82 - min_cop_82))
+    nominal_cop_82 = calc_nominal_speed_property_with_other_datapoints(min_cop_82, max_cop_82, nominal_cop_95, min_cop_95, max_cop_95)
     return [[min_cop_95, nominal_cop_95, max_cop_95], [min_cop_82, nominal_cop_82, max_cop_82]]
   end
 
@@ -1948,7 +1948,7 @@ module HVAC
     max_capacity_82 = max_capacity_95 / max_cap_maint_95
     min_capacity_82 = min_capacity_95 / min_cap_maint_95
     if cooling_system.cooling_capacity > 0.0
-      nominal_capacity_82 = min_capacity_82 + ((nominal_capacity_95 - min_capacity_95) / (max_capacity_95 - min_capacity_95) * (max_capacity_82 - min_capacity_82))
+      nominal_capacity_82 = calc_nominal_speed_property_with_other_datapoints(min_capacity_82, max_capacity_82, nominal_capacity_95, min_capacity_95, max_capacity_95)
     else
       nominal_capacity_82 = 0.0
     end
@@ -1992,6 +1992,18 @@ module HVAC
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 82,
                                   isdefaulted: true)
+  end
+
+  # Returns the nominal speed property(capacity or cop) calculated with another temperature with nominal speed data points
+  #
+  # @param min_target_property [Double] The minimum property value at target temperature
+  # @param max_target_property [Double] The maximum property value at target temperature
+  # @param nom_other_dp_property [Double] The nominal property value at another temperature
+  # @param min_other_dp_property [Double] The minimum property value at another temperature
+  # @param max_other_dp_property [Double] The maximum property value at another temperature
+  # @return [Double] The nominal speed property(capacity or cop)
+  def self.calc_nominal_speed_property_with_other_datapoints(min_target_property, max_target_property, nom_other_dp_property, min_other_dp_property, max_other_dp_property)
+    return min_target_property + ((nom_other_dp_property - min_other_dp_property) / (max_other_dp_property - min_other_dp_property) * (max_target_property - min_target_property))
   end
 
   # Returns the rated speed net COP value for the HVAC system at 47F, using table interpolation(based on HSPF2, Capacity maintenance at 17F) from RESNET Addendum.

@@ -417,15 +417,6 @@
                 <PerformanceDataPoint>
                   <OutdoorTemperature>5.0</OutdoorTemperature>
                   <Capacity>19900.0</Capacity>
-                  <CapacityDescription>nominal</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>1.8</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>5.0</OutdoorTemperature>
-                  <Capacity>19900.0</Capacity>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>

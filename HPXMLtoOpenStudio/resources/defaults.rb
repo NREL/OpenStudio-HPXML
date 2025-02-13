@@ -2404,14 +2404,8 @@ module Defaults
         if hvac_system.cooling_detailed_performance_data.empty?
           HVAC.set_cool_detailed_performance_data(hvac_system)
         else
-          # process capacity fraction of nominal
-          hvac_system.cooling_detailed_performance_data.each do |dp|
-            next unless dp.capacity.nil?
-
-            dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.cooling_capacity).round
-            dp.capacity_isdefaulted = true
-          end
-
+          detailed_performance_data = hvac_system.cooling_detailed_performance_data
+          expand_detailed_performance_data(detailed_performance_data, hvac_system.cooling_capacity)
           # override some properties based on detailed performance data
           cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
           cool_max_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
@@ -2424,13 +2418,8 @@ module Defaults
             set_heating_capacity_17F(hvac_system)
             HVAC.set_heat_detailed_performance_data(hvac_system)
           else
-            # process capacity fraction of nominal
-            hvac_system.heating_detailed_performance_data.each do |dp|
-              next unless dp.capacity.nil?
-
-              dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.heating_capacity).round
-              dp.capacity_isdefaulted = true
-            end
+            detailed_performance_data = hvac_system.heating_detailed_performance_data
+            expand_detailed_performance_data(detailed_performance_data, hvac_system.heating_capacity)
             set_heating_capacity_17F(hvac_system)
 
             # override some properties based on detailed performance data
@@ -2443,6 +2432,50 @@ module Defaults
         end
       else
         set_heating_capacity_17F(hvac_system) if is_hp
+      end
+    end
+  end
+
+  # This method assigns default values for omitted optional inputs in detailed performance data by:
+  # 1. Assigns capacities with fractions.
+  # 2. Add the nominal speed capacity and cop calculated with other temperature with nominal speed data
+  # Currently these objects are only used for variable-speed air source systems.
+  #
+  # @param detailed_performance_data [HPXML::HeatingDetailedPerformanceData or HPXML::CoolingDetailedPerformanceData] HPXML HeatingDetailedPerformanceData or CoolingDetailedPerformanceData array that contains HeatingPerformanceDataPoint or CoolingPerformanceDataPoint
+  # @param nominal_capacity [Double] Nominal heating/cooling capacity
+  # @return [nil]
+  def self.expand_detailed_performance_data(detailed_performance_data, nominal_capacity)
+    # process capacity fraction of nominal
+    detailed_performance_data.each do |dp|
+      next unless dp.capacity.nil?
+
+      dp.capacity = (dp.capacity_fraction_of_nominal * nominal_capacity).round
+      dp.capacity_isdefaulted = true
+    end
+
+    all_outdoor_odbs = detailed_performance_data.map { |dp| dp.outdoor_temperature }.uniq.sort
+    # All temperatures with nominal speed
+    nom_odbs = all_outdoor_odbs.select { |odb| not detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.nil? }
+    return if nom_odbs.size == all_outdoor_odbs.size # all data specified
+
+    all_outdoor_odbs.each do |odb|
+      # no nominal speed data point
+      next unless detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.nil?
+
+      neighbor_temp = nom_odbs.min_by { |x| (odb - x).abs }
+      detailed_performance_data.add(capacity_description: HPXML::CapacityDescriptionNominal,
+                                    outdoor_temperature: odb,
+                                    isdefaulted: true)
+      added_dp = detailed_performance_data[-1]
+      [:capacity, :efficiency_cop].each do |property|
+        round_digit = (property == :capacity ? 1 : 4)
+        neighbor_property_max = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.send(property)
+        neighbor_property_nom = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.send(property)
+        neighbor_property_min = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.send(property)
+        target_property_max = detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.send(property)
+        target_property_min = detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.send(property)
+        nominal_property_odb = HVAC.calc_nominal_speed_property_with_other_datapoints(target_property_min, target_property_max, neighbor_property_nom, neighbor_property_min, neighbor_property_max).round(round_digit)
+        added_dp.send("#{property}=", nominal_property_odb)
       end
     end
   end

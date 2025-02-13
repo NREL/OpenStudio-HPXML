@@ -3868,14 +3868,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     if hvac_perf_data_heating_args_initialized.uniq.size == 1 && hvac_perf_data_heating_args_initialized.uniq[0]
       heating_data_points_lengths = [args[:hvac_perf_data_heating_outdoor_temperatures].count(','),
                                      args[:hvac_perf_data_heating_min_speed_capacities].count(','),
-                                     args[:hvac_perf_data_heating_nom_speed_capacities].count(','),
                                      args[:hvac_perf_data_heating_max_speed_capacities].count(','),
                                      args[:hvac_perf_data_heating_min_speed_cops].count(','),
-                                     args[:hvac_perf_data_heating_nom_speed_cops].count(','),
                                      args[:hvac_perf_data_heating_max_speed_cops].count(',')]
 
       error = (heating_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed heating performance data arguments does not have enough comma-separated elements specified.' if error
+
+      heating_nom_data_points_lengths = [args[:hvac_perf_data_heating_nom_speed_capacities].count(','),
+                                         args[:hvac_perf_data_heating_nom_speed_cops].count(',')]
+      error = (heating_nom_data_points_lengths.uniq.size != 1)
+      errors << 'Normalized speed detailed heating performance data does not specify enough properties.' if error
     end
 
     hvac_perf_data_cooling_args_initialized = [!args[:hvac_perf_data_cooling_outdoor_temperatures].nil?,
@@ -3891,14 +3894,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     if hvac_perf_data_cooling_args_initialized.uniq.size == 1 && hvac_perf_data_cooling_args_initialized.uniq[0]
       cooling_data_points_lengths = [args[:hvac_perf_data_cooling_outdoor_temperatures].count(','),
                                      args[:hvac_perf_data_cooling_min_speed_capacities].count(','),
-                                     args[:hvac_perf_data_cooling_nom_speed_capacities].count(','),
                                      args[:hvac_perf_data_cooling_max_speed_capacities].count(','),
                                      args[:hvac_perf_data_cooling_min_speed_cops].count(','),
-                                     args[:hvac_perf_data_cooling_nom_speed_cops].count(','),
                                      args[:hvac_perf_data_cooling_max_speed_cops].count(',')]
 
       error = (cooling_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
+
+      cooling_nom_data_points_lengths = [args[:hvac_perf_data_cooling_nom_speed_capacities].count(','),
+                                         args[:hvac_perf_data_cooling_nom_speed_cops].count(',')]
+      error = (cooling_nom_data_points_lengths.uniq.size != 1)
+      errors << 'Normalized speed detailed cooling performance data does not specify enough properties.' if error
     end
 
     emissions_args_initialized = [!args[:emissions_scenario_names].nil?,
@@ -5817,11 +5823,11 @@ module HPXMLFile
         case hvac_perf_data_capacity_type
         when 'Absolute capacities'
           min_speed_capacity = Float(min_speed_cap_or_frac)
-          nom_speed_capacity = Float(nom_speed_cap_or_frac)
+          nom_speed_capacity = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
           max_speed_capacity = Float(max_speed_cap_or_frac)
         when 'Normalized capacity fractions'
           min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
-          nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac)
+          nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
           max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
         end
 
@@ -5830,11 +5836,13 @@ module HPXMLFile
                           capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMinimum,
                           efficiency_cop: Float(min_speed_cop))
-        clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
-                          capacity: nom_speed_capacity,
-                          capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
-                          capacity_description: HPXML::CapacityDescriptionNominal,
-                          efficiency_cop: Float(nom_speed_cop))
+        if not nom_speed_capacity.nil?
+          clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                            capacity: nom_speed_capacity,
+                            capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
+                            capacity_description: HPXML::CapacityDescriptionNominal,
+                            efficiency_cop: (nom_speed_cop.nil? ? nil : Float(nom_speed_cop)))
+        end
         clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                           capacity: max_speed_capacity,
                           capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
@@ -5985,11 +5993,11 @@ module HPXMLFile
           case hvac_perf_data_capacity_type
           when 'Absolute capacities'
             min_speed_capacity = Float(min_speed_cap_or_frac)
-            nom_speed_capacity = Float(nom_speed_cap_or_frac)
+            nom_speed_capacity = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
             max_speed_capacity = Float(max_speed_cap_or_frac)
           when 'Normalized capacity fractions'
             min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
-            nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac)
+            nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
             max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
           end
 
@@ -5998,11 +6006,13 @@ module HPXMLFile
                             capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                             capacity_description: HPXML::CapacityDescriptionMinimum,
                             efficiency_cop: Float(min_speed_cop))
-          htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
-                            capacity: nom_speed_capacity,
-                            capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
-                            capacity_description: HPXML::CapacityDescriptionNominal,
-                            efficiency_cop: Float(nom_speed_cop))
+          if not nom_speed_capacity.nil?
+            htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                              capacity: nom_speed_capacity,
+                              capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
+                              capacity_description: HPXML::CapacityDescriptionNominal,
+                              efficiency_cop: (nom_speed_cop.nil? ? nil : Float(nom_speed_cop)))
+          end
           htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                             capacity: max_speed_capacity,
                             capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
@@ -6034,11 +6044,11 @@ module HPXMLFile
           case hvac_perf_data_capacity_type
           when 'Absolute capacities'
             min_speed_capacity = Float(min_speed_cap_or_frac)
-            nom_speed_capacity = Float(nom_speed_cap_or_frac)
+            nom_speed_capacity = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
             max_speed_capacity = Float(max_speed_cap_or_frac)
           when 'Normalized capacity fractions'
             min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
-            nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac)
+            nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
             max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
           end
 
@@ -6047,11 +6057,13 @@ module HPXMLFile
                             capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                             capacity_description: HPXML::CapacityDescriptionMinimum,
                             efficiency_cop: Float(min_speed_cop))
-          clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
-                            capacity: nom_speed_capacity,
-                            capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
-                            capacity_description: HPXML::CapacityDescriptionNominal,
-                            efficiency_cop: Float(nom_speed_cop))
+          if not nom_speed_capacity.nil?
+            clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                              capacity: nom_speed_capacity,
+                              capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
+                              capacity_description: HPXML::CapacityDescriptionNominal,
+                              efficiency_cop: (nom_speed_cop.nil? ? nil : Float(nom_speed_cop)))
+          end
           clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                             capacity: max_speed_capacity,
                             capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
