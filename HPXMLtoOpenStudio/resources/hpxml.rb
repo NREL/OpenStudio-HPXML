@@ -9653,7 +9653,7 @@ class HPXML < Object
              :max_current_rating, # [Double] MaxCurrentRating
              :occupied_spaces,    # [Double] OccupiedSpaces
              :component_idrefs,   # [Array<String>] AttachedToComponent/@idref
-             :panel_idref]        # [String] AttachedToElectricPanel/@idref
+             :panel_idref]        # [String] AttachedToSubPanel/@idref
     attr_accessor(*ATTRS)
 
     # Returns the components attached to the branch circuit.
@@ -9738,7 +9738,7 @@ class HPXML < Object
         end
       end
       if not @panel_idref.nil?
-        attached_to_panel = XMLHelper.add_element(branch_circuit, 'AttachedToElectricPanel')
+        attached_to_panel = XMLHelper.add_element(branch_circuit, 'AttachedToSubPanel')
         XMLHelper.add_attribute(attached_to_panel, 'idref', @panel_idref)
       end
     end
@@ -9755,7 +9755,7 @@ class HPXML < Object
       @max_current_rating = XMLHelper.get_value(branch_circuit, 'MaxCurrentRating', :float)
       @occupied_spaces = XMLHelper.get_value(branch_circuit, 'OccupiedSpaces', :float)
       @component_idrefs = HPXML::get_idrefs(branch_circuit, 'AttachedToComponent')
-      @panel_idref = HPXML::get_idref(XMLHelper.get_element(branch_circuit, 'AttachedToElectricPanel'))
+      @panel_idref = HPXML::get_idref(XMLHelper.get_element(branch_circuit, 'AttachedToSubPanel'))
     end
   end
 

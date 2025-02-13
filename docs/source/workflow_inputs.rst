@@ -4647,7 +4647,7 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   ``MaxCurrentRating``                            double    A                            No        See [#]_
   ``OccupiedSpaces``                              integer                                No        See [#]_   Number of occupied breaker spaces
   ``AttachedToComponent``                         idref                                  No                   ID of attached component; multiple are allowed [#]_
-  ``AttachedToElectricPanel``                     idref                     See [#]_     No                   ID of attached electric panel (i.e., a subpanel) [#]_
+  ``AttachedToSubPanel``                          idref                     See [#]_     No                   ID of attached electric panel (i.e., a subpanel) [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] Voltage choices are "120" or "240".
@@ -4675,8 +4675,8 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          NumBreakers = NumBranches * (Voltage / 120)
   
   .. [#] Provide a AttachedToComponent element for each referenced component.
-  .. [#] AttachedToElectricPanel must reference a ``ElectricPanel``.
-  .. [#] Provide a AttachedToElectricPanel element for a referenced subpanel.
+  .. [#] AttachedToSubPanel must reference a ``ElectricPanel``.
+  .. [#] Provide a AttachedToSubPanel element for a referenced subpanel.
 
 .. _service_feeders:
 
