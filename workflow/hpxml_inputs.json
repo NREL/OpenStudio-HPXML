@@ -266,8 +266,7 @@
   },
   "tests/ASHRAE_Standard_140/L202AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AC.xml",
-    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Reflective",
-    "wall_color": "reflective"
+    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Reflective"
   },
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -355,8 +354,7 @@
   },
   "tests/ASHRAE_Standard_140/L202AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AL.xml",
-    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Reflective",
-    "wall_color": "reflective"
+    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Reflective"
   },
   "tests/HERS_HVAC/HVAC1a.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -651,8 +649,7 @@
     "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
-    "wall_siding_type": "wood siding",
-    "wall_color": "medium",
+    "enclosure_wall_siding": "Wood, Medium"
     "wall_assembly_r": 23,
     "window_front_wwr": 0,
     "window_back_wwr": 0,
@@ -3417,7 +3414,7 @@
     "slab_thickness": null,
     "slab_carpet_fraction": null,
     "enclosure_roof_material": null,
-    "wall_siding_type": null,
+    "enclosure_wall_siding": null,
     "window_fraction_operable": null,
     "window_interior_shading_winter": null,
     "window_interior_shading_summer": null,
