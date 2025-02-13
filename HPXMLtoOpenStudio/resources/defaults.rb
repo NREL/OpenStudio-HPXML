@@ -3343,6 +3343,16 @@ module Defaults
                             component_idrefs_isdefaulted: true)
       end
 
+      hpxml_bldg.ev_chargers.each do |ev_charger|
+        next unless ev_charger.service_feeders.empty?
+
+        service_feeders.add(id: "#{electric_panel.id}_ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                            type_isdefaulted: true,
+                            component_idrefs: [ev_charger.id],
+                            component_idrefs_isdefaulted: true)
+      end
+
       service_feeders.each do |service_feeder|
         next if service_feeder.power == 0
 
@@ -6533,6 +6543,13 @@ module Defaults
           watts += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', 'PowerRating', branch_circuit.voltage)
         end
       end
+      hpxml_bldg.ev_chargers.each do |ev_charger|
+        next if !component_ids.include?(ev_charger.id)
+
+        ev_charger.branch_circuits.each do |branch_circuit|
+          watts += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', 'PowerRating', branch_circuit.voltage)
+        end
+      end
     elsif type == HPXML::ElectricPanelLoadTypeLighting
       watts += get_default_panels_value(runner, default_panels_csv_data, 'lighting', 'PowerRating', HPXML::ElectricPanelVoltage120) * hpxml_bldg.building_construction.conditioned_floor_area
     elsif type == HPXML::ElectricPanelLoadTypeKitchen
@@ -6673,6 +6690,13 @@ module Defaults
       next if !component_ids.include?(plug_load.id)
 
       watts = plug_load.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging }.map { |sf| sf.power }.sum(0.0)
+      breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', 'BreakerSpaces', voltage, watts, max_current_rating)
+    end
+
+    hpxml_bldg.ev_chargers.each do |ev_charger|
+      next if !component_ids.include?(ev_charger.id)
+
+      watts = ev_charger.service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging }.map { |sf| sf.power }.sum(0.0)
       breaker_spaces += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', 'BreakerSpaces', voltage, watts, max_current_rating)
     end
 
