@@ -471,6 +471,8 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 
 - ``fuel_use_electricity_total_m_btu``
 
+- ``fuel_use_electricity_net_m_btu``
+
 - ``fuel_use_natural_gas_total_m_btu``
 
 - ``fuel_use_fuel_oil_total_m_btu``

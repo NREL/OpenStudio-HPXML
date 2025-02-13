@@ -9,6 +9,7 @@ require_relative '../measure.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/version.rb'
+require_relative '../../HPXMLtoOpenStudio/resources/calendar.rb'
 require 'oga'
 require 'json'
 

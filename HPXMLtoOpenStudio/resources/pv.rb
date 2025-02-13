@@ -64,6 +64,7 @@ module PV
     gpvwatts.setSystemLosses(pv_system.system_losses_fraction)
     gpvwatts.setTiltAngle(pv_system.array_tilt)
     gpvwatts.setAzimuthAngle(pv_system.array_azimuth)
+    gpvwatts.additionalProperties.setFeature('ObjectType', Constants::ObjectTypePhotovoltaics)
 
     case pv_system.tracking
     when HPXML::PVTrackingTypeFixed
