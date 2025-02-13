@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>cb87093e-a6c2-4d22-843b-355f210222d2</version_id>
-  <version_modified>2025-02-12T18:18:03Z</version_modified>
+  <version_id>3cedf10e-7bf9-4c77-97cb-cc0fde642c0c</version_id>
+  <version_modified>2025-02-13T16:24:40Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -22,7 +22,7 @@
     <argument>
       <name>schedules_column_names</name>
       <display_name>Schedules: Column Names</display_name>
-      <description>A comma-separated list of the column names to generate. If not provided, defaults to all columns. Possible column names are: lighting_interior, lighting_garage, cooking_range, dishwasher, clothes_washer, clothes_dryer, ceiling_fan, plug_loads_other, plug_loads_tv, hot_water_dishwasher, hot_water_clothes_washer, hot_water_fixtures.</description>
+      <description>A comma-separated list of the column names to generate. If not provided, defaults to all columns. Possible column names are: occupants, lighting_interior, lighting_garage, cooking_range, dishwasher, clothes_washer, clothes_dryer, ceiling_fan, plug_loads_other, plug_loads_tv, hot_water_dishwasher, hot_water_clothes_washer, hot_water_fixtures.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -116,7 +116,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>41E694DD</checksum>
+      <checksum>EB56CA85</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
