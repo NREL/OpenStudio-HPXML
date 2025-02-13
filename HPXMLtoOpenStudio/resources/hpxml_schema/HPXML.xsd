@@ -2303,9 +2303,9 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
-															<xs:element minOccurs="0" name="FractionChargedLocation">
+															<xs:element minOccurs="0" name="FractionChargedLocation" maxOccurs="unbounded">
 																<xs:annotation>
-																	<xs:documentation>The percentage of charging energy provided at a certain location.</xs:documentation>
+																	<xs:documentation>The percentage of charging energy provided at different locations.</xs:documentation>
 																</xs:annotation>
 																<xs:complexType>
 																	<xs:sequence>
@@ -2328,9 +2328,9 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
-															<xs:element minOccurs="0" name="FractionChargedLocation">
+															<xs:element minOccurs="0" name="FractionChargedLocation" maxOccurs="unbounded">
 																<xs:annotation>
-																	<xs:documentation>The percentage of charging energy provided at a certain location.</xs:documentation>
+																	<xs:documentation>The percentage of charging energy provided at different locations.</xs:documentation>
 																</xs:annotation>
 																<xs:complexType>
 																	<xs:sequence>
