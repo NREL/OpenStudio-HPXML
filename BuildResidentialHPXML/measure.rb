@@ -5836,7 +5836,7 @@ module HPXMLFile
                           capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMinimum,
                           efficiency_cop: Float(min_speed_cop))
-        if not nom_speed_capacity.nil?
+        if (not nom_speed_capacity.nil?) || (not nom_speed_capacity_fraction_of_nominal.nil?)
           clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                             capacity: nom_speed_capacity,
                             capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
@@ -6006,7 +6006,7 @@ module HPXMLFile
                             capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                             capacity_description: HPXML::CapacityDescriptionMinimum,
                             efficiency_cop: Float(min_speed_cop))
-          if not nom_speed_capacity.nil?
+          if (not nom_speed_capacity.nil?) || (not nom_speed_capacity_fraction_of_nominal.nil?)
             htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                               capacity: nom_speed_capacity,
                               capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
@@ -6057,7 +6057,7 @@ module HPXMLFile
                             capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                             capacity_description: HPXML::CapacityDescriptionMinimum,
                             efficiency_cop: Float(min_speed_cop))
-          if not nom_speed_capacity.nil?
+          if (not nom_speed_capacity.nil?) || (not nom_speed_capacity_fraction_of_nominal.nil?)
             clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                               capacity: nom_speed_capacity,
                               capacity_fraction_of_nominal: nom_speed_capacity_fraction_of_nominal,
