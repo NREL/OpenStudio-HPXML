@@ -382,11 +382,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Fuel outputs
     @fuels.each do |(_fuel_type, _total_or_net), fuel|
-      fuel.meters.each do |meter|
-        result << OpenStudio::IdfObject.load("Output:Meter,#{meter},runperiod;").get
-        if args[:include_timeseries_fuel_consumptions]
-          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},#{args[:timeseries_frequency]};").get
-        end
+      next if fuel.meter.nil?
+
+      result << OpenStudio::IdfObject.load("Output:Meter,#{fuel.meter},runperiod;").get
+      if args[:include_timeseries_fuel_consumptions]
+        result << OpenStudio::IdfObject.load("Output:Meter,#{fuel.meter},#{args[:timeseries_frequency]};").get
       end
     end
 
@@ -772,10 +772,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Fuel Uses
     @fuels.each do |(_fuel_type, _total_or_net), fuel|
-      fuel.annual_output = get_report_meter_data_annual(fuel.meters)
+      fuel.annual_output = get_report_meter_data_annual([fuel.meter])
       next unless args[:include_timeseries_fuel_consumptions]
 
-      fuel.timeseries_output = get_report_meter_data_timeseries(fuel.meters, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
+      fuel.timeseries_output = get_report_meter_data_timeseries([fuel.meter], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
     end
 
     # Peak Electricity Consumption
@@ -2302,13 +2302,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class Fuel < BaseOutput
-    # @param meters [TODO] TODO
-    def initialize(meters: [])
+    # @param meter [TODO] TODO
+    def initialize(meter: [])
       super()
-      @meters = meters
+      @meter = meter
       @timeseries_output_by_system = {}
     end
-    attr_accessor(:meters, :timeseries_output_by_system)
+    attr_accessor(:meter, :timeseries_output_by_system)
   end
 
   # TODO
@@ -2626,14 +2626,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Fuels
 
     @fuels = {}
-    @fuels[[FT::Elec, TE::Total]] = Fuel.new(meters: ['Electricity:Total'.upcase])
-    @fuels[[FT::Elec, TE::Net]] = Fuel.new(meters: ['Electricity:Net'.upcase])
-    @fuels[[FT::Gas, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
-    @fuels[[FT::Oil, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
-    @fuels[[FT::Propane, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"])
-    @fuels[[FT::WoodCord, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypeWoodCord}:Facility"])
-    @fuels[[FT::WoodPellets, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypeWoodPellets}:Facility"])
-    @fuels[[FT::Coal, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypeCoal}:Facility"])
+    @fuels[[FT::Elec, TE::Total]] = Fuel.new(meter: 'Electricity:Total'.upcase)
+    @fuels[[FT::Elec, TE::Net]] = Fuel.new(meter: 'Electricity:Net'.upcase)
+    @fuels[[FT::Gas, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypeNaturalGas}:Facility")
+    @fuels[[FT::Oil, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypeOil}:Facility")
+    @fuels[[FT::Propane, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypePropane}:Facility")
+    @fuels[[FT::WoodCord, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypeWoodCord}:Facility")
+    @fuels[[FT::WoodPellets, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypeWoodPellets}:Facility")
+    @fuels[[FT::Coal, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypeCoal}:Facility")
 
     @fuels.each do |(fuel_type, total_or_net), fuel|
       if total_or_net == TE::Net
@@ -2644,7 +2644,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       fuel.annual_units = 'MBtu'
       fuel.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
       if @end_uses.count { |key, end_use| key[0] == fuel_type && end_use.variables.size + end_use.meters.size > 0 } == 0
-        fuel.meters = []
+        fuel.meter = nil
       end
     end
 
