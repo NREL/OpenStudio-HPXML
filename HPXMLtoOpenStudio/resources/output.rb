@@ -1195,12 +1195,22 @@ module Outputs
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [nil]
   def self.create_custom_meters(model)
-    # Create custom meter for:
-    #  Total Electricity (accounts for EV charging, batteries)
-    #  NET Total Electricity (accounts EV charging, batteries, PV, and generators)
+    # Create custom meter for ReportSimulationOutput measure:
+    # - Total Electricity (Electricity:Facility plus EV charging, batteries)
+    # - Net Electricity (Total Electricity minus PV and generators)
+    #
+    # Create custom meter for ReportUtilityBills measure:
+    # - Total Electricity With Generators (Electricity:Facility plus EV charging, batteries, generators)
+    # - PV Electricity Only
 
+    # FIXME: Should we consider whether generators are included in Total? If we
+    # include them, we can remove two custom meters and use the same meters between
+    # the ReportSimulationOutput and ReportUtilityBills measures. Check if changing
+    # it would affect OS-ERI.
     total_key_vars = []
+    total_generators_key_vars = []
     net_key_vars = []
+    pv_key_vars = []
     model.getElectricLoadCenterDistributions.each do |elcd|
       # Batteries & EV charging output variables
       if elcd.electricalStorage.is_initialized
@@ -1217,21 +1227,29 @@ module Outputs
       end
       # PV output meter
       elcd.generators.each do |generator|
-        if generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypePhotovoltaics
-          net_key_vars << ['', 'Photovoltaic:ElectricityProduced']
-          net_key_vars << ['', 'PowerConversion:ElectricityProduced']
-        end
+        next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypePhotovoltaics
+
+        net_key_vars << ['', 'Photovoltaic:ElectricityProduced']
+        pv_key_vars << net_key_vars[-1]
+        net_key_vars << ['', 'PowerConversion:ElectricityProduced']
+        pv_key_vars << net_key_vars[-1]
       end
       # Generator output meter
       elcd.generators.each do |generator|
         if generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeGenerator
           net_key_vars << ['', 'Cogeneration:ElectricityProduced']
+          total_generators_key_vars << net_key_vars[-1]
         end
       end
     end
+    total_key_vars.each do |key_var|
+      total_generators_key_vars << key_var
+    end
 
     { 'Electricity:Total' => total_key_vars,
-      'Electricity:NetTotal' => net_key_vars }.each do |meter_name, key_vars|
+      'Electricity:TotalWithGenerators' => total_generators_key_vars,
+      'Electricity:NetTotal' => net_key_vars,
+      'Electricity:PV' => pv_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
         meter = OpenStudio::Model::MeterCustom.new(model)
