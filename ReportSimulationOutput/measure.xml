@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>22ee9fd1-7f6d-4aa4-bee7-70a9092d56db</version_id>
-  <version_modified>2025-02-14T15:38:46Z</version_modified>
+  <version_id>7ea19f86-f14c-4897-808a-f5b79bdd7a32</version_id>
+  <version_modified>2025-02-14T16:36:15Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -193,7 +193,7 @@
     <argument>
       <name>include_annual_unmet_hours</name>
       <display_name>Generate Annual Output: Unmet Hours</display_name>
-      <description>Generates annual unmet hours for heating and cooling.</description>
+      <description>Generates annual unmet hours for heating, cooling, and EV driving.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -212,7 +212,7 @@
     <argument>
       <name>include_annual_peak_fuels</name>
       <display_name>Generate Annual Output: Peak Fuels</display_name>
-      <description>Generates annual electricity peaks for summer/winter.</description>
+      <description>Generates annual/summer/winter electricity peaks.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -547,7 +547,7 @@
     <argument>
       <name>include_timeseries_unmet_hours</name>
       <display_name>Generate Timeseries Output: Unmet Hours</display_name>
-      <description>Generates timeseries unmet hours for heating and cooling.</description>
+      <description>Generates timeseries unmet hours for heating, cooling, and EV driving.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1579,6 +1579,27 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>peak_electricity_winter_net_w</name>
+      <display_name>peak_electricity_winter_net_w</display_name>
+      <short_name>peak_electricity_winter_net_w</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>peak_electricity_summer_net_w</name>
+      <display_name>peak_electricity_summer_net_w</display_name>
+      <short_name>peak_electricity_summer_net_w</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>peak_electricity_annual_net_w</name>
+      <display_name>peak_electricity_annual_net_w</display_name>
+      <short_name>peak_electricity_annual_net_w</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>peak_load_heating_delivered_k_btu_hr</name>
       <display_name>peak_load_heating_delivered_k_btu_hr</display_name>
       <short_name>peak_load_heating_delivered_k_btu_hr</short_name>
@@ -1934,7 +1955,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>24134ED6</checksum>
+      <checksum>5BD99B0E</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -1951,13 +1972,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A4D61AAB</checksum>
+      <checksum>B35E8476</checksum>
     </file>
     <file>
       <filename>test_report_sim_output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>DDB4B0D9</checksum>
+      <checksum>6D45731D</checksum>
     </file>
   </files>
 </measure>

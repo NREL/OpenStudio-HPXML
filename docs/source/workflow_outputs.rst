@@ -341,10 +341,16 @@ FIXME Values include any home battery charging/discharging and EV charging.
   ==================================  =============================================================
   Type                                Notes
   ==================================  =============================================================
-  Peak Electricity: Winter Total (W)  Maximum value in Dec/Jan/Feb (or Jun/Jul/Aug in the southern hemisphere)
-  Peak Electricity: Summer Total (W)  Maximum value in Jun/Jul/Aug (or Dec/Jan/Feb in the southern hemisphere)
-  Peak Electricity: Annual Total (W)  Maximum value in any month
+  Peak Electricity: Winter Total (W)  Winter maximum for total electricity consumption [#]_
+  Peak Electricity: Summer Total (W)  Summer maximum for total electricity consumption [#]_
+  Peak Electricity: Annual Total (W)  Annual maximum for total electricity consumption
+  Peak Electricity: Winter Net (W)    Winter maximum for total electricity consumption minus power produced by PV
+  Peak Electricity: Summer Net (W)    Summer maximum for total electricity consumption minus power produced by PV
+  Peak Electricity: Annual Net (W)    Annual maximum for total electricity consumption minus power produced by PV
   ==================================  =============================================================
+  
+  .. [#] Winter is Dec/Jan/Feb (or Jun/Jul/Aug in the southern hemisphere).
+  .. [#] Summer is Jun/Jul/Aug (or Dec/Jan/Feb in the southern hemisphere).
 
 Peak Building Loads
 ~~~~~~~~~~~~~~~~~~~
@@ -640,7 +646,7 @@ Depending on the outputs requested, the file may include:
   Hot Water Uses                      ``hotwater``         Water use for each end use type (in gallons).
   Total Loads                         ``loads``            Heating, cooling, and hot water loads (in kBtu).
   Component Loads                     ``componentloads``   Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
-  Unmet Hours                         ``unmethours``       Heating, cooling, and/or EV driving unmet hours.
+  Unmet Hours                         ``unmethours``       Heating, cooling, and EV driving unmet hours.
   Zone Temperatures                   ``temperatures``     Zone temperatures (in deg-F) for each space (e.g., conditioned space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
   Airflows                            ``airflows``         Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
   Weather                             ``weather``          Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.

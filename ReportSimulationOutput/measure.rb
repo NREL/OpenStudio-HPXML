@@ -97,13 +97,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_unmet_hours', false)
     arg.setDisplayName('Generate Annual Output: Unmet Hours')
-    arg.setDescription('Generates annual unmet hours for heating and cooling.')
+    arg.setDescription('Generates annual unmet hours for heating, cooling, and EV driving.')
     arg.setDefaultValue(true)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_peak_fuels', false)
     arg.setDisplayName('Generate Annual Output: Peak Fuels')
-    arg.setDescription('Generates annual electricity peaks for summer/winter.')
+    arg.setDescription('Generates annual/summer/winter electricity peaks.')
     arg.setDefaultValue(true)
     args << arg
 
@@ -211,7 +211,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_unmet_hours', false)
     arg.setDisplayName('Generate Timeseries Output: Unmet Hours')
-    arg.setDescription('Generates timeseries unmet hours for heating and cooling.')
+    arg.setDescription('Generates timeseries unmet hours for heating, cooling, and EV driving.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -449,7 +449,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Fuel outputs (annual only)
     @peak_fuels.values.each do |peak_fuel|
-      result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,Electricity:Total,Maximum;").get
+      result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,#{peak_fuel.meter},Maximum;").get
     end
 
     # Peak Load outputs (annual only)
@@ -782,7 +782,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     is_southern_hemisphere = @model.getBuilding.additionalProperties.getFeatureAsBoolean('is_southern_hemisphere').get
     is_northern_hemisphere = !is_southern_hemisphere
     @peak_fuels.each do |key, peak_fuel|
-      _fuel, season = key
+      _fuel, _total_or_net, season = key
       if (season == PFT::Summer && is_northern_hemisphere) || (season == PFT::Winter && is_southern_hemisphere)
         months = ['June', 'July', 'August']
       elsif (season == PFT::Winter && is_northern_hemisphere) || (season == PFT::Summer && is_southern_hemisphere)
@@ -791,7 +791,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         months = ['Maximum of Months']
       end
       for month in months
-        val = get_tabular_data_value(peak_fuel.report.upcase, 'Meter', 'Custom Monthly Report', [month], 'ELECTRICITY:TOTAL {Maximum}', peak_fuel.annual_units)
+        val = get_tabular_data_value(peak_fuel.report.upcase, 'Meter', 'Custom Monthly Report', [month], "#{peak_fuel.meter.upcase} {Maximum}", peak_fuel.annual_units)
         peak_fuel.annual_output = [peak_fuel.annual_output.to_f, val].max
       end
     end
@@ -2373,11 +2373,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   class PeakFuel < BaseOutput
     # @param report [TODO] TODO
-    def initialize(report:)
+    # @param meter [TODO] TODO
+    def initialize(report:, meter:)
       super()
       @report = report
+      @meter = meter
     end
-    attr_accessor(:report)
+    attr_accessor(:report, :meter)
   end
 
   # TODO
@@ -2636,7 +2638,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @fuels.each do |(fuel_type, total_or_net), fuel|
       if total_or_net == TE::Net
         fuel.name = "Fuel Use: #{fuel_type}: Net"
-      else
+      elsif total_or_net == TE::Total
         fuel.name = "Fuel Use: #{fuel_type}: Total"
       end
       fuel.annual_units = 'MBtu'
@@ -2696,13 +2698,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Fuels
     @peak_fuels = {}
-    @peak_fuels[[FT::Elec, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Total')
-    @peak_fuels[[FT::Elec, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Total')
-    @peak_fuels[[FT::Elec, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Total')
+    @peak_fuels[[FT::Elec, TE::Total, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Total', meter: 'Electricity:Total')
+    @peak_fuels[[FT::Elec, TE::Total, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Total', meter: 'Electricity:Total')
+    @peak_fuels[[FT::Elec, TE::Total, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Total', meter: 'Electricity:Total')
+    @peak_fuels[[FT::Elec, TE::Net, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Net', meter: 'Electricity:Net')
+    @peak_fuels[[FT::Elec, TE::Net, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Net', meter: 'Electricity:Net')
+    @peak_fuels[[FT::Elec, TE::Net, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Net', meter: 'Electricity:Net')
 
     @peak_fuels.each do |key, peak_fuel|
-      fuel_type, peak_fuel_type = key
-      peak_fuel.name = "Peak #{fuel_type}: #{peak_fuel_type} Total"
+      fuel_type, total_or_net, peak_fuel_type = key
+      if total_or_net == TE::Net
+        peak_fuel.name = "Peak #{fuel_type}: #{peak_fuel_type} Net"
+      elsif total_or_net == TE::Total
+        peak_fuel.name = "Peak #{fuel_type}: #{peak_fuel_type} Total"
+      end
       peak_fuel.annual_units = 'W'
     end
 
