@@ -1197,7 +1197,7 @@ module Outputs
   def self.create_custom_meters(model)
     # Create custom meter for ReportSimulationOutput measure:
     # - Total Electricity (Electricity:Facility plus EV charging, batteries)
-    # - Net Electricity (Total Electricity minus PV and generators)
+    # - Total Net Electricity (Total Electricity minus PV and generators)
     #
     # Create custom meter for ReportUtilityBills measure:
     # - Total Electricity With Generators (Electricity:Facility plus EV charging, batteries, generators)
@@ -1250,8 +1250,7 @@ module Outputs
 
     { 'Electricity:Total' => total_key_vars,
       'Electricity:TotalWithGenerators' => total_generators_key_vars,
-      'Electricity:NetTotal' => net_key_vars,
-      'Electricity:PV' => pv_key_vars }.each do |meter_name, key_vars|
+      'Electricity:NetTotal' => net_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
         meter = OpenStudio::Model::MeterCustom.new(model)
@@ -1262,6 +1261,15 @@ module Outputs
       meter.setName(meter_name)
       meter.setFuelType(EPlus::FuelTypeElectricity)
       key_vars.each do |key_var|
+        meter.addKeyVarGroup(key_var[0], key_var[1])
+      end
+    end
+
+    if not pv_key_vars.empty?
+      meter = OpenStudio::Model::MeterCustom.new(model)
+      meter.setName('Electricity:PV')
+      meter.setFuelType(EPlus::FuelTypeElectricity)
+      pv_key_vars.each do |key_var|
         meter.addKeyVarGroup(key_var[0], key_var[1])
       end
     end

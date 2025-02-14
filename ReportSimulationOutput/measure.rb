@@ -901,7 +901,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       [htg_fan_pump_end_use, backup_htg_fan_pump_end_use, clg_fan_pump_end_use].each do |end_use|
         next if end_use.annual_output_by_system[sys_id].nil?
 
-        apply_multiplier_to_output(end_use, nil, sys_id, energy_multiplier)
+        apply_multiplier_to_output(end_use, [], sys_id, energy_multiplier)
       end
     end
     @end_uses.delete([FT::Elec, 'TempGSHPSharedPump'])
@@ -919,6 +919,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    fuel_types = @fuels.keys.map { |fuel_type, _total_or_net| fuel_type }.uniq
     @hpxml_bldgs.each do |hpxml_bldg|
       # Apply Heating/Cooling DSEs
       (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).each do |htg_system|
@@ -928,13 +929,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next if htg_system.distribution_system.annual_heating_dse.nil?
 
         dse = htg_system.distribution_system.annual_heating_dse
-        @fuels.each do |(fuel_type, _total_or_net), fuel|
+        fuel_types.each do |fuel_type|
           [EUT::Heating, EUT::HeatingHeatPumpBackup, EUT::HeatingFanPump, EUT::HeatingHeatPumpBackupFanPump].each do |end_use_type|
             end_use = @end_uses[[fuel_type, end_use_type]]
             next if end_use.nil?
             next if end_use.annual_output_by_system[htg_system.id].nil?
 
-            apply_multiplier_to_output(end_use, fuel, htg_system.id, 1.0 / dse)
+            fuels = @fuels.select { |k, _v| k[0] == fuel_type }.values
+            apply_multiplier_to_output(end_use, fuels, htg_system.id, 1.0 / dse)
           end
         end
       end
@@ -945,13 +947,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next if clg_system.distribution_system.annual_cooling_dse.nil?
 
         dse = clg_system.distribution_system.annual_cooling_dse
-        @fuels.each do |(fuel_type, _total_or_net), fuel|
+        fuel_types.each do |fuel_type|
           [EUT::Cooling, EUT::CoolingFanPump].each do |end_use_type|
             end_use = @end_uses[[fuel_type, end_use_type]]
             next if end_use.nil?
             next if end_use.annual_output_by_system[clg_system.id].nil?
 
-            apply_multiplier_to_output(end_use, fuel, clg_system.id, 1.0 / dse)
+            fuels = @fuels.select { |k, _v| k[0] == fuel_type }.values
+            apply_multiplier_to_output(end_use, fuels, clg_system.id, 1.0 / dse)
           end
         end
       end
@@ -969,7 +972,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           dhw_ids = hpxml_bldg.water_heating_systems.map { |dhw| dhw.id }
         end
         dhw_ids.each do |dhw_id|
-          apply_multiplier_to_output(@loads[LT::HotWaterDelivered], @loads[LT::HotWaterSolarThermal], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
+          apply_multiplier_to_output(@loads[LT::HotWaterDelivered], [@loads[LT::HotWaterSolarThermal]], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
         end
       end
     end
@@ -2206,15 +2209,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   #
   # @param obj [TODO] TODO
-  # @param sync_obj [TODO] TODO
+  # @param sync_objs [TODO] TODO
   # @param sys_id [TODO] TODO
   # @param mult [TODO] TODO
   # @return [TODO] TODO
-  def apply_multiplier_to_output(obj, sync_obj, sys_id, mult)
+  def apply_multiplier_to_output(obj, sync_objs, sys_id, mult)
     # Annual
     orig_value = obj.annual_output_by_system[sys_id]
     obj.annual_output_by_system[sys_id] = orig_value * mult
-    if not sync_obj.nil?
+    sync_objs.each do |sync_obj|
       sync_obj.annual_output += (orig_value * mult - orig_value)
     end
 
@@ -2222,8 +2225,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if not obj.timeseries_output_by_system.empty?
       orig_values = obj.timeseries_output_by_system[sys_id]
       obj.timeseries_output_by_system[sys_id] = obj.timeseries_output_by_system[sys_id].map { |x| x * mult }
-      if not sync_obj.nil?
-        diffs = obj.timeseries_output_by_system[sys_id].zip(orig_values).map { |x, y| x - y }
+      diffs = obj.timeseries_output_by_system[sys_id].zip(orig_values).map { |x, y| x - y }
+      sync_objs.each do |sync_obj|
         sync_obj.timeseries_output = sync_obj.timeseries_output.zip(diffs).map { |x, y| x + y }
       end
     end
