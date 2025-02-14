@@ -6,8 +6,11 @@ __New Features__
   - Adds EV driving unmet hours output.
 - Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 - BuildResidentialScheduleFile measure:
-  - Adds stochastic schedule generation for electric vehicle charging.
+  - Adds stochastic schedule generation for electric vehicle charging (using `Vehicles`).
   - Removes generation of stochastic schedules for building components not present in the HPXML file.
+- Output updates:
+  - Adds new outputs for *net* peak electricity (summer/winter/annual); same as total peak electricity outputs but subtract PV.
+  - Adds generator electricity produced to fuel/energy totals, in that it is treated as offsetting electricity consumption (similar to battery discharging).
 
 __Bugfixes__
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
