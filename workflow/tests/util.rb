@@ -8,7 +8,6 @@ def run_simulation_tests(xmls)
   all_annual_results = {}
   Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
     next if xml.end_with? '-10x.xml'
-    next unless xml.include? 'base-dhw-indirect-dse.xml'
 
     xml_name = File.basename(xml)
     results = _run_xml(xml, Parallel.worker_number)
