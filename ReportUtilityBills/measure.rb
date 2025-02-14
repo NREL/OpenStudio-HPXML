@@ -762,7 +762,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     rows = data['Rows']
 
     index = cols.each_index.find { |i| meter_name == cols[i]['Variable'] }
-    return [0.0] if index.nil?
+    return [0.0] * rows.size if index.nil?
 
     vals = []
     rows.each do |row|
