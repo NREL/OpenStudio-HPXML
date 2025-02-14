@@ -1072,20 +1072,24 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         assert_operator(hpxml_bldg.heat_pumps[0].backup_heating_capacity, :>, htg_bak_cap)
         assert_operator(hpxml_bldg.heat_pumps[0].cooling_capacity, :>, clg_cap)
         hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.each_with_index do |dp, i|
-          assert_operator(dp.capacity, :>, htg_capacities_detailed[i])
+          # heating_detailed_performance_data has additional nominal points being added in the end, can be missing in htg_capacities_detailed.
+          assert_operator(dp.capacity, :>, htg_capacities_detailed[i]) unless htg_capacities_detailed[i].nil?
         end
         hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.each_with_index do |dp, i|
-          assert_operator(dp.capacity, :>, clg_capacities_detailed[i])
+          # cooling_detailed_performance_data has additional nominal points being added in the end, can be missing in clg_capacities_detailed.
+          assert_operator(dp.capacity, :>, clg_capacities_detailed[i]) unless clg_capacities_detailed[i].nil?
         end
       else
         assert_equal(hpxml_bldg.heat_pumps[0].heating_capacity, htg_cap)
         assert_equal(hpxml_bldg.heat_pumps[0].backup_heating_capacity, htg_bak_cap)
         assert_equal(hpxml_bldg.heat_pumps[0].cooling_capacity, clg_cap)
         hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.each_with_index do |dp, i|
-          assert_equal(dp.capacity, htg_capacities_detailed[i])
+          # heating_detailed_performance_data has additional nominal points being added in the end, can be missing in htg_capacities_detailed.
+          assert_equal(dp.capacity, htg_capacities_detailed[i]) unless htg_capacities_detailed[i].nil?
         end
         hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.each_with_index do |dp, i|
-          assert_equal(dp.capacity, clg_capacities_detailed[i])
+          # cooling_detailed_performance_data has additional nominal points being added in the end, can be missing in clg_capacities_detailed.
+          assert_equal(dp.capacity, clg_capacities_detailed[i]) unless clg_capacities_detailed[i].nil?
         end
       end
     end

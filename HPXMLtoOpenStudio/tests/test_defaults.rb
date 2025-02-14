@@ -2155,8 +2155,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nom_cap_at_47f, nom_cap_at_17f, nil, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0)
 
     # Test w/ detailed performance data and autosizing
-    heating_capacity_fractions = [0.278, 1.0, 1.0, 0.12, 0.69, 0.69, 0.05, 0.55, 0.55]
-    cooling_capacity_fractions = [0.325, 1.0, 1.0, 0.37, 1.08, 1.11]
+    heating_capacity_fractions = [0.278, 1.0, 1.1, 0.12, 0.69, 0.7, 0.05, 0.55]
+    cooling_capacity_fractions = [0.325, 1.0, 1.0, 0.37, 1.11]
     heating_capacities = []
     cooling_capacities = []
     hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.each_with_index do |dp, idx|
@@ -2172,15 +2172,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test that fractions are not used when capacities are provided
     _test_default_detailed_performance_capacities(default_hpxml_bldg.heat_pumps[0], 36000, 36000, heating_capacities, cooling_capacities)
 
+    heating_capacities = []
+    cooling_capacities = []
     hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.each_with_index do |dp, idx|
       dp.capacity = nil
-      heating_capacities << 36000 * heating_capacity_fractions[idx]
+      heating_capacities << (36000 * heating_capacity_fractions[idx]).round(1)
     end
     hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.each_with_index do |dp, idx|
       dp.capacity = nil
-      cooling_capacities << 36000 * cooling_capacity_fractions[idx]
+      cooling_capacities << (36000 * cooling_capacity_fractions[idx]).round(1)
     end
+    hpxml_bldg.heat_pumps[0].heating_capacity = 36000
+    hpxml_bldg.heat_pumps[0].cooling_capacity = 36000
     # Test that fractions are used when capacities are missing
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_detailed_performance_capacities(default_hpxml_bldg.heat_pumps[0], 36000, 36000, heating_capacities, cooling_capacities)
   end
 
@@ -5572,12 +5578,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
     if not heat_pump.heating_detailed_performance_data.empty?
       heat_pump.heating_detailed_performance_data.each_with_index do |dp, idx|
-        assert_equal(heating_capacities[idx], dp.capacity)
+        assert_equal(heating_capacities[idx], dp.capacity) unless heating_capacities[idx].nil?
       end
     end
     if not heat_pump.cooling_detailed_performance_data.empty?
       heat_pump.cooling_detailed_performance_data.each_with_index do |dp, idx|
-        assert_equal(cooling_capacities[idx], dp.capacity)
+        assert_equal(cooling_capacities[idx], dp.capacity) unless cooling_capacities[idx].nil?
       end
     end
   end
