@@ -1233,13 +1233,15 @@ module Outputs
         pv_key_vars << net_key_vars[-1]
         net_key_vars << ['', 'PowerConversion:ElectricityProduced']
         pv_key_vars << net_key_vars[-1]
+        break # Only add meter once
       end
       # Generator output meter
       elcd.generators.each do |generator|
-        if generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeGenerator
-          net_key_vars << ['', 'Cogeneration:ElectricityProduced']
-          total_generators_key_vars << net_key_vars[-1]
-        end
+        next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeGenerator
+
+        net_key_vars << ['', 'Cogeneration:ElectricityProduced']
+        total_generators_key_vars << net_key_vars[-1]
+        break # Only add meter once
       end
     end
     total_key_vars.each do |key_var|
