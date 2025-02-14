@@ -1225,7 +1225,7 @@ module Outputs
           total_key_vars << net_key_vars[-1]
         end
       end
-      # PV output meter
+      # PV output meters
       elcd.generators.each do |generator|
         next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypePhotovoltaics
 
@@ -1233,7 +1233,6 @@ module Outputs
         pv_key_vars << net_key_vars[-1]
         net_key_vars << ['', 'PowerConversion:ElectricityProduced']
         pv_key_vars << net_key_vars[-1]
-        break # Only add meter once
       end
       # Generator output meter
       elcd.generators.each do |generator|
@@ -1241,7 +1240,6 @@ module Outputs
 
         net_key_vars << ['', 'Cogeneration:ElectricityProduced']
         total_generators_key_vars << net_key_vars[-1]
-        break # Only add meter once
       end
     end
     total_key_vars.each do |key_var|
@@ -1260,7 +1258,7 @@ module Outputs
       end
       meter.setName(meter_name)
       meter.setFuelType(EPlus::FuelTypeElectricity)
-      key_vars.each do |key_var|
+      key_vars.uniq.each do |key_var|
         meter.addKeyVarGroup(key_var[0], key_var[1])
       end
     end
@@ -1269,7 +1267,7 @@ module Outputs
       meter = OpenStudio::Model::MeterCustom.new(model)
       meter.setName('Electricity:PV')
       meter.setFuelType(EPlus::FuelTypeElectricity)
-      pv_key_vars.each do |key_var|
+      pv_key_vars.uniq.each do |key_var|
         meter.addKeyVarGroup(key_var[0], key_var[1])
       end
     end
