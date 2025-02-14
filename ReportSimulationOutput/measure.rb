@@ -2625,7 +2625,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     @fuels = {}
     @fuels[[FT::Elec, TE::Total]] = Fuel.new(meters: ['Electricity:Total'.upcase])
-    @fuels[[FT::Elec, TE::Net]] = Fuel.new(meters: ['Electricity:NetTotal'.upcase])
+    @fuels[[FT::Elec, TE::Net]] = Fuel.new(meters: ['Electricity:Net'.upcase])
     @fuels[[FT::Gas, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
     @fuels[[FT::Oil, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
     @fuels[[FT::Propane, TE::Total]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"])

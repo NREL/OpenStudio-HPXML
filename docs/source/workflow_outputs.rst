@@ -94,7 +94,7 @@ Annual energy outputs are listed below.
   Type                                  Notes
   ====================================  ===========================
   Energy Use: Total (MBtu)              Total energy consumption
-  Energy Use: Net (MBtu)                Total energy consumption minus power produced by PV or generators
+  Energy Use: Net (MBtu)                Total energy consumption minus power produced by PV
   ====================================  ===========================
 
 Annual Energy by Fuel Use
@@ -106,7 +106,7 @@ Fuel uses are listed below.
   Type                                  Notes
   ====================================  ===========================
   Fuel Use: Electricity: Total (MBtu)   Total electricity consumption
-  Fuel Use: Electricity: Net (MBtu)     Total energy consumption minus power produced by PV or generators
+  Fuel Use: Electricity: Net (MBtu)     Total energy consumption minus power produced by PV
   Fuel Use: Natural Gas: Total (MBtu)
   Fuel Use: Fuel Oil: Total (MBtu)      Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
   Fuel Use: Propane: Total (MBtu)
@@ -252,7 +252,7 @@ Results for each emissions scenario defined in the HPXML file are listed as show
   Type                                                                     Notes
   =======================================================================  ==================================================================
   Emissions: <EmissionsType>: <ScenarioName>: Total (lb)                   Scenario total emissions
-  Emissions: <EmissionsType>: <ScenarioName>: Net (lb)                     Scenario total emissions minus power produced by PV or generators
+  Emissions: <EmissionsType>: <ScenarioName>: Net (lb)                     Scenario total emissions minus power produced by PV
   =======================================================================  ==================================================================
 
 Annual Emissions by Fuel Use
@@ -264,7 +264,7 @@ Results for each emissions scenario defined in the HPXML file are listed as show
   Type                                                                     Notes
   =======================================================================  ==================================================================
   Emissions: <EmissionsType>: <ScenarioName>: Electricity: Total (lb)      Scenario total emissions for Electricity only
-  Emissions: <EmissionsType>: <ScenarioName>: Electricity: Net (lb)        Scenario total emissions for Electricity only minus power produced by PV or generators
+  Emissions: <EmissionsType>: <ScenarioName>: Electricity: Net (lb)        Scenario total emissions for Electricity only minus power produced by PV
   Emissions: <EmissionsType>: <ScenarioName>: Natural Gas: Total (lb)      Scenario emissions for Natural Gas only
   Emissions: <EmissionsType>: <ScenarioName>: Fuel Oil: Total (lb)         Scenario emissions for Fuel Oil only
   Emissions: <EmissionsType>: <ScenarioName>: Propane: Total (lb)          Scenario emissions for Propane only
@@ -630,7 +630,7 @@ Depending on the outputs requested, the file may include:
   ==================================  ===================  ==================================================================================================================================
   Type                                Argument [#]_        Notes
   ==================================  ===================  ==================================================================================================================================
-  Total Consumptions                  ``total``            Energy use for building total and net (i.e., subtracts any power produced by PV or generators).
+  Total Consumptions                  ``total``            Energy use for building total and net (i.e., subtracts any power produced by PV).
   Fuel Consumptions                   ``fuels``            Energy use for each fuel type (in kBtu for fossil fuels and kWh for electricity).
   End Use Consumptions                ``enduses``          Energy use for each end use type (in kBtu for fossil fuels and kWh for electricity).
   System Use Consumptions             ``systemuses``       Energy use for each HVAC and water heating system (in kBtu).

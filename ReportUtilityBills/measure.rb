@@ -698,7 +698,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # @return [Hash] Fuel type, is_production => Fuel object
   def setup_fuel_outputs()
     fuels = {}
-    fuels[[FT::Elec, false]] = Fuel.new(meter: 'ELECTRICITY:TOTALWITHGENERATORS', units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+    fuels[[FT::Elec, false]] = Fuel.new(meter: 'ELECTRICITY:TOTAL', units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
     fuels[[FT::Elec, true]] = Fuel.new(meter: 'ELECTRICITY:PV', units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
     fuels[[FT::Gas, false]] = Fuel.new(meter: "#{EPlus::FuelTypeNaturalGas}:Facility", units: UtilityBills.get_fuel_units(HPXML::FuelTypeNaturalGas))
     fuels[[FT::Oil, false]] = Fuel.new(meter: "#{EPlus::FuelTypeOil}:Facility", units: UtilityBills.get_fuel_units(HPXML::FuelTypeOil))
