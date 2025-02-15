@@ -1620,11 +1620,10 @@ module HVAC
   # TODO
   #
   # @param compressor_type [String] Type of compressor (HPXML::HVACCompressorTypeXXX)
-  # @param heating_capacity_retention_temp [TODO] TODO
-  # @param heating_capacity_retention_fraction [TODO] TODO
+  # @param heating_capacity_fraction_17F [Double] Heating capacity fraction at 17F (Btuh)
   # @return [TODO] TODO
-  def self.get_heat_cap_eir_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
-    cap_ft_spec = calc_heat_cap_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+  def self.get_heat_cap_eir_ft_spec(compressor_type, heating_capacity_fraction_17F)
+    cap_ft_spec = calc_heat_cap_ft_spec(compressor_type, heating_capacity_fraction_17F)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       # From "Improved Modeling of Residential Air Conditioners and Heat Pumps for Energy Calculations", Cutler et al
       # https://www.nrel.gov/docs/fy13osti/56354.pdf
@@ -1778,8 +1777,8 @@ module HVAC
 
     case heating_system.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
-      heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention_17F(heating_system)
-      htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+      heating_capacity_fraction_17F = get_heating_capacity_fraction_17F(heating_system)
+      htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_fraction_17F)
       if [HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? heating_system.heat_pump_type
         htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton_simple()
         htg_ap.heat_fan_speed_ratios = [1.0]
@@ -1793,9 +1792,9 @@ module HVAC
 
     when HPXML::HVACCompressorTypeTwoStage
       hspf = calc_hspf_from_hspf2(heating_system)
-      heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention_17F(heating_system)
+      heating_capacity_fraction_17F = get_heating_capacity_fraction_17F(heating_system)
       htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type)
-      htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+      htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_fraction_17F)
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
       htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
       htg_ap.heat_rated_cops = [0.0426 * hspf**2 - 0.0747 * hspf + 1.5374] # Regression based on inverse model
@@ -1825,8 +1824,8 @@ module HVAC
     min_capacity_47 = heat_pump.heating_capacity * hp_ap.heat_capacity_ratios[0]
 
     # COPs @ 47F
-    # COP@47F uses table interpolation from hspf2 and capacity retention of 17F
-    nominal_cop_47 = get_cop_47_rated(heat_pump.heating_efficiency_hspf2, get_heating_capacity_retention_17F(heat_pump)[1])
+    # COP@47F uses table interpolation from hspf2 and capacity fraction at 17F
+    nominal_cop_47 = get_cop_47_rated(heat_pump.heating_efficiency_hspf2, get_heating_capacity_fraction_17F(heat_pump))
     # rated EIR@47F / max EIR@47F =  max COP@47F / rated COP@47F
     rated_eir_ratio_47 = 0.939
     max_cop_47 = nominal_cop_47 * rated_eir_ratio_47
@@ -2854,10 +2853,9 @@ module HVAC
   # TODO
   #
   # @param compressor_type [String] Type of compressor (HPXML::HVACCompressorTypeXXX)
-  # @param heating_capacity_retention_temp [TODO] TODO
-  # @param heating_capacity_retention_fraction [TODO] TODO
+  # @param heating_capacity_fraction_17F [Double] Heating capacity fraction at 17F (Btuh)
   # @return [TODO] TODO
-  def self.calc_heat_cap_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
+  def self.calc_heat_cap_ft_spec(compressor_type, heating_capacity_fraction_17F)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       iat_slope = -0.002303414
       iat_intercept = 0.18417308
@@ -2869,9 +2867,9 @@ module HVAC
     end
 
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
-    # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
-    x_A = heating_capacity_retention_temp
-    y_A = heating_capacity_retention_fraction
+    # Derive coefficients from user input for capacity fraction at 17F.
+    x_A = 17.0
+    y_A = heating_capacity_fraction_17F
     x_B = HVAC::AirSourceHeatRatedODB
     y_B = 1.0
 
@@ -2882,32 +2880,27 @@ module HVAC
   end
 
   # Returns the capacity maintenance from 17F to 47F,
-  # Default based on NEEP data for all var speed heat pump types, if neither capacity 17F nor capacity retention is not provided
+  # Default based on NEEP data for all var speed heat pump types, if neither capacity 17F nor capacity fraction 17F is not provided
   # Maintenance = capacity@17F / capacity@47F
   #
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @return [TODO] TODO
-  def self.get_heating_capacity_retention_17F(heat_pump)
-    heating_capacity_retention_temp = 17.0
+  # @return [Double] Heating capacity fraction at 17F (Btuh)
+  def self.get_heating_capacity_fraction_17F(heat_pump)
     if (not heat_pump.heating_capacity_17F.nil?) && (heat_pump.heating_capacity > 0.0)
-      heating_capacity_retention_fraction = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+      return heat_pump.heating_capacity_17F / heat_pump.heating_capacity
     else
-      if not heat_pump.heating_capacity_retention_fraction.nil?
-        retention_fraction = heat_pump.heating_capacity_retention_fraction
-        retention_temp = heat_pump.heating_capacity_retention_temp
+      if not heat_pump.heating_capacity_fraction_17F.nil?
+        return heat_pump.heating_capacity_fraction_17F
       else
-        retention_temp = 5.0
         case heat_pump.compressor_type
         when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
-          retention_fraction = 0.425
+          return 0.59 # Approximately based on Cutler curves
         when HPXML::HVACCompressorTypeVariableSpeed
           # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-          retention_fraction = (0.0461 * calc_hspf_from_hspf2(heat_pump) + 0.1594).round(4)
+          return (0.0329 * calc_hspf_from_hspf2(heat_pump) + 0.3996).round(4)
         end
       end
-      heating_capacity_retention_fraction = 1.0 - (1.0 - retention_fraction) / (47.0 - retention_temp) * (47.0 - 17.0)
     end
-    return heating_capacity_retention_temp, heating_capacity_retention_fraction
   end
 
   # TODO

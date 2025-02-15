@@ -2,6 +2,7 @@
 
 __New Features__
 - HVAC modeling updates:
+  - **Breaking Change**: Replaces `HeatPump/extension/HeatingCapacityRetention[Fraction | Temperature]` with `HeatPump/extension/HeatingCapacityFraction17F`.
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional EER or EER2 inputs for central air conditioners/heat pumps and mini-splits.
   - Updates to detailed performance datapoints:

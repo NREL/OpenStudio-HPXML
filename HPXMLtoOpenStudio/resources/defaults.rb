@@ -2491,12 +2491,10 @@ module Defaults
       rated_capacity_17 = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
       heat_pump.heating_capacity_17F = rated_capacity_17
     else
-      _retention_temp, retention_fraction_17F = HVAC.get_heating_capacity_retention_17F(heat_pump)
-      heat_pump.heating_capacity_17F = (heat_pump.heating_capacity * retention_fraction_17F).round
+      heat_pump.heating_capacity_17F = (heat_pump.heating_capacity * HVAC.get_heating_capacity_fraction_17F(heat_pump)).round
     end
     heat_pump.heating_capacity_17F_isdefaulted = true
-    heat_pump.heating_capacity_retention_fraction = nil
-    heat_pump.heating_capacity_retention_temp = nil
+    heat_pump.heating_capacity_fraction_17F = nil
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::HVACControl object
