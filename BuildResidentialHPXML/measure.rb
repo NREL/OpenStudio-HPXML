@@ -1451,7 +1451,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_fraction_17F', false)
     arg.setDisplayName('Heat Pump: Heating Capacity Fraction at 17F')
-    arg.setDescription("The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
+    arg.setDescription("The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity at 47F. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('Frac')
     args << arg
 

@@ -1475,7 +1475,7 @@
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
-      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1879 -->
+      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1931 -->
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) = 0'>extension/HeatingCapacityRetention has been replaced by extension/HeatingCapacityFraction17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityFraction17F) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityFraction17F | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:extension/h:HeatingCapacityFraction17F) &lt; 1 or not(h:extension/h:HeatingCapacityFraction17F)'>Expected extension/HeatingCapacityFraction17F to be less than 1</sch:assert>
@@ -1529,7 +1529,7 @@
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
-      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1879 -->
+      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1931 -->
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) = 0'>extension/HeatingCapacityRetention has been replaced by extension/HeatingCapacityFraction17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityFraction17F) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityFraction17F | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:extension/h:HeatingCapacityFraction17F) &lt; 1 or not(h:extension/h:HeatingCapacityFraction17F)'>Expected extension/HeatingCapacityFraction17F to be less than 1</sch:assert>
@@ -1645,7 +1645,7 @@
       <sch:assert role='ERROR' test='count(h:HeatPumpFuel) = 1'>Expected 1 element(s) for xpath: HeatPumpFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>
-      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1879 -->
+      <!-- Moved/deprecated HeatingCapacityRetention input; see https://github.com/NREL/OpenStudio-HPXML/pull/1931 -->
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityRetention) = 0'>extension/HeatingCapacityRetention has been replaced by extension/HeatingCapacityFraction17F</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingCapacityFraction17F) + count(h:HeatingCapacity17F) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingCapacityFraction17F | HeatingCapacity17F</sch:assert> <!-- See [HeatPumpCapacityRetention] -->
       <sch:assert role='ERROR' test='number(h:extension/h:HeatingCapacityFraction17F) &lt; 1 or not(h:extension/h:HeatingCapacityFraction17F)'>Expected extension/HeatingCapacityFraction17F to be less than 1</sch:assert>
