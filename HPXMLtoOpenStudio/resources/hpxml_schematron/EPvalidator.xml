@@ -1507,6 +1507,10 @@
       <sch:assert role='ERROR' test='number(h:extension/h:ChargeDefectRatio) &lt;= 9 or not(h:extension/h:ChargeDefectRatio)'>Expected extension/ChargeDefectRatio to be less than or equal to 9</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:CrankcaseHeaterPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/CrankcaseHeaterPowerWatts</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:CrankcaseHeaterPowerWatts) &gt;= 0.0 or not(h:extension/h:CrankcaseHeaterPowerWatts)'>Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.0.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:PanHeaterPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PanHeaterPowerWatts</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:PanHeaterPowerWatts) &gt;= 0.0 or not(h:extension/h:PanHeaterPowerWatts)'>Expected extension/PanHeaterPowerWatts to be greater than or equal to 0.0.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:PanHeaterControlType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PanHeaterControlType</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:PanHeaterControlType[text()="continuous" or text()="defrost mode"] or not(h:extension/h:PanHeaterControlType)'>Expected extension/PanHeaterControlType to be 'continuous' or 'defrost mode'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER"]/h:Value) &lt; 8'>SEER should typically be greater than or equal to 8.</sch:report>
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 8'>SEER2 should typically be greater than or equal to 8.</sch:report>
@@ -1561,6 +1565,10 @@
       <sch:assert role='ERROR' test='number(h:extension/h:ChargeDefectRatio) &lt;= 9 or not(h:extension/h:ChargeDefectRatio)'>Expected extension/ChargeDefectRatio to be less than or equal to 9</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:CrankcaseHeaterPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/CrankcaseHeaterPowerWatts</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:CrankcaseHeaterPowerWatts) &gt;= 0.0 or not(h:extension/h:CrankcaseHeaterPowerWatts)'>Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.0.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:PanHeaterPowerWatts) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PanHeaterPowerWatts</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:PanHeaterPowerWatts) &gt;= 0.0 or not(h:extension/h:PanHeaterPowerWatts)'>Expected extension/PanHeaterPowerWatts to be greater than or equal to 0.0.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:PanHeaterControlType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/PanHeaterControlType</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:PanHeaterControlType[text()="continuous" or text()="defrost mode"] or not(h:extension/h:PanHeaterControlType)'>Expected extension/PanHeaterControlType to be 'continuous' or 'defrost mode'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER"]/h:Value) &lt; 8'>SEER should typically be greater than or equal to 8.</sch:report>
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 8'>SEER2 should typically be greater than or equal to 8.</sch:report>

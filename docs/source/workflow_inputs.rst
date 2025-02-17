@@ -2798,6 +2798,8 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``extension/AirflowDefectRatio``                                  double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double   W         >= 0                      No        See [#]_        Crankcase heater power
+  ``extension/PanHeaterPowerWatts``                                 double   W         >= 0                      No        150.0           Pan heater power
+  ``extension/PanHeaterControlType``                                string             See [#]_                  No        continuous      Pan heater control type [#]_
   ``extension/CoolingAutosizingFactor``                             double   frac      > 0                       No        1.0             Cooling autosizing capacity multiplier
   ``extension/HeatingAutosizingFactor``                             double   frac      > 0                       No        1.0             Heating autosizing capacity multiplier
   ``extension/CoolingAutosizingLimit``                              double   Btu/hr    > 0                       No                        Cooling autosizing capacity limit
@@ -2850,6 +2852,9 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
+  .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
+  .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
+         If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode.
 
 .. _hvac_hp_mini_split:
 
@@ -2888,6 +2893,8 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   ``extension/AirflowDefectRatio``                                  double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double    W         >= 0                      No        See [#]_        Crankcase heater power
+  ``extension/PanHeaterPowerWatts``                                 double    W         >= 0                      No        150.0           Pan heater power
+  ``extension/PanHeaterControlType``                                string              See [#]_                  No        continuous      Pan heater control type [#]_
   ``extension/CoolingAutosizingFactor``                             double    frac      > 0                       No        1.0             Cooling autosizing capacity multiplier
   ``extension/HeatingAutosizingFactor``                             double    frac      > 0                       No        1.0             Heating autosizing capacity multiplier
   ``extension/CoolingAutosizingLimit``                              double    Btu/hr    > 0                       No                        Cooling autosizing capacity limit
@@ -2933,6 +2940,9 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
+  .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
+  .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
+         If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode.
 
 .. _hvac_hp_pthp:
 

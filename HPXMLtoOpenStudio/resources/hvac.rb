@@ -473,6 +473,10 @@ module HVAC
       apply_advanced_defrost(model, htg_coil, air_loop_unitary, control_zone.spaces[0], htg_supp_coil, cooling_system, q_dot_defrost)
     end
 
+    if is_heatpump && cooling_system.pan_heater_watts.to_f > 0
+      apply_pan_heater(model, air_loop_unitary, control_zone.spaces[0], cooling_system)
+    end
+
     return air_loop
   end
 
@@ -5305,7 +5309,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed]  OpenStudio Heating Coil object
   # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
-  # @param conditioned_space [OpenStudio::Model::Space]  OpenStudio Space object for conditioned zone
+  # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @param q_dot_defrost [Double] Calculated delivered cooling q_dot [W]
@@ -5339,8 +5343,8 @@ module HVAC
         supp_sys_power_level = 0.0
       end
     end
-    # other equipment actuator
 
+    # Other equipment/actuator
     defrost_heat_load_oe = Model.add_other_equipment(
       model,
       name: "#{air_loop_unitary.name} defrost heat load",
@@ -5415,10 +5419,78 @@ module HVAC
     program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = 0")
     program.addLine('EndIf')
 
+    # EMS calling manager
     Model.add_ems_program_calling_manager(
       model,
       name: "#{program.name} calling manager",
       calling_point: 'InsideHVACSystemIterationLoop',
+      ems_programs: [program]
+    )
+  end
+
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
+  # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @return [nil]
+  def self.apply_pan_heater(model, air_loop_unitary, conditioned_space, heat_pump)
+    # Other equipment/actuator
+    pan_heater_energy_oe = Model.add_other_equipment(
+      model,
+      name: "#{air_loop_unitary.name} pan heater energy",
+      end_use: Constants::ObjectTypePanHeater,
+      space: conditioned_space,
+      design_level: 0,
+      frac_radiant: 0,
+      frac_latent: 0,
+      frac_lost: 1,
+      schedule: model.alwaysOnDiscreteSchedule,
+      fuel_type: HPXML::FuelTypeElectricity
+    )
+    pan_heater_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+
+    pan_heater_energy_oe_act = Model.add_ems_actuator(
+      name: "#{pan_heater_energy_oe.name} act",
+      model_object: pan_heater_energy_oe,
+      comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
+    )
+
+    # Sensor
+    tout_db_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{air_loop_unitary.name} tout s",
+      output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+      key_name: 'Environment'
+    )
+
+    # EMS program
+    program = Model.add_ems_program(
+      model,
+      name: "#{air_loop_unitary.name} pan heater program"
+    )
+    program.addLine("If #{tout_db_sensor.name} <= #{UnitConversions.convert(32.0, 'F', 'C')}")
+    if heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeContinuous
+      program.addLine("  Set #{pan_heater_energy_oe_act.name} = #{heat_pump.pan_heater_watts}")
+    elsif heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeDefrost
+      # Set defrost fraction per RESNET MINHERS Addendum 82
+      # FIXME: Reuse this code in the defrost model
+      program.addLine("  Set F_defrost = 0.134 - (0.003 * ((#{tout_db_sensor.name} * 1.8) + 32))")
+      program.addLine('  Set F_defrost = @Min F_defrost 0.08')
+      program.addLine('  Set F_defrost = @Max F_defrost 0')
+      program.addLine("  Set #{pan_heater_energy_oe_act.name} = F_defrost * #{heat_pump.pan_heater_watts}")
+    end
+    program.addLine('Else')
+    program.addLine("  Set #{pan_heater_energy_oe_act.name} = 0.0")
+    program.addLine('  Set F_defrost = 0')
+    program.addLine('EndIf')
+
+    # EMS calling manager
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'BeginTimestepBeforePredictor',
       ems_programs: [program]
     )
   end

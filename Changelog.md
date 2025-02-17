@@ -2,9 +2,10 @@
 
 __New Features__
 - HVAC modeling updates:
-  - **Breaking Change**: Replaces `HeatPump/extension/HeatingCapacityRetention[Fraction | Temperature]` with `HeatPump/extension/HeatingCapacityFraction17F`.
+  - **Breaking Change**: Replaces `HeatingCapacityRetention[Fraction | Temperature]` with `HeatingCapacityFraction17F`.
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
-  - Allows optional EER or EER2 inputs for central air conditioners/heat pumps and mini-splits.
+  - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.
+  - Allows optional EER or EER2 inputs (`AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value`) for central air conditioners/heat pumps and mini-splits.
   - Updates to detailed performance datapoints:
     - **Breaking Change**: `OutdoorTemperature` values must be 47F, 17F, and 5F (plus an optional user-specified temperature <5F) for heating
     - **Breaking Change**: `OutdoorTemperature` values must be 82F and 95F (plus an optional user-specified temperature >95F) for cooling

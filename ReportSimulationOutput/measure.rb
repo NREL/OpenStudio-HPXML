@@ -3100,6 +3100,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           Constants::ObjectTypeMechanicalVentilationPreheating => EUT::MechVentPreheat,
           Constants::ObjectTypeMechanicalVentilationPrecooling => EUT::MechVentPrecool,
           Constants::ObjectTypeBackupSuppHeat => EUT::HeatingHeatPumpBackup,
+          Constants::ObjectTypePanHeater => EUT::Heating,
           Constants::ObjectTypeWaterHeaterAdjustment => EUT::HotWater,
           Constants::ObjectTypeBatteryLossesAdjustment => EUT::Battery }.each do |obj_name, eut|
           next unless subcategory.start_with? obj_name
