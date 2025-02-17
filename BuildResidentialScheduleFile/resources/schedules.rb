@@ -194,7 +194,7 @@ class ScheduleGenerator
     sinks = random_shift_and_normalize(sink_activity_sch, random_offset)
     baths = random_shift_and_normalize(bath_activity_sch, random_offset)
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
-    @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = fixtures.map { |flow| flow / fixtures.max }
+    @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = normalize(fixtures)
     fill_ev_schedules(mkc_activity_schedules, occupancy_schedules[:ev_occupant_presence])
     if @debug
       @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
@@ -556,7 +556,8 @@ class ScheduleGenerator
     end
 
     vehicle = @hpxml_bldg.vehicles[0]
-    hours_per_year = (vehicle.hours_per_week / 7) * UnitConversions.convert(1, 'yr', 'day')
+    hours_per_week = get_ev_hours_per_week(vehicle)
+    hours_per_year = (hours_per_week / 7) * UnitConversions.convert(1, 'yr', 'day')
 
     occupant_away_hours_per_year = []
     mkc_activity_schedules.size.times do |i|
@@ -573,6 +574,24 @@ class ScheduleGenerator
       _, ev_occupant = elligible_occupant.sample(random: @prngs[:ev])
       return ev_occupant
     end
+  end
+
+  # Gets the (user-specified or defaulted) hours/week for the vehicle.
+  #
+  # @param vehicle [HPXML::Vehicle] The EV of interest
+  # @return [Double] Hours per week of driving
+  def get_ev_hours_per_week(vehicle)
+    hours_per_week = vehicle.hours_per_week
+    if hours_per_week.nil?
+      default_values = Defaults.get_electric_vehicle_values
+      if vehicle.miles_per_year.nil?
+        hours_per_week = default_values[:hours_per_week]
+      else
+        miles_to_hrs_per_week = default_values[:miles_per_year] / default_values[:hours_per_week]
+        hours_per_week = vehicle.miles_per_year / miles_to_hrs_per_week
+      end
+    end
+    return hours_per_week
   end
 
   # Normalize an array by dividing all values by the maximum value.
@@ -776,15 +795,15 @@ class ScheduleGenerator
         first_half_driving = (actual_driving_time / 2.0).ceil
         second_half_driving = actual_driving_time - first_half_driving
 
-        discharging_schedule += [1] * first_half_driving  # Start driving
-        discharging_schedule += [0] * idle_time           # Idle in the middle
-        discharging_schedule += [1] * second_half_driving # End driving
-        charging_schedule += [0] * activity_minutes
+        discharging_schedule.concat([1] * first_half_driving)  # Start driving
+        discharging_schedule.concat([0] * idle_time)           # Idle in the middle
+        discharging_schedule.concat([1] * second_half_driving) # End driving
+        charging_schedule.concat([0] * activity_minutes)
 
         driving_minutes_used += actual_driving_time
       else
-        charging_schedule += [1] * activity_minutes
-        discharging_schedule += [0] * activity_minutes
+        charging_schedule.concat([1] * activity_minutes)
+        discharging_schedule.concat([0] * activity_minutes)
       end
     end
     if driving_minutes_used < total_driving_minutes_per_year
@@ -806,7 +825,8 @@ class ScheduleGenerator
     end
 
     vehicle = @hpxml_bldg.vehicles[0]
-    hours_per_year = (vehicle.hours_per_week / 7) * UnitConversions.convert(1, 'yr', 'day')
+    hours_per_week = get_ev_hours_per_week(vehicle)
+    hours_per_year = (hours_per_week / 7) * UnitConversions.convert(1, 'yr', 'day')
     away_index = 5 # Index of away activity in the markov-chain simulator
     away_schedule = markov_chain_simulation_result[@ev_occupant_number].column(away_index)
     charging_schedule, discharging_schedule = get_ev_battery_schedule(away_schedule, hours_per_year)
@@ -892,8 +912,8 @@ class ScheduleGenerator
     end
 
     interior_lighting_schedule = interior_lighting_schedule.flatten
-    max_value = interior_lighting_schedule.max
-    interior_lighting_schedule.map { |s| s / max_value }
+    interior_lighting_schedule = normalize(interior_lighting_schedule)
+    return interior_lighting_schedule
   end
 
   # Generate occupancy schedules for sleeping, away, idle, EV presence and total occupancy.
@@ -1422,7 +1442,7 @@ class ScheduleGenerator
     schedule = aggregate_array(schedule, @minutes_per_step)
 
     # Normalize by peak value
-    peak_value = schedule.max
-    schedule.map { |value| value / peak_value }
+    schedule = normalize(schedule)
+    return schedule
   end
 end
