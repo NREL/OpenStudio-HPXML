@@ -3037,17 +3037,18 @@ module HVACSizing
     rated_odb = (mode == :clg) ? HVAC::AirSourceCoolRatedODB : HVAC::AirSourceHeatRatedODB
     detailed_performance_data = (mode == :clg) ? hvac_sys.cooling_detailed_performance_data : hvac_sys.heating_detailed_performance_data
     if detailed_performance_data.empty?
-      # Based on retention fraction and retention temperature
+      # Based on capacity fraction at a given temperature
       if mode == :clg
         _min_cap_maint_95, max_cap_maint_95 = HVAC.get_cool_capacity_maint_95()
         # Review: Use max speed maintenance?
-        capacity_retention_fraction = 1 / max_cap_maint_95
-        capacity_retention_temperature = 82.0
+        capacity_fraction = 1 / max_cap_maint_95
+        capacity_temperature = 82.0
       elsif mode == :htg
-        capacity_retention_temperature, capacity_retention_fraction = HVAC.get_heating_capacity_retention_17F(hvac_sys)
+        capacity_fraction = HVAC.get_heating_capacity_fraction_17F(hvac_sys)
+        capacity_temperature = 17.0
       end
-      odb_adj = 1.0 - (1.0 - capacity_retention_fraction) / (rated_odb - capacity_retention_temperature) * (rated_odb - outdoor_temp)
-    else # there are detailed performance data
+      odb_adj = 1.0 - (1.0 - capacity_fraction) / (rated_odb - capacity_temperature) * (rated_odb - outdoor_temp)
+    else
       # Based on detailed performance data
       max_rated_dp = detailed_performance_data.find { |dp| dp.outdoor_temperature == rated_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
       if max_rated_dp.capacity.nil?

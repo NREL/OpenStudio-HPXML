@@ -1940,8 +1940,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     hpxml_bldg.heat_pumps.each do |hpsys|
       hpsys.heating_capacity = nil
       hpsys.heating_capacity_17F = nil
-      hpsys.heating_capacity_retention_fraction = nil
-      hpsys.heating_capacity_retention_temp = nil
+      hpsys.heating_capacity_fraction_17F = nil
       hpsys.backup_heating_capacity = nil
       hpsys.cooling_capacity = nil
     end
