@@ -1578,7 +1578,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('heat_pump_pan_heater_control_type', pan_heater_control_type_choices, false)
     arg.setDisplayName('Heat Pump: Pan Heater Control Type')
-    arg.setDescription("Heat pump control type. If '#{HPXML::HVACPanHeaterControlTypeContinuous}', operates continuously when outdoor temperature is below 32F. If '#{HPXML::HVACPanHeaterControlTypeDefrost}', operates only during defrost mode. Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps).")
+    arg.setDescription("Heat pump pan heater control type. If '#{HPXML::HVACPanHeaterControlTypeContinuous}', operates continuously when outdoor temperature is below 32F. If '#{HPXML::HVACPanHeaterControlTypeDefrost}', operates only during defrost mode. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.")
     args << arg
 
     perf_data_capacity_type_choices = OpenStudio::StringVector.new
