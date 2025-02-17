@@ -2,6 +2,10 @@
 
 # Collection of methods related to output reporting or writing output files.
 module Outputs
+  MeterCustomElectricityTotal = 'Electricity:Total'
+  MeterCustomElectricityNet = 'Electricity:Net'
+  MeterCustomElectricityPV = 'Electricity:PV'
+
   # Add EMS programs for output reporting. In the case where a whole SFA/MF building is
   # being simulated, these programs are added to the whole building (merged) model, not
   # the individual dwelling unit models.
@@ -1238,8 +1242,8 @@ module Outputs
     end
 
     # Create Total/Net meters
-    { 'Electricity:Total' => total_key_vars,
-      'Electricity:Net' => net_key_vars }.each do |meter_name, key_vars|
+    { MeterCustomElectricityTotal => total_key_vars,
+      MeterCustomElectricityNet => net_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
         meter = OpenStudio::Model::MeterCustom.new(model)
@@ -1257,7 +1261,7 @@ module Outputs
     # Create PV meter
     if not pv_key_vars.empty?
       meter = OpenStudio::Model::MeterCustom.new(model)
-      meter.setName('Electricity:PV')
+      meter.setName(MeterCustomElectricityPV)
       meter.setFuelType(EPlus::FuelTypeElectricity)
       pv_key_vars.uniq.each do |key_var|
         meter.addKeyVarGroup(key_var[0], key_var[1])

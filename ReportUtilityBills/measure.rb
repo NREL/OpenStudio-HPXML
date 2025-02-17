@@ -693,19 +693,19 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # Initialize the Fuel objects with meter and units.
+  # Initialize the Fuel objects with meter and fuel units.
   #
   # @return [Hash] Fuel type, is_production => Fuel object
   def setup_fuel_outputs()
     fuels = {}
-    fuels[[FT::Elec, false]] = Fuel.new(meter: 'ELECTRICITY:TOTAL', units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
-    fuels[[FT::Elec, true]] = Fuel.new(meter: 'ELECTRICITY:PV', units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
-    fuels[[FT::Gas, false]] = Fuel.new(meter: "#{EPlus::FuelTypeNaturalGas}:Facility", units: UtilityBills.get_fuel_units(HPXML::FuelTypeNaturalGas))
-    fuels[[FT::Oil, false]] = Fuel.new(meter: "#{EPlus::FuelTypeOil}:Facility", units: UtilityBills.get_fuel_units(HPXML::FuelTypeOil))
-    fuels[[FT::Propane, false]] = Fuel.new(meter: "#{EPlus::FuelTypePropane}:Facility", units: UtilityBills.get_fuel_units(HPXML::FuelTypePropane))
-    fuels[[FT::WoodCord, false]] = Fuel.new(meter: "#{EPlus::FuelTypeWoodCord}:Facility", units: UtilityBills.get_fuel_units(HPXML::FuelTypeWoodCord))
-    fuels[[FT::WoodPellets, false]] = Fuel.new(meter: "#{EPlus::FuelTypeWoodPellets}:Facility", units: UtilityBills.get_fuel_units(HPXML::FuelTypeWoodPellets))
-    fuels[[FT::Coal, false]] = Fuel.new(meter: "#{EPlus::FuelTypeCoal}:Facility", units: UtilityBills.get_fuel_units(HPXML::FuelTypeCoal))
+    fuels[[FT::Elec, false]] = Fuel.new(meter: Outputs::MeterCustomElectricityTotal.upcase, fuel: HPXML::FuelTypeElectricity)
+    fuels[[FT::Elec, true]] = Fuel.new(meter: Outputs::MeterCustomElectricityPV.upcase, fuel: HPXML::FuelTypeElectricity)
+    fuels[[FT::Gas, false]] = Fuel.new(meter: "#{EPlus::FuelTypeNaturalGas}:Facility", fuel: HPXML::FuelTypeNaturalGas)
+    fuels[[FT::Oil, false]] = Fuel.new(meter: "#{EPlus::FuelTypeOil}:Facility", fuel: HPXML::FuelTypeOil)
+    fuels[[FT::Propane, false]] = Fuel.new(meter: "#{EPlus::FuelTypePropane}:Facility", fuel: HPXML::FuelTypePropane)
+    fuels[[FT::WoodCord, false]] = Fuel.new(meter: "#{EPlus::FuelTypeWoodCord}:Facility", fuel: HPXML::FuelTypeWoodCord)
+    fuels[[FT::WoodPellets, false]] = Fuel.new(meter: "#{EPlus::FuelTypeWoodPellets}:Facility", fuel: HPXML::FuelTypeWoodPellets)
+    fuels[[FT::Coal, false]] = Fuel.new(meter: "#{EPlus::FuelTypeCoal}:Facility", fuel: HPXML::FuelTypeCoal)
     return fuels
   end
 

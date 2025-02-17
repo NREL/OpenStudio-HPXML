@@ -3,11 +3,11 @@
 # Object that stores collections of EnergyPlus meter names, units, and timeseries data.
 class Fuel
   # @param meter [String] EnergyPlus meter name
-  # @param units [String] fuel units (HPXML::FuelTypeXXX)
-  def initialize(meter:, units:)
+  # @param fuel [String] fuel type (HPXML::FuelTypeXXX)
+  def initialize(meter:, fuel:)
     @meter = meter
     @timeseries = []
-    @units = units
+    @units = UtilityBills.get_fuel_units(fuel)
   end
   attr_accessor(:meter, :timeseries, :units)
 end

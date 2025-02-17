@@ -336,7 +336,6 @@ Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Peak building electricity outputs are listed below.
-FIXME Values include any home battery charging/discharging and EV charging.
 
   ==================================  =============================================================
   Type                                Notes

@@ -1030,7 +1030,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         te_types = [total_or_net]
       else
-        te_types = [TE::Total, TE::Net]
+        te_types = [TE::Total]
       end
 
       te_types.each do |te_type|
@@ -1218,7 +1218,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       key_values.each do |key_value|
-        @output_variables[[output_variable_name, key_value]] = OutputVariable.new
+        @output_variables[[output_variable_name, key_value]] = OutputVariableOrMeter.new
         @output_variables[[output_variable_name, key_value]].name = "#{output_variable_name}: #{key_value.split.map(&:capitalize).join(' ')}"
         @output_variables[[output_variable_name, key_value]].timeseries_units = units
         @output_variables[[output_variable_name, key_value]].timeseries_output = get_report_variable_data_timeseries([key_value], [output_variable_name], 1, 0, args[:timeseries_frequency])
@@ -1234,7 +1234,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next
       end
 
-      @output_meters[output_meter_name] = OutputMeter.new
+      @output_meters[output_meter_name] = OutputVariableOrMeter.new
       @output_meters[output_meter_name].name = output_meter_name
       @output_meters[output_meter_name].timeseries_units = units
       @output_meters[output_meter_name].timeseries_output = get_report_meter_data_timeseries([output_meter_name], 1, 0, args[:timeseries_frequency])
@@ -2303,7 +2303,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   class Fuel < BaseOutput
     # @param meter [TODO] TODO
-    def initialize(meter: [])
+    def initialize(meter:)
       super()
       @meter = meter
       @timeseries_output_by_system = {}
@@ -2316,7 +2316,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # @param outputs [TODO] TODO
     # @param is_negative [TODO] TODO
     # @param is_storage [TODO] TODO
-    def initialize(outputs: [], is_negative: false, is_storage: false)
+    def initialize(outputs:, is_negative: false, is_storage: false)
       super()
       @variables = outputs.select { |o| !o[2].include?(':') }
       @meters = outputs.select { |o| o[2].include?(':') }
@@ -2350,7 +2350,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   class HotWater < BaseOutput
     # @param outputs [TODO] TODO
-    def initialize(outputs: [])
+    def initialize(outputs:)
       super()
       @variables = outputs.select { |o| !o[2].include?(':') }
       @meters = outputs.select { |o| o[2].include?(':') }
@@ -2363,7 +2363,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   class Resilience < BaseOutput
     # @param variables [TODO] TODO
-    def initialize(variables: [])
+    def initialize(variables:)
       super()
       @variables = variables
     end
@@ -2419,16 +2419,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   # TODO
-  class IdealLoad < BaseOutput
-    # @param variables [TODO] TODO
-    def initialize(variables: [])
-      super()
-      @variables = variables
-    end
-    attr_accessor(:variables)
-  end
-
-  # TODO
   class PeakLoad < BaseOutput
     # @param ems_variable [TODO] TODO
     # @param report [TODO] TODO
@@ -2473,15 +2463,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   # TODO
-  class OutputVariable < BaseOutput
-    def initialize
-      super()
-    end
-    attr_accessor()
-  end
-
-  # TODO
-  class OutputMeter < BaseOutput
+  class OutputVariableOrMeter < BaseOutput
     def initialize
       super()
     end
@@ -2626,8 +2608,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Fuels
 
     @fuels = {}
-    @fuels[[FT::Elec, TE::Total]] = Fuel.new(meter: 'Electricity:Total'.upcase)
-    @fuels[[FT::Elec, TE::Net]] = Fuel.new(meter: 'Electricity:Net'.upcase)
+    @fuels[[FT::Elec, TE::Total]] = Fuel.new(meter: Outputs::MeterCustomElectricityTotal.upcase)
+    @fuels[[FT::Elec, TE::Net]] = Fuel.new(meter: Outputs::MeterCustomElectricityNet.upcase)
     @fuels[[FT::Gas, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypeNaturalGas}:Facility")
     @fuels[[FT::Oil, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypeOil}:Facility")
     @fuels[[FT::Propane, TE::Total]] = Fuel.new(meter: "#{EPlus::FuelTypePropane}:Facility")
@@ -2698,12 +2680,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Fuels
     @peak_fuels = {}
-    @peak_fuels[[FT::Elec, TE::Total, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Total', meter: 'Electricity:Total')
-    @peak_fuels[[FT::Elec, TE::Total, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Total', meter: 'Electricity:Total')
-    @peak_fuels[[FT::Elec, TE::Total, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Total', meter: 'Electricity:Total')
-    @peak_fuels[[FT::Elec, TE::Net, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Net', meter: 'Electricity:Net')
-    @peak_fuels[[FT::Elec, TE::Net, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Net', meter: 'Electricity:Net')
-    @peak_fuels[[FT::Elec, TE::Net, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Net', meter: 'Electricity:Net')
+    @peak_fuels[[FT::Elec, TE::Total, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Total', meter: Outputs::MeterCustomElectricityTotal)
+    @peak_fuels[[FT::Elec, TE::Total, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Total', meter: Outputs::MeterCustomElectricityTotal)
+    @peak_fuels[[FT::Elec, TE::Total, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Total', meter: Outputs::MeterCustomElectricityTotal)
+    @peak_fuels[[FT::Elec, TE::Net, PFT::Winter]] = PeakFuel.new(report: 'Peak Electricity Net', meter: Outputs::MeterCustomElectricityNet)
+    @peak_fuels[[FT::Elec, TE::Net, PFT::Summer]] = PeakFuel.new(report: 'Peak Electricity Net', meter: Outputs::MeterCustomElectricityNet)
+    @peak_fuels[[FT::Elec, TE::Net, PFT::Annual]] = PeakFuel.new(report: 'Peak Electricity Net', meter: Outputs::MeterCustomElectricityNet)
 
     @peak_fuels.each do |key, peak_fuel|
       fuel_type, total_or_net, peak_fuel_type = key
