@@ -115,7 +115,7 @@
             <Area>456.0</Area>
             <Azimuth>0</Azimuth>
             <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <SolarAbsorptance>0.2</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -136,7 +136,7 @@
             <Area>216.0</Area>
             <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <SolarAbsorptance>0.2</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -157,7 +157,7 @@
             <Area>456.0</Area>
             <Azimuth>180</Azimuth>
             <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <SolarAbsorptance>0.2</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -178,7 +178,7 @@
             <Area>216.0</Area>
             <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <SolarAbsorptance>0.2</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -200,7 +200,7 @@
             <Area>60.8</Area>
             <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <SolarAbsorptance>0.2</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall5Insulation'/>
@@ -218,7 +218,7 @@
             <Area>60.8</Area>
             <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <SolarAbsorptance>0.2</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall6Insulation'/>
