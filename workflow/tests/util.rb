@@ -231,16 +231,16 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?) }
       next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
     end
-    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && vehicle.ev_charger_idref.nil? }
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && vehicle.ev_charger_idref.nil? } }
       next if message.include? 'Electric vehicle specified with no charger provided; home EV charging will not be modeled.'
     end
-    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? && vehicle.ev_weekday_fractions.nil? } && !hpxml_bldg.header.schedules_filepaths.empty?
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? && vehicle.ev_weekday_fractions.nil? } && !hpxml_bldg.header.schedules_filepaths.empty? }
       next if message.include? 'driving hours could not be met'
     end
-    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV } && hpxml_bldg.plug_loads.any? { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV } && hpxml_bldg.plug_loads.any? { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging } }
       next if message.include? 'Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'
     end
-    if hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type != HPXML::VehicleTypeBEV }
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type != HPXML::VehicleTypeBEV } }
       next if message.include?('Vehicle type') && message.include?('is not currently handled, the vehicle will not be modeled')
     end
     if hpxml_path.include? 'base-location-capetown-zaf.xml'
