@@ -2854,7 +2854,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
   .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
   .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
-         If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode.
+         If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode and the outdoor temperature is below 32F.
 
 .. _hvac_hp_mini_split:
 
@@ -2942,7 +2942,7 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
   .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
   .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
-         If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode.
+         If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode and the outdoor temperature is below 32F.
 
 .. _hvac_hp_pthp:
 
