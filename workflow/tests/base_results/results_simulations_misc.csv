@@ -63,6 +63,8 @@ base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml,0.0,0.0,0.0,1354.
 base-bldgtype-mf-unit-shared-water-heater-recirc.xml,0.0,0.0,0.0,1354.7,998.0,11171.7,3093.4,943.5,1655.2,1655.2,4.038,7.78,0.0
 base-bldgtype-mf-unit-shared-water-heater.xml,0.0,0.0,0.0,1354.7,998.0,11171.7,3093.4,906.8,1618.5,1618.5,4.038,7.78,0.0
 base-bldgtype-mf-unit.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,3093.4,1600.1,2147.8,2147.8,3.848,7.747,0.0
+base-bldgtype-mf-whole-building-common-spaces-reverse.xml,0.0,0.0,0.0,8128.5,5988.0,67066.1,17088.0,19191.9,14654.5,19191.9,38.1,26.012,0.0
+base-bldgtype-mf-whole-building-common-spaces.xml,0.0,0.0,0.0,8128.5,5988.0,67066.2,17088.0,18910.5,14711.7,18910.5,39.166,26.615,0.0
 base-bldgtype-mf-whole-building.xml,0.0,0.0,0.0,8128.5,5988.0,67066.1,16866.9,22275.5,18426.7,22275.5,54.296,56.41,0.0
 base-bldgtype-sfa-unit-2stories.xml,0.0,0.0,0.0,1354.7,998.0,11171.5,2624.7,2050.9,3164.5,3164.5,18.235,15.439,0.0
 base-bldgtype-sfa-unit-atticroof-cathedral.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2624.7,2138.1,4554.2,4554.2,36.735,28.677,0.0
