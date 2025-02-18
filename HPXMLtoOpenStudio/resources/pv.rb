@@ -37,6 +37,7 @@ module PV
 
     # Apply unit multiplier
     max_power = pv_system.max_power_output * unit_multiplier
+    return if max_power <= 0
 
     if pv_system.is_shared_system
       # Apportion to single dwelling unit by # bedrooms
