@@ -5363,10 +5363,11 @@ module HVAC
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
+    cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeBackupSuppHeat } # Ensure unique meter for each heat pump
     defrost_supp_heat_energy_oe = Model.add_other_equipment(
       model,
       name: "#{air_loop_unitary.name} defrost supp heat energy",
-      end_use: Constants::ObjectTypeBackupSuppHeat,
+      end_use: "#{Constants::ObjectTypeBackupSuppHeat}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
       frac_radiant: 0,
@@ -5437,10 +5438,11 @@ module HVAC
   # @return [nil]
   def self.apply_pan_heater(model, air_loop_unitary, conditioned_space, heat_pump)
     # Other equipment/actuator
+    cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypePanHeater } # Ensure unique meter for each heat pump
     pan_heater_energy_oe = Model.add_other_equipment(
       model,
       name: "#{air_loop_unitary.name} pan heater energy",
-      end_use: Constants::ObjectTypePanHeater,
+      end_use: "#{Constants::ObjectTypePanHeater}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
       frac_radiant: 0,
