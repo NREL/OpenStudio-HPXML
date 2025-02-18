@@ -77,24 +77,24 @@ def create_hpxmls
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+      if hpxml_path.include?('whole-building.xml')
         suffix = "_#{i}" if i > 1
-        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
-        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
-        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
+        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
+        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
+        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? HPXML::AtticTypeVented : HPXML::AtticTypeBelowApartment)
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
-      elsif hpxml_path.include?('base-bldgtype-mf-whole-building-common-spaces')
+      elsif hpxml_path.include?('whole-building-common-spaces')
         suffix = "_#{i}" if i > 1
-        build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv")
-        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
-        build_residential_hpxml['geometry_attic_type'] = (i >= 7 ? 'VentedAttic' : 'BelowApartment')
+        build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
+        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
+        build_residential_hpxml['geometry_attic_type'] = (i >= 7 ? HPXML::AtticTypeVented : HPXML::AtticTypeBelowApartment)
         build_residential_hpxml['geometry_average_ceiling_height'] = (i >= 7 ? 2.0 : 8.0)
         build_residential_hpxml['geometry_unit_num_bedrooms'] = (i >= 7 ? 0 : 3)
-        build_residential_hpxml['geometry_unit_num_bathrooms'] = (i >= 7 ? 1 : 2) # FIXME: schema requirement : min exclusive 0
+        build_residential_hpxml['geometry_unit_num_bathrooms'] = (i >= 7 ? 1 : 2)
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => -7.0, 2 => -7.0, 3 => 1.0, 4 => 1.0, 5 => 9.0, 6 => 9.0, 7 => 17.0, 8 => 17.0 }[i]
         # Partially conditioned basement + one unconditioned hallway each floor + unconditioned attic
-        build_residential_hpxml['heating_system_type'] = { 1 => 'ElectricResistance', 2 => 'none', 3 => 'none', 4 => 'ElectricResistance', 5 => 'none', 6 => 'ElectricResistance', 7 => 'none', 8 => 'none' }[i]
-        build_residential_hpxml['cooling_system_type'] = { 1 => 'room air conditioner', 2 => 'none', 3 => 'none', 4 => 'room air conditioner', 5 => 'none', 6 => 'room air conditioner', 7 => 'none', 8 => 'none' }[i]
+        build_residential_hpxml['heating_system_type'] = ([1, 4, 6].include?(i) ? HPXML::HVACTypeElectricResistance : 'none')
+        build_residential_hpxml['cooling_system_type'] = ([1, 4, 6].include?(i) ? HPXML::HVACTypeRoomAirConditioner : 'none')
       end
 
       # Re-generate stochastic schedule CSV?
@@ -1485,10 +1485,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         window.overhangs_distance_to_bottom_of_window = 0.0
       end
     end
-    if ['base-enclosure-2stories-garage.xml',
-        'base-enclosure-garage.xml',
-        'base-zones-spaces.xml',
-        'base-zones-spaces-multiple.xml'].include? hpxml_file
+    if hpxml_bldg.has_location(HPXML::LocationGarage)
       grg_wall = hpxml_bldg.walls.select { |w|
                    w.interior_adjacent_to == HPXML::LocationGarage &&
                      w.exterior_adjacent_to == HPXML::LocationOutside
@@ -2359,6 +2356,19 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.batteries[0].usable_capacity_ah = hpxml_bldg.batteries[0].nominal_capacity_ah * default_values[:usable_fraction]
       hpxml_bldg.batteries[0].nominal_capacity_kwh = nil
       hpxml_bldg.batteries[0].usable_capacity_kwh = nil
+    end
+
+    # ------------- #
+    # HPXML Vehicle #
+    # ------------- #
+
+    if ['base-vehicle-multiple.xml'].include? hpxml_file
+      hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
+                              vehicle_type: HPXML::VehicleTypeHybrid,
+                              fuel_economy_units: HPXML::UnitsMPG,
+                              fuel_economy_combined: 44.0,
+                              miles_per_year: 15000.0,
+                              hours_per_week: 10.0)
     end
 
     # ---------------- #

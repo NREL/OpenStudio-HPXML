@@ -55,7 +55,7 @@
           <ConditionedBuildingVolume>9600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-mf-unit.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -420,7 +420,7 @@
           <ConditionedBuildingVolume>9600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic_2.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-mf-unit_2.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -774,7 +774,7 @@
           <ConditionedBuildingVolume>9600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic_3.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-mf-unit_3.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -1114,7 +1114,7 @@
           <ConditionedBuildingVolume>9600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic_4.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-mf-unit_4.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -1477,7 +1477,7 @@
           <ConditionedBuildingVolume>9600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic_5.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-mf-unit_5.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -1805,7 +1805,7 @@
           <ConditionedBuildingVolume>9600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic_6.csv</SchedulesFilePath>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-mf-unit_6.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>

@@ -424,6 +424,17 @@ Optionally generates timeseries EnergyPlus output variables. If multiple output 
 
 <br/>
 
+**Generate Timeseries Output: EnergyPlus Output Meters**
+
+Optionally generates timeseries EnergyPlus output meters. If multiple output meters are desired, use a comma-separated list. Example: "Electricity:Facility, HeatingCoils:EnergyTransfer"
+
+- **Name:** ``user_output_meters``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **Annual Output File Name**
 
 If not provided, defaults to 'results_annual.csv' (or 'results_annual.json' or 'results_annual.msgpack').
@@ -524,8 +535,6 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 
 - ``end_use_electricity_plug_loads_m_btu``
 
-- ``end_use_electricity_electric_vehicle_charging_m_btu``
-
 - ``end_use_electricity_well_pump_m_btu``
 
 - ``end_use_electricity_pool_heater_m_btu``
@@ -541,6 +550,8 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 - ``end_use_electricity_generator_m_btu``
 
 - ``end_use_electricity_battery_m_btu``
+
+- ``end_use_electricity_electric_vehicle_charging_m_btu``
 
 - ``end_use_natural_gas_heating_m_btu``
 
@@ -683,6 +694,8 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 - ``unmet_hours_heating_hr``
 
 - ``unmet_hours_cooling_hr``
+
+- ``unmet_hours_ev_driving_hr``
 
 - ``peak_electricity_winter_total_w``
 
