@@ -18,6 +18,7 @@ __Bugfixes__
 - Fixes possible heating/cooling spikes when using maximum power ratio detailed schedule for variable-speed HVAC systems.
 - Fixes unavailable periods for two consecutive, but partial, days.
 - Fixes error when specifying a glass block window without interior shading coefficients.
+- Fixes battery charging/discharging not being included in peak electricity outputs.
 
 ## OpenStudio-HPXML v1.9.1
 
