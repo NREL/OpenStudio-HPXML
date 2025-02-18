@@ -1433,6 +1433,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       return false
     end
 
+    # Check total vs net energy use
+    has_pv = @hpxml_bldgs.count { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? } > 0
+    if has_pv
+      if @totals[TE::Total].annual_output == @totals[TE::Net].annual_output
+        runner.registerError('Building has PV but total/net energy uses are equal.')
+        return false
+      end
+    else
+      if @totals[TE::Total].annual_output != @totals[TE::Net].annual_output
+        runner.registerError('Building does not have PV but total/net energy uses are different.')
+        return false
+      end
+    end
+
     # Check sum of electricity produced end use outputs match total output from meter
     sum_elec_prod_annual = @end_uses.select { |k, eu| k[0] == FT::Elec && eu.is_negative }.map { |_k, eu| eu.annual_output.to_f }.sum(0.0) # Negative value
     if (sum_elec_prod_annual - meter_elec_produced).abs > tol
