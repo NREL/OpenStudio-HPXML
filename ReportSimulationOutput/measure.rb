@@ -1030,7 +1030,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if fuel_type == FT::Elec
         te_types = [total_or_net]
       else
-        te_types = [TE::Total]
+        te_types = [TE::Total, TE::Net]
       end
 
       te_types.each do |te_type|
