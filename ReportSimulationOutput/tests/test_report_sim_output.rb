@@ -9,6 +9,7 @@ require_relative '../measure.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/version.rb'
+require_relative '../../HPXMLtoOpenStudio/resources/calendar.rb'
 require 'oga'
 require 'json'
 
@@ -155,6 +156,9 @@ class ReportSimulationOutputTest < Minitest::Test
     "Peak Electricity: #{PFT::Winter} #{TE::Total} (W)",
     "Peak Electricity: #{PFT::Summer} #{TE::Total} (W)",
     "Peak Electricity: #{PFT::Annual} #{TE::Total} (W)",
+    "Peak Electricity: #{PFT::Winter} #{TE::Net} (W)",
+    "Peak Electricity: #{PFT::Summer} #{TE::Net} (W)",
+    "Peak Electricity: #{PFT::Annual} #{TE::Net} (W)",
     "Peak Load: #{PLT::Heating} (kBtu/hr)",
     "Peak Load: #{PLT::Cooling} (kBtu/hr)",
     "Component Load: Heating: #{CLT::Roofs} (MBtu)",
@@ -625,6 +629,11 @@ class ReportSimulationOutputTest < Minitest::Test
     actual_fridge_energy_use = actual_annual_rows["End Use: #{FT::Elec}: #{EUT::Refrigerator} (MBtu)"]
     rated_fridge_energy_use = UnitConversions.convert(hpxml.buildings[0].refrigerators[0].rated_annual_kwh, 'kWh', 'MBtu')
     assert_in_epsilon(0.93, actual_fridge_energy_use / rated_fridge_energy_use, 0.1)
+
+    # Verify Total/Net outputs when no PV
+    actual_annual_rows = _get_annual_values(annual_csv)
+    assert_equal(actual_annual_rows["Energy Use: #{TE::Total} (MBtu)"], actual_annual_rows["Energy Use: #{TE::Net} (MBtu)"])
+    assert_equal(actual_annual_rows["Fuel Use: #{FT::Elec}: #{TE::Total} (MBtu)"], actual_annual_rows["Fuel Use: #{FT::Elec}: #{TE::Net} (MBtu)"])
   end
 
   def test_annual_only2
@@ -698,6 +707,10 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Energy Use: #{TE::Total}",
                                                              "Energy Use: #{TE::Net}"])
+    # Verify Total/Net outputs when PV
+    actual_annual_rows = _get_annual_values(annual_csv)
+    assert_operator(actual_annual_rows["Energy Use: #{TE::Total} (MBtu)"], :>, actual_annual_rows["Energy Use: #{TE::Net} (MBtu)"])
+    assert_operator(actual_annual_rows["Fuel Use: #{FT::Elec}: #{TE::Total} (MBtu)"], :>, actual_annual_rows["Fuel Use: #{FT::Elec}: #{TE::Net} (MBtu)"])
   end
 
   def test_timeseries_hourly_fuels
