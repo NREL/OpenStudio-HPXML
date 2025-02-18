@@ -1,11 +1,16 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
-- Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
+- Electric vehicle enhancements:
+  - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
+  - Adds EV driving unmet hours output.
 - Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 - BuildResidentialScheduleFile measure:
-  - Adds stochastic schedule generation for electric vehicle charging.
+  - Adds stochastic schedule generation for electric vehicle charging (using `Vehicles`).
   - Removes generation of stochastic schedules for building components not present in the HPXML file.
+- Output updates:
+  - **Breaking change**: Adds generator electricity produced to *total* fuel/energy use; previously it was only included in *net* values.
+  - Adds new outputs for *net* peak electricity (summer/winter/annual); same as *total* peak electricity outputs but subtracts power produced by PV.
 - Electric panel calculations:
   - Allows optional `ElectricPanel` inputs for describing branch circuits and service feeders
   - Optionally reports breaker spaces and calculated loads for specified NEC calculation types
@@ -16,6 +21,7 @@ __Bugfixes__
 - Fixes possible heating/cooling spikes when using maximum power ratio detailed schedule for variable-speed HVAC systems.
 - Fixes unavailable periods for two consecutive, but partial, days.
 - Fixes error when specifying a glass block window without interior shading coefficients.
+- Fixes battery charging/discharging not being included in peak electricity outputs.
 
 ## OpenStudio-HPXML v1.9.1
 
