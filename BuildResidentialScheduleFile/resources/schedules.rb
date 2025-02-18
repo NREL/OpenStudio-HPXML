@@ -558,8 +558,7 @@ class ScheduleGenerator
     end
 
     vehicle = @hpxml_bldg.vehicles[0]
-    hours_per_week = get_ev_hours_per_week(vehicle)
-    hours_per_year = (hours_per_week / 7) * UnitConversions.convert(1, 'yr', 'day')
+    hours_per_year = (vehicle.hours_per_week / 7) * UnitConversions.convert(1, 'yr', 'day')
 
     occupant_away_hours_per_year = []
     mkc_activity_schedules.size.times do |i|
@@ -576,24 +575,6 @@ class ScheduleGenerator
       _, ev_occupant = elligible_occupant.sample(random: @prngs[:ev])
       return ev_occupant
     end
-  end
-
-  # Gets the (user-specified or defaulted) hours/week for the vehicle.
-  #
-  # @param vehicle [HPXML::Vehicle] The EV of interest
-  # @return [Double] Hours per week of driving
-  def get_ev_hours_per_week(vehicle)
-    hours_per_week = vehicle.hours_per_week
-    if hours_per_week.nil?
-      default_values = Defaults.get_electric_vehicle_values
-      if vehicle.miles_per_year.nil?
-        hours_per_week = default_values[:hours_per_week]
-      else
-        miles_to_hrs_per_week = default_values[:miles_per_year] / default_values[:hours_per_week]
-        hours_per_week = vehicle.miles_per_year / miles_to_hrs_per_week
-      end
-    end
-    return hours_per_week
   end
 
   # Normalize an array by dividing all values by the maximum value.
@@ -827,8 +808,7 @@ class ScheduleGenerator
     end
 
     vehicle = @hpxml_bldg.vehicles[0]
-    hours_per_week = get_ev_hours_per_week(vehicle)
-    hours_per_year = (hours_per_week / 7) * UnitConversions.convert(1, 'yr', 'day')
+    hours_per_year = (vehicle.hours_per_week / 7) * UnitConversions.convert(1, 'yr', 'day')
     away_index = 5 # Index of away activity in the markov-chain simulator
     away_schedule = markov_chain_simulation_result[@ev_occupant_number].column(away_index)
     charging_schedule, discharging_schedule = get_ev_battery_schedule(away_schedule, hours_per_year)
