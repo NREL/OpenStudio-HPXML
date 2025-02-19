@@ -2862,7 +2862,7 @@ Mini-Split Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
 
 Each mini-split heat pump is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
-Each ``HeatPump`` is expected to represent a single outdoor unit, whether connected to one indoor head or multiple indoor heads.
+Each ``HeatPump`` should represent a single outdoor unit, whether connected to one indoor head or multiple indoor heads.
 
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
   Element                                                           Type      Units     Constraints               Required  Default         Notes
