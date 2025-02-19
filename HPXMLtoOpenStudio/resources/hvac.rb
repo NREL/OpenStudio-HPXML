@@ -5495,7 +5495,11 @@ module HVAC
       model,
       name: "#{air_loop_unitary.name} pan heater program"
     )
-    program.addLine("If (#{tout_db_sensor.name} <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (#{htg_avail_sensor.name} == 1)")
+    if htg_avail_sensor.nil?
+      program.addLine("If (#{tout_db_sensor.name} <= #{UnitConversions.convert(32.0, 'F', 'C')})")
+    else # Don't run pan heater during heating unavailable period
+      program.addLine("If (#{tout_db_sensor.name} <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (#{htg_avail_sensor.name} == 1)")
+    end
     if heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeContinuous
       program.addLine("  Set #{pan_heater_energy_oe_act.name} = #{heat_pump.pan_heater_watts}")
     elsif heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeDefrost
