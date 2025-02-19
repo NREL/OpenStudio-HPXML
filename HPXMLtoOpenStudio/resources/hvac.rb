@@ -474,7 +474,7 @@ module HVAC
     end
 
     if is_heatpump && cooling_system.pan_heater_watts.to_f > 0
-      apply_pan_heater(model, air_loop_unitary, control_zone.spaces[0], cooling_system)
+      apply_pan_heater(model, htg_coil, air_loop_unitary, control_zone.spaces[0], cooling_system)
     end
 
     return air_loop
@@ -5307,7 +5307,7 @@ module HVAC
   # when using the advanced defrost model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed]  OpenStudio Heating Coil object
+  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
   # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
@@ -5432,11 +5432,12 @@ module HVAC
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
   # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @return [nil]
-  def self.apply_pan_heater(model, air_loop_unitary, conditioned_space, heat_pump)
+  def self.apply_pan_heater(model, htg_coil, air_loop_unitary, conditioned_space, heat_pump)
     # Other equipment/actuator
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypePanHeater } # Ensure unique meter for each heat pump
     pan_heater_energy_oe = Model.add_other_equipment(
@@ -5467,6 +5468,15 @@ module HVAC
       key_name: 'Environment'
     )
 
+    if heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeDefrost
+      htg_coil_rtf_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{htg_coil.name} rtf s",
+        output_var_or_meter_name: 'Heating Coil Runtime Fraction',
+        key_name: htg_coil.name
+      )
+    end
+
     # EMS program
     program = Model.add_ems_program(
       model,
@@ -5481,11 +5491,10 @@ module HVAC
       program.addLine("  Set F_defrost = 0.134 - (0.003 * ((#{tout_db_sensor.name} * 1.8) + 32))")
       program.addLine('  Set F_defrost = @Min F_defrost 0.08')
       program.addLine('  Set F_defrost = @Max F_defrost 0')
-      program.addLine("  Set #{pan_heater_energy_oe_act.name} = F_defrost * #{heat_pump.pan_heater_watts}")
+      program.addLine("  Set #{pan_heater_energy_oe_act.name} = F_defrost * #{htg_coil_rtf_sensor.name} * #{heat_pump.pan_heater_watts}")
     end
     program.addLine('Else')
     program.addLine("  Set #{pan_heater_energy_oe_act.name} = 0.0")
-    program.addLine('  Set F_defrost = 0')
     program.addLine('EndIf')
 
     # EMS calling manager
@@ -5851,7 +5860,6 @@ module HVAC
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
       hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
       hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?
-      hp_sys.pan_heater_watts *= unit_multiplier unless hp_sys.pan_heater_watts.nil?
       hpxml_header.heat_pump_backup_heating_capacity_increment *= unit_multiplier unless hpxml_header.heat_pump_backup_heating_capacity_increment.nil?
       hp_sys.heating_detailed_performance_data.each do |dp|
         dp.capacity *= unit_multiplier unless dp.capacity.nil?
