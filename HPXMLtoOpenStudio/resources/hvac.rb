@@ -474,7 +474,7 @@ module HVAC
     end
 
     if is_heatpump && cooling_system.pan_heater_watts.to_f > 0
-      apply_pan_heater(model, htg_coil, air_loop_unitary, control_zone.spaces[0], cooling_system)
+      apply_pan_heater(model, htg_coil, air_loop_unitary, control_zone.spaces[0], cooling_system, hvac_unavailable_periods[:htg])
     end
 
     return air_loop
@@ -5436,8 +5436,9 @@ module HVAC
   # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @param heating_unavailable_periods [HPXML::UnavailablePeriods] Unavailable periods for heating
   # @return [nil]
-  def self.apply_pan_heater(model, htg_coil, air_loop_unitary, conditioned_space, heat_pump)
+  def self.apply_pan_heater(model, htg_coil, air_loop_unitary, conditioned_space, heat_pump, heating_unavailable_periods)
     # Other equipment/actuator
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypePanHeater } # Ensure unique meter for each heat pump
     pan_heater_energy_oe = Model.add_other_equipment(
@@ -5460,7 +5461,7 @@ module HVAC
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
-    # Sensor
+    # Sensors
     tout_db_sensor = Model.add_ems_sensor(
       model,
       name: "#{air_loop_unitary.name} tout s",
@@ -5477,12 +5478,24 @@ module HVAC
       )
     end
 
+    # Create HVAC availability sensor
+    if not heating_unavailable_periods.empty?
+      htg_avail_sch = ScheduleConstant.new(model, 'heating availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: heating_unavailable_periods)
+
+      htg_avail_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{htg_avail_sch.schedule.name} s",
+        output_var_or_meter_name: 'Schedule Value',
+        key_name: htg_avail_sch.schedule.name
+      )
+    end
+
     # EMS program
     program = Model.add_ems_program(
       model,
       name: "#{air_loop_unitary.name} pan heater program"
     )
-    program.addLine("If #{tout_db_sensor.name} <= #{UnitConversions.convert(32.0, 'F', 'C')}")
+    program.addLine("If (#{tout_db_sensor.name} <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (#{htg_avail_sensor.name} == 1)")
     if heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeContinuous
       program.addLine("  Set #{pan_heater_energy_oe_act.name} = #{heat_pump.pan_heater_watts}")
     elsif heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeDefrost
