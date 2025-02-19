@@ -187,7 +187,7 @@ module ElectricPanel
         new_loads += service_feeder.power if service_feeder.is_new_load
       end
 
-      capacity_w = new_loads + 1.25 * peak_fuels[[FT::Elec, PFT::Annual]].annual_output
+      capacity_w = new_loads + 1.25 * peak_fuels[[FT::Elec, TE::Total, PFT::Annual]].annual_output
       capacity_a = capacity_w / Float(electric_panel.voltage)
       headroom_a = electric_panel.max_current_rating - capacity_a
       return capacity_w, capacity_a, headroom_a
