@@ -335,7 +335,7 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>17.25</Value>
+                <Value>17.5</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.78</SensibleHeatFraction>
               <CoolingDetailedPerformanceData>
