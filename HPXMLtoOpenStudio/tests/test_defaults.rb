@@ -2167,24 +2167,24 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     # Test that fractions are not used when capacities are provided
-    _test_default_detailed_performance_capacities(default_hpxml_bldg.heat_pumps[0], 36000, 36000, heating_capacities, cooling_capacities)
+    _test_default_detailed_performance_capacities(default_hpxml_bldg.heat_pumps[0], 35800, 36000, heating_capacities, cooling_capacities)
 
     heating_capacities = []
     cooling_capacities = []
     hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.each_with_index do |dp, idx|
       dp.capacity = nil
-      heating_capacities << (36000 * heating_capacity_fractions[idx]).round(1)
+      heating_capacities << (30000 * heating_capacity_fractions[idx]).round
     end
     hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.each_with_index do |dp, idx|
       dp.capacity = nil
-      cooling_capacities << (36000 * cooling_capacity_fractions[idx]).round(1)
+      cooling_capacities << (40000 * cooling_capacity_fractions[idx]).round
     end
-    hpxml_bldg.heat_pumps[0].heating_capacity = 36000
-    hpxml_bldg.heat_pumps[0].cooling_capacity = 36000
+    hpxml_bldg.heat_pumps[0].heating_capacity = 30000
+    hpxml_bldg.heat_pumps[0].cooling_capacity = 40000
     # Test that fractions are used when capacities are missing
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_detailed_performance_capacities(default_hpxml_bldg.heat_pumps[0], 36000, 36000, heating_capacities, cooling_capacities)
+    _test_default_detailed_performance_capacities(default_hpxml_bldg.heat_pumps[0], 30000, 40000, heating_capacities, cooling_capacities)
   end
 
   def test_default_detailed_performance_data
