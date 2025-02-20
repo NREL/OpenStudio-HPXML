@@ -19,6 +19,7 @@ __Bugfixes__
 - Fixes unavailable periods for two consecutive, but partial, days.
 - Fixes error when specifying a glass block window without interior shading coefficients.
 - Fixes battery charging/discharging not being included in peak electricity outputs.
+- BuildResidentialHPXML measure: Fixes error when specifying a combi boiler as the water heater type and a *shared* boiler as the heating system type.
 
 ## OpenStudio-HPXML v1.9.1
 
