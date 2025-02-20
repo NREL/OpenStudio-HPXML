@@ -6,10 +6,8 @@ __New Features__
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional EER or EER2 inputs for central air conditioners/heat pumps and mini-splits.
   - Updates to detailed performance datapoints:
-    - **Breaking Change**: `OutdoorTemperature` values must be 47F, 17F, and 5F (plus an optional user-specified temperature <5F) for heating
-    - **Breaking Change**: `OutdoorTemperature` values must be 82F and 95F (plus an optional user-specified temperature >95F) for cooling
-    - **Breaking Change**: Additional datapoints with `CapacityDescription`="nominal" must be provided for variable speed equipment
-    - Detailed performance datapoints can now be used for single stage and two stage equipment too.
+    - **Breaking Change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
+    - Detailed performance datapoints can now be specified for single stage and two stage equipment too.
 - Electric vehicle enhancements:
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
