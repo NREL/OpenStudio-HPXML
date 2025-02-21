@@ -340,7 +340,7 @@
               <CoolingDetailedPerformanceData>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>95.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.325</CapacityFractionOfNominal>
+                  <CapacityFractionOfNominal>0.33</CapacityFractionOfNominal>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -376,7 +376,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>82.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.11</CapacityFractionOfNominal>
+                  <CapacityFractionOfNominal>1.13</CapacityFractionOfNominal>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>

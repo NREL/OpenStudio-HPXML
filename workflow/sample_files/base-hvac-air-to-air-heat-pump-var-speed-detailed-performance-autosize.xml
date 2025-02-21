@@ -409,7 +409,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>47.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.99</CapacityFractionOfNominal>
+                  <CapacityFractionOfNominal>1.0</CapacityFractionOfNominal>
                   <CapacityDescription>nominal</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -418,7 +418,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>47.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.99</CapacityFractionOfNominal>
+                  <CapacityFractionOfNominal>1.0</CapacityFractionOfNominal>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -436,7 +436,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>17.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.68</CapacityFractionOfNominal>
+                  <CapacityFractionOfNominal>0.69</CapacityFractionOfNominal>
                   <CapacityDescription>nominal</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -445,7 +445,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>17.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.68</CapacityFractionOfNominal>
+                  <CapacityFractionOfNominal>0.69</CapacityFractionOfNominal>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
