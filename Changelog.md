@@ -7,15 +7,18 @@ __New Features__
   - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.
   - Allows optional EER or EER2 inputs (`AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value`) for central air conditioners/heat pumps and mini-splits.
   - Updates to detailed performance datapoints:
-    - **Breaking Change**: `OutdoorTemperature` values must be 47F, 17F, and 5F (plus an optional user-specified temperature <5F) for heating
-    - **Breaking Change**: `OutdoorTemperature` values must be 82F and 95F (plus an optional user-specified temperature >95F) for cooling
-    - **Breaking Change**: Additional datapoints with `CapacityDescription`="nominal" must be provided for variable speed equipment
-    - Detailed performance datapoints can now be used for single stage and two stage equipment too.
-- Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
+    - **Breaking Change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
+    - Detailed performance datapoints can now be specified for single stage and two stage equipment too.
+- Electric vehicle enhancements:
+  - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
+  - Adds EV driving unmet hours output.
 - Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 - BuildResidentialScheduleFile measure:
-  - Adds stochastic schedule generation for electric vehicle charging.
+  - Adds stochastic schedule generation for electric vehicle charging (using `Vehicles`).
   - Removes generation of stochastic schedules for building components not present in the HPXML file.
+- Output updates:
+  - **Breaking change**: Adds generator electricity produced to *total* fuel/energy use; previously it was only included in *net* values.
+  - Adds new outputs for *net* peak electricity (summer/winter/annual); same as *total* peak electricity outputs but subtracts power produced by PV.
 
 __Bugfixes__
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
@@ -23,6 +26,7 @@ __Bugfixes__
 - Fixes possible heating/cooling spikes when using maximum power ratio detailed schedule for variable-speed HVAC systems.
 - Fixes unavailable periods for two consecutive, but partial, days.
 - Fixes error when specifying a glass block window without interior shading coefficients.
+- Fixes battery charging/discharging not being included in peak electricity outputs.
 
 ## OpenStudio-HPXML v1.9.1
 

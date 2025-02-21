@@ -697,10 +697,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(3, clg_coil.stages.size)
-    [4.67, 3.00, 3.00].each_with_index do |cop, i|
+    [4.56, 2.91, 2.91].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [3442, 10831, 10831].each_with_index do |clg_capacity, i|
+    [3501, 10825, 10825].each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -708,10 +708,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(3, htg_coil.stages.size)
-    [4.78, 4.36, 3.69].each_with_index do |cop, i|
+    [4.73, 3.63, 3.63].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    [2922, 10270, 10270].each_with_index do |htg_capacity, i|
+    [2894, 10222, 10222].each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
 
@@ -965,10 +965,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(3, clg_coil.stages.size)
-    [4.06, 4.11, 3.43].each_with_index do |cop, i|
+    [3.77, 2.59, 2.55].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [3042, 10634, 12639].each_with_index do |clg_capacity, i|
+    [2669, 10674, 10795].each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -976,10 +976,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(3, htg_coil.stages.size)
-    [4.83, 3.89, 3.31].each_with_index do |cop, i|
+    [3.49, 2.74, 2.85].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    [3556, 10467, 16236].each_with_index do |htg_capacity, i|
+    [3337, 10992, 13363].each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
 

@@ -2455,7 +2455,7 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   ``CompressorType``                                                string                See [#]_                 No        See [#]_        Type of compressor
   ``FractionCoolLoadServed``                                        double   frac         >= 0, <= 1 [#]_          Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh       > 0                      Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double   Btu/Wh       > 0                      No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double   Btu/Wh       > 0, <= SEER (or SEER2)  No        See [#]_        Rated cooling efficiency [#]_
   ``SensibleHeatFraction``                                          double   frac         > 0.5, <= 1              No        See [#]_        Sensible heat fraction
   ``CoolingDetailedPerformanceData``                                element                                        No        <none>          Cooling detailed performance data [#]_
   ``extension/FanMotorType``                                        string                See [#]_                 No        See [#]_        Blower fan model type [#]_
@@ -2626,30 +2626,30 @@ Mini-Split Air Conditioner
 
 Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
-  ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
-  Element                                                           Type      Units   Constraints      Required  Default         Notes
-  ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
-  ``SystemIdentifier``                                              id                                 Yes                       Unique identifier
-  ``AttachedToZone``                                                idref             See [#]_         See [#]_                  ID of attached zone
-  ``UnitLocation``                                                  string            See [#]_         No        See [#]_        Location of air handler
-  ``DistributionSystem``                                            idref             See [#]_         No                        ID of attached distribution system
-  ``CoolingSystemType``                                             string            mini-split       Yes                       Type of cooling system
-  ``CoolingSystemFuel``                                             string            electricity      Yes                       Fuel type
-  ``CoolingCapacity``                                               double    Btu/hr  >= 0             No        autosized [#]_  Cooling output capacity
-  ``CompressorType``                                                string            See [#]_         No        variable speed  Type of compressor
-  ``FractionCoolLoadServed``                                        double    frac    >= 0, <= 1 [#]_  Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh  > 0              Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh  > 0              No        See [#]_        Rated cooling efficiency [#]_
-  ``SensibleHeatFraction``                                          double    frac    > 0.5, <= 1      No        0.73            Sensible heat fraction
-  ``CoolingDetailedPerformanceData``                                element                            No        <none>          Cooling detailed performance data [#]_
-  ``extension/FanMotorType``                                        string            See [#]_         No        BPM             Blower fan model type
-  ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/AirflowDefectRatio``                                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                                   double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
-  ``extension/CrankcaseHeaterPowerWatts``                           double    W       >= 0             No        See [#]_        Crankcase heater power
-  ``extension/CoolingAutosizingFactor``                             double    frac    > 0              No        1.0             Cooling autosizing capacity multiplier
-  ``extension/CoolingAutosizingLimit``                              double    Btu/hr  > 0              No                        Cooling autosizing capacity limit
-  ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
+  ================================================================  ========  ======  =======================  ========  ==============  ===========================================================
+  Element                                                           Type      Units   Constraints              Required  Default         Notes
+  ================================================================  ========  ======  =======================  ========  ==============  ===========================================================
+  ``SystemIdentifier``                                              id                                         Yes                       Unique identifier
+  ``AttachedToZone``                                                idref             See [#]_                 See [#]_                  ID of attached zone
+  ``UnitLocation``                                                  string            See [#]_                 No        See [#]_        Location of air handler
+  ``DistributionSystem``                                            idref             See [#]_                 No                        ID of attached distribution system
+  ``CoolingSystemType``                                             string            mini-split               Yes                       Type of cooling system
+  ``CoolingSystemFuel``                                             string            electricity              Yes                       Fuel type
+  ``CoolingCapacity``                                               double    Btu/hr  >= 0                     No        autosized [#]_  Cooling output capacity
+  ``CompressorType``                                                string            See [#]_                 No        variable speed  Type of compressor
+  ``FractionCoolLoadServed``                                        double    frac    >= 0, <= 1 [#]_          Yes                       Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh  > 0                      Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh  > 0, <= SEER (or SEER2)  No        See [#]_        Rated cooling efficiency [#]_
+  ``SensibleHeatFraction``                                          double    frac    > 0.5, <= 1              No        0.73            Sensible heat fraction
+  ``CoolingDetailedPerformanceData``                                element                                    No        <none>          Cooling detailed performance data [#]_
+  ``extension/FanMotorType``                                        string            See [#]_                 No        BPM             Blower fan model type
+  ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0                     No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/AirflowDefectRatio``                                  double    frac    >= -0.9, <= 9            No        0.0             Deviation between design/installed airflows [#]_
+  ``extension/ChargeDefectRatio``                                   double    frac    >= -0.9, <= 9            No        0.0             Deviation between design/installed refrigerant charges [#]_
+  ``extension/CrankcaseHeaterPowerWatts``                           double    W       >= 0                     No        See [#]_        Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                             double    frac    > 0                      No        1.0             Cooling autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                              double    Btu/hr  > 0                      No                        Cooling autosizing capacity limit
+  ================================================================  ========  ======  =======================  ========  ==============  ===========================================================
 
   .. [#] If AttachedToZone provided, it must reference a conditioned ``Zone``.
   .. [#] AttachedToZone only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
@@ -2788,7 +2788,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``FractionHeatLoadServed``                                        double   frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                        double   frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double   Btu/Wh    > 0                       No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double   Btu/Wh    > 0, <= SEER (or SEER2)   No        See [#]_        Rated cooling efficiency [#]_
   ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                      No        <none>          Cooling detailed performance data [#]_
   ``HeatingDetailedPerformanceData``                                element                                      No        <none>          Heating detailed performance data [#]_
@@ -2883,7 +2883,7 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   ``FractionHeatLoadServed``                                        double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                        double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh    > 0                       No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh    > 0, <= SEER (or SEER2)   No        See [#]_        Rated cooling efficiency [#]_
   ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                       No        <none>          Cooling detailed performance data [#]_
   ``HeatingDetailedPerformanceData``                                element                                       No        <none>          Heating detailed performance data [#]_
@@ -3255,14 +3255,25 @@ For air-source HVAC systems with detailed cooling performance data, performance 
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] Detailed performance datapoints at outdoor temperatures of 82F and 95F are required.
-         An additional optional datapoint is allowed at a user-specified temperature greater than 95F.
+  .. [#] OutdoorTemperature choices are 82F, 95F, and one optional user-specified temperature greater than 95F.
          Datapoints at additional outdoor temperatures are not currently supported.
   .. [#] CapacityDescription choices are "minimum", "nominal", and "maximum".
-         For single stage equipment, one datapoint (using "nominal") must be provided at every outdoor temperature.
-         For two stage equipment, two datapoints (using "minimum" and "nominal") must be provided at every outdoor temperature.
-         For variable speed equipment, three datapoints (using "minimum", "nominal", and "maximum") must be provided at every outdoor temperature.
+         See the table below for the allowed combinations of CapacityDescription and OutdoorTemperature.
   .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
+
+Allowed combinations of CapacityDescription and OutdoorTemperature for a given datapoints are:
+
+  ===================  ============  ========  ========
+  Outdoor temperature  minimum [#]_  nominal   maximum [#]_
+  ===================  ============  ========  ========
+  >95F                 optional      optional  optional [#]_
+  95F                  required      required  required
+  82F                  required      optional  required
+  ===================  ============  ========  ========
+
+  .. [#] Only two stage and variable speed equipment will use CapacityDescription="minimum".
+  .. [#] Only variable speed equipment will use CapacityDescription="maximum".
+  .. [#] For variable speed equipment, minimum/maximum datapoints must both be provided or omitted.
 
 Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
 
@@ -3282,14 +3293,26 @@ For air-source HVAC systems with detailed heating performance data, performance 
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
-  .. [#] Detailed performance datapoints at outdoor temperatures of 47F, 17F, and 5F are required.
-         An additional optional datapoint is allowed at a user-specified temperature less than 5F.
+  .. [#] OutdoorTemperature choices are 47F, 17F, 5F, and one optional user-specified temperature less than 5F.
          Datapoints at additional outdoor temperatures are not currently supported.
   .. [#] CapacityDescription choices are "minimum", "nominal", and "maximum".
-         For single stage equipment, one datapoint (using "nominal") must be provided at every outdoor temperature.
-         For two stage equipment, two datapoints (using "minimum" and "nominal") must be provided at every outdoor temperature.
-         For variable speed equipment, three datapoints (using "minimum", "nominal", and "maximum") must be provided at every outdoor temperature.
+         See the table below for the allowed combinations of CapacityDescription and OutdoorTemperature.
   .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
+
+Allowed combinations of CapacityDescription and OutdoorTemperature for a given datapoints are:
+
+  ===================  ============  ========  ========
+  Outdoor temperature  minimum [#]_  nominal   maximum [#]_
+  ===================  ============  ========  ========
+  47F                  required      required  required
+  17F                  required      required  required
+  5F                   required      optional  required
+  <5F                  optional      optional  optional [#]_
+  ===================  ============  ========  ========
+
+  .. [#] Only two stage and variable speed equipment will use CapacityDescription="minimum".
+  .. [#] Only variable speed equipment will use CapacityDescription="maximum".
+  .. [#] For variable speed equipment, minimum/maximum datapoints must both be provided or omitted.
 
 Note that when detailed cooling performance data is provided, some other inputs (like HSPF) are ignored.
 

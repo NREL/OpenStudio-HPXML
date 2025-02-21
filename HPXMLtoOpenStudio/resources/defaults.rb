@@ -2281,11 +2281,11 @@ module Defaults
       seer2 = hvac_system.cooling_efficiency_seer2
       case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
-        eer2 = 0.73 * seer2 + 1.47
+        eer2 = [0.73 * seer2 + 1.47, seer2].min
       when HPXML::HVACCompressorTypeTwoStage
-        eer2 = 0.63 * seer2 + 2.34
+        eer2 = [0.63 * seer2 + 2.34, seer2].min
       when HPXML::HVACCompressorTypeVariableSpeed
-        eer2 = 0.31 * seer2 + 6.45
+        eer2 = [0.31 * seer2 + 6.45, seer2].min
       end
       hvac_system.cooling_efficiency_eer2 = eer2.round(2)
       hvac_system.cooling_efficiency_eer2_isdefaulted = true
