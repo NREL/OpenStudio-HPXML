@@ -2192,8 +2192,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def test_default_detailed_performance_data
-    # Test to verify the default detailed performance data points are consistent with RESNET NEEP-statistical-Model
+    # Test to verify the default detailed performance data points are consistent with RESNET's NEEP-Statistical-Model.xlsm
+
+    # Variable Speed
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed.xml')
+
     # Configure the same capacities, efficiencies, etc.
     hpxml_bldg.heat_pumps[0].cooling_capacity = 6000.0
     hpxml_bldg.heat_pumps[0].heating_capacity = 8700.0
@@ -2205,8 +2208,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 7.5
     hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
+    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+
     # Heating
     max_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     nom_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
@@ -2217,6 +2222,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     max_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     nom_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
     min_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
     # 47F
     assert_in_epsilon(9576.6, max_dp_47f.capacity, 0.01)
     assert_in_epsilon(8700.0, nom_dp_47f.capacity, 0.01)
@@ -2224,6 +2230,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(2.34, max_dp_47f.efficiency_cop, 0.01)
     assert_in_epsilon(2.49, nom_dp_47f.efficiency_cop, 0.01)
     assert_in_epsilon(3.20, min_dp_47f.efficiency_cop, 0.01)
+
     # 17F
     assert_in_epsilon(9176.9, max_dp_17f.capacity, 0.01)
     assert_in_epsilon(7500.0, nom_dp_17f.capacity, 0.01)
@@ -2231,17 +2238,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(1.66, max_dp_17f.efficiency_cop, 0.01)
     assert_in_epsilon(1.84, nom_dp_17f.efficiency_cop, 0.01)
     assert_in_epsilon(2.08, min_dp_17f.efficiency_cop, 0.01)
+
     # 5F
     assert_in_epsilon(7950.8, max_dp_5f.capacity, 0.01)
     assert_in_epsilon(7857.4, nom_dp_5f.capacity, 0.01)
     assert_in_epsilon(2552.7, min_dp_5f.capacity, 0.01)
-    # The RESNET table seems to be incorrect in calculating the Net Power @ 5F,
-    # it is: MaxPower@5F = EIRm5max * MaxPower@17F,
-    # while it should be EIRm5max * MaxPower@17F * (MaxCapacity@5F/ MaxCapacity@17F)
-    # (MaxCapacity@5F/ MaxCapacity@17F) = (7950.8/9176.9) = 0.8664, fixing it in the assertions below
-    assert_in_epsilon(1.24 / 0.8664, max_dp_5f.efficiency_cop, 0.01)
-    assert_in_epsilon(1.24 / 0.8664, nom_dp_5f.efficiency_cop, 0.01)
-    assert_in_epsilon(1.43 / 0.8664, min_dp_5f.efficiency_cop, 0.01)
+    assert_in_epsilon(1.43, max_dp_5f.efficiency_cop, 0.01)
+    assert_in_epsilon(1.43, nom_dp_5f.efficiency_cop, 0.01)
+    assert_in_epsilon(1.65, min_dp_5f.efficiency_cop, 0.01)
+
     # Cooling
     max_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     nom_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
@@ -2249,6 +2254,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     max_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     nom_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
     min_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
     # 95F
     assert_in_epsilon(6426.0, max_dp_95f.capacity, 0.01)
     assert_in_epsilon(6000.0, nom_dp_95f.capacity, 0.01)
@@ -2256,6 +2262,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(2.17, max_dp_95f.efficiency_cop, 0.01)
     assert_in_epsilon(2.34, nom_dp_95f.efficiency_cop, 0.01)
     assert_in_epsilon(5.47, min_dp_95f.efficiency_cop, 0.01)
+
     # 82F
     assert_in_epsilon(6833.7, max_dp_82f.capacity, 0.01)
     assert_in_epsilon(6380.0, nom_dp_82f.capacity, 0.01)
@@ -2263,6 +2270,102 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(2.88, max_dp_82f.efficiency_cop, 0.01)
     assert_in_epsilon(3.11, nom_dp_82f.efficiency_cop, 0.01)
     assert_in_epsilon(7.19, min_dp_82f.efficiency_cop, 0.01)
+
+    # Two Stage
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed.xml')
+
+    # Configure the same capacities, efficiencies, etc.
+    hpxml_bldg.heat_pumps[0].cooling_capacity = 6000.0
+    hpxml_bldg.heat_pumps[0].heating_capacity = 8700.0
+    hpxml_bldg.heat_pumps[0].heating_capacity_17F = 7500.0
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer = nil
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = 14.3
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer = nil
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 8.0
+    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
+    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 7.5
+    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
+    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    # Heating
+    nom_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+    nom_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
+    # 47F
+    assert_in_epsilon(8700.0, nom_dp_47f.capacity, 0.01)
+    assert_in_epsilon(6190.9, min_dp_47f.capacity, 0.01)
+    assert_in_epsilon(2.64, nom_dp_47f.efficiency_cop, 0.01)
+    assert_in_epsilon(3.11, min_dp_47f.efficiency_cop, 0.01)
+
+    # 17F
+    assert_in_epsilon(7500.0, nom_dp_17f.capacity, 0.01)
+    assert_in_epsilon(5337.0, min_dp_17f.capacity, 0.01)
+    assert_in_epsilon(1.95, nom_dp_17f.efficiency_cop, 0.01)
+    assert_in_epsilon(2.29, min_dp_17f.efficiency_cop, 0.01)
+
+    # Cooling
+    nom_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+    nom_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
+    # 95F
+    assert_in_epsilon(6000.0, nom_dp_95f.capacity, 0.01)
+    assert_in_epsilon(4365.2, min_dp_95f.capacity, 0.01)
+    assert_in_epsilon(2.34, nom_dp_95f.efficiency_cop, 0.01)
+    assert_in_epsilon(3.76, min_dp_95f.efficiency_cop, 0.01)
+
+    # 82F
+    assert_in_epsilon(6411.7, nom_dp_82f.capacity, 0.01)
+    assert_in_epsilon(4664.7, min_dp_82f.capacity, 0.01)
+    assert_in_epsilon(2.92, nom_dp_82f.efficiency_cop, 0.01)
+    assert_in_epsilon(4.67, min_dp_82f.efficiency_cop, 0.01)
+
+    # Single Stage
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+
+    # Configure the same capacities, efficiencies, etc.
+    hpxml_bldg.heat_pumps[0].cooling_capacity = 6000.0
+    hpxml_bldg.heat_pumps[0].heating_capacity = 8700.0
+    hpxml_bldg.heat_pumps[0].heating_capacity_17F = 7500.0
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer = nil
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = 14.3
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer = nil
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 8.0
+    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
+    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 7.5
+    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
+    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypePSC
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    # Heating
+    nom_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    nom_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+
+    # 47F
+    assert_in_epsilon(8700.0, nom_dp_47f.capacity, 0.01)
+    assert_in_epsilon(2.99, nom_dp_47f.efficiency_cop, 0.01)
+
+    # 17F
+    assert_in_epsilon(7500.0, nom_dp_17f.capacity, 0.01)
+    assert_in_epsilon(2.21, nom_dp_17f.efficiency_cop, 0.01)
+
+    # Cooling
+    nom_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    nom_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+
+    # 95F
+    assert_in_epsilon(6000.0, nom_dp_95f.capacity, 0.01)
+    assert_in_epsilon(2.34, nom_dp_95f.efficiency_cop, 0.01)
+
+    # 82F
+    assert_in_epsilon(6411.7, nom_dp_82f.capacity, 0.01)
+    assert_in_epsilon(4.37, nom_dp_82f.efficiency_cop, 0.01)
   end
 
   def test_pthp
