@@ -2018,8 +2018,8 @@ module HVAC
                     [5.796, 5.341, 4.663, 3.995, 3.564],
                     [8.202, 7.265, 5.990, 4.845, 4.248],
                     [11.689, 9.800, 7.529, 5.720, 4.928]]
-    x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }
-    y1, y2 = rated_cap_maint_17F_47F_array.min_by(2) { |x| (x - rated_cap_maint_17F_47F).abs }
+    x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }.sort
+    y1, y2 = rated_cap_maint_17F_47F_array.min_by(2) { |x| (x - rated_cap_maint_17F_47F).abs }.sort
     x_indexes = [x1, x2].map { |x| hspf2_array.find_index(x) }.sort
     y_indexes = [y1, y2].map { |y| rated_cap_maint_17F_47F_array.find_index(y) }.sort
     fx1y1 = cop_47_array[x_indexes[0]][y_indexes[0]]
@@ -2041,8 +2041,8 @@ module HVAC
     cop_82_array = [[4.047, 6.175, 14.240, 19.508, 23.029],
                     [7.061, 10.289, 23.262, 31.842, 37.513],
                     [10.058, 14.053, 30.962, 42.388, 49.863]]
-    x1, x2 = seer2_array.min_by(2) { |x| (x - seer2).abs }
-    y1, y2 = seer2_eer2_ratio_array.min_by(2) { |x| (x - seer2_eer2_ratio).abs }
+    x1, x2 = seer2_array.min_by(2) { |x| (x - seer2).abs }.sort
+    y1, y2 = seer2_eer2_ratio_array.min_by(2) { |x| (x - seer2_eer2_ratio).abs }.sort
     x_indexes = [x1, x2].map { |x| seer2_array.find_index(x) }.sort
     y_indexes = [y1, y2].map { |y| seer2_eer2_ratio_array.find_index(y) }.sort
     fx1y1 = cop_82_array[x_indexes[0]][y_indexes[0]]

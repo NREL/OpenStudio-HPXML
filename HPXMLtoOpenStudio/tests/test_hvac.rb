@@ -75,10 +75,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(3, clg_coil.stages.size)
-    [4.21, 4.52, 4.23].each_with_index do |cop, i|
+    [5.93, 4.52, 4.23].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [2740, 7213, 7747].each_with_index do |capacity, i|
+    [1996, 7213, 7747].each_with_index do |capacity, i|
       assert_in_epsilon(capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -107,7 +107,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, nil, nil, 2740, 4.21, 7213, 4.52, 7747, 4.23)
+    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, nil, nil, 1996, 5.93, 7213, 4.52, 7747, 4.23)
   end
 
   def test_central_air_conditioner_furnace_var_speed_max_power_ratio
@@ -129,7 +129,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, nil, nil, 2740, 4.21, 7213, 4.52, 7747, 4.23)
+    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, nil, nil, 1996, 5.93, 7213, 4.52, 7747, 4.23)
   end
 
   def test_room_air_conditioner
@@ -654,10 +654,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(3, clg_coil.stages.size)
-    [3.27, 4.30, 4.02].each_with_index do |cop, i|
+    [3.84, 4.30, 4.02].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [5020, 10819, 11620].each_with_index do |clg_capacity, i|
+    [4296, 10819, 11620].each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -665,7 +665,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(3, htg_coil.stages.size)
-    [3.86, 3.14, 2.96].each_with_index do |cop, i|
+    [4.20, 3.43, 3.24].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
     [3151, 10282, 11269].each_with_index do |htg_capacity, i|
@@ -750,7 +750,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, 3150.16, 3.86, 10282, 3.14, 11269, 2.96, 5020, 3.27, 10819, 4.30, 11620, 4.02)
+    _check_max_power_ratio_EMS_multispeed(model, 3150.75, 4.20, 10282, 3.43, 11269, 3.24, 4296, 3.84, 10819, 4.30, 11620, 4.02)
 
     # two systems
     args_hash = {}
@@ -776,8 +776,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(2, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, 3150.16, 3.86, 10282, 3.14, 11269, 2.96, 5020, 3.27, 10819, 4.30, 11620, 4.02, 2, 0)
-    _check_max_power_ratio_EMS_multispeed(model, 3150.16, 3.86, 10282, 3.14, 11269, 2.96, 5020, 3.27, 10819, 4.30, 11620, 4.02, 2, 1)
+    _check_max_power_ratio_EMS_multispeed(model, 3150.75, 4.20, 10282, 3.43, 11269, 3.24, 4296, 3.84, 10819, 4.30, 11620, 4.02, 2, 0)
+    _check_max_power_ratio_EMS_multispeed(model, 3150.75, 4.20, 10282, 3.43, 11269, 3.24, 4296, 3.84, 10819, 4.30, 11620, 4.02, 2, 1)
   end
 
   def test_air_to_air_heat_pump_1_speed_onoff_thermostat
@@ -928,10 +928,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(3, clg_coil.stages.size)
-    [4.77, 3.88, 3.62].each_with_index do |cop, i|
+    [5.67, 3.88, 3.62].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [3316, 10709, 11490].each_with_index do |clg_capacity, i|
+    [2838, 10709, 11490].each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -939,7 +939,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(3, htg_coil.stages.size)
-    [3.51, 2.79, 2.63].each_with_index do |cop, i|
+    [4.48, 3.61, 3.40].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
     [3156, 10392, 11408].each_with_index do |htg_capacity, i|
@@ -1013,7 +1013,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, 3150.75, 3.86, 10282, 3.14, 11269, 2.96, 3328, 4.70, 10819, 3.98, 11620, 3.72)
+    _check_max_power_ratio_EMS_multispeed(model, 3150.75, 4.20, 10282, 3.43, 11269, 3.24, 2957, 5.35, 10819, 3.98, 11620, 3.72)
   end
 
   def test_mini_split_air_conditioner
@@ -1025,10 +1025,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(3, clg_coil.stages.size)
-    [4.77, 3.88, 3.62].each_with_index do |cop, i|
+    [5.67, 3.88, 3.62].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [2210, 7139, 7660].each_with_index do |clg_capacity, i|
+    [1892, 7139, 7660].each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -1793,9 +1793,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       assert_equal(2, program_values['rt_capacity_0'].size)
       assert_equal(2, program_values['rt_capacity_1'].size)
       assert_equal(2, program_values['rt_capacity_2'].size)
-      assert_in_epsilon(program_values['rated_eir_0'][index], 1.0 / htg_speed1_cop, 0.01) unless htg_speed1_cop.nil?
-      assert_in_epsilon(program_values['rated_eir_1'][index], 1.0 / htg_speed2_cop, 0.01) unless htg_speed2_cop.nil?
-      assert_in_epsilon(program_values['rated_eir_2'][index], 1.0 / htg_speed3_cop, 0.01) unless htg_speed3_cop.nil?
+      assert_in_epsilon(1.0 / program_values['rated_eir_0'][index], htg_speed1_cop, 0.01) unless htg_speed1_cop.nil?
+      assert_in_epsilon(1.0 / program_values['rated_eir_1'][index], htg_speed2_cop, 0.01) unless htg_speed2_cop.nil?
+      assert_in_epsilon(1.0 / program_values['rated_eir_2'][index], htg_speed3_cop, 0.01) unless htg_speed3_cop.nil?
       assert_in_epsilon(program_values['rt_capacity_0'][index], htg_speed1_capacity, 0.01) unless htg_speed1_capacity.nil?
       assert_in_epsilon(program_values['rt_capacity_1'][index], htg_speed2_capacity, 0.01) unless htg_speed2_capacity.nil?
       assert_in_epsilon(program_values['rt_capacity_2'][index], htg_speed3_capacity, 0.01) unless htg_speed3_capacity.nil?
@@ -1808,9 +1808,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       assert_equal(1, program_values['rt_capacity_1'].size)
       assert_equal(1, program_values['rt_capacity_2'].size)
     end
-    assert_in_epsilon(program_values['rated_eir_0'][index], 1.0 / clg_speed1_cop, 0.01) unless clg_speed1_cop.nil?
-    assert_in_epsilon(program_values['rated_eir_1'][index], 1.0 / clg_speed2_cop, 0.01) unless clg_speed2_cop.nil?
-    assert_in_epsilon(program_values['rated_eir_2'][index], 1.0 / clg_speed3_cop, 0.01) unless clg_speed3_cop.nil?
+    assert_in_epsilon(1.0 / program_values['rated_eir_0'][index], clg_speed1_cop, 0.01) unless clg_speed1_cop.nil?
+    assert_in_epsilon(1.0 / program_values['rated_eir_1'][index], clg_speed2_cop, 0.01) unless clg_speed2_cop.nil?
+    assert_in_epsilon(1.0 / program_values['rated_eir_2'][index], clg_speed3_cop, 0.01) unless clg_speed3_cop.nil?
     assert_in_epsilon(program_values['rt_capacity_0'][index], clg_speed1_capacity, 0.01) unless clg_speed1_capacity.nil?
     assert_in_epsilon(program_values['rt_capacity_1'][index], clg_speed2_capacity, 0.01) unless clg_speed2_capacity.nil?
     assert_in_epsilon(program_values['rt_capacity_2'][index], clg_speed3_capacity, 0.01) unless clg_speed3_capacity.nil?
