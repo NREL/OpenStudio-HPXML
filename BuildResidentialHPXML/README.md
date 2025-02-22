@@ -2650,22 +2650,22 @@ Outdoor temperatures of heating detailed performance data if available. Applies 
 
 <br/>
 
-**HVAC Detailed Performance Data: Heating Nominal Speed Capacities**
+**HVAC Detailed Performance Data: Heating Minimum Speed Capacities**
 
-Nominal speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps).
+Minimum speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps).
 
-- **Name:** ``hvac_perf_data_heating_nom_speed_capacities``
+- **Name:** ``hvac_perf_data_heating_min_speed_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**HVAC Detailed Performance Data: Heating Minimum Speed Capacities**
+**HVAC Detailed Performance Data: Heating Nominal Speed Capacities**
 
-Minimum speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps).
+Nominal speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps).
 
-- **Name:** ``hvac_perf_data_heating_min_speed_capacities``
+- **Name:** ``hvac_perf_data_heating_nom_speed_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -2683,22 +2683,22 @@ Maximum speed capacities of heating detailed performance data if available, corr
 
 <br/>
 
-**HVAC Detailed Performance Data: Heating Nominal Speed COPs**
+**HVAC Detailed Performance Data: Heating Minimum Speed COPs**
 
-Nominal speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps).
+Minimum speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps).
 
-- **Name:** ``hvac_perf_data_heating_nom_speed_cops``
+- **Name:** ``hvac_perf_data_heating_min_speed_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**HVAC Detailed Performance Data: Heating Minimum Speed COPs**
+**HVAC Detailed Performance Data: Heating Nominal Speed COPs**
 
-Minimum speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps).
+Nominal speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps).
 
-- **Name:** ``hvac_perf_data_heating_min_speed_cops``
+- **Name:** ``hvac_perf_data_heating_nom_speed_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -2727,22 +2727,22 @@ Outdoor temperatures of cooling detailed performance data if available. Applies 
 
 <br/>
 
-**HVAC Detailed Performance Data: Cooling Nominal Speed Capacities**
+**HVAC Detailed Performance Data: Cooling Minimum Speed Capacities**
 
-Nominal speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
+Minimum speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
 
-- **Name:** ``hvac_perf_data_cooling_nom_speed_capacities``
+- **Name:** ``hvac_perf_data_cooling_min_speed_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**HVAC Detailed Performance Data: Cooling Minimum Speed Capacities**
+**HVAC Detailed Performance Data: Cooling Nominal Speed Capacities**
 
-Minimum speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
+Nominal speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
 
-- **Name:** ``hvac_perf_data_cooling_min_speed_capacities``
+- **Name:** ``hvac_perf_data_cooling_nom_speed_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -2760,22 +2760,22 @@ Maximum speed capacities of cooling detailed performance data if available, corr
 
 <br/>
 
-**HVAC Detailed Performance Data: Cooling Nominal Speed COPs**
+**HVAC Detailed Performance Data: Cooling Minimum Speed COPs**
 
-Nominal speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
+Minimum speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
 
-- **Name:** ``hvac_perf_data_cooling_nom_speed_cops``
+- **Name:** ``hvac_perf_data_cooling_min_speed_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**HVAC Detailed Performance Data: Cooling Minimum Speed COPs**
+**HVAC Detailed Performance Data: Cooling Nominal Speed COPs**
 
-Minimum speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
+Nominal speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
 
-- **Name:** ``hvac_perf_data_cooling_min_speed_cops``
+- **Name:** ``hvac_perf_data_cooling_nom_speed_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
