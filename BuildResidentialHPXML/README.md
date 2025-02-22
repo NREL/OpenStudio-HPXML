@@ -2348,27 +2348,14 @@ The maximum capacity limit applied to the auto-sizing methodology. If not provid
 
 <br/>
 
-**Heat Pump: Heating Capacity Retention Fraction**
+**Heat Pump: Heating Capacity Fraction at 17F**
 
-The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except ground-to-air. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
+The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity at 47F. Applies to all heat pump types except ground-to-air. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
 
-- **Name:** ``heat_pump_heating_capacity_retention_fraction``
+- **Name:** ``heat_pump_heating_capacity_fraction_17F``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Heating Capacity Retention Temperature**
-
-The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except ground-to-air. Required if the Heating Capacity Retention Fraction is provided.
-
-- **Name:** ``heat_pump_heating_capacity_retention_temp``
-- **Type:** ``Double``
-
-- **Units:** ``F``
 
 - **Required:** ``false``
 
@@ -2628,7 +2615,7 @@ Type of capacity values for detailed performance data if available. Applies only
 
 **HVAC Detailed Performance Data: Heating Outdoor Temperatures**
 
-Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 F. At least two performance data points are required using a comma-separated list.
+Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). Outdoor temperatures must be 47F, 17F, and 5F (and one optional temperature less than 5F). At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_heating_outdoor_temperatures``
 - **Type:** ``String``
@@ -2642,6 +2629,17 @@ Outdoor temperatures of heating detailed performance data if available. Applies 
 Minimum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_heating_min_speed_capacities``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC Detailed Performance Data: Heating Nominal Speed Capacities**
+
+Nominal speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+
+- **Name:** ``hvac_perf_data_heating_nom_speed_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -2670,6 +2668,17 @@ Minimum speed efficiency COP values of heating detailed performance data if avai
 
 <br/>
 
+**HVAC Detailed Performance Data: Heating Nominal Speed COPs**
+
+Nominal speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+
+- **Name:** ``hvac_perf_data_heating_nom_speed_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **HVAC Detailed Performance Data: Heating Maximum Speed COPs**
 
 Maximum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
@@ -2683,7 +2692,7 @@ Maximum speed efficiency COP values of heating detailed performance data if avai
 
 **HVAC Detailed Performance Data: Cooling Outdoor Temperatures**
 
-Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 F. At least two performance data points are required using a comma-separated list.
+Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). Outdoor temperatures must be 82F and 95F (and one optional temperature greater than 95F). At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_cooling_outdoor_temperatures``
 - **Type:** ``String``
@@ -2697,6 +2706,17 @@ Outdoor temperatures of cooling detailed performance data if available. Applies 
 Minimum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_cooling_min_speed_capacities``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC Detailed Performance Data: Cooling Nominal Speed Capacities**
+
+Nominal speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+
+- **Name:** ``hvac_perf_data_cooling_nom_speed_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -2719,6 +2739,17 @@ Maximum speed capacities of cooling detailed performance data if available. Appl
 Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_cooling_min_speed_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC Detailed Performance Data: Cooling Nominal Speed COPs**
+
+Nominal speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+
+- **Name:** ``hvac_perf_data_cooling_nom_speed_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``

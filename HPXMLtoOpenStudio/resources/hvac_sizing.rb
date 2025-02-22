@@ -9,7 +9,7 @@ module HVACSizing
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
+  # @param hvac_systems [Array<Hash>] List of HPXML HVAC systems of interest
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports capacities/airflows
   # @return [Array<Hash, Hash, Hash>] Maps of HVAC systems => HVACSizingValues objects, HPXML::Zones => DesignLoadValues object, HPXML::Spaces => DesignLoadValues object
   def self.calculate(runner, weather, hpxml_bldg, hvac_systems, update_hpxml: true)
@@ -145,7 +145,7 @@ module HVACSizing
   # Initial checks for errors (i.e., situations that should not occur). Throws an error if found.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
+  # @param hvac_systems [Array<Hash>] List of HPXML HVAC systems of interest
   # @return [nil]
   def self.check_for_errors(hpxml_bldg, hvac_systems)
     # Check all surfaces adjacent to conditioned space (and not adiabatic) are
@@ -1690,7 +1690,7 @@ module HVACSizing
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
+  # @param hvac_systems [Array<Hash>] List of HPXML HVAC systems of interest
   # @param zone [HPXML::Zone] The current zone of interest
   # @return [nil]
   def self.apply_hvac_fractions_load_served(hvac_loads, hvac_heating, hvac_cooling, hpxml_bldg, hvac_systems, zone)
@@ -2606,7 +2606,7 @@ module HVACSizing
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @param hvac_system [Hash] HPXML HVAC (heating and/or cooling) system
+  # @param hvac_system [Hash] The HPXML HVAC system of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_hvac_equipment_adjustments(mj, runner, hvac_sizings, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
@@ -3018,17 +3018,11 @@ module HVACSizing
   #
   # @param outdoor_temp [Double] Outdoor drybulb temperature (F)
   # @param indoor_temp [Double] Indoor drybulb (heating) or wetbulb (cooling) temperature (F)
-  # @param mode [Symbol] Heating or cooling
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Double] Heat pump adjustment factor (capacity fraction)
   def self.adjust_indoor_condition_var_speed(outdoor_temp, indoor_temp, mode)
-    if mode == :clg
-      rated_indoor_temp = HVAC::AirSourceCoolRatedIWB
-      coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
-    elsif mode == :htg
-      rated_indoor_temp = HVAC::AirSourceHeatRatedIDB
-      capacity_retention_temp_1speed, capacity_retention_fraction_1speed = Defaults.get_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
-      coefficients_1speed = HVAC.get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, capacity_retention_temp_1speed, capacity_retention_fraction_1speed)[0][0]
-    end
+    coefficients_1speed = HVAC.get_resnet_cap_eir_ft_spec(mode)[0]
+    rated_indoor_temp = (mode == :clg) ? HVAC::AirSourceCoolRatedIWB : HVAC::AirSourceHeatRatedIDB
     return MathTools.biquadratic(indoor_temp, outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, outdoor_temp, coefficients_1speed)
   end
 
@@ -3037,33 +3031,34 @@ module HVACSizing
   #
   # @param outdoor_temp [Double] Outdoor drybulb temperature (F)
   # @param hvac_sys [HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC system of interest
-  # @param mode [Symbol] Heating or cooling
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Double] Heat pump adjustment factor (capacity fraction)
   def self.adjust_outdoor_condition_var_speed(outdoor_temp, hvac_sys, mode)
     rated_odb = (mode == :clg) ? HVAC::AirSourceCoolRatedODB : HVAC::AirSourceHeatRatedODB
     detailed_performance_data = (mode == :clg) ? hvac_sys.cooling_detailed_performance_data : hvac_sys.heating_detailed_performance_data
     if detailed_performance_data.empty?
-      # Based on retention fraction and retention temperature
+      # Based on capacity fraction at a given temperature
       if mode == :clg
-        capacity_retention_temperature = hvac_sys.additional_properties.cooling_capacity_retention_temperature
-        capacity_retention_fraction = hvac_sys.additional_properties.cooling_capacity_retention_fraction
+        _min_cap_maint_95, max_cap_maint_95 = HVAC.get_cool_capacity_maint_95()
+        # Review: Use max speed maintenance?
+        capacity_fraction = 1 / max_cap_maint_95
+        capacity_temperature = 82.0
       elsif mode == :htg
-        capacity_retention_temperature, capacity_retention_fraction = HVAC.get_heating_capacity_retention(hvac_sys)
+        capacity_fraction = HVAC.get_heating_capacity_fraction_17F(hvac_sys)
+        capacity_temperature = 17.0
       end
-      odb_adj = (1.0 - capacity_retention_fraction) / (rated_odb - capacity_retention_temperature) * (outdoor_temp - rated_odb) + 1.0
-    else # there are detailed performance data
+      odb_adj = 1.0 - (1.0 - capacity_fraction) / (rated_odb - capacity_temperature) * (rated_odb - outdoor_temp)
+    else
       # Based on detailed performance data
       max_rated_dp = detailed_performance_data.find { |dp| dp.outdoor_temperature == rated_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
       if max_rated_dp.capacity.nil?
         property = :capacity_fraction_of_nominal
-        # Should use nominal instead of maximum
         capacity_nominal = 1.0
       else
         property = :capacity
-        # Should use nominal instead of maximum
         capacity_nominal = (mode == :clg) ? hvac_sys.cooling_capacity : hvac_sys.heating_capacity
       end
-      odb_adj = HVAC.interpolate_to_odb_table_point(detailed_performance_data, HPXML::CapacityDescriptionMaximum, outdoor_temp, property) / capacity_nominal
+      odb_adj = HVAC.extrapolate_datapoint(detailed_performance_data, HPXML::CapacityDescriptionMaximum, :outdoor_temperature, outdoor_temp, property) / capacity_nominal
     end
     return odb_adj
   end
@@ -3701,7 +3696,7 @@ module HVACSizing
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param cool_cap_adj_factor [Double] Heat pump's cooling capacity at the design temperature as a fraction of the nominal cooling capacity (frac)
-  # @param hvac_system [Hash] HPXML HVAC (heating and/or cooling) system
+  # @param hvac_system [Hash] The HPXML HVAC system of interest
   # @param hvac_heating_speed [Integer] Nominal heating speed index of the HVAC system
   # @param oversize_limit [Double] Oversize fraction (frac)
   # @param oversize_delta [Double] Oversize delta (Btu/hr)
@@ -5144,7 +5139,7 @@ module HVACSizing
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
+  # @param hvac_systems [Array<Hash>] List of HPXML HVAC systems of interest
   # @param zone [HPXML::Zone] The current zone of interest
   # @return [Array<Double, Double>] Fraction of zone heat load, fraction of zone cool load
   def self.get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, hvac_systems, zone)
