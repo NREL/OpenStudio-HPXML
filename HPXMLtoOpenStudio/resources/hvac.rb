@@ -1778,6 +1778,12 @@ module HVAC
       nom_cop_17 = nom_cop_47 / 1.356
       min_cop_17 = nom_cop_17 / 0.850
 
+      # Capacities @ 5F
+      min_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, min_capacity_17, min_capacity_47)
+
+      # COPs @ 5F
+      min_cop_5 = min_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, min_capacity_17 / min_cop_17, min_capacity_47 / min_cop_47)
+
     when HPXML::HVACCompressorTypeVariableSpeed
       # Capacities @ 47F
       max_capacity_47 = nom_capacity_47 * hp_ap.heat_capacity_ratios[-1]

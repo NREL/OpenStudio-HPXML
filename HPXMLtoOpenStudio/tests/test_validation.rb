@@ -127,8 +127,21 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                      'Expected PerformanceDataPoint/OutdoorTemperature to be 82, 95, or >95',
                                                                      'Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature>95 and CapacityDescription="minimum"]',
                                                                      'Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature>95 and CapacityDescription="maximum"]'],
-                            'hvac-detailed-performance-not-variable-speed' => ['Expected 1 element(s) for xpath: ../CompressorType[text()="variable speed"]',
-                                                                               'Expected 1 element(s) for xpath: ../CompressorType[text()="variable speed"]'],
+                            'hvac-detailed-performance-inconsistent-capacities' => ['Expected ../../HeatingCapacity to be equal to Capacity',
+                                                                                    'Expected ../../HeatingCapacity17F to be equal to Capacity',
+                                                                                    'Expected ../../CoolingCapacity to be equal to Capacity'],
+                            'hvac-detailed-performance-inconsistent-capacity-fractions' => ['Expected CapacityFractionOfNominal to be 1.0',
+                                                                                            'Expected CapacityFractionOfNominal to be 1.0'],
+                            'hvac-detailed-performance-incomplete-pair' => ['Cooling detailed performance data for outdoor temperature > 95.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.',
+                                                                            'Heating detailed performance data for outdoor temperature < 5.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
+                            'hvac-detailed-performance-invalid-data' => ['Cooling detailed performance data for outdoor temperature = 82.0 is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at maximum capacity.',
+                                                                         'Cooling detailed performance data for outdoor temperature = 95.0 is invalid; Minimum capacity must be less than or equal to maximum capacity.',
+                                                                         'Cooling detailed performance data for outdoor temperature = 95.0 is invalid; Minimum capacity must be less than or equal to nominal capacity.',
+                                                                         'Heating detailed performance data for outdoor temperature = 47.0 is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at maximum capacity.',
+                                                                         'Heating detailed performance data for outdoor temperature = 47.0 is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at nominal capacity.',
+                                                                         'Heating detailed performance data for outdoor temperature = 5.0 is invalid; Minimum capacity must be less than or equal to maximum capacity.'],
+                            'hvac-detailed-performance-missing-compressor-type' => ['Expected 1 element(s) for xpath: ../CompressorType',
+                                                                                    'Expected 1 element(s) for xpath: ../CompressorType'],
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
@@ -485,9 +498,47 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             efficiency_cop: 2.1
           )
         end
-      when 'hvac-detailed-performance-not-variable-speed'
+      when 'hvac-detailed-performance-inconsistent-capacities'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
-        hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
+        hpxml_bldg.heat_pumps[0].heating_capacity = 10000
+        hpxml_bldg.heat_pumps[0].cooling_capacity = 10000
+        hpxml_bldg.heat_pumps[0].heating_capacity_17F = 1000
+      when 'hvac-detailed-performance-inconsistent-capacity-fractions'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml')
+        hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data[1].capacity_fraction_of_nominal = 1.1
+        hpxml_bldg.heat_pumps[0].heating_detailed_performance_data[1].capacity_fraction_of_nominal = 1.1
+      when 'hvac-detailed-performance-incomplete-pair'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
+        hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.add(
+          outdoor_temperature: 105.0,
+          capacity_description: HPXML::CapacityDescriptionMinimum,
+          capacity: 15000.0,
+          efficiency_cop: 7
+        )
+        hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.add(
+          outdoor_temperature: -2.0,
+          capacity_description: HPXML::CapacityDescriptionMinimum,
+          capacity: 1500.0,
+          efficiency_cop: 0.7
+        )
+      when 'hvac-detailed-performance-invalid-data'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
+        min_dp_82F = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == 82.0 }
+        max_dp_82F = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 82.0 }
+        min_dp_82F.efficiency_cop = 0.1 * max_dp_82F.efficiency_cop
+        min_dp_95F = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == 95.0 }
+        max_dp_95F = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 95.0 }
+        min_dp_95F.capacity = 1.1 * max_dp_95F.capacity
+        min_dp_47F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == 47.0 }
+        max_dp_47F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 47.0 }
+        min_dp_47F.efficiency_cop = 0.1 * max_dp_47F.efficiency_cop
+        min_dp_5F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == 5.0 }
+        max_dp_5F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 5.0 }
+        min_dp_5F.capacity = 1.1 * max_dp_5F.capacity
+        min_dp_5F.efficiency_cop = 2 * max_dp_5F.efficiency_cop
+      when 'hvac-detailed-performance-missing-compressor-type'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
+        hpxml_bldg.heat_pumps[0].compressor_type = nil
       when 'hvac-distribution-return-duct-leakage-missing'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-evap-cooler-only-ducted.xml')
         hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[-1].delete
@@ -1168,19 +1219,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'emissions-wrong-rows' => ['Emissions File has invalid number of rows'],
                             'geothermal-loop-multiple-attached-hps' => ["Multiple heat pumps found attached to geothermal loop 'GeothermalLoop1'."],
                             'heat-pump-backup-system-load-fraction' => ['Heat pump backup system cannot have a fraction heat load served specified.'],
-                            'hvac-detailed-performance-inconsistent-capacities' => ['Expected ../../HeatingCapacity to be equal to Capacity',
-                                                                                    'Expected ../../HeatingCapacity17F to be equal to Capacity',
-                                                                                    'Expected ../../CoolingCapacity to be equal to Capacity'],
-                            'hvac-detailed-performance-inconsistent-capacity-fractions' => ['Expected CapacityFractionOfNominal to be 1.0',
-                                                                                            'Expected CapacityFractionOfNominal to be 1.0'],
-                            'hvac-detailed-performance-incomplete-pair' => ['Cooling detailed performance data for outdoor temperature = 105.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.',
-                                                                            'Heating detailed performance data for outdoor temperature = -2.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
-                            'hvac-detailed-performance-invalid-data' => ['Cooling detailed performance data for outdoor temperature = 82.0 is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at maximum capacity.',
-                                                                         'Cooling detailed performance data for outdoor temperature = 95.0 is invalid; Maximum capacity must be greater than or equal to minimum capacity.',
-                                                                         'Cooling detailed performance data for outdoor temperature = 95.0 is invalid; Nominal capacity must be greater than or equal to minimum capacity.',
-                                                                         'Heating detailed performance data for outdoor temperature = 47.0 is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at maximum capacity.',
-                                                                         'Heating detailed performance data for outdoor temperature = 47.0 is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at nominal capacity.',
-                                                                         'Heating detailed performance data for outdoor temperature = 5.0 is invalid; Maximum capacity must be greater than or equal to minimum capacity.'],
                             'heat-pump-switchover-temp-elec-backup' => ['Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.'],
                             'heat-pump-lockout-temps-elec-backup' => ['Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.'],
                             'hvac-attached-to-uncond-zone' => ["HVAC system 'HeatingSystem1' is attached to an unconditioned zone."],
@@ -1367,44 +1405,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'heat-pump-switchover-temp-elec-backup'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.heat_pumps[0].backup_heating_switchover_temp = 35.0
-      when 'hvac-detailed-performance-inconsistent-capacities'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
-        hpxml_bldg.heat_pumps[0].heating_capacity = 10000
-        hpxml_bldg.heat_pumps[0].cooling_capacity = 10000
-        hpxml_bldg.heat_pumps[0].heating_capacity_17F = 1000
-      when 'hvac-detailed-performance-inconsistent-capacity-fractions'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml')
-        hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data[1].capacity_fraction_of_nominal = 1.1
-        hpxml_bldg.heat_pumps[0].heating_detailed_performance_data[1].capacity_fraction_of_nominal = 1.1
-      when 'hvac-detailed-performance-incomplete-pair'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
-        hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.add(
-          outdoor_temperature: 105.0,
-          capacity_description: HPXML::CapacityDescriptionMinimum,
-          capacity: 15000.0,
-          efficiency_cop: 7
-        )
-        hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.add(
-          outdoor_temperature: -2.0,
-          capacity_description: HPXML::CapacityDescriptionMinimum,
-          capacity: 1500.0,
-          efficiency_cop: 0.7
-        )
-      when 'hvac-detailed-performance-invalid-data'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
-        min_dp_82F = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == 82.0 }
-        max_dp_82F = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 82.0 }
-        min_dp_82F.efficiency_cop = 0.1 * max_dp_82F.efficiency_cop
-        min_dp_95F = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == 95.0 }
-        max_dp_95F = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 95.0 }
-        min_dp_95F.capacity = 1.1 * max_dp_95F.capacity
-        min_dp_47F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == 47.0 }
-        max_dp_47F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 47.0 }
-        min_dp_47F.efficiency_cop = 0.1 * max_dp_47F.efficiency_cop
-        min_dp_5F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == 5.0 }
-        max_dp_5F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 5.0 }
-        min_dp_5F.capacity = 1.1 * max_dp_5F.capacity
-        min_dp_5F.efficiency_cop = 2 * max_dp_5F.efficiency_cop
       when 'heat-pump-lockout-temps-elec-backup'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.heat_pumps[0].compressor_lockout_temp = 35.0

@@ -2285,6 +2285,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     min_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
     nom_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
     min_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+    min_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
 
     # 47F
     assert_in_epsilon(8700.0, nom_dp_47f.capacity, 0.01)
@@ -2297,6 +2298,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(5337.0, min_dp_17f.capacity, 0.01)
     assert_in_epsilon(1.95, nom_dp_17f.efficiency_cop, 0.01)
     assert_in_epsilon(2.29, min_dp_17f.efficiency_cop, 0.01)
+
+    # 5F
+    assert_in_epsilon(4995.4, min_dp_5f.capacity, 0.01)
+    assert_in_epsilon(2.03, min_dp_5f.efficiency_cop, 0.01)
 
     # Cooling
     nom_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
