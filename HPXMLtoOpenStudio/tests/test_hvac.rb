@@ -55,7 +55,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     [4.95, 4.53].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [5252, 7158].each_with_index do |capacity, i|
+    [5252, 7259].each_with_index do |capacity, i|
       assert_in_epsilon(capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -612,7 +612,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     [4.95, 4.53].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [7870, 10736].each_with_index do |clg_capacity, i|
+    [7870, 10888].each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -1375,10 +1375,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.87, 0.87].each_with_index do |rated_airflow_ratio, i|
+    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
-    [0.8, 0.8].each_with_index do |rated_airflow_ratio, i|
+    [0.7, 0.7].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
     end
   end
@@ -1391,10 +1391,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.748, 0.748].each_with_index do |rated_airflow_ratio, i|
+    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
-    [0.702, 0.702].each_with_index do |rated_airflow_ratio, i|
+    [0.70, 0.70].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
     end
 
@@ -1404,10 +1404,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.748, 0.748].each_with_index do |rated_airflow_ratio, i|
+    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
-    [0.702, 0.702].each_with_index do |rated_airflow_ratio, i|
+    [0.70, 0.70].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
     end
   end
@@ -1458,7 +1458,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    [0.87, 0.87].each_with_index do |rated_airflow_ratio, i|
+    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
   end
@@ -1471,7 +1471,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    [0.747, 0.748].each_with_index do |rated_airflow_ratio, i|
+    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
   end
@@ -1554,10 +1554,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.748, 0.748].each_with_index do |rated_airflow_ratio, i|
+    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
-    [0.702, 0.702].each_with_index do |rated_airflow_ratio, i|
+    [0.70, 0.70].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
     end
   end

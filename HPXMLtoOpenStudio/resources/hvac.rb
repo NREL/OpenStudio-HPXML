@@ -2120,11 +2120,11 @@ module HVAC
   # @return [Array<Double>] cooling cfm/ton of rated capacity for each speed
   def self.get_cool_cfm_per_ton(compressor_type)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
-      return [394.2]
+      return [400.0]
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
-      return [411.0083, 344.1]
+      return [400.0] * 2
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      return [400.0, 400.0, 400.0]
+      return [400.0] * 3
     else
       fail 'Compressor type not supported.'
     end
@@ -2137,11 +2137,11 @@ module HVAC
   def self.get_heat_cfm_per_ton(compressor_type)
     case compressor_type
     when HPXML::HVACCompressorTypeSingleStage
-      return [384.1]
+      return [400.0]
     when HPXML::HVACCompressorTypeTwoStage
-      return [391.3333, 352.2]
+      return [400.0] * 2
     when HPXML::HVACCompressorTypeVariableSpeed
-      return [400.0, 400.0, 400.0]
+      return [400.0] * 3
     else
       fail 'Compressor type not supported.'
     end
@@ -2151,7 +2151,7 @@ module HVAC
   #
   # @return [Array<Double>] heating cfm/ton of rated capacity for one speed
   def self.get_heat_cfm_per_ton_simple()
-    return [350.0]
+    return [400.0]
   end
 
   # TODO
@@ -4626,21 +4626,15 @@ module HVAC
   def self.set_cool_c_d(cooling_system)
     clg_ap = cooling_system.additional_properties
 
-    # Degradation coefficient for cooling
     if is_room_dx_hvac_system(cooling_system)
       clg_ap.cool_c_d = 0.22
     else
+      # Per RESNET MINHERS Addendum 82
       case cooling_system.compressor_type
-      when HPXML::HVACCompressorTypeSingleStage
-        if calc_seer_from_seer2(cooling_system) < 13.0
-          clg_ap.cool_c_d = 0.20
-        else
-          clg_ap.cool_c_d = 0.07
-        end
-      when HPXML::HVACCompressorTypeTwoStage
-        clg_ap.cool_c_d = 0.11
+      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+        clg_ap.cool_c_d = 0.08
       when HPXML::HVACCompressorTypeVariableSpeed
-        clg_ap.cool_c_d = 0.25
+        clg_ap.cool_c_d = 0.40
       end
     end
 
@@ -4656,21 +4650,15 @@ module HVAC
   def self.set_heat_c_d(heating_system)
     htg_ap = heating_system.additional_properties
 
-    # Degradation coefficient for heating
-    if (heating_system.is_a? HPXML::HeatPump) && ([HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heating_system.heat_pump_type)
+    if is_room_dx_hvac_system(heating_system)
       htg_ap.heat_c_d = 0.22
     else
+      # Per RESNET MINHERS Addendum 82
       case heating_system.compressor_type
-      when HPXML::HVACCompressorTypeSingleStage
-        if calc_hspf_from_hspf2(heating_system) < 7.0
-          htg_ap.heat_c_d =  0.20
-        else
-          htg_ap.heat_c_d =  0.11
-        end
-      when HPXML::HVACCompressorTypeTwoStage
-        htg_ap.heat_c_d =  0.11
+      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+        htg_ap.heat_c_d = 0.08
       when HPXML::HVACCompressorTypeVariableSpeed
-        htg_ap.heat_c_d =  0.25
+        htg_ap.heat_c_d = 0.40
       end
     end
 
