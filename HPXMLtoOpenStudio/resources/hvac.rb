@@ -2022,8 +2022,8 @@ module HVAC
                     [5.796, 5.341, 4.663, 3.995, 3.564],
                     [8.202, 7.265, 5.990, 4.845, 4.248],
                     [11.689, 9.800, 7.529, 5.720, 4.928]]
-    x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }
-    y1, y2 = rated_cap_maint_17F_47F_array.min_by(2) { |x| (x - rated_cap_maint_17F_47F).abs }
+    x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }.sort
+    y1, y2 = rated_cap_maint_17F_47F_array.min_by(2) { |x| (x - rated_cap_maint_17F_47F).abs }.sort
     x_indexes = [x1, x2].map { |x| hspf2_array.find_index(x) }.sort
     y_indexes = [y1, y2].map { |y| rated_cap_maint_17F_47F_array.find_index(y) }.sort
     fx1y1 = cop_47_array[x_indexes[0]][y_indexes[0]]
@@ -2045,8 +2045,8 @@ module HVAC
     cop_82_array = [[4.047, 6.175, 14.240, 19.508, 23.029],
                     [7.061, 10.289, 23.262, 31.842, 37.513],
                     [10.058, 14.053, 30.962, 42.388, 49.863]]
-    x1, x2 = seer2_array.min_by(2) { |x| (x - seer2).abs }
-    y1, y2 = seer2_eer2_ratio_array.min_by(2) { |x| (x - seer2_eer2_ratio).abs }
+    x1, x2 = seer2_array.min_by(2) { |x| (x - seer2).abs }.sort
+    y1, y2 = seer2_eer2_ratio_array.min_by(2) { |x| (x - seer2_eer2_ratio).abs }.sort
     x_indexes = [x1, x2].map { |x| seer2_array.find_index(x) }.sort
     y_indexes = [y1, y2].map { |y| seer2_eer2_ratio_array.find_index(y) }.sort
     fx1y1 = cop_82_array[x_indexes[0]][y_indexes[0]]
@@ -2124,11 +2124,11 @@ module HVAC
   # @return [Array<Double>] cooling cfm/ton of rated capacity for each speed
   def self.get_cool_cfm_per_ton(compressor_type)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
-      return [394.2]
+      return [400.0]
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
-      return [411.0083, 344.1]
+      return [400.0] * 2
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      return [400.0, 400.0, 400.0]
+      return [400.0] * 3
     else
       fail 'Compressor type not supported.'
     end
@@ -2141,11 +2141,11 @@ module HVAC
   def self.get_heat_cfm_per_ton(compressor_type)
     case compressor_type
     when HPXML::HVACCompressorTypeSingleStage
-      return [384.1]
+      return [400.0]
     when HPXML::HVACCompressorTypeTwoStage
-      return [391.3333, 352.2]
+      return [400.0] * 2
     when HPXML::HVACCompressorTypeVariableSpeed
-      return [400.0, 400.0, 400.0]
+      return [400.0] * 3
     else
       fail 'Compressor type not supported.'
     end
@@ -2155,7 +2155,7 @@ module HVAC
   #
   # @return [Array<Double>] heating cfm/ton of rated capacity for one speed
   def self.get_heat_cfm_per_ton_simple()
-    return [350.0]
+    return [400.0]
   end
 
   # TODO
@@ -4630,21 +4630,15 @@ module HVAC
   def self.set_cool_c_d(cooling_system)
     clg_ap = cooling_system.additional_properties
 
-    # Degradation coefficient for cooling
     if is_room_dx_hvac_system(cooling_system)
       clg_ap.cool_c_d = 0.22
     else
+      # Per RESNET MINHERS Addendum 82
       case cooling_system.compressor_type
-      when HPXML::HVACCompressorTypeSingleStage
-        if calc_seer_from_seer2(cooling_system) < 13.0
-          clg_ap.cool_c_d = 0.20
-        else
-          clg_ap.cool_c_d = 0.07
-        end
-      when HPXML::HVACCompressorTypeTwoStage
-        clg_ap.cool_c_d = 0.11
+      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+        clg_ap.cool_c_d = 0.08
       when HPXML::HVACCompressorTypeVariableSpeed
-        clg_ap.cool_c_d = 0.25
+        clg_ap.cool_c_d = 0.40
       end
     end
 
@@ -4660,21 +4654,15 @@ module HVAC
   def self.set_heat_c_d(heating_system)
     htg_ap = heating_system.additional_properties
 
-    # Degradation coefficient for heating
-    if (heating_system.is_a? HPXML::HeatPump) && ([HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heating_system.heat_pump_type)
+    if is_room_dx_hvac_system(heating_system)
       htg_ap.heat_c_d = 0.22
     else
+      # Per RESNET MINHERS Addendum 82
       case heating_system.compressor_type
-      when HPXML::HVACCompressorTypeSingleStage
-        if calc_hspf_from_hspf2(heating_system) < 7.0
-          htg_ap.heat_c_d =  0.20
-        else
-          htg_ap.heat_c_d =  0.11
-        end
-      when HPXML::HVACCompressorTypeTwoStage
-        htg_ap.heat_c_d =  0.11
+      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+        htg_ap.heat_c_d = 0.08
       when HPXML::HVACCompressorTypeVariableSpeed
-        htg_ap.heat_c_d =  0.25
+        htg_ap.heat_c_d = 0.40
       end
     end
 
