@@ -228,6 +228,8 @@ class HPXML < Object
   HVACTypeWallFurnace = 'WallFurnace'
   HVACFanMotorTypePSC = 'PSC'
   HVACFanMotorTypeBPM = 'BPM'
+  HVACPanHeaterControlTypeContinuous = 'continuous'
+  HVACPanHeaterControlTypeDefrost = 'defrost mode'
   HydronicTypeBaseboard = 'baseboard'
   HydronicTypeRadiantCeiling = 'radiant ceiling'
   HydronicTypeRadiantFloor = 'radiant floor'
@@ -7019,6 +7021,8 @@ class HPXML < Object
              :shared_loop_watts,                   # [Double] extension/SharedLoopWatts (W)
              :shared_loop_motor_efficiency,        # [Double] extension/SharedLoopMotorEfficiency (frac)
              :crankcase_heater_watts,              # [Double] extension/CrankcaseHeaterPowerWatts (W)
+             :pan_heater_watts,                    # [Double] extension/PanHeaterPowerWatts (W)
+             :pan_heater_control_type,             # [String] extension/PanHeaterControlType (HPXML::HVACPanHeaterControlTypeXXX)
              :heating_capacity_fraction_17F,       # [Double] extension/HeatingCapacityFraction17F (frac)
              :cooling_autosizing_factor,           # [Double] extension/CoolingAutosizingFactor (frac)
              :heating_autosizing_factor,           # [Double] extension/HeatingAutosizingFactor (frac)
@@ -7250,6 +7254,8 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
       XMLHelper.add_extension(heat_pump, 'CrankcaseHeaterPowerWatts', @crankcase_heater_watts, :float, @crankcase_heater_watts_isdefaulted) unless @crankcase_heater_watts.nil?
+      XMLHelper.add_extension(heat_pump, 'PanHeaterPowerWatts', @pan_heater_watts, :float, @pan_heater_watts_isdefaulted) unless @pan_heater_watts.nil?
+      XMLHelper.add_extension(heat_pump, 'PanHeaterControlType', @pan_heater_control_type, :string, @pan_heater_control_type_isdefaulted) unless @pan_heater_control_type.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingCapacityFraction17F', @heating_capacity_fraction_17F, :float, @heating_capacity_fraction_17F_isdefaulted) unless @heating_capacity_fraction_17F.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingAutosizingFactor', @cooling_autosizing_factor, :float, @cooling_autosizing_factor_isdefaulted) unless @cooling_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAutosizingFactor', @heating_autosizing_factor, :float, @heating_autosizing_factor_isdefaulted) unless @heating_autosizing_factor.nil?
@@ -7323,6 +7329,8 @@ class HPXML < Object
       @shared_loop_watts = XMLHelper.get_value(heat_pump, 'extension/SharedLoopWatts', :float)
       @shared_loop_motor_efficiency = XMLHelper.get_value(heat_pump, 'extension/SharedLoopMotorEfficiency', :float)
       @crankcase_heater_watts = XMLHelper.get_value(heat_pump, 'extension/CrankcaseHeaterPowerWatts', :float)
+      @pan_heater_watts = XMLHelper.get_value(heat_pump, 'extension/PanHeaterPowerWatts', :float)
+      @pan_heater_control_type = XMLHelper.get_value(heat_pump, 'extension/PanHeaterControlType', :string)
       @heating_capacity_fraction_17F = XMLHelper.get_value(heat_pump, 'extension/HeatingCapacityFraction17F', :float)
       @cooling_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/CoolingAutosizingFactor', :float)
       @heating_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/HeatingAutosizingFactor', :float)

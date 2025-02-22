@@ -71,6 +71,7 @@ module Constants
   ObjectTypeNaturalVentilation = 'natural vent'
   ObjectTypeNeighbors = 'neighbors'
   ObjectTypeOccupants = 'occupants'
+  ObjectTypePanHeater = 'pan heater'
   ObjectTypePhotovoltaics = 'photovoltaics'
   ObjectTypePTAC = 'packaged terminal air conditioner'
   ObjectTypePTHP = 'packaged terminal heat pump'
