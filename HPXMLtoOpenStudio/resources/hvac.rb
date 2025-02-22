@@ -1655,7 +1655,7 @@ module HVAC
     clg_ap = cooling_system.additional_properties
     clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
     set_hvac_degradation_coefficient(cooling_system)
-    
+
     if is_room_dx_hvac_system(cooling_system)
       clg_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
       clg_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
@@ -1670,7 +1670,7 @@ module HVAC
       clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
       clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
     end
-    
+
     set_cool_rated_shrs_gross(cooling_system)
   end
 
@@ -1730,10 +1730,10 @@ module HVAC
     htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heating_system.compressor_type)
     htg_ap.heat_capacity_ratios = get_heat_capacity_ratios_47F(heating_system)
     set_hvac_degradation_coefficient(heating_system)
-    
+
     if is_room_dx_hvac_system(heating_system)
       heating_capacity_fraction_17F = get_heating_capacity_fraction_17F(heating_system)
-      htg_ap.heat_cap_ft_spec  = calc_heat_cap_ft_spec(heating_capacity_fraction_17F)
+      htg_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec(heating_capacity_fraction_17F)
       htg_ap.heat_eir_ft_spec = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
       htg_ap.heat_rated_cfm_per_ton = [RatedCFMPerTon]
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[0]
