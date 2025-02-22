@@ -2194,10 +2194,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   def test_default_detailed_performance_data
     # Test to verify the default detailed performance data points are consistent with RESNET's NEEP-Statistical-Model.xlsm
 
-    # Variable Speed
-    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed.xml')
+    # ============== #
+    # Variable Speed #
+    # ============== #
 
-    # Configure the same capacities, efficiencies, etc.
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed.xml')
     hpxml_bldg.heat_pumps[0].cooling_capacity = 6000.0
     hpxml_bldg.heat_pumps[0].heating_capacity = 8700.0
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = 7500.0
@@ -2271,21 +2272,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(3.11, nom_dp_82f.efficiency_cop, 0.01)
     assert_in_epsilon(7.19, min_dp_82f.efficiency_cop, 0.01)
 
-    # Two Stage
-    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed.xml')
+    # ========= #
+    # Two Stage #
+    # ========= #
 
-    # Configure the same capacities, efficiencies, etc.
-    hpxml_bldg.heat_pumps[0].cooling_capacity = 6000.0
-    hpxml_bldg.heat_pumps[0].heating_capacity = 8700.0
-    hpxml_bldg.heat_pumps[0].heating_capacity_17F = 7500.0
-    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer = nil
-    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = 14.3
-    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer = nil
-    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 8.0
-    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
-    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 7.5
-    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
-    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
+    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
 
@@ -2325,20 +2316,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(2.92, nom_dp_82f.efficiency_cop, 0.01)
     assert_in_epsilon(4.67, min_dp_82f.efficiency_cop, 0.01)
 
-    # Single Stage
-    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    # ============ #
+    # Single Stage #
+    # ============ #
 
-    # Configure the same capacities, efficiencies, etc.
-    hpxml_bldg.heat_pumps[0].cooling_capacity = 6000.0
-    hpxml_bldg.heat_pumps[0].heating_capacity = 8700.0
-    hpxml_bldg.heat_pumps[0].heating_capacity_17F = 7500.0
-    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer = nil
-    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = 14.3
-    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer = nil
-    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 8.0
-    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
-    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 7.5
-    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
+    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
     hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypePSC
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()

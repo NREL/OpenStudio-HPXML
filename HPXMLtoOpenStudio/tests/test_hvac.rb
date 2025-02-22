@@ -22,6 +22,119 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
   end
 
+  def test_resnet_model
+    # Test to verify the model is consistent with RESNET's NEEP-Statistical-Model.xlsm
+
+    # ============== #
+    # Variable Speed #
+    # ============== #
+
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed.xml')
+    hpxml_bldg.heat_pumps[0].cooling_capacity = 6000.0
+    hpxml_bldg.heat_pumps[0].heating_capacity = 8700.0
+    hpxml_bldg.heat_pumps[0].heating_capacity_17F = 7500.0
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer = nil
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = 14.3
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer = nil
+    hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 8.0
+    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
+    hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 7.5
+    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
+    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+
+    args_hash = {}
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(3, clg_coil.stages.size)
+    [5.50, 2.48, 2.31].each_with_index do |cop, i|
+      assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
+    end
+    [1135.1, 6100.1, 6546.8].each_with_index do |capacity_btuh, i|
+      assert_in_epsilon(capacity_btuh, UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), 0.01)
+    end
+    [37.8, 200.0, 214.2].each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(clg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+    end
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(3, htg_coil.stages.size)
+    [3.23, 2.62, 2.47].each_with_index do |cop, i|
+      assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
+    end
+    [2591.2, 8421.9, 9214.5].each_with_index do |capacity_btuh, i|
+      assert_in_epsilon(capacity_btuh, UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), 0.01)
+    end
+    [86.7, 290.0, 319.2].each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(htg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+    end
+
+    # ========= #
+    # Two Stage #
+    # ========= #
+
+    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
+    [3.94, 2.48].each_with_index do |cop, i|
+      assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
+    end
+    [4406.9, 6100.1].each_with_index do |capacity_btuh, i|
+      assert_in_epsilon(capacity_btuh, UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), 0.01)
+    end
+    [145.5, 200.0].each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(clg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+    end
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil.stages.size)
+    [3.23, 2.79].each_with_index do |cop, i|
+      assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
+    end
+    [6081.8, 8421.9].each_with_index do |capacity_btuh, i|
+      assert_in_epsilon(capacity_btuh, UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), 0.01)
+    end
+    [206.4, 290.0].each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(htg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+    end
+
+    # ============ #
+    # Single Stage #
+    # ============ #
+
+    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
+    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypePSC
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
+    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
+    assert_in_epsilon(2.72, clg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(6256.2, UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr'), 0.01)
+    assert_in_epsilon(200.0, UnitConversions.convert(clg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
+    htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
+    assert_in_epsilon(3.32, htg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(8290.3, UnitConversions.convert(htg_coil.ratedTotalHeatingCapacity.get, 'W', 'Btu/hr'), 0.01)
+    assert_in_epsilon(290.0, UnitConversions.convert(htg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+  end
+
   def test_central_air_conditioner_1_speed
     ['base-hvac-central-ac-only-1-speed.xml',
      'base-hvac-central-ac-only-1-speed-seer2.xml'].each do |hpxml_path|
@@ -52,10 +165,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(2, clg_coil.stages.size)
-    [4.95, 4.53].each_with_index do |cop, i|
+    [4.62, 4.44].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [5252, 7259].each_with_index do |capacity, i|
+    [5204, 7234].each_with_index do |capacity, i|
       assert_in_epsilon(capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -495,13 +608,13 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       # Check cooling coil
       assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
       clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-      assert_in_epsilon(3.77, clg_coil.ratedCOP, 0.01)
+      assert_in_epsilon(4.51, clg_coil.ratedCOP, 0.01)
       assert_in_epsilon(11040, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
       # Check heating coil
       assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
       htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
-      assert_in_epsilon(3.29, htg_coil.ratedCOP, 0.01)
+      assert_in_epsilon(2.99, htg_coil.ratedCOP, 0.01)
       assert_in_epsilon(10077, htg_coil.ratedTotalHeatingCapacity.get, 0.01)
 
       # Check supp heating coil
@@ -609,10 +722,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(2, clg_coil.stages.size)
-    [4.95, 4.53].each_with_index do |cop, i|
+    [4.62, 4.44].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
-    [7870, 10888].each_with_index do |clg_capacity, i|
+    [7806, 10851].each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
 
@@ -620,10 +733,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(2, htg_coil.stages.size)
-    [4.52, 3.93].each_with_index do |cop, i|
+    [3.96, 3.44].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
-    [7356, 10254].each_with_index do |htg_capacity, i|
+    [7394, 10250].each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
 
@@ -882,7 +995,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1224)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1249)
 
     # Separate backup heat pump test
     args_hash = {}
@@ -1197,7 +1310,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    assert_in_epsilon(3.31, clg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(3.26, clg_coil.ratedCOP, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
 
@@ -1213,7 +1326,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    assert_in_epsilon(1.50, clg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(1.41, clg_coil.ratedCOP, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
 
@@ -1229,7 +1342,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    assert_in_epsilon(3.50, clg_coil.ratedCOP, 0.01)
+    assert_in_epsilon(3.46, clg_coil.ratedCOP, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
 
