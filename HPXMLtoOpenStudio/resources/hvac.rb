@@ -2872,40 +2872,6 @@ module HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param name [TODO] TODO
-  # @param independent_vars [TODO] TODO
-  # @param output_values [TODO] TODO
-  # @param output_min [TODO] TODO
-  # @param output_max [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_table_lookup(model, name, independent_vars, output_values, output_min = nil, output_max = nil)
-    if (not output_min.nil?) && (output_values.min < output_min)
-      fail "Minimum table lookup output value (#{output_values.min}) is less than #{output_min} for #{name}."
-    end
-    if (not output_max.nil?) && (output_values.max > output_max)
-      fail "Maximum table lookup output value (#{output_values.max}) is greater than #{output_max} for #{name}."
-    end
-
-    table = OpenStudio::Model::TableLookup.new(model)
-    table.setName(name)
-    independent_vars.each do |var|
-      ind_var = OpenStudio::Model::TableIndependentVariable.new(model)
-      ind_var.setName(var[:name])
-      ind_var.setMinimumValue(var[:min])
-      ind_var.setMaximumValue(var[:max])
-      ind_var.setExtrapolationMethod('Constant')
-      ind_var.setValues(var[:values])
-      table.addIndependentVariable(ind_var)
-    end
-    table.setMinimumOutput(output_min) unless output_min.nil?
-    table.setMaximumOutput(output_max) unless output_max.nil?
-    table.setOutputValues(output_values)
-    return table
-  end
-
-  # TODO
-  #
   # @param net_cap [TODO] TODO
   # @param fan_power [TODO] TODO
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
@@ -3277,19 +3243,39 @@ module HVAC
       if not cooling_system.cooling_detailed_performance_data.empty?
         capacity_description = clg_ap.cooling_datapoints_by_speed.keys[i]
         speed_performance_data = clg_ap.cooling_datapoints_by_speed[capacity_description].sort_by { |dp| [dp.indoor_wetbulb, dp.outdoor_temperature] }
-        var_wb = { name: 'wet_bulb_temp_in', min: -100, max: 100, values: speed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_wetbulb, 'F', 'C') }.uniq }
-        var_db = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: speed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq }
-        cap_ft_independent_vars = [var_wb, var_db]
-        eir_ft_independent_vars = [var_wb, var_db]
+        var_iwb = Model.add_table_independent_variable(
+          model,
+          name: 'wet_bulb_temp_in',
+          min: -100,
+          max: 100,
+          values: speed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_wetbulb, 'F', 'C') }.uniq
+        )
+        var_odb = Model.add_table_independent_variable(
+          model,
+          name: 'dry_bulb_temp_out',
+          min: -100,
+          max: 100,
+          values: speed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
+        )
 
         rate_dp = speed_performance_data.find { |dp| (dp.indoor_wetbulb == HVAC::AirSourceCoolRatedIWB) && (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) }
         clg_ap.cool_rated_cops << rate_dp.gross_efficiency_cop
         clg_ap.cool_rated_capacities_gross << rate_dp.gross_capacity
         clg_ap.cool_rated_capacities_net << rate_dp.capacity
-        cap_ft_output_values = speed_performance_data.map { |dp| dp.gross_capacity / rate_dp.gross_capacity }
-        eir_ft_output_values = speed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / (1.0 / rate_dp.gross_efficiency_cop) }
-        cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values, 0.0)
-        eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values, 0.0)
+        cap_ft_curve = Model.add_table_lookup(
+          model,
+          name: "Cool-CAP-fT#{i + 1}",
+          ind_vars: [var_iwb, var_odb],
+          output_values: speed_performance_data.map { |dp| dp.gross_capacity / rate_dp.gross_capacity },
+          output_min: 0.0
+        )
+        eir_ft_curve = Model.add_table_lookup(
+          model,
+          name: "Cool-EIR-fT#{i + 1}",
+          ind_vars: [var_iwb, var_odb],
+          output_values: speed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / (1.0 / rate_dp.gross_efficiency_cop) },
+          output_min: 0.0
+        )
       else
         cap_ft_curve = Model.add_curve_biquadratic(
           model,
@@ -3427,19 +3413,39 @@ module HVAC
       if not heating_system.heating_detailed_performance_data.empty?
         capacity_description = htg_ap.heating_datapoints_by_speed.keys[i]
         speed_performance_data = htg_ap.heating_datapoints_by_speed[capacity_description].sort_by { |dp| [dp.indoor_temperature, dp.outdoor_temperature] }
-        var_idb = { name: 'dry_bulb_temp_in', min: -100, max: 100, values: speed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_temperature, 'F', 'C') }.uniq }
-        var_odb = { name: 'dry_bulb_temp_out', min: -100, max: 100, values: speed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq }
-        cap_ft_independent_vars = [var_idb, var_odb]
-        eir_ft_independent_vars = [var_idb, var_odb]
+        var_idb = Model.add_table_independent_variable(
+          model,
+          name: 'dry_bulb_temp_in',
+          min: -100,
+          max: 100,
+          values: speed_performance_data.map { |dp| UnitConversions.convert(dp.indoor_temperature, 'F', 'C') }.uniq
+        )
+        var_odb = Model.add_table_independent_variable(
+          model,
+          name: 'dry_bulb_temp_out',
+          min: -100,
+          max: 100,
+          values: speed_performance_data.map { |dp| UnitConversions.convert(dp.outdoor_temperature, 'F', 'C') }.uniq
+        )
 
         rate_dp = speed_performance_data.find { |dp| (dp.indoor_temperature == HVAC::AirSourceHeatRatedIDB) && (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) }
         htg_ap.heat_rated_cops << rate_dp.gross_efficiency_cop
         htg_ap.heat_rated_capacities_net << rate_dp.capacity
         htg_ap.heat_rated_capacities_gross << rate_dp.gross_capacity
-        cap_ft_output_values = speed_performance_data.map { |dp| dp.gross_capacity / rate_dp.gross_capacity }
-        eir_ft_output_values = speed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / (1.0 / rate_dp.gross_efficiency_cop) }
-        cap_ft_curve = create_table_lookup(model, "Heat-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values, 0)
-        eir_ft_curve = create_table_lookup(model, "Heat-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values, 0)
+        cap_ft_curve = Model.add_table_lookup(
+          model,
+          name: "Heat-CAP-fT#{i + 1}",
+          ind_vars: [var_idb, var_odb],
+          output_values: speed_performance_data.map { |dp| dp.gross_capacity / rate_dp.gross_capacity },
+          output_min: 0.0
+        )
+        eir_ft_curve = Model.add_table_lookup(
+          model,
+          name: "Heat-EIR-fT#{i + 1}",
+          ind_vars: [var_idb, var_odb],
+          output_values: speed_performance_data.map { |dp| (1.0 / dp.gross_efficiency_cop) / (1.0 / rate_dp.gross_efficiency_cop) },
+          output_min: 0.0
+        )
       else
         cap_ft_curve = Model.add_curve_biquadratic(
           model,

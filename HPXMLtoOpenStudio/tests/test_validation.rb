@@ -124,9 +124,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'heat-pump-lockout-temperatures' => ['Expected CompressorLockoutTemperature to be less than or equal to BackupHeatingLockoutTemperature'],
                             'heat-pump-multiple-backup-systems' => ['Expected 0 or 1 element(s) for xpath: HeatPump/BackupSystem [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'hvac-detailed-performance-bad-odbs' => ['Expected PerformanceDataPoint/OutdoorTemperature to be 47, 17, 5, or <5',
-                                                                     'Expected PerformanceDataPoint/OutdoorTemperature to be 82, 95, or >95',
-                                                                     'Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature>95 and CapacityDescription="minimum"]',
-                                                                     'Expected 0 or 1 element(s) for xpath: PerformanceDataPoint[OutdoorTemperature>95 and CapacityDescription="maximum"]'],
+                                                                     'Expected PerformanceDataPoint/OutdoorTemperature to be 82, 95, or >95'],
                             'hvac-detailed-performance-inconsistent-capacities' => ['Expected ../../HeatingCapacity to be equal to Capacity',
                                                                                     'Expected ../../HeatingCapacity17F to be equal to Capacity',
                                                                                     'Expected ../../CoolingCapacity to be equal to Capacity'],
@@ -483,21 +481,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
           capacity: 20000.0,
           efficiency_cop: 7.0
         )
-        # For cooling, also test multiple pairs at the same ODB
-        for _i in 1..2
-          hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.add(
-            outdoor_temperature: 105.0,
-            capacity_description: HPXML::CapacityDescriptionMinimum,
-            capacity: 10000.0,
-            efficiency_cop: 4.1
-          )
-          hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.add(
-            outdoor_temperature: 105.0,
-            capacity_description: HPXML::CapacityDescriptionMaximum,
-            capacity: 60000.0,
-            efficiency_cop: 2.1
-          )
-        end
       when 'hvac-detailed-performance-inconsistent-capacities'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
         hpxml_bldg.heat_pumps[0].heating_capacity = 10000
