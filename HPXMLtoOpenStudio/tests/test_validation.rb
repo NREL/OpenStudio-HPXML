@@ -505,8 +505,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].heating_capacity_17F = 1000
       when 'hvac-detailed-performance-inconsistent-capacity-fractions'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml')
-        hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data[1].capacity_fraction_of_nominal = 1.1
-        hpxml_bldg.heat_pumps[0].heating_detailed_performance_data[1].capacity_fraction_of_nominal = 1.1
+        hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data[1].capacity_fraction_of_nominal = 0.98
+        hpxml_bldg.heat_pumps[0].heating_detailed_performance_data[1].capacity_fraction_of_nominal = 0.98
       when 'hvac-detailed-performance-incomplete-pair'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
         hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.add(

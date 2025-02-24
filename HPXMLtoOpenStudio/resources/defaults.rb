@@ -2405,6 +2405,11 @@ module Defaults
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       is_hp = hvac_system.is_a? HPXML::HeatPump
       system_type = is_hp ? hvac_system.heat_pump_type : hvac_system.cooling_system_type
+      if [HPXML::HVACTypeHeatPumpPTHP,
+          HPXML::HVACTypeHeatPumpRoom].include? system_type
+        set_heating_capacity_17F(hvac_system)
+        next
+      end
       next unless [HPXML::HVACTypeCentralAirConditioner,
                    HPXML::HVACTypeMiniSplitAirConditioner,
                    HPXML::HVACTypeHeatPumpAirToAir,
@@ -2417,6 +2422,7 @@ module Defaults
         HVAC.set_cool_detailed_performance_data(hvac_system)
       else
         expand_detailed_performance_data(hvac_system.compressor_type, hvac_system.cooling_detailed_performance_data, hvac_system.cooling_capacity)
+
         # override some properties based on detailed performance data
         cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
         dps = hvac_system.cooling_detailed_performance_data.select { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB }
