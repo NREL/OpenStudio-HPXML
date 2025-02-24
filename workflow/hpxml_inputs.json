@@ -601,6 +601,31 @@
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-07.xml",
     "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
+  "real_homes/house051.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "geometry_unit_cfa": 3000,
+    "heating_system_type": "none",
+    "cooling_system_type": "none",
+    "heat_pump_type": "air-to-air",
+    "heat_pump_heating_efficiency": 7.7,
+    "heat_pump_cooling_efficiency": 13,
+    "heat_pump_heating_capacity": 84000,
+    "heat_pump_cooling_capacity": 84000,
+    "heat_pump_fraction_heat_load_served": 1,
+    "heat_pump_fraction_cool_load_served": 1,
+    "water_heater_fuel_type": "natural gas",
+    "cooking_range_oven_fuel_type": "natural gas",
+    "clothes_dryer_fuel_type": "natural gas",
+    "pv_system_present": true,
+    "pool_present": true,
+    "pool_heater_type": "heat pump",
+    "electric_panel_service_voltage": "240",
+    "electric_panel_service_rating": 200
+  },
+  "real_homes/house052.xml": {
+    "parent_hpxml": "real_homes/house051.xml",
+    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based"
+  },
   "sample_files/base.xml": {
     "simulation_control_timestep": 60,
     "site_type": "suburban",

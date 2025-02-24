@@ -9682,23 +9682,31 @@ class HPXML < Object
     def components
       return [] if @component_idrefs.nil?
 
+      # FIXME: can this be condensed/simplified somehow?
       heating_systems = @parent_object.heating_systems.select { |heating_system| @component_idrefs.include? heating_system.id }
       cooling_systems = @parent_object.cooling_systems.select { |cooling_system| @component_idrefs.include? cooling_system.id }
       heat_pumps = @parent_object.heat_pumps.select { |heat_pump| @component_idrefs.include? heat_pump.id }
       water_heating_systems = @parent_object.water_heating_systems.select { |water_heating_system| @component_idrefs.include? water_heating_system.id }
+      clothes_washers = @parent_object.clothes_washers.select { |clothes_washer| @component_idrefs.include? clothes_washer.id }
       clothes_dryers = @parent_object.clothes_dryers.select { |clothes_dryer| @component_idrefs.include? clothes_dryer.id }
       dishwashers = @parent_object.dishwashers.select { |dishwasher| @component_idrefs.include? dishwasher.id }
       cooking_ranges = @parent_object.cooking_ranges.select { |cooking_range| @component_idrefs.include? cooking_range.id }
+      ovens = @parent_object.ovens.select { |oven| @component_idrefs.include? oven.id }
+      refrigerators = @parent_object.refrigerators.select { |refrigerator| @component_idrefs.include? refrigerator.id }
+      freezers = @parent_object.freezers.select { |freezer| @component_idrefs.include? freezer.id }
+      dehumidifiers = @parent_object.dehumidifiers.select { |dehumidifier| @component_idrefs.include? dehumidifier.id }
       ventilation_fans = @parent_object.ventilation_fans.select { |ventilation_fan| @component_idrefs.include? ventilation_fan.id }
       permanent_spa_pumps = @parent_object.permanent_spas.select { |permanent_spa| @component_idrefs.include? permanent_spa.pump_id }
       permanent_spa_heaters = @parent_object.permanent_spas.select { |permanent_spa| @component_idrefs.include? permanent_spa.heater_id }
       pool_pumps = @parent_object.pools.select { |pool| @component_idrefs.include? pool.pump_id }
       pool_heaters = @parent_object.pools.select { |pool| @component_idrefs.include? pool.heater_id }
-      plug_load_well_pumps = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) && plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump }
-      plug_load_vehicles = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) && plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
+      plug_loads = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) }
+      fuel_loads = @parent_object.fuel_loads.select { |fuel_load| @component_idrefs.include?(fuel_load.id) }
       ev_chargers = @parent_object.ev_chargers.select { |ev_charger| @component_idrefs.include? ev_charger.id }
+      pv_systems = @parent_object.pv_systems.select { |pv_system| @component_idrefs.include? pv_system.id }
+      lighting_groups = @parent_object.lighting_groups.select { |lighting_group| @component_idrefs.include? lighting_group.id }
 
-      list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
+      list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_washers + clothes_dryers + dishwashers + cooking_ranges + ovens + refrigerators + freezers + dehumidifiers + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_loads + fuel_loads + ev_chargers + pv_systems + lighting_groups
       if @component_idrefs.size > list.size
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for branch circuit '#{@id}'."
       end

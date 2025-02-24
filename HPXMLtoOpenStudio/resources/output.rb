@@ -1337,21 +1337,23 @@ module Outputs
     results_out << ['Electric Panel Breaker Spaces: Headroom Count', hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.map { |electric_panel| electric_panel.breaker_spaces_headroom }.sum(0.0) * hpxml_bldg.building_construction.number_of_units }.sum(0.0)]
 
     # Summary panel loads
-    results_out << [line_break]
-    results_out << ['Electric Panel Load: Heating (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[0] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Cooling (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[1] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Hot Water (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[2] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Clothes Dryer (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[3] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Dishwasher (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[4] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Range/Oven (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[5] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Mech Vent (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[6] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Permanent Spa Heater (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[7] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Permanent Spa Pump (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[8] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Pool Heater (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[9] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Pool Pump (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[10] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Well Pump (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[11] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Electric Vehicle Charging (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[12] }.sum(0.0).round(1)]
-    results_out << ['Electric Panel Load: Other (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[13] }.sum(0.0).round(1)]
+    if !hpxml_header.service_feeders_load_calculation_types.empty?
+      results_out << [line_break]
+      results_out << ['Electric Panel Load: Heating (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[0] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Cooling (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[1] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Hot Water (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[2] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Clothes Dryer (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[3] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Dishwasher (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[4] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Range/Oven (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[5] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Mech Vent (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[6] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Permanent Spa Heater (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[7] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Permanent Spa Pump (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[8] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Pool Heater (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[9] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Pool Pump (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[10] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Well Pump (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[11] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Electric Vehicle Charging (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[12] }.sum(0.0).round(1)]
+      results_out << ['Electric Panel Load: Other (W)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_panel_loads(hpxml_bldg)[13] }.sum(0.0).round(1)]
+    end
 
     # Load-based capacities
     hpxml_header.service_feeders_load_calculation_types.each do |service_feeders_load_calculation_type|

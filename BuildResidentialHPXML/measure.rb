@@ -7237,7 +7237,7 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_electric_panel(hpxml_bldg, args)
-    return if args[:electric_panel_service_feeders_load_calculation_types].nil?
+    return if args[:electric_panel_breaker_spaces].nil? && args[:electric_panel_breaker_spaces].nil? && args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil?
 
     if args[:electric_panel_breaker_spaces_type] == 'total'
       total_breaker_spaces = args[:electric_panel_breaker_spaces]
@@ -7250,6 +7250,8 @@ module HPXMLFile
                                    max_current_rating: args[:electric_panel_service_rating],
                                    headroom: headroom_breaker_spaces,
                                    rated_total_spaces: total_breaker_spaces)
+
+    return if args[:electric_panel_service_feeders_load_calculation_types].nil?
 
     electric_panel = hpxml_bldg.electric_panels[0]
     branch_circuits = electric_panel.branch_circuits
