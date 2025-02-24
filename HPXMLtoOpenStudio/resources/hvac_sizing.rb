@@ -2653,14 +2653,9 @@ module HVACSizing
       entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
 
-      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-        idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
-        odb_adj = adjust_outdoor_condition_var_speed(entering_temp, hvac_cooling, :clg)
-        total_cap_curve_value = odb_adj * idb_adj
-      else
-        coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
-        total_cap_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, entering_temp, coefficients)
-      end
+      idb_adj = adjust_heat_pump_capacity_for_indoor_condition(entering_temp, mj.cool_indoor_wetbulb, :clg)
+      odb_adj = adjust_heat_pump_capacity_for_outdoor_condition(entering_temp, hvac_cooling, :clg)
+      total_cap_curve_value = odb_adj * idb_adj
 
       cool_cap_rated = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
       cool_cfm_rated = UnitConversions.convert(cool_cap_rated, 'btu/hr', 'ton') * hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed]
@@ -2775,8 +2770,8 @@ module HVACSizing
       hvac_cooling_shr_rated = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
       entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
-      idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
-      odb_adj = adjust_outdoor_condition_var_speed(entering_temp, hvac_cooling, :clg)
+      idb_adj = adjust_heat_pump_capacity_for_indoor_condition(entering_temp, mj.cool_indoor_wetbulb, :clg)
+      odb_adj = adjust_heat_pump_capacity_for_outdoor_condition(entering_temp, hvac_cooling, :clg)
       total_cap_curve_value = odb_adj * idb_adj
 
       hvac_sizings.Cool_Capacity = (hvac_sizings.Cool_Load_Tot / total_cap_curve_value)
@@ -2890,8 +2885,7 @@ module HVACSizing
             fail 'Primary heat pump should have been sized already.'
           end
 
-          hp_heating_speed = get_nominal_speed(hvac_hp.additional_properties, false)
-          hvac_sizings.Heat_Load = calculate_heat_pump_backup_load(mj, hvac_hp, hvac_sizings.Heat_Load, hp_sizing_values.Heat_Capacity, hp_heating_speed, hpxml_bldg)
+          hvac_sizings.Heat_Load = calculate_heat_pump_backup_load(mj, hvac_hp, hvac_sizings.Heat_Load, hp_sizing_values.Heat_Capacity, hpxml_bldg)
         end
       end
     elsif not hvac_cooling.nil? && hvac_cooling.has_integrated_heating
@@ -2910,9 +2904,9 @@ module HVACSizing
            HPXML::HVACTypeHeatPumpRoom].include? heating_type
 
       hvac_heating_speed = get_nominal_speed(hvac_heating_ap, false)
-      process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed, oversize_limit, oversize_delta, hpxml_bldg)
+      process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, total_cap_curve_value, hvac_system, oversize_limit, oversize_delta, hpxml_bldg)
 
-      hvac_sizings.Heat_Capacity_Supp = calculate_heat_pump_backup_load(mj, hvac_heating, hvac_sizings.Heat_Load_Supp, hvac_sizings.Heat_Capacity, hvac_heating_speed, hpxml_bldg)
+      hvac_sizings.Heat_Capacity_Supp = calculate_heat_pump_backup_load(mj, hvac_heating, hvac_sizings.Heat_Load_Supp, hvac_sizings.Heat_Capacity, hpxml_bldg)
       if (heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
         hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, heating_delta_t, dx_capacity: hvac_sizings.Heat_Capacity, hp_cooling_cfm: hvac_sizings.Cool_Airflow)
       else
@@ -3020,7 +3014,7 @@ module HVACSizing
   # @param indoor_temp [Double] Indoor drybulb (heating) or wetbulb (cooling) temperature (F)
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Double] Heat pump adjustment factor (capacity fraction)
-  def self.adjust_indoor_condition_var_speed(outdoor_temp, indoor_temp, mode)
+  def self.adjust_heat_pump_capacity_for_indoor_condition(outdoor_temp, indoor_temp, mode)
     coefficients_1speed = HVAC.get_resnet_cap_eir_ft_spec(mode)[0]
     rated_indoor_temp = (mode == :clg) ? HVAC::AirSourceCoolRatedIWB : HVAC::AirSourceHeatRatedIDB
     return MathTools.biquadratic(indoor_temp, outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, outdoor_temp, coefficients_1speed)
@@ -3033,7 +3027,7 @@ module HVACSizing
   # @param hvac_sys [HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC system of interest
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Double] Heat pump adjustment factor (capacity fraction)
-  def self.adjust_outdoor_condition_var_speed(outdoor_temp, hvac_sys, mode)
+  def self.adjust_heat_pump_capacity_for_outdoor_condition(outdoor_temp, hvac_sys, mode)
     rated_odb = (mode == :clg) ? HVAC::AirSourceCoolRatedODB : HVAC::AirSourceHeatRatedODB
     detailed_performance_data = (mode == :clg) ? hvac_sys.cooling_detailed_performance_data : hvac_sys.heating_detailed_performance_data
     if detailed_performance_data.empty?
@@ -3050,7 +3044,8 @@ module HVACSizing
       odb_adj = 1.0 - (1.0 - capacity_fraction) / (rated_odb - capacity_temperature) * (rated_odb - outdoor_temp)
     else
       # Based on detailed performance data
-      max_rated_dp = detailed_performance_data.find { |dp| dp.outdoor_temperature == rated_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
+      capacity_description = (hvac_sys.compressor_type == HPXML::HVACCompressorTypeVariableSpeed ? HPXML::CapacityDescriptionMaximum : HPXML::CapacityDescriptionNominal)
+      max_rated_dp = detailed_performance_data.find { |dp| dp.outdoor_temperature == rated_odb && dp.capacity_description == capacity_description }
       if max_rated_dp.capacity.nil?
         property = :capacity_fraction_of_nominal
         capacity_nominal = 1.0
@@ -3058,7 +3053,7 @@ module HVACSizing
         property = :capacity
         capacity_nominal = (mode == :clg) ? hvac_sys.cooling_capacity : hvac_sys.heating_capacity
       end
-      odb_adj = HVAC.extrapolate_datapoint(detailed_performance_data, HPXML::CapacityDescriptionMaximum, :outdoor_temperature, outdoor_temp, property) / capacity_nominal
+      odb_adj = HVAC.extrapolate_datapoint(detailed_performance_data, capacity_description, :outdoor_temperature, outdoor_temp, property) / capacity_nominal
     end
     return odb_adj
   end
@@ -3638,17 +3633,11 @@ module HVACSizing
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param heating_temp [Double] Outdoor drybulb temperature (F)
-  # @param hvac_heating_speed [Integer] Nominal heating speed index of the HVAC system
   # @return [Double] Heat pump adjustment factor (capacity fraction)
-  def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_temp, hvac_heating_speed)
-    if hvac_heating.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      idb_adj = adjust_indoor_condition_var_speed(heating_temp, mj.heat_setpoint, :htg)
-      odb_adj = adjust_outdoor_condition_var_speed(heating_temp, hvac_heating, :htg)
-      return odb_adj * idb_adj
-    else
-      coefficients = hvac_heating.additional_properties.heat_cap_ft_spec[hvac_heating_speed]
-      return MathTools.biquadratic(mj.heat_setpoint, heating_temp, coefficients)
-    end
+  def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_temp)
+    idb_adj = adjust_heat_pump_capacity_for_indoor_condition(heating_temp, mj.heat_setpoint, :htg)
+    odb_adj = adjust_heat_pump_capacity_for_outdoor_condition(heating_temp, hvac_heating, :htg)
+    return odb_adj * idb_adj
   end
 
   # Calculates the portion of the heating load that the heat pump backup needs to serve.
@@ -3659,10 +3648,9 @@ module HVACSizing
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param heating_load [Double] Full heating load (Btu/hr)
   # @param hp_nominal_heating_capacity [Double] Heat pump nominal heating capacity (Btu/hr)
-  # @param hvac_heating_speed [Integer] Nominal heating speed index of the HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Double] Heat pump backup load (Btu/hr)
-  def self.calculate_heat_pump_backup_load(mj, hvac_heating, heating_load, hp_nominal_heating_capacity, hvac_heating_speed, hpxml_bldg)
+  def self.calculate_heat_pump_backup_load(mj, hvac_heating, heating_load, hp_nominal_heating_capacity, hpxml_bldg)
     if hpxml_bldg.header.heat_pump_backup_sizing_methodology == HPXML::HeatPumpBackupSizingEmergency
       # Size backup to meet full design load in case heat pump fails
       return heating_load
@@ -3679,7 +3667,7 @@ module HVACSizing
       end
 
       # Heat pump operating at design temperature, size backup to meet remaining design load
-      heat_cap_adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, hpxml_bldg.header.manualj_heating_design_temp, hvac_heating_speed)
+      heat_cap_adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, hpxml_bldg.header.manualj_heating_design_temp)
       hp_output_at_outdoor_temperature = hp_nominal_heating_capacity * heat_cap_adj_factor
       return [heating_load - hp_output_at_outdoor_temperature, 0.0].max
     else
@@ -3697,12 +3685,11 @@ module HVACSizing
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param cool_cap_adj_factor [Double] Heat pump's cooling capacity at the design temperature as a fraction of the nominal cooling capacity (frac)
   # @param hvac_system [Hash] The HPXML HVAC system of interest
-  # @param hvac_heating_speed [Integer] Nominal heating speed index of the HVAC system
   # @param oversize_limit [Double] Oversize fraction (frac)
   # @param oversize_delta [Double] Oversize delta (Btu/hr)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, cool_cap_adj_factor, hvac_system, hvac_heating_speed,
+  def self.process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, cool_cap_adj_factor, hvac_system,
                                         oversize_limit, oversize_delta, hpxml_bldg)
 
     if not hvac_heating.backup_heating_switchover_temp.nil?
@@ -3724,7 +3711,7 @@ module HVACSizing
       heating_temp = hpxml_bldg.header.manualj_heating_design_temp
     end
 
-    heat_cap_adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_temp, hvac_heating_speed)
+    heat_cap_adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_temp)
     heat_cap_rated = heating_load / heat_cap_adj_factor
 
     if cool_cap_adj_factor.nil? # Heat pump has no cooling
