@@ -2987,7 +2987,7 @@ module HVAC
         # Max cooling ODB temperature
         max_odb = weather_temp
         if max_odb > user_odbs.max
-          outdoor_dry_bulbs << max_odb
+          outdoor_dry_bulbs << [:max, max_odb]
         end
 
         # Min cooling ODB temperature
@@ -2998,13 +2998,13 @@ module HVAC
         odb_at_min_power = -999999.0 if dp82f.input_power >= dp95f.input_power # Exclude if power increasing at lower ODB temperatures
         min_odb = [odb_at_min_power, 50.0].max
         if min_odb < user_odbs.min
-          outdoor_dry_bulbs << min_odb
+          outdoor_dry_bulbs << [:min, min_odb]
         end
       else
         # Min heating ODB temperature
         min_odb = [hp_min_temp, weather_temp].max
         if min_odb < user_odbs.min
-          outdoor_dry_bulbs << min_odb
+          outdoor_dry_bulbs << [:min, min_odb]
         end
 
         # Max heating OBD temperature
@@ -3013,7 +3013,7 @@ module HVAC
 
       # Add new datapoint at min/max ODB temperatures
       n_tries = 1000
-      outdoor_dry_bulbs.each do |target_odb|
+      outdoor_dry_bulbs.each do |target_type, target_odb|
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
         else
@@ -3032,9 +3032,9 @@ module HVAC
           end
 
           # Increment/decrement outdoor temperature and try again
-          if mode == :clg
+          if target_type == :max
             target_odb -= 0.1 # deg-F
-          else
+          elsif target_type == :min
             target_odb += 0.1 # deg-F
           end
 
