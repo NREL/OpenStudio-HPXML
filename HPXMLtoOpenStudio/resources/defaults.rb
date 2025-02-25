@@ -3187,8 +3187,9 @@ module Defaults
 
       if !hpxml_header.service_feeders_load_calculation_types.empty?
         if !branch_circuits.empty?
-          # Here we're not requiring that BranchCircuits be empty because the BuildResHPXML measure may have written BranchCircuits with heat pump, water heater, clothes dryer, cooking range, electric vehicle, etc. voltage
-          runner.registerWarning('Doing NEC calcs but BranchCircuits not empty.')
+          # BranchCircuits NOT required to be empty because there may be voltage specified on branch circuits for heat pump, water heater, clothes dryer, cooking range, electric vehicle, etc.
+          # However, if for example a branch circuit is specified for an air handler, a duplicate air handler branch circuit will be created
+          runner.registerWarning('Service feeder calculation types are specified but branch circuits are specified; new branch circuits created to support the load calculations may be duplicative.')
         end
 
         hpxml_bldg.heating_systems.each do |heating_system|
@@ -3446,7 +3447,7 @@ module Defaults
         if service_feeder.power.nil?
           service_feeder.power = get_service_feeder_power_default_values(runner, hpxml_bldg, service_feeder, default_panels_csv_data, electric_panel)
           service_feeder.power_isdefaulted = true
-        else
+        else # Previously skipped adding HVAC system branch circuits
           if service_feeder.type == HPXML::ElectricPanelLoadTypeHeating
             hpxml_bldg.heating_systems.each do |heating_system|
               next if !service_feeder.component_idrefs.include?(heating_system.id)
@@ -3491,6 +3492,22 @@ module Defaults
               if branch_circuit.occupied_spaces.nil?
                 branch_circuit.occupied_spaces = get_breaker_spaces_from_power_watts_voltage_amps(service_feeder.power, branch_circuit.voltage, branch_circuit.max_current_rating)
                 branch_circuit.occupied_spaces_isdefaulted = true
+              end
+            end
+          elsif service_feeder.type == HPXML::ElectricPanelLoadTypeLighting
+            lighting_watts_per_sqft = get_default_panels_value(runner, default_panels_csv_data, 'lighting', 'PowerRating', HPXML::ElectricPanelVoltage120)
+            if service_feeder.power != lighting_watts_per_sqft * hpxml_bldg.building_construction.conditioned_floor_area
+              runner.registerWarning("Entered power rating (#{service_feeder.power}) for service feeder load type '#{service_feeder.type}' does not equal #{lighting_watts_per_sqft} W/sqft for #{hpxml_bldg.building_construction.conditioned_floor_area}.")
+            end
+          elsif [HPXML::ElectricPanelLoadTypeKitchen, HPXML::ElectricPanelLoadTypeLaundry].include? service_feeder.type
+            watts_min = get_default_panels_value(runner, default_panels_csv_data, service_feeder.type, 'PowerRating', HPXML::ElectricPanelVoltage120)
+            if service_feeder.power < watts_min
+              runner.registerWarning("Entered power rating (#{service_feeder.power}) for service feeder load type '#{service_feeder.type}' is less than the minimum (#{watts_min}).")
+            elsif service_feeder.power > watts_min
+              breaker_spaces = get_default_panels_value(runner, default_panels_csv_data, service_feeder.type, 'BreakerSpaces', HPXML::ElectricPanelVoltage120)
+              watts_per_branch = watts_min / breaker_spaces
+              if service_feeder.power % watts_per_branch != 0
+                runner.registerWarning("Entered power rating (#{service_feeder.power}) for service feeder load type '#{service_feeder.type}' is not a valid multiple (#{watts_per_branch}).")
               end
             end
           end
