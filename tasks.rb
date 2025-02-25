@@ -2425,7 +2425,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                           voltage: HPXML::ElectricPanelVoltage120,
                           max_current_rating: 20.0,
                           occupied_spaces: 1,
-                          component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
+                          component_idrefs: [hpxml_bldg.clothes_washers[0].id,
+                                             hpxml_bldg.water_heating_systems[0].id])
       branch_circuits.add(id: 'ReceptaclesShed1',
                           voltage: HPXML::ElectricPanelVoltage120,
                           max_current_rating: 20.0,

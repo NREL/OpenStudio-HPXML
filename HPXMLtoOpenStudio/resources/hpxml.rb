@@ -9682,7 +9682,7 @@ class HPXML < Object
     def components
       return [] if @component_idrefs.nil?
 
-      # FIXME: can this be condensed/simplified somehow?
+      # FIXME: should this be constrained?
       heating_systems = @parent_object.heating_systems.select { |heating_system| @component_idrefs.include? heating_system.id }
       cooling_systems = @parent_object.cooling_systems.select { |cooling_system| @component_idrefs.include? cooling_system.id }
       heat_pumps = @parent_object.heat_pumps.select { |heat_pump| @component_idrefs.include? heat_pump.id }
@@ -9708,7 +9708,7 @@ class HPXML < Object
 
       list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_washers + clothes_dryers + dishwashers + cooking_ranges + ovens + refrigerators + freezers + dehumidifiers + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_loads + fuel_loads + ev_chargers + pv_systems + lighting_groups
       if @component_idrefs.size > list.size
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for branch circuit '#{@id}'."
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not supported for branch circuit '#{@id}'."
       end
 
       return list
@@ -9742,6 +9742,7 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
+      begin; components; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -9889,7 +9890,7 @@ class HPXML < Object
 
       list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
       if @component_idrefs.size > list.size
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for service feeder '#{@id}'."
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not supported for service feeder '#{@id}'."
       end
 
       return list

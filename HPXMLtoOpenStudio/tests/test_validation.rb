@@ -1201,8 +1201,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                "Calculated a negative net surface area for surface 'Floor1'."],
                             'orphaned-geothermal-loop' => ["Geothermal loop 'GeothermalLoop1' found but no heat pump attached to it."],
                             'orphaned-hvac-distribution' => ["Distribution system 'HVACDistribution1' found but no HVAC system attached to it."],
-                            'panel-wrong-system-type' => ["One or more referenced components 'WaterHeatingSystem1' not valid for service feeder 'ServiceFeeder1'"],
-                            'panel-missing-system' => ["One or more referenced components 'foobar' not found for service feeder 'ServiceFeeder1'"],
+                            'panel-branch-circuit-not-supported' => ["One or more referenced components 'AirInfiltrationMeasurement1' not supported for branch circuit 'BranchCircuit1'"],
+                            'panel-service-feeder-wrong-system-type' => ["One or more referenced components 'WaterHeatingSystem1' not valid for service feeder 'ServiceFeeder1'"],
+                            'panel-service-feeder-missing-system' => ["One or more referenced components 'foobar' not supported for service feeder 'ServiceFeeder1'"],
                             'refrigerators-multiple-primary' => ['More than one refrigerator designated as the primary.'],
                             'refrigerators-no-primary' => ['Could not find a primary refrigerator.'],
                             'repeated-relatedhvac-dhw-indirect' => ["RelatedHVACSystem 'HeatingSystem1' is attached to multiple water heating systems."],
@@ -1573,13 +1574,18 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-furnace-gas-room-ac.xml')
         hpxml_bldg.heating_systems[0].delete
         hpxml_bldg.hvac_controls[0].heating_setpoint_temp = nil
-      when 'panel-wrong-system-type'
+      when 'panel-branch-circuit-not-supported'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
+        hpxml_bldg.electric_panels[0].branch_circuits.add(id: 'BranchCircuit1',
+                                                          component_idrefs: [hpxml_bldg.air_infiltration_measurements[0].id])
+      when 'panel-service-feeder-wrong-system-type'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
         hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
                                                           type: HPXML::ElectricPanelLoadTypeHeating,
                                                           component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-      when 'panel-missing-system'
+      when 'panel-service-feeder-missing-system'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
         hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
