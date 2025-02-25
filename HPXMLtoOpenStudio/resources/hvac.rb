@@ -2977,20 +2977,13 @@ module HVAC
         convert_datapoint_net_to_gross(dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
       end
 
-      # Ensure we don't create datapoints at ODB temperatures with zero/negative gross capacities or powers
-      delta_odb = 1.0 # Use a slightly larger (or smaller) ODB so things don't blow up
-      high_odb_at_zero_power = extrapolate_datapoint(datapoints, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :negative) - delta_odb
-      high_odb_at_zero_capacity = extrapolate_datapoint(datapoints, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :negative) - delta_odb
-      low_odb_at_zero_power = extrapolate_datapoint(datapoints, capacity_description, :gross_input_power, 0.0, :outdoor_temperature, :positive) + delta_odb
-      low_odb_at_zero_capacity = extrapolate_datapoint(datapoints, capacity_description, :gross_capacity, 0.0, :outdoor_temperature, :positive) + delta_odb
-
       # Determine min/max ODB temperatures to extrapolate to, to cover full range of equipment operation.
       # Note: Since we create the TableLookup object using ExtrapolationMethod='constant', we do not
       # need to create additional datapoints just to maintain constant performance.
       outdoor_dry_bulbs = []
       if mode == :clg
         # Max cooling ODB temperature
-        max_odb = [high_odb_at_zero_power, high_odb_at_zero_capacity, weather_temp].min
+        max_odb = weather_temp
         if max_odb > user_odbs.max
           outdoor_dry_bulbs << max_odb
         end
@@ -3001,13 +2994,13 @@ module HVAC
         min_power = 0.5 * dp82f.input_power
         odb_at_min_power = MathTools.interp2(min_power, dp82f.input_power, dp95f.input_power, 82.0, 95.0)
         odb_at_min_power = -999999.0 if dp82f.input_power >= dp95f.input_power # Exclude if power increasing at lower ODB temperatures
-        min_odb = [odb_at_min_power, low_odb_at_zero_power, low_odb_at_zero_capacity, 50.0].max
+        min_odb = [odb_at_min_power, 50.0].max
         if min_odb < user_odbs.min
           outdoor_dry_bulbs << min_odb
         end
       else
         # Min heating ODB temperature
-        min_odb = [low_odb_at_zero_power, low_odb_at_zero_capacity, hp_min_temp, weather_temp].max
+        min_odb = [hp_min_temp, weather_temp].max
         if min_odb < user_odbs.min
           outdoor_dry_bulbs << min_odb
         end
@@ -3017,18 +3010,37 @@ module HVAC
       end
 
       # Add new datapoint at min/max ODB temperatures
+      n_tries = 1000
+      min_btuh = 100
       outdoor_dry_bulbs.each do |target_odb|
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
         else
           new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
         end
-        new_dp.outdoor_temperature = target_odb
 
-        new_dp.capacity = extrapolate_datapoint(datapoints, capacity_description, :outdoor_temperature, target_odb, :capacity)
-        new_dp.input_power = extrapolate_datapoint(datapoints, capacity_description, :outdoor_temperature, target_odb, :input_power)
-        new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
-        convert_datapoint_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+        for i in 1..n_tries
+          new_dp.outdoor_temperature = target_odb
+          new_dp.capacity = extrapolate_datapoint(datapoints, capacity_description, target_odb, :capacity)
+          new_dp.input_power = extrapolate_datapoint(datapoints, capacity_description, target_odb, :input_power)
+          new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
+          convert_datapoint_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
+
+          if new_dp.capacity > min_btuh && new_dp.gross_capacity > min_btuh && new_dp.input_power > min_btuh && new_dp.gross_input_power > min_btuh
+            break
+          end
+
+          # Increment/decrement outdoor temperature and try again
+          if mode == :clg
+            target_odb -= 0.1 # deg-F
+          else
+            target_odb += 0.1 # deg-F
+          end
+
+          if i == n_tries
+            fail 'Unexpected error.'
+          end
+        end
 
         datapoints << new_dp
       end
@@ -3041,46 +3053,45 @@ module HVAC
   #
   # @param datapoints [HPXML::CoolingDetailedPerformanceData or HPXML::HeatingDetailedPerformanceData] Array of detailed performance datapoints at a given speed
   # @param capacity_description [String] The capacity description (HPXML::CapacityDescriptionXXX)
-  # @param target_property [Symbol] The datapoint property for the target value (e.g., :outdoor_temperature)
-  # @param target_value [Double] The target value to extrapolate to (F)
-  # @param property [Symbol] The datapoint property to extrapolate (e.g., :capacity, :efficiency_cop, etc.)
-  # @param slope_requirement [Symbol] The slope requirement (:positive or :negative)
+  # @param target_odb [Double] The target outdoor drybulb temperature to extrapolate to (F)
+  # @param property [Symbol] The datapoint property to extrapolate (e.g., :capacity, :input_power, etc.)
   # @return [Double] The extrapolated value (F)
-  def self.extrapolate_datapoint(datapoints, capacity_description, target_property, target_value, property, slope_requirement = nil)
+  def self.extrapolate_datapoint(datapoints, capacity_description, target_odb, property)
     datapoints = datapoints.select { |dp| dp.capacity_description == capacity_description }
 
-    target_dp = datapoints.find { |dp| dp.send(target_property) == target_value }
+    target_dp = datapoints.find { |dp| dp.outdoor_temperature == target_odb }
     if not target_dp.nil?
       return target_dp.send(property)
     end
 
-    user_vals = datapoints.map { |dp| dp.send(target_property) }.uniq.sort
+    sorted_dps = datapoints.sort_by { |dp| dp.outdoor_temperature }
 
-    high_val = user_vals.find { |v| v > target_value }
-    low_val = user_vals.reverse.find { |v| v < target_value }
-    if user_vals.size == 1
-      high_val = low_val if high_val.nil?
-      low_val = high_val if low_val.nil?
-    elsif high_val.nil?
-      high_val = user_vals[-1]
-      low_val = user_vals[-2]
-    elsif low_val.nil?
-      high_val = user_vals[1]
-      low_val = user_vals[0]
+    # Check if target_odb is between any two adjacent datapoints; if so, interpolate.
+    for i in 0..(sorted_dps.size - 2)
+      dp1 = sorted_dps[i]
+      dp2 = sorted_dps[i + 1]
+      next unless (target_odb >= dp1.outdoor_temperature && target_odb <= dp2.outdoor_temperature) ||
+                  (target_odb <= dp1.outdoor_temperature && target_odb >= dp2.outdoor_temperature)
+
+      val = MathTools.interp2(target_odb, dp1.outdoor_temperature, dp2.outdoor_temperature, dp1.send(property), dp2.send(property))
+      return val
     end
-    high_dp = datapoints.find { |dp| dp.send(target_property) == high_val }
-    low_dp = datapoints.find { |dp| dp.send(target_property) == low_val }
 
-    val = MathTools.interp2(target_value, low_val, high_val, low_dp.send(property), high_dp.send(property))
+    # If we got this far, need to perform extrapolation instead
 
-    if not slope_requirement.nil?
-      slope = (high_dp.send(property) - low_dp.send(property)) / (high_dp.send(target_property) - low_dp.send(target_property))
-      if (slope_requirement == :negative) && (slope >= 0 || slope.nan?)
-        return 999999.0
-      elsif (slope_requirement == :positive) && (slope.to_f <= 0 || slope.nan?)
-        return -999999.0
-      end
+    # Extrapolate from first two temperatures or last two temperatures?
+    if target_odb < sorted_dps[0].outdoor_temperature && target_odb < sorted_dps[1].outdoor_temperature
+      indices = [0, 1]
+    elsif target_odb > sorted_dps[-2].outdoor_temperature && target_odb > sorted_dps[-1].outdoor_temperature
+      indices = [-2, -1]
+    else
+      fail 'Unexpected error.'
     end
+
+    # Perform extrapolation
+    dp1 = sorted_dps[indices[0]]
+    dp2 = sorted_dps[indices[1]]
+    val = MathTools.interp2(target_odb, dp1.outdoor_temperature, dp2.outdoor_temperature, dp1.send(property), dp2.send(property))
 
     if val.nan?
       fail 'Unexpected error'
@@ -5700,7 +5711,7 @@ module HVAC
     hpxml_bldg.cooling_systems.each do |clg_sys|
       clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
       clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, min_airflow].max
-      next unless not clg_sys.cooling_detailed_performance_data.empty?
+      next if clg_sys.cooling_detailed_performance_data.empty?
 
       clg_sys.cooling_detailed_performance_data.each do |dp|
         speed = speed_descriptions.index(dp.capacity_description) + 1

@@ -2506,25 +2506,45 @@ module Defaults
       added_dp = detailed_performance_data[-1]
       neighbor_dps = detailed_performance_data.select { |dp| dp.outdoor_temperature == neighbor_temp }
       target_dps = detailed_performance_data.select { |dp| dp.outdoor_temperature == odb }
-      [:capacity, :efficiency_cop].each do |property|
-        # FIXME: Need to interpolate net COPs based on net powers
-        round_digit = (property == :capacity ? 1 : 4)
-        case compressor_type
-        when HPXML::HVACCompressorTypeTwoStage
-          neighbor_property_nom = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.send(property)
-          neighbor_property_min = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.send(property)
-          target_property_min = target_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.send(property)
-          nominal_property_odb = (neighbor_property_nom * target_property_min / neighbor_property_min).round(round_digit)
-        when HPXML::HVACCompressorTypeVariableSpeed
-          neighbor_property_max = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.send(property)
-          neighbor_property_nom = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.send(property)
-          neighbor_property_min = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.send(property)
-          target_property_max = target_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.send(property)
-          target_property_min = target_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.send(property)
-          nominal_property_odb = MathTools.interp2(neighbor_property_nom, neighbor_property_min, neighbor_property_max, target_property_min, target_property_max).round(round_digit)
-        end
-        added_dp.send("#{property}=", nominal_property_odb)
+
+      neighbor_dp_max = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }
+      neighbor_dp_nom = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }
+      neighbor_dp_min = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+      target_dp_max = target_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }
+      target_dp_min = target_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
+      # Net capacity
+      case compressor_type
+      when HPXML::HVACCompressorTypeTwoStage
+        neighbor_nom_capacity = neighbor_dp_nom.capacity
+        neighbor_min_capacity = neighbor_dp_min.capacity
+        target_min_capacity = target_dp_min.capacity
+        added_dp.capacity = (neighbor_nom_capacity * target_min_capacity / neighbor_min_capacity).round
+      when HPXML::HVACCompressorTypeVariableSpeed
+        neighbor_max_capacity = neighbor_dp_max.capacity
+        neighbor_nom_capacity = neighbor_dp_nom.capacity
+        neighbor_min_capacity = neighbor_dp_min.capacity
+        target_max_capacity = target_dp_max.capacity
+        target_min_capacity = target_dp_min.capacity
+        added_dp.capacity = MathTools.interp2(neighbor_nom_capacity, neighbor_min_capacity, neighbor_max_capacity, target_min_capacity, target_max_capacity).round
       end
+
+      # Net power
+      case compressor_type
+      when HPXML::HVACCompressorTypeTwoStage
+        neighbor_nom_power = neighbor_dp_nom.capacity / neighbor_dp_nom.efficiency_cop
+        neighbor_min_power = neighbor_dp_min.capacity / neighbor_dp_min.efficiency_cop
+        target_min_power = target_dp_min.capacity / neighbor_dp_min.efficiency_cop
+        input_power = (neighbor_nom_power * target_min_power / neighbor_min_power).round(4)
+      when HPXML::HVACCompressorTypeVariableSpeed
+        neighbor_max_power = neighbor_dp_max.capacity / neighbor_dp_max.efficiency_cop
+        neighbor_nom_power = neighbor_dp_nom.capacity / neighbor_dp_nom.efficiency_cop
+        neighbor_min_power = neighbor_dp_min.capacity / neighbor_dp_min.efficiency_cop
+        target_max_power = target_dp_max.capacity / target_dp_max.efficiency_cop
+        target_min_power = target_dp_min.capacity / neighbor_dp_min.efficiency_cop
+        input_power = MathTools.interp2(neighbor_nom_power, neighbor_min_power, neighbor_max_power, target_min_power, target_max_power).round(4)
+      end
+      added_dp.efficiency_cop = added_dp.capacity / input_power
     end
   end
 

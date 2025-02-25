@@ -3017,7 +3017,8 @@ module HVACSizing
   def self.adjust_heat_pump_capacity_for_indoor_condition(outdoor_temp, indoor_temp, mode)
     coefficients_1speed = HVAC.get_resnet_cap_eir_ft_spec(mode)[0]
     rated_indoor_temp = (mode == :clg) ? HVAC::AirSourceCoolRatedIWB : HVAC::AirSourceHeatRatedIDB
-    return MathTools.biquadratic(indoor_temp, outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, outdoor_temp, coefficients_1speed)
+    cap_adj = MathTools.biquadratic(indoor_temp, outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, outdoor_temp, coefficients_1speed)
+    return cap_adj
   end
 
   # Calculates the heat pump's heating or cooling capacity at the specified outdoor temperature, as a fraction
@@ -3041,7 +3042,7 @@ module HVACSizing
         capacity_fraction = HVAC.get_heating_capacity_fraction_17F(hvac_sys)
         capacity_temperature = 17.0
       end
-      odb_adj = 1.0 - (1.0 - capacity_fraction) / (rated_odb - capacity_temperature) * (rated_odb - outdoor_temp)
+      cap_adj = 1.0 - (1.0 - capacity_fraction) / (rated_odb - capacity_temperature) * (rated_odb - outdoor_temp)
     else
       # Based on detailed performance data
       capacity_description = (hvac_sys.compressor_type == HPXML::HVACCompressorTypeVariableSpeed ? HPXML::CapacityDescriptionMaximum : HPXML::CapacityDescriptionNominal)
@@ -3053,9 +3054,9 @@ module HVACSizing
         property = :capacity
         capacity_nominal = (mode == :clg) ? hvac_sys.cooling_capacity : hvac_sys.heating_capacity
       end
-      odb_adj = HVAC.extrapolate_datapoint(detailed_performance_data, capacity_description, :outdoor_temperature, outdoor_temp, property) / capacity_nominal
+      cap_adj = HVAC.extrapolate_datapoint(detailed_performance_data, capacity_description, outdoor_temp, property) / capacity_nominal
     end
-    return odb_adj
+    return cap_adj
   end
 
   # Increases the autosized heating/cooling capacities to account for any reduction in
