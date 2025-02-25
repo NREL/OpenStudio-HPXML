@@ -76,6 +76,7 @@ class HPXML < Object
   BlindsOpen = 'open'
   BlindsHalfOpen = 'half open'
   CapacityDescriptionMinimum = 'minimum'
+  CapacityDescriptionNominal = 'nominal'
   CapacityDescriptionMaximum = 'maximum'
   CertificationEnergyStar = 'Energy Star'
   ClothesDryerControlTypeMoisture = 'moisture'
@@ -225,6 +226,8 @@ class HPXML < Object
   HVACTypeSpaceHeater = 'SpaceHeater'
   HVACTypeStove = 'Stove'
   HVACTypeWallFurnace = 'WallFurnace'
+  HVACFanMotorTypePSC = 'PSC'
+  HVACFanMotorTypeBPM = 'BPM'
   HydronicTypeBaseboard = 'baseboard'
   HydronicTypeRadiantCeiling = 'radiant ceiling'
   HydronicTypeRadiantFloor = 'radiant floor'
@@ -426,6 +429,7 @@ class HPXML < Object
   UnitsDollars = '$'
   UnitsDollarsPerkW = '$/kW'
   UnitsEER = 'EER'
+  UnitsEER2 = 'EER2'
   UnitsELA = 'EffectiveLeakageArea'
   UnitsCEER = 'CEER'
   UnitsHSPF = 'HSPF'
@@ -6389,6 +6393,7 @@ class HPXML < Object
              :heating_airflow_cfm,              # [Double] extension/HeatingAirflowCFM (cfm)
              :heating_autosizing_factor,        # [Double] extension/HeatingAutosizingFactor (frac)
              :heating_autosizing_limit,         # [Double] extension/HeatingAutosizingLimit (Btu/hr)
+             :fan_motor_type,                   # [String] extension/FanMotorType
              :htg_seed_id]                      # [String] extension/HeatingSeedId
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
@@ -6553,6 +6558,7 @@ class HPXML < Object
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', @electric_auxiliary_energy, :float, @electric_auxiliary_energy_isdefaulted) unless @electric_auxiliary_energy.nil?
       XMLHelper.add_extension(heating_system, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heating_system, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
+      XMLHelper.add_extension(heating_system, 'FanMotorType', @fan_motor_type, :string, @fan_motor_type_isdefaulted) unless @fan_motor_type.nil?
       XMLHelper.add_extension(heating_system, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
       XMLHelper.add_extension(heating_system, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
       XMLHelper.add_extension(heating_system, 'FanPowerWatts', @fan_watts, :float, @fan_watts_isdefaulted) unless @fan_watts.nil?
@@ -6599,6 +6605,7 @@ class HPXML < Object
       @electric_auxiliary_energy = XMLHelper.get_value(heating_system, 'ElectricAuxiliaryEnergy', :float)
       @shared_loop_watts = XMLHelper.get_value(heating_system, 'extension/SharedLoopWatts', :float)
       @shared_loop_motor_efficiency = XMLHelper.get_value(heating_system, 'extension/SharedLoopMotorEfficiency', :float)
+      @fan_motor_type = XMLHelper.get_value(heating_system, 'extension/FanMotorType', :string)
       @fan_coil_watts = XMLHelper.get_value(heating_system, 'extension/FanCoilWatts', :float)
       @fan_watts_per_cfm = XMLHelper.get_value(heating_system, 'extension/FanPowerWattsPerCFM', :float)
       @fan_watts = XMLHelper.get_value(heating_system, 'extension/FanPowerWatts', :float)
@@ -6676,6 +6683,7 @@ class HPXML < Object
              :cooling_efficiency_seer,                             # [Double] AnnualCoolingEfficiency[Units="SEER"]/Value (Btu/Wh)
              :cooling_efficiency_seer2,                            # [Double] AnnualCoolingEfficiency[Units="SEER2"]/Value (Btu/Wh)
              :cooling_efficiency_eer,                              # [Double] AnnualCoolingEfficiency[Units="EER"]/Value (Btu/Wh)
+             :cooling_efficiency_eer2,                             # [Double] AnnualCoolingEfficiency[Units="EER2"]/Value (Btu/Wh)
              :cooling_efficiency_ceer,                             # [Double] AnnualCoolingEfficiency[Units="CEER"]/Value (Btu/Wh)
              :cooling_efficiency_kw_per_ton,                       # [Double] AnnualCoolingEfficiency[Units="kW/ton"]/Value (kW/ton)
              :cooling_shr,                                         # [Double] SensibleHeatFraction (frac)
@@ -6694,6 +6702,7 @@ class HPXML < Object
              :crankcase_heater_watts,                              # [Double] extension/CrankcaseHeaterPowerWatts (W)
              :cooling_autosizing_factor,                           # [Double] extension/CoolingAutosizingFactor (frac)
              :cooling_autosizing_limit,                            # [Double] extension/CoolingAutosizingLimit (Btu/hr)
+             :fan_motor_type,                                      # [String] extension/FanMotorType
              :clg_seed_id,                                         # [String] extension/CoolingSeedId
              :htg_seed_id]                                         # [String] extension/HeatingSeedId
     attr_reader(*CLASS_ATTRS)
@@ -6819,6 +6828,11 @@ class HPXML < Object
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER, :string)
         XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_eer, :float, @cooling_efficiency_eer_isdefaulted)
       end
+      if not @cooling_efficiency_eer2.nil?
+        annual_efficiency = XMLHelper.add_element(cooling_system, 'AnnualCoolingEfficiency')
+        XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER2, :string)
+        XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_eer2, :float, @cooling_efficiency_eer2_isdefaulted)
+      end
       if not @cooling_efficiency_ceer.nil?
         annual_efficiency = XMLHelper.add_element(cooling_system, 'AnnualCoolingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsCEER, :string)
@@ -6841,6 +6855,7 @@ class HPXML < Object
       XMLHelper.add_element(cooling_system, 'IntegratedHeatingSystemFractionHeatLoadServed', @integrated_heating_system_fraction_heat_load_served, :float) unless @integrated_heating_system_fraction_heat_load_served.nil?
       XMLHelper.add_extension(cooling_system, 'AirflowDefectRatio', @airflow_defect_ratio, :float, @airflow_defect_ratio_isdefaulted) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(cooling_system, 'ChargeDefectRatio', @charge_defect_ratio, :float, @charge_defect_ratio_isdefaulted) unless @charge_defect_ratio.nil?
+      XMLHelper.add_extension(cooling_system, 'FanMotorType', @fan_motor_type, :string, @fan_motor_type_isdefaulted) unless @fan_motor_type.nil?
       XMLHelper.add_extension(cooling_system, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingAirflowCFM', @cooling_airflow_cfm, :float, @cooling_airflow_cfm_isdefaulted) unless @cooling_airflow_cfm.nil?
       XMLHelper.add_extension(cooling_system, 'HeatingAirflowCFM', @integrated_heating_system_airflow_cfm, :float, @integrated_heating_system_airflow_cfm_isdefaulted) unless @integrated_heating_system_airflow_cfm.nil?
@@ -6881,6 +6896,7 @@ class HPXML < Object
       @cooling_efficiency_seer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value", :float)
       @cooling_efficiency_seer2 = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsSEER2}']/Value", :float)
       @cooling_efficiency_eer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
+      @cooling_efficiency_eer2 = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsEER2}']/Value", :float)
       @cooling_efficiency_ceer = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       @cooling_efficiency_kw_per_ton = XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='#{UnitsKwPerTon}']/Value", :float)
       @cooling_detailed_performance_data.from_doc(cooling_system)
@@ -6891,6 +6907,7 @@ class HPXML < Object
       @integrated_heating_system_fraction_heat_load_served = XMLHelper.get_value(cooling_system, 'IntegratedHeatingSystemFractionHeatLoadServed', :float)
       @airflow_defect_ratio = XMLHelper.get_value(cooling_system, 'extension/AirflowDefectRatio', :float)
       @charge_defect_ratio = XMLHelper.get_value(cooling_system, 'extension/ChargeDefectRatio', :float)
+      @fan_motor_type = XMLHelper.get_value(cooling_system, 'extension/FanMotorType', :string)
       @fan_watts_per_cfm = XMLHelper.get_value(cooling_system, 'extension/FanPowerWattsPerCFM', :float)
       @cooling_airflow_cfm = XMLHelper.get_value(cooling_system, 'extension/CoolingAirflowCFM', :float)
       @integrated_heating_system_airflow_cfm = XMLHelper.get_value(cooling_system, 'extension/HeatingAirflowCFM', :float)
@@ -6987,6 +7004,7 @@ class HPXML < Object
              :cooling_efficiency_seer,             # [Double] AnnualCoolingEfficiency[Units="SEER"]/Value (Btu/Wh)
              :cooling_efficiency_seer2,            # [Double] AnnualCoolingEfficiency[Units="SEER2"]/Value (Btu/Wh)
              :cooling_efficiency_eer,              # [Double] AnnualCoolingEfficiency[Units="EER"]/Value (Btu/Wh)
+             :cooling_efficiency_eer2,             # [Double] AnnualCoolingEfficiency[Units="EER2"]/Value (Btu/Wh)
              :cooling_efficiency_ceer,             # [Double] AnnualCoolingEfficiency[Units="CEER"]/Value (Btu/Wh)
              :heating_efficiency_hspf,             # [Double] AnnualHeatingEfficiency[Units="HSPF"]/Value (Btu/Wh)
              :heating_efficiency_hspf2,            # [Double] AnnualHeatingEfficiency[Units="HSPF2"]/Value (Btu/Wh)
@@ -7000,15 +7018,15 @@ class HPXML < Object
              :pump_watts_per_ton,                  # [Double] extension/PumpPowerWattsPerTon (W/ton)
              :shared_loop_watts,                   # [Double] extension/SharedLoopWatts (W)
              :shared_loop_motor_efficiency,        # [Double] extension/SharedLoopMotorEfficiency (frac)
-             :heating_capacity_retention_fraction, # [Double] extension/HeatingCapacityRetention/Fraction (frac)
-             :heating_capacity_retention_temp,     # [Double] extension/HeatingCapacityRetention/Temperature (F)
              :crankcase_heater_watts,              # [Double] extension/CrankcaseHeaterPowerWatts (W)
+             :heating_capacity_fraction_17F,       # [Double] extension/HeatingCapacityFraction17F (frac)
              :cooling_autosizing_factor,           # [Double] extension/CoolingAutosizingFactor (frac)
              :heating_autosizing_factor,           # [Double] extension/HeatingAutosizingFactor (frac)
              :backup_heating_autosizing_factor,    # [Double] extension/BackupHeatingAutosizingFactor (frac)
              :cooling_autosizing_limit,            # [Double] extension/CoolingAutosizingLimit (Btu/hr)
              :heating_autosizing_limit,            # [Double] extension/HeatingAutosizingLimit (Btu/hr)
              :backup_heating_autosizing_limit,     # [Double] extension/BackupHeatingAutosizingLimit (Btu/hr)
+             :fan_motor_type,                      # [String] extension/FanMotorType
              :htg_seed_id,                         # [String] extension/HeatingSeedId
              :clg_seed_id]                         # [String] extension/CoolingSeedId
     attr_reader(*CLASS_ATTRS)
@@ -7150,7 +7168,7 @@ class HPXML < Object
       XMLHelper.add_element(heat_pump, 'HeatPumpType', @heat_pump_type, :string) unless @heat_pump_type.nil?
       XMLHelper.add_element(heat_pump, 'HeatPumpFuel', @heat_pump_fuel, :string) unless @heat_pump_fuel.nil?
       XMLHelper.add_element(heat_pump, 'HeatingCapacity', @heating_capacity, :float, @heating_capacity_isdefaulted) unless @heating_capacity.nil?
-      XMLHelper.add_element(heat_pump, 'HeatingCapacity17F', @heating_capacity_17F, :float) unless @heating_capacity_17F.nil?
+      XMLHelper.add_element(heat_pump, 'HeatingCapacity17F', @heating_capacity_17F, :float, @heating_capacity_17F_isdefaulted) unless @heating_capacity_17F.nil?
       XMLHelper.add_element(heat_pump, 'CoolingCapacity', @cooling_capacity, :float, @cooling_capacity_isdefaulted) unless @cooling_capacity.nil?
       XMLHelper.add_element(heat_pump, 'CompressorType', @compressor_type, :string, @compressor_type_isdefaulted) unless @compressor_type.nil?
       XMLHelper.add_element(heat_pump, 'CompressorLockoutTemperature', @compressor_lockout_temp, :float, @compressor_lockout_temp_isdefaulted) unless @compressor_lockout_temp.nil?
@@ -7196,6 +7214,11 @@ class HPXML < Object
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER, :string)
         XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_eer, :float, @cooling_efficiency_eer_isdefaulted)
       end
+      if not @cooling_efficiency_eer2.nil?
+        annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualCoolingEfficiency')
+        XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER2, :string)
+        XMLHelper.add_element(annual_efficiency, 'Value', @cooling_efficiency_eer2, :float, @cooling_efficiency_eer2_isdefaulted)
+      end
       if not @heating_efficiency_hspf.nil?
         annual_efficiency = XMLHelper.add_element(heat_pump, 'AnnualHeatingEfficiency')
         XMLHelper.add_element(annual_efficiency, 'Units', UnitsHSPF, :string)
@@ -7219,18 +7242,15 @@ class HPXML < Object
       @heating_detailed_performance_data.to_doc(heat_pump)
       XMLHelper.add_extension(heat_pump, 'AirflowDefectRatio', @airflow_defect_ratio, :float, @airflow_defect_ratio_isdefaulted) unless @airflow_defect_ratio.nil?
       XMLHelper.add_extension(heat_pump, 'ChargeDefectRatio', @charge_defect_ratio, :float, @charge_defect_ratio_isdefaulted) unless @charge_defect_ratio.nil?
+      XMLHelper.add_extension(heat_pump, 'FanMotorType', @fan_motor_type, :string, @fan_motor_type_isdefaulted) unless @fan_motor_type.nil?
       XMLHelper.add_extension(heat_pump, 'FanPowerWattsPerCFM', @fan_watts_per_cfm, :float, @fan_watts_per_cfm_isdefaulted) unless @fan_watts_per_cfm.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAirflowCFM', @heating_airflow_cfm, :float, @heating_airflow_cfm_isdefaulted) unless @heating_airflow_cfm.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingAirflowCFM', @cooling_airflow_cfm, :float, @cooling_airflow_cfm_isdefaulted) unless @cooling_airflow_cfm.nil?
       XMLHelper.add_extension(heat_pump, 'PumpPowerWattsPerTon', @pump_watts_per_ton, :float, @pump_watts_per_ton_isdefaulted) unless @pump_watts_per_ton.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
-      if (not @heating_capacity_retention_fraction.nil?) || (not @heating_capacity_retention_temp.nil?)
-        htg_cap_retention = XMLHelper.add_extension(heat_pump, 'HeatingCapacityRetention')
-        XMLHelper.add_element(htg_cap_retention, 'Fraction', @heating_capacity_retention_fraction, :float, @heating_capacity_retention_fraction_isdefaulted) unless @heating_capacity_retention_fraction.nil?
-        XMLHelper.add_element(htg_cap_retention, 'Temperature', @heating_capacity_retention_temp, :float, @heating_capacity_retention_temp_isdefaulted) unless @heating_capacity_retention_temp.nil?
-      end
       XMLHelper.add_extension(heat_pump, 'CrankcaseHeaterPowerWatts', @crankcase_heater_watts, :float, @crankcase_heater_watts_isdefaulted) unless @crankcase_heater_watts.nil?
+      XMLHelper.add_extension(heat_pump, 'HeatingCapacityFraction17F', @heating_capacity_fraction_17F, :float, @heating_capacity_fraction_17F_isdefaulted) unless @heating_capacity_fraction_17F.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingAutosizingFactor', @cooling_autosizing_factor, :float, @cooling_autosizing_factor_isdefaulted) unless @cooling_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAutosizingFactor', @heating_autosizing_factor, :float, @heating_autosizing_factor_isdefaulted) unless @heating_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'BackupHeatingAutosizingFactor', @backup_heating_autosizing_factor, :float, @backup_heating_autosizing_factor_isdefaulted) unless @backup_heating_autosizing_factor.nil?
@@ -7286,6 +7306,7 @@ class HPXML < Object
       @cooling_efficiency_seer2 = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsSEER2}']/Value", :float)
       @cooling_efficiency_ceer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsCEER}']/Value", :float)
       @cooling_efficiency_eer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value", :float)
+      @cooling_efficiency_eer2 = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER2}']/Value", :float)
       @heating_efficiency_hspf = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF}']/Value", :float)
       @heating_efficiency_hspf2 = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF2}']/Value", :float)
       @heating_efficiency_cop = XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value", :float)
@@ -7294,15 +7315,15 @@ class HPXML < Object
       @heating_detailed_performance_data.from_doc(heat_pump)
       @airflow_defect_ratio = XMLHelper.get_value(heat_pump, 'extension/AirflowDefectRatio', :float)
       @charge_defect_ratio = XMLHelper.get_value(heat_pump, 'extension/ChargeDefectRatio', :float)
+      @fan_motor_type = XMLHelper.get_value(heat_pump, 'extension/FanMotorType', :string)
       @fan_watts_per_cfm = XMLHelper.get_value(heat_pump, 'extension/FanPowerWattsPerCFM', :float)
       @heating_airflow_cfm = XMLHelper.get_value(heat_pump, 'extension/HeatingAirflowCFM', :float)
       @cooling_airflow_cfm = XMLHelper.get_value(heat_pump, 'extension/CoolingAirflowCFM', :float)
       @pump_watts_per_ton = XMLHelper.get_value(heat_pump, 'extension/PumpPowerWattsPerTon', :float)
       @shared_loop_watts = XMLHelper.get_value(heat_pump, 'extension/SharedLoopWatts', :float)
       @shared_loop_motor_efficiency = XMLHelper.get_value(heat_pump, 'extension/SharedLoopMotorEfficiency', :float)
-      @heating_capacity_retention_fraction = XMLHelper.get_value(heat_pump, 'extension/HeatingCapacityRetention/Fraction', :float)
-      @heating_capacity_retention_temp = XMLHelper.get_value(heat_pump, 'extension/HeatingCapacityRetention/Temperature', :float)
       @crankcase_heater_watts = XMLHelper.get_value(heat_pump, 'extension/CrankcaseHeaterPowerWatts', :float)
+      @heating_capacity_fraction_17F = XMLHelper.get_value(heat_pump, 'extension/HeatingCapacityFraction17F', :float)
       @cooling_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/CoolingAutosizingFactor', :float)
       @heating_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/HeatingAutosizingFactor', :float)
       @backup_heating_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/BackupHeatingAutosizingFactor', :float)
@@ -11387,15 +11408,52 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
-      outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
+
+      outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionNominal, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
       outdoor_temps.each do |outdoor_temp|
-        num_min = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
-        num_max = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
-        if (num_min != 1) || (num_max != 1)
+        min_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
+        nom_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal && dp.outdoor_temperature == outdoor_temp }
+        max_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
+        # Check we have exactly one minimum and one maximum datapoint
+        if (min_dps.size != 1) || (max_dps.size != 1)
           errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is incomplete; there must be exactly one minimum and one maximum capacity datapoint."
+        else
+          min_capacity = min_dps[0].capacity.nil? ? min_dps[0].capacity_fraction_of_nominal : min_dps[0].capacity
+          min_cop = min_dps[0].efficiency_cop
+          if nom_dps.size == 1
+            nom_capacity = nom_dps[0].capacity.nil? ? nom_dps[0].capacity_fraction_of_nominal : nom_dps[0].capacity
+            nom_cop = nom_dps[0].efficiency_cop
+          end
+          max_capacity = max_dps[0].capacity.nil? ? max_dps[0].capacity_fraction_of_nominal : max_dps[0].capacity
+          max_cop = max_dps[0].efficiency_cop
+
+          # Check powers ordered correctly
+          if min_capacity / min_cop > max_capacity / max_cop
+            errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at maximum capacity."
+          end
+          if nom_dps.size == 1
+            if min_capacity / min_cop > nom_capacity / nom_cop
+              errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at nominal capacity."
+            end
+            if nom_capacity / nom_cop > max_capacity / max_cop
+              errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power (capacity / COP) at nominal capacity must be less than or equal to power at maximum capacity."
+            end
+          end
+          # Check capacities ordered correctly
+          if min_capacity > max_capacity
+            errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Maximum capacity must be greater than or equal to minimum capacity."
+          end
+          if nom_dps.size == 1
+            if min_capacity > nom_capacity
+              errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Nominal capacity must be greater than or equal to minimum capacity."
+            end
+            if nom_capacity > max_capacity
+              errors << "Cooling detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Maximum capacity must be greater than or equal to nominal capacity."
+            end
+          end
         end
       end
+
       return errors
     end
 
@@ -11423,7 +11481,9 @@ class HPXML < Object
              :capacity_description,         # [String] CapacityDescription (HPXML::CapacityDescriptionXXX)
              :efficiency_cop,               # [Double] Efficiency[Units="COP"]/Value (W/W)
              :gross_capacity,               # FUTURE: Not in HPXML schema, should move to additional_properties
-             :gross_efficiency_cop]         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_efficiency_cop,         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_input_power,            # FUTURE: Not in HPXML schema, should move to additional_properties
+             :input_power]                  # FUTURE: Not in HPXML schema, should move to additional_properties
     attr_accessor(*ATTRS)
 
     # Deletes the current object from the array.
@@ -11495,15 +11555,52 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
-      outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
+
+      outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionNominal, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
       outdoor_temps.each do |outdoor_temp|
-        num_min = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
-        num_max = count { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
-        if (num_min != 1) || (num_max != 1)
+        min_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum && dp.outdoor_temperature == outdoor_temp }
+        nom_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal && dp.outdoor_temperature == outdoor_temp }
+        max_dps = self.select { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == outdoor_temp }
+        # Check we have exactly one minimum and one maximum datapoint
+        if (min_dps.size != 1) || (max_dps.size != 1)
           errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is incomplete; there must be exactly one minimum and one maximum capacity datapoint."
+        else
+          min_capacity = min_dps[0].capacity.nil? ? min_dps[0].capacity_fraction_of_nominal : min_dps[0].capacity
+          min_cop = min_dps[0].efficiency_cop
+          if nom_dps.size == 1
+            nom_capacity = nom_dps[0].capacity.nil? ? nom_dps[0].capacity_fraction_of_nominal : nom_dps[0].capacity
+            nom_cop = nom_dps[0].efficiency_cop
+          end
+          max_capacity = max_dps[0].capacity.nil? ? max_dps[0].capacity_fraction_of_nominal : max_dps[0].capacity
+          max_cop = max_dps[0].efficiency_cop
+
+          # Check powers ordered correctly
+          if min_capacity / min_cop > max_capacity / max_cop
+            errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at maximum capacity."
+          end
+          if nom_dps.size == 1
+            if min_capacity / min_cop > nom_capacity / nom_cop
+              errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at nominal capacity."
+            end
+            if nom_capacity / nom_cop > max_capacity / max_cop
+              errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Power (capacity / COP) at nominal capacity must be less than or equal to power at maximum capacity."
+            end
+          end
+          # Check capacities ordered correctly
+          if min_capacity > max_capacity
+            errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Maximum capacity must be greater than or equal to minimum capacity."
+          end
+          if nom_dps.size == 1
+            if min_capacity > nom_capacity
+              errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Nominal capacity must be greater than or equal to minimum capacity."
+            end
+            if nom_capacity > max_capacity
+              errors << "Heating detailed performance data for outdoor temperature = #{outdoor_temp} is invalid; Maximum capacity must be greater than or equal to nominal capacity."
+            end
+          end
         end
       end
+
       return errors
     end
 
@@ -11530,7 +11627,9 @@ class HPXML < Object
              :capacity_description,         # [String] CapacityDescription (HPXML::CapacityDescriptionXXX)
              :efficiency_cop,               # [Double] Efficiency[Units="COP"]/Value (W/W)
              :gross_capacity,               # FUTURE: Not in HPXML schema, should move to additional_properties
-             :gross_efficiency_cop]         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_efficiency_cop,         # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_input_power,            # FUTURE: Not in HPXML schema, should move to additional_properties
+             :input_power]                  # FUTURE: Not in HPXML schema, should move to additional_properties
     attr_accessor(*ATTRS)
 
     # Deletes the current object from the array.
