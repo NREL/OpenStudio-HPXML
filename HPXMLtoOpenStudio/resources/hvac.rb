@@ -10,6 +10,8 @@ module HVAC
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
   RatedCFMPerTon = 400.0 # cfm/ton of rated capacity
   CrankcaseHeaterTemp = 50.0 # degF, RESNET MINHERS Addendum 82
+  MinCapacity = 1.0 # Btuh
+  MinAirflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
 
   # Adds any HVAC Systems to the OpenStudio model.
   #
@@ -3011,7 +3013,6 @@ module HVAC
 
       # Add new datapoint at min/max ODB temperatures
       n_tries = 1000
-      min_btuh = 100
       outdoor_dry_bulbs.each do |target_odb|
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
@@ -3026,7 +3027,7 @@ module HVAC
           new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
           convert_datapoint_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
 
-          if new_dp.capacity > min_btuh && new_dp.gross_capacity > min_btuh && new_dp.input_power > min_btuh && new_dp.gross_input_power > min_btuh
+          if new_dp.capacity >= MinCapacity && new_dp.gross_capacity > 0 && new_dp.input_power > 0 && new_dp.gross_input_power > 0
             break
           end
 
@@ -5701,37 +5702,35 @@ module HVAC
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.ensure_nonzero_sizing_values(hpxml_bldg)
-    min_capacity = 1.0 # Btuh
-    min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
     speed_descriptions = [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionNominal, HPXML::CapacityDescriptionMaximum]
     hpxml_bldg.heating_systems.each do |htg_sys|
-      htg_sys.heating_capacity = [htg_sys.heating_capacity, min_capacity].max
-      htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, min_airflow].max unless htg_sys.heating_airflow_cfm.nil?
+      htg_sys.heating_capacity = [htg_sys.heating_capacity, MinCapacity].max
+      htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, MinAirflow].max unless htg_sys.heating_airflow_cfm.nil?
     end
     hpxml_bldg.cooling_systems.each do |clg_sys|
-      clg_sys.cooling_capacity = [clg_sys.cooling_capacity, min_capacity].max
-      clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, min_airflow].max
+      clg_sys.cooling_capacity = [clg_sys.cooling_capacity, MinCapacity].max
+      clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, MinAirflow].max
       next if clg_sys.cooling_detailed_performance_data.empty?
 
       clg_sys.cooling_detailed_performance_data.each do |dp|
         speed = speed_descriptions.index(dp.capacity_description) + 1
-        dp.capacity = [dp.capacity, min_capacity * speed].max
+        dp.capacity = [dp.capacity, MinCapacity * speed].max
       end
     end
     hpxml_bldg.heat_pumps.each do |hp_sys|
-      hp_sys.cooling_capacity = [hp_sys.cooling_capacity, min_capacity].max
-      hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm, min_airflow].max
-      hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible, min_capacity].max
-      hp_sys.heating_capacity = [hp_sys.heating_capacity, min_capacity].max
-      hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm, min_airflow].max
-      hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, min_capacity].max unless hp_sys.heating_capacity_17F.nil?
-      hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, min_capacity].max unless hp_sys.backup_heating_capacity.nil?
+      hp_sys.cooling_capacity = [hp_sys.cooling_capacity, MinCapacity].max
+      hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm, MinAirflow].max
+      hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible, MinCapacity].max
+      hp_sys.heating_capacity = [hp_sys.heating_capacity, MinCapacity].max
+      hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm, MinAirflow].max
+      hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, MinCapacity].max unless hp_sys.heating_capacity_17F.nil?
+      hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, MinCapacity].max unless hp_sys.backup_heating_capacity.nil?
       if not hp_sys.heating_detailed_performance_data.empty?
         hp_sys.heating_detailed_performance_data.each do |dp|
           next if dp.capacity.nil?
 
           speed = speed_descriptions.index(dp.capacity_description) + 1
-          dp.capacity = [dp.capacity, min_capacity * speed].max
+          dp.capacity = [dp.capacity, MinCapacity * speed].max
         end
       end
       next if hp_sys.cooling_detailed_performance_data.empty?
@@ -5740,7 +5739,7 @@ module HVAC
         next if dp.capacity.nil?
 
         speed = speed_descriptions.index(dp.capacity_description) + 1
-        dp.capacity = [dp.capacity, min_capacity * speed].max
+        dp.capacity = [dp.capacity, MinCapacity * speed].max
       end
     end
   end
