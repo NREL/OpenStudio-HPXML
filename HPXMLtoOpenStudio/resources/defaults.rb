@@ -2519,15 +2519,16 @@ module Defaults
         neighbor_nom_capacity = neighbor_dp_nom.capacity
         neighbor_min_capacity = neighbor_dp_min.capacity
         target_min_capacity = target_dp_min.capacity
-        added_dp.capacity = (neighbor_nom_capacity * target_min_capacity / neighbor_min_capacity).round
+        capacity = neighbor_nom_capacity * target_min_capacity / neighbor_min_capacity
       when HPXML::HVACCompressorTypeVariableSpeed
         neighbor_max_capacity = neighbor_dp_max.capacity
         neighbor_nom_capacity = neighbor_dp_nom.capacity
         neighbor_min_capacity = neighbor_dp_min.capacity
         target_max_capacity = target_dp_max.capacity
         target_min_capacity = target_dp_min.capacity
-        added_dp.capacity = MathTools.interp2(neighbor_nom_capacity, neighbor_min_capacity, neighbor_max_capacity, target_min_capacity, target_max_capacity).round
+        capacity = MathTools.interp2(neighbor_nom_capacity, neighbor_min_capacity, neighbor_max_capacity, target_min_capacity, target_max_capacity)
       end
+      added_dp.capacity = capacity.round
 
       # Net power
       case compressor_type
@@ -2535,16 +2536,16 @@ module Defaults
         neighbor_nom_power = neighbor_dp_nom.capacity / neighbor_dp_nom.efficiency_cop
         neighbor_min_power = neighbor_dp_min.capacity / neighbor_dp_min.efficiency_cop
         target_min_power = target_dp_min.capacity / neighbor_dp_min.efficiency_cop
-        input_power = (neighbor_nom_power * target_min_power / neighbor_min_power).round(4)
+        input_power = neighbor_nom_power * target_min_power / neighbor_min_power
       when HPXML::HVACCompressorTypeVariableSpeed
         neighbor_max_power = neighbor_dp_max.capacity / neighbor_dp_max.efficiency_cop
         neighbor_nom_power = neighbor_dp_nom.capacity / neighbor_dp_nom.efficiency_cop
         neighbor_min_power = neighbor_dp_min.capacity / neighbor_dp_min.efficiency_cop
         target_max_power = target_dp_max.capacity / target_dp_max.efficiency_cop
         target_min_power = target_dp_min.capacity / neighbor_dp_min.efficiency_cop
-        input_power = MathTools.interp2(neighbor_nom_power, neighbor_min_power, neighbor_max_power, target_min_power, target_max_power).round(4)
+        input_power = MathTools.interp2(neighbor_nom_power, neighbor_min_power, neighbor_max_power, target_min_power, target_max_power)
       end
-      added_dp.efficiency_cop = added_dp.capacity / input_power
+      added_dp.efficiency_cop = (added_dp.capacity / input_power).round(4)
     end
   end
 

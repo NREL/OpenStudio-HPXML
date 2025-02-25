@@ -1819,55 +1819,55 @@ module HVAC
     detailed_performance_data = heat_pump.heating_detailed_performance_data
 
     # 47F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_47.round(1),
+    detailed_performance_data.add(capacity: max_capacity_47.round,
                                   efficiency_cop: max_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 47,
                                   isdefaulted: true) unless max_capacity_47.nil?
     # 47F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_47.round(1),
+    detailed_performance_data.add(capacity: nom_capacity_47.round,
                                   efficiency_cop: nom_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 47,
                                   isdefaulted: true)
     # 47F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_47.round(1),
+    detailed_performance_data.add(capacity: min_capacity_47.round,
                                   efficiency_cop: min_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 47,
                                   isdefaulted: true) unless min_capacity_47.nil?
     # 17F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_17.round(1),
+    detailed_performance_data.add(capacity: max_capacity_17.round,
                                   efficiency_cop: max_cop_17.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 17,
                                   isdefaulted: true) unless max_capacity_17.nil?
     # 17F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_17.round(1),
+    detailed_performance_data.add(capacity: nom_capacity_17.round,
                                   efficiency_cop: nom_cop_17.round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 17,
                                   isdefaulted: true)
     # 17F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_17.round(1),
+    detailed_performance_data.add(capacity: min_capacity_17.round,
                                   efficiency_cop: min_cop_17.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 17,
                                   isdefaulted: true) unless min_capacity_17.nil?
     # 5F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_5.round(1),
+    detailed_performance_data.add(capacity: max_capacity_5.round,
                                   efficiency_cop: max_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 5,
                                   isdefaulted: true) unless max_capacity_5.nil?
     # 5F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_5.round(1),
+    detailed_performance_data.add(capacity: nom_capacity_5.round,
                                   efficiency_cop: nom_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 5,
                                   isdefaulted: true) unless nom_capacity_5.nil?
     # 5F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_5.round(1),
+    detailed_performance_data.add(capacity: min_capacity_5.round,
                                   efficiency_cop: min_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 5,
@@ -1920,37 +1920,37 @@ module HVAC
     detailed_performance_data = cooling_system.cooling_detailed_performance_data
 
     # 95F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_95.round(1),
+    detailed_performance_data.add(capacity: max_capacity_95.round,
                                   efficiency_cop: cops_95[:max].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 95,
                                   isdefaulted: true) unless max_capacity_95.nil?
     # 95F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_95.round(1),
+    detailed_performance_data.add(capacity: nom_capacity_95.round,
                                   efficiency_cop: cops_95[:nom].round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 95,
                                   isdefaulted: true)
     # 95F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_95.round(1),
+    detailed_performance_data.add(capacity: min_capacity_95.round,
                                   efficiency_cop: cops_95[:min].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 95,
                                   isdefaulted: true) unless min_capacity_95.nil?
     # 82F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_82.round(1),
+    detailed_performance_data.add(capacity: max_capacity_82.round,
                                   efficiency_cop: cops_82[:max].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 82,
                                   isdefaulted: true) unless max_capacity_82.nil?
     # 82F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_82.round(1),
+    detailed_performance_data.add(capacity: nom_capacity_82.round,
                                   efficiency_cop: cops_82[:nom].round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 82,
                                   isdefaulted: true)
     # 82F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_82.round(1),
+    detailed_performance_data.add(capacity: min_capacity_82.round,
                                   efficiency_cop: cops_82[:min].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 82,
@@ -3022,9 +3022,9 @@ module HVAC
 
         for i in 1..n_tries
           new_dp.outdoor_temperature = target_odb
-          new_dp.capacity = extrapolate_datapoint(datapoints, capacity_description, target_odb, :capacity)
+          new_dp.capacity = extrapolate_datapoint(datapoints, capacity_description, target_odb, :capacity).round
           new_dp.input_power = extrapolate_datapoint(datapoints, capacity_description, target_odb, :input_power)
-          new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
+          new_dp.efficiency_cop = (new_dp.capacity / new_dp.input_power).round(4)
           convert_datapoint_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
 
           if new_dp.capacity >= MinCapacity && new_dp.gross_capacity > 0 && new_dp.input_power > 0 && new_dp.gross_input_power > 0
@@ -3137,9 +3137,9 @@ module HVAC
           end
           # Interpolate based on net power and capacity per RESNET MINHERS Addendum 82.
           new_dp.input_power = dp.input_power + Float(j) / (n_pt + 1) * (dp2.input_power - dp.input_power)
-          new_dp.capacity = dp.capacity + Float(j) / (n_pt + 1) * (dp2.capacity - dp.capacity)
+          new_dp.capacity = (dp.capacity + Float(j) / (n_pt + 1) * (dp2.capacity - dp.capacity)).round
           new_dp.outdoor_temperature = dp.outdoor_temperature + Float(j) / (n_pt + 1) * (dp2.outdoor_temperature - dp.outdoor_temperature)
-          new_dp.efficiency_cop = new_dp.capacity / new_dp.input_power
+          new_dp.efficiency_cop = (new_dp.capacity / new_dp.input_power).round(4)
           new_dp.capacity_description = dp.capacity_description
           convert_datapoint_net_to_gross(new_dp, mode, hvac_system, cfm_per_ton[speed], max_rated_fan_cfm)
           datapoints << new_dp
