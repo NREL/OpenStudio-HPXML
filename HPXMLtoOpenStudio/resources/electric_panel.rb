@@ -8,7 +8,7 @@ module ElectricPanel
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
   # @return [nil]
-  def self.calculate(hpxml_header, hpxml_bldg, electric_panel)
+  def self.calculate(runner, hpxml_header, hpxml_bldg, electric_panel)
     capacity_types = []
     capacity_total_watts = []
     capacity_total_amps = []
@@ -30,7 +30,7 @@ module ElectricPanel
     electric_panel.capacity_headroom_amps = capacity_headroom_amps
 
     breaker_spaces_values = BreakerSpacesValues.new
-    calculate_breaker_spaces(electric_panel, breaker_spaces_values)
+    calculate_breaker_spaces(runner, electric_panel, breaker_spaces_values)
 
     electric_panel.breaker_spaces_total = breaker_spaces_values.BreakerSpaces_Total
     electric_panel.breaker_spaces_occupied = breaker_spaces_values.BreakerSpaces_Occupied
@@ -199,17 +199,23 @@ module ElectricPanel
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
   # @param [Array<HPXML::ServiceFeeder>] List of service feeder objects
   # @return [nil]
-  def self.calculate_breaker_spaces(electric_panel, service_feeders)
+  def self.calculate_breaker_spaces(runner, electric_panel, service_feeders)
+    total = electric_panel.rated_total_spaces
+    headroom = electric_panel.headroom
     occupied = electric_panel.branch_circuits.map { |branch_circuit| branch_circuit.occupied_spaces }.sum(0.0)
-    if !electric_panel.rated_total_spaces.nil?
-      total = electric_panel.rated_total_spaces
-    else
-      total = occupied + electric_panel.headroom
+
+    if !total.nil? && !headroom.nil?
+      if occupied + headroom != total
+        runner.registerWarning("#{electric_panel.id}: the sum of occupied spaces (#{occupied}) and headroom (#{headroom}) does equal total (#{total}); modifying headroom.")
+      end
+    elsif !headroom.nil?
+      total = occupied + headroom
     end
+    headroom = total - occupied
 
     service_feeders.BreakerSpaces_Total = total
     service_feeders.BreakerSpaces_Occupied = occupied
-    service_feeders.BreakerSpaces_HeadRoom = total - occupied
+    service_feeders.BreakerSpaces_HeadRoom = headroom
   end
 end
 

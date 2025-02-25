@@ -4654,8 +4654,7 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   ``Voltage``                                     string    V               See [#]_     No        See [#]_
   ``MaxCurrentRating``                            double    A                            No        See [#]_
   ``OccupiedSpaces``                              integer                                No        See [#]_   Number of occupied breaker spaces
-  ``AttachedToComponent``                         idref                                  No                   ID of attached component; multiple are allowed [#]_
-  ``AttachedToSubPanel``                          idref                     See [#]_     No                   ID of attached electric panel (i.e., a subpanel) [#]_
+  ``AttachedToComponent``                         idref                     See [#]_     No                   ID of attached component; multiple are allowed [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] Voltage choices are "120" or "240".
@@ -4664,13 +4663,13 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          \- **No referenced components, non-electric heating systems, room air conditioners, dishwashers, ventilation fans, plug loads**: 120
          
          \- **All other referenced components**: 240
-  
+
   .. [#] If MaxCurrentRating not provided, defaults based on Voltage as follows:
   
          \- **120**: 20
          
          \- **240**: 50
-         
+
   .. [#] If OccupiedSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of components referenced by AttachedToComponent.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
          Occupied breaker spaces will be recalculated based on the new Voltage classification.
@@ -4681,10 +4680,10 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          NumBranches = ceiling(RequiredAmperage / MaxCurrentRating)
          
          NumBreakers = NumBranches * (Voltage / 120)
-  
+
+  .. [#] AttachedToComponent must reference a ``HeatingSystem``, ``CoolingSystem``, ``HeatPump``,  ``WaterHeatingSystem``, ``ClothesWasher``, ``ClothesDryer``, ``Dishwasher``, ``CookingRange``, ``Oven``, ``Refrigerator``, ``Freezer``, ``Dehumidifier``, ``VentilationFan``, ``PermanentSpa/Pumps/Pump``, ``PermanentSpa/Heater``, ``Pool/Pumps/Pump``, ``Pool/Heater``, ``PlugLoad``, ``FuelLoad``, ``ElectricVehicleCharger``, ``PVSystem``, or ``LightingGroup``.
   .. [#] Provide a AttachedToComponent element for each referenced component.
-  .. [#] AttachedToSubPanel must reference a ``ElectricPanel``.
-  .. [#] Provide a AttachedToSubPanel element for a referenced subpanel.
+         A branch circuit is assumed to be dedicated when exactly one AttachedToComponent element is provided.
 
 .. _service_feeders:
 

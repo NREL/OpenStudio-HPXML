@@ -1203,7 +1203,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'orphaned-hvac-distribution' => ["Distribution system 'HVACDistribution1' found but no HVAC system attached to it."],
                             'panel-branch-circuit-not-supported' => ["One or more referenced components 'AirInfiltrationMeasurement1' not supported for branch circuit 'BranchCircuit1'"],
                             'panel-service-feeder-wrong-system-type' => ["One or more referenced components 'WaterHeatingSystem1' not valid for service feeder 'ServiceFeeder1'"],
-                            'panel-service-feeder-missing-system' => ["One or more referenced components 'foobar' not supported for service feeder 'ServiceFeeder1'"],
+                            'panel-service-feeder-not-supported' => ["One or more referenced components 'foobar' not supported for service feeder 'ServiceFeeder1'"],
                             'refrigerators-multiple-primary' => ['More than one refrigerator designated as the primary.'],
                             'refrigerators-no-primary' => ['Could not find a primary refrigerator.'],
                             'repeated-relatedhvac-dhw-indirect' => ["RelatedHVACSystem 'HeatingSystem1' is attached to multiple water heating systems."],
@@ -1585,7 +1585,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
                                                           type: HPXML::ElectricPanelLoadTypeHeating,
                                                           component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-      when 'panel-service-feeder-missing-system'
+      when 'panel-service-feeder-not-supported'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
         hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
@@ -1826,7 +1826,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'manualj-sum-space-internal-loads-sensible' => ['ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],
                               'manualj-sum-space-internal-loads-latent' => ['ManualJInputs/InternalLoadsLatent (200.0) does not match sum of conditioned spaces (100.0).'],
                               'multiple-conditioned-zone' => ['While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'],
-                              'panel-missing-default' => ['Service feeder calculation types are specified but branch circuits are specified; new branch circuits created to support the load calculations may be duplicative.',
+                              'panel-missing-default' => ['Service feeder calculations will be performed but branch circuits are already specified; new branch circuits that are created to support these calculations may be duplicative.',
                                                           "Voltage (240) for 'dishwasher' is not specified in default_panels.csv; PowerRating will be assigned according to Voltage=120.",
                                                           "Voltage (240) for 'dishwasher' is not specified in default_panels.csv; BreakerSpaces will be recalculated using Voltage=240."],
                               'panel-lighting' => ["Entered power rating (4000.0) for service feeder load type 'lighting' does not equal 3.0 W/sqft for 1228.0."],

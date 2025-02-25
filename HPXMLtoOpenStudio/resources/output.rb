@@ -1051,7 +1051,7 @@ module Outputs
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     hpxml_bldg.electric_panels.each do |electric_panel|
       electric_panel.branch_circuits.each do |branch_circuit|
-        if !branch_circuit.components.empty?
+        if branch_circuit.components.size == 1 # Assume dedicated circuit
           branch_circuit.components.each do |component|
             if component.is_a?(HPXML::HeatingSystem) || component.is_a?(HPXML::HeatPump)
               htg += branch_circuit.occupied_spaces * unit_multiplier
@@ -1083,11 +1083,12 @@ module Outputs
               oth += branch_circuit.occupied_spaces * unit_multiplier
             end
           end
-        else
+        else # 0 or 2+ referenced components
           oth += branch_circuit.occupied_spaces * unit_multiplier
         end
       end
     end
+
     return htg, clg, hw, cd, dw, ov, vf, sh, sp, ph, pp, wp, ev, oth
   end
 

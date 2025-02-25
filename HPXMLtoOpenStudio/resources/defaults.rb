@@ -3189,7 +3189,7 @@ module Defaults
         if !branch_circuits.empty?
           # BranchCircuits NOT required to be empty because there may be voltage specified on branch circuits for heat pump, water heater, clothes dryer, cooking range, electric vehicle, etc.
           # However, if for example a branch circuit is specified for an air handler, a duplicate air handler branch circuit will be created
-          runner.registerWarning('Service feeder calculation types are specified but branch circuits are specified; new branch circuits created to support the load calculations may be duplicative.')
+          runner.registerWarning('Service feeder calculations will be performed but branch circuits are already specified; new branch circuits that are created to support these calculations may be duplicative.')
         end
 
         hpxml_bldg.heating_systems.each do |heating_system|
@@ -3572,7 +3572,7 @@ module Defaults
         electric_panel.headroom_isdefaulted = true
       end
 
-      ElectricPanel.calculate(hpxml_header, hpxml_bldg, electric_panel)
+      ElectricPanel.calculate(runner, hpxml_header, hpxml_bldg, electric_panel)
     end # end hpxml_bldg.electric_panels.each do |electric_panel|
   end
 

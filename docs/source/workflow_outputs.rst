@@ -724,6 +724,7 @@ Breaker Spaces
 ~~~~~~~~~~~~~~
 
 Electric panel breaker space counts are available as listed below.
+End use categories (e.g., Heating, Cooling, Hot Water) report occupied spaces for dedicated circuits except for Other which reports otherwise uncategorized or shared circuits.
 
   ================================================================================  ====================
   Type                                                                              Notes
