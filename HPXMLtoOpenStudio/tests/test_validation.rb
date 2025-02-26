@@ -146,7 +146,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-gshp-invalid-bore-depth-high' => ['Expected BoreholesOrTrenches/Length to be less than or equal to 500 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
                             'hvac-gshp-autosized-count-not-rectangle' => ["Expected BoreholesOrTrenches/Count when extension/BorefieldConfiguration is not 'Rectangle' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
                             'hvac-invalid-fan-model-type' => ["Expected extension/FanMotorType to be 'PSC' or 'BPM'"],
-                            'hvac-invalid-eer' => ['Expected EER to be less than or equal to SEER.'],
+                            'hvac-invalid-eer' => ['Expected EER to be less than SEER.'],
                             'hvac-invalid-eer2' => ['Expected EER2 to be less than or equal to SEER2.'],
                             'hvac-location-heating-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-location-cooling-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
