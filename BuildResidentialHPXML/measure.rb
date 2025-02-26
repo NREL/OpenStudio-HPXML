@@ -1593,85 +1593,85 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_outdoor_temperatures', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Heating Outdoor Temperatures')
-    arg.setDescription('Outdoor temperatures of heating detailed performance data if available. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps). Outdoor temperatures must be 47F, 17F, and 5F (and one optional temperature less than 5F).')
+    arg.setDescription("Outdoor temperatures of heating detailed performance data if available. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps). Only certain outdoor temperatures are allowed, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).")
     arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_capacities', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Speed Capacities')
-    arg.setDescription('Minimum speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps).')
+    arg.setDescription("Minimum speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).")
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_nom_speed_capacities', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Heating Nominal Speed Capacities')
-    arg.setDescription('Nominal speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps).')
+    arg.setDescription("Nominal speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).")
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_max_speed_capacities', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Speed Capacities')
-    arg.setDescription('Maximum speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (air-to-air and mini-split heat pumps).')
+    arg.setDescription("Maximum speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).")
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_cops', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Speed COPs')
-    arg.setDescription('Minimum speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps).')
+    arg.setDescription("Minimum speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).")
     arg.setUnits('W/W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_nom_speed_cops', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Heating Nominal Speed COPs')
-    arg.setDescription('Nominal speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps).')
+    arg.setDescription("Nominal speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).")
     arg.setUnits('W/W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_max_speed_cops', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Speed COPs')
-    arg.setDescription('Maximum speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (air-to-air and mini-split heat pumps).')
+    arg.setDescription("Maximum speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).")
     arg.setUnits('W/W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_outdoor_temperatures', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Cooling Outdoor Temperatures')
-    arg.setDescription('Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Outdoor temperatures must be 82F and 95F (and one optional temperature greater than 95F).')
+    arg.setDescription("Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Only certain outdoor temperatures are allowed, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).")
     arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_capacities', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Speed Capacities')
-    arg.setDescription('Minimum speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).')
+    arg.setDescription("Minimum speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).")
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_nom_speed_capacities', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Cooling Nominal Speed Capacities')
-    arg.setDescription('Nominal speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).')
+    arg.setDescription("Nominal speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).")
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_max_speed_capacities', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Speed Capacities')
-    arg.setDescription('Maximum speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).')
+    arg.setDescription("Maximum speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).")
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_cops', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Speed COPs')
-    arg.setDescription('Minimum speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).')
+    arg.setDescription("Minimum speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).")
     arg.setUnits('W/W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_nom_speed_cops', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Cooling Nominal Speed COPs')
-    arg.setDescription('Nominal speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).')
+    arg.setDescription("Nominal speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).")
     arg.setUnits('W/W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_max_speed_cops', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Speed COPs')
-    arg.setDescription('Maximum speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).')
+    arg.setDescription("Maximum speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='#{docs_base_url}#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).")
     arg.setUnits('W/W')
     args << arg
 
@@ -3884,25 +3884,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (hvac_perf_data_heating_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required heating detailed performance data arguments.' if error
 
-    if hvac_perf_data_heating_args_initialized.uniq.size == 1 && hvac_perf_data_heating_args_initialized.uniq[0]
-      heating_data_points_lengths = [args[:hvac_perf_data_heating_outdoor_temperatures].count(',')]
-      if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
-        heating_data_points_lengths << args[:hvac_perf_data_heating_min_speed_capacities].count(',')
-        heating_data_points_lengths << args[:hvac_perf_data_heating_min_speed_cops].count(',')
-      end
-      if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
-        heating_data_points_lengths << args[:hvac_perf_data_heating_max_speed_capacities].count(',')
-        heating_data_points_lengths << args[:hvac_perf_data_heating_max_speed_cops].count(',')
-      end
-      error = (heating_data_points_lengths.uniq.size != 1)
-      errors << 'One or more detailed heating performance data arguments does not have enough comma-separated elements specified.' if error
-
-      heating_nom_data_points_lengths = [args[:hvac_perf_data_heating_nom_speed_capacities].count(','),
-                                         args[:hvac_perf_data_heating_nom_speed_cops].count(',')]
-      error = (heating_nom_data_points_lengths.uniq.size != 1)
-      errors << 'Normalized speed detailed heating performance data does not specify enough properties.' if error
-    end
-
     hvac_perf_data_cooling_args_initialized = [!args[:hvac_perf_data_cooling_outdoor_temperatures].nil?,
                                                !args[:hvac_perf_data_cooling_nom_speed_capacities].nil?,
                                                !args[:hvac_perf_data_cooling_nom_speed_cops].nil?]
@@ -3916,25 +3897,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
     error = (hvac_perf_data_cooling_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required cooling detailed performance data arguments.' if error
-
-    if hvac_perf_data_cooling_args_initialized.uniq.size == 1 && hvac_perf_data_cooling_args_initialized.uniq[0]
-      cooling_data_points_lengths = [args[:hvac_perf_data_cooling_outdoor_temperatures].count(',')]
-      if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
-        cooling_data_points_lengths << args[:hvac_perf_data_cooling_min_speed_capacities].count(',')
-        cooling_data_points_lengths << args[:hvac_perf_data_cooling_min_speed_cops].count(',')
-      end
-      if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
-        cooling_data_points_lengths << args[:hvac_perf_data_cooling_max_speed_capacities].count(',')
-        cooling_data_points_lengths << args[:hvac_perf_data_cooling_max_speed_cops].count(',')
-      end
-      error = (cooling_data_points_lengths.uniq.size != 1)
-      errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
-
-      cooling_nom_data_points_lengths = [args[:hvac_perf_data_cooling_nom_speed_capacities].count(','),
-                                         args[:hvac_perf_data_cooling_nom_speed_cops].count(',')]
-      error = (cooling_nom_data_points_lengths.uniq.size != 1)
-      errors << 'Normalized speed detailed cooling performance data does not specify enough properties.' if error
-    end
 
     emissions_args_initialized = [!args[:emissions_scenario_names].nil?,
                                   !args[:emissions_types].nil?,
