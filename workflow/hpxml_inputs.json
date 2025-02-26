@@ -2273,7 +2273,7 @@
   },
   "sample_files/base-hvac-boiler-gas-central-ac-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "Fuel Boiler, 92% AFUE",
+    "heating_system": "Fuel Boiler, 92% AFUE"
   },
   "sample_files/base-hvac-boiler-gas-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
