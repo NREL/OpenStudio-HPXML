@@ -5604,26 +5604,10 @@ module Defaults
   # @param [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump]
   # @return [String] Compressor type (HPXML::HVACCompressorTypeXXX)
   def self.get_hvac_compressor_type(hvac_system)
-    hvac_type = (hvac_system.is_a? HPXML::HeatPump) ? hvac_system.heat_pump_type : hvac_system.cooling_system_type
-    case hvac_type
-    when HPXML::HVACTypeCentralAirConditioner,
-         HPXML::HVACTypeHeatPumpAirToAir
-      if HVAC.calc_seer_from_seer2(hvac_system) <= 15
-        return HPXML::HVACCompressorTypeSingleStage
-      elsif HVAC.calc_seer_from_seer2(hvac_system) <= 21
-        return HPXML::HVACCompressorTypeTwoStage
-      elsif HVAC.calc_seer_from_seer2(hvac_system) > 21
-        return HPXML::HVACCompressorTypeVariableSpeed
-      end
-    when HPXML::HVACTypeMiniSplitAirConditioner,
-         HPXML::HVACTypeHeatPumpMiniSplit
-      return HPXML::HVACCompressorTypeVariableSpeed
-    when HPXML::HVACTypePTAC,
-         HPXML::HVACTypeHeatPumpPTHP,
-         HPXML::HVACTypeHeatPumpRoom,
-         HPXML::HVACTypeRoomAirConditioner
+    if HVAC.is_room_dx_hvac_system(hvac_system)
       return HPXML::HVACCompressorTypeSingleStage
     end
+
     return
   end
 

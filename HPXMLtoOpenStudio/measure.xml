@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>8785e37d-a9ba-4e73-86d7-73a44a5d9081</version_id>
-  <version_modified>2025-02-25T17:43:48Z</version_modified>
+  <version_id>37497215-62d6-4740-826f-95f58c489289</version_id>
+  <version_modified>2025-02-25T23:00:28Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>003ACC42</checksum>
+      <checksum>CD5E489D</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -375,7 +375,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0BA576D5</checksum>
+      <checksum>F3423883</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9D1666E8</checksum>
+      <checksum>BE29EE9B</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -699,7 +699,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>017EF066</checksum>
+      <checksum>C6067819</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -771,7 +771,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>FB46C78F</checksum>
+      <checksum>9937F6AB</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>

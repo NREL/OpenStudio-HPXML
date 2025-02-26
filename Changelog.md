@@ -2,6 +2,7 @@
 
 __New Features__
 - HVAC modeling updates:
+  - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps.
   - **Breaking Change**: Replaces `HeatingCapacityRetention[Fraction | Temperature]` with `HeatingCapacityFraction17F`.
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.

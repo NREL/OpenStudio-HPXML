@@ -138,8 +138,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                          'Heating detailed performance data for outdoor temperature = 47.0 is invalid; Power (capacity / COP) at minimum capacity must be less than power at maximum capacity.',
                                                                          'Heating detailed performance data for outdoor temperature = 47.0 is invalid; Power (capacity / COP) at minimum capacity must be less than or equal to power at nominal capacity.',
                                                                          'Heating detailed performance data for outdoor temperature = 5.0 is invalid; Minimum capacity must be less than maximum capacity.'],
-                            'hvac-detailed-performance-missing-compressor-type' => ['Expected 1 element(s) for xpath: ../CompressorType',
-                                                                                    'Expected 1 element(s) for xpath: ../CompressorType'],
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
@@ -519,9 +517,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         max_dp_5F = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum && dp.outdoor_temperature == 5.0 }
         min_dp_5F.capacity = 1.1 * max_dp_5F.capacity
         min_dp_5F.efficiency_cop = 2 * max_dp_5F.efficiency_cop
-      when 'hvac-detailed-performance-missing-compressor-type'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
-        hpxml_bldg.heat_pumps[0].compressor_type = nil
       when 'hvac-distribution-return-duct-leakage-missing'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-evap-cooler-only-ducted.xml')
         hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[-1].delete
