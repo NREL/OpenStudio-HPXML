@@ -3245,13 +3245,15 @@ For air-source HVAC systems with detailed cooling performance data, performance 
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes                  Cooling capacity (or fraction) at the specified outdoor temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0 [#]_    Yes                  Cooling capacity (or fraction) at the specified outdoor temperature
   ``CapacityDescription``                         string                    See [#]_     Yes                  Cooling capacity description
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] OutdoorTemperature choices are 82F, 95F, and one optional user-specified temperature greater than 95F.
          Datapoints at additional outdoor temperatures are not currently supported.
+  .. [#] If Capacity is used, the nominal value for the 95F datapoint must match the CoolingCapacity input (if provided).
+         If CapacityFractionOfNominal is used, the nominal value for the 95F datapoint must be 1.
   .. [#] CapacityDescription choices are "minimum", "nominal", and "maximum".
          See the table below for the allowed combinations of CapacityDescription and OutdoorTemperature.
   .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.
@@ -3284,13 +3286,15 @@ For air-source HVAC systems with detailed heating performance data, performance 
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes                  Heating capacity (or fraction) at the specified outdoor temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0 [#]_    Yes                  Heating capacity (or fraction) at the specified outdoor temperature
   ``CapacityDescription``                         string                    See [#]_     Yes                  Heating capacity description
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] OutdoorTemperature choices are 47F, 17F, 5F, and one optional user-specified temperature less than 5F.
          Datapoints at additional outdoor temperatures are not currently supported.
+  .. [#] If Capacity is used, the nominal value for the 47F datapoint must match the HeatingCapacity input (if provided) and the nominal value for the 17F datapoint must match the HeatingCapacity17F input (if provided).
+         If CapacityFractionOfNominal is used, the nominal value for the 95F datapoint must be 1.
   .. [#] CapacityDescription choices are "minimum", "nominal", and "maximum".
          See the table below for the allowed combinations of CapacityDescription and OutdoorTemperature.
   .. [#] The COP should not include power required for defrost cycling or drain pan heater operation.

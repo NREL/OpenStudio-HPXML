@@ -22,8 +22,20 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
   end
 
+  def _get_table_lookup_factor(curve, t1, t2)
+    tbl = curve.to_TableLookup.get
+    idx1 = tbl.independentVariables[0].values.index { |v| (v - UnitConversions.convert(t1, 'F', 'C')).abs <= 0.00001 }
+    idx2 = tbl.independentVariables[1].values.index { |v| (v - UnitConversions.convert(t2, 'F', 'C')).abs <= 0.00001 }
+    idx = idx1 * tbl.independentVariables[1].values.size + idx2
+    adj = tbl.outputValues[idx]
+    return adj
+  end
+
   def test_resnet_model
     # Test to verify the model is consistent with RESNET's NEEP-Statistical-Model.xlsm
+    # Spreadsheet can be found in https://github.com/NREL/OpenStudio-HPXML/pull/1879
+
+    tol = 0.03 # 3%, higher tolerance because expected values from spreadsheet are not rounded like they are in the RESNET Standard
 
     # ============== #
     # Variable Speed #
@@ -51,28 +63,66 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(3, clg_coil.stages.size)
+    [37.8, 200.0, 214.2].each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(clg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), tol)
+    end
+
+    # 95F
     [5.50, 2.48, 2.31].each_with_index do |cop, i|
-      assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
+      eir_adj = _get_table_lookup_factor(clg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 95.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * clg_coil.stages[i].grossRatedCoolingCOP, tol)
     end
     [1135.1, 6100.1, 6546.8].each_with_index do |capacity_btuh, i|
-      assert_in_epsilon(capacity_btuh, UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), 0.01)
+      cap_adj = _get_table_lookup_factor(clg_coil.stages[i].totalCoolingCapacityFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 95.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
     end
-    [37.8, 200.0, 214.2].each_with_index do |cfm, i|
-      assert_in_epsilon(cfm, UnitConversions.convert(clg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+
+    # 82F
+    [7.24, 3.32, 3.09].each_with_index do |cop, i|
+      eir_adj = _get_table_lookup_factor(clg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 82.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * clg_coil.stages[i].grossRatedCoolingCOP, tol)
+    end
+    [1197.8, 6480.1, 6954.6].each_with_index do |capacity_btuh, i|
+      cap_adj = _get_table_lookup_factor(clg_coil.stages[i].totalCoolingCapacityFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 82.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
     end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(3, htg_coil.stages.size)
+    [86.7, 290.0, 319.2].each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(htg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), tol)
+    end
+
+    # 47F
     [3.23, 2.62, 2.47].each_with_index do |cop, i|
-      assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
+      eir_adj = _get_table_lookup_factor(htg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 47.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * htg_coil.stages[i].grossRatedHeatingCOP, tol)
     end
     [2591.2, 8421.9, 9214.5].each_with_index do |capacity_btuh, i|
-      assert_in_epsilon(capacity_btuh, UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), 0.01)
+      cap_adj = _get_table_lookup_factor(htg_coil.stages[i].heatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 47.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), tol)
     end
-    [86.7, 290.0, 319.2].each_with_index do |cfm, i|
-      assert_in_epsilon(cfm, UnitConversions.convert(htg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+
+    # 17F
+    [2.09, 1.90, 1.71].each_with_index do |cop, i|
+      eir_adj = _get_table_lookup_factor(htg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 17.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * htg_coil.stages[i].grossRatedHeatingCOP, tol)
+    end
+    [3117.4, 7221.9, 8814.8].each_with_index do |capacity_btuh, i|
+      cap_adj = _get_table_lookup_factor(htg_coil.stages[i].heatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 17.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), tol)
+    end
+
+    # 5F
+    [1.65, 1.45, 1.46].each_with_index do |cop, i|
+      eir_adj = _get_table_lookup_factor(htg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 5.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * htg_coil.stages[i].grossRatedHeatingCOP, tol)
+    end
+    [2542.6, 7579.3, 7588.7].each_with_index do |capacity_btuh, i|
+      cap_adj = _get_table_lookup_factor(htg_coil.stages[i].heatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 5.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), tol)
     end
 
     # ========= #
@@ -87,28 +137,66 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
     assert_equal(2, clg_coil.stages.size)
+    [145.5, 200.0].each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(clg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), tol)
+    end
+
+    # 95F
     [3.94, 2.48].each_with_index do |cop, i|
-      assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
+      eir_adj = _get_table_lookup_factor(clg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 95.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * clg_coil.stages[i].grossRatedCoolingCOP, tol)
     end
     [4406.9, 6100.1].each_with_index do |capacity_btuh, i|
-      assert_in_epsilon(capacity_btuh, UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), 0.01)
+      cap_adj = _get_table_lookup_factor(clg_coil.stages[i].totalCoolingCapacityFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 95.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
     end
-    [145.5, 200.0].each_with_index do |cfm, i|
-      assert_in_epsilon(cfm, UnitConversions.convert(clg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+
+    # 82F
+    [4.92, 3.10].each_with_index do |cop, i|
+      eir_adj = _get_table_lookup_factor(clg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 82.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * clg_coil.stages[i].grossRatedCoolingCOP, tol)
+    end
+    [4706.5, 6511.8].each_with_index do |capacity_btuh, i|
+      cap_adj = _get_table_lookup_factor(clg_coil.stages[i].totalCoolingCapacityFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 82.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
     end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     assert_equal(2, htg_coil.stages.size)
+    [206.4, 290.0].each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(htg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), tol)
+    end
+
+    # 47F
     [3.23, 2.79].each_with_index do |cop, i|
-      assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
+      eir_adj = _get_table_lookup_factor(htg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 47.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * htg_coil.stages[i].grossRatedHeatingCOP, tol)
     end
     [6081.8, 8421.9].each_with_index do |capacity_btuh, i|
-      assert_in_epsilon(capacity_btuh, UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), 0.01)
+      cap_adj = _get_table_lookup_factor(htg_coil.stages[i].heatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 47.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), tol)
     end
-    [206.4, 290.0].each_with_index do |cfm, i|
-      assert_in_epsilon(cfm, UnitConversions.convert(htg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+
+    # 17F
+    [2.36, 2.02].each_with_index do |cop, i|
+      eir_adj = _get_table_lookup_factor(htg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 17.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * htg_coil.stages[i].grossRatedHeatingCOP, tol)
+    end
+    [5227.9, 7221.9].each_with_index do |capacity_btuh, i|
+      cap_adj = _get_table_lookup_factor(htg_coil.stages[i].heatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 17.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), tol)
+    end
+
+    # 5F
+    [2.08, 1.78].each_with_index do |cop, i|
+      eir_adj = _get_table_lookup_factor(htg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 5.0)
+      assert_in_epsilon(cop, 1.0 / eir_adj * htg_coil.stages[i].grossRatedHeatingCOP, tol)
+    end
+    [4886.3, 6741.9].each_with_index do |capacity_btuh, i|
+      cap_adj = _get_table_lookup_factor(htg_coil.stages[i].heatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 5.0)
+      assert_in_epsilon(capacity_btuh, cap_adj * UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), tol)
     end
 
     # ============ #
@@ -123,16 +211,42 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    assert_in_epsilon(2.72, clg_coil.ratedCOP, 0.01)
-    assert_in_epsilon(6256.2, UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr'), 0.01)
-    assert_in_epsilon(200.0, UnitConversions.convert(clg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(200.0, UnitConversions.convert(clg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm'), tol)
+
+    # 95F
+    eir_adj = _get_table_lookup_factor(clg_coil.energyInputRatioFunctionOfTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 95.0)
+    assert_in_epsilon(2.72, 1.0 / eir_adj * clg_coil.ratedCOP, tol)
+    cap_adj = _get_table_lookup_factor(clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 95.0)
+    assert_in_epsilon(6256.2, cap_adj * UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
+
+    # 82F
+    eir_adj = _get_table_lookup_factor(clg_coil.energyInputRatioFunctionOfTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 82.0)
+    assert_in_epsilon(5.50, 1.0 / eir_adj * clg_coil.ratedCOP, tol)
+    cap_adj = _get_table_lookup_factor(clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve, HVAC::AirSourceCoolRatedIWB, 82.0)
+    assert_in_epsilon(6667.9, cap_adj * UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
-    assert_in_epsilon(3.32, htg_coil.ratedCOP, 0.01)
-    assert_in_epsilon(8290.3, UnitConversions.convert(htg_coil.ratedTotalHeatingCapacity.get, 'W', 'Btu/hr'), 0.01)
-    assert_in_epsilon(290.0, UnitConversions.convert(htg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(290.0, UnitConversions.convert(htg_coil.ratedAirFlowRate.get, 'm^3/s', 'cfm'), tol)
+
+    # 47F
+    eir_adj = _get_table_lookup_factor(htg_coil.energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 47.0)
+    assert_in_epsilon(3.32, 1.0 / eir_adj * htg_coil.ratedCOP, tol)
+    cap_adj = _get_table_lookup_factor(htg_coil.totalHeatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 47.0)
+    assert_in_epsilon(8290.3, cap_adj * UnitConversions.convert(htg_coil.ratedTotalHeatingCapacity.get, 'W', 'Btu/hr'), tol)
+
+    # 17F
+    eir_adj = _get_table_lookup_factor(htg_coil.energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 17.0)
+    assert_in_epsilon(2.37, 1.0 / eir_adj * htg_coil.ratedCOP, tol)
+    cap_adj = _get_table_lookup_factor(htg_coil.totalHeatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 17.0)
+    assert_in_epsilon(7090.3, cap_adj * UnitConversions.convert(htg_coil.ratedTotalHeatingCapacity.get, 'W', 'Btu/hr'), tol)
+
+    # 5F
+    eir_adj = _get_table_lookup_factor(htg_coil.energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 5.0)
+    assert_in_epsilon(2.07, 1.0 / eir_adj * htg_coil.ratedCOP, tol)
+    cap_adj = _get_table_lookup_factor(htg_coil.totalHeatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, 5.0)
+    assert_in_epsilon(6610.3, cap_adj * UnitConversions.convert(htg_coil.ratedTotalHeatingCapacity.get, 'W', 'Btu/hr'), tol)
   end
 
   def test_central_air_conditioner_1_speed

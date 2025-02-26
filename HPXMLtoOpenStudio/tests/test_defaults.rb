@@ -2186,6 +2186,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
   def test_default_detailed_performance_data
     # Test to verify the default detailed performance data points are consistent with RESNET's NEEP-Statistical-Model.xlsm
+    # Spreadsheet can be found in https://github.com/NREL/OpenStudio-HPXML/pull/1879
 
     # ============== #
     # Variable Speed #
@@ -2278,6 +2279,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     min_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
     nom_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
     min_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+    nom_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
     min_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
 
     # 47F
@@ -2293,7 +2295,9 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(2.29, min_dp_17f.efficiency_cop, 0.01)
 
     # 5F
+    assert_in_epsilon(7020.0, nom_dp_5f.capacity, 0.01)
     assert_in_epsilon(4995.4, min_dp_5f.capacity, 0.01)
+    assert_in_epsilon(1.72, nom_dp_5f.efficiency_cop, 0.01)
     assert_in_epsilon(2.03, min_dp_5f.efficiency_cop, 0.01)
 
     # Cooling
@@ -2326,6 +2330,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Heating
     nom_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
     nom_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    nom_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
 
     # 47F
     assert_in_epsilon(8700.0, nom_dp_47f.capacity, 0.01)
@@ -2334,6 +2339,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # 17F
     assert_in_epsilon(7500.0, nom_dp_17f.capacity, 0.01)
     assert_in_epsilon(2.21, nom_dp_17f.efficiency_cop, 0.01)
+
+    # 5F
+    assert_in_epsilon(7020.0, nom_dp_5f.capacity, 0.01)
+    assert_in_epsilon(1.95, nom_dp_5f.efficiency_cop, 0.01)
 
     # Cooling
     nom_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }

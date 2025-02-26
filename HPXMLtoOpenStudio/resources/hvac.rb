@@ -1766,6 +1766,12 @@ module HVAC
       # COPs @ 17F
       nom_cop_17 = nom_cop_47 / 1.356
 
+      # Capacities @ 5F
+      nom_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17, nom_capacity_47)
+
+      # COPs @ 5F
+      nom_cop_5 = nom_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17 / nom_cop_17, nom_capacity_47 / nom_cop_47)
+
     when HPXML::HVACCompressorTypeTwoStage
       # Capacities @ 47F
       min_capacity_47 = nom_capacity_47 * hp_ap.heat_capacity_ratios[0]
@@ -1781,9 +1787,11 @@ module HVAC
       min_cop_17 = nom_cop_17 / 0.850
 
       # Capacities @ 5F
+      nom_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17, nom_capacity_47)
       min_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, min_capacity_17, min_capacity_47)
 
       # COPs @ 5F
+      nom_cop_5 = nom_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17 / nom_cop_17, nom_capacity_47 / nom_cop_47)
       min_cop_5 = min_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, min_capacity_17 / min_cop_17, min_capacity_47 / min_cop_47)
 
     when HPXML::HVACCompressorTypeVariableSpeed
