@@ -3065,6 +3065,10 @@ module HVAC
       return target_dp.send(property)
     end
 
+    if datapoints.size < 2
+      fail 'Could not extrapolate datapoints.'
+    end
+
     sorted_dps = datapoints.sort_by { |dp| dp.outdoor_temperature }
 
     # Check if target_odb is between any two adjacent datapoints; if so, interpolate.

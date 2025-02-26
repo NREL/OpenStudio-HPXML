@@ -2048,7 +2048,7 @@ The rated efficiency value of the cooling system. Ignored for evaporative cooler
 
 **Cooling System: Cooling Compressor Type**
 
-The compressor type of the cooling system. Only applies to central air conditioner and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#central-air-conditioner'>Central Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.
+The compressor type of the cooling system. Required for central air conditioner and mini-split.
 
 - **Name:** ``cooling_system_cooling_compressor_type``
 - **Type:** ``Choice``
@@ -2287,7 +2287,7 @@ The rated cooling efficiency value of the heat pump.
 
 **Heat Pump: Cooling Compressor Type**
 
-The compressor type of the heat pump. Only applies to air-to-air and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.
+The compressor type of the heat pump. Required for air-to-air and mini-split.
 
 - **Name:** ``heat_pump_cooling_compressor_type``
 - **Type:** ``Choice``

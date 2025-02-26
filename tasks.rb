@@ -1968,7 +1968,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if hpxml_file.include? 'base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'
       hpxml_bldg.geothermal_loops[0].shank_spacing = 2.5
     end
-    if ['base-hvac-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
+    if ['base-hvac-air-to-air-heat-pump-1-speed.xml',
+        'base-hvac-air-to-air-heat-pump-1-speed-detailed-performance.xml'].include? hpxml_file
       hpxml_bldg.heat_pumps[0].cooling_efficiency_eer = 12.9
     end
     if ['base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml'].include? hpxml_file

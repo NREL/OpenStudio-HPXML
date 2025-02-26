@@ -1278,7 +1278,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_compressor_type', compressor_type_choices, false)
     arg.setDisplayName('Cooling System: Cooling Compressor Type')
-    arg.setDescription("The compressor type of the cooling system. Only applies to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.")
+    arg.setDescription("The compressor type of the cooling system. Required for #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_sensible_heat_fraction', false)
@@ -1423,7 +1423,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_compressor_type', compressor_type_choices, false)
     arg.setDisplayName('Heat Pump: Cooling Compressor Type')
-    arg.setDescription("The compressor type of the heat pump. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.")
+    arg.setDescription("The compressor type of the heat pump. Required for #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_sensible_heat_fraction', false)
@@ -3864,23 +3864,36 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
+    if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include? args[:cooling_system_type]
+      compressor_type = args[:cooling_system_cooling_compressor_type]
+    elsif [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? args[:heat_pump_type]
+      compressor_type = args[:heat_pump_cooling_compressor_type]
+    end
+
     hvac_perf_data_heating_args_initialized = [!args[:hvac_perf_data_heating_outdoor_temperatures].nil?,
-                                               !args[:hvac_perf_data_heating_min_speed_capacities].nil?,
                                                !args[:hvac_perf_data_heating_nom_speed_capacities].nil?,
-                                               !args[:hvac_perf_data_heating_max_speed_capacities].nil?,
-                                               !args[:hvac_perf_data_heating_min_speed_cops].nil?,
-                                               !args[:hvac_perf_data_heating_nom_speed_cops].nil?,
-                                               !args[:hvac_perf_data_heating_max_speed_cops].nil?]
+                                               !args[:hvac_perf_data_heating_nom_speed_cops].nil?]
+    if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+      hvac_perf_data_heating_args_initialized << !args[:hvac_perf_data_heating_min_speed_capacities].nil?
+      hvac_perf_data_heating_args_initialized << !args[:hvac_perf_data_heating_min_speed_cops].nil?
+    end
+    if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+      hvac_perf_data_heating_args_initialized << !args[:hvac_perf_data_heating_max_speed_capacities].nil?
+      hvac_perf_data_heating_args_initialized << !args[:hvac_perf_data_heating_max_speed_cops].nil?
+    end
     error = (hvac_perf_data_heating_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required heating detailed performance data arguments.' if error
 
     if hvac_perf_data_heating_args_initialized.uniq.size == 1 && hvac_perf_data_heating_args_initialized.uniq[0]
-      heating_data_points_lengths = [args[:hvac_perf_data_heating_outdoor_temperatures].count(','),
-                                     args[:hvac_perf_data_heating_min_speed_capacities].count(','),
-                                     args[:hvac_perf_data_heating_max_speed_capacities].count(','),
-                                     args[:hvac_perf_data_heating_min_speed_cops].count(','),
-                                     args[:hvac_perf_data_heating_max_speed_cops].count(',')]
-
+      heating_data_points_lengths = [args[:hvac_perf_data_heating_outdoor_temperatures].count(',')]
+      if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+        heating_data_points_lengths << args[:hvac_perf_data_heating_min_speed_capacities].count(',')
+        heating_data_points_lengths << args[:hvac_perf_data_heating_min_speed_cops].count(',')
+      end
+      if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+        heating_data_points_lengths << args[:hvac_perf_data_heating_max_speed_capacities].count(',')
+        heating_data_points_lengths << args[:hvac_perf_data_heating_max_speed_cops].count(',')
+      end
       error = (heating_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed heating performance data arguments does not have enough comma-separated elements specified.' if error
 
@@ -3891,22 +3904,29 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     hvac_perf_data_cooling_args_initialized = [!args[:hvac_perf_data_cooling_outdoor_temperatures].nil?,
-                                               !args[:hvac_perf_data_cooling_min_speed_capacities].nil?,
                                                !args[:hvac_perf_data_cooling_nom_speed_capacities].nil?,
-                                               !args[:hvac_perf_data_cooling_max_speed_capacities].nil?,
-                                               !args[:hvac_perf_data_cooling_min_speed_cops].nil?,
-                                               !args[:hvac_perf_data_cooling_nom_speed_cops].nil?,
-                                               !args[:hvac_perf_data_cooling_max_speed_cops].nil?]
+                                               !args[:hvac_perf_data_cooling_nom_speed_cops].nil?]
+    if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+      hvac_perf_data_cooling_args_initialized << !args[:hvac_perf_data_cooling_min_speed_capacities].nil?
+      hvac_perf_data_cooling_args_initialized << !args[:hvac_perf_data_cooling_min_speed_cops].nil?
+    end
+    if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+      hvac_perf_data_cooling_args_initialized << !args[:hvac_perf_data_cooling_max_speed_capacities].nil?
+      hvac_perf_data_cooling_args_initialized << !args[:hvac_perf_data_cooling_max_speed_cops].nil?
+    end
     error = (hvac_perf_data_cooling_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required cooling detailed performance data arguments.' if error
 
     if hvac_perf_data_cooling_args_initialized.uniq.size == 1 && hvac_perf_data_cooling_args_initialized.uniq[0]
-      cooling_data_points_lengths = [args[:hvac_perf_data_cooling_outdoor_temperatures].count(','),
-                                     args[:hvac_perf_data_cooling_min_speed_capacities].count(','),
-                                     args[:hvac_perf_data_cooling_max_speed_capacities].count(','),
-                                     args[:hvac_perf_data_cooling_min_speed_cops].count(','),
-                                     args[:hvac_perf_data_cooling_max_speed_cops].count(',')]
-
+      cooling_data_points_lengths = [args[:hvac_perf_data_cooling_outdoor_temperatures].count(',')]
+      if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+        cooling_data_points_lengths << args[:hvac_perf_data_cooling_min_speed_capacities].count(',')
+        cooling_data_points_lengths << args[:hvac_perf_data_cooling_min_speed_cops].count(',')
+      end
+      if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+        cooling_data_points_lengths << args[:hvac_perf_data_cooling_max_speed_capacities].count(',')
+        cooling_data_points_lengths << args[:hvac_perf_data_cooling_max_speed_cops].count(',')
+      end
       error = (cooling_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
 
@@ -5812,12 +5832,22 @@ module HPXMLFile
     if (not args[:hvac_perf_data_cooling_outdoor_temperatures].nil?) && [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type)
       hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type]
       hvac_perf_data_cooling_outdoor_temperatures = args[:hvac_perf_data_cooling_outdoor_temperatures].split(',').map(&:strip)
-      hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].split(',').map(&:strip)
       hvac_perf_data_cooling_nom_speed_capacities = args[:hvac_perf_data_cooling_nom_speed_capacities].split(',').map(&:strip)
-      hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].split(',').map(&:strip)
-      hvac_perf_data_cooling_min_speed_cops = args[:hvac_perf_data_cooling_min_speed_cops].split(',').map(&:strip)
       hvac_perf_data_cooling_nom_speed_cops = args[:hvac_perf_data_cooling_nom_speed_cops].split(',').map(&:strip)
-      hvac_perf_data_cooling_max_speed_cops = args[:hvac_perf_data_cooling_max_speed_cops].split(',').map(&:strip)
+      if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+        hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].split(',').map(&:strip)
+        hvac_perf_data_cooling_min_speed_cops = args[:hvac_perf_data_cooling_min_speed_cops].split(',').map(&:strip)
+      else
+        hvac_perf_data_cooling_min_speed_capacities = [nil] * hvac_perf_data_cooling_outdoor_temperatures.size
+        hvac_perf_data_cooling_min_speed_cops = [nil] * hvac_perf_data_cooling_outdoor_temperatures.size
+      end
+      if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+        hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].split(',').map(&:strip)
+        hvac_perf_data_cooling_max_speed_cops = args[:hvac_perf_data_cooling_max_speed_cops].split(',').map(&:strip)
+      else
+        hvac_perf_data_cooling_max_speed_capacities = [nil] * hvac_perf_data_cooling_outdoor_temperatures.size
+        hvac_perf_data_cooling_max_speed_cops = [nil] * hvac_perf_data_cooling_outdoor_temperatures.size
+      end
 
       clg_perf_data = hpxml_bldg.cooling_systems[0].cooling_detailed_performance_data
       cooling_perf_data_data_points = hvac_perf_data_cooling_outdoor_temperatures.zip(hvac_perf_data_cooling_min_speed_capacities,
@@ -5831,20 +5861,22 @@ module HPXMLFile
 
         case hvac_perf_data_capacity_type
         when 'Absolute capacities'
-          min_speed_capacity = Float(min_speed_cap_or_frac)
+          min_speed_capacity = Float(min_speed_cap_or_frac) unless min_speed_cap_or_frac.nil?
           nom_speed_capacity = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
-          max_speed_capacity = Float(max_speed_cap_or_frac)
+          max_speed_capacity = Float(max_speed_cap_or_frac) unless max_speed_cap_or_frac.nil?
         when 'Normalized capacity fractions'
-          min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+          min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac) unless min_speed_cap_or_frac.nil?
           nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
-          max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
+          max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac) unless max_speed_cap_or_frac.nil?
         end
 
-        clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
-                          capacity: min_speed_capacity,
-                          capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
-                          capacity_description: HPXML::CapacityDescriptionMinimum,
-                          efficiency_cop: Float(min_speed_cop))
+        if (not min_speed_capacity.nil?) || (not min_speed_capacity_fraction_of_nominal.nil?)
+          clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                            capacity: min_speed_capacity,
+                            capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
+                            capacity_description: HPXML::CapacityDescriptionMinimum,
+                            efficiency_cop: (min_speed_cop.nil? ? nil : Float(min_speed_cop)))
+        end
         if (not nom_speed_capacity.nil?) || (not nom_speed_capacity_fraction_of_nominal.nil?)
           clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                             capacity: nom_speed_capacity,
@@ -5852,11 +5884,13 @@ module HPXMLFile
                             capacity_description: HPXML::CapacityDescriptionNominal,
                             efficiency_cop: (nom_speed_cop.nil? ? nil : Float(nom_speed_cop)))
         end
+        next unless (not max_speed_capacity.nil?) || (not max_speed_capacity_fraction_of_nominal.nil?)
+
         clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                           capacity: max_speed_capacity,
                           capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMaximum,
-                          efficiency_cop: Float(max_speed_cop))
+                          efficiency_cop: (max_speed_cop.nil? ? nil : Float(max_speed_cop)))
       end
     end
   end
@@ -5988,12 +6022,22 @@ module HPXMLFile
       if not args[:hvac_perf_data_heating_outdoor_temperatures].nil?
         hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type]
         hvac_perf_data_heating_outdoor_temperatures = args[:hvac_perf_data_heating_outdoor_temperatures].split(',').map(&:strip)
-        hvac_perf_data_heating_min_speed_capacities = args[:hvac_perf_data_heating_min_speed_capacities].split(',').map(&:strip)
         hvac_perf_data_heating_nom_speed_capacities = args[:hvac_perf_data_heating_nom_speed_capacities].split(',').map(&:strip)
-        hvac_perf_data_heating_max_speed_capacities = args[:hvac_perf_data_heating_max_speed_capacities].split(',').map(&:strip)
-        hvac_perf_data_heating_min_speed_cops = args[:hvac_perf_data_heating_min_speed_cops].split(',').map(&:strip)
         hvac_perf_data_heating_nom_speed_cops = args[:hvac_perf_data_heating_nom_speed_cops].split(',').map(&:strip)
-        hvac_perf_data_heating_max_speed_cops = args[:hvac_perf_data_heating_max_speed_cops].split(',').map(&:strip)
+        if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+          hvac_perf_data_heating_min_speed_capacities = args[:hvac_perf_data_heating_min_speed_capacities].split(',').map(&:strip)
+          hvac_perf_data_heating_min_speed_cops = args[:hvac_perf_data_heating_min_speed_cops].split(',').map(&:strip)
+        else
+          hvac_perf_data_heating_min_speed_capacities = [nil] * hvac_perf_data_heating_outdoor_temperatures.size
+          hvac_perf_data_heating_min_speed_cops = [nil] * hvac_perf_data_heating_outdoor_temperatures.size
+        end
+        if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+          hvac_perf_data_heating_max_speed_capacities = args[:hvac_perf_data_heating_max_speed_capacities].split(',').map(&:strip)
+          hvac_perf_data_heating_max_speed_cops = args[:hvac_perf_data_heating_max_speed_cops].split(',').map(&:strip)
+        else
+          hvac_perf_data_heating_max_speed_capacities = [nil] * hvac_perf_data_heating_outdoor_temperatures.size
+          hvac_perf_data_heating_max_speed_cops = [nil] * hvac_perf_data_heating_outdoor_temperatures.size
+        end
 
         htg_perf_data = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data
         heating_perf_data_data_points = hvac_perf_data_heating_outdoor_temperatures.zip(hvac_perf_data_heating_min_speed_capacities,
@@ -6007,20 +6051,22 @@ module HPXMLFile
 
           case hvac_perf_data_capacity_type
           when 'Absolute capacities'
-            min_speed_capacity = Float(min_speed_cap_or_frac)
+            min_speed_capacity = Float(min_speed_cap_or_frac) unless min_speed_cap_or_frac.nil?
             nom_speed_capacity = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
-            max_speed_capacity = Float(max_speed_cap_or_frac)
+            max_speed_capacity = Float(max_speed_cap_or_frac) unless max_speed_cap_or_frac.nil?
           when 'Normalized capacity fractions'
-            min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+            min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac) unless min_speed_cap_or_frac.nil?
             nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
-            max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
+            max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac) unless max_speed_cap_or_frac.nil?
           end
 
-          htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
-                            capacity: min_speed_capacity,
-                            capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
-                            capacity_description: HPXML::CapacityDescriptionMinimum,
-                            efficiency_cop: Float(min_speed_cop))
+          if (not min_speed_capacity.nil?) || (not min_speed_capacity_fraction_of_nominal.nil?)
+            htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                              capacity: min_speed_capacity,
+                              capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
+                              capacity_description: HPXML::CapacityDescriptionMinimum,
+                              efficiency_cop: (min_speed_cop.nil? ? nil : Float(min_speed_cop)))
+          end
           if (not nom_speed_capacity.nil?) || (not nom_speed_capacity_fraction_of_nominal.nil?)
             htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                               capacity: nom_speed_capacity,
@@ -6028,23 +6074,35 @@ module HPXMLFile
                               capacity_description: HPXML::CapacityDescriptionNominal,
                               efficiency_cop: (nom_speed_cop.nil? ? nil : Float(nom_speed_cop)))
           end
+          next unless (not max_speed_capacity.nil?) || (not max_speed_capacity_fraction_of_nominal.nil?)
+
           htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                             capacity: max_speed_capacity,
                             capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                             capacity_description: HPXML::CapacityDescriptionMaximum,
-                            efficiency_cop: Float(max_speed_cop))
+                            efficiency_cop: (max_speed_cop.nil? ? nil : Float(max_speed_cop)))
         end
       end
 
       if not args[:hvac_perf_data_cooling_outdoor_temperatures].nil?
         hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type]
         hvac_perf_data_cooling_outdoor_temperatures = args[:hvac_perf_data_cooling_outdoor_temperatures].split(',').map(&:strip)
-        hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].split(',').map(&:strip)
         hvac_perf_data_cooling_nom_speed_capacities = args[:hvac_perf_data_cooling_nom_speed_capacities].split(',').map(&:strip)
-        hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].split(',').map(&:strip)
-        hvac_perf_data_cooling_min_speed_cops = args[:hvac_perf_data_cooling_min_speed_cops].split(',').map(&:strip)
         hvac_perf_data_cooling_nom_speed_cops = args[:hvac_perf_data_cooling_nom_speed_cops].split(',').map(&:strip)
-        hvac_perf_data_cooling_max_speed_cops = args[:hvac_perf_data_cooling_max_speed_cops].split(',').map(&:strip)
+        if [HPXML::HVACCompressorTypeTwoStage, HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+          hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].split(',').map(&:strip)
+          hvac_perf_data_cooling_min_speed_cops = args[:hvac_perf_data_cooling_min_speed_cops].split(',').map(&:strip)
+        else
+          hvac_perf_data_cooling_min_speed_capacities = [nil] * hvac_perf_data_cooling_outdoor_temperatures.size
+          hvac_perf_data_cooling_min_speed_cops = [nil] * hvac_perf_data_cooling_outdoor_temperatures.size
+        end
+        if [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+          hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].split(',').map(&:strip)
+          hvac_perf_data_cooling_max_speed_cops = args[:hvac_perf_data_cooling_max_speed_cops].split(',').map(&:strip)
+        else
+          hvac_perf_data_cooling_max_speed_capacities = [nil] * hvac_perf_data_cooling_outdoor_temperatures.size
+          hvac_perf_data_cooling_max_speed_cops = [nil] * hvac_perf_data_cooling_outdoor_temperatures.size
+        end
 
         clg_perf_data = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data
         cooling_perf_data_data_points = hvac_perf_data_cooling_outdoor_temperatures.zip(hvac_perf_data_cooling_min_speed_capacities,
@@ -6058,20 +6116,22 @@ module HPXMLFile
 
           case hvac_perf_data_capacity_type
           when 'Absolute capacities'
-            min_speed_capacity = Float(min_speed_cap_or_frac)
+            min_speed_capacity = Float(min_speed_cap_or_frac) unless min_speed_cap_or_frac.nil?
             nom_speed_capacity = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
-            max_speed_capacity = Float(max_speed_cap_or_frac)
+            max_speed_capacity = Float(max_speed_cap_or_frac) unless max_speed_cap_or_frac.nil?
           when 'Normalized capacity fractions'
-            min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+            min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac) unless min_speed_cap_or_frac.nil?
             nom_speed_capacity_fraction_of_nominal = Float(nom_speed_cap_or_frac) unless nom_speed_cap_or_frac.nil?
-            max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
+            max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac) unless max_speed_cap_or_frac.nil?
           end
 
-          clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
-                            capacity: min_speed_capacity,
-                            capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
-                            capacity_description: HPXML::CapacityDescriptionMinimum,
-                            efficiency_cop: Float(min_speed_cop))
+          if (not min_speed_capacity.nil?) || (not min_speed_capacity_fraction_of_nominal.nil?)
+            clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                              capacity: min_speed_capacity,
+                              capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
+                              capacity_description: HPXML::CapacityDescriptionMinimum,
+                              efficiency_cop: (min_speed_cop.nil? ? nil : Float(min_speed_cop)))
+          end
           if (not nom_speed_capacity.nil?) || (not nom_speed_capacity_fraction_of_nominal.nil?)
             clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                               capacity: nom_speed_capacity,
@@ -6079,11 +6139,13 @@ module HPXMLFile
                               capacity_description: HPXML::CapacityDescriptionNominal,
                               efficiency_cop: (nom_speed_cop.nil? ? nil : Float(nom_speed_cop)))
           end
+          next unless (not max_speed_capacity.nil?) || (not max_speed_capacity_fraction_of_nominal.nil?)
+
           clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                             capacity: max_speed_capacity,
                             capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                             capacity_description: HPXML::CapacityDescriptionMaximum,
-                            efficiency_cop: Float(max_speed_cop))
+                            efficiency_cop: (max_speed_cop.nil? ? nil : Float(max_speed_cop)))
         end
       end
     end
