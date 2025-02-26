@@ -1157,18 +1157,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#flue-or-chimney'>Flue or Chimney</a>) is used.")
     args << arg
 
-    heating_system_type_choices = OpenStudio::StringVector.new
-    heating_system_type_choices << Constants::None
-    heating_system_type_choices << HPXML::HVACTypeFurnace
-    heating_system_type_choices << HPXML::HVACTypeWallFurnace
-    heating_system_type_choices << HPXML::HVACTypeFloorFurnace
-    heating_system_type_choices << HPXML::HVACTypeBoiler
-    heating_system_type_choices << HPXML::HVACTypeElectricResistance
-    heating_system_type_choices << HPXML::HVACTypeStove
-    heating_system_type_choices << HPXML::HVACTypeSpaceHeater
-    heating_system_type_choices << HPXML::HVACTypeFireplace
-    heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Baseboard"
-    heating_system_type_choices << "Shared #{HPXML::HVACTypeBoiler} w/ Ductless Fan Coil"
+
 
     heating_system_fuel_choices = OpenStudio::StringVector.new
     heating_system_fuel_choices << HPXML::FuelTypeElectricity
@@ -1198,23 +1187,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     compressor_type_choices << HPXML::HVACCompressorTypeTwoStage
     compressor_type_choices << HPXML::HVACCompressorTypeVariableSpeed
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_type', heating_system_type_choices, true)
-    arg.setDisplayName('Heating System: Type')
-    arg.setDescription("The type of heating system. Use '#{Constants::None}' if there is no heating system or if there is a heat pump serving a heating load.")
-    arg.setDefaultValue(HPXML::HVACTypeFurnace)
+    heating_system_choices = get_option_names('heating_system.tsv')
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system', heating_system_choices, true)
+    arg.setDisplayName('Heating System')
+    arg.setDescription("The heating system type/efficiency. Efficiency is Rated AFUE or Percent as a Fraction. Use '#{Constants::None}' if there is no heating system or if there is a heat pump serving a heating load.")
+    arg.setDefaultValue('Fuel Furnace, 78% AFUE')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_fuel', heating_system_fuel_choices, true)
     arg.setDisplayName('Heating System: Fuel Type')
     arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency', true)
-    arg.setDisplayName('Heating System: Rated AFUE or Percent')
-    arg.setUnits('Frac')
-    arg.setDescription('The rated heating efficiency value of the heating system.')
-    arg.setDefaultValue(0.78)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_capacity', false)
@@ -1239,18 +1223,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The heating load served by the heating system.')
     arg.setUnits('Frac')
     arg.setDefaultValue(1)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_pilot_light', false)
-    arg.setDisplayName('Heating System: Pilot Light')
-    arg.setDescription("The fuel usage of the pilot light. Applies only to #{HPXML::HVACTypeFurnace}, #{HPXML::HVACTypeWallFurnace}, #{HPXML::HVACTypeFloorFurnace}, #{HPXML::HVACTypeStove}, #{HPXML::HVACTypeBoiler}, and #{HPXML::HVACTypeFireplace} with non-electric fuel type. If not provided, assumes no pilot light.")
-    arg.setUnits('Btuh')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_airflow_defect_ratio', false)
-    arg.setDisplayName('Heating System: Airflow Defect Ratio')
-    arg.setDescription("The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heating system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeFurnace}. If not provided, assumes no defect.")
-    arg.setUnits('Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
@@ -3749,6 +3721,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @return [Array<String>] array of errors
   def argument_errors(args)
     errors = []
+
+    HPXMLFile.get_option_properties(args, 'heating_system.tsv', args[:heating_system])
 
     error = (args[:heating_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:heating_system_fraction_heat_load_served] > 0) && (args[:heat_pump_fraction_heat_load_served] > 0)
     errors << 'Multiple central heating systems are not currently supported.' if error
