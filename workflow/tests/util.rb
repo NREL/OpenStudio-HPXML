@@ -305,6 +305,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
 
   messages.each do |message|
     # General
+    next if message.include? 'Target water temperature should be less than or equal to the hot water temperature' # FIXME: Temporary until https://github.com/NREL/EnergyPlus/issues/10962 is fixed
+    next if message.include? 'Target water temperature should be greater than or equal to the cold water temperature' # FIXME: Temporary until https://github.com/NREL/EnergyPlus/issues/10962 is fixed
+    next if message.include? 'Temperature of tank < 2C indicates of possibility of freeze' # FIXME: Temporary until https://github.com/NREL/EnergyPlus/issues/10962 is fixed
     next if message.include? 'Schedule will not be validated.' # FIXME: Temporary until https://github.com/NREL/EnergyPlus/issues/10961 is fixed
     next if message.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
     next if message.include? 'Schedule:Constant="ALWAYS ON DISCRETE", Blank Schedule Type Limits Name input'
