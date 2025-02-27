@@ -1668,8 +1668,7 @@ module HVAC
       clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_ceer, 'Btu/hr', 'W')]
     else
       clg_ap.cool_rated_cfm_per_ton = [RatedCFMPerTon] * clg_ap.cool_capacity_ratios.size
-      clg_ap.cool_rated_airflow_rate = clg_ap.cool_rated_cfm_per_ton[-1]
-      clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton, clg_ap.cool_rated_airflow_rate)
+      clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton)
       clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
     end
 
@@ -1738,12 +1737,10 @@ module HVAC
       htg_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec(heating_capacity_fraction_17F)
       htg_ap.heat_eir_ft_spec = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
       htg_ap.heat_rated_cfm_per_ton = [RatedCFMPerTon]
-      htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[0]
       htg_ap.heat_fan_speed_ratios = [1.0]
     else
       htg_ap.heat_rated_cfm_per_ton = [RatedCFMPerTon] * htg_ap.heat_capacity_ratios.size
-      htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
-      htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
+      htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton)
     end
   end
 
@@ -1752,7 +1749,6 @@ module HVAC
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @return [nil]
   def self.set_heat_detailed_performance_data(heat_pump)
-    # FIXME: Move this method to defaults.rb
     hp_ap = heat_pump.additional_properties
 
     nom_capacity_47 = heat_pump.heating_capacity
@@ -1767,10 +1763,18 @@ module HVAC
       nom_cop_17 = nom_cop_47 / 1.356
 
       # Capacities @ 5F
-      nom_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17, nom_capacity_47)
+      if nom_capacity_47 > 0
+        nom_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17, nom_capacity_47)
+      else
+        nom_capacity_5 = 0.0
+      end
 
       # COPs @ 5F
-      nom_cop_5 = nom_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17 / nom_cop_17, nom_capacity_47 / nom_cop_47)
+      if nom_capacity_5 > 0
+        nom_cop_5 = nom_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17 / nom_cop_17, nom_capacity_47 / nom_cop_47)
+      else
+        nom_cop_5 = MathTools.interp2(5.0, 17.0, 47.0, nom_cop_17, nom_cop_47) # Arbitrary
+      end
 
     when HPXML::HVACCompressorTypeTwoStage
       # Capacities @ 47F
@@ -1787,12 +1791,25 @@ module HVAC
       min_cop_17 = nom_cop_17 / 0.850
 
       # Capacities @ 5F
-      nom_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17, nom_capacity_47)
-      min_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, min_capacity_17, min_capacity_47)
+      if nom_capacity_47 > 0
+        nom_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17, nom_capacity_47)
+        min_capacity_5 = MathTools.interp2(5.0, 17.0, 47.0, min_capacity_17, min_capacity_47)
+      else
+        nom_capacity_5 = 0.0
+        min_capacity_5 = 0.0
+      end
 
       # COPs @ 5F
-      nom_cop_5 = nom_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17 / nom_cop_17, nom_capacity_47 / nom_cop_47)
-      min_cop_5 = min_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, min_capacity_17 / min_cop_17, min_capacity_47 / min_cop_47)
+      if nom_capacity_5 > 0
+        nom_cop_5 = nom_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, nom_capacity_17 / nom_cop_17, nom_capacity_47 / nom_cop_47)
+      else
+        nom_cop_5 = MathTools.interp2(5.0, 17.0, 47.0, nom_cop_17, nom_cop_47) # Arbitrary
+      end
+      if min_capacity_5 > 0
+        min_cop_5 = min_capacity_5 / MathTools.interp2(5.0, 17.0, 47.0, min_capacity_17 / min_cop_17, min_capacity_47 / min_cop_47)
+      else
+        min_cop_5 = MathTools.interp2(5.0, 17.0, 47.0, min_cop_17, min_cop_47) # Arbitrary
+      end
 
     when HPXML::HVACCompressorTypeVariableSpeed
       # Capacities @ 47F
@@ -1887,7 +1904,6 @@ module HVAC
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
   # @return [nil]
   def self.set_cool_detailed_performance_data(cooling_system)
-    # FIXME: Move this method to defaults.rb
     clg_ap = cooling_system.additional_properties
 
     nom_capacity_95 = cooling_system.cooling_capacity
@@ -1914,7 +1930,7 @@ module HVAC
       min_cap_maint_95, max_cap_maint_95 = get_cool_capacity_maint_95()
       max_capacity_82 = max_capacity_95 / max_cap_maint_95
       min_capacity_82 = min_capacity_95 / min_cap_maint_95
-      if nom_capacity_95 > 0.0
+      if nom_capacity_95 > 0
         nom_capacity_82 = MathTools.interp2(nom_capacity_95, min_capacity_95, max_capacity_95, min_capacity_82, max_capacity_82)
       else
         nom_capacity_82 = 0.0
@@ -2854,12 +2870,11 @@ module HVAC
   #
   # @param capacity_ratios [TODO] TODO
   # @param rated_cfm_per_tons [TODO] TODO
-  # @param rated_airflow_rate [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_fan_speed_ratios(capacity_ratios, rated_cfm_per_tons, rated_airflow_rate)
+  def self.calc_fan_speed_ratios(capacity_ratios, rated_cfm_per_tons)
     fan_speed_ratios = []
     capacity_ratios.each_with_index do |capacity_ratio, i|
-      fan_speed_ratios << rated_cfm_per_tons[i] * capacity_ratio / rated_airflow_rate
+      fan_speed_ratios << rated_cfm_per_tons[i] * capacity_ratio / rated_cfm_per_tons[-1]
     end
     return fan_speed_ratios
   end
@@ -3074,7 +3089,7 @@ module HVAC
     end
 
     if datapoints.size < 2
-      fail 'Could not extrapolate datapoints.'
+      fail 'Unexpected error: Not enough datapoints to extrapolate.'
     end
 
     sorted_dps = datapoints.sort_by { |dp| dp.outdoor_temperature }
@@ -3098,7 +3113,7 @@ module HVAC
     elsif target_odb > sorted_dps[-2].outdoor_temperature && target_odb > sorted_dps[-1].outdoor_temperature
       indices = [-2, -1]
     else
-      fail 'Unexpected error.'
+      fail 'Unexpected error: Could not determine extrapolation indices.'
     end
 
     # Perform extrapolation
@@ -3107,7 +3122,7 @@ module HVAC
     val = MathTools.interp2(target_odb, dp1.outdoor_temperature, dp2.outdoor_temperature, dp1.send(property), dp2.send(property))
 
     if val.nan?
-      fail 'Unexpected error'
+      fail 'Unexpected error: Extrapolated result was NaN.'
     end
 
     return val
@@ -3604,7 +3619,7 @@ module HVAC
       if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
         cool_nominal_cfm_per_ton = clg_ap.cool_rated_cfm_per_ton[0]
       else
-        cool_nominal_cfm_per_ton = (clg_ap.cool_rated_airflow_rate - clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]) / (clg_ap.cool_capacity_ratios[-1] - clg_ap.cool_capacity_ratios[0]) * (1.0 - clg_ap.cool_capacity_ratios[0]) + clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]
+        cool_nominal_cfm_per_ton = (clg_ap.cool_rated_cfm_per_ton[-1] - clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]) / (clg_ap.cool_capacity_ratios[-1] - clg_ap.cool_capacity_ratios[0]) * (1.0 - clg_ap.cool_capacity_ratios[0]) + clg_ap.cool_rated_cfm_per_ton[0] * clg_ap.cool_capacity_ratios[0]
       end
 
       p_atm = UnitConversions.convert(1, 'atm', 'psi')

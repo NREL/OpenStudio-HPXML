@@ -2415,60 +2415,22 @@ module Defaults
                    HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? system_type
 
-      hvac_ap = hvac_system.additional_properties
-
       # Cooling
       if hvac_system.cooling_detailed_performance_data.empty?
         HVAC.set_cool_detailed_performance_data(hvac_system)
       else
-        expand_detailed_performance_data(hvac_system.compressor_type, hvac_system.cooling_detailed_performance_data, hvac_system.cooling_capacity)
-
-        # override some properties based on detailed performance data
-        cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
-        dps = hvac_system.cooling_detailed_performance_data.select { |dp| dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB }
-        cool_capacities = []
-        case hvac_system.compressor_type
-        when HPXML::HVACCompressorTypeSingleStage
-          cool_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
-        when HPXML::HVACCompressorTypeTwoStage
-          cool_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.capacity, 1.0].max
-          cool_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
-        when HPXML::HVACCompressorTypeVariableSpeed
-          cool_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.capacity, 1.0].max
-          cool_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
-          cool_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity, 1.0].max
-        end
-        hvac_ap.cool_capacity_ratios = cool_capacities.map { |capacity| capacity / cool_rated_capacity }
-        hvac_ap.cool_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.cool_capacity_ratios, hvac_ap.cool_rated_cfm_per_ton, hvac_ap.cool_rated_airflow_rate)
+        expand_detailed_performance_data(:clg, hvac_system)
       end
 
-      # Heating
-      if is_hp
-        if hvac_system.heating_detailed_performance_data.empty?
-          set_heating_capacity_17F(hvac_system)
-          HVAC.set_heat_detailed_performance_data(hvac_system)
-        else
-          expand_detailed_performance_data(hvac_system.compressor_type, hvac_system.heating_detailed_performance_data, hvac_system.heating_capacity)
-          set_heating_capacity_17F(hvac_system)
+      next unless is_hp
 
-          # override some properties based on detailed performance data
-          heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
-          dps = hvac_system.heating_detailed_performance_data.select { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB }
-          heat_capacities = []
-          case hvac_system.compressor_type
-          when HPXML::HVACCompressorTypeSingleStage
-            heat_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
-          when HPXML::HVACCompressorTypeTwoStage
-            heat_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.capacity, 1.0].max
-            heat_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
-          when HPXML::HVACCompressorTypeVariableSpeed
-            heat_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.capacity, 1.0].max
-            heat_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
-            heat_capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity, 1.0].max
-          end
-          hvac_ap.heat_capacity_ratios = heat_capacities.map { |capacity| capacity / heat_rated_capacity }
-          hvac_ap.heat_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.heat_capacity_ratios, hvac_ap.heat_rated_cfm_per_ton, hvac_ap.heat_rated_airflow_rate)
-        end
+      # Heating
+      if hvac_system.heating_detailed_performance_data.empty?
+        set_heating_capacity_17F(hvac_system)
+        HVAC.set_heat_detailed_performance_data(hvac_system)
+      else
+        expand_detailed_performance_data(:htg, hvac_system)
+        set_heating_capacity_17F(hvac_system)
       end
     end
   end
@@ -2477,11 +2439,24 @@ module Defaults
   # 1. Assigns capacities with fractions.
   # 2. Add the nominal speed capacity and cop calculated with other temperature with nominal speed data
   #
-  # @param compressor_type [String] Type of compressor (HPXML::HVACCompressorTypeXXX)
-  # @param detailed_performance_data [HPXML::HeatingDetailedPerformanceData or HPXML::CoolingDetailedPerformanceData] HPXML HeatingDetailedPerformanceData or CoolingDetailedPerformanceData array that contains HeatingPerformanceDataPoint or CoolingPerformanceDataPoint
-  # @param nominal_capacity [Double] Nominal heating/cooling capacity
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [nil]
-  def self.expand_detailed_performance_data(compressor_type, detailed_performance_data, nominal_capacity)
+  def self.expand_detailed_performance_data(mode, hvac_system)
+    hvac_ap = hvac_system.additional_properties
+
+    if mode == :clg
+      detailed_performance_data = hvac_system.cooling_detailed_performance_data
+      rated_odb = HVAC::AirSourceCoolRatedODB
+      nominal_capacity = hvac_system.cooling_capacity
+      rated_cfm_per_ton = hvac_ap.cool_rated_cfm_per_ton
+    elsif mode == :htg
+      detailed_performance_data = hvac_system.heating_detailed_performance_data
+      rated_odb = HVAC::AirSourceHeatRatedODB
+      nominal_capacity = hvac_system.heating_capacity
+      rated_cfm_per_ton = hvac_ap.heat_rated_cfm_per_ton
+    end
+
     # process capacity fraction of nominal
     detailed_performance_data.each do |dp|
       next unless dp.capacity.nil?
@@ -2491,9 +2466,9 @@ module Defaults
     end
 
     all_outdoor_odbs = detailed_performance_data.map { |dp| dp.outdoor_temperature }.uniq.sort
+
     # All temperatures with nominal speed
     nom_odbs = all_outdoor_odbs.select { |odb| not detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.nil? }
-    return if nom_odbs.size == all_outdoor_odbs.size # all data specified
 
     all_outdoor_odbs.each do |odb|
       # no nominal speed data point
@@ -2514,7 +2489,7 @@ module Defaults
       target_dp_min = target_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }
 
       # Net capacity
-      case compressor_type
+      case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeTwoStage
         neighbor_nom_capacity = neighbor_dp_nom.capacity
         neighbor_min_capacity = neighbor_dp_min.capacity
@@ -2531,7 +2506,7 @@ module Defaults
       added_dp.capacity = capacity.round
 
       # Net power
-      case compressor_type
+      case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeTwoStage
         neighbor_nom_power = neighbor_dp_nom.capacity / neighbor_dp_nom.efficiency_cop
         neighbor_min_power = neighbor_dp_min.capacity / neighbor_dp_min.efficiency_cop
@@ -2546,6 +2521,31 @@ module Defaults
         input_power = MathTools.interp2(neighbor_nom_power, neighbor_min_power, neighbor_max_power, target_min_power, target_max_power)
       end
       added_dp.efficiency_cop = (added_dp.capacity / input_power).round(4)
+    end
+
+    # override some properties based on detailed performance data
+    dps = detailed_performance_data.select { |dp| dp.outdoor_temperature == rated_odb }
+    capacities = []
+    case hvac_system.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
+    when HPXML::HVACCompressorTypeTwoStage
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.capacity, 1.0].max
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
+    when HPXML::HVACCompressorTypeVariableSpeed
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.capacity, 1.0].max
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity, 1.0].max
+    end
+    capacity_ratios = capacities.map { |capacity| capacity / [nominal_capacity, 1.0].max }
+    fan_speed_ratios = HVAC.calc_fan_speed_ratios(capacity_ratios, rated_cfm_per_ton)
+
+    if mode == :clg
+      hvac_ap.cool_capacity_ratios = capacity_ratios
+      hvac_ap.cool_fan_speed_ratios = fan_speed_ratios
+    elsif mode == :htg
+      hvac_ap.heat_capacity_ratios = capacity_ratios
+      hvac_ap.heat_fan_speed_ratios = fan_speed_ratios
     end
   end
 
