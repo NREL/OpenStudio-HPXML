@@ -261,7 +261,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
     end
     if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw'
-      next if message.include? 'No design condition info found; calculating design conditions from EPW weather data.'
+      next if message.include? 'No EPW design conditions found; calculating design conditions from EPW weather data.'
     end
     if hpxml_bldg.building_construction.number_of_units > 1
       next if message.include? 'NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'

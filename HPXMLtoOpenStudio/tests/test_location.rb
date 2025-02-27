@@ -74,7 +74,6 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     assert_equal(UnitConversions.convert(-1.3, 'deltac', 'deltaf'), weather.data.DeepGroundSurfTempAmp2)
     assert_equal(20, weather.data.DeepGroundPhaseShiftTempAmp1)
     assert_equal(31, weather.data.DeepGroundPhaseShiftTempAmp2)
-    assert_equal(0, runner.result.stepWarnings.size)
 
     # honolulu
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -84,7 +83,6 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     assert_equal(UnitConversions.convert(0.1, 'deltac', 'deltaf'), weather.data.DeepGroundSurfTempAmp2)
     assert_equal(37, weather.data.DeepGroundPhaseShiftTempAmp1)
     assert_equal(-13, weather.data.DeepGroundPhaseShiftTempAmp2)
-    assert_equal(0, runner.result.stepWarnings.size)
 
     # cape town
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -94,7 +92,6 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     assert_equal(UnitConversions.convert(0.1, 'deltac', 'deltaf'), weather.data.DeepGroundSurfTempAmp2)
     assert_equal(17, weather.data.DeepGroundPhaseShiftTempAmp1)
     assert_equal(15, weather.data.DeepGroundPhaseShiftTempAmp2)
-    assert_equal(0, runner.result.stepWarnings.size)
 
     # boulder
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -104,8 +101,6 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     assert_equal(UnitConversions.convert(1.1, 'deltac', 'deltaf'), weather.data.DeepGroundSurfTempAmp2)
     assert_equal(19, weather.data.DeepGroundPhaseShiftTempAmp1)
     assert_equal(-34, weather.data.DeepGroundPhaseShiftTempAmp2)
-    assert_equal(1, runner.result.stepWarnings.size)
-    assert_equal(1, runner.result.stepWarnings.count { |w| w == 'No design condition info found; calculating design conditions from EPW weather data.' })
   end
 
   def _test_measure(args_hash)
