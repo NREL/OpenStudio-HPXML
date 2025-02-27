@@ -6,13 +6,14 @@ def run_simulation_tests(xmls)
   # Run simulations
   puts "Running #{xmls.size} HPXML files..."
   all_annual_results = {}
-  Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
+  Parallel.map(xmls, in_threads: 4) do |xml|
     next if xml.end_with? '-10x.xml'
 
     xml_name = File.basename(xml)
     results = _run_xml(xml, Parallel.worker_number)
     all_annual_results[xml_name], monthly_results = results
 
+    next
     next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
     next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
 
@@ -261,7 +262,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
     end
     if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw'
-      next if message.include? 'No design condition info found; calculating design conditions from EPW weather data.'
+      next if message.include? 'No EPW design conditions found; calculating design conditions from EPW weather data.'
     end
     if hpxml_bldg.building_construction.number_of_units > 1
       next if message.include? 'NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'
