@@ -11706,7 +11706,7 @@ class HPXML < Object
   def self.is_thermal_boundary(surface)
     interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
     exterior_conditioned = conditioned_locations.include? surface.exterior_adjacent_to
-    return (interior_conditioned != exterior_conditioned)
+    return (interior_conditioned && !exterior_conditioned)
   end
 
   # Returns whether the HPXML::Floor object represents a ceiling or floor
