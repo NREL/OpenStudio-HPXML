@@ -305,6 +305,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
 
   messages.each do |message|
     # General
+    next if message.include? 'Schedule will not be validated.' # FIXME: Temporary until https://github.com/NREL/EnergyPlus/issues/10961 is fixed
     next if message.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
     next if message.include? 'Schedule:Constant="ALWAYS ON DISCRETE", Blank Schedule Type Limits Name input'
     next if message.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
