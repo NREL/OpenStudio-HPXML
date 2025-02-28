@@ -25,31 +25,30 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
-  def test_upgrade
+  def test_ashp_upgrade
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path) }
     hpxml, _hpxml_bldg = _create_hpxml('base-detailed-electric-panel.xml')
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
     _model, hpxml, hpxml_bldg = _test_measure(args_hash)
     electric_panel = hpxml_bldg.electric_panels[0]
 
-    assert_in_epsilon(9909, electric_panel.capacity_total_watts[0], 0.01)
-    assert_in_epsilon(9909 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
-    assert_in_epsilon(electric_panel.max_current_rating - 9909 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
+    # Baseline
+    assert_in_epsilon(9738, electric_panel.capacity_total_watts[0], 0.01)
+    assert_in_epsilon(9738 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
+    assert_in_epsilon(electric_panel.max_current_rating - 9738 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
     assert_equal(13, electric_panel.breaker_spaces_total)
     assert_equal(8, electric_panel.breaker_spaces_occupied)
     assert_equal(13 - 8, electric_panel.breaker_spaces_headroom)
 
     # Upgrade
     electric_panel.headroom = nil
-    electric_panel.rated_total_spaces = 12
+    electric_panel.rated_total_spaces = 13
     branch_circuits = electric_panel.branch_circuits
     service_feeders = electric_panel.service_feeders
     sf = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }
-    sf.power = 17942
-    sf.is_new_load = true
+    sf.power = 16942
     sf = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }
-    sf.power = 17942
-    sf.is_new_load = true
+    sf.power = 16942
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeWaterHeater,
                         power: 4500,
@@ -85,12 +84,29 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     electric_panel = hpxml_bldg.electric_panels[0]
 
-    assert_in_epsilon(35851, electric_panel.capacity_total_watts[0], 0.01)
-    assert_in_epsilon(35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
-    assert_in_epsilon(electric_panel.max_current_rating - 35851 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
-    assert_equal(12, electric_panel.breaker_spaces_total)
+    # Part A (not adding new HVAC)
+    assert_in_epsilon(24662, electric_panel.capacity_total_watts[0], 0.01)
+    assert_in_epsilon((24662 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_total_amps[0], 0.01)
+    assert_in_epsilon((electric_panel.max_current_rating - 24662 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_headroom_amps[0], 0.01)
+    assert_equal(13, electric_panel.breaker_spaces_total)
     assert_equal(15, electric_panel.breaker_spaces_occupied)
-    assert_equal(12 - 15, electric_panel.breaker_spaces_headroom)
+    assert_equal(13 - 15, electric_panel.breaker_spaces_headroom)
+
+    # Part B (adding new HVAC)
+    sf = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }
+    sf.is_new_load = true
+    sf = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }
+    sf.is_new_load = true
+    XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    electric_panel = hpxml_bldg.electric_panels[0]
+
+    assert_in_epsilon(34827, electric_panel.capacity_total_watts[0], 0.01)
+    assert_in_epsilon((34827 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_total_amps[0], 0.01)
+    assert_in_epsilon((electric_panel.max_current_rating - 34827 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_headroom_amps[0], 0.01)
+    assert_equal(13, electric_panel.breaker_spaces_total)
+    assert_equal(15, electric_panel.breaker_spaces_occupied)
+    assert_equal(13 - 15, electric_panel.breaker_spaces_headroom)
   end
 
   def test_low_load

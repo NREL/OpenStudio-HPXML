@@ -134,21 +134,21 @@ module ElectricPanel
       clg_existing = electric_panel.service_feeders.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && !panel_load.is_new_load }.map { |pl| pl.power }.sum(0.0)
       clg_new = electric_panel.service_feeders.select { |panel_load| panel_load.type == HPXML::ElectricPanelLoadTypeCooling && panel_load.is_new_load }.map { |pl| pl.power }.sum(0.0)
 
-      if htg_new + clg_new == 0
+      hvac_load = [htg_existing + htg_new, clg_existing + clg_new].max
+      other_load = 0.0
+      electric_panel.service_feeders.each do |panel_load|
+        next if panel_load.type == HPXML::ElectricPanelLoadTypeHeating || panel_load.type == HPXML::ElectricPanelLoadTypeCooling
+
+        other_load += panel_load.power
+      end
+
+      if htg_new + clg_new == 0 # not adding new HVAC
         # Part A
-        total_load = electric_panel.service_feeders.map { |panel_load| panel_load.power }.sum(0.0) # just sum all the loads
+        total_load = hvac_load + other_load
         total_load = discount_load(total_load, 8000.0, 0.4)
         service_feeders.LoadBased_CapacityW = total_load
-      else
+      else # adding new HVAC
         # Part B
-        hvac_load = [htg_existing + htg_new, clg_existing + clg_new].max
-        other_load = 0.0
-        electric_panel.service_feeders.each do |panel_load|
-          next if panel_load.type == HPXML::ElectricPanelLoadTypeHeating || panel_load.type == HPXML::ElectricPanelLoadTypeCooling
-
-          other_load += panel_load.power
-        end
-
         other_load = discount_load(other_load, 8000.0, 0.4)
         service_feeders.LoadBased_CapacityW = hvac_load + other_load
       end
