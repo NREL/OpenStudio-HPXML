@@ -5351,11 +5351,11 @@ module HVAC
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
-    cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeBackupSuppHeat } # Ensure unique meter for each heat pump
+    cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeHPDefrostSupplHeat } # Ensure unique meter for each heat pump
     defrost_supp_heat_energy_oe = Model.add_other_equipment(
       model,
       name: "#{air_loop_unitary.name} defrost supp heat energy",
-      end_use: "#{Constants::ObjectTypeBackupSuppHeat}#{cnt + 1}",
+      end_use: "#{Constants::ObjectTypeHPDefrostSupplHeat}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
       frac_radiant: 0,
@@ -5508,7 +5508,7 @@ module HVAC
     Model.add_ems_program_calling_manager(
       model,
       name: "#{program.name} calling manager",
-      calling_point: 'BeginTimestepBeforePredictor',
+      calling_point: 'InsideHVACSystemIterationLoop',
       ems_programs: [program]
     )
   end
