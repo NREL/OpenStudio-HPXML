@@ -237,7 +237,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @return [WeatherFile> Weather object containing EPW information
   def process_weather(runner, hpxml, args)
     epw_path = Location.get_epw_path(hpxml.buildings[0], args[:hpxml_path])
-    weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
+    weather = WeatherFile.new(epw_path: epw_path, runner: runner)
     hpxml.buildings.each_with_index do |hpxml_bldg, i|
       next if i == 0
       next if Location.get_epw_path(hpxml_bldg, args[:hpxml_path]) == epw_path
