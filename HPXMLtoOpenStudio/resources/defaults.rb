@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-$zip_csv_data = nil
+$weather_lookup_cache = {}
 
 # Collection of methods related to defaulting optional inputs in the HPXML
 # that were not provided.
@@ -4494,12 +4494,12 @@ module Defaults
   def self.get_weather_station_csv_data
     zipcode_csv_filepath = File.join(File.dirname(__FILE__), 'data', 'zipcode_weather_stations.csv')
 
-    if $zip_csv_data.nil?
+    if $weather_lookup_cache[:csv_data].nil?
       # Note: We don't use the CSV library here because it's slow for large files
-      $zip_csv_data = File.readlines(zipcode_csv_filepath).map(&:strip)
+      $weather_lookup_cache[:csv_data] = File.readlines(zipcode_csv_filepath).map(&:strip)
     end
 
-    return $zip_csv_data
+    return $weather_lookup_cache[:csv_data]
   end
 
   # Gets the default TMY3 EPW weather station for the specified zipcode. If the exact
@@ -4508,6 +4508,11 @@ module Defaults
   # @param zipcode [String] Zipcode of interest
   # @return [Hash] Mapping with keys for every column name in zipcode_weather_stations.csv
   def self.lookup_weather_data_from_zipcode(zipcode)
+    if $weather_lookup_cache[:zipcode] == zipcode
+      # Use cache
+      return $weather_lookup_cache[:zipcode_data]
+    end
+
     begin
       zipcode3 = zipcode[0, 3]
       zipcode_int = Integer(Float(zipcode[0, 5])) # Convert to 5-digit integer
@@ -4542,15 +4547,19 @@ module Defaults
           weather_station[col_name] = row[j]
         end
       end
-      if distance == 0
-        return weather_station # Exact match
-      end
+      next unless distance == 0
+
+      $weather_lookup_cache[:zipcode] = zipcode
+      $weather_lookup_cache[:zipcode_data] = weather_station
+      return weather_station # Exact match
     end
 
     if weather_station.empty?
       fail "Zip code '#{zipcode}' could not be found in zipcode_weather_stations.csv"
     end
 
+    $weather_lookup_cache[:zipcode] = zipcode
+    $weather_lookup_cache[:zipcode_data] = weather_station
     return weather_station
   end
 
@@ -4559,6 +4568,11 @@ module Defaults
   # @param wmo [String] Weather station World Meteorological Organization (WMO) number
   # @return [Hash or nil] Mapping with keys for every column name in zipcode_weather_stations.csv if WMO is found, otherwise nil
   def self.lookup_weather_data_from_wmo(wmo)
+    if $weather_lookup_cache[:wmo] == wmo
+      # Use cache
+      return $weather_lookup_cache[:wmo_data]
+    end
+
     zip_csv_data = get_weather_station_csv_data()
 
     col_names = nil
@@ -4579,9 +4593,13 @@ module Defaults
       col_names.each_with_index do |col_name, j|
         weather_station[col_name] = row[j]
       end
+      $weather_lookup_cache[:wmo] = wmo
+      $weather_lookup_cache[:wmo_data] = weather_station
       return weather_station
     end
 
+    $weather_lookup_cache[:wmo] = wmo
+    $weather_lookup_cache[:wmo_data] = {}
     return
   end
 

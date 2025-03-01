@@ -163,7 +163,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_in_delta(609.1, weather.data.CDD65F, 0.1)
     assert_in_delta(2863.0, weather.data.HDD50F, 0.1)
     assert_in_delta(6328.3, weather.data.HDD65F, 0.1)
-    assert_equal(0.58, weather.data.WSF)
+    assert_equal(0.53, weather.data.WSF)
     [30.8, 26.4, 43.0, 49.4, 56.8, 71.1, 71.2, 70.4, 60.8, 45.3, 39.6, 27.0].each_with_index do |monthly_temp, i|
       assert_in_delta(monthly_temp, weather.data.MonthlyAvgDrybulbs[i], 0.1)
     end

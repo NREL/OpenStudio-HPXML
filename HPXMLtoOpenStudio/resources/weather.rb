@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+$weather_cache = {}
+
 # Object that stores EnergyPlus weather information (either directly sourced from the EPW or
 # calculated based on the EPW data).
 class WeatherFile
@@ -7,30 +9,44 @@ class WeatherFile
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   def initialize(epw_path:, runner:, hpxml: nil)
-    @header = WeatherHeader.new
-    @data = WeatherData.new
-    @design = WeatherDesign.new
+    if $weather_cache[:epw_path] == epw_path
+      # Use cache
+      @header = $weather_cache[:header]
+      @data = $weather_cache[:data]
+      @design = $weather_cache[:design]
+      @epw_file = $weather_cache[:epw_file]
+      @epw_path = $weather_cache[:epw_path]
+      return
+    else
+      @header = WeatherHeader.new
+      @data = WeatherData.new
+      @design = WeatherDesign.new
+      @epw_file = OpenStudio::EpwFile.new(epw_path, true)
+      @epw_path = epw_path
+      $weather_cache[:header] = @header
+      $weather_cache[:data] = @data
+      $weather_cache[:design] = @design
+      $weather_cache[:epw_file] = @epw_file
+      $weather_cache[:epw_path] = @epw_path
+    end
 
     if not File.exist?(epw_path)
       fail "Cannot find weather file at #{epw_path}."
     end
 
-    process_epw(runner, epw_path, hpxml)
+    process_epw(runner, hpxml)
   end
 
-  attr_accessor(:header, :data, :design)
+  attr_accessor(:header, :data, :design, :epw_file, :epw_path)
 
   private
 
   # Main method that processes the EPW file to extract any information we need.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param epw_path [String] Path to the EPW weather file
   # @param hpxml [HPXML] HPXML object
   # @return [nil]
-  def process_epw(runner, epw_path, hpxml)
-    epw_file = OpenStudio::EpwFile.new(epw_path, true)
-
+  def process_epw(runner, hpxml)
     get_header_info_from_epw(epw_file)
     epw_has_design_data = get_design_info_from_epw(runner, epw_file)
 
@@ -178,17 +194,11 @@ class WeatherFile
   end
 
   # Calculates the ASHRAE 62.2 Weather and Shielding Factor (WSF) value per report
-  # LBNL-5795E "Infiltration as Ventilation: Weather-Induced Dilution" if the value is
-  # not available in the zipcode_weather_stations.csv resource file.
+  # LBNL-5795E "Infiltration as Ventilation: Weather-Induced Dilution".
   #
   # @param rowdata [Array<Hash>] Weather data for each EPW record
   # @return [Double] WSF value
   def calc_ashrae_622_wsf(rowdata)
-    weather_data = Defaults.lookup_weather_data_from_wmo(header.WMONumber)
-    if not weather_data.nil?
-      return Float(weather_data[:station_ashrae_622_wsf])
-    end
-
     # Constants
     c_d = 1.0       # discharge coefficient for ELA (at 4 Pa) (unitless)
     t_indoor = 22.0 # indoor setpoint year-round (C)
