@@ -1561,7 +1561,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-central-ac-only-1-speed.xml')
     hpxml_bldg.cooling_systems[0].cooling_shr = 0.88
-    hpxml_bldg.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.66
     hpxml_bldg.cooling_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
     hpxml_bldg.cooling_systems[0].charge_defect_ratio = -0.11
@@ -1573,7 +1572,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].crankcase_heater_watts = 40.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, 12345, 11.4, 11.0, 40.0, 1.0)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, 12345, 11.4, 11.0, 40.0, 1.0)
 
     # Test defaults - SEER/EER
     hpxml_bldg.cooling_systems[0].cooling_efficiency_seer2 = nil
@@ -1582,32 +1581,30 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = 11.58
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, 12345, 11.4, 11.0, 40.0, 1.0)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, 12345, 11.4, 11.0, 40.0, 1.0)
 
     # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
 
     # Test watts/cfm based on fan model type
     hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.375, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, 0.375, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
 
     # Test fan model type based on watts/cfm
-    hpxml_bldg.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
     hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.4
     hpxml_bldg.cooling_systems[0].fan_motor_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeSingleStage, 0.4, HPXML::HVACFanMotorTypePSC, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, 0.4, HPXML::HVACFanMotorTypePSC, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
-    hpxml_bldg.cooling_systems[0].compressor_type = nil
     hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = nil
     hpxml_bldg.cooling_systems[0].fan_motor_type = nil
     hpxml_bldg.cooling_systems[0].charge_defect_ratio = nil
@@ -1619,7 +1616,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, HPXML::HVACFanMotorTypePSC, nil, 0, 0, nil, 11.4, 9.79, 20.7, 1.0)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.73, 0.5, HPXML::HVACFanMotorTypePSC, nil, 0, 0, nil, 11.4, 9.79, 20.6, 1.0)
   end
 
   def test_room_air_conditioners
@@ -1688,18 +1685,17 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].airflow_defect_ratio = -0.22
     hpxml_bldg.cooling_systems[0].cooling_capacity = 12345
     hpxml_bldg.cooling_systems[0].crankcase_heater_watts = 40.0
-    hpxml_bldg.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer2 = 11.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, 12345, 18.05, 11.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, 12345, 18.05, 11.0, 40.0, 1.0)
 
     # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 18.05, 11.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.2)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 18.05, 11.0, 40.0, 1.2)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1709,19 +1705,18 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].airflow_defect_ratio = nil
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
     hpxml_bldg.cooling_systems[0].crankcase_heater_watts = nil
-    hpxml_bldg.cooling_systems[0].compressor_type = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = nil
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer2 = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.73, 0.18, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 18.05, 12.05, 16.9, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.73, 0.18, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 18.05, 12.05, 16.9, 1.0)
 
     # Test defaults w/ ductless
     hpxml_bldg.cooling_systems[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.73, 0.07, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 19.0, 12.34, 12.5, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.73, 0.07, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 19.0, 12.34, 12.5, 1.0)
 
     # Test defaults w/ ductless - SEER2/EER
     hpxml_bldg.cooling_systems[0].cooling_efficiency_seer2 = nil
@@ -1730,7 +1725,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = 12.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.73, 0.07, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 13.3, 12.0, 12.5, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.73, 0.07, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 13.3, 12.0, 12.5, 1.0)
   end
 
   def test_ptac
@@ -2044,7 +2039,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
     hpxml_bldg.heat_pumps[0].cooling_shr = 0.88
-    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.66
     hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
     hpxml_bldg.heat_pumps[0].charge_defect_ratio = -0.11
@@ -2065,14 +2059,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeDefrost
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 9876, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 9876, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test w/ heating capacity fraction 17F
     hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = 0.1
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test defaults - SEER2/HSPF2/EER
     hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = nil
@@ -2083,7 +2077,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = 8.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test autosizing with factors
     hpxml_bldg.heat_pumps[0].cooling_capacity = nil
@@ -2095,24 +2089,23 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = 1.1
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 13.3, 13.0, 6.8, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 13.3, 13.0, 6.8, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test watts/cfm based on fan model type
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.375, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 13.3, 13.0, 6.8, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.375, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 13.3, 13.0, 6.8, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test fan model type based on watts/cfm
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.17
     hpxml_bldg.heat_pumps[0].fan_motor_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.17, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 13.3, 13.0, 6.8, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.17, HPXML::HVACFanMotorTypePSC, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 13.3, 13.0, 6.8, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test defaults
     hpxml_bldg.heat_pumps[0].cooling_shr = nil
-    hpxml_bldg.heat_pumps[0].compressor_type = nil
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = nil
     hpxml_bldg.heat_pumps[0].fan_motor_type = nil
     hpxml_bldg.heat_pumps[0].charge_defect_ratio = nil
@@ -2132,7 +2125,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].pan_heater_control_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.73, HPXML::HVACCompressorTypeSingleStage, 0.5, HPXML::HVACFanMotorTypePSC, nil, nil, 0, 0, nil, nil, nil, nil, 13.3, 13.0, 6.8, 25.9, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.73, 0.5, HPXML::HVACFanMotorTypePSC, nil, nil, 0, 0, nil, nil, nil, nil, 13.3, 13.0, 6.8, 25.9, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
 
     # Test w/ detailed performance data
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
@@ -2153,7 +2146,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     nom_cap_at_17f = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nom_cap_at_47f, nom_cap_at_17f, nil, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nom_cap_at_47f, nom_cap_at_17f, nil, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
 
     # Test w/ detailed performance data and autosizing
     heating_capacity_fractions = [0.278, 1.0, 1.1, 0.12, 0.69, 0.7, 0.05, 0.55]
@@ -2192,9 +2185,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def test_default_detailed_performance_data
-    # Test to verify the default detailed performance data points are consistent with RESNET NEEP-statistical-Model
+    # Test to verify the default detailed performance data points are consistent with RESNET's NEEP-Statistical-Model.xlsm
+    # Spreadsheet can be found in https://github.com/NREL/OpenStudio-HPXML/pull/1879
+
+    # ============== #
+    # Variable Speed #
+    # ============== #
+
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed.xml')
-    # Configure the same capacities, efficiencies, etc.
     hpxml_bldg.heat_pumps[0].cooling_capacity = 6000.0
     hpxml_bldg.heat_pumps[0].heating_capacity = 8700.0
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = 7500.0
@@ -2205,8 +2203,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 7.5
     hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
+    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+
     # Heating
     max_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     nom_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
@@ -2217,6 +2217,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     max_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     nom_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
     min_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
     # 47F
     assert_in_epsilon(9576.6, max_dp_47f.capacity, 0.01)
     assert_in_epsilon(8700.0, nom_dp_47f.capacity, 0.01)
@@ -2224,6 +2225,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(2.34, max_dp_47f.efficiency_cop, 0.01)
     assert_in_epsilon(2.49, nom_dp_47f.efficiency_cop, 0.01)
     assert_in_epsilon(3.20, min_dp_47f.efficiency_cop, 0.01)
+
     # 17F
     assert_in_epsilon(9176.9, max_dp_17f.capacity, 0.01)
     assert_in_epsilon(7500.0, nom_dp_17f.capacity, 0.01)
@@ -2231,17 +2233,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(1.66, max_dp_17f.efficiency_cop, 0.01)
     assert_in_epsilon(1.84, nom_dp_17f.efficiency_cop, 0.01)
     assert_in_epsilon(2.08, min_dp_17f.efficiency_cop, 0.01)
+
     # 5F
     assert_in_epsilon(7950.8, max_dp_5f.capacity, 0.01)
     assert_in_epsilon(7857.4, nom_dp_5f.capacity, 0.01)
     assert_in_epsilon(2552.7, min_dp_5f.capacity, 0.01)
-    # The RESNET table seems to be incorrect in calculating the Net Power @ 5F,
-    # it is: MaxPower@5F = EIRm5max * MaxPower@17F,
-    # while it should be EIRm5max * MaxPower@17F * (MaxCapacity@5F/ MaxCapacity@17F)
-    # (MaxCapacity@5F/ MaxCapacity@17F) = (7950.8/9176.9) = 0.8664, fixing it in the assertions below
-    assert_in_epsilon(1.24 / 0.8664, max_dp_5f.efficiency_cop, 0.01)
-    assert_in_epsilon(1.24 / 0.8664, nom_dp_5f.efficiency_cop, 0.01)
-    assert_in_epsilon(1.43 / 0.8664, min_dp_5f.efficiency_cop, 0.01)
+    assert_in_epsilon(1.43, max_dp_5f.efficiency_cop, 0.01)
+    assert_in_epsilon(1.43, nom_dp_5f.efficiency_cop, 0.01)
+    assert_in_epsilon(1.65, min_dp_5f.efficiency_cop, 0.01)
+
     # Cooling
     max_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     nom_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
@@ -2249,6 +2249,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     max_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
     nom_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
     min_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
     # 95F
     assert_in_epsilon(6426.0, max_dp_95f.capacity, 0.01)
     assert_in_epsilon(6000.0, nom_dp_95f.capacity, 0.01)
@@ -2256,6 +2257,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(2.17, max_dp_95f.efficiency_cop, 0.01)
     assert_in_epsilon(2.34, nom_dp_95f.efficiency_cop, 0.01)
     assert_in_epsilon(5.47, min_dp_95f.efficiency_cop, 0.01)
+
     # 82F
     assert_in_epsilon(6833.7, max_dp_82f.capacity, 0.01)
     assert_in_epsilon(6380.0, nom_dp_82f.capacity, 0.01)
@@ -2263,6 +2265,96 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(2.88, max_dp_82f.efficiency_cop, 0.01)
     assert_in_epsilon(3.11, nom_dp_82f.efficiency_cop, 0.01)
     assert_in_epsilon(7.19, min_dp_82f.efficiency_cop, 0.01)
+
+    # ========= #
+    # Two Stage #
+    # ========= #
+
+    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    # Heating
+    nom_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+    nom_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+    nom_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
+    # 47F
+    assert_in_epsilon(8700.0, nom_dp_47f.capacity, 0.01)
+    assert_in_epsilon(6190.9, min_dp_47f.capacity, 0.01)
+    assert_in_epsilon(2.64, nom_dp_47f.efficiency_cop, 0.01)
+    assert_in_epsilon(3.11, min_dp_47f.efficiency_cop, 0.01)
+
+    # 17F
+    assert_in_epsilon(7500.0, nom_dp_17f.capacity, 0.01)
+    assert_in_epsilon(5337.0, min_dp_17f.capacity, 0.01)
+    assert_in_epsilon(1.95, nom_dp_17f.efficiency_cop, 0.01)
+    assert_in_epsilon(2.29, min_dp_17f.efficiency_cop, 0.01)
+
+    # 5F
+    assert_in_epsilon(7020.0, nom_dp_5f.capacity, 0.01)
+    assert_in_epsilon(4995.4, min_dp_5f.capacity, 0.01)
+    assert_in_epsilon(1.72, nom_dp_5f.efficiency_cop, 0.01)
+    assert_in_epsilon(2.03, min_dp_5f.efficiency_cop, 0.01)
+
+    # Cooling
+    nom_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+    nom_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    min_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
+    # 95F
+    assert_in_epsilon(6000.0, nom_dp_95f.capacity, 0.01)
+    assert_in_epsilon(4365.2, min_dp_95f.capacity, 0.01)
+    assert_in_epsilon(2.34, nom_dp_95f.efficiency_cop, 0.01)
+    assert_in_epsilon(3.76, min_dp_95f.efficiency_cop, 0.01)
+
+    # 82F
+    assert_in_epsilon(6411.7, nom_dp_82f.capacity, 0.01)
+    assert_in_epsilon(4664.7, min_dp_82f.capacity, 0.01)
+    assert_in_epsilon(2.92, nom_dp_82f.efficiency_cop, 0.01)
+    assert_in_epsilon(4.67, min_dp_82f.efficiency_cop, 0.01)
+
+    # ============ #
+    # Single Stage #
+    # ============ #
+
+    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
+    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypePSC
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    # Heating
+    nom_dp_47f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    nom_dp_17f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    nom_dp_5f = default_hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 5.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+
+    # 47F
+    assert_in_epsilon(8700.0, nom_dp_47f.capacity, 0.01)
+    assert_in_epsilon(2.99, nom_dp_47f.efficiency_cop, 0.01)
+
+    # 17F
+    assert_in_epsilon(7500.0, nom_dp_17f.capacity, 0.01)
+    assert_in_epsilon(2.21, nom_dp_17f.efficiency_cop, 0.01)
+
+    # 5F
+    assert_in_epsilon(7020.0, nom_dp_5f.capacity, 0.01)
+    assert_in_epsilon(1.95, nom_dp_5f.efficiency_cop, 0.01)
+
+    # Cooling
+    nom_dp_95f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 95.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+    nom_dp_82f = default_hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data.find { |dp| dp.outdoor_temperature == 82.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+
+    # 95F
+    assert_in_epsilon(6000.0, nom_dp_95f.capacity, 0.01)
+    assert_in_epsilon(2.34, nom_dp_95f.efficiency_cop, 0.01)
+
+    # 82F
+    assert_in_epsilon(6411.7, nom_dp_82f.capacity, 0.01)
+    assert_in_epsilon(4.37, nom_dp_82f.efficiency_cop, 0.01)
   end
 
   def test_pthp
@@ -2326,20 +2418,19 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_capacity = 34567
     hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = 0.1
     hpxml_bldg.heat_pumps[0].crankcase_heater_watts = 40.0
-    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 11.0
     hpxml_bldg.heat_pumps[0].pan_heater_watts = 99.0
     hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeDefrost
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 18.05, 11.0, 8.5, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 18.05, 11.0, 8.5, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test w/ heating capacity 17F
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = 9876
     hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 9876, 34567, 18.05, 11.0, 8.5, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 9876, 34567, 18.05, 11.0, 8.5, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test autosizing with factors
     hpxml_bldg.heat_pumps[0].cooling_capacity = nil
@@ -2351,7 +2442,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = 1.1
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 18.05, 11.0, 8.5, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 18.05, 11.0, 8.5, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test defaults
     hpxml_bldg.heat_pumps[0].cooling_shr = nil
@@ -2364,7 +2455,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = nil
     hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
     hpxml_bldg.heat_pumps[0].crankcase_heater_watts = nil
-    hpxml_bldg.heat_pumps[0].compressor_type = nil
     hpxml_bldg.heat_pumps[0].heating_autosizing_factor = nil
     hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = nil
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
@@ -2376,13 +2466,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].pan_heater_control_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.73, 0.18, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 18.05, 12.05, 8.5, 21.7, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.73, 0.18, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 18.05, 12.05, 8.5, 21.7, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
 
     # Test defaults w/ ductless and no backup
     hpxml_bldg.heat_pumps[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.73, 0.07, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 19.0, 12.34, 9.0, 19.6, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.73, 0.07, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 19.0, 12.34, 9.0, 19.6, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
 
     # Test defaults - SEER2/HSPF2/EER
     hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = nil
@@ -2393,7 +2483,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = 8.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.73, 0.07, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 14.0, 12.3, 7.2, 19.6, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.73, 0.07, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 14.0, 12.3, 7.2, 19.6, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
   end
 
   def test_heat_pump_temperatures
@@ -5266,10 +5356,9 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(type, furniture_mass.type)
   end
 
-  def _test_default_central_air_conditioner_values(cooling_system, shr, compressor_type, fan_watts_per_cfm, fan_motor_type, cooling_airflow_cfm, charge_defect_ratio,
-                                                   airflow_defect_ratio, cooling_capacity, cooling_efficiency_seer2, cooling_efficiency_eer2, crankcase_heater_watts, cooling_autosizing_factor)
+  def _test_default_central_air_conditioner_values(cooling_system, shr, fan_watts_per_cfm, fan_motor_type, cooling_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
+                                                   cooling_capacity, cooling_efficiency_seer2, cooling_efficiency_eer2, crankcase_heater_watts, cooling_autosizing_factor)
     assert_equal(shr, cooling_system.cooling_shr)
-    assert_equal(compressor_type, cooling_system.compressor_type)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
     assert_equal(fan_motor_type, cooling_system.fan_motor_type)
     if cooling_airflow_cfm.nil? # nil implies an autosized value
@@ -5330,7 +5419,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_mini_split_air_conditioner_values(cooling_system, shr, fan_watts_per_cfm, fan_motor_type, cooling_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
-                                                      cooling_capacity, cooling_efficiency_seer2, cooling_efficiency_eer2, crankcase_heater_watts, compressor_type, cooling_autosizing_factor)
+                                                      cooling_capacity, cooling_efficiency_seer2, cooling_efficiency_eer2, crankcase_heater_watts, cooling_autosizing_factor)
     assert_equal(shr, cooling_system.cooling_shr)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
     assert_equal(fan_motor_type, cooling_system.fan_motor_type)
@@ -5358,7 +5447,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(cooling_efficiency_eer2, cooling_system.cooling_efficiency_eer2)
     end
-    assert_equal(compressor_type, cooling_system.compressor_type)
   end
 
   def _test_default_furnace_values(heating_system, fan_watts_per_cfm, fan_motor_type, heating_airflow_cfm, airflow_defect_ratio, heating_capacity,
@@ -5502,14 +5590,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_air_to_air_heat_pump_values(heat_pump, shr, compressor_type, fan_watts_per_cfm, fan_motor_type,
+  def _test_default_air_to_air_heat_pump_values(heat_pump, shr, fan_watts_per_cfm, fan_motor_type,
                                                 cooling_airflow_cfm, heating_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
                                                 cooling_capacity, heating_capacity, heating_capacity_17F, backup_heating_capacity,
                                                 cooling_efficiency_seer2, cooling_efficiency_eer2, heating_efficiency_hspf2,
                                                 crankcase_heater_watts, heating_autosizing_factor, cooling_autosizing_factor,
                                                 backup_heating_autosizing_factor, pan_heater_watts, pan_heater_control_type)
     assert_equal(shr, heat_pump.cooling_shr)
-    assert_equal(compressor_type, heat_pump.compressor_type)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
     assert_equal(fan_motor_type, heat_pump.fan_motor_type)
     if cooling_airflow_cfm.nil? # nil implies an autosized value
@@ -5628,7 +5715,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   def _test_default_mini_split_heat_pump_values(heat_pump, shr, fan_watts_per_cfm, fan_motor_type, heating_airflow_cfm, cooling_airflow_cfm,
                                                 charge_defect_ratio, airflow_defect_ratio, cooling_capacity, heating_capacity, heating_capacity_17F,
                                                 backup_heating_capacity, cooling_efficiency_seer2, cooling_efficiency_eer2, heating_efficiency_hspf2,
-                                                crankcase_heater_watts, compressor_type, heating_autosizing_factor, cooling_autosizing_factor,
+                                                crankcase_heater_watts, heating_autosizing_factor, cooling_autosizing_factor,
                                                 backup_heating_autosizing_factor, pan_heater_watts, pan_heater_control_type)
     assert_equal(shr, heat_pump.cooling_shr)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
@@ -5684,7 +5771,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(heating_efficiency_hspf2, heat_pump.heating_efficiency_hspf2)
     end
-    assert_equal(compressor_type, heat_pump.compressor_type)
     assert_equal(pan_heater_watts, heat_pump.pan_heater_watts)
     assert_equal(pan_heater_control_type, heat_pump.pan_heater_control_type)
   end
