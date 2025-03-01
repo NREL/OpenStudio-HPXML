@@ -3566,6 +3566,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     # Test branch circuit inputs not overriden by defaults
     branch_circuits = electric_panel.branch_circuits
+    branch_circuits.clear
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage120,
                         max_current_rating: 20.0,
@@ -3580,47 +3581,59 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                         occupied_spaces: 2,
                         component_idrefs: [hpxml_bldg.cooling_systems[0].id])
 
-    # Test demand load inputs not overridden by defaults
+    # Test service feeder inputs not overridden by defaults
     service_feeders = electric_panel.service_feeders
-    htg_load = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }
-    htg_load.power = 1000
-    htg_load.is_new_load = true
-    clg_load = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }
-    clg_load.power = 2000
-    clg_load.is_new_load = true
-    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeHeating,
+                        power: 1000,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.heating_systems[0].id])
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeCooling,
+                        power: 2000,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.cooling_systems[0].id])
+
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeWaterHeater,
                         power: 3000,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeClothesDryer,
                         power: 4000,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     hpxml_bldg.dishwashers.add(id: 'Dishwasher')
-    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage120,
+                        max_current_rating: 20.0,
+                        occupied_spaces: 1,
+                        component_idrefs: [hpxml_bldg.dishwashers[0].id])
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeDishwasher,
                         power: 5000,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.dishwashers[0].id])
-    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeRangeOven,
                         power: 6000,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
-    vf_load = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeMechVent }
-    vf_load.power = 7000
-    vf_load.is_new_load = true
-    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeMechVent,
+                        power: 7000,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.ventilation_fans[0].id])
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeLighting,
                         power: 8000,
                         is_new_load: true)
-    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeKitchen,
                         power: 9000,
                         is_new_load: true)
-    service_feeders.add(id: "DemandLoad#{service_feeders.size + 1}",
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeLaundry,
                         power: 10000,
                         is_new_load: true)

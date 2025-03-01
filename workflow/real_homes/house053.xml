@@ -526,254 +526,58 @@
             <MaxCurrentRating>200.0</MaxCurrentRating>
             <Headroom>13</Headroom>
             <RatedTotalSpaces>60</RatedTotalSpaces>
-            <BranchCircuits>
-              <BranchCircuit>
-                <SystemIdentifier id='ASHP3Ton'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>50.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
+            <ServiceFeeders>
+              <ServiceFeeder>
+                <SystemIdentifier id='ServiceFeeder1'/>
+                <LoadType>heating</LoadType>
+                <PowerRating>14238.1</PowerRating>
                 <AttachedToComponent idref='HeatPump1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Receptacles1'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='LightingLivingRm'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesFamilyRm1'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ASHP4Ton'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>50.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ServiceFeeder2'/>
+                <LoadType>cooling</LoadType>
+                <PowerRating>14508.6</PowerRating>
                 <AttachedToComponent idref='HeatPump1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesBathRm1'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesBathRm2'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Lighting1'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Lighting2'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Lighting3'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='LightReceptPergola'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='PV'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>60.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
-                <AttachedToComponent idref='PVSystem1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='SubpanelOldMain'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>50.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Receptacles2'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Receptacles3'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesFamilyRm3'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='AirHandler2'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
-                <AttachedToComponent idref='HeatPump1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='GarageDoors'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='DryerGas'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-                <AttachedToComponent idref='ClothesDryer1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='WasherTanklessGasWaterHeater'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-                <AttachedToComponent idref='ClothesWasher1'/>
-                <AttachedToComponent idref='WaterHeatingSystem1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesShed1'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesShed2'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='SubpanelPool'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>80.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='LightRecepDiningRm'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Washer'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-                <AttachedToComponent idref='ClothesWasher1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='LightRecepFamilyRm'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Receptacles4'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>0.5</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Receptacles5'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>0.5</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='AirHandler1'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
-                <AttachedToComponent idref='HeatPump1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesBedrm1'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesBedrm2'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesBedrm3'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesKitchen1'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ServiceFeeder3'/>
+                <LoadType>dishwasher</LoadType>
+                <PowerRating>1200.0</PowerRating>
                 <AttachedToComponent idref='Dishwasher1'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='ReceptaclesKitchen2'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='Microwave'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>20.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='PumpPool'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ServiceFeeder4'/>
+                <LoadType>pool pump</LoadType>
+                <PowerRating>1491.0</PowerRating>
                 <AttachedToComponent idref='Pool1Pump'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='HPHeaterPool'/>
-                <Voltage>240</Voltage>
-                <MaxCurrentRating>50.0</MaxCurrentRating>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ServiceFeeder5'/>
+                <LoadType>pool heater</LoadType>
+                <PowerRating>5100.0</PowerRating>
                 <AttachedToComponent idref='Pool1Heater'/>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='LightRecepPool1'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-              <BranchCircuit>
-                <SystemIdentifier id='LightRecepPool2'/>
-                <Voltage>120</Voltage>
-                <MaxCurrentRating>15.0</MaxCurrentRating>
-                <OccupiedSpaces>1.0</OccupiedSpaces>
-              </BranchCircuit>
-            </BranchCircuits>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='Lighting'/>
+                <LoadType>lighting</LoadType>
+                <PowerRating>9000.0</PowerRating>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='Kitchen'/>
+                <LoadType>kitchen</LoadType>
+                <PowerRating>3000.0</PowerRating>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='Laundry'/>
+                <LoadType>laundry</LoadType>
+                <PowerRating>1500.0</PowerRating>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='Other'/>
+                <LoadType>other</LoadType>
+                <PowerRating>373.0</PowerRating>
+              </ServiceFeeder>
+            </ServiceFeeders>
           </ElectricPanel>
         </ElectricPanels>
         <Batteries>

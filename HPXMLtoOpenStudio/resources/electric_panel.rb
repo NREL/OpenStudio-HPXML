@@ -14,15 +14,23 @@ module ElectricPanel
     capacity_total_amps = []
     capacity_headroom_amps = []
     hpxml_header.service_feeders_load_calculation_types.each do |service_feeders_load_calculation_type|
-      next unless service_feeders_load_calculation_type.include?('Load-Based')
+      if service_feeders_load_calculation_type.include?('Load-Based')
+        load_based_capacity_values = LoadValues.new
+        calculate_load_based(hpxml_bldg, electric_panel, load_based_capacity_values, service_feeders_load_calculation_type)
 
-      load_based_capacity_values = LoadBasedCapacityValues.new
-      calculate_load_based(hpxml_bldg, electric_panel, load_based_capacity_values, service_feeders_load_calculation_type)
+        capacity_types << service_feeders_load_calculation_type
+        capacity_total_watts << load_based_capacity_values.Load_CapacityW.round(1)
+        capacity_total_amps << load_based_capacity_values.Load_CapacityA.round(1)
+        capacity_headroom_amps << load_based_capacity_values.Load_HeadRoomA.round(1)
+      elsif service_feeders_load_calculation_type.include?('Meter-Based')
+        meter_based_capacity_values = LoadValues.new
+        calculate_meter_based(hpxml_bldg, electric_panel, meter_based_capacity_values, service_feeders_load_calculation_type)
 
-      capacity_types << service_feeders_load_calculation_type
-      capacity_total_watts << load_based_capacity_values.LoadBased_CapacityW.round(1)
-      capacity_total_amps << load_based_capacity_values.LoadBased_CapacityA.round(1)
-      capacity_headroom_amps << load_based_capacity_values.LoadBased_HeadRoomA.round(1)
+        capacity_types << service_feeders_load_calculation_type
+        capacity_total_watts << meter_based_capacity_values.Load_CapacityW.round(1)
+        capacity_total_amps << meter_based_capacity_values.Load_CapacityA.round(1)
+        capacity_headroom_amps << meter_based_capacity_values.Load_HeadRoomA.round(1)
+      end
     end
     electric_panel.capacity_types = capacity_types
     electric_panel.capacity_total_watts = capacity_total_watts
@@ -146,15 +154,15 @@ module ElectricPanel
         # Part A
         total_load = hvac_load + other_load
         total_load = discount_load(total_load, 8000.0, 0.4)
-        service_feeders.LoadBased_CapacityW = total_load
+        service_feeders.Load_CapacityW = total_load
       else # adding new HVAC
         # Part B
         other_load = discount_load(other_load, 8000.0, 0.4)
-        service_feeders.LoadBased_CapacityW = hvac_load + other_load
+        service_feeders.Load_CapacityW = hvac_load + other_load
       end
 
-      service_feeders.LoadBased_CapacityA = service_feeders.LoadBased_CapacityW / Float(electric_panel.voltage)
-      service_feeders.LoadBased_HeadRoomA = electric_panel.max_current_rating - service_feeders.LoadBased_CapacityA
+      service_feeders.Load_CapacityA = service_feeders.Load_CapacityW / Float(electric_panel.voltage)
+      service_feeders.Load_HeadRoomA = electric_panel.max_current_rating - service_feeders.Load_CapacityA
     end
   end
 
@@ -175,7 +183,7 @@ module ElectricPanel
   # @param peak_fuels [Hash] Map of peak building electricity outputs
   # @param service_feeders_load_calculation_type [String] the load calculation type
   # @return [Array<Double, Double, Double>] The capacity (W), the capacity (A), and headroom (A)
-  def self.calculate_meter_based(hpxml_bldg, electric_panel, peak_fuels, service_feeders_load_calculation_type)
+  def self.calculate_meter_based(hpxml_bldg, electric_panel, service_feeders, service_feeders_load_calculation_type)
     if service_feeders_load_calculation_type == HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased
       htg_new = get_panel_load_heating(hpxml_bldg, electric_panel, addition: true)
       clg_new = electric_panel.service_feeders.select { |service_feeder| service_feeder.type == HPXML::ElectricPanelLoadTypeCooling && service_feeder.is_new_load }.map { |pl| pl.power }.sum(0.0)
@@ -187,10 +195,12 @@ module ElectricPanel
         new_loads += service_feeder.power if service_feeder.is_new_load
       end
 
-      capacity_w = new_loads + 1.25 * peak_fuels[[FT::Elec, TE::Total, PFT::Annual]].annual_output
-      capacity_a = capacity_w / Float(electric_panel.voltage)
-      headroom_a = electric_panel.max_current_rating - capacity_a
-      return capacity_w, capacity_a, headroom_a
+      extension_properties = hpxml_bldg.header.extension_properties
+      peak_elec = extension_properties['PeakElectricity'].to_f
+
+      service_feeders.Load_CapacityW = new_loads + 1.25 * peak_elec
+      service_feeders.Load_CapacityA = service_feeders.Load_CapacityW / Float(electric_panel.voltage)
+      service_feeders.Load_HeadRoomA = electric_panel.max_current_rating - service_feeders.Load_CapacityA
     end
   end
 
@@ -220,14 +230,14 @@ module ElectricPanel
 end
 
 # Object with calculated load
-class LoadBasedCapacityValues
-  LOADBASED_ATTRS = [:LoadBased_CapacityW,
-                     :LoadBased_CapacityA,
-                     :LoadBased_HeadRoomA]
-  attr_accessor(*LOADBASED_ATTRS)
+class LoadValues
+  LOAD_ATTRS = [:Load_CapacityW,
+                :Load_CapacityA,
+                :Load_HeadRoomA]
+  attr_accessor(*LOAD_ATTRS)
 
   def initialize
-    LOADBASED_ATTRS.each do |attr|
+    LOAD_ATTRS.each do |attr|
       send("#{attr}=", 0.0)
     end
   end
