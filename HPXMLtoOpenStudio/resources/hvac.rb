@@ -460,7 +460,7 @@ module HVAC
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, hvac_sequential_load_fracs, [htg_cfm.to_f, clg_cfm.to_f].max, heating_system, hvac_unavailable_periods)
 
     add_backup_staging_ems_program(model, air_loop_unitary, htg_supp_coil, control_zone, htg_coil)
-    apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
+    apply_installation_quality_ems_program(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     # supp coil control in staging EMS
     add_two_speed_staging_ems_program(model, air_loop_unitary, htg_supp_coil, control_zone, has_deadband_control, cooling_system)
@@ -471,6 +471,10 @@ module HVAC
 
     if is_heatpump && hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
       apply_advanced_defrost(model, htg_coil, air_loop_unitary, control_zone.spaces[0], htg_supp_coil, cooling_system, q_dot_defrost)
+    end
+
+    if is_heatpump && cooling_system.pan_heater_watts.to_f > 0
+      apply_pan_heater_ems_program(model, htg_coil, air_loop_unitary, control_zone.spaces[0], cooling_system, hvac_unavailable_periods[:htg])
     end
 
     return air_loop
@@ -749,7 +753,7 @@ module HVAC
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, hvac_sequential_load_fracs, [htg_cfm, clg_cfm].max, heat_pump, hvac_unavailable_periods)
 
     # HVAC Installation Quality
-    apply_installation_quality(model, heat_pump, heat_pump, air_loop_unitary, htg_coil, clg_coil, control_zone)
+    apply_installation_quality_ems_program(model, heat_pump, heat_pump, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     return air_loop
   end
@@ -4955,7 +4959,7 @@ module HVAC
   # @param defect_ratio [TODO] TODO
   # @param hvac_ap [TODO] TODO
   # @return [nil]
-  def self.add_installation_quality_program(fault_program, tin_sensor, tout_sensor, airflow_rated_defect_ratio, clg_or_htg_coil, model, f_chg, obj_name, mode, defect_ratio, hvac_ap)
+  def self.add_installation_quality_ems_program(fault_program, tin_sensor, tout_sensor, airflow_rated_defect_ratio, clg_or_htg_coil, model, f_chg, obj_name, mode, defect_ratio, hvac_ap)
     if mode == :clg
       if clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
         num_speeds = 1
@@ -5167,7 +5171,7 @@ module HVAC
   # @param clg_coil [TODO] TODO
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @return [nil]
-  def self.apply_installation_quality(model, heating_system, cooling_system, unitary_system, htg_coil, clg_coil, control_zone)
+  def self.apply_installation_quality_ems_program(model, heating_system, cooling_system, unitary_system, htg_coil, clg_coil, control_zone)
     if not cooling_system.nil?
       charge_defect_ratio = cooling_system.charge_defect_ratio
       cool_airflow_defect_ratio = cooling_system.airflow_defect_ratio
@@ -5203,7 +5207,7 @@ module HVAC
 
     return if cool_airflow_rated_defect_ratio.empty? && heat_airflow_rated_defect_ratio.empty?
 
-    obj_name = "#{unitary_system.name} IQ"
+    obj_name = "#{unitary_system.name} install quality program"
 
     tin_sensor = Model.add_ems_sensor(
       model,
@@ -5228,11 +5232,11 @@ module HVAC
     fault_program.addLine("Set F_CH = #{f_chg.round(3)}")
 
     if not cool_airflow_rated_defect_ratio.empty?
-      add_installation_quality_program(fault_program, tin_sensor, tout_sensor, cool_airflow_rated_defect_ratio, clg_coil, model, f_chg, obj_name, :clg, cool_airflow_defect_ratio, clg_ap)
+      add_installation_quality_ems_program(fault_program, tin_sensor, tout_sensor, cool_airflow_rated_defect_ratio, clg_coil, model, f_chg, obj_name, :clg, cool_airflow_defect_ratio, clg_ap)
     end
 
     if not heat_airflow_rated_defect_ratio.empty?
-      add_installation_quality_program(fault_program, tin_sensor, tout_sensor, heat_airflow_rated_defect_ratio, htg_coil, model, f_chg, obj_name, :htg, heat_airflow_defect_ratio, htg_ap)
+      add_installation_quality_ems_program(fault_program, tin_sensor, tout_sensor, heat_airflow_rated_defect_ratio, htg_coil, model, f_chg, obj_name, :htg, heat_airflow_defect_ratio, htg_ap)
     end
 
     Model.add_ems_program_calling_manager(
@@ -5291,9 +5295,9 @@ module HVAC
   # when using the advanced defrost model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed]  OpenStudio Heating Coil object
+  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
   # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
-  # @param conditioned_space [OpenStudio::Model::Space]  OpenStudio Space object for conditioned zone
+  # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @param q_dot_defrost [Double] Calculated delivered cooling q_dot [W]
@@ -5327,8 +5331,8 @@ module HVAC
         supp_sys_power_level = 0.0
       end
     end
-    # other equipment actuator
 
+    # Other equipment/actuator
     defrost_heat_load_oe = Model.add_other_equipment(
       model,
       name: "#{air_loop_unitary.name} defrost heat load",
@@ -5347,10 +5351,11 @@ module HVAC
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
+    cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeHPDefrostSupplHeat } # Ensure unique meter for each heat pump
     defrost_supp_heat_energy_oe = Model.add_other_equipment(
       model,
       name: "#{air_loop_unitary.name} defrost supp heat energy",
-      end_use: Constants::ObjectTypeBackupSuppHeat,
+      end_use: "#{Constants::ObjectTypeHPDefrostSupplHeat}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
       frac_radiant: 0,
@@ -5403,6 +5408,103 @@ module HVAC
     program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = 0")
     program.addLine('EndIf')
 
+    # EMS calling manager
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'InsideHVACSystemIterationLoop',
+      ems_programs: [program]
+    )
+  end
+
+  # Creates an EMS program to add pan heater energy use for a heat pump.
+  # A pan heater ensures that water melted during the defrost cycle does not refreeze into ice and
+  # result in fan obstruction or coil damage.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
+  # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
+  # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @param heating_unavailable_periods [HPXML::UnavailablePeriods] Unavailable periods for heating
+  # @return [nil]
+  def self.apply_pan_heater_ems_program(model, htg_coil, air_loop_unitary, conditioned_space, heat_pump, heating_unavailable_periods)
+    # Other equipment/actuator
+    cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypePanHeater } # Ensure unique meter for each heat pump
+    pan_heater_energy_oe = Model.add_other_equipment(
+      model,
+      name: "#{air_loop_unitary.name} pan heater energy",
+      end_use: "#{Constants::ObjectTypePanHeater}#{cnt + 1}",
+      space: conditioned_space,
+      design_level: 0,
+      frac_radiant: 0,
+      frac_latent: 0,
+      frac_lost: 1,
+      schedule: model.alwaysOnDiscreteSchedule,
+      fuel_type: HPXML::FuelTypeElectricity
+    )
+    pan_heater_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+
+    pan_heater_energy_oe_act = Model.add_ems_actuator(
+      name: "#{pan_heater_energy_oe.name} act",
+      model_object: pan_heater_energy_oe,
+      comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
+    )
+
+    # Sensors
+    tout_db_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{air_loop_unitary.name} tout s",
+      output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+      key_name: 'Environment'
+    )
+
+    if heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeDefrost
+      htg_coil_rtf_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{htg_coil.name} rtf s",
+        output_var_or_meter_name: 'Heating Coil Runtime Fraction',
+        key_name: htg_coil.name
+      )
+    end
+
+    # Create HVAC availability sensor
+    if not heating_unavailable_periods.empty?
+      htg_avail_sch = ScheduleConstant.new(model, 'heating availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: heating_unavailable_periods)
+
+      htg_avail_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{htg_avail_sch.schedule.name} s",
+        output_var_or_meter_name: 'Schedule Value',
+        key_name: htg_avail_sch.schedule.name
+      )
+    end
+
+    # EMS program
+    program = Model.add_ems_program(
+      model,
+      name: "#{air_loop_unitary.name} pan heater program"
+    )
+    if htg_avail_sensor.nil?
+      program.addLine("If (#{tout_db_sensor.name} <= #{UnitConversions.convert(32.0, 'F', 'C')})")
+    else # Don't run pan heater during heating unavailable period
+      program.addLine("If (#{tout_db_sensor.name} <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (#{htg_avail_sensor.name} == 1)")
+    end
+    if heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeContinuous
+      program.addLine("  Set #{pan_heater_energy_oe_act.name} = #{heat_pump.pan_heater_watts}")
+    elsif heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeDefrost
+      # Set defrost fraction per RESNET MINHERS Addendum 82
+      # FIXME: Reuse this code in the defrost model
+      program.addLine("  Set F_defrost = 0.134 - (0.003 * ((#{tout_db_sensor.name} * 1.8) + 32))")
+      program.addLine('  Set F_defrost = @Min F_defrost 0.08')
+      program.addLine('  Set F_defrost = @Max F_defrost 0')
+      program.addLine("  Set #{pan_heater_energy_oe_act.name} = F_defrost * #{htg_coil_rtf_sensor.name} * #{heat_pump.pan_heater_watts}")
+    end
+    program.addLine('Else')
+    program.addLine("  Set #{pan_heater_energy_oe_act.name} = 0.0")
+    program.addLine('EndIf')
+
+    # EMS calling manager
     Model.add_ems_program_calling_manager(
       model,
       name: "#{program.name} calling manager",

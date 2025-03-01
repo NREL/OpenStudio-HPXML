@@ -2251,6 +2251,21 @@ module Defaults
       end
     end
 
+    # Pan heater
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      case heat_pump.heat_pump_type
+      when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit
+        if heat_pump.pan_heater_watts.nil?
+          heat_pump.pan_heater_watts = 150.0 # W, per RESNET MINHERS Addendum 82
+          heat_pump.pan_heater_watts_isdefaulted = true
+        end
+        if heat_pump.pan_heater_control_type.nil? && heat_pump.pan_heater_watts > 0
+          heat_pump.pan_heater_control_type = HPXML::HVACPanHeaterControlTypeContinuous # Per RESNET MINHERS Addendum 82
+          heat_pump.pan_heater_control_type_isdefaulted = true
+        end
+      end
+    end
+
     # EER2
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)

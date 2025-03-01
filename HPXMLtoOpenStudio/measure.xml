@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>be03b9f4-60fd-454f-bce3-18f9573396fe</version_id>
-  <version_modified>2025-02-21T23:59:04Z</version_modified>
+  <version_id>57f13890-e162-459e-aedd-6c8a88963e64</version_id>
+  <version_modified>2025-02-28T21:30:55Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -207,7 +207,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1382D07B</checksum>
+      <checksum>797B58A9</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F102958F</checksum>
+      <checksum>CE586CDF</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -357,7 +357,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E58F99B7</checksum>
+      <checksum>C6D9D813</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -375,7 +375,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EA557B0F</checksum>
+      <checksum>F6593FE9</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>583EBD15</checksum>
+      <checksum>A1CEBF61</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -699,7 +699,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>FF1099AE</checksum>
+      <checksum>3FC69409</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -723,7 +723,7 @@
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>DCCB51E3</checksum>
+      <checksum>B6D40D94</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>

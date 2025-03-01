@@ -2199,6 +2199,20 @@
     "heat_pump_heating_autosizing_limit": 44000,
     "heating_system_2_heating_autosizing_limit": 29000
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-pan-heater-continuous-mode.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
+    "heat_pump_pan_heater_watts": 100.0,
+    "heat_pump_pan_heater_control_type": "continuous"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-pan-heater-defrost-mode.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
+    "heat_pump_pan_heater_watts": 100.0,
+    "heat_pump_pan_heater_control_type": "defrost mode"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-pan-heater-none.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
+    "heat_pump_pan_heater_watts": 0.0
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv",

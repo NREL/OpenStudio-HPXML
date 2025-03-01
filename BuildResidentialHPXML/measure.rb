@@ -1566,6 +1566,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_pan_heater_watts', false)
+    arg.setDisplayName('Heat Pump: Pan Heater Power Watts')
+    arg.setDescription("Heat Pump pan heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    pan_heater_control_type_choices = OpenStudio::StringVector.new
+    pan_heater_control_type_choices << HPXML::HVACPanHeaterControlTypeContinuous
+    pan_heater_control_type_choices << HPXML::HVACPanHeaterControlTypeDefrost
+
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('heat_pump_pan_heater_control_type', pan_heater_control_type_choices, false)
+    arg.setDisplayName('Heat Pump: Pan Heater Control Type')
+    arg.setDescription("Heat pump pan heater control type. If '#{HPXML::HVACPanHeaterControlTypeContinuous}', operates continuously when outdoor temperature is below 32F. If '#{HPXML::HVACPanHeaterControlTypeDefrost}', operates only during defrost mode when outdoor temperature is below 32F. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.")
+    args << arg
+
     perf_data_capacity_type_choices = OpenStudio::StringVector.new
     perf_data_capacity_type_choices << 'Absolute capacities'
     perf_data_capacity_type_choices << 'Normalized capacity fractions'
@@ -5925,6 +5940,11 @@ module HPXMLFile
       heat_pump_crankcase_heater_watts = args[:heat_pump_crankcase_heater_watts]
     end
 
+    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump_type)
+      heat_pump_pan_heater_watts = args[:heat_pump_pan_heater_watts]
+      heat_pump_pan_heater_control_type = args[:heat_pump_pan_heater_control_type]
+    end
+
     hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
                               heat_pump_type: heat_pump_type,
                               heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -5959,6 +5979,8 @@ module HPXMLFile
                               airflow_defect_ratio: airflow_defect_ratio,
                               charge_defect_ratio: args[:heat_pump_charge_defect_ratio],
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
+                              pan_heater_watts: heat_pump_pan_heater_watts,
+                              pan_heater_control_type: heat_pump_pan_heater_control_type,
                               primary_heating_system: args[:heat_pump_fraction_heat_load_served] > 0,
                               primary_cooling_system: args[:heat_pump_fraction_cool_load_served] > 0)
 

@@ -38,7 +38,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       # Check EMS
       assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
       unitary_system = model.getAirLoopHVACUnitarySystems[0]
-      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
       assert(program_values.empty?) # Check no EMS program
     end
   end
@@ -62,7 +62,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
   end
 
@@ -85,7 +85,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
   end
 
@@ -513,7 +513,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       # Check EMS
       assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
       unitary_system = model.getAirLoopHVACUnitarySystems[0]
-      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
       assert(program_values.empty?) # Check no EMS program
     end
   end
@@ -549,7 +549,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       # Check EMS
       assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
       unitary_system = model.getAirLoopHVACUnitarySystems[0]
-      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
       assert(program_values.empty?) # Check no EMS program
     end
   end
@@ -636,7 +636,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
   end
 
@@ -681,7 +681,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
   end
 
@@ -726,7 +726,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
   end
 
@@ -952,7 +952,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
   end
 
@@ -989,7 +989,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
   end
 
@@ -1035,7 +1035,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
   end
 
@@ -1064,7 +1064,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
 
     # Check ghx
@@ -1117,7 +1117,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
 
     # Check ghx
@@ -1359,7 +1359,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
 
     # defect ratios in EMS is calculated correctly
     assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
@@ -1441,7 +1441,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(fan_watts_cfm2, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
 
     # defect ratios in EMS is calculated correctly
     assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
@@ -1525,7 +1525,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
 
     # defect ratios in EMS is calculated correctly
     assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
@@ -1633,6 +1633,25 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     assert_in_epsilon(crankcase_heater_watts, clg_coil.crankcaseHeaterCapacity, 0.01)
+  end
+
+  def test_heat_pump_pan_heater_watts
+    args_hash = {}
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.heat_pumps[0].pan_heater_watts = 60.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml_bldg.heat_pumps[0]
+    pan_heater_watts = heat_pump.pan_heater_watts
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} pan heater program")
+    assert_equal(pan_heater_watts, program_values['air_source_heat_pump_unitary_system_pan_heater_energy_act'][0])
   end
 
   def test_ceiling_fan
@@ -1753,7 +1772,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
     # Check installation quality EMS
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     clg_speed_cfms = clg_ratios.map { |ratio| cooling_cfm * ratio }
     assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
     assert_in_epsilon(program_values['FF_AF_clg'].sum, clg_speed_cfms.zip(rated_airflow_cfm_clg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
