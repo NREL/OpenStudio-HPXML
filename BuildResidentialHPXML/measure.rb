@@ -7327,6 +7327,11 @@ module HPXMLFile
                           component_idrefs: [heat_pump.id])
     end
 
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{hvac_distribution.id}",
+                          component_idrefs: [hvac_distribution.id])
+    end
+
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
 

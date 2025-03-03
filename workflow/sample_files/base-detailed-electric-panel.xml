@@ -337,11 +337,11 @@
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>52280.0</HeatingCapacity>
+              <HeatingSystemFuel>electricity</HeatingSystemFuel>
+              <HeatingCapacity>36000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.92</Value>
+                <Value>0.98</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
@@ -462,8 +462,8 @@
             <Headroom>5</Headroom>
             <BranchCircuits>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit1_HeatingSystem1'/>
-                <AttachedToComponent idref='HeatingSystem1'/>
+                <SystemIdentifier id='BranchCircuit2_AirHandler'/>
+                <AttachedToComponent idref='HVACDistribution1'/>
               </BranchCircuit>
               <BranchCircuit>
                 <SystemIdentifier id='BranchCircuit2_CoolingSystem1'/>

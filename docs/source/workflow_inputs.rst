@@ -4681,7 +4681,7 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          
          NumBreakers = NumBranches * (Voltage / 120)
 
-  .. [#] AttachedToComponent must reference a ``HeatingSystem``, ``CoolingSystem``, ``HeatPump``,  ``WaterHeatingSystem``, ``ClothesWasher``, ``ClothesDryer``, ``Dishwasher``, ``CookingRange``, ``Oven``, ``Refrigerator``, ``Freezer``, ``Dehumidifier``, ``VentilationFan``, ``PermanentSpa/Pumps/Pump``, ``PermanentSpa/Heater``, ``Pool/Pumps/Pump``, ``Pool/Heater``, ``PlugLoad``, ``FuelLoad``, ``ElectricVehicleCharger``, ``PVSystem``, or ``LightingGroup``.
+  .. [#] AttachedToComponent must reference a ``HeatingSystem``, ``CoolingSystem``, ``HeatPump``,  ``HVACDistribution``, ``WaterHeatingSystem``, ``ClothesWasher``, ``ClothesDryer``, ``Dishwasher``, ``CookingRange``, ``Oven``, ``Refrigerator``, ``Freezer``, ``Dehumidifier``, ``VentilationFan``, ``PermanentSpa/Pumps/Pump``, ``PermanentSpa/Heater``, ``Pool/Pumps/Pump``, ``Pool/Heater``, ``PlugLoad``, ``FuelLoad``, ``ElectricVehicleCharger``, ``PVSystem``, or ``LightingGroup``.
   .. [#] Provide a AttachedToComponent element for each referenced component.
          A branch circuit is assumed to be dedicated when exactly one AttachedToComponent element is provided.
 
@@ -4706,9 +4706,9 @@ Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
   .. [#] Depending on the LoadType, AttachedToComponent must reference:
 
-         \- **heating**: ``HeatingSystem`` or ``HeatPump``
+         \- **heating**: ``HeatingSystem``, ``HeatPump``, or ``HVACDistribution``
 
-         \- **cooling**: ``CoolingSystem`` or ``HeatPump``
+         \- **cooling**: ``CoolingSystem``, ``HeatPump``, or ``HVACDistribution``
 
          \- **hot water**: ``WaterHeatingSystem``
 

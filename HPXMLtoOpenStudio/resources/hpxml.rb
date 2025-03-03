@@ -7898,6 +7898,40 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
+    # Returns any branch circuits that the component may be attached to.
+    #
+    # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
+    def branch_circuits
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.branch_circuits.each do |branch_circuit|
+          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
+          next unless branch_circuit.component_idrefs.include?(@id)
+
+          list << branch_circuit
+        end
+      end
+
+      return list
+    end
+
+    # Returns any service feeders that the component may be attached to.
+    #
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
+    def service_feeders
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
+
+          list << service_feeder
+        end
+      end
+
+      return list
+    end
+
     # Returns all the HVAC systems attached to this HVAC distribution system.
     #
     # @return [Array<HPXML::XXX>] The list of HVAC systems
@@ -9734,6 +9768,7 @@ class HPXML < Object
       heating_systems = @parent_object.heating_systems.select { |heating_system| @component_idrefs.include? heating_system.id }
       cooling_systems = @parent_object.cooling_systems.select { |cooling_system| @component_idrefs.include? cooling_system.id }
       heat_pumps = @parent_object.heat_pumps.select { |heat_pump| @component_idrefs.include? heat_pump.id }
+      hvac_distributions = @parent_object.hvac_distributions.select { |hvac_distribution| @component_idrefs.include? hvac_distribution.id }
       water_heating_systems = @parent_object.water_heating_systems.select { |water_heating_system| @component_idrefs.include? water_heating_system.id }
       clothes_washers = @parent_object.clothes_washers.select { |clothes_washer| @component_idrefs.include? clothes_washer.id }
       clothes_dryers = @parent_object.clothes_dryers.select { |clothes_dryer| @component_idrefs.include? clothes_dryer.id }
@@ -9754,7 +9789,7 @@ class HPXML < Object
       pv_systems = @parent_object.pv_systems.select { |pv_system| @component_idrefs.include? pv_system.id }
       lighting_groups = @parent_object.lighting_groups.select { |lighting_group| @component_idrefs.include? lighting_group.id }
 
-      list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_washers + clothes_dryers + dishwashers + cooking_ranges + ovens + refrigerators + freezers + dehumidifiers + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_loads + fuel_loads + ev_chargers + pv_systems + lighting_groups
+      list = heating_systems + cooling_systems + heat_pumps + hvac_distributions + water_heating_systems + clothes_washers + clothes_dryers + dishwashers + cooking_ranges + ovens + refrigerators + freezers + dehumidifiers + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_loads + fuel_loads + ev_chargers + pv_systems + lighting_groups
       if @component_idrefs.size > list.size
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not supported for branch circuit '#{@id}'."
       end
@@ -9877,6 +9912,7 @@ class HPXML < Object
       heating_systems = @parent_object.heating_systems.select { |heating_system| @component_idrefs.include? heating_system.id }
       cooling_systems = @parent_object.cooling_systems.select { |cooling_system| @component_idrefs.include? cooling_system.id }
       heat_pumps = @parent_object.heat_pumps.select { |heat_pump| @component_idrefs.include? heat_pump.id }
+      hvac_distributions = @parent_object.hvac_distributions.select { |hvac_distribution| @component_idrefs.include? hvac_distribution.id }
       water_heating_systems = @parent_object.water_heating_systems.select { |water_heating_system| @component_idrefs.include? water_heating_system.id }
       clothes_dryers = @parent_object.clothes_dryers.select { |clothes_dryer| @component_idrefs.include? clothes_dryer.id }
       dishwashers = @parent_object.dishwashers.select { |dishwasher| @component_idrefs.include? dishwasher.id }
@@ -9897,6 +9933,9 @@ class HPXML < Object
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeCooling].include?(@type)
       end
       if !heat_pumps.empty?
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
+      end
+      if !hvac_distributions.empty?
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
       end
       if !water_heating_systems.empty?
@@ -9936,7 +9975,7 @@ class HPXML < Object
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
       end
 
-      list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
+      list = heating_systems + cooling_systems + heat_pumps + hvac_distributions + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
       if @component_idrefs.size > list.size
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not supported for service feeder '#{@id}'."
       end

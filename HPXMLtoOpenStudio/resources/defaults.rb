@@ -3229,12 +3229,23 @@ module Defaults
           branch_circuit.components.each do |component|
             types = []
             if component.is_a?(HPXML::HeatingSystem)
-              types << HPXML::ElectricPanelLoadTypeHeating if component.fraction_heat_load_served > 0
+              types << HPXML::ElectricPanelLoadTypeHeating if component.fraction_heat_load_served.nil? || (component.fraction_heat_load_served > 0)
             elsif component.is_a?(HPXML::CoolingSystem)
               types << HPXML::ElectricPanelLoadTypeCooling if component.fraction_cool_load_served > 0
             elsif component.is_a?(HPXML::HeatPump)
               types << HPXML::ElectricPanelLoadTypeHeating if component.fraction_heat_load_served > 0
               types << HPXML::ElectricPanelLoadTypeCooling if component.fraction_cool_load_served > 0
+            elsif component.is_a?(HPXML::HVACDistribution)
+              component.hvac_systems.each do |hvac_system|
+                if hvac_system.is_a?(HPXML::HeatingSystem)
+                  types << HPXML::ElectricPanelLoadTypeHeating
+                elsif hvac_system.is_a?(HPXML::CoolingSystem)
+                  types << HPXML::ElectricPanelLoadTypeCooling
+                elsif hvac_system.is_a?(HPXML::HeatPump)
+                  types << HPXML::ElectricPanelLoadTypeHeating
+                  types << HPXML::ElectricPanelLoadTypeCooling
+                end
+              end
             elsif component.is_a?(HPXML::WaterHeatingSystem)
               types << HPXML::ElectricPanelLoadTypeWaterHeater
             elsif component.is_a?(HPXML::ClothesDryer)
@@ -3335,18 +3346,13 @@ module Defaults
 
       branch_circuits.each do |branch_circuit|
         if branch_circuit.occupied_spaces.nil?
-          branch_circuit.occupied_spaces = get_branch_circuit_occupied_spaces_default_values(runner, hpxml_bldg, branch_circuit, default_panels_csv_data)
+          branch_circuit.occupied_spaces = get_branch_circuit_occupied_spaces_default_values(branch_circuit)
           branch_circuit.occupied_spaces_isdefaulted = true
         end
       end
 
       # after all occupied spaces are set, check if any exceed max (1 for 120V and 2 for 240V)
       branch_circuits.each do |branch_circuit|
-        if branch_circuit.occupied_spaces.nil?
-          branch_circuit.occupied_spaces = get_branch_circuit_occupied_spaces_default_values(runner, hpxml_bldg, branch_circuit, default_panels_csv_data)
-          branch_circuit.occupied_spaces_isdefaulted = true
-        end
-
         occupied_spaces = branch_circuit.occupied_spaces
         max_breakers_per_branch_circuit = Integer(Float(branch_circuit.voltage)) / 120
 
@@ -5986,6 +5992,14 @@ module Defaults
       if component.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
         return HPXML::ElectricPanelVoltage120
       end
+    elsif component.is_a?(HPXML::HVACDistribution)
+      component.hvac_systems.each do |hvac_system|
+        if (hvac_system.is_a?(HPXML::HeatingSystem) && (hvac_system.heating_system_fuel == HPXML::FuelTypeElectricity)) ||
+           (hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.backup_heating_fuel.nil? || (hvac_system.backup_heating_fuel == HPXML::FuelTypeElectricity)))
+          return HPXML::ElectricPanelVoltage240
+        end
+      end
+      return HPXML::ElectricPanelVoltage120
     elsif component.is_a?(HPXML::Dishwasher)
       return HPXML::ElectricPanelVoltage120
     elsif component.is_a?(HPXML::VentilationFan)
@@ -6090,9 +6104,6 @@ module Defaults
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heating_system.heating_capacity, heating_system.heating_efficiency_afue, heating_system.heating_efficiency_percent), 'btu/hr', 'w')
         end
-
-        watts += HVAC.get_blower_fan_power_watts(heating_system.fan_watts_per_cfm, heating_system.heating_airflow_cfm)
-        watts += HVAC.get_pump_power_watts(heating_system.electric_auxiliary_energy)
       end
 
       hpxml_bldg.heat_pumps.each do |heat_pump|
@@ -6102,52 +6113,60 @@ module Defaults
         if heat_pump.branch_circuits.empty?
           voltage = get_branch_circuit_voltage_default_values(heat_pump)
           runner.registerWarning("Missing branch circuit for #{heat_pump.id}; assuming #{voltage}V.")
-          watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
-          watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), voltage)
+          watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), voltage)
 
           if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
             if heat_pump.simultaneous_backup # sum; backup > compressor
 
               if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-                watts_ahu += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
+                watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
               end
 
             else # max; switchover
 
               if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-                watts_ahu += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), HPXML::ElectricPanelVoltage240),
-                              UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
+                watts += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), HPXML::ElectricPanelVoltage240),
+                          UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
               end
 
             end
           end
 
-          watts += watts_ahu + watts_odu
         else
           heat_pump.branch_circuits.each do |branch_circuit|
-            watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
-            watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
+            watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
 
             if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
 
               if heat_pump.simultaneous_backup # sum; backup > compressor
 
                 if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-                  watts_ahu += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
+                  watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
                 end
 
               else # max; switchover
 
                 if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-                  watts_ahu += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), HPXML::ElectricPanelVoltage240),
-                                UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
+                  watts += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), HPXML::ElectricPanelVoltage240),
+                            UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
                 end
 
               end
             end
+          end
+        end
+      end
 
-            watts += watts_ahu + watts_odu
+      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+        next if !component_ids.include?(hvac_distribution.id)
+
+        hvac_distribution.hvac_systems.each do |hvac_system|
+          if hvac_system.is_a?(HPXML::HeatingSystem) || hvac_system.is_a?(HPXML::HeatPump)
+            watts += HVAC.get_blower_fan_power_watts(hvac_system.fan_watts_per_cfm, hvac_system.heating_airflow_cfm)
+          end
+          if hvac_system.is_a?(HPXML::HeatingSystem)
+            watts += HVAC.get_pump_power_watts(hvac_system.electric_auxiliary_energy)
           end
         end
       end
@@ -6161,16 +6180,10 @@ module Defaults
         if cooling_system.branch_circuits.empty?
           voltage = get_branch_circuit_voltage_default_values(cooling_system)
           runner.registerWarning("Missing branch circuit for #{cooling_system.id}; assuming #{voltage}V.")
-          watts_ahu = HVAC.get_blower_fan_power_watts(cooling_system.fan_watts_per_cfm, cooling_system.cooling_airflow_cfm)
-          watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'), voltage)
-
-          watts += watts_ahu + watts_odu
+          watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'), voltage)
         else
           cooling_system.branch_circuits.each do |branch_circuit|
-            watts_ahu = HVAC.get_blower_fan_power_watts(cooling_system.fan_watts_per_cfm, cooling_system.cooling_airflow_cfm)
-            watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
-
-            watts += watts_ahu + watts_odu
+            watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
           end
         end
       end
@@ -6179,10 +6192,17 @@ module Defaults
         next if !component_ids.include?(heat_pump.id)
         next if heat_pump.fraction_cool_load_served == 0
 
-        watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.cooling_airflow_cfm)
-        watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), get_branch_circuit_voltage_default_values(heat_pump))
+        watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), get_branch_circuit_voltage_default_values(heat_pump))
+      end
 
-        watts += watts_ahu + watts_odu
+      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+        next if !component_ids.include?(hvac_distribution.id)
+
+        hvac_distribution.hvac_systems.each do |hvac_system|
+          if hvac_system.is_a?(HPXML::CoolingSystem) || hvac_system.is_a?(HPXML::HeatPump)
+            watts += HVAC.get_blower_fan_power_watts(hvac_system.fan_watts_per_cfm, hvac_system.cooling_airflow_cfm)
+          end
+        end
       end
 
     elsif type == HPXML::ElectricPanelLoadTypeWaterHeater
@@ -6446,18 +6466,26 @@ module Defaults
 
   # Gets the default breaker spaces for a branch circuit based on power rating, voltage, amps, and attached components.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param branch_circuit [HPXML::BranchCircuit] Object that defines a single electric panel branch circuit
-  # @param default_panels_csv_data [Hash] { load_name => { voltage => power_rating, ... }, ... }
   # @return [Integer] number of breaker spaces
-  def self.get_branch_circuit_occupied_spaces_default_values(_runner, _hpxml_bldg, branch_circuit, _default_panels_csv_data)
-    watts = 0
+  def self.get_branch_circuit_occupied_spaces_default_values(branch_circuit)
+    htg, clg, oth = 0, 0, 0
     branch_circuit.components.each do |component|
-      component.service_feeders.each do |service_feeder|
-        watts += service_feeder.power
+      if (branch_circuit.voltage == HPXML::ElectricPanelVoltage120) && component.is_a?(HPXML::CoolingSystem) && (component.cooling_system_type == HPXML::HVACTypeRoomAirConditioner)
+        # no-op
+      else
+        component.service_feeders.each do |service_feeder|
+          if service_feeder.type == HPXML::ElectricPanelLoadTypeHeating
+            htg += service_feeder.power
+          elsif service_feeder.type == HPXML::ElectricPanelLoadTypeCooling
+            clg += service_feeder.power
+          else
+            oth += service_feeder.power
+          end
+        end
       end
     end
+    watts = [htg, clg].max + oth
     occupied_spaces = get_breaker_spaces_from_power_watts_voltage_amps(watts, branch_circuit.voltage, branch_circuit.max_current_rating)
     return occupied_spaces
   end
