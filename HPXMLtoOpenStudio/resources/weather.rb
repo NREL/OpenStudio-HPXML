@@ -8,13 +8,18 @@ class WeatherFile
   # @param epw_path [String] Path to the EPW weather file
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   def initialize(epw_path:, runner:)
-    if $weather_cache[:epw_path] == epw_path
+    if not File.exist?(epw_path)
+      fail "Cannot find weather file at #{epw_path}."
+    end
+
+    if not $weather_cache[epw_path].nil?
       # Use cache
-      @header = $weather_cache[:header]
-      @data = $weather_cache[:data]
-      @design = $weather_cache[:design]
-      @epw_file = $weather_cache[:epw_file]
-      @epw_path = $weather_cache[:epw_path]
+      epw_data = $weather_cache[epw_path]
+      @header = epw_data[:header]
+      @data = epw_data[:data]
+      @design = epw_data[:design]
+      @epw_file = epw_data[:epw_file]
+      @epw_path = epw_data
       return
     else
       @header = WeatherHeader.new
@@ -22,15 +27,10 @@ class WeatherFile
       @design = WeatherDesign.new
       @epw_file = OpenStudio::EpwFile.new(epw_path, true)
       @epw_path = epw_path
-      $weather_cache[:header] = @header
-      $weather_cache[:data] = @data
-      $weather_cache[:design] = @design
-      $weather_cache[:epw_file] = @epw_file
-      $weather_cache[:epw_path] = @epw_path
-    end
-
-    if not File.exist?(epw_path)
-      fail "Cannot find weather file at #{epw_path}."
+      $weather_cache[epw_path] = { header: @header,
+                                   data: @data,
+                                   design: @design,
+                                   epw_file: @epw_file }
     end
 
     process_epw(runner)

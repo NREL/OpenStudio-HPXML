@@ -4508,9 +4508,9 @@ module Defaults
   # @param zipcode [String] Zipcode of interest
   # @return [Hash] Mapping with keys for every column name in zipcode_weather_stations.csv
   def self.lookup_weather_data_from_zipcode(zipcode)
-    if $weather_lookup_cache[:zipcode] == zipcode
+    if not $weather_lookup_cache["zipcode_#{zipcode}"].nil?
       # Use cache
-      return $weather_lookup_cache[:zipcode_data]
+      return $weather_lookup_cache["zipcode_#{zipcode}"]
     end
 
     begin
@@ -4549,8 +4549,7 @@ module Defaults
       end
       next unless distance == 0
 
-      $weather_lookup_cache[:zipcode] = zipcode
-      $weather_lookup_cache[:zipcode_data] = weather_station
+      $weather_lookup_cache["zipcode_#{zipcode}"] = weather_station
       return weather_station # Exact match
     end
 
@@ -4558,8 +4557,7 @@ module Defaults
       fail "Zip code '#{zipcode}' could not be found in zipcode_weather_stations.csv"
     end
 
-    $weather_lookup_cache[:zipcode] = zipcode
-    $weather_lookup_cache[:zipcode_data] = weather_station
+    $weather_lookup_cache["zipcode_#{zipcode}"] = weather_station
     return weather_station
   end
 
@@ -4568,9 +4566,9 @@ module Defaults
   # @param wmo [String] Weather station World Meteorological Organization (WMO) number
   # @return [Hash or nil] Mapping with keys for every column name in zipcode_weather_stations.csv if WMO is found, otherwise nil
   def self.lookup_weather_data_from_wmo(wmo)
-    if $weather_lookup_cache[:wmo] == wmo
+    if not $weather_lookup_cache["wmo_#{wmo}"].nil?
       # Use cache
-      return $weather_lookup_cache[:wmo_data]
+      return $weather_lookup_cache["wmo_#{wmo}"]
     end
 
     zip_csv_data = get_weather_station_csv_data()
@@ -4596,8 +4594,7 @@ module Defaults
       break
     end
 
-    $weather_lookup_cache[:wmo] = wmo
-    $weather_lookup_cache[:wmo_data] = weather_station
+    $weather_lookup_cache["wmo_#{wmo}"] = weather_station
     return weather_station
   end
 
