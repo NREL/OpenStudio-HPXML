@@ -820,8 +820,8 @@ class ScheduleGenerator
     away_index = 5 # Index of away activity in the markov-chain simulator
     away_schedule = markov_chain_simulation_result[@ev_occupant_number].column(away_index)
     charging_schedule, discharging_schedule = get_ev_battery_schedule(away_schedule, hours_per_year)
-    agg_charging_schedule = random_shift_and_aggregate(charging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
-    agg_discharging_schedule = random_shift_and_aggregate(discharging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
+    agg_charging_schedule = random_shift_and_aggregate(charging_schedule).map { |val| val.to_f / @minutes_per_step }
+    agg_discharging_schedule = random_shift_and_aggregate(discharging_schedule).map { |val| val.to_f / @minutes_per_step }
 
     # The combined schedule is not a sum of the charging and discharging schedules because when charging and discharging
     # both occur in a timestep, we don't want them to cancel out and draw no power from the building. So, whenever there
