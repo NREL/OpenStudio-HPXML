@@ -43,3 +43,4 @@ None	none
 "Stove, 80% Efficiency"	Stove	0.8		
 "Fuel Floor Furnace, 80% AFUE, 600 BTUh Pilot Light"	FloorFurnace	0.8	600	
 "Space Heater, 100% Efficiency"	SpaceHeater	1		
+"Space Heater, 92% Efficiency"	SpaceHeater	0.92		
