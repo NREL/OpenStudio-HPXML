@@ -59,7 +59,7 @@
         </BuildingConstruction>
         <extension>
           <AdditionalProperties>
-            <PeakElectricity>4500</PeakElectricity>
+            <PeakElectricity>4500.0</PeakElectricity>
           </AdditionalProperties>
         </extension>
       </BuildingSummary>

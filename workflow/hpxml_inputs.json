@@ -1959,12 +1959,12 @@
     "kitchen_fans_quantity": 1,
     "bathroom_fans_quantity": 2,
     "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
+    "electric_panel_baseline_peak_electricity_power": 4500,
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
     "electric_panel_breaker_spaces_type": "headroom",
     "electric_panel_breaker_spaces": 5,
-    "electric_panel_load_other_power": 559,
-    "additional_properties": "PeakElectricity=4500"
+    "electric_panel_load_other_power": 559
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2375,13 +2375,13 @@
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
+    "electric_panel_baseline_peak_electricity_power": 4500,
     "electric_panel_service_voltage": "240",
     "electric_panel_service_rating": 100,
     "electric_panel_breaker_spaces_type": "headroom",
     "electric_panel_breaker_spaces": 5,
     "electric_panel_load_cooling_system_power": 3542,
-    "electric_panel_load_other_power": 559,
-    "additional_properties": "PeakElectricity=4500"
+    "electric_panel_load_other_power": 559
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",

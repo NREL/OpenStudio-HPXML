@@ -4432,6 +4432,19 @@ Types of electric panel service/feeder load calculations. Possible types are: 20
 
 <br/>
 
+**Electric Panel: Peak Electricity Power**
+
+Specifies the baseline peak electricity. Used for 2023 Existing Dwelling Meter-Based.
+
+- **Name:** ``electric_panel_baseline_peak_electricity_power``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
 **Electric Panel: Service Voltage**
 
 The service voltage of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.

@@ -2633,6 +2633,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Types of electric panel service/feeder load calculations. Possible types are: #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased}, #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased}. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_baseline_peak_electricity_power', false)
+    arg.setDisplayName('Electric Panel: Peak Electricity Power')
+    arg.setDescription("Specifies the baseline peak electricity. Used for #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased}.")
+    arg.setUnits('W')
+    args << arg
+
     electric_panel_voltage_choices = OpenStudio::StringVector.new
     electric_panel_voltage_choices << HPXML::ElectricPanelVoltage120
     electric_panel_voltage_choices << HPXML::ElectricPanelVoltage240
@@ -5141,6 +5147,14 @@ module HPXMLFile
         extension_properties[key] = value
       end
       hpxml_bldg.header.extension_properties = extension_properties
+    end
+
+    if not args[:electric_panel_baseline_peak_electricity_power].nil?
+      if hpxml_bldg.header.extension_properties.nil?
+        hpxml_bldg.header.extension_properties = { 'PeakElectricity' => args[:electric_panel_baseline_peak_electricity_power] }
+      else
+        hpxml_bldg.header.extension_properties['PeakElectricity'] = args[:electric_panel_baseline_peak_electricity_power]
+      end
     end
   end
 

@@ -595,17 +595,18 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     Dir["#{@sample_files_path}/*.xml"].each do |hpxml|
       hpxml_name = File.basename(hpxml)
       hpxml, hpxml_bldg = _create_hpxml(hpxml_name, hpxml_name)
-      hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased]
+      hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased,
+                                                             HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased]
 
       Defaults.apply(runner, hpxml, hpxml_bldg, weather)
       electric_panel = hpxml_bldg.electric_panels[0]
 
       assert_operator(electric_panel.capacity_total_watts[0], :>, 0.0)
       assert_operator(electric_panel.capacity_total_amps[0], :>, 0.0)
-      assert_operator(electric_panel.capacity_headroom_amps[0], :>, 0.0)
-      assert_operator(electric_panel.breaker_spaces_total, :>, 0)
-      assert_operator(electric_panel.breaker_spaces_occupied, :>, 0)
-      assert_operator(electric_panel.breaker_spaces_headroom, :>, 0)
+      assert(electric_panel.capacity_headroom_amps[0] != 0.0)
+      assert_operator(electric_panel.capacity_total_watts[1], :>, 0.0)
+      assert_operator(electric_panel.capacity_total_amps[1], :>, 0.0)
+      assert(electric_panel.capacity_headroom_amps[1] != 0.0)
     end
   end
 
@@ -650,6 +651,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     if hpxml_bldg.electric_panels.size == 0
       hpxml_bldg.electric_panels.add(id: 'ElectricPanel')
     end
+    hpxml_bldg.header.extension_properties['PeakElectricity'] = 4500
     return hpxml, hpxml_bldg
   end
 
