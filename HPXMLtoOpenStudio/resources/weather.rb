@@ -12,6 +12,7 @@ class WeatherFile
       fail "Cannot find weather file at #{epw_path}."
     end
 
+    @epw_path = epw_path
     if not $weather_cache[epw_path].nil?
       # Use cache
       epw_data = $weather_cache[epw_path]
@@ -19,14 +20,12 @@ class WeatherFile
       @data = epw_data[:data]
       @design = epw_data[:design]
       @epw_file = epw_data[:epw_file]
-      @epw_path = epw_data
       return
     else
       @header = WeatherHeader.new
       @data = WeatherData.new
       @design = WeatherDesign.new
       @epw_file = OpenStudio::EpwFile.new(epw_path, true)
-      @epw_path = epw_path
       $weather_cache[epw_path] = { header: @header,
                                    data: @data,
                                    design: @design,
