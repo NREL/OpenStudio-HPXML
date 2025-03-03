@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>a36fb4f6-7688-49e8-97ac-da9ef347a8d3</version_id>
-  <version_modified>2025-03-01T23:19:44Z</version_modified>
+  <version_id>a68ccdf3-c8ad-4fc0-91f8-39f576cb6f6f</version_id>
+  <version_modified>2025-03-03T03:38:42Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -327,7 +327,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7F287FCB</checksum>
+      <checksum>2C159DDA</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>

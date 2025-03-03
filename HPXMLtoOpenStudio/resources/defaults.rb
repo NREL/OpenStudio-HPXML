@@ -4575,6 +4575,7 @@ module Defaults
 
     zip_csv_data = get_weather_station_csv_data()
 
+    weather_station = {}
     col_names = nil
     wmo_idx = nil
     zip_csv_data.each_with_index do |row, i|
@@ -4589,18 +4590,15 @@ module Defaults
 
       next unless row[wmo_idx] == wmo
 
-      weather_station = {}
       col_names.each_with_index do |col_name, j|
         weather_station[col_name] = row[j]
       end
-      $weather_lookup_cache[:wmo] = wmo
-      $weather_lookup_cache[:wmo_data] = weather_station
-      return weather_station
+      break
     end
 
     $weather_lookup_cache[:wmo] = wmo
-    $weather_lookup_cache[:wmo_data] = {}
-    return
+    $weather_lookup_cache[:wmo_data] = weather_station
+    return weather_station
   end
 
   # Gets the default number of bathrooms in the dwelling unit.
