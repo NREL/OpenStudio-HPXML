@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>4e7b1028-d052-4de6-bfd9-709de164cb9b</version_id>
-  <version_modified>2025-03-03T04:56:46Z</version_modified>
+  <version_id>1efb99e6-bee6-4766-b58d-8c201261d3b2</version_id>
+  <version_modified>2025-03-03T05:41:52Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -741,7 +741,7 @@
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>733BB792</checksum>
+      <checksum>48836AFF</checksum>
     </file>
     <file>
       <filename>test_miscloads.rb</filename>
@@ -789,7 +789,7 @@
       <filename>test_weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>43A4396B</checksum>
+      <checksum>6D80EFBE</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
