@@ -2,9 +2,9 @@ name: ci
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    types: [synchronize, opened]
+    types: [ synchronize, opened ]
   workflow_dispatch:
 
 jobs:
@@ -22,8 +22,7 @@ jobs:
           rm -f Gemfile.lock && bundle install
           export DEBIAN_FRONTEND=noninteractive
           sudo apt update
-          sudo -E apt-get install -y wget unzip python3-sphinx-rtd-theme python3-pip
-          pip3 install pandas numpy
+          sudo -E apt-get install -y wget unzip python3-sphinx-rtd-theme
 
       - name: Check measures
         shell: bash
@@ -51,7 +50,7 @@ jobs:
           if ! git diff --quiet --ignore-cr-at-eol HPXMLtoOpenStudio/resources/schedule_files/*.csv; then
             echo "Detailed schedule file differences:"
             cd HPXMLtoOpenStudio/resources/schedule_files
-            python print_diff.py
+            openstudio print_diff.py
           fi
 
       - name: Run measure unit tests
