@@ -37,6 +37,7 @@ module ElectricPanel
     electric_panel.capacity_total_amps = capacity_total_amps
     electric_panel.capacity_headroom_amps = capacity_headroom_amps
 
+    # TODO: only if !branch_circuits/empty?
     breaker_spaces_values = BreakerSpacesValues.new
     calculate_breaker_spaces(runner, electric_panel, breaker_spaces_values)
 
@@ -215,7 +216,7 @@ module ElectricPanel
     occupied = electric_panel.branch_circuits.map { |branch_circuit| branch_circuit.occupied_spaces }.sum(0.0)
 
     if !total.nil? && !headroom.nil?
-      if occupied + headroom != total
+      if (not electric_panel.branch_circuits.empty?) && (occupied + headroom != total)
         runner.registerWarning("#{electric_panel.id}: the sum of occupied spaces (#{occupied}) and headroom (#{headroom}) does equal total (#{total}); modifying headroom.")
       end
     elsif !headroom.nil?
