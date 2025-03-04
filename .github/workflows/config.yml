@@ -22,8 +22,8 @@ jobs:
           rm -f Gemfile.lock && bundle install
           export DEBIAN_FRONTEND=noninteractive
           sudo apt update
-          sudo -E apt-get install -y wget unzip python3-sphinx-rtd-theme
-          pip install pandas numpy
+          sudo -E apt-get install -y wget unzip python3-sphinx-rtd-theme python3-pip
+          pip3 install pandas numpy
 
       - name: Check measures
         shell: bash
