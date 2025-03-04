@@ -4496,7 +4496,7 @@ module Defaults
 
     if $weather_lookup_cache[:csv_data].nil?
       # Note: We don't use the CSV library here because it's slow for large files
-      $weather_lookup_cache[:csv_data] = File.readlines(zipcode_csv_filepath).map { |r| r.split(',') }
+      $weather_lookup_cache[:csv_data] = File.readlines(zipcode_csv_filepath).map { |r| r.strip.split(',') }
     end
 
     return $weather_lookup_cache[:csv_data]
