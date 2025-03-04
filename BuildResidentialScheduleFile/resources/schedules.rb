@@ -211,10 +211,10 @@ class ScheduleGenerator
     return true
   end
 
-  # TODO
+  # Simulate occupant activities using Markov chain model.
   #
-  # @return [TODO] TODO
-  def simulate_occupant_activities()
+  # @return [Array<Matrix>] Array of matrices containing activity schedules for each occupant
+  def simulate_occupant_activities
     mkc_activity_schedules = [] # holds the markov-chain state for each of the seven simulated states for each occupant.
     # States are: 'sleeping', 'shower', 'laundry', 'cooking', 'dishwashing', 'absent', 'nothingAtHome'
 
@@ -963,12 +963,12 @@ class ScheduleGenerator
     end
   end
 
-  # TODO
+  # Generate plug load schedules based on occupant activities and daily schedules.
   #
-  # @param mkc_activity_schedules [TODO] TODO
-  # @param daily_schedules [TODO] TODO
-  # @param schedule_type [TODO] TODO
-  # @return [TODO]
+  # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
+  # @param daily_schedules [Hash] Hash containing daily schedule data for plug loads
+  # @param schedule_type [Symbol] Type of plug load schedule to generate
+  # @return [Array<Float>] Array of hourly plug load schedule values normalized to 1.0
   def generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, schedule_type)
     schedule = Array.new(@total_days_in_year * 1440, 0.0)
     @total_days_in_year.times do |day|
