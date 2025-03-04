@@ -92,7 +92,7 @@ module ElectricPanel
         heating_system_watts = service_feeder.power
         primary_heat_pump_watts = 0
         if !heating_system.primary_heat_pump.nil?
-          primary_heat_pump_watts = electric_panel.service_feeders.find { |pl| pl.component_idrefs.include?(heating_system.primary_heat_pump.id) }.power
+          primary_heat_pump_watts = electric_panel.service_feeders.find { |sf| sf.component_idrefs.include?(heating_system.primary_heat_pump.id) }.power
         end
 
         if addition.nil? ||
@@ -112,7 +112,7 @@ module ElectricPanel
       heat_pump_watts = service_feeder.power
       backup_system_watts = 0
       if !heat_pump.backup_system.nil?
-        backup_system_watts = electric_panel.service_feeders.find { |pl| pl.component_idrefs.include?(heat_pump.backup_system.id) }.power
+        backup_system_watts = electric_panel.service_feeders.find { |sf| sf.component_idrefs.include?(heat_pump.backup_system.id) }.power
       end
 
       next unless addition.nil? ||

@@ -93,12 +93,12 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_equal(13 - 15, electric_panel.breaker_spaces_headroom)
 
     # Load-Based Part A
-    assert_in_epsilon(24662.0, electric_panel.capacity_total_watts[0], 0.01)
-    assert_in_epsilon((24662.0 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_total_amps[0], 0.01)
-    assert_in_epsilon((electric_panel.max_current_rating - 24662.0 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_headroom_amps[0], 0.01)
+    assert_in_epsilon(24735.8, electric_panel.capacity_total_watts[0], 0.001)
+    assert_in_epsilon((24735.8 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_total_amps[0], 0.01)
+    assert_in_epsilon((electric_panel.max_current_rating - 24735.8 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_headroom_amps[0], 0.01)
 
     # Meter-Based
-    assert_in_epsilon(29535.0, electric_panel.capacity_total_watts[1], 0.01)
+    assert_in_epsilon(29535.0, electric_panel.capacity_total_watts[1], 0.001)
     assert_in_epsilon((29535.0 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_total_amps[1], 0.01)
     assert_in_epsilon((electric_panel.max_current_rating - 29535.0 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_headroom_amps[1], 0.01)
 
@@ -116,9 +116,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_equal(13 - 15, electric_panel.breaker_spaces_headroom)
 
     # Load-Based Part B
-    assert_in_epsilon(34827, electric_panel.capacity_total_watts[0], 0.01)
-    assert_in_epsilon((34827 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_total_amps[0], 0.01)
-    assert_in_epsilon((electric_panel.max_current_rating - 34827 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_headroom_amps[0], 0.01)
+    assert_in_epsilon(35011.7, electric_panel.capacity_total_watts[0], 0.01)
+    assert_in_epsilon((35011.7 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_total_amps[0], 0.01)
+    assert_in_epsilon((electric_panel.max_current_rating - 35011.7 / Float(HPXML::ElectricPanelVoltage240)).round(1), electric_panel.capacity_headroom_amps[0], 0.01)
 
     # Meter-Based
     assert_in_epsilon(46477.0, electric_panel.capacity_total_watts[1], 0.01)
@@ -228,8 +228,9 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
     branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                        component_idrefs: [hpxml_bldg.heating_systems[0].id,
-                                           hpxml_bldg.hvac_distributions[0].id])
+                        component_idrefs: [hpxml_bldg.heating_systems[0].id])
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        component_idrefs: [hpxml_bldg.hvac_distributions[0].id])
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         component_idrefs: [hpxml_bldg.cooling_systems[0].id])
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)

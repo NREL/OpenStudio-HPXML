@@ -7271,7 +7271,7 @@ module HPXMLFile
 
     hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.primary_system
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{heating_system.id}",
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                             component_idrefs: [heating_system.id])
         if !args[:electric_panel_load_heating_system_power].nil? || !args[:electric_panel_load_heating_system_addition].nil?
           service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
@@ -7281,7 +7281,7 @@ module HPXMLFile
                               component_idrefs: [heating_system.id])
         end
       else
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{heating_system.id}",
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                             component_idrefs: [heating_system.id])
         if !args[:electric_panel_load_heating_system_2_power].nil? || !args[:electric_panel_load_heating_system_2_addition].nil?
           service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
@@ -7294,7 +7294,7 @@ module HPXMLFile
     end
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{cooling_system.id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           component_idrefs: [cooling_system.id])
 
       next unless !args[:electric_panel_load_cooling_system_power].nil? || !args[:electric_panel_load_cooling_system_addition].nil?
@@ -7307,7 +7307,7 @@ module HPXMLFile
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{heat_pump.id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           voltage: args[:electric_panel_load_heat_pump_voltage],
                           component_idrefs: [heat_pump.id])
 
@@ -7328,14 +7328,26 @@ module HPXMLFile
     end
 
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{hvac_distribution.id}",
-                          component_idrefs: [hvac_distribution.id])
+      # check the heating system first
+      hvac_distribution.hvac_systems.each do |hvac_system|
+        next unless (hvac_system.is_a?(HPXML::HeatingSystem) && (hvac_system.heating_system_fuel == HPXML::FuelTypeElectricity)) ||
+                    (hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.backup_heating_fuel.nil? || (hvac_system.backup_heating_fuel == HPXML::FuelTypeElectricity)))
+
+        # indoor unit is wired with electric heating
+        branch_circuit = hvac_system.branch_circuits[0]
+        branch_circuit.component_idrefs << hvac_distribution.id
+      end
+      # then wire separately
+      if hvac_distribution.branch_circuits.empty?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            component_idrefs: [hvac_distribution.id])
+      end
     end
 
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
 
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{water_heating_system.id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           voltage: args[:electric_panel_load_water_heater_voltage],
                           component_idrefs: [water_heating_system.id])
       next unless !args[:electric_panel_load_water_heater_power].nil? || !args[:electric_panel_load_water_heater_addition].nil?
@@ -7350,7 +7362,7 @@ module HPXMLFile
     hpxml_bldg.clothes_dryers.each do |clothes_dryer|
       next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
 
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{clothes_dryer.id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           voltage: args[:electric_panel_load_clothes_dryer_voltage],
                           component_idrefs: [clothes_dryer.id])
       next unless !args[:electric_panel_load_clothes_dryer_power].nil? || !args[:electric_panel_load_clothes_dryer_addition].nil?
@@ -7363,7 +7375,7 @@ module HPXMLFile
     end
 
     hpxml_bldg.dishwashers.each do |dishwasher|
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{dishwasher.id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           voltage: args[:electric_panel_load_clothes_dryer_voltage],
                           component_idrefs: [dishwasher.id])
       next unless !args[:electric_panel_load_dishwasher_power].nil? || !args[:electric_panel_load_dishwasher_addition].nil?
@@ -7378,7 +7390,7 @@ module HPXMLFile
     hpxml_bldg.cooking_ranges.each do |cooking_range|
       next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
 
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{cooking_range.id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           voltage: args[:electric_panel_load_cooking_range_voltage],
                           component_idrefs: [cooking_range.id])
       next unless !args[:electric_panel_load_cooking_range_power].nil? || !args[:electric_panel_load_cooking_range_addition].nil?
@@ -7391,7 +7403,7 @@ module HPXMLFile
     end
 
     hpxml_bldg.ventilation_fans.each do |ventilation_fan|
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{ventilation_fan.id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           component_idrefs: [ventilation_fan.id])
       if ventilation_fan.fan_location == HPXML::LocationKitchen
         if !args[:electric_panel_load_kitchen_fans_power].nil? || !args[:electric_panel_load_kitchen_fans_addition].nil?
@@ -7437,7 +7449,7 @@ module HPXMLFile
     end
 
     hpxml_bldg.permanent_spas.each do |permanent_spa|
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{permanent_spa.pump_id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           component_idrefs: [permanent_spa.pump_id])
       if !args[:electric_panel_load_permanent_spa_pump_power].nil? || !args[:electric_panel_load_permanent_spa_pump_addition].nil?
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
@@ -7449,7 +7461,7 @@ module HPXMLFile
 
       next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
 
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{permanent_spa.heater_id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           component_idrefs: [permanent_spa.heater_id])
       next unless !args[:electric_panel_load_permanent_spa_heater_power].nil? || !args[:electric_panel_load_permanent_spa_heater_addition].nil?
 
@@ -7461,7 +7473,7 @@ module HPXMLFile
     end
 
     hpxml_bldg.pools.each do |pool|
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{pool.pump_id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           component_idrefs: [pool.pump_id])
       if !args[:electric_panel_load_pool_pump_power].nil? || !args[:electric_panel_load_pool_pump_addition].nil?
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
@@ -7473,7 +7485,7 @@ module HPXMLFile
 
       next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
 
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{pool.heater_id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           component_idrefs: [pool.heater_id])
       next unless !args[:electric_panel_load_pool_heater_power].nil? || !args[:electric_panel_load_pool_heater_addition].nil?
 
@@ -7486,7 +7498,7 @@ module HPXMLFile
 
     hpxml_bldg.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{plug_load.id}",
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                             component_idrefs: [plug_load.id])
         if !args[:electric_panel_load_misc_plug_loads_well_pump_power].nil? || !args[:electric_panel_load_misc_plug_loads_well_pump_addition].nil?
           service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
@@ -7496,7 +7508,7 @@ module HPXMLFile
                               component_idrefs: [plug_load.id])
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{plug_load.id}",
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                             voltage: args[:electric_panel_load_misc_plug_loads_vehicle_voltage],
                             component_idrefs: [plug_load.id])
         if !args[:electric_panel_load_misc_plug_loads_vehicle_power].nil? || !args[:electric_panel_load_misc_plug_loads_vehicle_addition].nil?
@@ -7517,7 +7529,7 @@ module HPXMLFile
                     '2' => HPXML::ElectricPanelVoltage240,
                     '3' => HPXML::ElectricPanelVoltage240 }[args[:ev_charger_level]]
       end
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{ev_charger.id}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           voltage: voltage,
                           component_idrefs: [ev_charger.id])
       if not args[:electric_panel_load_misc_plug_loads_vehicle_power].nil?
@@ -7534,20 +7546,20 @@ module HPXMLFile
                           component_idrefs: [ev_charger.id])
     end
 
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_Lighting",
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         occupied_spaces: 0,
                         component_idrefs: [])
 
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_Kitchen",
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         occupied_spaces: 2,
                         component_idrefs: [])
 
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_Laundry",
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         occupied_spaces: 1,
                         component_idrefs: [])
 
     if !args[:electric_panel_load_other_power].nil? || !args[:electric_panel_load_other_addition].nil?
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_Other",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           occupied_spaces: 1,
                           component_idrefs: [])
       service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",

@@ -729,20 +729,7 @@ End use categories (e.g., Heating, Cooling, Hot Water) report occupied spaces fo
   ================================================================================  ====================
   Type                                                                              Notes
   ================================================================================  ====================
-  Electric Panel Breaker Spaces: Heating Count                                      Sum of heating system and heat pump heating occupied spaces
-  Electric Panel Breaker Spaces: Cooling Count                                      Sum of cooling system and heat pump cooling occupied spaces
-  Electric Panel Breaker Spaces: Hot Water Count                                    Sum of water heating system occupied spaces
-  Electric Panel Breaker Spaces: Clothes Dryer Count                                Sum of clothes dryer occupied spaces
-  Electric Panel Breaker Spaces: Dishwasher Count                                   Sum of dishwasher occupied spaces
-  Electric Panel Breaker Spaces: Range/Oven Count                                   Sum of range/oven occupied spaces
-  Electric Panel Breaker Spaces: Mech Vent Count                                    Sum of mechanical ventilation occupied spaces
-  Electric Panel Breaker Spaces: Permanent Spa Heater Count                         Sum of permanent spa heater occupied spaces
-  Electric Panel Breaker Spaces: Permanent Spa Pump Count                           Sum of permanent spa pump occupied spaces
-  Electric Panel Breaker Spaces: Pool Heater Count                                  Sum of pool heater occupied spaces
-  Electric Panel Breaker Spaces: Pool Pump Count                                    Sum of pool pump occupied spaces
-  Electric Panel Breaker Spaces: Well Pump Count                                    Sum of well pump occupied spaces
-  Electric Panel Breaker Spaces: Electric Vehicle Charging Count                    Sum of electric vehicle charging occupied spaces
-  Electric Panel Breaker Spaces: Other Count                                        Sum of other occupied spaces
+  Electric Panel Breaker Spaces: <BranchCircuitID> Count                            Occupied spaces for the branch circuit
   Electric Panel Breaker Spaces: Total Count                                        Total rated number of spaces on the panel
   Electric Panel Breaker Spaces: Occupied Count                                     Total number of occupied spaces on the panel
   Electric Panel Breaker Spaces: Headroom Count                                     Total Count minus Occupied Count

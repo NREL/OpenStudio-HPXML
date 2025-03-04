@@ -451,39 +451,40 @@
             <Headroom>5</Headroom>
             <BranchCircuits>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit1_HeatPump1'/>
+                <SystemIdentifier id='BranchCircuit1'/>
                 <AttachedToComponent idref='HeatPump1'/>
+                <AttachedToComponent idref='HVACDistribution1'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit2_WaterHeatingSystem1'/>
+                <SystemIdentifier id='BranchCircuit2'/>
                 <AttachedToComponent idref='WaterHeatingSystem1'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit3_ClothesDryer1'/>
+                <SystemIdentifier id='BranchCircuit3'/>
                 <AttachedToComponent idref='ClothesDryer1'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit4_Dishwasher1'/>
+                <SystemIdentifier id='BranchCircuit4'/>
                 <AttachedToComponent idref='Dishwasher1'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit5_CookingRange1'/>
+                <SystemIdentifier id='BranchCircuit5'/>
                 <AttachedToComponent idref='CookingRange1'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit6_Lighting'/>
+                <SystemIdentifier id='BranchCircuit6'/>
                 <OccupiedSpaces>0.0</OccupiedSpaces>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit7_Kitchen'/>
+                <SystemIdentifier id='BranchCircuit7'/>
                 <OccupiedSpaces>2.0</OccupiedSpaces>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit8_Laundry'/>
+                <SystemIdentifier id='BranchCircuit8'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit9_Other'/>
+                <SystemIdentifier id='BranchCircuit9'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
               </BranchCircuit>
             </BranchCircuits>

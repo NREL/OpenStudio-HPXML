@@ -337,11 +337,11 @@
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>52280.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.98</Value>
+                <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
@@ -462,35 +462,39 @@
             <Headroom>5</Headroom>
             <BranchCircuits>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit2_AirHandler'/>
-                <AttachedToComponent idref='HVACDistribution1'/>
+                <SystemIdentifier id='BranchCircuit1'/>
+                <AttachedToComponent idref='HeatingSystem1'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit2_CoolingSystem1'/>
+                <SystemIdentifier id='BranchCircuit2'/>
                 <AttachedToComponent idref='CoolingSystem1'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit3_VentilationFan1'/>
+                <SystemIdentifier id='BranchCircuit3'/>
+                <AttachedToComponent idref='HVACDistribution1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit4'/>
                 <AttachedToComponent idref='VentilationFan1'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit4_VentilationFan2'/>
+                <SystemIdentifier id='BranchCircuit5'/>
                 <AttachedToComponent idref='VentilationFan2'/>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit5_Lighting'/>
+                <SystemIdentifier id='BranchCircuit6'/>
                 <OccupiedSpaces>0.0</OccupiedSpaces>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit6_Kitchen'/>
+                <SystemIdentifier id='BranchCircuit7'/>
                 <OccupiedSpaces>2.0</OccupiedSpaces>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit7_Laundry'/>
+                <SystemIdentifier id='BranchCircuit8'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
               </BranchCircuit>
               <BranchCircuit>
-                <SystemIdentifier id='BranchCircuit8_Other'/>
+                <SystemIdentifier id='BranchCircuit9'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
               </BranchCircuit>
             </BranchCircuits>

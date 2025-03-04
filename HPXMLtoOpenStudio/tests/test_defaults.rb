@@ -3570,11 +3570,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage120,
                         max_current_rating: 20.0,
-                        occupied_spaces: 1)
+                        occupied_spaces: 1,
+                        component_idrefs: [hpxml_bldg.heating_systems[0].id])
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage240,
                         max_current_rating: 50.0,
-                        occupied_spaces: 2)
+                        occupied_spaces: 2,
+                        component_idrefs: [hpxml_bldg.hvac_distributions[0].id])
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage240,
                         max_current_rating: 50.0,
@@ -3593,7 +3595,16 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                         power: 2000,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.cooling_systems[0].id])
-
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeHeating,
+                        power: 0,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.hvac_distributions[0].id])
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeCooling,
+                        power: 0,
+                        is_new_load: true,
+                        component_idrefs: [hpxml_bldg.hvac_distributions[0].id])
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeWaterHeater,
                         power: 3000,
@@ -3692,10 +3703,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     service_feeders = electric_panel.service_feeders
     _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage240, 200.0, 3, nil)
     _test_default_branch_circuit_values(branch_circuits[0], HPXML::ElectricPanelVoltage120, 20.0, 0)
-    _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage120, 20.0, 0)
+    _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage120, 20.0, 1)
     _test_default_branch_circuit_values(branch_circuits[2], HPXML::ElectricPanelVoltage240, 50.0, 2)
-    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 427.9, false)
-    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }, 2807.4, false)
+    _test_default_service_feeder_values(service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }[0], 0, false)
+    _test_default_service_feeder_values(service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }[1], 427.9, false)
+    _test_default_service_feeder_values(service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }[0], 2622.9, false)
+    _test_default_service_feeder_values(service_feeders.select { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }[1], 184.5, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeWaterHeater }, 0.0, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeClothesDryer }, 0.0, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeDishwasher }, 1200.0, false)
