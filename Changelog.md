@@ -20,6 +20,7 @@ __Bugfixes__
 - Fixes error when specifying a glass block window without interior shading coefficients.
 - Fixes battery charging/discharging not being included in peak electricity outputs.
 - Fixes possible error if there's a surface w/ interior unconditioned space and exterior "other housing unit".
+- Fixes out-of-sync shifting of occupancy and end use schedule resulting in activities even when there is no occupancy.
 
 ## OpenStudio-HPXML v1.9.1
 
