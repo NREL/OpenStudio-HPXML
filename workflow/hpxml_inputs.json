@@ -1216,6 +1216,10 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0
   },
+  "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard-combi-tankless.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml",
+    "water_heater_type": "space-heating boiler with tankless coil"
+  },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml",
     "heating_system_type": "Shared Boiler w/ Ductless Fan Coil"
