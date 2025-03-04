@@ -2,11 +2,13 @@
 """
 Script to print detailed differences between schedule CSV files in git.
 Compares the current state of files on disk with the committed versions.
+Returns exit code 1 if differences are found, 0 otherwise.
 """
 
 import os
 import subprocess
 import pandas as pd
+import sys
 
 def get_git_tracked_csv_files():
     """Get all tracked CSV files in the current directory."""
@@ -193,8 +195,12 @@ def main():
             # Add blank line between files
             if i < len(changed_files) - 1:
                 print("")
+        # Exit with error code to fail the CI
+        sys.exit(1)
     else:
         print("No changes detected in schedule CSV files.")
+        # Exit with success code
+        sys.exit(0)
 
 if __name__ == "__main__":
     main() 
