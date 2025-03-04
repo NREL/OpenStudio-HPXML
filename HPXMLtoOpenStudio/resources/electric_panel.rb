@@ -37,7 +37,6 @@ module ElectricPanel
     electric_panel.capacity_total_amps = capacity_total_amps
     electric_panel.capacity_headroom_amps = capacity_headroom_amps
 
-    # TODO: only if !branch_circuits/empty?
     breaker_spaces_values = BreakerSpacesValues.new
     calculate_breaker_spaces(runner, electric_panel, breaker_spaces_values)
 

@@ -2556,6 +2556,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                             type: HPXML::ElectricPanelLoadTypeOther,
                             power: 373)
       end
+    elsif ['house054.xml'].include? hpxml_file
+      electric_panel = hpxml_bldg.electric_panels[0]
+      branch_circuits = electric_panel.branch_circuits
+      branch_circuits.clear
     end
 
     # ------------- #
