@@ -147,18 +147,19 @@ class ScheduleGenerator
     @weekday_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekday')
     @weekend_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekend')
 
+    mkc_activity_schedules = simulate_occupant_activities()
+
     # Apply random offset to schedules to avoid synchronization
     offset_range = 30 # +- 30 minutes offset
     @random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
 
-    mkc_activity_schedules = simulate_occupant_activities()
     # shape of mkc_activity_schedules is [n, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
     @ev_occupant_number = get_ev_occupant_number(mkc_activity_schedules)
     occupancy_schedules = generate_occupancy_schedules(mkc_activity_schedules)
 
     # Apply random shift to occupancy schedules but don't normalize
-    away_schedule = random_shift_and_aggregate(occupancy_schedules[:away_schedule])
-    @schedules[SchedulesFile::Columns[:Occupants].name] = away_schedule.map { |i| 1.0 - i }
+    home_schedule = occupancy_schedules[:away_schedule].map { |i| (1.0 - i) }
+    @schedules[SchedulesFile::Columns[:Occupants].name] = random_shift_and_normalize(home_schedule, @minutes_per_step)
 
     fill_plug_loads_schedule(mkc_activity_schedules, weather)
     fill_lighting_schedule(mkc_activity_schedules, args)
@@ -201,12 +202,11 @@ class ScheduleGenerator
     @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = normalize(fixtures)
 
     # Apply random shift to EV occupant presence but don't normalize
-    ev_occupant_presence = random_shift_and_aggregate(occupancy_schedules[:ev_occupant_presence])
+    ev_occupant_presence = random_shift_and_normalize(occupancy_schedules[:ev_occupant_presence], @minutes_per_step)
     fill_ev_schedules(mkc_activity_schedules, ev_occupant_presence)
 
     if @debug
-      @schedules[SchedulesFile::Columns[:PresentOccupants].name] = random_shift_and_aggregate(occupancy_schedules[:present_occupants])
-      @schedules[SchedulesFile::Columns[:Sleeping].name] = random_shift_and_aggregate(occupancy_schedules[:sleep_schedule])
+      @schedules[SchedulesFile::Columns[:Sleeping].name] =  random_shift_and_normalize(occupancy_schedules[:sleep_schedule], @minutes_per_step)
     end
     return true
   end
@@ -588,10 +588,15 @@ class ScheduleGenerator
   # Normalize an array by dividing all values by the maximum value.
   #
   # @param arr [Array] Array of numeric values to normalize
+  # @param max_val [Float, nil] Maximum value to normalize to. If nil, use the maximum value in the schedule.
   # @return [Array] Array with values normalized to between 0 and 1
-  def normalize(arr)
-    m = arr.max
-    arr = arr.map { |a| a / m }
+  def normalize(arr, max_val = nil)
+    if max_val.nil?
+      m = arr.max
+    else
+      m = max_val
+    end
+    arr = arr.map { |a| a / m.to_f }
     return arr
   end
 
@@ -820,8 +825,8 @@ class ScheduleGenerator
     away_index = 5 # Index of away activity in the markov-chain simulator
     away_schedule = markov_chain_simulation_result[@ev_occupant_number].column(away_index)
     charging_schedule, discharging_schedule = get_ev_battery_schedule(away_schedule, hours_per_year)
-    agg_charging_schedule = random_shift_and_aggregate(charging_schedule).map { |val| val.to_f / @minutes_per_step }
-    agg_discharging_schedule = random_shift_and_aggregate(discharging_schedule).map { |val| val.to_f / @minutes_per_step }
+    agg_charging_schedule = random_shift_and_normalize(charging_schedule, @minutes_per_step)
+    agg_discharging_schedule = random_shift_and_normalize(discharging_schedule, @minutes_per_step)
 
     # The combined schedule is not a sum of the charging and discharging schedules because when charging and discharging
     # both occur in a timestep, we don't want them to cancel out and draw no power from the building. So, whenever there
@@ -1440,9 +1445,10 @@ class ScheduleGenerator
   # Apply random time shift and normalize schedule values.
   #
   # @param schedule [Array<Float>] Array of minute-level schedule values
+  # @param max_val [Float] Maximum value to normalize to. If nil, use the maximum value in the schedule.
   # @return [Array<Float>] Normalized schedule with random time shift applied
-  def random_shift_and_normalize(schedule)
+  def random_shift_and_normalize(schedule, max_val = nil)
     shifted_schedule = random_shift_and_aggregate(schedule)
-    return normalize(shifted_schedule)
+    return normalize(shifted_schedule, max_val)
   end
 end
