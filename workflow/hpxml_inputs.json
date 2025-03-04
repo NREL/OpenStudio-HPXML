@@ -1134,6 +1134,7 @@
     "electric_panel_load_heat_pump_cooling_power": 2500,
     "electric_panel_load_heat_pump_addition": true,
     "electric_panel_load_heating_system_2_power": 1950,
+    "electric_panel_load_heating_system_2_addition": true,
     "electric_panel_load_water_heater_power": 4500,
     "electric_panel_load_clothes_dryer_power": 4500,
     "electric_panel_load_dishwasher_power": 1150,

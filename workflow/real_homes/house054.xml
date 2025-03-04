@@ -515,6 +515,7 @@
                 <SystemIdentifier id='ServiceFeeder1'/>
                 <LoadType>heating</LoadType>
                 <PowerRating>1950.0</PowerRating>
+                <IsNewLoad>true</IsNewLoad>
                 <AttachedToComponent idref='HeatingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
