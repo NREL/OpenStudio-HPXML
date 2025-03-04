@@ -102,6 +102,9 @@ module Defaults
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
     apply_cfis_fan_power(hpxml_bldg)
 
+    # Default electric panels has to be after sizing to have autosized capacity information
+    apply_electric_panels(runner, hpxml.header, hpxml_bldg)
+
     cleanup_zones_spaces(hpxml_bldg)
 
     return all_zone_loads, all_space_loads
@@ -3169,6 +3172,239 @@ module Defaults
     end
   end
 
+  # TODO
+  #
+  def self.service_feeders_defined(service_feeders)
+    service_feeders.each do |service_feeder|
+      return false if service_feeder.power.nil?
+    end
+    return false if service_feeders.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLighting } == 0
+    return false if service_feeders.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeKitchen } == 0
+    return false if service_feeders.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLaundry } == 0
+
+    return true
+  end
+
+  # Assigns default values for omitted optional inputs in the HPXML::ElectricPanel objects.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.apply_electric_panels(runner, hpxml_header, hpxml_bldg)
+    default_panels_csv_data = get_panels_csv_data()
+
+    hpxml_bldg.electric_panels.each do |electric_panel|
+      branch_circuits = electric_panel.branch_circuits
+      service_feeders = electric_panel.service_feeders
+
+      branch_circuits.each do |branch_circuit|
+        if branch_circuit.voltage.nil?
+          if branch_circuit.components.empty?
+            branch_circuit.voltage = HPXML::ElectricPanelVoltage120
+          else
+            branch_circuit.components.each do |component|
+              voltage = get_branch_circuit_voltage_default_values(component)
+              if !branch_circuit.voltage.nil? && (voltage != branch_circuit.voltage)
+                branch_circuit.voltage = HPXML::ElectricPanelVoltage240
+              else
+                branch_circuit.voltage = voltage
+              end
+            end
+          end
+          branch_circuit.voltage_isdefaulted = true
+        end
+        if branch_circuit.max_current_rating.nil?
+          branch_circuit.max_current_rating = get_branch_circuit_amps_default_values(branch_circuit)
+          branch_circuit.max_current_rating_isdefaulted = true
+        end
+      end
+
+      if not service_feeders_defined(service_feeders)
+        # may or may not have any branch circuits
+        # service feeders need to be added/defaulted
+        # first add based on contents of branch circuits and whether corresponding service feeder already exists
+        # if there isn't branch circuit when going to default watts, issue warning and assume a voltage
+        branch_circuits.each do |branch_circuit|
+          branch_circuit.components.each do |component|
+            types = []
+            if component.is_a?(HPXML::HeatingSystem)
+              types << HPXML::ElectricPanelLoadTypeHeating if component.fraction_heat_load_served.nil? || (component.fraction_heat_load_served > 0)
+            elsif component.is_a?(HPXML::CoolingSystem)
+              types << HPXML::ElectricPanelLoadTypeCooling if component.fraction_cool_load_served > 0
+            elsif component.is_a?(HPXML::HeatPump)
+              types << HPXML::ElectricPanelLoadTypeHeating if component.fraction_heat_load_served > 0
+              types << HPXML::ElectricPanelLoadTypeCooling if component.fraction_cool_load_served > 0
+            elsif component.is_a?(HPXML::HVACDistribution)
+              component.hvac_systems.each do |hvac_system|
+                if hvac_system.is_a?(HPXML::HeatingSystem)
+                  types << HPXML::ElectricPanelLoadTypeHeating
+                elsif hvac_system.is_a?(HPXML::CoolingSystem)
+                  types << HPXML::ElectricPanelLoadTypeCooling
+                elsif hvac_system.is_a?(HPXML::HeatPump)
+                  types << HPXML::ElectricPanelLoadTypeHeating
+                  types << HPXML::ElectricPanelLoadTypeCooling
+                end
+              end
+            elsif component.is_a?(HPXML::WaterHeatingSystem)
+              types << HPXML::ElectricPanelLoadTypeWaterHeater
+            elsif component.is_a?(HPXML::ClothesDryer)
+              types << HPXML::ElectricPanelLoadTypeClothesDryer
+            elsif component.is_a?(HPXML::Dishwasher)
+              types << HPXML::ElectricPanelLoadTypeDishwasher
+            elsif component.is_a?(HPXML::CookingRange)
+              types << HPXML::ElectricPanelLoadTypeRangeOven
+            elsif component.is_a?(HPXML::VentilationFan)
+              types << HPXML::ElectricPanelLoadTypeMechVent
+            elsif component.is_a?(HPXML::PermanentSpa) && branch_circuit.component_idrefs.include?(component.heater_id)
+              types << HPXML::ElectricPanelLoadTypePermanentSpaHeater
+            elsif component.is_a?(HPXML::PermanentSpa) && branch_circuit.component_idrefs.include?(component.pump_id)
+              types << HPXML::ElectricPanelLoadTypePermanentSpaPump
+            elsif component.is_a?(HPXML::Pool) && branch_circuit.component_idrefs.include?(component.heater_id)
+              types << HPXML::ElectricPanelLoadTypePoolHeater
+            elsif component.is_a?(HPXML::Pool) && branch_circuit.component_idrefs.include?(component.pump_id)
+              types << HPXML::ElectricPanelLoadTypePoolPump
+            elsif component.is_a?(HPXML::PlugLoad) && component.plug_load_type == HPXML::PlugLoadTypeWellPump
+              types << HPXML::ElectricPanelLoadTypeWellPump
+            elsif component.is_a?(HPXML::PlugLoad) && component.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+              types << HPXML::ElectricPanelLoadTypeElectricVehicleCharging
+            end
+
+            if component.respond_to?(:service_feeders) && component.service_feeders.empty?
+              component_idref = component.id
+            elsif component.respond_to?(:pump_service_feeders) && branch_circuit.component_idrefs.include?(component.pump_id) && component.pump_service_feeders.empty?
+              component_idref = component.pump_id
+            elsif component.respond_to?(:heater_service_feeders) && branch_circuit.component_idrefs.include?(component.heater_id) && component.heater_service_feeders.empty?
+              component_idref = component.heater_id
+            end
+
+            next unless !component_idref.nil?
+
+            types.each do |type|
+              service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                                  type: type,
+                                  type_isdefaulted: true,
+                                  component_idrefs: [component_idref],
+                                  component_idrefs_isdefaulted: true)
+            end
+          end
+        end
+
+        # add lighting, kitchen, laundry, other if they don't already exist
+        [HPXML::ElectricPanelLoadTypeLighting, HPXML::ElectricPanelLoadTypeKitchen, HPXML::ElectricPanelLoadTypeLaundry, HPXML::ElectricPanelLoadTypeOther].each do |type|
+          next unless service_feeders.count { |pl| pl.type == type } == 0
+
+          service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                              type: type,
+                              type_isdefaulted: true,
+                              component_idrefs: [])
+        end
+
+        # then default values of service feeders
+        service_feeders.each do |service_feeder|
+          if service_feeder.power.nil?
+            service_feeder.power = get_service_feeder_power_default_values(runner, hpxml_bldg, service_feeder, default_panels_csv_data, electric_panel)
+            service_feeder.power_isdefaulted = true
+          end
+          if service_feeder.is_new_load.nil?
+            service_feeder.is_new_load = false
+            service_feeder.is_new_load_isdefaulted = true
+          end
+        end
+      end
+
+      # check lighting
+      lighting_watts_per_sqft = get_default_panels_value(runner, default_panels_csv_data, 'lighting', 'PowerRating', HPXML::ElectricPanelVoltage120)
+      lighting_watts = service_feeders.select { |pl| pl.type == HPXML::ElectricPanelLoadTypeLighting }.map { |pl| pl.power }.sum(0.0)
+      if lighting_watts != lighting_watts_per_sqft * hpxml_bldg.building_construction.conditioned_floor_area
+        runner.registerWarning("Power rating (#{lighting_watts}) for service feeder load type '#{HPXML::ElectricPanelLoadTypeLighting}' does not equal #{lighting_watts_per_sqft} W/sqft for #{hpxml_bldg.building_construction.conditioned_floor_area}.")
+      end
+
+      # check kitchen
+      kitchen_watts_min = get_default_panels_value(runner, default_panels_csv_data, 'kitchen', 'PowerRating', HPXML::ElectricPanelVoltage120)
+      kitchen_watts = service_feeders.select { |pl| pl.type == HPXML::ElectricPanelLoadTypeKitchen }.map { |pl| pl.power }.sum(0.0)
+      if kitchen_watts < kitchen_watts_min
+        runner.registerWarning("Power rating (#{kitchen_watts}) for service feeder load type '#{HPXML::ElectricPanelLoadTypeKitchen}' is less than the minimum (#{kitchen_watts_min}).")
+      end
+      kitchen_breaker_spaces = get_default_panels_value(runner, default_panels_csv_data, HPXML::ElectricPanelLoadTypeKitchen, 'BreakerSpaces', HPXML::ElectricPanelVoltage120)
+      kitchen_watts_per_branch = kitchen_watts_min / kitchen_breaker_spaces
+      if (kitchen_watts > kitchen_watts_min) && (kitchen_watts % kitchen_watts_per_branch != 0)
+        runner.registerWarning("Power rating (#{kitchen_watts}) for service feeder load type '#{HPXML::ElectricPanelLoadTypeKitchen}' is not a valid multiple (#{kitchen_watts_per_branch}).")
+      end
+
+      # check laundry
+      laundry_watts_min = get_default_panels_value(runner, default_panels_csv_data, 'laundry', 'PowerRating', HPXML::ElectricPanelVoltage120)
+      laundry_watts = service_feeders.select { |pl| pl.type == HPXML::ElectricPanelLoadTypeLaundry }.map { |pl| pl.power }.sum(0.0)
+      if laundry_watts < laundry_watts_min
+        runner.registerWarning("Power rating (#{laundry_watts}) for service feeder load type '#{HPXML::ElectricPanelLoadTypeLaundry}' is less than the minimum (#{laundry_watts_min}).")
+      end
+      laundry_breaker_spaces = get_default_panels_value(runner, default_panels_csv_data, HPXML::ElectricPanelLoadTypeLaundry, 'BreakerSpaces', HPXML::ElectricPanelVoltage120)
+      laundry_watts_per_branch = laundry_watts_min / laundry_breaker_spaces
+      if (laundry_watts > laundry_watts_min) && (laundry_watts % laundry_watts_per_branch != 0)
+        runner.registerWarning("Power rating (#{laundry_watts}) for service feeder load type '#{HPXML::ElectricPanelLoadTypeLaundry}' is not a valid multiple (#{laundry_watts_per_branch}).")
+      end
+
+      branch_circuits.each do |branch_circuit|
+        if branch_circuit.occupied_spaces.nil?
+          branch_circuit.occupied_spaces = get_branch_circuit_occupied_spaces_default_values(branch_circuit)
+          branch_circuit.occupied_spaces_isdefaulted = true
+        end
+      end
+
+      # after all occupied spaces are set, check if any exceed max (1 for 120V and 2 for 240V)
+      branch_circuits.each do |branch_circuit|
+        occupied_spaces = branch_circuit.occupied_spaces
+        max_breakers_per_branch_circuit = Integer(Float(branch_circuit.voltage)) / 120
+
+        next unless occupied_spaces > max_breakers_per_branch_circuit
+
+        branch_circuit.occupied_spaces = max_breakers_per_branch_circuit
+        extra_occupied_spaces = occupied_spaces - max_breakers_per_branch_circuit
+        n_branch_circuits = extra_occupied_spaces / max_breakers_per_branch_circuit
+
+        (1..n_branch_circuits).each do |i|
+          branch_circuits.add(id: "#{branch_circuit.id}_#{i + 1}",
+                              voltage: branch_circuit.voltage,
+                              voltage_isdefaulted: true,
+                              max_current_rating: branch_circuit.max_current_rating,
+                              max_current_rating_isdefaulted: true,
+                              occupied_spaces: max_breakers_per_branch_circuit,
+                              occupied_spaces_isdefaulted: true,
+                              component_idrefs: branch_circuit.component_idrefs,
+                              component_idrefs_isdefaulted: true)
+        end
+
+        next unless extra_occupied_spaces % max_breakers_per_branch_circuit != 0
+
+        branch_circuits.add(id: "#{branch_circuit.id}_#{n_branch_circuits.ceil + 1}",
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            voltage_isdefaulted: true,
+                            max_current_rating: 20.0,
+                            max_current_rating_isdefaulted: true,
+                            occupied_spaces: 1,
+                            occupied_spaces_isdefaulted: true,
+                            component_idrefs: branch_circuit.component_idrefs,
+                            component_idrefs_isdefaulted: true)
+      end
+
+      electric_panel_default_values = get_electric_panel_values()
+      if electric_panel.voltage.nil?
+        electric_panel.voltage = electric_panel_default_values[:panel_voltage]
+        electric_panel.voltage_isdefaulted = true
+      end
+      if electric_panel.max_current_rating.nil?
+        electric_panel.max_current_rating = electric_panel_default_values[:max_current_rating]
+        electric_panel.max_current_rating_isdefaulted = true
+      end
+      if electric_panel.headroom.nil? && electric_panel.rated_total_spaces.nil?
+        electric_panel.headroom = electric_panel_default_values[:headroom]
+        electric_panel.headroom_isdefaulted = true
+      end
+
+      ElectricPanel.calculate(runner, hpxml_header, hpxml_bldg, electric_panel)
+    end # end hpxml_bldg.electric_panels.each do |electric_panel|
+  end
+
   # Assigns default values for omitted optional inputs in the HPXML::Generator objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -5728,6 +5964,553 @@ module Defaults
       months[m] = 1
     end
     return months
+  end
+
+  # Returns the number of breaker spaces based on rated power and voltage.
+  #
+  # @param watts [Double] power rating (W)
+  # @param voltage [String] '120' or '240'
+  # @param max_amps [Double] maximum amperage (A)
+  # @return [Integer] the number of breaker spaces
+  def self.get_breaker_spaces_from_power_watts_voltage_amps(watts, voltage, max_amps)
+    return 0 if watts == 0
+
+    # Note that default_panels.csv has a Breaker Spaces column manually populated based on the following calculation.
+    # If max_amps were to change, for example, the value in Breaker Spaces may change.
+    required_amperage = watts / Float(voltage)
+    num_branches = (required_amperage / max_amps).ceil
+    num_breakers = num_branches * Integer(Float(voltage) / 120)
+    return num_breakers
+  end
+
+  # Gets the default properties for electric panels.
+  #
+  # @return [Hash] Map of property type => value
+  def self.get_electric_panel_values()
+    return { panel_voltage: HPXML::ElectricPanelVoltage240,
+             max_current_rating: 200.0, # A
+             headroom: 3 }
+  end
+
+  # Gets the default voltage for a branch circuit based on attached component.
+  #
+  # @param branch_circuit [HPXML::BranchCircuit] Object that defines a single electric panel branch circuit
+  # @return [String] '120' or '240'
+  def self.get_branch_circuit_voltage_default_values(component)
+    if component.is_a?(HPXML::HeatingSystem)
+      if component.heating_system_fuel != HPXML::FuelTypeElectricity
+        return HPXML::ElectricPanelVoltage120
+      end
+    elsif component.is_a?(HPXML::CoolingSystem)
+      if component.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
+        return HPXML::ElectricPanelVoltage120
+      end
+    elsif component.is_a?(HPXML::HVACDistribution)
+      component.hvac_systems.each do |hvac_system|
+        if (hvac_system.is_a?(HPXML::HeatingSystem) && (hvac_system.heating_system_fuel == HPXML::FuelTypeElectricity)) ||
+           (hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.backup_heating_fuel.nil? || (hvac_system.backup_heating_fuel == HPXML::FuelTypeElectricity)))
+          return HPXML::ElectricPanelVoltage240
+        end
+      end
+      return HPXML::ElectricPanelVoltage120
+    elsif component.is_a?(HPXML::Dishwasher)
+      return HPXML::ElectricPanelVoltage120
+    elsif component.is_a?(HPXML::VentilationFan)
+      return HPXML::ElectricPanelVoltage120
+    elsif component.is_a?(HPXML::PlugLoad)
+      return HPXML::ElectricPanelVoltage120
+    end
+    return HPXML::ElectricPanelVoltage240
+  end
+
+  # Gets the default max amps for a branch circuit based on voltage.
+  #
+  # @param branch_circuit [HPXML::BranchCircuit] Object that defines a single electric panel branch circuit
+  # @return [Double] maximum amperage
+  def self.get_branch_circuit_amps_default_values(branch_circuit)
+    if branch_circuit.voltage == HPXML::ElectricPanelVoltage120
+      return 20.0
+    end
+
+    return 50.0
+  end
+
+  # Gets the default power rating capacity for each panel load.
+  #
+  # @return [Hash] { load_name => { voltage => power_rating, ... }, ... }
+  def self.get_panels_csv_data()
+    default_panels_csv = File.join(File.dirname(__FILE__), 'data', 'default_panels.csv')
+    if not File.exist?(default_panels_csv)
+      fail 'Could not find default_panels.csv'
+    end
+
+    require 'csv'
+    default_panels_csv_data = {}
+    CSV.foreach(default_panels_csv, headers: true) do |row|
+      load_name = row['Load Name']
+      voltage = row['Voltage']
+      power_rating = row['Power Rating']
+      breaker_spaces = row['Breaker Spaces']
+
+      power_rating = 0 if power_rating == 'auto'
+      breaker_spaces = 0 if breaker_spaces == 'auto'
+
+      default_panels_csv_data[load_name] = {} if !default_panels_csv_data.keys.include?(load_name)
+      default_panels_csv_data[load_name][voltage] = {}
+      default_panels_csv_data[load_name][voltage]['PowerRating'] = Float(power_rating)
+      default_panels_csv_data[load_name][voltage]['BreakerSpaces'] = Integer(breaker_spaces)
+    end
+
+    return default_panels_csv_data
+  end
+
+  # Get the Power Rating or Breaker Spaces from the default_panels.csv file.
+  # If Voltage does not exist in the table, then either:
+  #  - Power Rating: default per the other Voltage classification
+  #  - Breaker Spaces: recalculate using the specified Voltage classification
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param default_panels_csv_data [Hash] { load_name => { voltage => power_rating, ... }, ... }
+  # @param load_name [String] load name specified in default_panels.csv
+  # @param column [String] 'PowerRating' or 'BreakerSpaces'
+  # @param voltage [String] '120' or '240'
+  # @return [Double or Integer] power rating or number of breaker spaces
+  def self.get_default_panels_value(runner, default_panels_csv_data, load_name, column, voltage)
+    if not default_panels_csv_data[load_name].keys.include?(voltage)
+      warning = "Voltage (#{voltage}) for '#{load_name}' is not specified in default_panels.csv; "
+      if column == 'PowerRating'
+        if voltage == HPXML::ElectricPanelVoltage120
+          new_voltage = HPXML::ElectricPanelVoltage240
+        elsif voltage == HPXML::ElectricPanelVoltage240
+          new_voltage = HPXML::ElectricPanelVoltage120
+        end
+        warning += "PowerRating will be assigned according to Voltage=#{new_voltage}."
+        value = default_panels_csv_data[load_name][new_voltage][column]
+      end
+      runner.registerWarning(warning)
+      return value
+    else
+      value = default_panels_csv_data[load_name][voltage][column]
+      return value
+    end
+  end
+
+  # Gets the default power rating for a service feeder based on load type, voltage, amps, and attached components.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param service_feeder [HPXML::ServiceFeeder] Object that defines a single electric panel service feeder
+  # @param default_panels_csv_data [Hash] { load_name => { voltage => power_rating, ... }, ... }
+  # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
+  # @return [Double] power rating (W)
+  def self.get_service_feeder_power_default_values(runner, hpxml_bldg, service_feeder, default_panels_csv_data, _electric_panel)
+    type = service_feeder.type
+    component_ids = service_feeder.component_idrefs
+    watts = 0
+
+    if type == HPXML::ElectricPanelLoadTypeHeating
+      hpxml_bldg.heating_systems.each do |heating_system|
+        next if !component_ids.include?(heating_system.id)
+        next if heating_system.is_shared_system
+        next if heating_system.fraction_heat_load_served == 0
+
+        if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+          watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heating_system.heating_capacity, heating_system.heating_efficiency_afue, heating_system.heating_efficiency_percent), 'btu/hr', 'w')
+        end
+      end
+
+      hpxml_bldg.heat_pumps.each do |heat_pump|
+        next if !component_ids.include?(heat_pump.id)
+        next if heat_pump.fraction_heat_load_served == 0
+
+        if heat_pump.branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(heat_pump)
+          runner.registerWarning("Missing branch circuit for #{heat_pump.id}; assuming #{voltage}V.")
+          watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), voltage)
+
+          if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+
+            if heat_pump.simultaneous_backup # sum; backup > compressor
+
+              if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+                watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
+              end
+
+            else # max; switchover
+
+              if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+                watts += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), HPXML::ElectricPanelVoltage240),
+                          UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
+              end
+
+            end
+          end
+
+        else
+          heat_pump.branch_circuits.each do |branch_circuit|
+            watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
+
+            if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+
+              if heat_pump.simultaneous_backup # sum; backup > compressor
+
+                if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+                  watts += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
+                end
+
+              else # max; switchover
+
+                if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+                  watts += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), HPXML::ElectricPanelVoltage240),
+                            UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
+                end
+
+              end
+            end
+            puts "watts1 #{watts}"
+          end
+        end
+      end
+
+      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+        next if !component_ids.include?(hvac_distribution.id)
+
+        hvac_distribution.hvac_systems.each do |hvac_system|
+          if hvac_system.is_a?(HPXML::HeatingSystem) || hvac_system.is_a?(HPXML::HeatPump)
+            watts += HVAC.get_blower_fan_power_watts(hvac_system.fan_watts_per_cfm, hvac_system.heating_airflow_cfm)
+          end
+          if hvac_system.is_a?(HPXML::HeatingSystem)
+            watts += HVAC.get_pump_power_watts(hvac_system.electric_auxiliary_energy)
+          end
+        end
+      end
+
+    elsif type == HPXML::ElectricPanelLoadTypeCooling
+      hpxml_bldg.cooling_systems.each do |cooling_system|
+        next if !component_ids.include?(cooling_system.id)
+        next if cooling_system.is_shared_system
+        next if cooling_system.fraction_cool_load_served == 0
+
+        if cooling_system.branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(cooling_system)
+          runner.registerWarning("Missing branch circuit for #{cooling_system.id}; assuming #{voltage}V.")
+          watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'), voltage)
+        else
+          cooling_system.branch_circuits.each do |branch_circuit|
+            watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(cooling_system.cooling_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
+          end
+        end
+      end
+
+      hpxml_bldg.heat_pumps.each do |heat_pump|
+        next if !component_ids.include?(heat_pump.id)
+        next if heat_pump.fraction_cool_load_served == 0
+
+        if heat_pump.branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(heat_pump)
+          runner.registerWarning("Missing branch circuit for #{heat_pump.id}; assuming #{voltage}V.")
+          watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), voltage)
+        else
+          heat_pump.branch_circuits.each do |branch_circuit|
+            watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
+          end
+          puts "watts2 #{watts}"
+        end
+      end
+
+      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+        next if !component_ids.include?(hvac_distribution.id)
+
+        hvac_distribution.hvac_systems.each do |hvac_system|
+          if hvac_system.is_a?(HPXML::CoolingSystem) || hvac_system.is_a?(HPXML::HeatPump)
+            watts += HVAC.get_blower_fan_power_watts(hvac_system.fan_watts_per_cfm, hvac_system.cooling_airflow_cfm)
+          end
+        end
+      end
+
+    elsif type == HPXML::ElectricPanelLoadTypeWaterHeater
+      hpxml_bldg.water_heating_systems.each do |water_heating_system|
+        next if !component_ids.include?(water_heating_system.id)
+        next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+        next if water_heating_system.is_shared_system
+
+        if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
+          watts += UnitConversions.convert(water_heating_system.heating_capacity, 'btu/hr', 'w')
+        elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
+          watts += [UnitConversions.convert(Waterheater.get_heating_input_capacity(water_heating_system.heating_capacity, water_heating_system.additional_properties.cop), 'btu/hr', 'w'),
+                    UnitConversions.convert(water_heating_system.backup_heating_capacity, 'btu/hr', 'w')].max
+        elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+          if hpxml_bldg.building_construction.number_of_bathrooms == 1
+            load_name = 'wh_tankless1'
+          elsif hpxml_bldg.building_construction.number_of_bathrooms == 2
+            load_name = 'wh_tankless2'
+          else # 3+
+            load_name = 'wh_tankless3'
+          end
+          if water_heating_system.branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(water_heating_system)
+            runner.registerWarning("Missing branch circuit for #{water_heating_system.id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, load_name, 'PowerRating', voltage)
+          else
+            water_heating_system.branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, load_name, 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeClothesDryer
+      hpxml_bldg.clothes_dryers.each do |clothes_dryer|
+        next if !component_ids.include?(clothes_dryer.id)
+        next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
+
+        if clothes_dryer.is_vented
+          if clothes_dryer.branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(clothes_dryer)
+            runner.registerWarning("Missing branch circuit for #{clothes_dryer.id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'dryer', 'PowerRating', voltage)
+          else
+            clothes_dryer.branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'dryer', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        else # HP
+          if clothes_dryer.branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(clothes_dryer)
+            runner.registerWarning("Missing branch circuit for #{clothes_dryer.id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'dryer_hp', 'PowerRating', voltage)
+          else
+            clothes_dryer.branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'dryer_hp', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeDishwasher
+      hpxml_bldg.dishwashers.each do |dishwasher|
+        next if !component_ids.include?(dishwasher.id)
+
+        if dishwasher.branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(dishwasher)
+          runner.registerWarning("Missing branch circuit for #{dishwasher.id}; assuming #{voltage}V.")
+          watts += get_default_panels_value(runner, default_panels_csv_data, 'dishwasher', 'PowerRating', voltage)
+        else
+          dishwasher.branch_circuits.each do |branch_circuit|
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'dishwasher', 'PowerRating', branch_circuit.voltage)
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeRangeOven
+      hpxml_bldg.cooking_ranges.each do |cooking_range|
+        next if !component_ids.include?(cooking_range.id)
+        next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
+
+        if cooking_range.branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(cooking_range)
+          runner.registerWarning("Missing branch circuit for #{cooking_range.id}; assuming #{voltage}V.")
+          watts += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven', 'PowerRating', voltage)
+        else
+          cooking_range.branch_circuits.each do |branch_circuit|
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven', 'PowerRating', branch_circuit.voltage)
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeMechVent
+      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+        next if !component_ids.include?(ventilation_fan.id)
+        next if ventilation_fan.is_shared_system
+
+        if [HPXML::LocationKitchen, HPXML::LocationBath].include?(ventilation_fan.fan_location)
+          watts += ventilation_fan.count * ventilation_fan.fan_power
+        elsif not ventilation_fan.fan_power.nil?
+          watts += ventilation_fan.fan_power
+        else
+          if ventilation_fan.branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(ventilation_fan)
+            runner.registerWarning("Missing branch circuit for #{ventilation_fan.id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'mechvent', 'PowerRating', voltage)
+          else
+            ventilation_fan.branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'mechvent', 'PowerRating', branch_circuit.voltage) # base-mechvent-cfis-no-additional-runtime.xml, e.g., has no FanPower defaulted
+            end
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypePermanentSpaHeater
+      hpxml_bldg.permanent_spas.each do |permanent_spa|
+        next if !component_ids.include?(permanent_spa.heater_id)
+        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
+
+        if permanent_spa.heater_type == HPXML::HeaterTypeElectricResistance
+          if permanent_spa.heater_branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(permanent_spa)
+            runner.registerWarning("Missing branch circuit for #{permanent_spa.heater_id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'spaheater', 'PowerRating', voltage)
+          else
+            permanent_spa.heater_branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'spaheater', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        elsif permanent_spa.heater_type == HPXML::HeaterTypeHeatPump
+          if permanent_spa.heater_branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(permanent_spa)
+            runner.registerWarning("Missing branch circuit for #{permanent_spa.heater_id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'spaheater_hp', 'PowerRating', voltage)
+          else
+            permanent_spa.heater_branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'spaheater_hp', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypePermanentSpaPump
+      hpxml_bldg.permanent_spas.each do |permanent_spa|
+        next if !component_ids.include?(permanent_spa.pump_id)
+
+        if permanent_spa.pump_branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(permanent_spa)
+          runner.registerWarning("Missing branch circuit for #{permanent_spa.pump_id}; assuming #{voltage}V.")
+          watts += get_default_panels_value(runner, default_panels_csv_data, 'spapump', 'PowerRating', voltage)
+        else
+          permanent_spa.pump_branch_circuits.each do |branch_circuit|
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'spapump', 'PowerRating', branch_circuit.voltage)
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypePoolHeater
+      hpxml_bldg.pools.each do |pool|
+        next if !component_ids.include?(pool.heater_id)
+        next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
+
+        if pool.heater_type == HPXML::HeaterTypeElectricResistance
+          if pool.heater_branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(pool)
+            runner.registerWarning("Missing branch circuit for #{pool.heater_id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'poolheater', 'PowerRating', voltage)
+          else
+            pool.heater_branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'poolheater', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        elsif pool.heater_type == HPXML::HeaterTypeHeatPump
+          if pool.heater_branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(pool)
+            runner.registerWarning("Missing branch circuit for #{pool.heater_id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'poolheater_hp', 'PowerRating', voltage)
+          else
+            pool.heater_branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'poolheater_hp', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypePoolPump
+      hpxml_bldg.pools.each do |pool|
+        next if !component_ids.include?(pool.pump_id)
+
+        if pool.pump_branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(pool)
+          runner.registerWarning("Missing branch circuit for #{pool.pump_id}; assuming #{voltage}V.")
+          watts += get_default_panels_value(runner, default_panels_csv_data, 'poolpump', 'PowerRating', voltage)
+        else
+          pool.pump_branch_circuits.each do |branch_circuit|
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'poolpump', 'PowerRating', branch_circuit.voltage)
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeWellPump
+      hpxml_bldg.plug_loads.each do |plug_load|
+        next if plug_load.plug_load_type != HPXML::PlugLoadTypeWellPump
+        next if !component_ids.include?(plug_load.id)
+
+        if hpxml_bldg.building_construction.number_of_bedrooms <= 3
+          if plug_load.branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(plug_load)
+            runner.registerWarning("Missing branch circuit for #{plug_load.id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'wellpump_small', 'PowerRating', voltage)
+          else
+            plug_load.branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'wellpump_small', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        else
+          if plug_load.branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(plug_load)
+            runner.registerWarning("Missing branch circuit for #{plug_load.id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'wellpump_large', 'PowerRating', voltage)
+          else
+            plug_load.branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'wellpump_large', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeElectricVehicleCharging
+      hpxml_bldg.plug_loads.each do |plug_load|
+        next if plug_load.plug_load_type != HPXML::PlugLoadTypeElectricVehicleCharging
+        next if !component_ids.include?(plug_load.id)
+
+        if plug_load.branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(plug_load)
+          runner.registerWarning("Missing branch circuit for #{plug_load.id}; assuming #{voltage}V.")
+          watts += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', 'PowerRating', voltage)
+        else
+          plug_load.branch_circuits.each do |branch_circuit|
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', 'PowerRating', branch_circuit.voltage)
+          end
+        end
+      end
+      hpxml_bldg.ev_chargers.each do |ev_charger|
+        next if !component_ids.include?(ev_charger.id)
+
+        if ev_charger.branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(ev_charger)
+          runner.registerWarning("Missing branch circuit for #{plug_load.id}; assuming #{voltage}V.")
+          watts += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', 'PowerRating', voltage)
+        else
+          ev_charger.branch_circuits.each do |branch_circuit|
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'ev_level', 'PowerRating', branch_circuit.voltage)
+          end
+        end
+      end
+    elsif type == HPXML::ElectricPanelLoadTypeLighting
+      watts += get_default_panels_value(runner, default_panels_csv_data, 'lighting', 'PowerRating', HPXML::ElectricPanelVoltage120) * hpxml_bldg.building_construction.conditioned_floor_area
+    elsif type == HPXML::ElectricPanelLoadTypeKitchen
+      watts += get_default_panels_value(runner, default_panels_csv_data, 'kitchen', 'PowerRating', HPXML::ElectricPanelVoltage120)
+    elsif type == HPXML::ElectricPanelLoadTypeLaundry
+      watts += get_default_panels_value(runner, default_panels_csv_data, 'laundry', 'PowerRating', HPXML::ElectricPanelVoltage120)
+    elsif type == HPXML::ElectricPanelLoadTypeOther
+      if hpxml_bldg.has_location(HPXML::LocationGarage)
+        watts += get_default_panels_value(runner, default_panels_csv_data, 'other', 'PowerRating', HPXML::ElectricPanelVoltage120) # Garage door opener
+      end
+    end
+
+    return watts.round(1)
+  end
+
+  # Gets the default breaker spaces for a branch circuit based on power rating, voltage, amps, and attached components.
+  #
+  # @param branch_circuit [HPXML::BranchCircuit] Object that defines a single electric panel branch circuit
+  # @return [Integer] number of breaker spaces
+  def self.get_branch_circuit_occupied_spaces_default_values(branch_circuit)
+    htg, clg, oth = 0, 0, 0
+    branch_circuit.components.each do |component|
+      if (branch_circuit.voltage == HPXML::ElectricPanelVoltage120) && component.is_a?(HPXML::CoolingSystem) && (component.cooling_system_type == HPXML::HVACTypeRoomAirConditioner)
+        # no-op
+      else
+        component.service_feeders.each do |service_feeder|
+          if service_feeder.type == HPXML::ElectricPanelLoadTypeHeating
+            htg += service_feeder.power
+          elsif service_feeder.type == HPXML::ElectricPanelLoadTypeCooling
+            clg += service_feeder.power
+          else
+            oth += service_feeder.power
+          end
+        end
+      end
+    end
+    watts = [htg, clg].max + oth
+    occupied_spaces = get_breaker_spaces_from_power_watts_voltage_amps(watts, branch_circuit.voltage, branch_circuit.max_current_rating)
+    return occupied_spaces
   end
 
   # Get default location, lifetime model, nominal capacity/voltage, round trip efficiency, and usable fraction for a battery.

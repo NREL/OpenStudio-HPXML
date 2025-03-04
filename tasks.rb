@@ -68,14 +68,14 @@ def create_hpxmls
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     num_apply_measures = 1
-    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
       num_apply_measures = 6
     end
 
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
@@ -157,6 +157,7 @@ def create_hpxmls
   dirs.each do |dir|
     Dir["#{workflow_dir}/#{dir}/*.xml"].each do |hpxml|
       next if abs_hpxml_files.include? File.absolute_path(hpxml)
+      next if dir == 'real_homes'
 
       puts "Warning: Extra HPXML file found at #{File.absolute_path(hpxml)}"
     end
@@ -2331,6 +2332,230 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 annual_consumption_kbtu: 85000,
                                 annual_output_kwh: 12000,
                                 number_of_bedrooms_served: 18)
+    end
+
+    # -------------------- #
+    # HPXML Electric Panel #
+    # -------------------- #
+    if ['house051.xml', 'house052.xml', 'house053.xml'].include? hpxml_file
+      electric_panel = hpxml_bldg.electric_panels[0]
+      electric_panel.headroom = 13
+      electric_panel.rated_total_spaces = 60
+      branch_circuits = electric_panel.branch_circuits
+      branch_circuits.clear
+
+      hpxml_bldg.heat_pumps << hpxml_bldg.heat_pumps[0].dup
+      hpxml_bldg.heat_pumps[-1].id += "#{hpxml_bldg.hvac_distributions.size}"
+      hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
+      hpxml_bldg.heat_pumps[-1].primary_heating_system = false
+      hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.4
+      hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.4
+      hpxml_bldg.heat_pumps[-1].fraction_heat_load_served = 0.6
+      hpxml_bldg.heat_pumps[-1].fraction_cool_load_served = 0.6
+      hpxml_bldg.heat_pumps[0].heating_capacity = 36000
+      hpxml_bldg.heat_pumps[0].cooling_capacity = 36000
+      hpxml_bldg.heat_pumps[-1].heating_capacity = 48000
+      hpxml_bldg.heat_pumps[-1].cooling_capacity = 48000
+      hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
+                                        distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                        air_type: HPXML::AirTypeRegularVelocity)
+      hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[0].dup
+      hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].dup
+      hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
+      hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
+      hpxml_bldg.hvac_distributions[-1].ducts[0].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}"
+      hpxml_bldg.hvac_distributions[-1].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 2}"
+      hpxml_bldg.heat_pumps[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+
+      if ['house051.xml', 'house052.xml'].include? hpxml_file
+        # Main Panel
+        branch_circuits.add(id: 'ASHP3Ton',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 50.0,
+                            occupied_spaces: 2,
+                            component_idrefs: [hpxml_bldg.heat_pumps[0].id])
+        branch_circuits.add(id: 'Receptacles1',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'LightingLivingRm',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'ReceptaclesFamilyRm1',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'ASHP4Ton',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 50.0,
+                            occupied_spaces: 2,
+                            component_idrefs: [hpxml_bldg.heat_pumps[1].id])
+        branch_circuits.add(id: 'ReceptaclesBathRm1',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'ReceptaclesBathRm2',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'Lighting1',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'Lighting2',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'Lighting3',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'LightReceptPergola',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'PV',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 60.0,
+                            occupied_spaces: 2,
+                            component_idrefs: [hpxml_bldg.pv_systems[0].id])
+        branch_circuits.add(id: 'SubpanelOldMain',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 50.0,
+                            occupied_spaces: 2)
+        branch_circuits.add(id: 'Receptacles2',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'Receptacles3',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'ReceptaclesFamilyRm3',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'AirHandler2',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 2,
+                            component_idrefs: [hpxml_bldg.hvac_distributions[0].id])
+        branch_circuits.add(id: 'GarageDoors',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'DryerGas',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1,
+                            component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+        branch_circuits.add(id: 'WasherTanklessGasWaterHeater',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1,
+                            component_idrefs: [hpxml_bldg.clothes_washers[0].id,
+                                               hpxml_bldg.water_heating_systems[0].id])
+        branch_circuits.add(id: 'ReceptaclesShed1',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'ReceptaclesShed2',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'SubpanelPool',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 80.0,
+                            occupied_spaces: 2)
+
+        # Subpanel Old Main
+        branch_circuits.add(id: 'LightRecepDiningRm',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'Washer',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1,
+                            component_idrefs: [hpxml_bldg.clothes_washers[0].id])
+        branch_circuits.add(id: 'LightRecepFamilyRm',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'Receptacles4',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 0.5)
+        branch_circuits.add(id: 'Receptacles5',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 0.5)
+        branch_circuits.add(id: 'AirHandler1',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 2,
+                            component_idrefs: [hpxml_bldg.hvac_distributions[1].id])
+        branch_circuits.add(id: 'ReceptaclesBedrm1',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'ReceptaclesBedrm2',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'ReceptaclesBedrm3',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'ReceptaclesKitchen1',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1,
+                            component_idrefs: [hpxml_bldg.dishwashers[0].id])
+        branch_circuits.add(id: 'ReceptaclesKitchen2',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'Microwave',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 20.0,
+                            occupied_spaces: 1)
+
+        # Subpanel Pool
+        branch_circuits.add(id: 'PumpPool',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 2,
+                            component_idrefs: [hpxml_bldg.pools[0].pump_id])
+        branch_circuits.add(id: 'HPHeaterPool',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            max_current_rating: 50.0,
+                            occupied_spaces: 2,
+                            component_idrefs: [hpxml_bldg.pools[0].heater_id])
+        branch_circuits.add(id: 'LightRecepPool1',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+        branch_circuits.add(id: 'LightRecepPool2',
+                            voltage: HPXML::ElectricPanelVoltage120,
+                            max_current_rating: 15.0,
+                            occupied_spaces: 1)
+      elsif ['house053.xml'].include? hpxml_file
+        service_feeders = electric_panel.service_feeders
+        service_feeders.add(id: 'Lighting',
+                            type: HPXML::ElectricPanelLoadTypeLighting,
+                            power: 9000)
+        service_feeders.add(id: 'Kitchen',
+                            type: HPXML::ElectricPanelLoadTypeKitchen,
+                            power: 3000)
+        service_feeders.add(id: 'Laundry',
+                            type: HPXML::ElectricPanelLoadTypeLaundry,
+                            power: 1500)
+        service_feeders.add(id: 'Other',
+                            type: HPXML::ElectricPanelLoadTypeOther,
+                            power: 373)
+      end
     end
 
     # ------------- #
