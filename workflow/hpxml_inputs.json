@@ -867,8 +867,8 @@
   },
   "real_homes/house053.xml": {
     "parent_hpxml": "real_homes/house051.xml",
-    "electric_panel_load_heat_pump_heating_power": 14238.1,
-    "electric_panel_load_heat_pump_cooling_power": 14508.6,
+    "electric_panel_load_heat_pump_heating_power": 13496.1,
+    "electric_panel_load_heat_pump_cooling_power": 14896.1,
     "electric_panel_load_dishwasher_power": 1200,
     "electric_panel_load_pool_pump_power": 1491,
     "electric_panel_load_pool_heater_power": 5100

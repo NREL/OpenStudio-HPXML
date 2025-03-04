@@ -6167,6 +6167,7 @@ module Defaults
 
               end
             end
+            puts "watts1 #{watts}"
           end
         end
       end
@@ -6205,7 +6206,16 @@ module Defaults
         next if !component_ids.include?(heat_pump.id)
         next if heat_pump.fraction_cool_load_served == 0
 
-        watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), get_branch_circuit_voltage_default_values(heat_pump))
+        if heat_pump.branch_circuits.empty?
+          voltage = get_branch_circuit_voltage_default_values(heat_pump)
+          runner.registerWarning("Missing branch circuit for #{heat_pump.id}; assuming #{voltage}V.")
+          watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), voltage)
+        else
+          heat_pump.branch_circuits.each do |branch_circuit|
+            watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
+          end
+          puts "watts2 #{watts}"
+        end
       end
 
       hpxml_bldg.hvac_distributions.each do |hvac_distribution|
@@ -6331,7 +6341,7 @@ module Defaults
         next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
 
         if permanent_spa.heater_type == HPXML::HeaterTypeElectricResistance
-          if permanent_spa.branch_circuits.empty?
+          if permanent_spa.heater_branch_circuits.empty?
             voltage = get_branch_circuit_voltage_default_values(permanent_spa)
             runner.registerWarning("Missing branch circuit for #{permanent_spa.heater_id}; assuming #{voltage}V.")
             watts += get_default_panels_value(runner, default_panels_csv_data, 'spaheater', 'PowerRating', voltage)
@@ -6341,7 +6351,7 @@ module Defaults
             end
           end
         elsif permanent_spa.heater_type == HPXML::HeaterTypeHeatPump
-          if permanent_spa.branch_circuits.empty?
+          if permanent_spa.heater_branch_circuits.empty?
             voltage = get_branch_circuit_voltage_default_values(permanent_spa)
             runner.registerWarning("Missing branch circuit for #{permanent_spa.heater_id}; assuming #{voltage}V.")
             watts += get_default_panels_value(runner, default_panels_csv_data, 'spaheater_hp', 'PowerRating', voltage)
@@ -6356,7 +6366,7 @@ module Defaults
       hpxml_bldg.permanent_spas.each do |permanent_spa|
         next if !component_ids.include?(permanent_spa.pump_id)
 
-        if permanent_spa.branch_circuits.empty?
+        if permanent_spa.pump_branch_circuits.empty?
           voltage = get_branch_circuit_voltage_default_values(permanent_spa)
           runner.registerWarning("Missing branch circuit for #{permanent_spa.pump_id}; assuming #{voltage}V.")
           watts += get_default_panels_value(runner, default_panels_csv_data, 'spapump', 'PowerRating', voltage)
@@ -6372,7 +6382,7 @@ module Defaults
         next if ![HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
 
         if pool.heater_type == HPXML::HeaterTypeElectricResistance
-          if pool.branch_circuits.empty?
+          if pool.heater_branch_circuits.empty?
             voltage = get_branch_circuit_voltage_default_values(pool)
             runner.registerWarning("Missing branch circuit for #{pool.heater_id}; assuming #{voltage}V.")
             watts += get_default_panels_value(runner, default_panels_csv_data, 'poolheater', 'PowerRating', voltage)
@@ -6382,7 +6392,7 @@ module Defaults
             end
           end
         elsif pool.heater_type == HPXML::HeaterTypeHeatPump
-          if pool.branch_circuits.empty?
+          if pool.heater_branch_circuits.empty?
             voltage = get_branch_circuit_voltage_default_values(pool)
             runner.registerWarning("Missing branch circuit for #{pool.heater_id}; assuming #{voltage}V.")
             watts += get_default_panels_value(runner, default_panels_csv_data, 'poolheater_hp', 'PowerRating', voltage)
@@ -6397,7 +6407,7 @@ module Defaults
       hpxml_bldg.pools.each do |pool|
         next if !component_ids.include?(pool.pump_id)
 
-        if pool.branch_circuits.empty?
+        if pool.pump_branch_circuits.empty?
           voltage = get_branch_circuit_voltage_default_values(pool)
           runner.registerWarning("Missing branch circuit for #{pool.pump_id}; assuming #{voltage}V.")
           watts += get_default_panels_value(runner, default_panels_csv_data, 'poolpump', 'PowerRating', voltage)

@@ -401,10 +401,28 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>84000.0</HeatingCapacity>
-              <CoolingCapacity>84000.0</CoolingCapacity>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <HeatingCapacity>36000.0</HeatingCapacity>
+              <CoolingCapacity>36000.0</CoolingCapacity>
+              <FractionHeatLoadServed>0.4</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.4</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
+              </AnnualCoolingEfficiency>
+              <AnnualHeatingEfficiency>
+                <Units>HSPF</Units>
+                <Value>7.7</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
+            <HeatPump>
+              <SystemIdentifier id='HeatPump11'/>
+              <DistributionSystem idref='HVACDistribution2'/>
+              <HeatPumpType>air-to-air</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>48000.0</HeatingCapacity>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <FractionHeatLoadServed>0.6</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.6</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
@@ -450,6 +468,44 @@
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - vented</DuctLocation>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
+            </DistributionSystemType>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution2'/>
+            <DistributionSystemType>
+              <AirDistribution>
+                <AirDistributionType>regular velocity</AirDistributionType>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>75.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>25.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <SystemIdentifier id='Ducts3'/>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - vented</DuctLocation>
+                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <SystemIdentifier id='Ducts4'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
@@ -530,13 +586,13 @@
               <ServiceFeeder>
                 <SystemIdentifier id='ServiceFeeder1'/>
                 <LoadType>heating</LoadType>
-                <PowerRating>14238.1</PowerRating>
+                <PowerRating>13496.1</PowerRating>
                 <AttachedToComponent idref='HeatPump1'/>
               </ServiceFeeder>
               <ServiceFeeder>
                 <SystemIdentifier id='ServiceFeeder2'/>
                 <LoadType>cooling</LoadType>
-                <PowerRating>14508.6</PowerRating>
+                <PowerRating>14896.1</PowerRating>
                 <AttachedToComponent idref='HeatPump1'/>
               </ServiceFeeder>
               <ServiceFeeder>

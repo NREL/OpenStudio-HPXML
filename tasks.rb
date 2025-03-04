@@ -2344,6 +2344,29 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       branch_circuits = electric_panel.branch_circuits
       branch_circuits.clear
 
+      hpxml_bldg.heat_pumps << hpxml_bldg.heat_pumps[0].dup
+      hpxml_bldg.heat_pumps[-1].id += "#{hpxml_bldg.hvac_distributions.size}"
+      hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
+      hpxml_bldg.heat_pumps[-1].primary_heating_system = false
+      hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.4
+      hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.4
+      hpxml_bldg.heat_pumps[-1].fraction_heat_load_served = 0.6
+      hpxml_bldg.heat_pumps[-1].fraction_cool_load_served = 0.6
+      hpxml_bldg.heat_pumps[0].heating_capacity = 36000
+      hpxml_bldg.heat_pumps[0].cooling_capacity = 36000
+      hpxml_bldg.heat_pumps[-1].heating_capacity = 48000
+      hpxml_bldg.heat_pumps[-1].cooling_capacity = 48000
+      hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
+                                        distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                        air_type: HPXML::AirTypeRegularVelocity)
+      hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[0].dup
+      hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].dup
+      hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
+      hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
+      hpxml_bldg.hvac_distributions[-1].ducts[0].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}"
+      hpxml_bldg.hvac_distributions[-1].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 2}"
+      hpxml_bldg.heat_pumps[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+
       if ['house051.xml', 'house052.xml'].include? hpxml_file
         # Main Panel
         branch_circuits.add(id: 'ASHP3Ton',
@@ -2367,7 +2390,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                             voltage: HPXML::ElectricPanelVoltage240,
                             max_current_rating: 50.0,
                             occupied_spaces: 2,
-                            component_idrefs: [hpxml_bldg.heat_pumps[0].id])
+                            component_idrefs: [hpxml_bldg.heat_pumps[1].id])
         branch_circuits.add(id: 'ReceptaclesBathRm1',
                             voltage: HPXML::ElectricPanelVoltage120,
                             max_current_rating: 20.0,
@@ -2417,7 +2440,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                             voltage: HPXML::ElectricPanelVoltage240,
                             max_current_rating: 15.0,
                             occupied_spaces: 2,
-                            component_idrefs: [hpxml_bldg.heat_pumps[0].id])
+                            component_idrefs: [hpxml_bldg.hvac_distributions[0].id])
         branch_circuits.add(id: 'GarageDoors',
                             voltage: HPXML::ElectricPanelVoltage120,
                             max_current_rating: 20.0,
@@ -2472,7 +2495,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                             voltage: HPXML::ElectricPanelVoltage240,
                             max_current_rating: 15.0,
                             occupied_spaces: 2,
-                            component_idrefs: [hpxml_bldg.heat_pumps[0].id])
+                            component_idrefs: [hpxml_bldg.hvac_distributions[1].id])
         branch_circuits.add(id: 'ReceptaclesBedrm1',
                             voltage: HPXML::ElectricPanelVoltage120,
                             max_current_rating: 15.0,
