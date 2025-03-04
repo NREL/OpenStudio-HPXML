@@ -106,15 +106,15 @@ def compare_csv_files(file_path):
                     sample_changes = []
                     for idx in sample_indices:
                         if idx < len(df_git) and idx < len(df_current):
-                            sample_changes.append(f"row {idx}: {df_git.iloc[idx][col]} → {df_current.iloc[idx][col]}")
+                            sample_changes.append(f"row {idx}: {df_git.iloc[idx][col]} -> {df_current.iloc[idx][col]}")
                     
                     changed_columns.append((
                         col, 
-                        f"total: {sum_git:.2f} → {sum_current:.2f}",
+                        f"total: {sum_git:.2f} -> {sum_current:.2f}",
                         sample_changes
                     ))
                 else:
-                    changed_columns.append((col, f"total: {sum_git:.2f} → {sum_current:.2f}", None))
+                    changed_columns.append((col, f"total: {sum_git:.2f} -> {sum_current:.2f}", None))
             else:
                 # For non-numeric columns, show a few examples of changes
                 diff_mask = df_current[col] != df_git[col]
@@ -123,7 +123,7 @@ def compare_csv_files(file_path):
                     sample_changes = []
                     for idx in sample_indices:
                         if idx < len(df_git) and idx < len(df_current):
-                            sample_changes.append(f"row {idx}: '{df_git.iloc[idx][col]}' → '{df_current.iloc[idx][col]}'")
+                            sample_changes.append(f"row {idx}: '{df_git.iloc[idx][col]}' -> '{df_current.iloc[idx][col]}'")
                     
                     changed_columns.append((col, "Values changed", sample_changes))
                 else:
@@ -139,9 +139,9 @@ def compare_csv_files(file_path):
     
     # Add summary section
     result.append("SUMMARY:")
-    result.append(f"  • {len(changed_columns)} columns changed, {len(unchanged_columns)} columns unchanged")
+    result.append(f"  - {len(changed_columns)} columns changed, {len(unchanged_columns)} columns unchanged")
     if shape_changed:
-        result.append(f"  • Rows: {len(df_git)} → {len(df_current)}")
+        result.append(f"  - Rows: {len(df_git)} -> {len(df_current)}")
     result.append("")
     
     # List unchanged columns
@@ -158,7 +158,7 @@ def compare_csv_files(file_path):
         result.append("CHANGED COLUMNS:")
         
         for i, (col, change, samples) in enumerate(changed_columns):
-            result.append(f"  • {col}:")
+            result.append(f"  - {col}:")
             result.append(f"      {change}")
             
             if samples:
