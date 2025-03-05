@@ -86,10 +86,10 @@ def compare_csv_files(file_path):
     
     for col in all_columns:
         if col not in df_current.columns:
-            changed_columns.append((col, "Column removed"))
+            changed_columns.append((col, "Column removed", None))
             continue
         if col not in df_git.columns:
-            changed_columns.append((col, "Column added"))
+            changed_columns.append((col, "Column added", None))
             continue
         
         # Check if column values are different
