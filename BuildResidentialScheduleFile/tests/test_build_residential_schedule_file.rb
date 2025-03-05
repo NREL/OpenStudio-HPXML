@@ -232,7 +232,6 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:EVOccupant].name))
-    assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:PresentOccupants].name))
 
     @args_hash['schedules_random_seed'] = 2
     hpxml, result = _test_measure()

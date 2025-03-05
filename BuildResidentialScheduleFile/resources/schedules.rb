@@ -540,22 +540,6 @@ class ScheduleGenerator
     return sum
   end
 
-  # Get a binary representation of occupant presence at a given time index.
-  #
-  # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
-  # @param time_index [int] time index in the array
-  # @return [int] The integer whose binary representation indicates the presence of occupants. Bit 0 is presence of the first occupant, bit 1 is the presence of the second occupant, etc.
-  def get_present_occupants(mkc_activity_schedules, time_index)
-    sum = 0
-    multiplier = 1
-    mkc_activity_schedules.size.times do |i|
-      # Since mkc_activity_schedules[i][time_index, 5]) is 1 when the occupant is away, we need to subtract it from 1
-      sum += (1 - mkc_activity_schedules[i][time_index, 5]) * multiplier
-      multiplier *= 2
-    end
-    return sum
-  end
-
   # Determines which occupant will be assigned as the EV driver based on their away hours.
   #
   # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
@@ -913,7 +897,7 @@ class ScheduleGenerator
   # Generate occupancy schedules for sleeping, away, idle, EV presence and total occupancy.
   #
   # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
-  # @return [Hash] Hash containing arrays for sleep_schedule, away_schedule, idle_schedule, ev_occupant_presence, and present_occupants
+  # @return [Hash] Hash containing arrays for sleep_schedule, away_schedule, idle_schedule, ev_occupant_presence
   def generate_occupancy_schedules(mkc_activity_schedules)
     # States are: 0='sleeping', 1='shower', 2='laundry', 3='cooking', 4='dishwashing', 5='absent', 6='nothingAtHome'
     occupancy_arrays = {
@@ -921,8 +905,6 @@ class ScheduleGenerator
       away_schedule: [],
       idle_schedule: [],
       ev_occupant_presence: [],
-      # Binary representation of the presence of occupant. Each bit represents presence of one occupant
-      present_occupants: []
     }
     @total_days_in_year.times do |day|
       1440.times do |minute_of_day|
@@ -932,7 +914,6 @@ class ScheduleGenerator
         occupancy_arrays[:away_schedule] << sum_across_occupants(mkc_activity_schedules, 5, index_15).to_f / @num_occupants
         occupancy_arrays[:idle_schedule] << sum_across_occupants(mkc_activity_schedules, 6, index_15).to_f / @num_occupants
         occupancy_arrays[:ev_occupant_presence] << (1 - mkc_activity_schedules[@ev_occupant_number][index_15, 5])
-        occupancy_arrays[:present_occupants] << get_present_occupants(mkc_activity_schedules, index_15)
       end
     end
     return occupancy_arrays
