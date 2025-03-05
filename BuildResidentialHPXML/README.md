@@ -1150,29 +1150,16 @@ Assembly R-value for the ceiling (attic floor).
 
 <br/>
 
-**Roof: Material Type**
+**Enclosure: Roof Material**
 
-The material type of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
+The material type/color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
 
-- **Name:** ``roof_material_type``
+- **Name:** ``enclosure_roof_material``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `asphalt or fiberglass shingles`, `concrete`, `cool roof`, `slate or tile shingles`, `expanded polystyrene sheathing`, `metal surfacing`, `plastic/rubber/synthetic sheeting`, `shingles`, `wood shingles or shakes`
-
-<br/>
-
-**Roof: Color**
-
-The color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
-
-- **Name:** ``roof_color``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `dark`, `light`, `medium`, `medium dark`, `reflective`
+- **Choices:** `Asphalt/Fiberglass Shingles, Dark`, `Asphalt/Fiberglass Shingles, Medium Dark`, `Asphalt/Fiberglass Shingles, Medium`, `Asphalt/Fiberglass Shingles, Light`, `Asphalt/Fiberglass Shingles, Reflective`, `Tile/Slate, Dark`, `Tile/Slate, Medium Dark`, `Tile/Slate, Medium`, `Tile/Slate, Light`, `Tile/Slate, Reflective`, `Metal, Dark`, `Metal, Medium Dark`, `Metal, Medium`, `Metal, Light`, `Metal, Reflective`, `Wood Shingles/Shakes, Dark`, `Wood Shingles/Shakes, Medium Dark`, `Wood Shingles/Shakes, Medium`, `Wood Shingles/Shakes, Light`, `Wood Shingles/Shakes, Reflective`, `Shingles, Dark`, `Shingles, Medium Dark`, `Shingles, Medium`, `Shingles, Light`, `Shingles, Reflective`, `Synthetic Sheeting, Dark`, `Synthetic Sheeting, Medium Dark`, `Synthetic Sheeting, Medium`, `Synthetic Sheeting, Light`, `Synthetic Sheeting, Reflective`, `EPS Sheathing, Dark`, `EPS Sheathing, Medium Dark`, `EPS Sheathing, Medium`, `EPS Sheathing, Light`, `EPS Sheathing, Reflective`, `Concrete, Dark`, `Concrete, Medium Dark`, `Concrete, Medium`, `Concrete, Light`, `Concrete, Reflective`, `Cool Roof`
 
 <br/>
 
@@ -1894,16 +1881,16 @@ Presence of flue or chimney with combustion air from conditioned space; used for
 
 <br/>
 
-**Heating System: Type**
+**Heating System**
 
-The type of heating system. Use 'none' if there is no heating system or if there is a heat pump serving a heating load.
+The heating system type/efficiency. Efficiency is Rated AFUE or Percent as a Fraction. Use 'none' if there is no heating system or if there is a heat pump serving a heating load.
 
-- **Name:** ``heating_system_type``
+- **Name:** ``heating_system``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `Furnace`, `WallFurnace`, `FloorFurnace`, `Boiler`, `ElectricResistance`, `Stove`, `SpaceHeater`, `Fireplace`, `Shared Boiler w/ Baseboard`, `Shared Boiler w/ Ductless Fan Coil`
+- **Choices:** `Electric Furnace, 98% AFUE`, `Electric Furnace, 100% AFUE`, `Electric Baseboard, 100% Efficiency`, `Electric Boiler, 98% AFUE`, `Electric Boiler, 100% AFUE`, `Electric Wall Furnace, 100% AFUE`, `Fuel Boiler, 72% AFUE`, `Fuel Boiler, 76% AFUE`, `Fuel Boiler, 80% AFUE`, `Fuel Boiler, 82% AFUE`, `Fuel Boiler, 85% AFUE`, `Fuel Boiler, 90% AFUE`, `Fuel Boiler, 92% AFUE`, `Fuel Boiler, 92% AFUE, 600 BTUh Pilot Light`, `Fuel Boiler, 95% AFUE`, `Fuel Boiler, 96% AFUE`, `Fuel Furnace, 60% AFUE`, `Fuel Furnace, 68% AFUE`, `Fuel Furnace, 72% AFUE`, `Fuel Furnace, 76% AFUE`, `Fuel Furnace, 78% AFUE`, `Fuel Furnace, 80% AFUE`, `Fuel Furnace, 85% AFUE`, `Fuel Furnace, 90% AFUE`, `Fuel Furnace, 92% AFUE`, `Fuel Furnace, 92% AFUE, Airflow Defect Ratio`, `Fuel Furnace, 92% AFUE, 600 BTUh Pilot Light`, `Fuel Furnace, 92.5% AFUE`, `Fuel Furnace, 96% AFUE`, `Fuel Wall Furnace, 60% AFUE`, `Fuel Wall Furnace, 68% AFUE`, `Electric Wall Furnace, 98% AFUE`, `Electric Wall Furnace, 100% AFUE`, `None`, `Fuel Boiler w/ Baseboard, 78% AFUE`, `Fuel Boiler w/ Baseboard, 92% AFUE`, `Electric Boiler w/ Baseboard, 100% AFUE`, `Fuel Fan Coil Heating, 78% AFUE`, `Fuel Fan Coil Heating, 92% AFUE`, `Electric Fan Coil Heating, 100% AFUE`, `Fireplace, 80% Efficiency`, `Stove, 80% Efficiency`, `Fuel Floor Furnace, 80% AFUE, 600 BTUh Pilot Light`, `Space Heater, 100% Efficiency`, `Space Heater, 92% Efficiency`
 
 <br/>
 
@@ -1917,19 +1904,6 @@ The fuel type of the heating system. Ignored for ElectricResistance.
 - **Required:** ``true``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`, `coal`
-
-<br/>
-
-**Heating System: Rated AFUE or Percent**
-
-The rated heating efficiency value of the heating system.
-
-- **Name:** ``heating_system_heating_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
 
 <br/>
 
@@ -1980,32 +1954,6 @@ The heating load served by the heating system.
 - **Units:** ``Frac``
 
 - **Required:** ``true``
-
-<br/>
-
-**Heating System: Pilot Light**
-
-The fuel usage of the pilot light. Applies only to Furnace, WallFurnace, FloorFurnace, Stove, Boiler, and Fireplace with non-electric fuel type. If not provided, assumes no pilot light.
-
-- **Name:** ``heating_system_pilot_light``
-- **Type:** ``Double``
-
-- **Units:** ``Btuh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heating System: Airflow Defect Ratio**
-
-The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heating system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to Furnace. If not provided, assumes no defect.
-
-- **Name:** ``heating_system_airflow_defect_ratio``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
 
 <br/>
 
