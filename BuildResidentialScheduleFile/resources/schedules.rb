@@ -148,10 +148,18 @@ class ScheduleGenerator
     @weekend_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekend')
 
     mkc_activity_schedules = simulate_occupant_activities()
+
+    # Apply random offset to schedules to avoid synchronization when aggregating across dwelling units
+    offset_range = 30 # +- 30 minutes was minimum required to avoid synchronization spikes at 1000 unit aggregation
+    @random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
+
     # shape of mkc_activity_schedules is [n, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
     @ev_occupant_number = get_ev_occupant_number(mkc_activity_schedules)
     occupancy_schedules = generate_occupancy_schedules(mkc_activity_schedules)
-    @schedules[SchedulesFile::Columns[:Occupants].name] = occupancy_schedules[:away_schedule].map { |i| 1.0 - i }
+
+    # Apply random shift to occupancy schedules but don't normalize
+    home_schedule = occupancy_schedules[:away_schedule].map { |i| (1.0 - i) }
+    @schedules[SchedulesFile::Columns[:Occupants].name] = random_shift_and_normalize(home_schedule, @minutes_per_step)
 
     fill_plug_loads_schedule(mkc_activity_schedules, weather)
     fill_lighting_schedule(mkc_activity_schedules, args)
@@ -159,54 +167,54 @@ class ScheduleGenerator
     sink_activity_sch = generate_sink_schedule(mkc_activity_schedules)
     shower_activity_sch, bath_activity_sch = generate_bath_shower_schedules(mkc_activity_schedules)
 
-    # Apply random offset to schedules to avoid synchronization
-    offset_range = 30 # +- 30 minutes offset
-    random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
     if !@hpxml_bldg.dishwashers.to_a.empty?
       dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
       dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
       @schedules.merge!({
-                          SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch, random_offset),
-                          SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch, random_offset)
+                          SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch),
+                          SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch)
                         })
     end
     if !@hpxml_bldg.clothes_washers.to_a.empty?
       cw_hot_water_sch = generate_clothes_washer_schedule(mkc_activity_schedules)
       cw_power_sch, cd_power_sch = generate_clothes_washer_dryer_power_schedules(mkc_activity_schedules)
       @schedules.merge!({
-                          SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch, random_offset),
-                          SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch, random_offset)
+                          SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch),
+                          SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch)
                         })
       if !@hpxml_bldg.clothes_dryers.to_a.empty?
         @schedules.merge!({
-                            SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch, random_offset)
+                            SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch)
                           })
       end
     end
     if !@hpxml_bldg.cooking_ranges.to_a.empty?
       cooking_power_sch = generate_cooking_power_schedule(mkc_activity_schedules)
       @schedules.merge!({
-                          SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch, random_offset)
+                          SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch)
                         })
     end
 
-    showers = random_shift_and_normalize(shower_activity_sch, random_offset)
-    sinks = random_shift_and_normalize(sink_activity_sch, random_offset)
-    baths = random_shift_and_normalize(bath_activity_sch, random_offset)
+    showers = random_shift_and_normalize(shower_activity_sch)
+    sinks = random_shift_and_normalize(sink_activity_sch)
+    baths = random_shift_and_normalize(bath_activity_sch)
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
     @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = normalize(fixtures)
-    fill_ev_schedules(mkc_activity_schedules, occupancy_schedules[:ev_occupant_presence])
+
+    # Apply random shift to EV occupant presence but don't normalize
+    ev_occupant_presence = random_shift_and_normalize(occupancy_schedules[:ev_occupant_presence], @minutes_per_step)
+    fill_ev_schedules(mkc_activity_schedules, ev_occupant_presence)
+
     if @debug
-      @schedules[SchedulesFile::Columns[:PresentOccupants].name] = occupancy_schedules[:present_occupants]
-      @schedules[SchedulesFile::Columns[:Sleeping].name] = occupancy_schedules[:sleep_schedule]
+      @schedules[SchedulesFile::Columns[:Sleeping].name] =  random_shift_and_normalize(occupancy_schedules[:sleep_schedule], @minutes_per_step)
     end
     return true
   end
 
-  # TODO
+  # Simulate occupant activities using Markov chain model.
   #
-  # @return [TODO] TODO
-  def simulate_occupant_activities()
+  # @return [Array<Matrix>] Array of matrices containing activity schedules for each occupant
+  def simulate_occupant_activities
     mkc_activity_schedules = [] # holds the markov-chain state for each of the seven simulated states for each occupant.
     # States are: 'sleeping', 'shower', 'laundry', 'cooking', 'dishwashing', 'absent', 'nothingAtHome'
 
@@ -297,7 +305,8 @@ class ScheduleGenerator
     return new_array
   end
 
-  # Apply monthly schedule shifts based on weekday/weekend patterns.
+  # Apply monthly schedule shifts based on weekday/weekend patterns. This is done to bring the schedules into alignment
+  # with observed monthly and weekday/weekend patterns at national level since our mkc doesn't model monthly patterns.
   #
   # @param array [Array] Array of minute-level schedule values to shift
   # @param weekday_monthly_shift_dict [Hash] Map of month name to number of minutes to shift weekday schedules
@@ -532,22 +541,6 @@ class ScheduleGenerator
     return sum
   end
 
-  # Get a binary representation of occupant presence at a given time index.
-  #
-  # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
-  # @param time_index [int] time index in the array
-  # @return [int] The integer whose binary representation indicates the presence of occupants. Bit 0 is presence of the first occupant, bit 1 is the presence of the second occupant, etc.
-  def get_present_occupants(mkc_activity_schedules, time_index)
-    sum = 0
-    multiplier = 1
-    mkc_activity_schedules.size.times do |i|
-      # Since mkc_activity_schedules[i][time_index, 5]) is 1 when the occupant is away, we need to subtract it from 1
-      sum += (1 - mkc_activity_schedules[i][time_index, 5]) * multiplier
-      multiplier *= 2
-    end
-    return sum
-  end
-
   # Determines which occupant will be assigned as the EV driver based on their away hours.
   #
   # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
@@ -580,10 +573,15 @@ class ScheduleGenerator
   # Normalize an array by dividing all values by the maximum value.
   #
   # @param arr [Array] Array of numeric values to normalize
+  # @param max_val [Float, nil] Maximum value to normalize to. If nil, use the maximum value in the schedule.
   # @return [Array] Array with values normalized to between 0 and 1
-  def normalize(arr)
-    m = arr.max
-    arr = arr.map { |a| a / m }
+  def normalize(arr, max_val = nil)
+    if max_val.nil?
+      m = arr.max
+    else
+      m = max_val
+    end
+    arr = arr.map { |a| a / m.to_f }
     return arr
   end
 
@@ -812,8 +810,8 @@ class ScheduleGenerator
     away_index = 5 # Index of away activity in the markov-chain simulator
     away_schedule = markov_chain_simulation_result[@ev_occupant_number].column(away_index)
     charging_schedule, discharging_schedule = get_ev_battery_schedule(away_schedule, hours_per_year)
-    agg_charging_schedule = aggregate_array(charging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
-    agg_discharging_schedule = aggregate_array(discharging_schedule, @minutes_per_step).map { |val| val.to_f / @minutes_per_step }
+    agg_charging_schedule = random_shift_and_normalize(charging_schedule, @minutes_per_step)
+    agg_discharging_schedule = random_shift_and_normalize(discharging_schedule, @minutes_per_step)
 
     # The combined schedule is not a sum of the charging and discharging schedules because when charging and discharging
     # both occur in a timestep, we don't want them to cancel out and draw no power from the building. So, whenever there
@@ -900,7 +898,7 @@ class ScheduleGenerator
   # Generate occupancy schedules for sleeping, away, idle, EV presence and total occupancy.
   #
   # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
-  # @return [Hash] Hash containing arrays for sleep_schedule, away_schedule, idle_schedule, ev_occupant_presence, and present_occupants
+  # @return [Hash] Hash containing arrays for sleep_schedule, away_schedule, idle_schedule, ev_occupant_presence
   def generate_occupancy_schedules(mkc_activity_schedules)
     # States are: 0='sleeping', 1='shower', 2='laundry', 3='cooking', 4='dishwashing', 5='absent', 6='nothingAtHome'
     occupancy_arrays = {
@@ -908,18 +906,15 @@ class ScheduleGenerator
       away_schedule: [],
       idle_schedule: [],
       ev_occupant_presence: [],
-      # Binary representation of the presence of occupant. Each bit represents presence of one occupant
-      present_occupants: []
     }
     @total_days_in_year.times do |day|
-      @steps_in_day.times do |step|
-        minute = day * 1440 + step * @minutes_per_step
+      1440.times do |minute_of_day|
+        minute = day * 1440 + minute_of_day
         index_15 = (minute / 15).to_i
         occupancy_arrays[:sleep_schedule] << sum_across_occupants(mkc_activity_schedules, 0, index_15).to_f / @num_occupants
         occupancy_arrays[:away_schedule] << sum_across_occupants(mkc_activity_schedules, 5, index_15).to_f / @num_occupants
         occupancy_arrays[:idle_schedule] << sum_across_occupants(mkc_activity_schedules, 6, index_15).to_f / @num_occupants
         occupancy_arrays[:ev_occupant_presence] << (1 - mkc_activity_schedules[@ev_occupant_number][index_15, 5])
-        occupancy_arrays[:present_occupants] << get_present_occupants(mkc_activity_schedules, index_15)
       end
     end
     return occupancy_arrays
@@ -937,39 +932,38 @@ class ScheduleGenerator
     # Generate schedules for each plug load type if it exists
     if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'other' }
       plug_loads_other = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_other)
-      @schedules[SchedulesFile::Columns[:PlugLoadsOther].name] = normalize(plug_loads_other)
+      @schedules[SchedulesFile::Columns[:PlugLoadsOther].name] = random_shift_and_normalize(plug_loads_other)
     end
 
     if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'TV other' }
       plug_loads_tv = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_tv)
-      @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = normalize(plug_loads_tv)
+      @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = random_shift_and_normalize(plug_loads_tv)
     end
     if !@hpxml_bldg.ceiling_fans.to_a.empty?
       ceiling_fan = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :ceiling_fan)
-      @schedules[SchedulesFile::Columns[:CeilingFan].name] = normalize(ceiling_fan)
+      @schedules[SchedulesFile::Columns[:CeilingFan].name] = random_shift_and_normalize(ceiling_fan)
     end
   end
 
-  # TODO
+  # Generate plug load schedules based on occupant activities and daily schedules.
   #
-  # @param mkc_activity_schedules [TODO] TODO
-  # @param daily_schedules [TODO] TODO
-  # @param schedule_type [TODO] TODO
-  # @return [TODO]
+  # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
+  # @param daily_schedules [Hash] Hash containing daily schedule data for plug loads
+  # @param schedule_type [Symbol] Type of plug load schedule to generate
+  # @return [Array<Float>] Array of hourly plug load schedule values normalized to 1.0
   def generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, schedule_type)
-    schedule = Array.new(@total_days_in_year * @steps_in_day, 0.0)
+    schedule = Array.new(@total_days_in_year * 1440, 0.0)
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       month = today.month
       is_weekday = ![0, 6].include?(today.wday)
-      @steps_in_day.times do |step|
-        minute = day * 1440 + step * @minutes_per_step
+      1440.times do |minute_of_day|
+        minute = day * 1440 + minute_of_day
         index_15 = (minute / 15).to_i
         # Calculate occupancy percentage
         active_occupancy_percentage = calculate_active_occupancy(mkc_activity_schedules, index_15)
-        schedule_index = day * @steps_in_day + step
         # Update schedule based on daily schedules and occupancy
-        schedule[schedule_index] = get_value_from_daily_sch(
+        schedule[minute] = get_value_from_daily_sch(
           daily_schedules[schedule_type][:weekday],
           daily_schedules[schedule_type][:weekend],
           daily_schedules[schedule_type][:monthly],
@@ -1001,24 +995,23 @@ class ScheduleGenerator
     interior_lighting_schedule = initialize_interior_lighting_schedule(args)
 
     # Generate minute-level schedule
-    lighting_interior = Array.new(@total_days_in_year * @steps_in_day, 0.0)
+    lighting_interior = Array.new(@total_days_in_year * 1440, 0.0)
 
     @total_days_in_year.times do |day|
-      @steps_in_day.times do |step|
-        minute = day * 1440 + step * @minutes_per_step
+      1440.times do |minute_of_day|
+        minute = day * 1440 + minute_of_day
         index_15 = (minute / 15).to_i
 
         # Calculate occupancy percentage
         active_occupancy_percentage = calculate_active_occupancy(mkc_activity_schedules, index_15)
 
-        schedule_index = day * @steps_in_day + step
-        lighting_interior[schedule_index] = scale_lighting_by_occupancy(
+        lighting_interior[minute] = scale_lighting_by_occupancy(
           interior_lighting_schedule, minute, active_occupancy_percentage
         )
       end
     end
 
-    normalized_lighting = normalize(lighting_interior)
+    normalized_lighting = random_shift_and_normalize(lighting_interior)
     @schedules[SchedulesFile::Columns[:LightingInterior].name] = normalized_lighting
     if @hpxml_bldg.has_location(HPXML::LocationGarage)
       @schedules[SchedulesFile::Columns[:LightingGarage].name] = normalized_lighting
@@ -1415,13 +1408,12 @@ class ScheduleGenerator
     return cooking_power_sch
   end
 
-  # Apply random time shift and normalize schedule values.
+  # Apply random time shift to schedule values without normalizing.
   #
   # @param schedule [Array<Float>] Array of minute-level schedule values
-  # @param random_offset [Integer] Random offset in minutes to apply to the schedule
-  # @return [Array<Float>] Normalized schedule with random time shift applied
-  def random_shift_and_normalize(schedule, random_offset)
-    schedule = schedule.rotate(random_offset)
+  # @return [Array<Float>] Schedule with random time shift applied
+  def random_shift_and_aggregate(schedule)
+    schedule = schedule.rotate(@random_offset)
 
     # Apply monthly offsets and aggregate
     schedule = apply_monthly_offsets(array: schedule,
@@ -1429,6 +1421,16 @@ class ScheduleGenerator
                                      weekend_monthly_shift_dict: @weekend_monthly_shift_dict)
     schedule = aggregate_array(schedule, @minutes_per_step)
 
-    return normalize(schedule)
+    return schedule
+  end
+
+  # Apply random time shift and normalize schedule values.
+  #
+  # @param schedule [Array<Float>] Array of minute-level schedule values
+  # @param max_val [Float] Maximum value to normalize to. If nil, use the maximum value in the schedule.
+  # @return [Array<Float>] Normalized schedule with random time shift applied
+  def random_shift_and_normalize(schedule, max_val = nil)
+    shifted_schedule = random_shift_and_aggregate(schedule)
+    return normalize(shifted_schedule, max_val)
   end
 end
