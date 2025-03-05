@@ -149,8 +149,8 @@ class ScheduleGenerator
 
     mkc_activity_schedules = simulate_occupant_activities()
 
-    # Apply random offset to schedules to avoid synchronization
-    offset_range = 30 # +- 30 minutes offset
+    # Apply random offset to schedules to avoid synchronization when aggregating across dwelling units
+    offset_range = 30 # +- 30 minutes was minimum required to avoid synchronization spikes at 1000 unit aggregation
     @random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
 
     # shape of mkc_activity_schedules is [n, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
@@ -305,7 +305,8 @@ class ScheduleGenerator
     return new_array
   end
 
-  # Apply monthly schedule shifts based on weekday/weekend patterns.
+  # Apply monthly schedule shifts based on weekday/weekend patterns. This is done to bring the schedules into alignment
+  # with observed monthly and weekday/weekend patterns at national level since our mkc doesn't model monthly patterns.
   #
   # @param array [Array] Array of minute-level schedule values to shift
   # @param weekday_monthly_shift_dict [Hash] Map of month name to number of minutes to shift weekday schedules
