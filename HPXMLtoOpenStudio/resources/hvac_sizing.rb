@@ -2788,7 +2788,7 @@ module HVACSizing
       hvac_cooling_shr_rated = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
       entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
-      total_cap_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, entering_temp, hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed])
+      total_cap_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, entering_temp, hvac_cooling_ap.cool_cap_ft_spec)
 
       hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
       hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr_rated
@@ -3015,9 +3015,9 @@ module HVACSizing
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [Double] Heat pump adjustment factor (capacity fraction)
   def self.adjust_heat_pump_capacity_for_indoor_condition(outdoor_temp, indoor_temp, mode)
-    coefficients_1speed = HVAC.get_resnet_cap_eir_ft_spec(mode)[0]
+    cap_ft_spec_ss = HVAC.get_resnet_cap_eir_ft_spec(mode)[0]
     rated_indoor_temp = (mode == :clg) ? HVAC::AirSourceCoolRatedIWB : HVAC::AirSourceHeatRatedIDB
-    cap_adj = MathTools.biquadratic(indoor_temp, outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, outdoor_temp, coefficients_1speed)
+    cap_adj = MathTools.biquadratic(indoor_temp, outdoor_temp, cap_ft_spec_ss) / MathTools.biquadratic(rated_indoor_temp, outdoor_temp, cap_ft_spec_ss)
     return cap_adj
   end
 
@@ -3113,7 +3113,7 @@ module HVACSizing
       end
 
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
-      clg_fff_cap_coeff, _clg_fff_eir_coeff = HVAC.get_cool_cap_eir_fflow_spec(HPXML::HVACCompressorTypeSingleStage)[0]
+      clg_fff_cap_coeff, _clg_fff_eir_coeff = HVAC.get_resnet_cap_eir_fflow_spec(:clg)[0]
       a1_AF_Qgr_c = clg_fff_cap_coeff[0]
       a2_AF_Qgr_c = clg_fff_cap_coeff[1]
       a3_AF_Qgr_c = clg_fff_cap_coeff[2]
@@ -3177,7 +3177,7 @@ module HVACSizing
         heat_airflow_rated_defect_ratio = 1 + heat_airflow_defect_ratio
       end
 
-      htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_heat_cap_eir_fflow_spec(HPXML::HVACCompressorTypeSingleStage)[0]
+      htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_resnet_cap_eir_fflow_spec(:htg)[0]
       a1_AF_Qgr_h = htg_fff_cap_coeff[0]
       a2_AF_Qgr_h = htg_fff_cap_coeff[1]
       a3_AF_Qgr_h = htg_fff_cap_coeff[2]

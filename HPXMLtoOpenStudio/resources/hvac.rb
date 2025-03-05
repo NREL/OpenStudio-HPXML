@@ -8,7 +8,7 @@ module HVAC
   AirSourceCoolRatedOWB = 75.0 # degF, Rated outdoor wetbulb for air-source systems, cooling
   AirSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for air-source systems, cooling
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
-  RatedCFMPerTon = 400.0 # cfm/ton of rated capacity
+  RatedCFMPerTon = 400.0 # cfm/ton of rated capacity, RESNET MINHERS Addendum 82
   CrankcaseHeaterTemp = 50.0 # degF, RESNET MINHERS Addendum 82
   MinCapacity = 1.0 # Btuh
   MinAirflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
@@ -1581,37 +1581,11 @@ module HVAC
     return clg_wd_setpoints, clg_we_setpoints
   end
 
-  # TODO
-  #
-  # @param compressor_type [String] Type of compressor (HPXML::HVACCompressorTypeXXX)
-  # @return [TODO] TODO
-  def self.get_cool_cap_eir_fflow_spec(compressor_type)
-    # FIXME: Review this
-    case compressor_type
-    when HPXML::HVACCompressorTypeSingleStage
-      # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-      cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
-      eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
-    when HPXML::HVACCompressorTypeTwoStage
-      # Most two stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-      cap_fflow_spec = [[0.655239515, 0.511655216, -0.166894731],
-                        [0.618281092, 0.569060264, -0.187341356]]
-      eir_fflow_spec = [[1.639108268, -0.998953996, 0.359845728],
-                        [1.570774717, -0.914152018, 0.343377302]]
-    when HPXML::HVACCompressorTypeVariableSpeed
-      # Variable speed systems have constant flow ECM blowers, so the air handler can always achieve the design airflow rate by sacrificing blower power.
-      # So we assume that there is only one corresponding airflow rate for each compressor speed.
-      eir_fflow_spec = [[1, 0, 0]] * 3
-      cap_fflow_spec = [[1, 0, 0]] * 3
-    end
-    return cap_fflow_spec, eir_fflow_spec
-  end
-
-  # Return coefficients of capacity and eir as function of temperature curves,
-  # used to adjust the detailed performance data to account for variations in indoor conditions
+  # Returns coefficients for capacity and EIR as function of temperature curves.
+  # Based on RESNET MINHERS Addendum 82.
   #
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
-  # @return [Array<Double>, Array<Double>] Capacity as function of temperature coefficients, eir as function of temperature coefficients
+  # @return [Array<Double>, Array<Double>] Capacity=f(temperature) and EIR=f(temperature) coefficients
   def self.get_resnet_cap_eir_ft_spec(mode)
     if mode == :htg
       eir_ft_spec = [0.722917608, 0.003520184, 0.000143097, -0.005760341, 0.000141736, -0.000216676]
@@ -1623,28 +1597,18 @@ module HVAC
     return cap_ft_spec, eir_ft_spec
   end
 
-  # TODO
+  # Returns coefficients for capacity and EIR as function of airflow fraction curves.
+  # Based on RESNET MINHERS Addendum 82.
   #
-  # @param compressor_type [String] Type of compressor (HPXML::HVACCompressorTypeXXX)
-  # @return [TODO] TODO
-  def self.get_heat_cap_eir_fflow_spec(compressor_type)
-    # FIXME: Review this
-    case compressor_type
-    when HPXML::HVACCompressorTypeSingleStage
-      # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-      cap_fflow_spec = [[0.694045465, 0.474207981, -0.168253446]]
-      eir_fflow_spec = [[2.185418751, -1.942827919, 0.757409168]]
-    when HPXML::HVACCompressorTypeTwoStage
-      # Most two stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-      cap_fflow_spec = [[0.741466907, 0.378645444, -0.119754733],
-                        [0.76634609, 0.32840943, -0.094701495]]
-      eir_fflow_spec = [[2.153618211, -1.737190609, 0.584269478],
-                        [2.001041353, -1.58869128, 0.587593517]]
-    when HPXML::HVACCompressorTypeVariableSpeed
-      # Variable speed systems have constant flow ECM blowers, so the air handler can always achieve the design airflow rate by sacrificing blower power.
-      # So we assume that there is only one corresponding airflow rate for each compressor speed.
-      cap_fflow_spec = [[1, 0, 0]] * 3
-      eir_fflow_spec = [[1, 0, 0]] * 3
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
+  # @return [Array<Double>, Array<Double>] Capacity=f(airflow fraction) and EIR=f(airflow fraction) coefficients
+  def self.get_resnet_cap_eir_fflow_spec(mode)
+    if mode == :htg
+      cap_fflow_spec = [0.694045465, 0.474207981, -0.168253446]
+      eir_fflow_spec = [2.185418751, -1.942827919, 0.757409168]
+    elsif mode == :clg
+      cap_fflow_spec = [0.718664047, 0.41797409, -0.136638137]
+      eir_fflow_spec = [1.143487507, -0.13943972, -0.004047787]
     end
     return cap_fflow_spec, eir_fflow_spec
   end
@@ -1655,44 +1619,39 @@ module HVAC
   # @return [nil]
   def self.set_cool_curves_dx_air_source(cooling_system)
     clg_ap = cooling_system.additional_properties
-    clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
+
+    # Set cooling capacity ratios (capacities at each speed relative to nominal capacity)
+    # Based on RESNET MINHERS Addendum 82
+    case cooling_system.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      clg_ap.cool_capacity_ratios = [1.0]
+    when HPXML::HVACCompressorTypeTwoStage
+      qrcmin = 0.728 # Qmin/Qratedfull
+      clg_ap.cool_capacity_ratios = [qrcmin, 1.0]
+    when HPXML::HVACCompressorTypeVariableSpeed
+      _cops_95, cops_82 = get_cool_cops_95F_82F(cooling_system)
+      qr95full = 0.934 # Q95full/Q95max
+      qr95min = 1.0 / qr95full * (0.029 + 0.369 * cops_82[:max] / cops_82[:min]) # Q95min/Q95max
+      clg_ap.cool_capacity_ratios = [qr95min, 1.0, 1.0 / qr95full]
+    end
+
     set_hvac_degradation_coefficient(cooling_system)
 
     if is_room_dx_hvac_system(cooling_system)
-      clg_ap.cool_cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
-      clg_ap.cool_eir_ft_spec = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+      clg_ap.cool_cap_ft_spec = [3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]
+      clg_ap.cool_eir_ft_spec = [-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]
       clg_ap.cool_rated_cfm_per_ton = [312] # medium speed
       clg_ap.cool_fan_speed_ratios = [1.0]
-      clg_ap.cool_cap_fflow_spec = [[1.0, 0.0, 0.0]]
-      clg_ap.cool_eir_fflow_spec = [[1.0, 0.0, 0.0]]
+      clg_ap.cool_cap_fflow_spec = [1.0, 0.0, 0.0]
+      clg_ap.cool_eir_fflow_spec = [1.0, 0.0, 0.0]
       clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_ceer, 'Btu/hr', 'W')]
     else
       clg_ap.cool_rated_cfm_per_ton = [RatedCFMPerTon] * clg_ap.cool_capacity_ratios.size
       clg_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(clg_ap.cool_capacity_ratios, clg_ap.cool_rated_cfm_per_ton)
-      clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
+      clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_resnet_cap_eir_fflow_spec(:clg)
     end
 
     set_cool_rated_shrs_gross(cooling_system)
-  end
-
-  # Returns the cooling capacity ratios for the HVAC system.
-  #
-  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
-  # @return [Array<Double>] Ratio of cooling capacity to nominal cooling capacity for each speed
-  def self.get_cool_capacity_ratios(cooling_system)
-    case cooling_system.compressor_type
-    when HPXML::HVACCompressorTypeSingleStage
-      return [1.0]
-    when HPXML::HVACCompressorTypeTwoStage
-      return [0.728, 1.0]
-    when HPXML::HVACCompressorTypeVariableSpeed
-      nominal_to_max_ratio = 0.934
-      _cops_95, cops_82 = get_cool_cops_95F_82F(cooling_system)
-      min_capacity_ratio = 1.0 / nominal_to_max_ratio * (0.029 + 0.369 * cops_82[:max] / cops_82[:min])
-      return [min_capacity_ratio, 1.0, 1.0 / nominal_to_max_ratio]
-    end
-
-    fail 'Unable to get cooling capacity ratios.'
   end
 
   # Get net COP values at 95F and 82F for each speed based on RESNET MINHERS Addendum 82.
@@ -1708,15 +1667,21 @@ module HVAC
       nom_cop_82 = UnitConversions.convert(eer2b_82, 'Btu/hr', 'W')
       return { nom: nom_cop_95 }, { nom: nom_cop_82 }
     when HPXML::HVACCompressorTypeTwoStage
+      eirm95ratedfull = 1.244 # (P95ratedfull/Q95ratedfull)/(P82ratedfull/Q82ratedfull)
+
       min_cop_82 = get_cop_82_min(cooling_system.compressor_type, cooling_system.cooling_efficiency_seer2, cooling_system.cooling_efficiency_eer2)
-      min_cop_95 = min_cop_82 / 1.244
-      nom_cop_82 = nom_cop_95 * 1.244
+      min_cop_95 = min_cop_82 / eirm95ratedfull
+      nom_cop_82 = nom_cop_95 * eirm95ratedfull
       return { min: min_cop_95, nom: nom_cop_95 }, { min: min_cop_82, nom: nom_cop_82 }
     when HPXML::HVACCompressorTypeVariableSpeed
+      eirr95full = 0.928 # (P95full/Q95full)/(P95max/Q95max)
+      eirm95min = 1.315 # (P95min/Q95min)/(P82min/Q82min)
+      eirm95max = 1.326 # (P95max/Q95max)/(P82max/Q82max)
+
       min_cop_82 = get_cop_82_min(cooling_system.compressor_type, cooling_system.cooling_efficiency_seer2, cooling_system.cooling_efficiency_eer2)
-      max_cop_95 = nom_cop_95 * 0.928
-      min_cop_95 = min_cop_82 / 1.315
-      max_cop_82 = max_cop_95 * 1.326
+      max_cop_95 = nom_cop_95 * eirr95full
+      min_cop_95 = min_cop_82 / eirm95min
+      max_cop_82 = max_cop_95 * eirm95max
       nom_cop_82 = MathTools.interp2(nom_cop_95, min_cop_95, max_cop_95, min_cop_82, max_cop_82)
       return { min: min_cop_95, nom: nom_cop_95, max: max_cop_95 }, { min: min_cop_82, nom: nom_cop_82, max: max_cop_82 }
     end
@@ -1728,14 +1693,27 @@ module HVAC
   # @return [nil]
   def self.set_heat_curves_dx_air_source(heating_system)
     htg_ap = heating_system.additional_properties
-    htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heating_system.compressor_type)
-    htg_ap.heat_capacity_ratios = get_heat_capacity_ratios_47F(heating_system)
+    htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_resnet_cap_eir_fflow_spec(:htg)
+
+    # Set heating capacity ratios (capacities at each speed relative to nominal capacity)
+    # Based on RESNET MINHERS Addendum 82
+    case heating_system.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      htg_ap.heat_capacity_ratios = [1.0]
+    when HPXML::HVACCompressorTypeTwoStage
+      htg_ap.heat_capacity_ratios = [0.712, 1.0]
+    when HPXML::HVACCompressorTypeVariableSpeed
+      qr47full = 0.908 # Q47full/Q47max
+      qr47min = 0.272 # Q47min/Q47max
+      htg_ap.heat_capacity_ratios = [qr47min / qr47full, 1.0, 1.0 / qr47full]
+    end
+
     set_hvac_degradation_coefficient(heating_system)
 
     if is_room_dx_hvac_system(heating_system)
       heating_capacity_fraction_17F = get_heating_capacity_fraction_17F(heating_system)
       htg_ap.heat_cap_ft_spec = calc_heat_cap_ft_spec(heating_capacity_fraction_17F)
-      htg_ap.heat_eir_ft_spec = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
+      htg_ap.heat_eir_ft_spec = [0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]
       htg_ap.heat_rated_cfm_per_ton = [RatedCFMPerTon]
       htg_ap.heat_fan_speed_ratios = [1.0]
     else
@@ -1753,14 +1731,14 @@ module HVAC
 
     nom_capacity_47 = heat_pump.heating_capacity
     nom_capacity_17 = heat_pump.heating_capacity_17F
-    heat_capacity_ratios_17F = get_heat_capacity_ratios_17F(heat_pump)
-    heat_capacity_ratios_5F = get_heat_capacity_ratios_5F(heat_pump)
     nom_cop_47 = get_cop_47_rated(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf2, get_heating_capacity_fraction_17F(heat_pump))
 
     case heat_pump.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
+      eirm17ratedfull = 1.356 # (P17ratedfull/Q17ratedfull)/(P47ratedfull/Q47ratedfull)
+
       # COPs @ 17F
-      nom_cop_17 = nom_cop_47 / 1.356
+      nom_cop_17 = nom_cop_47 / eirm17ratedfull
 
       # Capacities @ 5F
       if nom_capacity_47 > 0
@@ -1777,18 +1755,22 @@ module HVAC
       end
 
     when HPXML::HVACCompressorTypeTwoStage
+      eirm17ratedfull = 1.356 # (P17ratedfull/Q17ratedfull)/(P47ratedfull/Q47ratedfull)
+      qrhmin = 0.712 # Qmin/Qfull
+      eirrhmin = 0.850 # (Pmin/Qmin)/(Pratedfull/Qratedfull)
+
       # Capacities @ 47F
       min_capacity_47 = nom_capacity_47 * hp_ap.heat_capacity_ratios[0]
 
       # COPs @ 47F
-      min_cop_47 = nom_cop_47 / 0.850
+      min_cop_47 = nom_cop_47 / eirrhmin
 
       # Capacities @ 17F
-      min_capacity_17 = heat_pump.heating_capacity_17F * heat_capacity_ratios_17F[0]
+      min_capacity_17 = heat_pump.heating_capacity_17F * qrhmin
 
       # COPs @ 17F
-      nom_cop_17 = nom_cop_47 / 1.356
-      min_cop_17 = nom_cop_17 / 0.850
+      nom_cop_17 = nom_cop_47 / eirm17ratedfull
+      min_cop_17 = nom_cop_17 / eirrhmin
 
       # Capacities @ 5F
       if nom_capacity_47 > 0
@@ -1812,87 +1794,101 @@ module HVAC
       end
 
     when HPXML::HVACCompressorTypeVariableSpeed
+      qr17full = 0.817 # Q17full/Q17max
+      qr17min = 0.341 # Q17min/Q17max
+      qm5max = 0.866 # Q5max/Q17max
+      qr5full = 0.988 # Q5full/Q5max
+      qr5min = 0.321 # Q5min/Q5max
+      eirr47full = 0.939 # (P47full/Q47full)/(P47max/Q47max)
+      eirr47min = 0.730 # (P47min/Q47min)/(P47max/Q47max)
+      eirm17full = 1.351 # (P17full/Q17full)/(P47full/Q47full)
+      eirr17full = 0.902 # (P17full/Q17full)/(P17max/Q17max)
+      eirr17min = 0.798 # (P17min/Q17min)/(P17max/Q17max)
+      eirm5max = 1.164 # (P5max/Q5max)/(P17max/Q17max)
+      eirr5full = 1.000 # (P5full/Q5full)/(P5max/Q5max)
+      eirr5min = 0.866 # (P5min/Q5min)/(P5max/Q5max)
+
       # Capacities @ 47F
       max_capacity_47 = nom_capacity_47 * hp_ap.heat_capacity_ratios[-1]
       min_capacity_47 = nom_capacity_47 * hp_ap.heat_capacity_ratios[0]
 
       # COPs @ 47F
-      max_cop_47 = nom_cop_47 * 0.939
-      min_cop_47 = max_cop_47 / 0.730
+      max_cop_47 = nom_cop_47 * eirr47full
+      min_cop_47 = max_cop_47 / eirr47min
 
       # Capacities @ 17F
-      max_capacity_17 = heat_pump.heating_capacity_17F * heat_capacity_ratios_17F[-1]
-      min_capacity_17 = heat_pump.heating_capacity_17F * heat_capacity_ratios_17F[0]
+      max_capacity_17 = heat_pump.heating_capacity_17F / qr17full
+      min_capacity_17 = heat_pump.heating_capacity_17F * qr17min / qr17full
 
       # COPs @ 17F
-      nom_cop_17 = nom_cop_47 / 1.351
-      max_cop_17 = nom_cop_17 * 0.902
-      min_cop_17 = max_cop_17 / 0.798
+      nom_cop_17 = nom_cop_47 / eirm17full
+      max_cop_17 = nom_cop_17 * eirr17full
+      min_cop_17 = max_cop_17 / eirr17min
 
       # Capacities @ 5F
-      max_capacity_5 = max_capacity_17 * 0.866
-      nom_capacity_5 = max_capacity_5 / heat_capacity_ratios_5F[-1]
-      min_capacity_5 = nom_capacity_5 * heat_capacity_ratios_5F[0]
+      max_capacity_5 = max_capacity_17 * qm5max
+      nom_capacity_5 = max_capacity_5 * qr5full
+      min_capacity_5 = nom_capacity_5 * qr5min / qr5full
 
       # COPs @ 5F
-      max_cop_5 = max_cop_17 / 1.164
-      nom_cop_5 = max_cop_5 / 1.000
-      min_cop_5 = max_cop_5 / 0.866
+      max_cop_5 = max_cop_17 / eirm5max
+      nom_cop_5 = max_cop_5 / eirr5full
+      min_cop_5 = max_cop_5 / eirr5min
     end
 
     # Add detailed performance data
     detailed_performance_data = heat_pump.heating_detailed_performance_data
 
     # 47F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_47.round,
+    detailed_performance_data.add(capacity: Float(max_capacity_47.round),
                                   efficiency_cop: max_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 47,
                                   isdefaulted: true) unless max_capacity_47.nil?
     # 47F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_47.round,
+    detailed_performance_data.add(capacity: Float(nom_capacity_47.round),
                                   efficiency_cop: nom_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 47,
                                   isdefaulted: true)
     # 47F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_47.round,
+    detailed_performance_data.add(capacity: Float(min_capacity_47.round),
                                   efficiency_cop: min_cop_47.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 47,
                                   isdefaulted: true) unless min_capacity_47.nil?
     # 17F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_17.round,
+    detailed_performance_data.add(capacity: Float(max_capacity_17.round),
                                   efficiency_cop: max_cop_17.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 17,
                                   isdefaulted: true) unless max_capacity_17.nil?
     # 17F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_17.round,
+    detailed_performance_data.add(capacity: Float(nom_capacity_17.round),
                                   efficiency_cop: nom_cop_17.round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 17,
                                   isdefaulted: true)
     # 17F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_17.round,
+    detailed_performance_data.add(capacity: Float(min_capacity_17.round),
                                   efficiency_cop: min_cop_17.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 17,
                                   isdefaulted: true) unless min_capacity_17.nil?
     # 5F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_5.round,
+    detailed_performance_data.add(capacity: Float(max_capacity_5.round),
                                   efficiency_cop: max_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 5,
                                   isdefaulted: true) unless max_capacity_5.nil?
     # 5F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_5.round,
+    detailed_performance_data.add(capacity: Float(nom_capacity_5.round),
                                   efficiency_cop: nom_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 5,
                                   isdefaulted: true) unless nom_capacity_5.nil?
     # 5F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_5.round,
+    detailed_performance_data.add(capacity: Float(min_capacity_5.round),
                                   efficiency_cop: min_cop_5.round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 5,
@@ -1910,15 +1906,19 @@ module HVAC
 
     case cooling_system.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
+      qm95ratedfull = 0.936 # Q95ratedfull/Q82ratedfull
+
       # Capacity @ 82F
-      nom_capacity_82 = nom_capacity_95 / 0.936
+      nom_capacity_82 = nom_capacity_95 / qm95ratedfull
 
     when HPXML::HVACCompressorTypeTwoStage
+      qm95ratedfull = 0.936 # Q95ratedfull/Q82ratedfull
+
       # Capacities @ 95F
       min_capacity_95 = nom_capacity_95 * clg_ap.cool_capacity_ratios[0]
 
       # Capacities @ 82F
-      nom_capacity_82 = nom_capacity_95 / 0.936
+      nom_capacity_82 = nom_capacity_95 / qm95ratedfull
       min_capacity_82 = nom_capacity_82 * clg_ap.cool_capacity_ratios[0]
 
     when HPXML::HVACCompressorTypeVariableSpeed
@@ -1944,37 +1944,37 @@ module HVAC
     detailed_performance_data = cooling_system.cooling_detailed_performance_data
 
     # 95F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_95.round,
+    detailed_performance_data.add(capacity: Float(max_capacity_95.round),
                                   efficiency_cop: cops_95[:max].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 95,
                                   isdefaulted: true) unless max_capacity_95.nil?
     # 95F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_95.round,
+    detailed_performance_data.add(capacity: Float(nom_capacity_95.round),
                                   efficiency_cop: cops_95[:nom].round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 95,
                                   isdefaulted: true)
     # 95F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_95.round,
+    detailed_performance_data.add(capacity: Float(min_capacity_95.round),
                                   efficiency_cop: cops_95[:min].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 95,
                                   isdefaulted: true) unless min_capacity_95.nil?
     # 82F, maximum speed
-    detailed_performance_data.add(capacity: max_capacity_82.round,
+    detailed_performance_data.add(capacity: Float(max_capacity_82.round),
                                   efficiency_cop: cops_82[:max].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMaximum,
                                   outdoor_temperature: 82,
                                   isdefaulted: true) unless max_capacity_82.nil?
     # 82F, nominal speed
-    detailed_performance_data.add(capacity: nom_capacity_82.round,
+    detailed_performance_data.add(capacity: Float(nom_capacity_82.round),
                                   efficiency_cop: cops_82[:nom].round(4),
                                   capacity_description: HPXML::CapacityDescriptionNominal,
                                   outdoor_temperature: 82,
                                   isdefaulted: true)
     # 82F, minimum speed
-    detailed_performance_data.add(capacity: min_capacity_82.round,
+    detailed_performance_data.add(capacity: Float(min_capacity_82.round),
                                   efficiency_cop: cops_82[:min].round(4),
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 82,
@@ -2001,20 +2001,20 @@ module HVAC
     when HPXML::HVACCompressorTypeTwoStage
       hspf2_array = [5.0, 6.5, 8.0, 9.5, 11.0]
       rated_cap_maint_17F_47F_array = [0.5, 0.533, 0.6, 0.7333, 1.0]
-      cop_47_array = [[1.791, 1.775, 1.753, 1.716, 1.654],
-                      [2.587, 2.535, 2.451, 2.319, 2.169],
-                      [3.576, 3.457, 3.262, 2.973, 2.694],
-                      [4.843, 4.602, 4.218, 3.682, 3.229],
-                      [6.523, 6.061, 5.359, 4.456, 3.773]]
+      cop_47_array = [[1.794, 1.779, 1.757, 1.720, 1.659],
+                      [2.592, 2.540, 2.456, 2.325, 2.176],
+                      [3.583, 3.464, 3.270, 2.980, 2.703],
+                      [4.852, 4.611, 4.227, 3.691, 3.239],
+                      [6.536, 6.073, 5.371, 4.467, 3.785]]
 
     when HPXML::HVACCompressorTypeVariableSpeed
       hspf2_array = [7.0, 9.25, 11.5, 13.75, 16.0]
       rated_cap_maint_17F_47F_array = [0.5, 0.54, 0.62, 0.78, 1.10]
-      cop_47_array = [[2.702, 2.620, 2.493, 2.364, 2.182],
-                      [4.050, 3.832, 3.507, 3.168, 2.875],
-                      [5.796, 5.341, 4.663, 3.995, 3.564],
-                      [8.202, 7.265, 5.990, 4.845, 4.248],
-                      [11.689, 9.800, 7.529, 5.720, 4.928]]
+      cop_47_array = [[2.762, 2.696, 2.579, 2.467, 2.345],
+                      [4.149, 3.941, 3.627, 3.305, 3.091],
+                      [5.934, 5.490, 4.821, 4.167, 3.834],
+                      [8.392, 7.463, 6.190, 5.054, 4.573],
+                      [11.948, 10.060, 7.779, 5.967, 5.307]]
     end
 
     x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }.sort
@@ -2063,65 +2063,13 @@ module HVAC
   end
 
   # Returns the min and max speed capacity maintenance from 95F to 82F
-  # Maintenance = capacity@95F / capacity@82F
+  # Based on RESNET MINHERS Addendum 82
   #
   # @return [Array<Double>] Min and max speed capacity maintenance from 95F to 82F
   def self.get_cool_capacity_maint_95()
-    return [0.948, 0.940]
-  end
-
-  # Returns the heating capacity ratios for the HVAC system at rated temperature (47F).
-  #
-  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @return [Array<Double>] Ratio of heating capacity to rated heating capacity for each speed at 47F.
-  def self.get_heat_capacity_ratios_47F(heat_pump)
-    case heat_pump.compressor_type
-    when HPXML::HVACCompressorTypeSingleStage
-      return [1.0]
-    when HPXML::HVACCompressorTypeTwoStage
-      return [0.712, 1.0]
-    when HPXML::HVACCompressorTypeVariableSpeed
-      nominal_to_max_ratio = 0.908
-      return [0.272 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
-    end
-
-    fail 'Unable to get heating capacity ratios.'
-  end
-
-  # Returns the heating capacity ratios for the HVAC system at 17F.
-  #
-  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @return [Array<Double>] Ratio of heating capacity to rated heating capacity for each speed at 17F.
-  def self.get_heat_capacity_ratios_17F(heat_pump)
-    case heat_pump.compressor_type
-    when HPXML::HVACCompressorTypeSingleStage
-      return [1.0]
-    when HPXML::HVACCompressorTypeTwoStage
-      return [0.712, 1.0]
-    when HPXML::HVACCompressorTypeVariableSpeed
-      nominal_to_max_ratio = 0.817
-      return [0.341 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
-    end
-
-    fail 'Unable to get heating capacity ratios.'
-  end
-
-  # Returns the heating capacity ratios for the HVAC system at 5F.
-  #
-  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @return [Array<Double>] Ratio of heating capacity to rated heating rated capacity for each speed at 5F.
-  def self.get_heat_capacity_ratios_5F(heat_pump)
-    case heat_pump.compressor_type
-    when HPXML::HVACCompressorTypeSingleStage
-      return [1.0]
-    when HPXML::HVACCompressorTypeTwoStage
-      return [0.712, 1.0]
-    when HPXML::HVACCompressorTypeVariableSpeed
-      nominal_to_max_ratio = 0.988
-      return [0.321 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
-    end
-
-    fail 'Unable to get heating capacity ratios.'
+    qm95min = 0.948 # Q95min/Q82min
+    qm95max = 0.940 # Q95max/Q82max
+    return [qm95min, qm95max]
   end
 
   # TODO
@@ -2668,34 +2616,34 @@ module HVAC
 
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
-      power_fraction = (fan_watts_per_cfm == 0) ? 1.0 : calculate_fan_power_from_curve(1.0, fan_ratio, hvac_system)
+      power_fraction = (fan_watts_per_cfm == 0) ? 1.0 : calculate_fan_power(1.0, fan_ratio, hvac_system)
       fan.addSpeed(fan_ratio.round(5), power_fraction.round(5))
     end
 
     return fan
   end
 
-  # Calculate fan power at any speed or mode
+  # Calculates fan power at any speed given the fan power at max speed and a fan speed ratio.
   #
-  # @param max_fan_power [Double] Rated fan power consumption
-  # @param fan_ratio [Double] Fan cfm ratio to full speed
+  # @param max_fan_power [Double] Rated fan power consumption (W)
+  # @param fan_ratio [Double] Fan cfm ratio to max speed
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
-  # @return [Double] Fan power at any speed or mode
-  def self.calculate_fan_power_from_curve(max_fan_power, fan_ratio, hvac_system)
+  # @return [Double] Fan power at the given speed (W)
+  def self.calculate_fan_power(max_fan_power, fan_ratio, hvac_system)
     if hvac_system.fan_motor_type.nil?
       # For system types that fan_motor_type is not specified, the fan_ratio should be 1
       fail 'Missing fan motor type for systems where more than one speed is modeled' unless (fan_ratio == 1.0 || max_fan_power == 0.0)
 
-      fan_power = max_fan_power
-    elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypeBPM
-      # BPM fan
-      pow = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
-      fan_power = max_fan_power * (fan_ratio**pow)
-    elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC
-      # PSC fan
-      fan_power = max_fan_power * fan_ratio * (0.3 * fan_ratio + 0.7)
+      return max_fan_power
+    else
+      # Based on RESNET MINHERS Addendum 82
+      if hvac_system.fan_motor_type == HPXML::HVACFanMotorTypeBPM
+        pow = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
+        return max_fan_power * (fan_ratio**pow)
+      elsif hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC
+        return max_fan_power * fan_ratio * (0.3 * fan_ratio + 0.7)
+      end
     end
-    return fan_power
   end
 
   # TODO
@@ -2827,7 +2775,6 @@ module HVAC
   def self.calc_heat_cap_ft_spec(heating_capacity_fraction_17F)
     iat_slope = -0.002303414
     iat_intercept = 0.18417308
-    num_speeds = 1
 
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
     # Derive coefficients from user input for capacity fraction at 17F.
@@ -2839,7 +2786,7 @@ module HVAC
     oat_slope = (y_B - y_A) / (x_B - x_A)
     oat_intercept = y_A - (x_A * oat_slope)
 
-    return [[oat_intercept + iat_intercept, iat_slope, 0, oat_slope, 0, 0]] * num_speeds
+    return [oat_intercept + iat_intercept, iat_slope, 0, oat_slope, 0, 0]
   end
 
   # Returns the capacity maintenance from 17F to 47F,
@@ -2971,7 +2918,7 @@ module HVAC
     hvac_ap = hvac_system.additional_properties
     this_cfm = UnitConversions.convert(dp.capacity, 'Btu/hr', 'ton') * cfm_per_ton
     fan_ratio = this_cfm / max_rated_fan_cfm
-    fan_power = calculate_fan_power_from_curve(hvac_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, hvac_system)
+    fan_power = calculate_fan_power(hvac_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, hvac_system)
     dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
     dp.input_power = dp.capacity / dp.efficiency_cop # Btu/hr
     dp.gross_input_power = dp.gross_capacity / dp.gross_efficiency_cop # Btu/hr
@@ -2982,7 +2929,7 @@ module HVAC
   # - Cooling, Min ODB: Linear from 82F and 95F, but no less than 50% power of the 82F value
   # - Cooling, Max ODB: Linear from 82F and 95F
   # - Heating, Min ODB: Linear from lowest two temperatures
-  # - Heating, Max ODB: Constant (same values as 47F)
+  # - Heating, Max ODB: Linear from 17F and 47F
   #
   # @param datapoints_by_speed [Hash] Map of capacity description => array of detailed performance datapoints
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
@@ -3031,7 +2978,10 @@ module HVAC
         end
 
         # Max heating OBD temperature
-        # No need to extrapolate since, per Addendum 82, performance is constant above 47F.
+        max_odb = 60
+        if max_odb > user_odbs.max
+          outdoor_dry_bulbs << [:max, max_odb]
+        end
       end
 
       # Add new datapoint at min/max ODB temperatures
@@ -3175,14 +3125,13 @@ module HVAC
     end
   end
 
-  # TODO
+  # Adds detailed performance datapoints to include sensitivity to indoor temperatures.
+  # Based on RESNET MINHERS Addendum 82.
   #
   # @param datapoints_by_speed [Hash] Map of capacity description => array of detailed performance datapoints
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @return [nil]
   def self.correct_ft_cap_eir(datapoints_by_speed, mode)
-    # Add sensitivity to indoor conditions
-    # single speed cutler curve coefficients
     if mode == :clg
       rated_t_i = HVAC::AirSourceCoolRatedIWB
       indoor_t = [57.0, rated_t_i, 72.0]
@@ -3233,7 +3182,7 @@ module HVAC
           # corrected capacity hash, with two temperature independent variables
           dp_new.gross_capacity *= cap_correction_factor
 
-          # eir FT curve output
+          # EIR FT curve output
           eir_ft_curve_output = MathTools.biquadratic(t_i, curve_t_o, eir_ft_spec_ss)
           eir_ft_curve_output_rated = MathTools.biquadratic(rated_t_i, curve_t_o, eir_ft_spec_ss)
           eir_correction_factor = eir_ft_curve_output / eir_ft_curve_output_rated
@@ -3265,7 +3214,7 @@ module HVAC
       clg_ap.cool_rated_capacities_net = []
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_ratio = clg_ap.cool_fan_speed_ratios[speed] * max_clg_cfm / max_rated_fan_cfm
-        fan_power = calculate_fan_power_from_curve(clg_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, cooling_system)
+        fan_power = calculate_fan_power(clg_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, cooling_system)
         net_capacity = capacity_ratio * cooling_system.cooling_capacity
         clg_ap.cool_rated_capacities_net << net_capacity
         gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :clg)[0]
@@ -3319,26 +3268,26 @@ module HVAC
         cap_ft_curve = Model.add_curve_biquadratic(
           model,
           name: "Cool-CAP-fT#{i + 1}",
-          coeff: convert_biquadratic_coeff_to_si(clg_ap.cool_cap_ft_spec[i]),
+          coeff: convert_biquadratic_coeff_to_si(clg_ap.cool_cap_ft_spec),
           min_x: -100, max_x: 100, min_y: -100, max_y: 100
         )
         eir_ft_curve = Model.add_curve_biquadratic(
           model,
           name: "Cool-EIR-fT#{i + 1}",
-          coeff: convert_biquadratic_coeff_to_si(clg_ap.cool_eir_ft_spec[i]),
+          coeff: convert_biquadratic_coeff_to_si(clg_ap.cool_eir_ft_spec),
           min_x: -100, max_x: 100, min_y: -100, max_y: 100
         )
       end
       cap_fff_curve = Model.add_curve_quadratic(
         model,
         name: "Cool-CAP-fFF#{i + 1}",
-        coeff: clg_ap.cool_cap_fflow_spec[i],
+        coeff: clg_ap.cool_cap_fflow_spec,
         min_x: 0, max_x: 2, min_y: 0, max_y: 2
       )
       eir_fff_curve = Model.add_curve_quadratic(
         model,
         name: "Cool-EIR-fFF#{i + 1}",
-        coeff: clg_ap.cool_eir_fflow_spec[i],
+        coeff: clg_ap.cool_eir_fflow_spec,
         min_x: 0, max_x: 2, min_y: 0, max_y: 2
       )
       if i == 0
@@ -3434,7 +3383,7 @@ module HVAC
       htg_ap.heat_rated_capacities_net = []
       htg_ap.heat_capacity_ratios.each_with_index do |capacity_ratio, speed|
         fan_ratio = htg_ap.heat_fan_speed_ratios[speed] * max_htg_cfm / max_rated_fan_cfm
-        fan_power = calculate_fan_power_from_curve(htg_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, heating_system)
+        fan_power = calculate_fan_power(htg_ap.fan_power_rated * max_rated_fan_cfm, fan_ratio, heating_system)
         net_capacity = capacity_ratio * heating_system.heating_capacity
         htg_ap.heat_rated_capacities_net << net_capacity
         gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :htg)[0]
@@ -3489,26 +3438,26 @@ module HVAC
         cap_ft_curve = Model.add_curve_biquadratic(
           model,
           name: "Heat-CAP-fT#{i + 1}",
-          coeff: convert_biquadratic_coeff_to_si(htg_ap.heat_cap_ft_spec[i]),
+          coeff: convert_biquadratic_coeff_to_si(htg_ap.heat_cap_ft_spec),
           min_x: -100, max_x: 100, min_y: -100, max_y: 100
         )
         eir_ft_curve = Model.add_curve_biquadratic(
           model,
           name: "Heat-EIR-fT#{i + 1}",
-          coeff: convert_biquadratic_coeff_to_si(htg_ap.heat_eir_ft_spec[i]),
+          coeff: convert_biquadratic_coeff_to_si(htg_ap.heat_eir_ft_spec),
           min_x: -100, max_x: 100, min_y: -100, max_y: 100
         )
       end
       cap_fff_curve = Model.add_curve_quadratic(
         model,
         name: "Heat-CAP-fFF#{i + 1}",
-        coeff: htg_ap.heat_cap_fflow_spec[i],
+        coeff: htg_ap.heat_cap_fflow_spec,
         min_x: 0, max_x: 2, min_y: 0, max_y: 2
       )
       eir_fff_curve = Model.add_curve_quadratic(
         model,
         name: "Heat-EIR-fFF#{i + 1}",
-        coeff: htg_ap.heat_eir_fflow_spec[i],
+        coeff: htg_ap.heat_eir_fflow_spec,
         min_x: 0, max_x: 2, min_y: 0, max_y: 2
       )
       if i == 0
@@ -3824,12 +3773,12 @@ module HVAC
   def self.add_capacity_degradation_ems_proram(model, system_ap, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
     # Note: Currently only available in 1 min time step
     if is_cooling
-      cap_fflow_spec = system_ap.cool_cap_fflow_spec[0]
-      eir_fflow_spec = system_ap.cool_eir_fflow_spec[0]
+      cap_fflow_spec = system_ap.cool_cap_fflow_spec
+      eir_fflow_spec = system_ap.cool_eir_fflow_spec
       ss_var_name = 'Cooling Coil Electricity Energy'
     else
-      cap_fflow_spec = system_ap.heat_cap_fflow_spec[0]
-      eir_fflow_spec = system_ap.heat_eir_fflow_spec[0]
+      cap_fflow_spec = system_ap.heat_cap_fflow_spec
+      eir_fflow_spec = system_ap.heat_eir_fflow_spec
       ss_var_name = 'Heating Coil Electricity Energy'
     end
     number_of_timestep_logged = calc_time_to_full_cap(system_ap.c_d)
@@ -4625,25 +4574,27 @@ module HVAC
     return cooling_efficiency_eer / 1.01
   end
 
-  # TODO
+  # Assigns the assumed rated ran power (W/cfm) for the HVAC system.
   #
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [nil]
   def self.set_fan_power_rated(hvac_system)
     hvac_ap = hvac_system.additional_properties
 
-    # Based on RESNET DX Modeling Appendix
-    psc_ducted_watts_per_cfm = 0.414 # W/cfm, PSC fan
-    psc_ductless_watts_per_cfm = 0.414 # W/cfm, PSC fan
-    bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
-    bpm_ductless_watts_per_cfm = 0.171 # W/cfm, BPM fan
     if is_room_dx_hvac_system(hvac_system)
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
-    elsif hvac_system.distribution_system.nil?
-      hvac_ap.fan_power_rated = (hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_ductless_watts_per_cfm : bpm_ductless_watts_per_cfm
     else
-      hvac_ap.fan_power_rated = (hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_ducted_watts_per_cfm : bpm_ducted_watts_per_cfm
+      # Based on RESNET MINHERS Addendum 82
+      psc_ducted_watts_per_cfm = 0.414 # W/cfm, PSC fan
+      psc_ductless_watts_per_cfm = 0.414 # W/cfm, PSC fan
+      bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
+      bpm_ductless_watts_per_cfm = 0.171 # W/cfm, BPM fan
+      if hvac_system.distribution_system.nil?
+        hvac_ap.fan_power_rated = (hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_ductless_watts_per_cfm : bpm_ductless_watts_per_cfm
+      else
+        hvac_ap.fan_power_rated = (hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_ducted_watts_per_cfm : bpm_ducted_watts_per_cfm
+      end
     end
   end
 
@@ -4994,11 +4945,11 @@ module HVAC
 
     # Apply Cutler curve airflow coefficients to later equations
     if mode == :clg
-      cap_fflow_spec, eir_fflow_spec = get_cool_cap_eir_fflow_spec(HPXML::HVACCompressorTypeSingleStage)
+      cap_fflow_spec, eir_fflow_spec = get_resnet_cap_eir_fflow_spec(:clg)
       qgr_values, p_values, ff_chg_values = get_charge_fault_cooling_coeff(f_chg)
       suffix = 'clg'
     elsif mode == :htg
-      cap_fflow_spec, eir_fflow_spec = get_heat_cap_eir_fflow_spec(HPXML::HVACCompressorTypeSingleStage)
+      cap_fflow_spec, eir_fflow_spec = get_resnet_cap_eir_fflow_spec(:htg)
       qgr_values, p_values, ff_chg_values = get_charge_fault_heating_coeff(f_chg)
       suffix = 'htg'
     end
@@ -5068,8 +5019,8 @@ module HVAC
       fault_program.addLine("Set EIR_IQ_adj_#{suffix} = EIR_Cutler_Curve_After_#{suffix} / EIR_Cutler_Curve_Pre_#{suffix}")
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
       if (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit) && (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit)
-        cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec[speed] : hvac_ap.heat_cap_fflow_spec[speed]
-        eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec[speed] : hvac_ap.heat_eir_fflow_spec[speed]
+        cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec : hvac_ap.heat_cap_fflow_spec
+        eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec : hvac_ap.heat_eir_fflow_spec
         fault_program.addLine("Set CAP_c1_#{suffix} = #{cap_fff_specs_coeff[0]}")
         fault_program.addLine("Set CAP_c2_#{suffix} = #{cap_fff_specs_coeff[1]}")
         fault_program.addLine("Set CAP_c3_#{suffix} = #{cap_fff_specs_coeff[2]}")
@@ -5218,7 +5169,7 @@ module HVAC
     end
     # cooling capacity and airflow are already with unit multiplier, calculate the capacity w/o multiplier
     nominal_cooling_capacity = heat_pump.cooling_capacity / unit_multiplier
-    defrost_power_fraction = calculate_fan_power_from_curve(1.0, max_heating_airflow / design_airflow, heat_pump)
+    defrost_power_fraction = calculate_fan_power(1.0, max_heating_airflow / design_airflow, heat_pump)
     power_design = fan_watts_per_cfm * design_airflow / unit_multiplier
     p_dot_blower = power_design * defrost_power_fraction
     # Based on manufacturer data for ~70 systems ranging from 1.5 to 5 tons with varying efficiency levels

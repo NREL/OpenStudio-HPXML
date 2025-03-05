@@ -2297,7 +2297,6 @@ module Defaults
       case cooling_system.cooling_system_type
       when HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner,
            HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC
-        # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_fan_power_rated(cooling_system)
         HVAC.set_cool_curves_dx_air_source(cooling_system)
 
@@ -2503,7 +2502,7 @@ module Defaults
         target_min_capacity = target_dp_min.capacity
         capacity = MathTools.interp2(neighbor_nom_capacity, neighbor_min_capacity, neighbor_max_capacity, target_min_capacity, target_max_capacity)
       end
-      added_dp.capacity = capacity.round
+      added_dp.capacity = Float(capacity.round)
 
       # Net power
       case hvac_system.compressor_type
