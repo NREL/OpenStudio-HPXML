@@ -4,6 +4,7 @@ __New Features__
 - Electric vehicle enhancements:
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
+  - Updates the default schedule for the EV charging `PlugLoad` to better reflect real-world hourly/monthly variation.
 - Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 - BuildResidentialScheduleFile measure:
   - Adds stochastic schedule generation for electric vehicle charging (using `Vehicles`).
