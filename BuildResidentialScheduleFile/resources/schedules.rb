@@ -206,7 +206,7 @@ class ScheduleGenerator
     fill_ev_schedules(mkc_activity_schedules, ev_occupant_presence)
 
     if @debug
-      @schedules[SchedulesFile::Columns[:Sleeping].name] =  random_shift_and_normalize(occupancy_schedules[:sleep_schedule], @minutes_per_step)
+      @schedules[SchedulesFile::Columns[:Sleeping].name] = random_shift_and_normalize(occupancy_schedules[:sleep_schedule], @minutes_per_step)
     end
     return true
   end
