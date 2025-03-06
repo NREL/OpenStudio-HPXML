@@ -4953,12 +4953,12 @@ module HVAC
       qgr_values, p_values, ff_chg_values = get_charge_fault_heating_coeff(f_chg)
       suffix = 'htg'
     end
-    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{cap_fflow_spec[0][0]}")
-    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{cap_fflow_spec[0][1]}")
-    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{cap_fflow_spec[0][2]}")
-    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{eir_fflow_spec[0][0]}")
-    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{eir_fflow_spec[0][1]}")
-    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{eir_fflow_spec[0][2]}")
+    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{cap_fflow_spec[0]}")
+    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{cap_fflow_spec[1]}")
+    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{cap_fflow_spec[2]}")
+    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{eir_fflow_spec[0]}")
+    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{eir_fflow_spec[1]}")
+    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{eir_fflow_spec[2]}")
 
     # charge fault coefficients
     fault_program.addLine("Set a1_CH_Qgr_#{suffix} = #{qgr_values[0]}")

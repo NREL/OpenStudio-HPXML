@@ -3113,7 +3113,7 @@ module HVACSizing
       end
 
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
-      clg_fff_cap_coeff, _clg_fff_eir_coeff = HVAC.get_resnet_cap_eir_fflow_spec(:clg)[0]
+      clg_fff_cap_coeff, _clg_fff_eir_coeff = HVAC.get_resnet_cap_eir_fflow_spec(:clg)
       a1_AF_Qgr_c = clg_fff_cap_coeff[0]
       a2_AF_Qgr_c = clg_fff_cap_coeff[1]
       a3_AF_Qgr_c = clg_fff_cap_coeff[2]
@@ -3177,7 +3177,7 @@ module HVACSizing
         heat_airflow_rated_defect_ratio = 1 + heat_airflow_defect_ratio
       end
 
-      htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_resnet_cap_eir_fflow_spec(:htg)[0]
+      htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_resnet_cap_eir_fflow_spec(:htg)
       a1_AF_Qgr_h = htg_fff_cap_coeff[0]
       a2_AF_Qgr_h = htg_fff_cap_coeff[1]
       a3_AF_Qgr_h = htg_fff_cap_coeff[2]
