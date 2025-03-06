@@ -1,0 +1,23 @@
+Option Name	cooling_system_type	cooling_system_cooling_efficiency_type	cooling_system_cooling_efficiency	cooling_system_cooling_compressor_type	cooling_system_cooling_sensible_heat_fraction	cooling_system_is_ducted	cooling_system_airflow_defect_ratio	cooling_system_charge_defect_ratio	cooling_system_crankcase_heater_watts	cooling_system_integrated_heating_system_fuel	cooling_system_integrated_heating_system_efficiency_percent
+None	none										
+"Central AC, SEER 8"	central air conditioner	SEER	8								
+"Central AC, SEER 10"	central air conditioner	SEER	10								
+"Central AC, SEER 13"	central air conditioner	SEER	13								
+"Central AC, SEER 13, Airflow Defect Ratio"	central air conditioner	SEER	13				-0.25	-0.25			
+"Central AC, SEER2 12.4, SEER 13.05"	central air conditioner	SEER2	12.4								
+"Central AC, SEER 14"	central air conditioner	SEER	14								
+"Central AC, SEER 15"	central air conditioner	SEER	15								
+"Central AC, SEER 18"	central air conditioner	SEER	18								
+"Central AC, SEER 18, Airflow Defect Ratio"	central air conditioner	SEER	18				-0.25	-0.25			
+"Central AC, SEER 24.5"	central air conditioner	SEER	24.5								
+"Room AC, EER 8.5"	room air conditioner	EER	8.5								
+"Room AC, EER 8.5, 0.73 SHR"	room air conditioner	EER	8.5		0.73						
+"Room AC, EER 9.8"	room air conditioner	EER	9.8								
+"Room AC, EER 10.7"	room air conditioner	EER	10.7								
+"Room AC, EER 12.0"	room air conditioner	EER	12								
+"Room AC, CEER 8.4"	room air conditioner	CEER	8.4								
+"Evaporative Cooler, EER 13"	evaporative cooler	EER	13								
+"Evaporative Cooler, SEER 13"	evaporative cooler	SEER	13			false					
+"Fan Coil Cooling, SEER 13"	mini-split	SEER	13			false					
+"Ducted Mini-Split AC, SEER 19"	mini-split	SEER	19			true					
+"PTAC, EER 10.7"	packaged terminal air conditioner	EER	10.7								
