@@ -3647,7 +3647,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     get_option_properties(args, 'roof_material.tsv', args[:enclosure_roof_material])
     # TODO: uncomment
-  # get_option_properties(args, 'wall_siding.tsv', args[:enclosure_wall_siding])
+    # get_option_properties(args, 'wall_siding.tsv', args[:enclosure_wall_siding])
     get_option_properties(args, 'heating_system.tsv', args[:heating_system])
     get_option_properties(args, 'cooling_system.tsv', args[:cooling_system])
 
