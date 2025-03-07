@@ -5,8 +5,6 @@
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
   <version_id>5c4ac92d-ea49-474a-a892-3c4cd8f88875</version_id>
   <version_modified>2025-03-07T01:17:24Z</version_modified>
-  <version_id>2c558b28-2852-4696-9d00-69800e84792b</version_id>
-  <version_modified>2025-03-06T23:47:43Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
