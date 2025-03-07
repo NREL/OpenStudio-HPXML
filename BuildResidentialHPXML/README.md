@@ -2048,7 +2048,7 @@ The rated efficiency value of the cooling system. Ignored for evaporative cooler
 
 **Cooling System: Cooling Compressor Type**
 
-The compressor type of the cooling system. Only applies to central air conditioner and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#central-air-conditioner'>Central Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.
+The compressor type of the cooling system. Required for central air conditioner and mini-split.
 
 - **Name:** ``cooling_system_cooling_compressor_type``
 - **Type:** ``Choice``
@@ -2287,7 +2287,7 @@ The rated cooling efficiency value of the heat pump.
 
 **Heat Pump: Cooling Compressor Type**
 
-The compressor type of the heat pump. Only applies to air-to-air and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.
+The compressor type of the heat pump. Required for air-to-air and mini-split.
 
 - **Name:** ``heat_pump_cooling_compressor_type``
 - **Type:** ``Choice``
@@ -2628,7 +2628,7 @@ Heat pump pan heater control type. If 'continuous', operates continuously when o
 
 **HVAC Detailed Performance Data: Capacity Type**
 
-Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps).
+Type of capacity values for detailed performance data if available. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps).
 
 - **Name:** ``hvac_perf_data_capacity_type``
 - **Type:** ``Choice``
@@ -2641,7 +2641,7 @@ Type of capacity values for detailed performance data if available. Applies only
 
 **HVAC Detailed Performance Data: Heating Outdoor Temperatures**
 
-Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). Outdoor temperatures must be 47F, 17F, and 5F (and one optional temperature less than 5F). At least two performance data points are required using a comma-separated list.
+Outdoor temperatures of heating detailed performance data if available. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps). Only certain outdoor temperatures are allowed, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_heating_outdoor_temperatures``
 - **Type:** ``String``
@@ -2652,7 +2652,7 @@ Outdoor temperatures of heating detailed performance data if available. Applies 
 
 **HVAC Detailed Performance Data: Heating Minimum Speed Capacities**
 
-Minimum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Minimum speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_heating_min_speed_capacities``
 - **Type:** ``String``
@@ -2663,7 +2663,7 @@ Minimum speed capacities of heating detailed performance data if available. Appl
 
 **HVAC Detailed Performance Data: Heating Nominal Speed Capacities**
 
-Nominal speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Nominal speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_heating_nom_speed_capacities``
 - **Type:** ``String``
@@ -2674,7 +2674,7 @@ Nominal speed capacities of heating detailed performance data if available. Appl
 
 **HVAC Detailed Performance Data: Heating Maximum Speed Capacities**
 
-Maximum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Maximum speed capacities of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_heating_max_speed_capacities``
 - **Type:** ``String``
@@ -2685,7 +2685,7 @@ Maximum speed capacities of heating detailed performance data if available. Appl
 
 **HVAC Detailed Performance Data: Heating Minimum Speed COPs**
 
-Minimum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Minimum speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_heating_min_speed_cops``
 - **Type:** ``String``
@@ -2696,7 +2696,7 @@ Minimum speed efficiency COP values of heating detailed performance data if avai
 
 **HVAC Detailed Performance Data: Heating Nominal Speed COPs**
 
-Nominal speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Nominal speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_heating_nom_speed_cops``
 - **Type:** ``String``
@@ -2707,7 +2707,7 @@ Nominal speed efficiency COP values of heating detailed performance data if avai
 
 **HVAC Detailed Performance Data: Heating Maximum Speed COPs**
 
-Maximum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Maximum speed efficiency COP values of heating detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-heating-performance-data'>Detailed Heating Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_heating_max_speed_cops``
 - **Type:** ``String``
@@ -2718,7 +2718,7 @@ Maximum speed efficiency COP values of heating detailed performance data if avai
 
 **HVAC Detailed Performance Data: Cooling Outdoor Temperatures**
 
-Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). Outdoor temperatures must be 82F and 95F (and one optional temperature greater than 95F). At least two performance data points are required using a comma-separated list.
+Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Only certain outdoor temperatures are allowed, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_cooling_outdoor_temperatures``
 - **Type:** ``String``
@@ -2729,7 +2729,7 @@ Outdoor temperatures of cooling detailed performance data if available. Applies 
 
 **HVAC Detailed Performance Data: Cooling Minimum Speed Capacities**
 
-Minimum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Minimum speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_cooling_min_speed_capacities``
 - **Type:** ``String``
@@ -2740,7 +2740,7 @@ Minimum speed capacities of cooling detailed performance data if available. Appl
 
 **HVAC Detailed Performance Data: Cooling Nominal Speed Capacities**
 
-Nominal speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Nominal speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_cooling_nom_speed_capacities``
 - **Type:** ``String``
@@ -2751,7 +2751,7 @@ Nominal speed capacities of cooling detailed performance data if available. Appl
 
 **HVAC Detailed Performance Data: Cooling Maximum Speed Capacities**
 
-Maximum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Maximum speed capacities of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_cooling_max_speed_capacities``
 - **Type:** ``String``
@@ -2762,7 +2762,7 @@ Maximum speed capacities of cooling detailed performance data if available. Appl
 
 **HVAC Detailed Performance Data: Cooling Minimum Speed COPs**
 
-Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Minimum speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to two stage and variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_cooling_min_speed_cops``
 - **Type:** ``String``
@@ -2773,7 +2773,7 @@ Minimum speed efficiency COP values of cooling detailed performance data if avai
 
 **HVAC Detailed Performance Data: Cooling Nominal Speed COPs**
 
-Nominal speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Nominal speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_cooling_nom_speed_cops``
 - **Type:** ``String``
@@ -2784,7 +2784,7 @@ Nominal speed efficiency COP values of cooling detailed performance data if avai
 
 **HVAC Detailed Performance Data: Cooling Maximum Speed COPs**
 
-Maximum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
+Maximum speed efficiency COP values of cooling detailed performance data if available, corresponding to the above outdoor temperatures. Applies only to variable speed air-source HVAC systems (central and mini-split air conditioners, air-to-air and mini-split heat pumps). Not all values are required, see the OS-HPXML documentation (<a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#detailed-cooling-performance-data'>Detailed Cooling Performance Data</a>).
 
 - **Name:** ``hvac_perf_data_cooling_max_speed_cops``
 - **Type:** ``String``
