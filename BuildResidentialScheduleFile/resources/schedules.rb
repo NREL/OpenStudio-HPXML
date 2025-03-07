@@ -577,11 +577,11 @@ class ScheduleGenerator
   # @return [Array] Array with values normalized to between 0 and 1
   def normalize(arr, max_val = nil)
     if max_val.nil?
-      m = arr.max
+      m = arr.max.to_f
     else
-      m = max_val
+      m = max_val.to_f
     end
-    arr = arr.map { |a| a / m.to_f }
+    arr = arr.map { |a| a / m }
     return arr
   end
 
