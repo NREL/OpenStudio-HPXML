@@ -2450,7 +2450,7 @@
   },
   "sample_files/base-hvac-evap-cooler-furnace-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "cooling_system": "Evaporative Cooler, SEER 13"
+    "cooling_system": "Ductless Evaporative Cooler, SEER 13"
   },
   "sample_files/base-hvac-evap-cooler-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-evap-cooler-furnace-gas.xml",
@@ -3348,7 +3348,6 @@
     "window_fraction_operable": null,
     "window_interior_shading_winter": null,
     "window_interior_shading_summer": null,
-    "cooling_system": "None",
     "hvac_control_heating_weekday_setpoint": null,
     "hvac_control_heating_weekend_setpoint": null,
     "hvac_control_cooling_weekday_setpoint": null,
@@ -3568,7 +3567,7 @@
     "window_area_left": 0,
     "window_area_right": 0,
     "door_area": 20,
-    "cooling_system": "Room AC, EER 8.5",
+    "cooling_system": "Room AC, EER 8.5, 0.73 SHR",
     "cooling_system_cooling_capacity": 12000,
     "heating_system_fuel": "electricity",
     "heating_system": "Electric Baseboard, 100% Efficiency",
