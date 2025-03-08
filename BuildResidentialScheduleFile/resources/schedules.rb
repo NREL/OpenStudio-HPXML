@@ -75,9 +75,7 @@ class ScheduleGenerator
       @runner.registerError("Invalid column name specified: '#{invalid_column}'.")
     end
     return false unless invalid_columns.empty?
-    t = Time.now
     success = create_stochastic_schedules(args: args, weather: weather)
-    puts "Time taken: #{Time.now - t} seconds"
     return false if not success
 
     return true
@@ -149,7 +147,6 @@ class ScheduleGenerator
     @weekday_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekday')
     @weekend_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekend')
     mkc_activity_schedules = simulate_occupant_activities()
-
     # Apply random offset to schedules to avoid synchronization when aggregating across dwelling units
     offset_range = 30 # +- 30 minutes was minimum required to avoid synchronization spikes at 1000 unit aggregation
     @random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
@@ -226,26 +223,32 @@ class ScheduleGenerator
     initial_probabilities = get_initial_probabilities()
     transition_matrices = get_transition_matrices()
     init_state_vector = Array.new(7, 0.0)
+    activity_duration_precomputed_vals = {}
+    state_prob_precomputed_vals = {}
     for _n in 1..@num_occupants
       occ_type_id = weighted_random(@prngs[:main], occupancy_types_probabilities)
       simulated_values = Array.new(@total_days_in_year * @mkc_ts_per_day, 0.0)
+      # create activity_duration_precomputed_vals for each active state, day_type and current occ_type_id
+      fill_activity_duration_precomputed_vals(activity_duration_precomputed_vals, occ_type_id)
+      fill_state_prob_precomputed_vals(state_prob_precomputed_vals, initial_probabilities, occ_type_id)
       @total_days_in_year.times do |day|
         today = @sim_start_day + day
         day_type = [0, 6].include?(today.wday) ? :weekend : :weekday
         j = 0
         state_prob = initial_probabilities[occ_type_id][day_type] # [] shape = 1x7. probability of transitioning to each of the 7 states
         while j < @mkc_ts_per_day
-          active_state = weighted_random(@prngs[:main], state_prob) # Randomly pick the next state
+          precomputed_vals = state_prob_precomputed_vals[occ_type_id][day_type]
+          active_state = weighted_random(@prngs[:main], state_prob, precomputed_vals) # Randomly pick the next state
           state_vector = init_state_vector.dup
           state_vector[active_state] = 1 # Transition to the new state
 
           # sample the duration of the state, and skip markov-chain based state transition until the end of the duration
-          activity_duration = sample_activity_duration(@prngs[:main], @activity_duration_prob_map, occ_type_id, active_state, day_type, j / 4)
+          precomputed_vals = activity_duration_precomputed_vals[occ_type_id][day_type][active_state][j / 4]
+          activity_duration = sample_activity_duration(@prngs[:main], @activity_duration_prob_map, occ_type_id, active_state, day_type, j / 4, precomputed_vals)
           fill_duration = [activity_duration, @mkc_ts_per_day - j].min
           simulated_values.fill(state_vector, day * @mkc_ts_per_day + j, fill_duration)
           j += fill_duration
           break if j >= @mkc_ts_per_day # break as soon as we have filled activities for the day
-          transition_probs = transition_matrices[occ_type_id][day_type][(j - 1) * 7..j * 7 - 1]
 
           # obtain the transition matrix for current timestep
           transition_probs = transition_matrices[occ_type_id][day_type][(j - 1) * 7..j * 7 - 1]
@@ -257,8 +260,44 @@ class ScheduleGenerator
       simulated_values.rotate!(-4 * 4) # 4am shifting (4 hours = 4 * 4 steps of 15 min intervals)
       mkc_activity_schedules << Matrix[*simulated_values]
     end
-
     return mkc_activity_schedules
+  end
+
+
+  # Precompute activity duration values for each occupant type, day type, and activity state. This helps
+  # speed up the sampling of the activity duration.
+  #
+  # @param activity_duration_precomputed_vals [Hash] Hash to store precomputed values
+  # @param occ_type_id [Integer] Occupant type ID (0-3)
+  # @return [void]
+  def fill_activity_duration_precomputed_vals(activity_duration_precomputed_vals, occ_type_id)
+    if not activity_duration_precomputed_vals.key?(occ_type_id)
+      activity_duration_precomputed_vals[occ_type_id] = {}
+      [:weekday, :weekend].each do |day_type|
+          activity_duration_precomputed_vals[occ_type_id][day_type] = {}
+          (0..6).each do |active_state|
+            activity_duration_precomputed_vals[occ_type_id][day_type][active_state] = {}
+            (0..23).each do |hour|
+              activity_duration_precomputed_vals[occ_type_id][day_type][active_state][hour] = get_activity_duration_precomputed_vals(@activity_duration_prob_map, occ_type_id, active_state, day_type, hour)
+            end
+          end
+      end
+    end
+  end
+
+  # Precompute state probability values for each occupant type and day type. This helps
+  # speed up the sampling of the state probability.
+  #
+  # @param state_prob_precomputed_vals [Hash] Hash to store precomputed values
+  # @param occ_type_id [Integer] Occupant type ID (0-3)
+  # @return [void]
+  def fill_state_prob_precomputed_vals(state_prob_precomputed_vals, initial_probabilities, occ_type_id)
+      if not state_prob_precomputed_vals.key?(occ_type_id)
+        state_prob_precomputed_vals[occ_type_id] = {}
+        [:weekday, :weekend].each do |day_type|
+          state_prob_precomputed_vals[occ_type_id][day_type] = weighted_random_precompute(initial_probabilities[occ_type_id][day_type])
+        end
+      end
   end
 
   # Get initial probabilities for each occupancy type and day type.
@@ -450,25 +489,69 @@ class ScheduleGenerator
     return activity_duration_prob_map
   end
 
+  # Precompute values for sample_activity_cluster_size to speed up the sampling.
+  #
+  # @param cluster_size_prob_map [Hash] Map of activity name to array of probabilities for different cluster sizes
+  # @param activity_type_name [String] Name of the activity type to precompute values for
+  # @return [Array] Precomputed values for weighted random sampling
+  def get_activity_cluster_size_precomputed_vals(cluster_size_prob_map, activity_type_name)
+    cluster_size_probabilities = cluster_size_prob_map[activity_type_name]
+    return weighted_random_precompute(cluster_size_probabilities)
+  end
+
   # Sample the number of events in a cluster for a given activity type.
   #
   # @param cluster_size_prob_map [Hash] Map of activity name to array of probabilities for different cluster sizes
   # @param activity_type_name [String] Name of the activity type to sample cluster size for
+  # @param precomputed_vals [Array] Precomputed values for weighted random sampling
   # @return [Integer] Number of events in the cluster (1-based)
-  def sample_activity_cluster_size(prng, cluster_size_prob_map, activity_type_name)
+  def sample_activity_cluster_size(prng, cluster_size_prob_map, activity_type_name, precomputed_vals = nil)
     cluster_size_probabilities = cluster_size_prob_map[activity_type_name]
-    return weighted_random(prng, cluster_size_probabilities) + 1
+    return weighted_random(prng, cluster_size_probabilities, precomputed_vals) + 1
+  end
+
+  # Precompute values for sample_event_duration to speed up the sampling.
+  #
+  # @param duration_probabilites_map [Hash] Map of event type to array containing durations and probabilities
+  # @param event_type [String] Type of event to precompute values for
+  # @return [Array] Precomputed values for weighted random sampling
+  def get_event_duration_precomputed_vals(duration_probabilites_map, event_type)
+    return weighted_random_precompute(duration_probabilites_map[event_type][1])
   end
 
   # Sample a duration for a given event type based on its probability distribution.
   #
   # @param duration_probabilites_map [Hash] Map of event type to array containing durations and probabilities
   # @param event_type [String] Type of event to sample duration for (e.g. 'hot_water_clothes_washer')
+  # @param precomputed_vals [Array] Precomputed values for weighted random sampling
   # @return [Float] Duration in minutes for the sampled event
-  def sample_event_duration(prng, duration_probabilites_map, event_type)
+  def sample_event_duration(prng, duration_probabilites_map, event_type, precomputed_vals = nil)
     durations = duration_probabilites_map[event_type][0]
     probabilities = duration_probabilites_map[event_type][1]
-    return durations[weighted_random(prng, probabilities)]
+    return durations[weighted_random(prng, probabilities, precomputed_vals)]
+  end
+
+  # Precompute values for sample_activity_duration to speed up the sampling.
+  #
+  # @param activity_duration_prob_map [Hash] Map of activity parameters to arrays containing durations and probabilities
+  # @param occ_type_id [String] Occupant type ID (cluster type)
+  # @param activity [Integer] Activity state number (1=shower, 2=laundry, 3=cooking, 4=dishwashing)
+  # @param day_type [String] Type of day ('weekday' or 'weekend')
+  # @param hour [Integer] Hour of the day (0-23)
+  def get_activity_duration_precomputed_vals(activity_duration_prob_map, occ_type_id, activity, day_type, hour)
+    time_of_day = hour < 8 ? 'morning' : hour < 16 ? 'midday' : 'evening'
+    if activity == 1
+      activity_name = 'shower'
+    elsif activity == 2
+      activity_name = 'laundry'
+    elsif activity == 3
+      activity_name = 'cooking'
+    elsif activity == 4
+      activity_name = 'dishwashing'
+    else
+      return nil  # precomputed value not needed since sample_activity_duration will return 1 in this case
+    end
+    return weighted_random_precompute(activity_duration_prob_map["#{occ_type_id}_#{activity_name}_#{day_type}_#{time_of_day}"][1])
   end
 
   # Sample a duration for an activity based on occupant type, activity type, day type and hour.
@@ -478,8 +561,9 @@ class ScheduleGenerator
   # @param activity [Integer] Activity state number (1=shower, 2=laundry, 3=cooking, 4=dishwashing)
   # @param day_type [String] Type of day ('weekday' or 'weekend')
   # @param hour [Integer] Hour of the day (0-23)
+  # @param precomputed_vals [Array] Precomputed values for weighted random sampling
   # @return [Integer] Duration in minutes for the sampled activity
-  def sample_activity_duration(prng, activity_duration_prob_map, occ_type_id, activity, day_type, hour)
+  def sample_activity_duration(prng, activity_duration_prob_map, occ_type_id, activity, day_type, hour, precomputed_vals = nil)
     # States are: 'sleeping', 'shower', 'laundry', 'cooking', 'dishwashing', 'absent', 'nothingAtHome'
     if hour < 8
       time_of_day = 'morning'
@@ -502,7 +586,7 @@ class ScheduleGenerator
     end
     durations = activity_duration_prob_map["#{occ_type_id}_#{activity_name}_#{day_type}_#{time_of_day}"][0]
     probabilities = activity_duration_prob_map["#{occ_type_id}_#{activity_name}_#{day_type}_#{time_of_day}"][1]
-    return durations[weighted_random(prng, probabilities)]
+    return durations[weighted_random(prng, probabilities, precomputed_vals)]
   end
 
   # Generate a random number from a Gaussian (normal) distribution with the given parameters.
@@ -599,21 +683,88 @@ class ScheduleGenerator
     return day_sch.min + (current_val - day_sch.min) * active_occupant_percentage
   end
 
+  # Precompute the cumulative weights for a given array of weights for speeding up weighted random sampling.
+  #
+  # @param weights [Array<Float>] Array of probability weights that sum to 1
+  # @return [Array<Float>] Array of cumulative weights
+  def weighted_random_precompute(weights)
+    sum = 0
+    return weights.map { |w| sum += w }
+  end
+
   # Randomly select an index based on weighted probabilities.
   #
   # @param prng [Random] Random number generator
   # @param weights [Array<Float>] Array of probability weights that sum to 1
+  # @param precomputed_vals [Array<Float>, nil] Precomputed values for faster sampling
   # @return [Integer] Randomly selected index based on probability weights
-  def weighted_random(prng, weights)
+  def weighted_random(prng, weights, precomputed_vals = nil)
     n = prng.rand
-    cum_weights = 0
-    weights.each_with_index do |w, index|
-      cum_weights += w
-      if n <= cum_weights
-        return index
-      end
+    cum_weight = 0.0
+
+    # Unrolled loop for small arrays for efficiency
+    # This is faster than using loop or bsearch_index when number of elements <= 10
+    if weights.size > 0
+      cum_weight += weights[0]
+      return 0 if n <= cum_weight
     end
-    return weights.size - 1 # If the prob weight don't sum to n, return last index
+
+    if weights.size > 1
+      cum_weight += weights[1]
+      return 1 if n <= cum_weight
+    end
+
+    if weights.size > 2
+      cum_weight += weights[2]
+      return 2 if n <= cum_weight
+    end
+
+    if weights.size > 3
+      cum_weight += weights[3]
+      return 3 if n <= cum_weight
+    end
+
+    if weights.size > 4
+      cum_weight += weights[4]
+      return 4 if n <= cum_weight
+    end
+
+    if weights.size > 5
+      cum_weight += weights[5]
+      return 5 if n <= cum_weight
+    end
+
+    if weights.size > 6
+      cum_weight += weights[6]
+      return 6 if n <= cum_weight
+    end
+
+    if weights.size > 7
+      cum_weight += weights[7]
+      return 7 if n <= cum_weight
+    end
+
+    if weights.size > 8
+      cum_weight += weights[8]
+      return 8 if n <= cum_weight
+    end
+
+    if weights.size > 9
+      cum_weight += weights[9]
+      return 9 if n <= cum_weight
+    end
+
+    if weights.size <= 9
+      return weights.size - 1
+    end
+
+    if precomputed_vals.nil?
+      cum_weights = weighted_random_precompute(weights)
+    else
+      cum_weights = precomputed_vals
+    end
+    index = cum_weights.bsearch_index { |w| w >= n }
+    return index || (weights.size - 1)
   end
 
   # Get the Building America lighting schedule based on location and time zone.
@@ -1025,6 +1176,8 @@ class ScheduleGenerator
     # Calculate clusters and flow rate
     cluster_per_day = calculate_sink_clusters_per_day()
     sink_flow_rate = gaussian_rand(@prngs[:hygiene], Constants::SinkFlowRateMean, Constants::SinkFlowRateStd)
+    events_per_cluster_precomputed = weighted_random_precompute(events_per_cluster_probs)
+    duration_precomputed = weighted_random_precompute(sink_duration_probs)
     # Generate sink events for each day
     @total_days_in_year.times do |day|
       cluster_per_day.times do
@@ -1043,12 +1196,12 @@ class ScheduleGenerator
         end
 
         # Generate events within this cluster
-        num_events = weighted_random(@prngs[:hygiene], events_per_cluster_probs) + 1
+        num_events = weighted_random(@prngs[:hygiene], events_per_cluster_probs, events_per_cluster_precomputed) + 1
         start_min = cluster_start_index * 15
         end_min = (cluster_start_index + 1) * 15
 
         num_events.times do
-          duration = weighted_random(@prngs[:hygiene], sink_duration_probs) + 1
+          duration = weighted_random(@prngs[:hygiene], sink_duration_probs, duration_precomputed) + 1
           duration = end_min - start_min if start_min + duration > end_min
 
           sink_activity_sch.fill(sink_flow_rate, (day * @minutes_per_day) + start_min, duration)
@@ -1124,6 +1277,8 @@ class ScheduleGenerator
     shower_sch = [0] * @mins_in_year
     # Generate schedules
     step = 0
+    shower_cluster_size_precomputed_vals = get_activity_cluster_size_precomputed_vals(@cluster_size_prob_map, 'shower')
+    shower_duration_precomputed_vals = get_event_duration_precomputed_vals(@event_duration_prob_map, 'shower')
     while step < @mkc_steps_in_a_year
       shower_state = sum_across_occupants(mkc_activity_schedules, 1, step)
       start_min = step * 15
@@ -1145,10 +1300,10 @@ class ScheduleGenerator
           end
         else
           # Fill shower events
-          num_events = sample_activity_cluster_size(@prngs[:hygiene], @cluster_size_prob_map, 'shower')
+          num_events = sample_activity_cluster_size(@prngs[:hygiene], @cluster_size_prob_map, 'shower', shower_cluster_size_precomputed_vals)
           m = 0
           num_events.times do
-            duration = sample_event_duration(@prngs[:hygiene], @event_duration_prob_map, 'shower')
+            duration = sample_event_duration(@prngs[:hygiene], @event_duration_prob_map, 'shower', shower_duration_precomputed_vals)
             int_duration = duration.ceil
             flow_rate = shower_flow_rate * duration / int_duration
             int_duration.times do
@@ -1195,15 +1350,17 @@ class ScheduleGenerator
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
     # Fill in dw_water draw schedule
     step = 0
+    dishwasher_cluster_size_precomputed_vals = get_activity_cluster_size_precomputed_vals(@cluster_size_prob_map, 'hot_water_dishwasher')
+    dishwasher_duration_precomputed_vals = get_event_duration_precomputed_vals(@event_duration_prob_map, 'hot_water_dishwasher')
     while step < @mkc_steps_in_a_year
       dish_state = sum_across_occupants(mkc_activity_schedules, 4, step, max_clip: 1)
       step_jump = 1
       if dish_state > 0
-        cluster_size = sample_activity_cluster_size(@prngs[:dishwasher], @cluster_size_prob_map, 'hot_water_dishwasher')
+        cluster_size = sample_activity_cluster_size(@prngs[:dishwasher], @cluster_size_prob_map, 'hot_water_dishwasher', dishwasher_cluster_size_precomputed_vals)
         start_minute = step * 15
         m = 0
         cluster_size.times do
-          duration = sample_event_duration(@prngs[:dishwasher], @event_duration_prob_map, 'hot_water_dishwasher')
+          duration = sample_event_duration(@prngs[:dishwasher], @event_duration_prob_map, 'hot_water_dishwasher', dishwasher_duration_precomputed_vals)
           int_duration = duration.ceil
           flow_rate = dw_flow_rate * duration / int_duration
           int_duration.times do
@@ -1245,17 +1402,20 @@ class ScheduleGenerator
     step = 0
     m = 0
     # Fill in clothes washer water draw schedule based on markov-chain state 2 (laundry)
+    cw_cluster_size_precomputed = get_activity_cluster_size_precomputed_vals(@cluster_size_prob_map, 'hot_water_clothes_washer')
+    cw_duration_precomputed = get_event_duration_precomputed_vals(@event_duration_prob_map, 'hot_water_clothes_washer')
+    num_load_precomputed = weighted_random_precompute(cw_load_size_probability)
     while step < @mkc_steps_in_a_year
       clothes_state = sum_across_occupants(mkc_activity_schedules, 2, step, max_clip: 1)
       step_jump = 1
       if clothes_state > 0
-        num_loads = weighted_random(@prngs[:clothes_washer], cw_load_size_probability) + 1
+        num_loads = weighted_random(@prngs[:clothes_washer], cw_load_size_probability, num_load_precomputed) + 1
         start_minute = step * 15
         m = 0
         num_loads.times do
-          cluster_size = sample_activity_cluster_size(@prngs[:clothes_washer], @cluster_size_prob_map, 'hot_water_clothes_washer')
+          cluster_size = sample_activity_cluster_size(@prngs[:clothes_washer], @cluster_size_prob_map, 'hot_water_clothes_washer', cw_cluster_size_precomputed)
           cluster_size.times do
-            duration = sample_event_duration(@prngs[:clothes_washer], @event_duration_prob_map, 'hot_water_clothes_washer')
+            duration = sample_event_duration(@prngs[:clothes_washer], @event_duration_prob_map, 'hot_water_clothes_washer', cw_duration_precomputed)
             int_duration = duration.ceil
             flow_rate = cw_flow_rate * duration.to_f / int_duration
             int_duration.times do
