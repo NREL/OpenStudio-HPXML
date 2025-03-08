@@ -198,11 +198,11 @@ class ScheduleGenerator
     time_tracking["random_shift_and_normalize (occupants)"] = Time.now - t_start
 
     t_start = Time.now
-    fill_plug_loads_schedule(mkc_activity_schedules, weather)
+    fill_plug_loads_schedule(mkc_activity_schedules, weather, occupancy_schedules)
     time_tracking["fill_plug_loads_schedule"] = Time.now - t_start
 
     t_start = Time.now
-    fill_lighting_schedule(mkc_activity_schedules, args)
+    fill_lighting_schedule(mkc_activity_schedules, args, occupancy_schedules)
     time_tracking["fill_lighting_schedule"] = Time.now - t_start
 
     # Generate schedules for each class of enduse
@@ -693,22 +693,6 @@ class ScheduleGenerator
     return day_sch.min + (current_val - day_sch.min) * active_occupant_percentage
   end
 
-  # Get schedule value for current minute based on weekday/weekend schedule and occupancy.
-  #
-  # @param weekday_sch [Array] Array of hourly schedule values for weekdays
-  # @param weekend_sch [Array] Array of hourly schedule values for weekends
-  # @param monthly_multiplier [Array] Array of monthly multipliers to apply to schedule values
-  # @param month [Integer] Current month (1-12)
-  # @param is_weekday [Boolean] Whether current day is a weekday
-  # @param minute [Integer] Current minute in simulation
-  # @param active_occupant_percentage [Float] Percentage of occupants that are active (not sleeping/away)
-  # @return [Float] Schedule value scaled by occupancy and monthly multiplier
-  def get_value_from_daily_sch(weekday_sch, weekend_sch, monthly_multiplier, month, is_weekday, minute, active_occupant_percentage)
-    is_weekday ? sch = weekday_sch : sch = weekend_sch
-    full_occupancy_current_val = sch[((minute % @minutes_per_day) / 60).to_i].to_f * monthly_multiplier[month - 1].to_f
-    return sch.min + (full_occupancy_current_val - sch.min) * active_occupant_percentage
-  end
-
   # Randomly select an index based on weighted probabilities.
   #
   # @param prng [Random] Random number generator
@@ -1020,22 +1004,22 @@ class ScheduleGenerator
   # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [void] Updates @schedules with plug loads and ceiling fan schedules
-  def fill_plug_loads_schedule(mkc_activity_schedules, weather)
+  def fill_plug_loads_schedule(mkc_activity_schedules, weather, occupancy_schedules)
     # Initialize base schedules
     daily_schedules = get_plugload_daily_schedules(@default_schedules_csv_data, @schedules_csv_data, weather)
 
     # Generate schedules for each plug load type if it exists
     if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'other' }
-      plug_loads_other = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_other)
+      plug_loads_other = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_other, occupancy_schedules)
       @schedules[SchedulesFile::Columns[:PlugLoadsOther].name] = random_shift_and_normalize(plug_loads_other)
     end
 
     if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'TV other' }
-      plug_loads_tv = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_tv)
+      plug_loads_tv = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_tv, occupancy_schedules)
       @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = random_shift_and_normalize(plug_loads_tv)
     end
     if !@hpxml_bldg.ceiling_fans.to_a.empty?
-      ceiling_fan = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :ceiling_fan)
+      ceiling_fan = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :ceiling_fan, occupancy_schedules)
       @schedules[SchedulesFile::Columns[:CeilingFan].name] = random_shift_and_normalize(ceiling_fan)
     end
   end
@@ -1046,38 +1030,31 @@ class ScheduleGenerator
   # @param daily_schedules [Hash] Hash containing daily schedule data for plug loads
   # @param schedule_type [Symbol] Type of plug load schedule to generate
   # @return [Array<Float>] Array of hourly plug load schedule values normalized to 1.0
-  def generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, schedule_type)
+  def generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, schedule_type, occupancy_schedules)
     schedule = Array.new(@total_days_in_year * @minutes_per_day, 0.0)
+    weekday_min = daily_schedules[schedule_type][:weekday].min
+    weekend_min = daily_schedules[schedule_type][:weekend].min
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       month = today.month
-      is_weekday = ![0, 6].include?(today.wday)
+      monthly_multiplier = daily_schedules[schedule_type][:monthly][month - 1].to_f
+      if [0, 6].include?(today.wday)
+        sch = daily_schedules[schedule_type][:weekend]
+        sch_min = weekend_min
+      else
+        sch = daily_schedules[schedule_type][:weekday]
+        sch_min = weekday_min
+      end
       @mkc_ts_per_day.times do |step|
         minute = day * @minutes_per_day + step * @minutes_per_mkc_ts
-        index_15 = (minute / 15).to_i
-        # Calculate occupancy percentage
-        active_occupancy_percentage = calculate_active_occupancy(mkc_activity_schedules, index_15)
-        # Update schedule based on daily schedules and occupancy
-        schedule.fill(get_value_from_daily_sch(
-          daily_schedules[schedule_type][:weekday],
-          daily_schedules[schedule_type][:weekend],
-          daily_schedules[schedule_type][:monthly],
-          month, is_weekday, minute, active_occupancy_percentage
-        ), minute, @minutes_per_mkc_ts)
+        hour = (step * @minutes_per_mkc_ts / 60).to_i
+        active_occupancy_percentage = 1 - (occupancy_schedules[:away_schedule][minute] + occupancy_schedules[:sleep_schedule][minute])
+        full_occupancy_current_val = sch[hour] * monthly_multiplier
+        modulated_value = sch_min + (full_occupancy_current_val - sch_min) * active_occupancy_percentage
+        schedule.fill(modulated_value, minute, @minutes_per_mkc_ts)
       end
     end
     return schedule
-  end
-
-  # Calculate the percentage of occupants that are actively present and awake.
-  #
-  # @param mkc_activity_schedules [Array] Array of occupant activity schedules
-  # @param index_15 [Integer] 15-minute timestep index
-  # @return [Float] Percentage of occupants that are actively present and awake
-  def calculate_active_occupancy(mkc_activity_schedules, index_15)
-    sleep_percentage = sum_across_occupants(mkc_activity_schedules, 0, index_15).to_f / @num_occupants
-    away_percentage = sum_across_occupants(mkc_activity_schedules, 5, index_15).to_f / @num_occupants
-    1 - (away_percentage + sleep_percentage)
   end
 
   # Fill the lighting schedule based on occupant activities.
@@ -1085,7 +1062,7 @@ class ScheduleGenerator
   # @param mkc_activity_schedules [Array] Array of occupant activity schedules
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
-  def fill_lighting_schedule(mkc_activity_schedules, args)
+  def fill_lighting_schedule(mkc_activity_schedules, args, occupancy_schedules)
     # Initialize base lighting schedule
     interior_lighting_schedule = initialize_interior_lighting_schedule(args)
 
@@ -1093,16 +1070,15 @@ class ScheduleGenerator
     lighting_interior = Array.new(@total_days_in_year * @minutes_per_day, 0.0)
 
     @total_days_in_year.times do |day|
+      day_sch = interior_lighting_schedule[day * 24, 24]
+      day_min = day_sch.min
       @mkc_ts_per_day.times do |step|
         minute = day * @minutes_per_day + step * @minutes_per_mkc_ts
-        index_15 = (minute / 15).to_i
-
-        # Calculate occupancy percentage
-        active_occupancy_percentage = calculate_active_occupancy(mkc_activity_schedules, index_15)
-
-        lighting_interior.fill(scale_lighting_by_occupancy(
-          interior_lighting_schedule, minute, active_occupancy_percentage
-        ), minute, @minutes_per_mkc_ts)
+        active_occupancy_percentage = 1 - (occupancy_schedules[:away_schedule][minute] +
+                                           occupancy_schedules[:sleep_schedule][minute])
+        current_val = interior_lighting_schedule[minute / 60]
+        value = day_min + (current_val - day_min) * active_occupancy_percentage
+        lighting_interior.fill(value, minute, @minutes_per_mkc_ts)
       end
     end
 
