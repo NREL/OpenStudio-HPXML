@@ -123,16 +123,6 @@ class ScheduleGenerator
   # @return [Boolean] true if successful
   def create_stochastic_schedules(args:,
                                   weather:)
-    time_tracking = {}
-
-    t_start = Time.now
-    @default_schedules_csv_data = Defaults.get_schedules_csv_data()
-    time_tracking["get_schedules_csv_data (default)"] = Time.now - t_start
-
-    t_start = Time.now
-    @schedules_csv_data = get_schedules_csv_data()
-    time_tracking["get_schedules_csv_data"] = Time.now - t_start
-
     # Use independent random number generators for each class of enduse so that when certain
     # enduses are removed/added in an upgrade run, the schedules for the other enduses are not affected
     # New class of enduses can be be added to the enduse_types list at the end without loss of backwards
@@ -150,158 +140,74 @@ class ScheduleGenerator
     @num_occupants = args[:geometry_num_occupants].to_i
     @resources_path = args[:resources_path]
     # pre-load the probability distribution csv files for speed
-    t_start = Time.now
+    @default_schedules_csv_data = Defaults.get_schedules_csv_data()
+    @schedules_csv_data = get_schedules_csv_data()
     @cluster_size_prob_map = read_activity_cluster_size_probs()
-    time_tracking["read_activity_cluster_size_probs"] = Time.now - t_start
-
-    t_start = Time.now
     @event_duration_prob_map = read_event_duration_probs()
-    time_tracking["read_event_duration_probs"] = Time.now - t_start
-
-    t_start = Time.now
     @activity_duration_prob_map = read_activity_duration_prob()
-    time_tracking["read_activity_duration_prob"] = Time.now - t_start
-
-    t_start = Time.now
     @appliance_power_dist_map = read_appliance_power_dist()
-    time_tracking["read_appliance_power_dist"] = Time.now - t_start
-
-    t_start = Time.now
     @weekday_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekday')
-    time_tracking["read_monthly_shift_minutes (weekday)"] = Time.now - t_start
-
-    t_start = Time.now
     @weekend_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekend')
-    time_tracking["read_monthly_shift_minutes (weekend)"] = Time.now - t_start
-
-    t_start = Time.now
     mkc_activity_schedules = simulate_occupant_activities()
-    time_tracking["simulate_occupant_activities"] = Time.now - t_start
 
     # Apply random offset to schedules to avoid synchronization when aggregating across dwelling units
     offset_range = 30 # +- 30 minutes was minimum required to avoid synchronization spikes at 1000 unit aggregation
     @random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
 
     # shape of mkc_activity_schedules is [n, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
-    t_start = Time.now
     @ev_occupant_number = get_ev_occupant_number(mkc_activity_schedules)
-    time_tracking["get_ev_occupant_number"] = Time.now - t_start
-
-    t_start = Time.now
     occupancy_schedules = generate_occupancy_schedules(mkc_activity_schedules)
-    time_tracking["generate_occupancy_schedules"] = Time.now - t_start
 
     # Apply random shift to occupancy schedules
     home_schedule = occupancy_schedules[:away_schedule].map { |i| (1.0 - i) }
-    t_start = Time.now
     @schedules[SchedulesFile::Columns[:Occupants].name] = random_shift_and_normalize(home_schedule, @minutes_per_step)
-    time_tracking["random_shift_and_normalize (occupants)"] = Time.now - t_start
 
-    t_start = Time.now
     fill_plug_loads_schedule(mkc_activity_schedules, weather, occupancy_schedules)
-    time_tracking["fill_plug_loads_schedule"] = Time.now - t_start
-
-    t_start = Time.now
     fill_lighting_schedule(mkc_activity_schedules, args, occupancy_schedules)
-    time_tracking["fill_lighting_schedule"] = Time.now - t_start
 
     # Generate schedules for each class of enduse
-    t_start = Time.now
     sink_activity_sch = generate_sink_schedule(mkc_activity_schedules)
-    time_tracking["generate_sink_schedule"] = Time.now - t_start
-
-    t_start = Time.now
     shower_activity_sch, bath_activity_sch = generate_bath_shower_schedules(mkc_activity_schedules)
-    time_tracking["generate_bath_shower_schedules"] = Time.now - t_start
 
     if !@hpxml_bldg.dishwashers.to_a.empty?
-      t_start = Time.now
       dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
-      time_tracking["generate_dishwasher_schedule"] = Time.now - t_start
-
-      t_start = Time.now
       dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
-      time_tracking["generate_dishwasher_power_schedule"] = Time.now - t_start
-
-      t_start = Time.now
       @schedules.merge!({
                           SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch),
                           SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch)
                         })
-      time_tracking["random_shift_and_normalize (dishwasher)"] = Time.now - t_start
     end
     if !@hpxml_bldg.clothes_washers.to_a.empty?
-      t_start = Time.now
       cw_hot_water_sch = generate_clothes_washer_schedule(mkc_activity_schedules)
-      time_tracking["generate_clothes_washer_schedule"] = Time.now - t_start
-
-      t_start = Time.now
       cw_power_sch, cd_power_sch = generate_clothes_washer_dryer_power_schedules(mkc_activity_schedules)
-      time_tracking["generate_clothes_washer_dryer_power_schedules"] = Time.now - t_start
-
-      t_start = Time.now
       @schedules.merge!({
                           SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch),
                           SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch)
                         })
-      time_tracking["random_shift_and_normalize (clothes_washer)"] = Time.now - t_start
 
       if !@hpxml_bldg.clothes_dryers.to_a.empty?
-        t_start = Time.now
         @schedules.merge!({
                             SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch)
                           })
-        time_tracking["random_shift_and_normalize (clothes_dryer)"] = Time.now - t_start
       end
     end
     if !@hpxml_bldg.cooking_ranges.to_a.empty?
-      t_start = Time.now
       cooking_power_sch = generate_cooking_power_schedule(mkc_activity_schedules)
-      time_tracking["generate_cooking_power_schedule"] = Time.now - t_start
-
-      t_start = Time.now
       @schedules.merge!({
                           SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch)
                         })
-      time_tracking["random_shift_and_normalize (cooking_range)"] = Time.now - t_start
     end
 
-    t_start = Time.now
     showers = random_shift_and_normalize(shower_activity_sch)
-    time_tracking["random_shift_and_normalize (showers)"] = Time.now - t_start
-
-    t_start = Time.now
     sinks = random_shift_and_normalize(sink_activity_sch)
-    time_tracking["random_shift_and_normalize (sinks)"] = Time.now - t_start
-
-    t_start = Time.now
     baths = random_shift_and_normalize(bath_activity_sch)
-    time_tracking["random_shift_and_normalize (baths)"] = Time.now - t_start
 
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
-    t_start = Time.now
     @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = normalize(fixtures)
-    time_tracking["normalize (fixtures)"] = Time.now - t_start
 
     # Apply random shift to EV occupant presence but don't normalize
-    t_start = Time.now
     ev_occupant_presence = random_shift_and_normalize(occupancy_schedules[:ev_occupant_presence], @minutes_per_step)
-    time_tracking["random_shift_and_normalize (ev_occupant_presence)"] = Time.now - t_start
-
-    t_start = Time.now
     fill_ev_schedules(mkc_activity_schedules, ev_occupant_presence)
-    time_tracking["fill_ev_schedules"] = Time.now - t_start
-
-    # Print timing information
-    puts "\nFunction execution times:"
-    total_time = 0
-    cumulative_time = 0
-    time_tracking.each do |func, time|
-      total_time += time
-      cumulative_time += time
-      puts "  #{func}: #{time.round(3)} seconds (cumulative: #{cumulative_time.round(3)} seconds)"
-    end
-    puts "Total tracked time: #{total_time.round(3)} seconds"
 
     if @debug
       @schedules[SchedulesFile::Columns[:Sleeping].name] = random_shift_and_normalize(occupancy_schedules[:sleep_schedule], @minutes_per_step)
@@ -348,7 +254,7 @@ class ScheduleGenerator
       end
       # Markov-chain transition probabilities is based on ATUS data, and the starting time of day for the data is
       # 4 am. We need to shift everything forward by 16 timesteps to make it midnight-based.
-      simulated_values = simulated_values.rotate(-4 * 4) # 4am shifting (4 hours = 4 * 4 steps of 15 min intervals)
+      simulated_values.rotate!(-4 * 4) # 4am shifting (4 hours = 4 * 4 steps of 15 min intervals)
       mkc_activity_schedules << Matrix[*simulated_values]
     end
 
@@ -1484,7 +1390,7 @@ class ScheduleGenerator
   # @param schedule [Array<Float>] Array of minute-level schedule values
   # @return [Array<Float>] Schedule with random time shift applied
   def random_shift_and_aggregate(schedule)
-    schedule = schedule.rotate(@random_offset)
+    schedule.rotate!(@random_offset)
 
     # Apply monthly offsets and aggregate
     schedule = apply_monthly_offsets(array: schedule,
