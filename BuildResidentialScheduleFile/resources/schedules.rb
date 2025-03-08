@@ -38,6 +38,8 @@ class ScheduleGenerator
     @total_days_in_year = total_days_in_year
     @mkc_ts_per_day = 96
     @mkc_ts_per_hour = 96 / 24
+    @minutes_per_mkc_ts = 15
+    @minutes_per_day = 1440
     @mkc_steps_in_a_year = @total_days_in_year * @mkc_ts_per_day
     @mins_in_year = @total_days_in_year * 1440
     @sim_year = sim_year
@@ -73,8 +75,9 @@ class ScheduleGenerator
       @runner.registerError("Invalid column name specified: '#{invalid_column}'.")
     end
     return false unless invalid_columns.empty?
-
+    t = Time.now
     success = create_stochastic_schedules(args: args, weather: weather)
+    puts "Time taken: #{Time.now - t} seconds"
     return false if not success
 
     return true
@@ -120,8 +123,15 @@ class ScheduleGenerator
   # @return [Boolean] true if successful
   def create_stochastic_schedules(args:,
                                   weather:)
+    time_tracking = {}
+
+    t_start = Time.now
     @default_schedules_csv_data = Defaults.get_schedules_csv_data()
+    time_tracking["get_schedules_csv_data (default)"] = Time.now - t_start
+
+    t_start = Time.now
     @schedules_csv_data = get_schedules_csv_data()
+    time_tracking["get_schedules_csv_data"] = Time.now - t_start
 
     # Use independent random number generators for each class of enduse so that when certain
     # enduses are removed/added in an upgrade run, the schedules for the other enduses are not affected
@@ -140,70 +150,158 @@ class ScheduleGenerator
     @num_occupants = args[:geometry_num_occupants].to_i
     @resources_path = args[:resources_path]
     # pre-load the probability distribution csv files for speed
+    t_start = Time.now
     @cluster_size_prob_map = read_activity_cluster_size_probs()
-    @event_duration_prob_map = read_event_duration_probs()
-    @activity_duration_prob_map = read_activity_duration_prob()
-    @appliance_power_dist_map = read_appliance_power_dist()
-    @weekday_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekday')
-    @weekend_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekend')
+    time_tracking["read_activity_cluster_size_probs"] = Time.now - t_start
 
+    t_start = Time.now
+    @event_duration_prob_map = read_event_duration_probs()
+    time_tracking["read_event_duration_probs"] = Time.now - t_start
+
+    t_start = Time.now
+    @activity_duration_prob_map = read_activity_duration_prob()
+    time_tracking["read_activity_duration_prob"] = Time.now - t_start
+
+    t_start = Time.now
+    @appliance_power_dist_map = read_appliance_power_dist()
+    time_tracking["read_appliance_power_dist"] = Time.now - t_start
+
+    t_start = Time.now
+    @weekday_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekday')
+    time_tracking["read_monthly_shift_minutes (weekday)"] = Time.now - t_start
+
+    t_start = Time.now
+    @weekend_monthly_shift_dict = read_monthly_shift_minutes(daytype: 'weekend')
+    time_tracking["read_monthly_shift_minutes (weekend)"] = Time.now - t_start
+
+    t_start = Time.now
     mkc_activity_schedules = simulate_occupant_activities()
+    time_tracking["simulate_occupant_activities"] = Time.now - t_start
 
     # Apply random offset to schedules to avoid synchronization when aggregating across dwelling units
     offset_range = 30 # +- 30 minutes was minimum required to avoid synchronization spikes at 1000 unit aggregation
     @random_offset = (@prngs[:main].rand * 2 * offset_range).to_i - offset_range
 
     # shape of mkc_activity_schedules is [n, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
+    t_start = Time.now
     @ev_occupant_number = get_ev_occupant_number(mkc_activity_schedules)
+    time_tracking["get_ev_occupant_number"] = Time.now - t_start
+
+    t_start = Time.now
     occupancy_schedules = generate_occupancy_schedules(mkc_activity_schedules)
+    time_tracking["generate_occupancy_schedules"] = Time.now - t_start
 
-    # Apply random shift to occupancy schedules but don't normalize
+    # Apply random shift to occupancy schedules
     home_schedule = occupancy_schedules[:away_schedule].map { |i| (1.0 - i) }
+    t_start = Time.now
     @schedules[SchedulesFile::Columns[:Occupants].name] = random_shift_and_normalize(home_schedule, @minutes_per_step)
+    time_tracking["random_shift_and_normalize (occupants)"] = Time.now - t_start
 
+    t_start = Time.now
     fill_plug_loads_schedule(mkc_activity_schedules, weather)
+    time_tracking["fill_plug_loads_schedule"] = Time.now - t_start
+
+    t_start = Time.now
     fill_lighting_schedule(mkc_activity_schedules, args)
+    time_tracking["fill_lighting_schedule"] = Time.now - t_start
+
     # Generate schedules for each class of enduse
+    t_start = Time.now
     sink_activity_sch = generate_sink_schedule(mkc_activity_schedules)
+    time_tracking["generate_sink_schedule"] = Time.now - t_start
+
+    t_start = Time.now
     shower_activity_sch, bath_activity_sch = generate_bath_shower_schedules(mkc_activity_schedules)
+    time_tracking["generate_bath_shower_schedules"] = Time.now - t_start
 
     if !@hpxml_bldg.dishwashers.to_a.empty?
+      t_start = Time.now
       dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
+      time_tracking["generate_dishwasher_schedule"] = Time.now - t_start
+
+      t_start = Time.now
       dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
+      time_tracking["generate_dishwasher_power_schedule"] = Time.now - t_start
+
+      t_start = Time.now
       @schedules.merge!({
                           SchedulesFile::Columns[:HotWaterDishwasher].name => random_shift_and_normalize(dw_hot_water_sch),
                           SchedulesFile::Columns[:Dishwasher].name => random_shift_and_normalize(dw_power_sch)
                         })
+      time_tracking["random_shift_and_normalize (dishwasher)"] = Time.now - t_start
     end
     if !@hpxml_bldg.clothes_washers.to_a.empty?
+      t_start = Time.now
       cw_hot_water_sch = generate_clothes_washer_schedule(mkc_activity_schedules)
+      time_tracking["generate_clothes_washer_schedule"] = Time.now - t_start
+
+      t_start = Time.now
       cw_power_sch, cd_power_sch = generate_clothes_washer_dryer_power_schedules(mkc_activity_schedules)
+      time_tracking["generate_clothes_washer_dryer_power_schedules"] = Time.now - t_start
+
+      t_start = Time.now
       @schedules.merge!({
                           SchedulesFile::Columns[:HotWaterClothesWasher].name => random_shift_and_normalize(cw_hot_water_sch),
                           SchedulesFile::Columns[:ClothesWasher].name => random_shift_and_normalize(cw_power_sch)
                         })
+      time_tracking["random_shift_and_normalize (clothes_washer)"] = Time.now - t_start
+
       if !@hpxml_bldg.clothes_dryers.to_a.empty?
+        t_start = Time.now
         @schedules.merge!({
                             SchedulesFile::Columns[:ClothesDryer].name => random_shift_and_normalize(cd_power_sch)
                           })
+        time_tracking["random_shift_and_normalize (clothes_dryer)"] = Time.now - t_start
       end
     end
     if !@hpxml_bldg.cooking_ranges.to_a.empty?
+      t_start = Time.now
       cooking_power_sch = generate_cooking_power_schedule(mkc_activity_schedules)
+      time_tracking["generate_cooking_power_schedule"] = Time.now - t_start
+
+      t_start = Time.now
       @schedules.merge!({
                           SchedulesFile::Columns[:CookingRange].name => random_shift_and_normalize(cooking_power_sch)
                         })
+      time_tracking["random_shift_and_normalize (cooking_range)"] = Time.now - t_start
     end
 
+    t_start = Time.now
     showers = random_shift_and_normalize(shower_activity_sch)
+    time_tracking["random_shift_and_normalize (showers)"] = Time.now - t_start
+
+    t_start = Time.now
     sinks = random_shift_and_normalize(sink_activity_sch)
+    time_tracking["random_shift_and_normalize (sinks)"] = Time.now - t_start
+
+    t_start = Time.now
     baths = random_shift_and_normalize(bath_activity_sch)
+    time_tracking["random_shift_and_normalize (baths)"] = Time.now - t_start
+
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
+    t_start = Time.now
     @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = normalize(fixtures)
+    time_tracking["normalize (fixtures)"] = Time.now - t_start
 
     # Apply random shift to EV occupant presence but don't normalize
+    t_start = Time.now
     ev_occupant_presence = random_shift_and_normalize(occupancy_schedules[:ev_occupant_presence], @minutes_per_step)
+    time_tracking["random_shift_and_normalize (ev_occupant_presence)"] = Time.now - t_start
+
+    t_start = Time.now
     fill_ev_schedules(mkc_activity_schedules, ev_occupant_presence)
+    time_tracking["fill_ev_schedules"] = Time.now - t_start
+
+    # Print timing information
+    puts "\nFunction execution times:"
+    total_time = 0
+    cumulative_time = 0
+    time_tracking.each do |func, time|
+      total_time += time
+      cumulative_time += time
+      puts "  #{func}: #{time.round(3)} seconds (cumulative: #{cumulative_time.round(3)} seconds)"
+    end
+    puts "Total tracked time: #{total_time.round(3)} seconds"
 
     if @debug
       @schedules[SchedulesFile::Columns[:Sleeping].name] = random_shift_and_normalize(occupancy_schedules[:sleep_schedule], @minutes_per_step)
@@ -221,9 +319,10 @@ class ScheduleGenerator
     occupancy_types_probabilities = Schedule.validate_values(Constants::OccupancyTypesProbabilities, 4, 'occupancy types probabilities')
     initial_probabilities = get_initial_probabilities()
     transition_matrices = get_transition_matrices()
+    init_state_vector = Array.new(7, 0.0)
     for _n in 1..@num_occupants
       occ_type_id = weighted_random(@prngs[:main], occupancy_types_probabilities)
-      simulated_values = []
+      simulated_values = Array.new(@total_days_in_year * @mkc_ts_per_day, 0.0)
       @total_days_in_year.times do |day|
         today = @sim_start_day + day
         day_type = [0, 6].include?(today.wday) ? :weekend : :weekday
@@ -231,19 +330,16 @@ class ScheduleGenerator
         state_prob = initial_probabilities[occ_type_id][day_type] # [] shape = 1x7. probability of transitioning to each of the 7 states
         while j < @mkc_ts_per_day
           active_state = weighted_random(@prngs[:main], state_prob) # Randomly pick the next state
-          state_vector = [0] * 7 # there are 7 states
+          state_vector = init_state_vector.dup
           state_vector[active_state] = 1 # Transition to the new state
 
           # sample the duration of the state, and skip markov-chain based state transition until the end of the duration
           activity_duration = sample_activity_duration(@prngs[:main], @activity_duration_prob_map, occ_type_id, active_state, day_type, j / 4)
-
-          for _i in 1..activity_duration
-            # repeat the same activity for the duration times
-            simulated_values << state_vector
-            j += 1
-            break if j >= @mkc_ts_per_day # break as soon as we have filled activities for the day
-          end
+          fill_duration = [activity_duration, @mkc_ts_per_day - j].min
+          simulated_values.fill(state_vector, day * @mkc_ts_per_day + j, fill_duration)
+          j += fill_duration
           break if j >= @mkc_ts_per_day # break as soon as we have filled activities for the day
+          transition_probs = transition_matrices[occ_type_id][day_type][(j - 1) * 7..j * 7 - 1]
 
           # obtain the transition matrix for current timestep
           transition_probs = transition_matrices[occ_type_id][day_type][(j - 1) * 7..j * 7 - 1]
@@ -329,8 +425,7 @@ class ScheduleGenerator
       if lead.nil?
         raise "Could not find the entry for month #{month}, day #{day_of_week} and state #{@state}"
       end
-
-      new_array.concat(array[day * 1440, 1440].rotate(lead))
+      new_array.concat(array[day * @minutes_per_day, @minutes_per_day].rotate(lead))
     end
     return new_array
   end
@@ -592,7 +687,7 @@ class ScheduleGenerator
   # @param active_occupant_percentage [Float] Percentage of occupants that are active (not sleeping/away)
   # @return [Float] Scaled lighting schedule value based on occupancy
   def scale_lighting_by_occupancy(sch, minute, active_occupant_percentage)
-    day_start = minute / 1440
+    day_start = minute / @minutes_per_day
     day_sch = sch[day_start * 24, 24]
     current_val = sch[minute / 60]
     return day_sch.min + (current_val - day_sch.min) * active_occupant_percentage
@@ -610,7 +705,7 @@ class ScheduleGenerator
   # @return [Float] Schedule value scaled by occupancy and monthly multiplier
   def get_value_from_daily_sch(weekday_sch, weekend_sch, monthly_multiplier, month, is_weekday, minute, active_occupant_percentage)
     is_weekday ? sch = weekday_sch : sch = weekend_sch
-    full_occupancy_current_val = sch[((minute % 1440) / 60).to_i].to_f * monthly_multiplier[month - 1].to_f
+    full_occupancy_current_val = sch[((minute % @minutes_per_day) / 60).to_i].to_f * monthly_multiplier[month - 1].to_f
     return sch.min + (full_occupancy_current_val - sch.min) * active_occupant_percentage
   end
 
@@ -902,19 +997,19 @@ class ScheduleGenerator
   def generate_occupancy_schedules(mkc_activity_schedules)
     # States are: 0='sleeping', 1='shower', 2='laundry', 3='cooking', 4='dishwashing', 5='absent', 6='nothingAtHome'
     occupancy_arrays = {
-      sleep_schedule: [],
-      away_schedule: [],
-      idle_schedule: [],
-      ev_occupant_presence: [],
+      sleep_schedule:  Array.new(@total_days_in_year * @minutes_per_day, 0.0),
+      away_schedule:  Array.new(@total_days_in_year * @minutes_per_day, 0.0),
+      idle_schedule:  Array.new(@total_days_in_year * @minutes_per_day, 0.0),
+      ev_occupant_presence: Array.new(@total_days_in_year * @minutes_per_day, 0.0),
     }
     @total_days_in_year.times do |day|
-      1440.times do |minute_of_day|
-        minute = day * 1440 + minute_of_day
+      @mkc_ts_per_day.times do |step|
+        minute = day * @minutes_per_day + step * @minutes_per_mkc_ts
         index_15 = (minute / 15).to_i
-        occupancy_arrays[:sleep_schedule] << sum_across_occupants(mkc_activity_schedules, 0, index_15).to_f / @num_occupants
-        occupancy_arrays[:away_schedule] << sum_across_occupants(mkc_activity_schedules, 5, index_15).to_f / @num_occupants
-        occupancy_arrays[:idle_schedule] << sum_across_occupants(mkc_activity_schedules, 6, index_15).to_f / @num_occupants
-        occupancy_arrays[:ev_occupant_presence] << (1 - mkc_activity_schedules[@ev_occupant_number][index_15, 5])
+        occupancy_arrays[:sleep_schedule].fill(sum_across_occupants(mkc_activity_schedules, 0, index_15).to_f / @num_occupants, minute, @minutes_per_mkc_ts)
+        occupancy_arrays[:away_schedule].fill(sum_across_occupants(mkc_activity_schedules, 5, index_15).to_f / @num_occupants, minute, @minutes_per_mkc_ts)
+        occupancy_arrays[:idle_schedule].fill(sum_across_occupants(mkc_activity_schedules, 6, index_15).to_f / @num_occupants, minute, @minutes_per_mkc_ts)
+        occupancy_arrays[:ev_occupant_presence].fill(1 - mkc_activity_schedules[@ev_occupant_number][index_15, 5], minute, @minutes_per_mkc_ts)
       end
     end
     return occupancy_arrays
@@ -952,23 +1047,23 @@ class ScheduleGenerator
   # @param schedule_type [Symbol] Type of plug load schedule to generate
   # @return [Array<Float>] Array of hourly plug load schedule values normalized to 1.0
   def generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, schedule_type)
-    schedule = Array.new(@total_days_in_year * 1440, 0.0)
+    schedule = Array.new(@total_days_in_year * @minutes_per_day, 0.0)
     @total_days_in_year.times do |day|
       today = @sim_start_day + day
       month = today.month
       is_weekday = ![0, 6].include?(today.wday)
-      1440.times do |minute_of_day|
-        minute = day * 1440 + minute_of_day
+      @mkc_ts_per_day.times do |step|
+        minute = day * @minutes_per_day + step * @minutes_per_mkc_ts
         index_15 = (minute / 15).to_i
         # Calculate occupancy percentage
         active_occupancy_percentage = calculate_active_occupancy(mkc_activity_schedules, index_15)
         # Update schedule based on daily schedules and occupancy
-        schedule[minute] = get_value_from_daily_sch(
+        schedule.fill(get_value_from_daily_sch(
           daily_schedules[schedule_type][:weekday],
           daily_schedules[schedule_type][:weekend],
           daily_schedules[schedule_type][:monthly],
           month, is_weekday, minute, active_occupancy_percentage
-        )
+        ), minute, @minutes_per_mkc_ts)
       end
     end
     return schedule
@@ -995,19 +1090,19 @@ class ScheduleGenerator
     interior_lighting_schedule = initialize_interior_lighting_schedule(args)
 
     # Generate minute-level schedule
-    lighting_interior = Array.new(@total_days_in_year * 1440, 0.0)
+    lighting_interior = Array.new(@total_days_in_year * @minutes_per_day, 0.0)
 
     @total_days_in_year.times do |day|
-      1440.times do |minute_of_day|
-        minute = day * 1440 + minute_of_day
+      @mkc_ts_per_day.times do |step|
+        minute = day * @minutes_per_day + step * @minutes_per_mkc_ts
         index_15 = (minute / 15).to_i
 
         # Calculate occupancy percentage
         active_occupancy_percentage = calculate_active_occupancy(mkc_activity_schedules, index_15)
 
-        lighting_interior[minute] = scale_lighting_by_occupancy(
+        lighting_interior.fill(scale_lighting_by_occupancy(
           interior_lighting_schedule, minute, active_occupancy_percentage
-        )
+        ), minute, @minutes_per_mkc_ts)
       end
     end
 
@@ -1074,7 +1169,7 @@ class ScheduleGenerator
           duration = weighted_random(@prngs[:hygiene], sink_duration_probs) + 1
           duration = end_min - start_min if start_min + duration > end_min
 
-          sink_activity_sch.fill(sink_flow_rate, (day * 1440) + start_min, duration)
+          sink_activity_sch.fill(sink_flow_rate, (day * @minutes_per_day) + start_min, duration)
           start_min += duration + Constants::SinkMinutesBetweenEventGap
 
           break if start_min >= end_min
