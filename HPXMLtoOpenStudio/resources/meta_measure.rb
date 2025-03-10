@@ -593,6 +593,7 @@ def report_os_warnings(os_log, rundir)
       next if s.logMessage.include? 'xsltValidate'
       next if s.logLevel == 0 && s.logMessage.include?('not within the expected limits') # Ignore EpwFile warnings
       next if s.logMessage.include? 'Error removing temporary directory at /tmp/xmlvalidation'
+      next if s.logMessage.include? 'Appears there are no ground temperature depth fields in the EPW file'
 
       f << "OS Message: #{s.logMessage}\n"
     end
