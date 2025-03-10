@@ -75,6 +75,7 @@ class ScheduleGenerator
       @runner.registerError("Invalid column name specified: '#{invalid_column}'.")
     end
     return false unless invalid_columns.empty?
+
     success = create_stochastic_schedules(args: args, weather: weather)
     return false if not success
 
@@ -159,8 +160,8 @@ class ScheduleGenerator
     home_schedule = occupancy_schedules[:away_schedule].map { |i| (1.0 - i) }
     @schedules[SchedulesFile::Columns[:Occupants].name] = random_shift_and_normalize(home_schedule, @minutes_per_step)
 
-    fill_plug_loads_schedule(mkc_activity_schedules, weather, occupancy_schedules)
-    fill_lighting_schedule(mkc_activity_schedules, args, occupancy_schedules)
+    fill_plug_loads_schedule(weather, occupancy_schedules)
+    fill_lighting_schedule(args, occupancy_schedules)
 
     # Generate schedules for each class of enduse
     sink_activity_sch = generate_sink_schedule(mkc_activity_schedules)
@@ -260,7 +261,6 @@ class ScheduleGenerator
     return mkc_activity_schedules
   end
 
-
   # Precompute activity duration values for each occupant type, day type, and activity state. This helps
   # speed up the sampling of the activity duration.
   #
@@ -271,13 +271,13 @@ class ScheduleGenerator
     if not activity_duration_precomputed_vals.key?(occ_type_id)
       activity_duration_precomputed_vals[occ_type_id] = {}
       [:weekday, :weekend].each do |day_type|
-          activity_duration_precomputed_vals[occ_type_id][day_type] = {}
-          (0..6).each do |active_state|
-            activity_duration_precomputed_vals[occ_type_id][day_type][active_state] = {}
-            (0..23).each do |hour|
-              activity_duration_precomputed_vals[occ_type_id][day_type][active_state][hour] = get_activity_duration_precomputed_vals(@activity_duration_prob_map, occ_type_id, active_state, day_type, hour)
-            end
+        activity_duration_precomputed_vals[occ_type_id][day_type] = {}
+        (0..6).each do |active_state|
+          activity_duration_precomputed_vals[occ_type_id][day_type][active_state] = {}
+          (0..23).each do |hour|
+            activity_duration_precomputed_vals[occ_type_id][day_type][active_state][hour] = get_activity_duration_precomputed_vals(@activity_duration_prob_map, occ_type_id, active_state, day_type, hour)
           end
+        end
       end
     end
   end
@@ -289,12 +289,12 @@ class ScheduleGenerator
   # @param occ_type_id [Integer] Occupant type ID (0-3)
   # @return [void]
   def fill_state_prob_precomputed_vals(state_prob_precomputed_vals, initial_probabilities, occ_type_id)
-      if not state_prob_precomputed_vals.key?(occ_type_id)
-        state_prob_precomputed_vals[occ_type_id] = {}
-        [:weekday, :weekend].each do |day_type|
-          state_prob_precomputed_vals[occ_type_id][day_type] = weighted_random_precompute(initial_probabilities[occ_type_id][day_type])
-        end
+    if not state_prob_precomputed_vals.key?(occ_type_id)
+      state_prob_precomputed_vals[occ_type_id] = {}
+      [:weekday, :weekend].each do |day_type|
+        state_prob_precomputed_vals[occ_type_id][day_type] = weighted_random_precompute(initial_probabilities[occ_type_id][day_type])
       end
+    end
   end
 
   # Get initial probabilities for each occupancy type and day type.
@@ -367,6 +367,7 @@ class ScheduleGenerator
       if lead.nil?
         raise "Could not find the entry for month #{month}, day #{day_of_week} and state #{@state}"
       end
+
       new_array.concat(array[day * @minutes_per_day, @minutes_per_day].rotate(lead))
     end
     return new_array
@@ -546,7 +547,7 @@ class ScheduleGenerator
     elsif activity == 4
       activity_name = 'dishwashing'
     else
-      return nil  # precomputed value not needed since sample_activity_duration will return 1 in this case
+      return # precomputed value not needed since sample_activity_duration will return 1 in this case
     end
     return weighted_random_precompute(activity_duration_prob_map["#{occ_type_id}_#{activity_name}_#{day_type}_#{time_of_day}"][1])
   end
@@ -983,9 +984,9 @@ class ScheduleGenerator
   def generate_occupancy_schedules(mkc_activity_schedules)
     # States are: 0='sleeping', 1='shower', 2='laundry', 3='cooking', 4='dishwashing', 5='absent', 6='nothingAtHome'
     occupancy_arrays = {
-      sleep_schedule:  Array.new(@total_days_in_year * @minutes_per_day, 0.0),
-      away_schedule:  Array.new(@total_days_in_year * @minutes_per_day, 0.0),
-      idle_schedule:  Array.new(@total_days_in_year * @minutes_per_day, 0.0),
+      sleep_schedule: Array.new(@total_days_in_year * @minutes_per_day, 0.0),
+      away_schedule: Array.new(@total_days_in_year * @minutes_per_day, 0.0),
+      idle_schedule: Array.new(@total_days_in_year * @minutes_per_day, 0.0),
       ev_occupant_presence: Array.new(@total_days_in_year * @minutes_per_day, 0.0),
     }
     @total_days_in_year.times do |day|
@@ -1003,36 +1004,36 @@ class ScheduleGenerator
 
   # Fill plug loads and ceiling fan schedules based on occupant activities.
   #
-  # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
   # @param weather [WeatherFile] Weather object containing EPW information
+  # @param occupancy_schedules [Hash] Hash returned by generate_occupancy_schedules
   # @return [void] Updates @schedules with plug loads and ceiling fan schedules
-  def fill_plug_loads_schedule(mkc_activity_schedules, weather, occupancy_schedules)
+  def fill_plug_loads_schedule(weather, occupancy_schedules)
     # Initialize base schedules
     daily_schedules = get_plugload_daily_schedules(@default_schedules_csv_data, @schedules_csv_data, weather)
 
     # Generate schedules for each plug load type if it exists
     if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'other' }
-      plug_loads_other = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_other, occupancy_schedules)
+      plug_loads_other = generate_plug_load_schedule(daily_schedules, :plug_loads_other, occupancy_schedules)
       @schedules[SchedulesFile::Columns[:PlugLoadsOther].name] = random_shift_and_normalize(plug_loads_other)
     end
 
     if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'TV other' }
-      plug_loads_tv = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :plug_loads_tv, occupancy_schedules)
+      plug_loads_tv = generate_plug_load_schedule(daily_schedules, :plug_loads_tv, occupancy_schedules)
       @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = random_shift_and_normalize(plug_loads_tv)
     end
     if !@hpxml_bldg.ceiling_fans.to_a.empty?
-      ceiling_fan = generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, :ceiling_fan, occupancy_schedules)
+      ceiling_fan = generate_plug_load_schedule(daily_schedules, :ceiling_fan, occupancy_schedules)
       @schedules[SchedulesFile::Columns[:CeilingFan].name] = random_shift_and_normalize(ceiling_fan)
     end
   end
 
   # Generate plug load schedules based on occupant activities and daily schedules.
   #
-  # @param mkc_activity_schedules [Array<Matrix>] Array of matrices containing Markov chain activity states for each occupant
   # @param daily_schedules [Hash] Hash containing daily schedule data for plug loads
   # @param schedule_type [Symbol] Type of plug load schedule to generate
+  # @param occupancy_schedules [Hash] Hash returned by generate_occupancy_schedules
   # @return [Array<Float>] Array of hourly plug load schedule values normalized to 1.0
-  def generate_plug_load_schedule(mkc_activity_schedules, daily_schedules, schedule_type, occupancy_schedules)
+  def generate_plug_load_schedule(daily_schedules, schedule_type, occupancy_schedules)
     schedule = Array.new(@total_days_in_year * @minutes_per_day, 0.0)
     weekday_min = daily_schedules[schedule_type][:weekday].min
     weekend_min = daily_schedules[schedule_type][:weekend].min
@@ -1061,10 +1062,10 @@ class ScheduleGenerator
 
   # Fill the lighting schedule based on occupant activities.
   #
-  # @param mkc_activity_schedules [Array] Array of occupant activity schedules
-  # @param args [Hash] Map of :argument_name => value
+  # @param args [Hash] Map of :argument_name => value passed to the measure
+  # @param occupancy_schedules [Hash] Hash returned by generate_occupancy_schedules
   # @return [nil]
-  def fill_lighting_schedule(mkc_activity_schedules, args, occupancy_schedules)
+  def fill_lighting_schedule(args, occupancy_schedules)
     # Initialize base lighting schedule
     interior_lighting_schedule = initialize_interior_lighting_schedule(args)
 
