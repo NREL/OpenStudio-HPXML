@@ -25,6 +25,7 @@ __Bugfixes__
 - Fixes battery charging/discharging not being included in peak electricity outputs.
 - Fixes possible error if there's a surface w/ interior unconditioned space and exterior "other housing unit".
 - BuildResidentialHPXML measure: Fixes error when specifying a combi boiler as the water heater type and a *shared* boiler as the heating system type.
+- BuildResidentialScheduleFile measure: Fixes out-of-sync shifting of occupancy and end use schedule resulting in activities even when there is no occupancy.
 
 ## OpenStudio-HPXML v1.9.1
 
