@@ -224,21 +224,18 @@ class ScheduleGenerator
     transition_matrices = get_transition_matrices()
     init_state_vector = Array.new(7, 0.0)
     activity_duration_precomputed_vals = {}
-    state_prob_precomputed_vals = {}
     for _n in 1..@num_occupants
       occ_type_id = weighted_random(@prngs[:main], occupancy_types_probabilities)
       simulated_values = Array.new(@total_days_in_year * @mkc_ts_per_day, 0.0)
       # create activity_duration_precomputed_vals for each active state, day_type and current occ_type_id
       fill_activity_duration_precomputed_vals(activity_duration_precomputed_vals, occ_type_id)
-      fill_state_prob_precomputed_vals(state_prob_precomputed_vals, initial_probabilities, occ_type_id)
       @total_days_in_year.times do |day|
         today = @sim_start_day + day
         day_type = [0, 6].include?(today.wday) ? :weekend : :weekday
         j = 0
         state_prob = initial_probabilities[occ_type_id][day_type] # [] shape = 1x7. probability of transitioning to each of the 7 states
         while j < @mkc_ts_per_day
-          precomputed_vals = state_prob_precomputed_vals[occ_type_id][day_type]
-          active_state = weighted_random(@prngs[:main], state_prob, precomputed_vals) # Randomly pick the next state
+          active_state = weighted_random(@prngs[:main], state_prob) # Randomly pick the next state
           state_vector = init_state_vector.dup
           state_vector[active_state] = 1 # Transition to the new state
 
@@ -700,66 +697,14 @@ class ScheduleGenerator
   # @return [Integer] Randomly selected index based on probability weights
   def weighted_random(prng, weights, precomputed_vals = nil)
     n = prng.rand
-    cum_weight = 0.0
-
-    # Unrolled loop for small arrays for efficiency
-    # This is faster than using loop or bsearch_index when number of elements <= 10
-    if weights.size > 0
-      cum_weight += weights[0]
-      return 0 if n <= cum_weight
-    end
-
-    if weights.size > 1
-      cum_weight += weights[1]
-      return 1 if n <= cum_weight
-    end
-
-    if weights.size > 2
-      cum_weight += weights[2]
-      return 2 if n <= cum_weight
-    end
-
-    if weights.size > 3
-      cum_weight += weights[3]
-      return 3 if n <= cum_weight
-    end
-
-    if weights.size > 4
-      cum_weight += weights[4]
-      return 4 if n <= cum_weight
-    end
-
-    if weights.size > 5
-      cum_weight += weights[5]
-      return 5 if n <= cum_weight
-    end
-
-    if weights.size > 6
-      cum_weight += weights[6]
-      return 6 if n <= cum_weight
-    end
-
-    if weights.size > 7
-      cum_weight += weights[7]
-      return 7 if n <= cum_weight
-    end
-
-    if weights.size > 8
-      cum_weight += weights[8]
-      return 8 if n <= cum_weight
-    end
-
-    if weights.size > 9
-      cum_weight += weights[9]
-      return 9 if n <= cum_weight
-    end
-
-    if weights.size <= 9
-      return weights.size - 1
-    end
-
     if precomputed_vals.nil?
-      cum_weights = weighted_random_precompute(weights)
+      # this is faster than calling weighted_random_precompute and doing bsearch_index
+      cum_weight = 0.0
+      weights.size.times do |i|
+        cum_weight += weights[i]
+        return i if cum_weight >= n
+      end
+      return weights.size - 1
     else
       cum_weights = precomputed_vals
     end
