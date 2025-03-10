@@ -282,21 +282,6 @@ class ScheduleGenerator
     end
   end
 
-  # Precompute state probability values for each occupant type and day type. This helps
-  # speed up the sampling of the state probability.
-  #
-  # @param state_prob_precomputed_vals [Hash] Hash to store precomputed values
-  # @param occ_type_id [Integer] Occupant type ID (0-3)
-  # @return [void]
-  def fill_state_prob_precomputed_vals(state_prob_precomputed_vals, initial_probabilities, occ_type_id)
-    if not state_prob_precomputed_vals.key?(occ_type_id)
-      state_prob_precomputed_vals[occ_type_id] = {}
-      [:weekday, :weekend].each do |day_type|
-        state_prob_precomputed_vals[occ_type_id][day_type] = weighted_random_precompute(initial_probabilities[occ_type_id][day_type])
-      end
-    end
-  end
-
   # Get initial probabilities for each occupancy type and day type.
   #
   # @return [Hash] Map of occupancy type ID to weekday/weekend initial probabilities
