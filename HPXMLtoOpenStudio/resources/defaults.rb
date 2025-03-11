@@ -3172,6 +3172,7 @@ module Defaults
     end
   end
 
+  # TODO
   def self.get_id(prefix, objects, unit_num)
     if not unit_num.nil?
       id = "#{prefix}#{objects.size + 1}_#{unit_num}"
