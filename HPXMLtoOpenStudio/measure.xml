@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>61d62ce5-c69f-48a5-b7a3-d3f50e3e8e07</version_id>
-  <version_modified>2025-03-11T05:18:18Z</version_modified>
+  <version_id>098dfa7a-1a48-4e8b-8760-f33182629cf3</version_id>
+  <version_modified>2025-03-11T15:55:27Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -480,12 +480,6 @@
       <checksum>F2FFB082</checksum>
     </file>
     <file>
-      <filename>schedule_files/__pycache__/print_diff.cpython-312.pyc</filename>
-      <filetype>pyc</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A87EF329</checksum>
-    </file>
-    <file>
       <filename>schedule_files/battery.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -568,72 +562,6 @@
       <filetype>py</filetype>
       <usage_type>resource</usage_type>
       <checksum>80525046</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/print_diff2.py</filename>
-      <filetype>py</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>34E1D29A</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-10-mins.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C5D98C0E</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-30-mins.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2A4142C3</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-ev-charger.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B19CBF32</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-mf-unit.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>02EF170D</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-mf-unit_2.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>44863327</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-mf-unit_3.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>61B223B7</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-mf-unit_4.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AA445880</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-mf-unit_5.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>39788BB5</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic-mf-unit_6.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>999FBC78</checksum>
-    </file>
-    <file>
-      <filename>schedule_files/profile_plots/occupancy-stochastic.csv_hot_water_fixtures_profile_comparison.png</filename>
-      <filetype>png</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E6767CC1</checksum>
     </file>
     <file>
       <filename>schedule_files/setpoints-10-mins.csv</filename>
