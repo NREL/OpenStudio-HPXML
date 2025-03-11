@@ -3349,7 +3349,6 @@
     "slab_carpet_fraction": null,
     "enclosure_roof_material": null,
     "wall_siding_type": null,
-    "cooling_system": "Central AC, SEER 13, Default Compressor and SHR",
     "window_fraction_operable": null,
     "window_interior_shading_winter": null,
     "window_interior_shading_summer": null,
