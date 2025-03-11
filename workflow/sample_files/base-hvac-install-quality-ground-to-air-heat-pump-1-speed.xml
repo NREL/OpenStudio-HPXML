@@ -333,11 +333,11 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
-                <Value>16.6</Value>
+                <Value>18.6</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>COP</Units>
-                <Value>3.6</Value>
+                <Value>3.8</Value>
               </AnnualHeatingEfficiency>
               <extension>
                 <AirflowDefectRatio>-0.25</AirflowDefectRatio>

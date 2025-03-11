@@ -333,11 +333,11 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
-                <Value>19.0</Value>
+                <Value>30.9</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>COP</Units>
-                <Value>4.5</Value>
+                <Value>4.4</Value>
               </AnnualHeatingEfficiency>
               <extension>
                 <PumpPowerWattsPerTon>100.0</PumpPowerWattsPerTon>
