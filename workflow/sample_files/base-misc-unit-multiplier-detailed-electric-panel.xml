@@ -439,32 +439,32 @@
             <SystemIdentifier id='ElectricPanel1'/>
             <ServiceFeeders>
               <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder1_PrimaryHeatingSystem'/>
+                <SystemIdentifier id='ServiceFeeder1'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder2_Cooling'/>
+                <SystemIdentifier id='ServiceFeeder2'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder3_WaterHeatingSystem'/>
+                <SystemIdentifier id='ServiceFeeder3'/>
                 <LoadType>hot water</LoadType>
                 <AttachedToComponent idref='WaterHeatingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder4_ClothesDryer'/>
+                <SystemIdentifier id='ServiceFeeder4'/>
                 <LoadType>clothes dryer</LoadType>
                 <AttachedToComponent idref='ClothesDryer1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder5_Dishwasher'/>
+                <SystemIdentifier id='ServiceFeeder5'/>
                 <LoadType>dishwasher</LoadType>
                 <AttachedToComponent idref='Dishwasher1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder6_CookingRange'/>
+                <SystemIdentifier id='ServiceFeeder6'/>
                 <LoadType>range/oven</LoadType>
                 <AttachedToComponent idref='CookingRange1'/>
               </ServiceFeeder>
