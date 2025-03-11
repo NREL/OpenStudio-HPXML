@@ -1115,15 +1115,14 @@ class ScheduleGenerator
         # Get probability distribution for today's events
         todays_probable_steps = sink_activity_probable_mins[day * @mkc_ts_per_day..((day + 1) * @mkc_ts_per_day - 1)]
         todays_probablities = todays_probable_steps.map.with_index { |p, i| p * hourly_onset_prob[i / @mkc_ts_per_hour] }
-
         # Normalize probabilities and select start time
         prob_sum = todays_probablities.sum(0)
         normalized_probabilities = todays_probablities.map { |p| p * 1 / prob_sum }
         cluster_start_index = weighted_random(@prngs[:hygiene], normalized_probabilities)
 
         # Mark time slot as used
-        if sink_activity_probable_mins[cluster_start_index] != 0
-          sink_activity_probable_mins[cluster_start_index] = 0
+        if sink_activity_probable_mins[day * @mkc_ts_per_day + cluster_start_index] != 0
+          sink_activity_probable_mins[day * @mkc_ts_per_day + cluster_start_index] = 0
         end
 
         # Generate events within this cluster
