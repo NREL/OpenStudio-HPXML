@@ -157,6 +157,7 @@ def create_hpxmls
   dirs.each do |dir|
     Dir["#{workflow_dir}/#{dir}/*.xml"].each do |hpxml|
       next if abs_hpxml_files.include? File.absolute_path(hpxml)
+      next if dir == 'real_homes'
 
       puts "Warning: Extra HPXML file found at #{File.absolute_path(hpxml)}"
     end
@@ -2331,6 +2332,16 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 annual_consumption_kbtu: 85000,
                                 annual_output_kwh: 12000,
                                 number_of_bedrooms_served: 18)
+    end
+
+    # -------------------- #
+    # HPXML Electric Panel #
+    # -------------------- #
+
+    if ['house054.xml'].include? hpxml_file
+      # electric_panel = hpxml_bldg.electric_panels[0]
+      # branch_circuits = electric_panel.branch_circuits
+      # branch_circuits.clear
     end
 
     # ------------- #
