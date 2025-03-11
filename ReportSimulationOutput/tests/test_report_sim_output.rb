@@ -1421,14 +1421,14 @@ class ReportSimulationOutputTest < Minitest::Test
     branch_circuits = electric_panel.branch_circuits
     service_feeders = electric_panel.service_feeders
     sf = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }
-    sf.power = 17942
+    sf.power = 16942
     sf.is_new_load = true
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage240,
                         occupied_spaces: 5,
                         component_idrefs: [hpxml_bldg.heating_systems[0].id])
     sf = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }
-    sf.power = 17942
+    sf.power = 16942
     sf.is_new_load = true
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage240,
@@ -1474,12 +1474,12 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(14, actual_panel_rows['Electric Panel Breaker Spaces: Total Count'])
     assert_equal(18, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
     assert_equal(14 - 18, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
-    assert_equal(35827.2, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Load (W)'])
-    assert_equal(149.3, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Capacity (A)'])
-    assert_in_epsilon(100.0 - 149.3, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Headroom Capacity (A)'], 0.01)
-    assert_equal(47477.0, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Total Load (W)'])
-    assert_equal(197.8, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Total Capacity (A)'])
-    assert_in_epsilon(100.0 - 197.8, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Headroom Capacity (A)'], 0.01)
+    assert_equal(34827.2, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Load (W)'])
+    assert_equal(145.1, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Capacity (A)'])
+    assert_in_epsilon(100.0 - 145.1, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Headroom Capacity (A)'], 0.01)
+    assert_equal(46477.0, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Total Load (W)'])
+    assert_equal(193.7, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Total Capacity (A)'])
+    assert_in_epsilon(100.0 - 193.7, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Headroom Capacity (A)'], 0.01)
   end
 
   private

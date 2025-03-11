@@ -421,27 +421,27 @@
             <SystemIdentifier id='ElectricPanel1'/>
             <ServiceFeeders>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder1'/>
+                <SystemIdentifier id='ServiceFeeder1_PrimaryHeatingSystem'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder2'/>
+                <SystemIdentifier id='ServiceFeeder2_Cooling'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder3'/>
+                <SystemIdentifier id='ServiceFeeder3_WaterHeatingSystem'/>
                 <LoadType>hot water</LoadType>
                 <AttachedToComponent idref='WaterHeatingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder4'/>
+                <SystemIdentifier id='ServiceFeeder4_Dishwasher'/>
                 <LoadType>dishwasher</LoadType>
                 <AttachedToComponent idref='Dishwasher1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder5'/>
+                <SystemIdentifier id='ServiceFeeder5_CookingRange'/>
                 <LoadType>range/oven</LoadType>
                 <AttachedToComponent idref='CookingRange1'/>
               </ServiceFeeder>
@@ -957,27 +957,27 @@
             <SystemIdentifier id='ElectricPanel1_2'/>
             <ServiceFeeders>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder1_2'/>
+                <SystemIdentifier id='ServiceFeeder1_PrimaryHeatingSystem_2'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1_2'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder2_2'/>
+                <SystemIdentifier id='ServiceFeeder2_Cooling_2'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1_2'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder3_2'/>
+                <SystemIdentifier id='ServiceFeeder3_WaterHeatingSystem_2'/>
                 <LoadType>hot water</LoadType>
                 <AttachedToComponent idref='WaterHeatingSystem1_2'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder4_2'/>
+                <SystemIdentifier id='ServiceFeeder4_Dishwasher_2'/>
                 <LoadType>dishwasher</LoadType>
                 <AttachedToComponent idref='Dishwasher1_2'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder5_2'/>
+                <SystemIdentifier id='ServiceFeeder5_CookingRange_2'/>
                 <LoadType>range/oven</LoadType>
                 <AttachedToComponent idref='CookingRange1_2'/>
               </ServiceFeeder>
@@ -1381,27 +1381,27 @@
             <SystemIdentifier id='ElectricPanel1_3'/>
             <ServiceFeeders>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder1_3'/>
+                <SystemIdentifier id='ServiceFeeder1_PrimaryHeatingSystem_3'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1_3'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder2_3'/>
+                <SystemIdentifier id='ServiceFeeder2_Cooling_3'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1_3'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder3_3'/>
+                <SystemIdentifier id='ServiceFeeder3_WaterHeatingSystem_3'/>
                 <LoadType>hot water</LoadType>
                 <AttachedToComponent idref='WaterHeatingSystem1_3'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder4_3'/>
+                <SystemIdentifier id='ServiceFeeder4_Dishwasher_3'/>
                 <LoadType>dishwasher</LoadType>
                 <AttachedToComponent idref='Dishwasher1_3'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder5_3'/>
+                <SystemIdentifier id='ServiceFeeder5_CookingRange_3'/>
                 <LoadType>range/oven</LoadType>
                 <AttachedToComponent idref='CookingRange1_3'/>
               </ServiceFeeder>
@@ -1805,27 +1805,27 @@
             <SystemIdentifier id='ElectricPanel1_4'/>
             <ServiceFeeders>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder1_4'/>
+                <SystemIdentifier id='ServiceFeeder1_PrimaryHeatingSystem_4'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1_4'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder2_4'/>
+                <SystemIdentifier id='ServiceFeeder2_Cooling_4'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1_4'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder3_4'/>
+                <SystemIdentifier id='ServiceFeeder3_WaterHeatingSystem_4'/>
                 <LoadType>hot water</LoadType>
                 <AttachedToComponent idref='WaterHeatingSystem1_4'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder4_4'/>
+                <SystemIdentifier id='ServiceFeeder4_Dishwasher_4'/>
                 <LoadType>dishwasher</LoadType>
                 <AttachedToComponent idref='Dishwasher1_4'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder5_4'/>
+                <SystemIdentifier id='ServiceFeeder5_CookingRange_4'/>
                 <LoadType>range/oven</LoadType>
                 <AttachedToComponent idref='CookingRange1_4'/>
               </ServiceFeeder>
@@ -2286,27 +2286,27 @@
             <SystemIdentifier id='ElectricPanel1_5'/>
             <ServiceFeeders>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder1_5'/>
+                <SystemIdentifier id='ServiceFeeder1_PrimaryHeatingSystem_5'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1_5'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder2_5'/>
+                <SystemIdentifier id='ServiceFeeder2_Cooling_5'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1_5'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder3_5'/>
+                <SystemIdentifier id='ServiceFeeder3_WaterHeatingSystem_5'/>
                 <LoadType>hot water</LoadType>
                 <AttachedToComponent idref='WaterHeatingSystem1_5'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder4_5'/>
+                <SystemIdentifier id='ServiceFeeder4_Dishwasher_5'/>
                 <LoadType>dishwasher</LoadType>
                 <AttachedToComponent idref='Dishwasher1_5'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder5_5'/>
+                <SystemIdentifier id='ServiceFeeder5_CookingRange_5'/>
                 <LoadType>range/oven</LoadType>
                 <AttachedToComponent idref='CookingRange1_5'/>
               </ServiceFeeder>
@@ -2767,27 +2767,27 @@
             <SystemIdentifier id='ElectricPanel1_6'/>
             <ServiceFeeders>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder1_6'/>
+                <SystemIdentifier id='ServiceFeeder1_PrimaryHeatingSystem_6'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1_6'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder2_6'/>
+                <SystemIdentifier id='ServiceFeeder2_Cooling_6'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1_6'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder3_6'/>
+                <SystemIdentifier id='ServiceFeeder3_WaterHeatingSystem_6'/>
                 <LoadType>hot water</LoadType>
                 <AttachedToComponent idref='WaterHeatingSystem1_6'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder4_6'/>
+                <SystemIdentifier id='ServiceFeeder4_Dishwasher_6'/>
                 <LoadType>dishwasher</LoadType>
                 <AttachedToComponent idref='Dishwasher1_6'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder5_6'/>
+                <SystemIdentifier id='ServiceFeeder5_CookingRange_6'/>
                 <LoadType>range/oven</LoadType>
                 <AttachedToComponent idref='CookingRange1_6'/>
               </ServiceFeeder>

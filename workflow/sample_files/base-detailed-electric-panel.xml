@@ -462,33 +462,33 @@
             <Headroom>5</Headroom>
             <BranchCircuits>
               <BranchCircuit>
-                <SystemIdentifier id='ElectricPanel1_BranchCircuit1'/>
+                <SystemIdentifier id='BranchCircuit1_Other'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
               </BranchCircuit>
             </BranchCircuits>
             <ServiceFeeders>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder1'/>
+                <SystemIdentifier id='ServiceFeeder1_PrimaryHeatingSystem'/>
                 <LoadType>heating</LoadType>
                 <AttachedToComponent idref='HeatingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder2'/>
+                <SystemIdentifier id='ServiceFeeder2_Cooling'/>
                 <LoadType>cooling</LoadType>
                 <AttachedToComponent idref='CoolingSystem1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder3'/>
+                <SystemIdentifier id='ServiceFeeder3_KitchenFan'/>
                 <LoadType>mech vent</LoadType>
                 <AttachedToComponent idref='VentilationFan1'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder4'/>
+                <SystemIdentifier id='ServiceFeeder4_BathFan'/>
                 <LoadType>mech vent</LoadType>
                 <AttachedToComponent idref='VentilationFan2'/>
               </ServiceFeeder>
               <ServiceFeeder>
-                <SystemIdentifier id='ElectricPanel1_ServiceFeeder5'/>
+                <SystemIdentifier id='ServiceFeeder5_Other'/>
                 <LoadType>other</LoadType>
                 <PowerRating>559.0</PowerRating>
               </ServiceFeeder>

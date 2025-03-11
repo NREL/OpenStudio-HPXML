@@ -3566,6 +3566,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     # Test branch circuit inputs not overriden by defaults
     branch_circuits = electric_panel.branch_circuits
+    branch_circuits.clear
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage120,
                         max_current_rating: 20.0,

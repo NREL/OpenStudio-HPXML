@@ -3349,17 +3349,17 @@ module Defaults
         service_feeder.components.each do |component|
           if component.is_a?(HPXML::Pool) || component.is_a?(HPXML::PermanentSpa)
             if component.pump_branch_circuits.empty?
-              branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+              branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{service_feeder.id}",
                                   component_idrefs: [component.pump_id])
             end
             if component.heater_branch_circuits.empty?
-              branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+              branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{service_feeder.id}",
                                   component_idrefs: [component.heater_id])
             end
           elsif component.branch_circuits.empty?
             # Skip HVAC system branch circuits; these will be added on the fly down below when we loop thru service feeders
             if !component.is_a?(HPXML::HeatingSystem) && !component.is_a?(HPXML::CoolingSystem) && !component.is_a?(HPXML::HeatPump)
-              branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+              branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_#{service_feeder.id}",
                                   component_idrefs: [component.id])
             end
           end
@@ -3367,48 +3367,48 @@ module Defaults
       end
 
       if service_feeders.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeOther } == 0
-        service_feeders.add(id: "#{electric_panel.id}_ServiceFeeder#{service_feeders.size + 1}",
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}_Other",
                             type: HPXML::ElectricPanelLoadTypeOther,
                             type_isdefaulted: true,
                             component_idrefs: [])
         (1..get_default_panels_value(runner, default_panels_csv_data, 'other', 'BreakerSpaces', HPXML::ElectricPanelVoltage120)).each do |_i|
-          branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+          branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_Other",
                               occupied_spaces: 1,
                               occupied_spaces_isdefaulted: true)
         end
       end
 
       if service_feeders.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLighting } == 0
-        service_feeders.add(id: "#{electric_panel.id}_ServiceFeeder#{service_feeders.size + 1}",
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}_Lighting",
                             type: HPXML::ElectricPanelLoadTypeLighting,
                             type_isdefaulted: true,
                             component_idrefs: [])
         (1..get_default_panels_value(runner, default_panels_csv_data, 'lighting', 'BreakerSpaces', HPXML::ElectricPanelVoltage120)).each do |_i|
-          branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+          branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_Lighting",
                               occupied_spaces: 1,
                               occupied_spaces_isdefaulted: true)
         end
       end
 
       if service_feeders.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeKitchen } == 0
-        service_feeders.add(id: "#{electric_panel.id}_ServiceFeeder#{service_feeders.size + 1}",
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}_Kitchen",
                             type: HPXML::ElectricPanelLoadTypeKitchen,
                             type_isdefaulted: true,
                             component_idrefs: [])
         (1..get_default_panels_value(runner, default_panels_csv_data, 'kitchen', 'BreakerSpaces', HPXML::ElectricPanelVoltage120)).each do |_i|
-          branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+          branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_Kitchen",
                               occupied_spaces: 1,
                               occupied_spaces_isdefaulted: true)
         end
       end
 
       if service_feeders.count { |pl| pl.type == HPXML::ElectricPanelLoadTypeLaundry } == 0
-        service_feeders.add(id: "#{electric_panel.id}_ServiceFeeder#{service_feeders.size + 1}",
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}_Laundry",
                             type: HPXML::ElectricPanelLoadTypeLaundry,
                             type_isdefaulted: true,
                             component_idrefs: [])
         (1..get_default_panels_value(runner, default_panels_csv_data, 'laundry', 'BreakerSpaces', HPXML::ElectricPanelVoltage120)).each do |_i|
-          branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+          branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}_Laundry",
                               occupied_spaces: 1,
                               occupied_spaces_isdefaulted: true)
         end
@@ -6239,7 +6239,7 @@ module Defaults
   def self.get_or_add_branch_circuit(electric_panel, component, add = false)
     branch_circuits = electric_panel.branch_circuits
     if component.branch_circuits.empty? || add
-      branch_circuits.add(id: "#{electric_panel.id}_BranchCircuit#{branch_circuits.size + 1}",
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           component_idrefs: [component.id])
       branch_circuit = branch_circuits[-1]
     else
