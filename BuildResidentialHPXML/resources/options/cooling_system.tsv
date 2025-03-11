@@ -3,7 +3,6 @@ None	none
 "Central AC, SEER 8"	central air conditioner	SEER	8								
 "Central AC, SEER 10"	central air conditioner	SEER	10								
 "Central AC, SEER 13"	central air conditioner	SEER	13	single stage	0.73						
-"Central AC, SEER 13, Default Compressor and SHR"	central air conditioner	SEER	13								
 "Central AC, SEER 13, 25W Crankcase Heater"	central air conditioner	SEER	13	single stage	0.73				25		
 "Central AC, SEER 13, 50W Crankcase Heater"	central air conditioner	SEER	13	single stage	0.73				50		
 "Central AC, SEER 13, Two Stage "	central air conditioner	SEER	13	two stage							
@@ -26,13 +25,13 @@ None	none
 "Room AC, EER 12.0"	room air conditioner	EER	12		0.65						
 "Room AC, CEER 8.4"	room air conditioner	CEER	8.4		0.65						
 "Evaporative Cooler, EER 13"	evaporative cooler	EER	13								
-"Ductless Evaporative Cooler, SEER 13"	evaporative cooler	SEER	13			false					
-"Ducted Evaporative Cooler, SEER 13"	evaporative cooler	SEER	13			true					
-"Fan Coil Cooling, SEER 13"	mini-split	SEER	13			false					
-"Ducted Mini-Split AC, SEER 19"	mini-split	SEER	19		0.73	true					
-"Ducted Mini-Split AC, SEER 19, Airflow Defect Ratio"	mini-split	SEER	19		0.73	true	-0.25	-0.25			
-"Ductless Mini-Split AC, SEER 19"	mini-split	SEER	19		0.73	false					
-"Ductless Mini-Split AC, SEER 17"	mini-split	SEER	17	variable speed	0.73	false					
+"Ductless Evaporative Cooler, SEER 13"	evaporative cooler	SEER	13			FALSE					
+"Ducted Evaporative Cooler, SEER 13"	evaporative cooler	SEER	13			TRUE					
+"Fan Coil Cooling, SEER 13"	mini-split	SEER	13			FALSE					
+"Ducted Mini-Split AC, SEER 19"	mini-split	SEER	19		0.73	TRUE					
+"Ducted Mini-Split AC, SEER 19, Airflow Defect Ratio"	mini-split	SEER	19		0.73	TRUE	-0.25	-0.25			
+"Ductless Mini-Split AC, SEER 19"	mini-split	SEER	19		0.73	FALSE					
+"Ductless Mini-Split AC, SEER 17"	mini-split	SEER	17	variable speed	0.73	FALSE					
 "PTAC, EER 10.7"	packaged terminal air conditioner	EER	10.7		0.65						
 "PTAC, EER 10.7, Electric Heating"	packaged terminal air conditioner	EER	10.7		0.65					electricity	1
 "PTAC, EER 10.7, Natural Gas Heating"	packaged terminal air conditioner	EER	10.7		0.65					natural gas	0.8
