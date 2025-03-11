@@ -1125,8 +1125,9 @@ class ScheduleGenerator
         cluster_start_index = weighted_random(@prngs[:hygiene], normalized_probabilities, precomputed_cumweights)
         attempts += 1
         if sink_activity_probable_mins[day * @mkc_ts_per_day + cluster_start_index] == 0
-          next  # Sample again if time slot is already used
+          next # Sample again if time slot is already used
         end
+
         # Mark time slot as used
         sink_activity_probable_mins[day * @mkc_ts_per_day + cluster_start_index] = 0
         generated_clusters += 1
