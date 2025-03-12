@@ -2287,12 +2287,12 @@ The rated cooling efficiency value of the heat pump.
 
 **Heat Pump: Cooling Compressor Type**
 
-The compressor type of the heat pump. Only applies to air-to-air and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.
+The compressor type of the heat pump. Only applies to air-to-air, mini-split and ground-to-air.
 
 - **Name:** ``heat_pump_cooling_compressor_type``
 - **Type:** ``Choice``
 
-- **Required:** ``false``
+- **Required:** ``true``
 
 - **Choices:** `single stage`, `two stage`, `variable speed`
 
