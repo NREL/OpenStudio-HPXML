@@ -5,6 +5,7 @@
 
 require 'msgpack'
 require 'time'
+require_relative '../HPXMLtoOpenStudio/resources/calendar.rb'
 require_relative '../HPXMLtoOpenStudio/resources/constants.rb'
 require_relative '../HPXMLtoOpenStudio/resources/energyplus.rb'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml.rb'
@@ -2041,11 +2042,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     rows = timeseries_data['Rows']
     indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }
     vals = [0.0] * rows.size
+
+    # Calculate whether we need to shift values once up front
+    shift_values = {}
+    indexes.each_with_index do |_i, idx|
+      shift_values[idx] = false
+      if apply_ems_shift(timeseries_frequency)
+        if meter_names[idx].include? Constants::ObjectTypeWaterHeaterAdjustment
+          # Shift energy use adjustment to align with hot water energy use
+          shift_values[idx] = true
+        elsif meter_names[idx].include? Constants::ObjectTypePanHeater
+          # Shift energy use adjustment to align with HVAC operation and weather
+          shift_values[idx] = true
+        end
+      end
+    end
+
     rows.each_with_index do |row, row_idx|
       row = row[row.keys[0]]
       indexes.each_with_index do |i, idx|
-        if meter_names[idx].include?(Constants::ObjectTypeWaterHeaterAdjustment) && apply_ems_shift(timeseries_frequency)
-          # Shift energy use adjustment to allow with hot water energy use
+        if shift_values[idx]
           vals[row_idx - 1] += row[i] * unit_conv + unit_adder
         else
           vals[row_idx] += row[i] * unit_conv + unit_adder
@@ -3071,7 +3087,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           Constants::ObjectTypeMiscPermanentSpaHeater => EUT::PermanentSpaHeater,
           Constants::ObjectTypeMechanicalVentilationPreheating => EUT::MechVentPreheat,
           Constants::ObjectTypeMechanicalVentilationPrecooling => EUT::MechVentPrecool,
-          Constants::ObjectTypeBackupSuppHeat => EUT::HeatingHeatPumpBackup,
+          Constants::ObjectTypeHPDefrostSupplHeat => EUT::HeatingHeatPumpBackup,
+          Constants::ObjectTypePanHeater => EUT::Heating,
           Constants::ObjectTypeWaterHeaterAdjustment => EUT::HotWater,
           Constants::ObjectTypeBatteryLossesAdjustment => EUT::Battery }.each do |obj_name, eut|
           next unless subcategory.start_with? obj_name

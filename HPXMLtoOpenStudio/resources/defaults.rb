@@ -101,6 +101,7 @@ module Defaults
     # These need to be applied after sizing HVAC capacities/airflows
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
     apply_cfis_fan_power(hpxml_bldg)
+    apply_crankcase_heating(hpxml_bldg)
 
     cleanup_zones_spaces(hpxml_bldg)
 
@@ -1843,6 +1844,13 @@ module Defaults
     # Convert negative values (e.g., -1) to nil as appropriate
     # This is needed to support autosizing in OS-ERI, where the capacities are required inputs
     hpxml_bldg.hvac_systems.each do |hvac_system|
+      if hvac_system.respond_to?(:cooling_detailed_performance_data) && (not hvac_system.cooling_detailed_performance_data.empty?) && (hvac_system.respond_to?(:cooling_capacity) && hvac_system.cooling_capacity.nil?)
+        hvac_system.cooling_capacity = hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.capacity
+      end
+      if hvac_system.respond_to?(:heating_detailed_performance_data) && (not hvac_system.heating_detailed_performance_data.empty?) && (hvac_system.respond_to?(:heating_capacity) && hvac_system.heating_capacity.nil?)
+        hvac_system.heating_capacity = hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.capacity
+      end
+
       if hvac_system.respond_to?(:heating_capacity) && hvac_system.heating_capacity.to_f < 0
         hvac_system.heating_capacity = nil
       end
@@ -1857,36 +1865,44 @@ module Defaults
       end
     end
 
-    # Convert SEER2/HSPF2 to SEER/HSPF
-    hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless [HPXML::HVACTypeCentralAirConditioner,
-                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
-      next unless cooling_system.cooling_efficiency_seer.nil?
+    # Convert SEER/EER/HSPF to SEER2/EER2/HSPF2
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a?(HPXML::CoolingSystem)
+        next unless [HPXML::HVACTypeCentralAirConditioner,
+                     HPXML::HVACTypeMiniSplitAirConditioner].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a?(HPXML::HeatPump)
+        next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                     HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
+      end
+      if hvac_system.cooling_efficiency_seer2.nil?
+        hvac_system.cooling_efficiency_seer2 = HVAC.calc_seer2_from_seer(hvac_system).round(2)
+        hvac_system.cooling_efficiency_seer2_isdefaulted = true
+        hvac_system.cooling_efficiency_seer = nil
+      end
+      next unless hvac_system.cooling_efficiency_eer2.nil? && (not hvac_system.cooling_efficiency_eer.nil?)
 
-      is_ducted = !cooling_system.distribution_system_idref.nil?
-      cooling_system.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(cooling_system.cooling_efficiency_seer2, is_ducted).round(2)
-      cooling_system.cooling_efficiency_seer_isdefaulted = true
-      cooling_system.cooling_efficiency_seer2 = nil
+      hvac_system.cooling_efficiency_eer2 = HVAC.calc_eer2_from_eer(hvac_system).round(2)
+      hvac_system.cooling_efficiency_eer2_isdefaulted = true
+      hvac_system.cooling_efficiency_eer = nil
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-      next unless heat_pump.cooling_efficiency_seer.nil?
+      next unless heat_pump.heating_efficiency_hspf2.nil?
 
-      is_ducted = !heat_pump.distribution_system_idref.nil?
-      heat_pump.cooling_efficiency_seer = HVAC.calc_seer_from_seer2(heat_pump.cooling_efficiency_seer2, is_ducted).round(2)
-      heat_pump.cooling_efficiency_seer_isdefaulted = true
-      heat_pump.cooling_efficiency_seer2 = nil
+      heat_pump.heating_efficiency_hspf2 = HVAC.calc_hspf2_from_hspf(heat_pump).round(2)
+      heat_pump.heating_efficiency_hspf2_isdefaulted = true
+      heat_pump.heating_efficiency_hspf = nil
     end
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless [HPXML::HVACTypeHeatPumpAirToAir,
-                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-      next unless heat_pump.heating_efficiency_hspf.nil?
 
-      is_ducted = !heat_pump.distribution_system_idref.nil?
-      heat_pump.heating_efficiency_hspf = HVAC.calc_hspf_from_hspf2(heat_pump.heating_efficiency_hspf2, is_ducted).round(2)
-      heat_pump.heating_efficiency_hspf_isdefaulted = true
-      heat_pump.heating_efficiency_hspf2 = nil
+    # Convert EER to CEER
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      next unless HVAC.is_room_dx_hvac_system(hvac_system)
+      next unless hvac_system.cooling_efficiency_ceer.nil?
+
+      hvac_system.cooling_efficiency_ceer = HVAC.calc_ceer_from_eer(hvac_system.cooling_efficiency_eer).round(2)
+      hvac_system.cooling_efficiency_ceer_isdefaulted = true
+      hvac_system.cooling_efficiency_eer = nil
     end
 
     # Default HVAC autosizing factors
@@ -1921,26 +1937,14 @@ module Defaults
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.compressor_type.nil?
 
-      cooling_system.compressor_type = get_hvac_compressor_type(cooling_system.cooling_system_type)
+      cooling_system.compressor_type = get_hvac_compressor_type(cooling_system)
       cooling_system.compressor_type_isdefaulted = true
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless heat_pump.compressor_type.nil?
 
-      heat_pump.compressor_type = get_hvac_compressor_type(heat_pump.heat_pump_type)
+      heat_pump.compressor_type = get_hvac_compressor_type(heat_pump)
       heat_pump.compressor_type_isdefaulted = true
-    end
-
-    # Default HP heating capacity retention
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless heat_pump.heating_capacity_retention_fraction.nil?
-      next unless heat_pump.heating_capacity_17F.nil?
-      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
-      next unless heat_pump.heating_detailed_performance_data.empty? # set after hvac sizing
-
-      heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = get_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
-      heat_pump.heating_capacity_retention_fraction_isdefaulted = true
-      heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
 
     # Default HP compressor lockout temp
@@ -2113,9 +2117,61 @@ module Defaults
       heat_pump.airflow_defect_ratio_isdefaulted = true
     end
 
-    # Fan power
+    # Fan model type
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.heating_system_type == HPXML::HVACTypeFurnace
+      next unless heating_system.fan_motor_type.nil?
+      next if (not heating_system.distribution_system.nil?) && (heating_system.distribution_system.air_type == HPXML::AirTypeGravity)
+
+      if (not heating_system.attached_cooling_system.nil?) && (not heating_system.attached_cooling_system.compressor_type.nil?)
+        # Based on RESNET DX Modeling Appendix
+        heating_system.fan_motor_type = (heating_system.attached_cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
+      else
+        # HEScore assumption
+        heating_system.fan_motor_type = (heating_system.heating_efficiency_afue > 0.9) ? HPXML::HVACFanMotorTypeBPM : HPXML::HVACFanMotorTypePSC
+      end
+      heating_system.fan_motor_type_isdefaulted = true
+    end
+    hpxml_bldg.cooling_systems.each do |cooling_system|
+      next unless cooling_system.fan_motor_type.nil?
+
+      if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_motor_type.nil?)
+        cooling_system.fan_motor_type = cooling_system.attached_heating_system.fan_motor_type
+        cooling_system.fan_motor_type_isdefaulted = true
+      elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
+        # Based on RESNET DX Modeling Appendix
+        cooling_system.fan_motor_type = (cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
+        cooling_system.fan_motor_type_isdefaulted = true
+      elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
+        cooling_system.fan_motor_type = HPXML::HVACFanMotorTypeBPM
+        cooling_system.fan_motor_type_isdefaulted = true
+      elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
+        # Depends on airflow rate, so defaulted in hvac_sizing.rb
+      end
+    end
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      next unless heat_pump.fan_motor_type.nil?
+
+      if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
+        # Based on RESNET DX Modeling Appendix
+        heat_pump.fan_motor_type = (heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
+        heat_pump.fan_motor_type_isdefaulted = true
+      elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
+        if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
+          heat_pump.fan_motor_type = HPXML::HVACFanMotorTypeBPM
+        else
+          heat_pump.fan_motor_type = HPXML::HVACFanMotorTypePSC
+        end
+        heat_pump.fan_motor_type_isdefaulted = true
+      elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+        heat_pump.fan_motor_type = HPXML::HVACFanMotorTypeBPM
+        heat_pump.fan_motor_type_isdefaulted = true
+      end
+    end
+
+    # Fan watts/cfm
     psc_watts_per_cfm = 0.5 # W/cfm, PSC fan
-    ecm_watts_per_cfm = 0.375 # W/cfm, ECM fan
+    bpm_watts_per_cfm = 0.375 # W/cfm, BPM fan
     mini_split_ductless_watts_per_cfm = 0.07 # W/cfm
     mini_split_ducted_watts_per_cfm = 0.18 # W/cfm
     hpxml_bldg.heating_systems.each do |heating_system|
@@ -2124,10 +2180,8 @@ module Defaults
         if heating_system.fan_watts_per_cfm.nil?
           if (not heating_system.distribution_system.nil?) && (heating_system.distribution_system.air_type == HPXML::AirTypeGravity)
             heating_system.fan_watts_per_cfm = 0.0
-          elsif heating_system.heating_efficiency_afue > 0.9 # HEScore assumption
-            heating_system.fan_watts_per_cfm = ecm_watts_per_cfm
           else
-            heating_system.fan_watts_per_cfm = psc_watts_per_cfm
+            heating_system.fan_watts_per_cfm = (heating_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
           end
           heating_system.fan_watts_per_cfm_isdefaulted = true
         end
@@ -2144,6 +2198,7 @@ module Defaults
         end
       end
     end
+
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.fan_watts_per_cfm.nil?
 
@@ -2153,74 +2208,28 @@ module Defaults
       else
         case cooling_system.cooling_system_type
         when HPXML::HVACTypeCentralAirConditioner
-          if cooling_system.cooling_efficiency_seer > 13.5 # HEScore assumption
-            cooling_system.fan_watts_per_cfm = ecm_watts_per_cfm
-          else
-            cooling_system.fan_watts_per_cfm = psc_watts_per_cfm
-          end
+          cooling_system.fan_watts_per_cfm = (cooling_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
           cooling_system.fan_watts_per_cfm_isdefaulted = true
         when HPXML::HVACTypeMiniSplitAirConditioner
-          if not cooling_system.distribution_system.nil?
-            cooling_system.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
-          else
-            cooling_system.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
-          end
+          cooling_system.fan_watts_per_cfm = cooling_system.distribution_system.nil? ? mini_split_ductless_watts_per_cfm : mini_split_ducted_watts_per_cfm
           cooling_system.fan_watts_per_cfm_isdefaulted = true
         when HPXML::HVACTypeEvaporativeCooler
           # Depends on airflow rate, so defaulted in hvac_sizing.rb
         end
       end
     end
+
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless heat_pump.fan_watts_per_cfm.nil?
 
       case heat_pump.heat_pump_type
-      when HPXML::HVACTypeHeatPumpAirToAir
-        if heat_pump.heating_efficiency_hspf > 8.75 # HEScore assumption
-          heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
-        else
-          heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
-        end
-        heat_pump.fan_watts_per_cfm_isdefaulted = true
-      when HPXML::HVACTypeHeatPumpGroundToAir
-        if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
-          heat_pump.fan_watts_per_cfm = ecm_watts_per_cfm
-        else
-          heat_pump.fan_watts_per_cfm = psc_watts_per_cfm
-        end
+      when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir
+        heat_pump.fan_watts_per_cfm = (heat_pump.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
         heat_pump.fan_watts_per_cfm_isdefaulted = true
       when HPXML::HVACTypeHeatPumpMiniSplit
-        if not heat_pump.distribution_system.nil?
-          heat_pump.fan_watts_per_cfm = mini_split_ducted_watts_per_cfm
-        else
-          heat_pump.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
-        end
+        heat_pump.fan_watts_per_cfm = heat_pump.distribution_system.nil? ? mini_split_ductless_watts_per_cfm : mini_split_ducted_watts_per_cfm
         heat_pump.fan_watts_per_cfm_isdefaulted = true
       end
-    end
-
-    # Crankcase heater power [Watts]
-    hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-      next unless cooling_system.crankcase_heater_watts.nil?
-
-      if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-        cooling_system.crankcase_heater_watts = 0.0
-      else
-        cooling_system.crankcase_heater_watts = 50 # From RESNET Publication No. 002-2017
-      end
-      cooling_system.crankcase_heater_watts_isdefaulted = true
-    end
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-      next unless heat_pump.crankcase_heater_watts.nil?
-
-      if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-        heat_pump.crankcase_heater_watts = 0.0
-      else
-        heat_pump.crankcase_heater_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0 : 50 # From RESNET Publication No. 002-2017
-      end
-      heat_pump.crankcase_heater_watts_isdefaulted = true
     end
 
     # Pilot Light
@@ -2242,21 +2251,55 @@ module Defaults
       end
     end
 
+    # Pan heater
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      case heat_pump.heat_pump_type
+      when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit
+        if heat_pump.pan_heater_watts.nil?
+          heat_pump.pan_heater_watts = 150.0 # W, per RESNET MINHERS Addendum 82
+          heat_pump.pan_heater_watts_isdefaulted = true
+        end
+        if heat_pump.pan_heater_control_type.nil? && heat_pump.pan_heater_watts > 0
+          heat_pump.pan_heater_control_type = HPXML::HVACPanHeaterControlTypeContinuous # Per RESNET MINHERS Addendum 82
+          heat_pump.pan_heater_control_type_isdefaulted = true
+        end
+      end
+    end
+
+    # EER2
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a?(HPXML::CoolingSystem)
+        next unless [HPXML::HVACTypeCentralAirConditioner,
+                     HPXML::HVACTypeMiniSplitAirConditioner].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a?(HPXML::HeatPump)
+        next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                     HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
+      end
+      next unless hvac_system.cooling_efficiency_eer.nil? && hvac_system.cooling_efficiency_eer2.nil?
+
+      # Regressions based on Central ACs & HPs in ENERGY STAR product lists
+      seer2 = hvac_system.cooling_efficiency_seer2
+      case hvac_system.compressor_type
+      when HPXML::HVACCompressorTypeSingleStage
+        eer2 = [0.73 * seer2 + 1.47, seer2].min
+      when HPXML::HVACCompressorTypeTwoStage
+        eer2 = [0.63 * seer2 + 2.34, seer2].min
+      when HPXML::HVACCompressorTypeVariableSpeed
+        eer2 = [0.31 * seer2 + 6.45, seer2].min
+      end
+      hvac_system.cooling_efficiency_eer2 = eer2.round(2)
+      hvac_system.cooling_efficiency_eer2_isdefaulted = true
+    end
+
     # Detailed HVAC performance
     hpxml_bldg.cooling_systems.each do |cooling_system|
       clg_ap = cooling_system.additional_properties
       case cooling_system.cooling_system_type
       when HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner,
            HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC
-        if [HPXML::HVACTypeRoomAirConditioner,
-            HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
-          use_eer = true
-        else
-          use_eer = false
-        end
         # Note: We use HP cooling curve so that a central AC behaves the same.
-        HVAC.set_fan_power_rated(cooling_system, use_eer)
-        HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
+        HVAC.set_fan_power_rated(cooling_system)
+        HVAC.set_cool_curves_dx_air_source(cooling_system)
 
       when HPXML::HVACTypeEvaporativeCooler
         clg_ap.effectiveness = 0.72 # Assumption from HEScore
@@ -2270,21 +2313,16 @@ module Defaults
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
-      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_heat_cfm_per_ton(HPXML::HVACCompressorTypeSingleStage, true)
+      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_heat_cfm_per_ton_simple()
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       case heat_pump.heat_pump_type
       when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom
-        if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-          use_eer_cop = true
-        else
-          use_eer_cop = false
-        end
-        HVAC.set_fan_power_rated(heat_pump, use_eer_cop)
+        HVAC.set_fan_power_rated(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
-        HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
+        HVAC.set_cool_curves_dx_air_source(heat_pump)
+        HVAC.set_heat_curves_dx_air_source(heat_pump)
 
       when HPXML::HVACTypeHeatPumpGroundToAir
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
@@ -2371,62 +2409,107 @@ module Defaults
       next unless [HPXML::HVACTypeCentralAirConditioner,
                    HPXML::HVACTypeMiniSplitAirConditioner,
                    HPXML::HVACTypeHeatPumpAirToAir,
-                   HPXML::HVACTypeHeatPumpMiniSplit].include? system_type
+                   HPXML::HVACTypeHeatPumpMiniSplit,
+                   HPXML::HVACTypeHeatPumpPTHP,
+                   HPXML::HVACTypeHeatPumpRoom].include? system_type
 
-      next unless hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      if hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
 
-      HVAC.drop_intermediate_speeds(hvac_system)
-
-      hvac_ap = hvac_system.additional_properties
-      if hvac_system.cooling_detailed_performance_data.empty?
-        HVAC.set_cool_detailed_performance_data(hvac_system)
-      else
-        # process capacity fraction of nominal
-        hvac_system.cooling_detailed_performance_data.each do |dp|
-          next unless dp.capacity.nil?
-
-          dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.cooling_capacity).round(3)
-          dp.capacity_isdefaulted = true
-        end
-
-        # override some properties based on detailed performance data
-        cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
-        cool_max_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
-        cool_min_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
-        hvac_ap.cool_capacity_ratios = [cool_min_capacity / cool_rated_capacity, cool_max_capacity / cool_rated_capacity]
-        hvac_ap.cool_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.cool_capacity_ratios, hvac_ap.cool_rated_cfm_per_ton, hvac_ap.cool_rated_airflow_rate)
-      end
-      if is_hp
-        if hvac_system.heating_detailed_performance_data.empty?
-          HVAC.set_heat_detailed_performance_data(hvac_system)
+        hvac_ap = hvac_system.additional_properties
+        if hvac_system.cooling_detailed_performance_data.empty?
+          HVAC.set_cool_detailed_performance_data(hvac_system)
         else
-          # process capacity fraction of nominal
-          hvac_system.heating_detailed_performance_data.each do |dp|
-            next unless dp.capacity.nil?
-
-            dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.heating_capacity).round(3)
-            dp.capacity_isdefaulted = true
-          end
-
-          if hvac_system.heating_capacity_retention_fraction.nil? && hvac_system.heating_capacity_17F.nil?
-            # Calculate heating capacity retention at 5F outdoor drybulb
-            target_odb = 5.0
-            max_capacity_47 = hvac_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-            hvac_system.heating_capacity_retention_fraction = (HVAC.interpolate_to_odb_table_point(hvac_system.heating_detailed_performance_data, HPXML::CapacityDescriptionMaximum, target_odb, :capacity) / max_capacity_47).round(5)
-            hvac_system.heating_capacity_retention_fraction = 0.0 if hvac_system.heating_capacity_retention_fraction < 0
-            hvac_system.heating_capacity_retention_temp = target_odb
-            hvac_system.heating_capacity_retention_fraction_isdefaulted = true
-            hvac_system.heating_capacity_retention_temp_isdefaulted = true
-          end
+          detailed_performance_data = hvac_system.cooling_detailed_performance_data
+          expand_detailed_performance_data(detailed_performance_data, hvac_system.cooling_capacity)
           # override some properties based on detailed performance data
-          heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
-          heat_max_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
-          heat_min_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
-          hvac_ap.heat_capacity_ratios = [heat_min_capacity / heat_rated_capacity, heat_max_capacity / heat_rated_capacity]
-          hvac_ap.heat_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.heat_capacity_ratios, hvac_ap.heat_rated_cfm_per_ton, hvac_ap.heat_rated_airflow_rate)
+          cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
+          cool_max_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
+          cool_min_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
+          hvac_ap.cool_capacity_ratios = [cool_min_capacity / cool_rated_capacity, 1.0, cool_max_capacity / cool_rated_capacity]
+          hvac_ap.cool_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.cool_capacity_ratios, hvac_ap.cool_rated_cfm_per_ton, hvac_ap.cool_rated_airflow_rate)
         end
+        if is_hp
+          if hvac_system.heating_detailed_performance_data.empty?
+            set_heating_capacity_17F(hvac_system)
+            HVAC.set_heat_detailed_performance_data(hvac_system)
+          else
+            detailed_performance_data = hvac_system.heating_detailed_performance_data
+            expand_detailed_performance_data(detailed_performance_data, hvac_system.heating_capacity)
+            set_heating_capacity_17F(hvac_system)
+
+            # override some properties based on detailed performance data
+            heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
+            heat_max_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
+            heat_min_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
+            hvac_ap.heat_capacity_ratios = [heat_min_capacity / heat_rated_capacity, 1.0, heat_max_capacity / heat_rated_capacity]
+            hvac_ap.heat_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.heat_capacity_ratios, hvac_ap.heat_rated_cfm_per_ton, hvac_ap.heat_rated_airflow_rate)
+          end
+        end
+      else
+        set_heating_capacity_17F(hvac_system) if is_hp
       end
     end
+  end
+
+  # This method assigns default values for omitted optional inputs in detailed performance data by:
+  # 1. Assigns capacities with fractions.
+  # 2. Add the nominal speed capacity and cop calculated with other temperature with nominal speed data
+  # Currently these objects are only used for variable-speed air source systems.
+  #
+  # @param detailed_performance_data [HPXML::HeatingDetailedPerformanceData or HPXML::CoolingDetailedPerformanceData] HPXML HeatingDetailedPerformanceData or CoolingDetailedPerformanceData array that contains HeatingPerformanceDataPoint or CoolingPerformanceDataPoint
+  # @param nominal_capacity [Double] Nominal heating/cooling capacity
+  # @return [nil]
+  def self.expand_detailed_performance_data(detailed_performance_data, nominal_capacity)
+    # process capacity fraction of nominal
+    detailed_performance_data.each do |dp|
+      next unless dp.capacity.nil?
+
+      dp.capacity = (dp.capacity_fraction_of_nominal * nominal_capacity).round
+      dp.capacity_isdefaulted = true
+    end
+
+    all_outdoor_odbs = detailed_performance_data.map { |dp| dp.outdoor_temperature }.uniq.sort
+    # All temperatures with nominal speed
+    nom_odbs = all_outdoor_odbs.select { |odb| not detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.nil? }
+    return if nom_odbs.size == all_outdoor_odbs.size # all data specified
+
+    all_outdoor_odbs.each do |odb|
+      # no nominal speed data point
+      next unless detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.nil?
+
+      neighbor_temp = nom_odbs.min_by { |x| (odb - x).abs }
+      detailed_performance_data.add(capacity_description: HPXML::CapacityDescriptionNominal,
+                                    outdoor_temperature: odb,
+                                    isdefaulted: true)
+      added_dp = detailed_performance_data[-1]
+      [:capacity, :efficiency_cop].each do |property|
+        round_digit = (property == :capacity ? 1 : 4)
+        neighbor_property_max = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.send(property)
+        neighbor_property_nom = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.send(property)
+        neighbor_property_min = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.send(property)
+        target_property_max = detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.send(property)
+        target_property_min = detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.send(property)
+        nominal_property_odb = HVAC.calc_nominal_speed_property_with_other_datapoints(target_property_min, target_property_max, neighbor_property_nom, neighbor_property_min, neighbor_property_max).round(round_digit)
+        added_dp.send("#{property}=", nominal_property_odb)
+      end
+    end
+  end
+
+  # TODO
+  #
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @return [TODO] TODO
+  def self.set_heating_capacity_17F(heat_pump)
+    return unless heat_pump.heating_capacity_17F.nil?
+
+    if not heat_pump.heating_detailed_performance_data.empty?
+      rated_capacity_17 = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
+      heat_pump.heating_capacity_17F = rated_capacity_17
+    else
+      heat_pump.heating_capacity_17F = (heat_pump.heating_capacity * HVAC.get_heating_capacity_fraction_17F(heat_pump)).round
+    end
+    heat_pump.heating_capacity_17F_isdefaulted = true
+    heat_pump.heating_capacity_fraction_17F = nil
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::HVACControl object
@@ -2872,6 +2955,34 @@ module Defaults
 
       vent_fan.fan_power = (blower_flow_rate * fan_w_per_cfm).round(2)
       vent_fan.fan_power_isdefaulted = true
+    end
+  end
+
+  # Assigns the crankcase heater power for an HVAC system where the optional input has been omitted.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.apply_crankcase_heating(hpxml_bldg)
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      if hvac_system.is_a? HPXML::CoolingSystem
+        next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a? HPXML::HeatPump
+        next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? hvac_system.heat_pump_type
+      end
+      next unless hvac_system.crankcase_heater_watts.nil?
+
+      if HVAC.is_room_dx_hvac_system(hvac_system)
+        hvac_system.crankcase_heater_watts = 0.0
+      else
+        # 10 W/ton of cooling capacity per RESNET MINHERS Addendum 82
+        if hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.fraction_cool_load_served == 0)
+          # Heat pump only provides heating, use heating capacity instead
+          hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+        else
+          hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+        end
+      end
+      hvac_system.crankcase_heater_watts_isdefaulted = true
     end
   end
 
@@ -5445,9 +5556,10 @@ module Defaults
 
   # Gets the default compressor type for a HVAC system.
   #
-  # @param hvac_type [String] The type of cooling system or heat pump (HPXML::HVACTypeXXX)
+  # @param [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump]
   # @return [String] Compressor type (HPXML::HVACCompressorTypeXXX)
-  def self.get_hvac_compressor_type(hvac_type)
+  def self.get_hvac_compressor_type(hvac_system)
+    hvac_type = (hvac_system.is_a? HPXML::HeatPump) ? hvac_system.heat_pump_type : hvac_system.cooling_system_type
     case hvac_type
     when HPXML::HVACTypePTAC,
          HPXML::HVACTypeHeatPumpPTHP,
@@ -5678,23 +5790,6 @@ module Defaults
       fail "Unexpected control type #{control_type}."
     end
     return clg_wd_setpoints, clg_we_setpoints
-  end
-
-  # Gets the default heating capacity retention at 5F for a heat pump.
-  #
-  # @param compressor_type [String] Type of compressor (HPXML::HVACCompressorTypeXXX)
-  # @param hspf [Double] Heat pump efficiency
-  # @return [Array<Double, Double>] Temperature (F), heating capacity retention at the temperature (frac)
-  def self.get_heating_capacity_retention(compressor_type, hspf = nil)
-    retention_temp = 5.0
-    case compressor_type
-    when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
-      retention_fraction = 0.425
-    when HPXML::HVACCompressorTypeVariableSpeed
-      # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-      retention_fraction = (0.0461 * hspf + 0.1594).round(4)
-    end
-    return retention_temp, retention_fraction
   end
 
   # Gets the monthly ceiling fan operation schedule.
