@@ -1275,6 +1275,7 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0,
     "heat_pump_type": "ground-to-air",
+    "heat_pump_cooling_compressor_type": "single stage",
     "heat_pump_heating_efficiency_type": "COP",
     "heat_pump_heating_efficiency": 3.6,
     "heat_pump_cooling_efficiency_type": "EER",
