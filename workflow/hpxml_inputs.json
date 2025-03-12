@@ -92,7 +92,6 @@
     "heating_system_fraction_heat_load_served": 0,
     "cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0,
-    "cooling_system_cooling_compressor_type": "single stage",
     "heat_pump_type": "none",
     "heat_pump_heating_efficiency_type": "HSPF",
     "heat_pump_heating_efficiency": 0,
