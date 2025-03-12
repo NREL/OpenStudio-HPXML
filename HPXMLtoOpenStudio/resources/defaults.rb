@@ -6155,7 +6155,9 @@ module Defaults
       elsif component.is_a?(HPXML::VentilationFan)
         return HPXML::ElectricPanelVoltage120
       elsif component.is_a?(HPXML::PlugLoad)
-        return HPXML::ElectricPanelVoltage120
+        if component.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+          return HPXML::ElectricPanelVoltage120
+        end
       end
       return HPXML::ElectricPanelVoltage240
     end
