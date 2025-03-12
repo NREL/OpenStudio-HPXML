@@ -1892,7 +1892,7 @@ module HVAC
     when HPXML::HVACCompressorTypeTwoStage
       return [0.7353, 1.0]
     when HPXML::HVACCompressorTypeVariableSpeed
-      # TODO
+      return [0.3, 0.4, 0.6, 0.8, 1.0]
     end
 
     fail 'Unable to get cooling capacity ratios.'
@@ -2087,7 +2087,7 @@ module HVAC
     when HPXML::HVACCompressorTypeTwoStage
       return [0.7374, 1.0]
     when HPXML::HVACCompressorTypeVariableSpeed
-      # TODO
+      return [0.3, 0.4, 0.6, 0.8, 1.0]
     end
 
     fail 'Unable to get cooling capacity ratios.'
@@ -2183,7 +2183,7 @@ module HVAC
       # 1200CFM - FULL LOAD (Speed 2)
       return [470.4205, 377.3585]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      # TODO
+      return [400.0] * 5
     else
       fail 'Compressor type not supported.'
     end
@@ -2204,7 +2204,7 @@ module HVAC
       # 1200CFM - FULL LOAD (Speed 2)
       return [397.5904, 319.8465]
     when HPXML::HVACCompressorTypeVariableSpeed
-      # TODO
+      return [400.0] * 5
     else
       fail 'Compressor type not supported.'
     end
@@ -2273,10 +2273,8 @@ module HVAC
       #                           [0.815, 0.325, -0.14]]
       # hp_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
       #                           [1.5872, -1.055, 0.4678]]
-      hp_ap.cool_cap_fwf_spec = [[1.0, 0.0, 0.0],
-                                 [1.0, 0.0, 0.0]]
-      hp_ap.cool_eir_fwf_spec = [[1.0, 0.0, 0.0],
-                                 [1.0, 0.0, 0.0]]
+      hp_ap.cool_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 2
+      hp_ap.cool_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 2
 
       # Heating Curves
       # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
@@ -2296,17 +2294,63 @@ module HVAC
       #                           [0.769, 0.399, -0.168]]
       # hp_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
       #                           [1.1679, -0.3215, 0.1535]]
-      hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0],
-                                 [1.0, 0.0, 0.0]]
-      hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0],
-                                 [1.0, 0.0, 0.0]]
+      hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 2
+      hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 2
       # FIXME: Rated condition is the same as DX coil E+ conditions, so followed the same approach here, please review
       set_cool_rated_shrs_gross(heat_pump)
       # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
       cool_cop_ratios = [1.102827763, 1.0]
       heat_cop_ratios = [1.161791639, 1.0]
-    when HPXML::HVACCompressorTypeTwoStage
-      # TODO: Add variable speed system performance curves
+    when HPXML::HVACCompressorTypeVariableSpeed
+      # Cooling Curves
+      # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
+      # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
+      # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+      # Using E+ rated conditions:
+      # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
+      hp_ap.cool_cap_ft_spec = [[0.7318339651, 0.0026380494, 0.0007884288, -0.0033663668, 0.0000580330, -0.0000513954],
+                                [0.6851633792, 0.0015103186, 0.0007667432, 0.0000000000, 0.0000000000, 0.0000000000],
+                                [0.6851633792, 0.0015103186, 0.0007667432, 0.0000000000, 0.0000000000, 0.0000000000],
+                                [0.6851633792, 0.0015103186, 0.0007667432, 0.0000000000, 0.0000000000, 0.0000000000],
+                                [0.6830368552, 0.0016926176, 0.0007639550, 0.0007603029, -0.0000217624, -0.0000088954]]
+      hp_ap.cool_eir_ft_spec = [[0.1795197812, 0.0155938331, -0.0004456268, 0.0018659759, 0.0006625390, 0.0000980176],
+                                [0.1864201828, 0.0158122412, -0.0004520530, 0.0000512173, 0.0007179199, 0.0000997373],
+                                [0.2151513077, 0.0162624225, -0.0004636327, -0.0037454438, 0.0008108454, 0.0001001540],
+                                [0.2521345673, 0.0164359784, -0.0004645030, -0.0036695295, 0.0007615529, 0.0000935670],
+                                [0.2921943813, 0.0166187382, -0.0004650401, -0.0029281175, 0.0006888443, 0.0000859183]]
+      # FIXME: Placeholders
+      hp_ap.cool_cap_fflow_spec = [[1.0, 0.0, 0.0]] * 5
+      hp_ap.cool_eir_fflow_spec = [[1.0, 0.0, 0.0]] * 5
+      hp_ap.cool_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 5
+      hp_ap.cool_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 5
+
+      # Heating Curves
+      # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
+      # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
+      # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+      # Using E+ rated conditions:
+      # Heating: Indoor air at 70F DB; Entering water temperature: 70F
+      hp_ap.heat_cap_ft_spec = [[0.6118236681, 0.0190824571, -0.0000666514, -0.0065876905, 0.0002847000, 0.0000610714],
+                                [0.6177200000, 0.0194760000, -0.0000648000, 0.0000000000, 0.0000000000, 0.0000000000],
+                                [0.6177200000, 0.0194760000, -0.0000648000, 0.0000000000, 0.0000000000, 0.0000000000],
+                                [0.6177200000, 0.0194760000, -0.0000648000, 0.0000000000, 0.0000000000, 0.0000000000],
+                                [0.6072336009, 0.0193441286, -0.0000646457, 0.0011532679, -0.0000305036, 0.0000054964]]
+      hp_ap.heat_eir_ft_spec = [[2.6533007240, -0.0581203458, 0.0004729607, -0.0494128585, 0.0000935628, 0.0007591674],
+                                [2.8085006240, -0.0605600128, 0.0004916572, -0.0595978299, 0.0003438610, 0.0007983145],
+                                [2.9426953145, -0.0628316837, 0.0005058360, -0.0696242206, 0.0005543354, 0.0008550994],
+                                [3.0169566667, -0.0642766798, 0.0005138178, -0.0738827035, 0.0006072439, 0.0008977487],
+                                [3.0634852800, -0.0651674877, 0.0005167746, -0.0757026041, 0.0005896355, 0.0009364029]]
+      # FIXME: Placeholders
+      hp_ap.heat_cap_fflow_spec = [[1.0, 0.0, 0.0]] * 5
+      hp_ap.heat_eir_fflow_spec = [[1.0, 0.0, 0.0]] * 5
+      hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 5
+      hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 5
+      # FIXME: Rated condition is the same as DX coil E+ conditions, so followed the same approach here, please review
+      set_cool_rated_shrs_gross(heat_pump)
+      # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+      cool_cop_ratios = [1.285116034, 1.360219899, 1.298730993, 1.15020145, 1]
+      # FIXME: Review this, data looks suspicious
+      heat_cop_ratios = [0.95, 1.066666667, 1.112195122, 1.066666667, 1]
     end
 
     # Fan/pump adjustments calculations

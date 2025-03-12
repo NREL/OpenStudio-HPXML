@@ -26,8 +26,6 @@ class WorkflowSimulations2Test < Minitest::Test
     xmls = []
     [sample_files_dir, real_homes_dir].each do |hpxml_files_dir|
       Dir["#{hpxml_files_dir}/*.xml"].sort.each do |xml|
-        next if (xml.include? 'base-hvac-ground-to-air-heat-pump-var-speed')
-
         xmls << File.absolute_path(xml)
       end
     end
