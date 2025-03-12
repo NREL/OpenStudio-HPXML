@@ -10,6 +10,7 @@ __New Features__
   - Updates to detailed performance datapoints:
     - **Breaking Change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
     - Detailed performance datapoints can now be specified for single stage and two stage equipment too.
+    - Adds more error-checking to ensure appropriate data inputs.
 - Electric vehicle enhancements:
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
