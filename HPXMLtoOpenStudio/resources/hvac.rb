@@ -2269,10 +2269,15 @@ module HVAC
                                    [0.8551, 0.1688, -0.0238]]
       hp_ap.cool_eir_fflow_spec = [[0.7931, 0.2623, -0.0552],
                                    [0.8241, 0.1523, 0.0234]]
-      hp_ap.cool_cap_fwf_spec = [[0.8387, 0.2903, -0.129],
-                                 [0.815, 0.325, -0.14]]
-      hp_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
-                                 [1.5872, -1.055, 0.4678]]
+      #hp_ap.cool_cap_fwf_spec = [[0.8387, 0.2903, -0.129],
+      #                           [0.815, 0.325, -0.14]]
+      #hp_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
+      #                           [1.5872, -1.055, 0.4678]]
+      hp_ap.cool_cap_fwf_spec = [[1.0, 0.0, 0.0],
+                                 [1.0, 0.0, 0.0]]
+      hp_ap.cool_eir_fwf_spec = [[1.0, 0.0, 0.0],
+                                 [1.0, 0.0, 0.0]]
+      
       # Heating Curves
       # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
       # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
@@ -2287,10 +2292,14 @@ module HVAC
                                    [0.8264, 0.1593, 0.0143]]
       hp_ap.heat_eir_fflow_spec = [[1.2006, -0.1943, -0.0062],
                                    [1.2568, -0.2856, 0.0288]]
-      hp_ap.heat_cap_fwf_spec = [[0.7112, 0.5027, -0.2139],
-                                 [0.769, 0.399, -0.168]]
-      hp_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
-                                 [1.1679, -0.3215, 0.1535]]
+      #hp_ap.heat_cap_fwf_spec = [[0.7112, 0.5027, -0.2139],
+      #                           [0.769, 0.399, -0.168]]
+      #hp_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
+      #                           [1.1679, -0.3215, 0.1535]]
+      hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0],
+                                 [1.0, 0.0, 0.0]]
+      hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0],
+                                 [1.0, 0.0, 0.0]]
       # FIXME: Rated condition is the same as DX coil E+ conditions, so followed the same approach here, please review
       set_cool_rated_shrs_gross(heat_pump)
       # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
