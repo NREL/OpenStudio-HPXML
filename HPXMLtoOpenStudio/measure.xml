@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>a3a5c3f2-d947-48d5-af3a-f3bd78fedd4f</version_id>
-  <version_modified>2025-03-13T18:19:18Z</version_modified>
+  <version_id>a5365917-4382-47d2-80bb-b9b2e778ce37</version_id>
+  <version_modified>2025-03-13T19:20:36Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -333,7 +333,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CFE01CCD</checksum>
+      <checksum>2E4CD1B7</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -351,7 +351,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B6CCA5A7</checksum>
+      <checksum>0566822E</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
@@ -363,7 +363,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>38DA3B96</checksum>
+      <checksum>DEC801AD</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -381,7 +381,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D20E31C9</checksum>
+      <checksum>02F81013</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -399,7 +399,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A079BB8E</checksum>
+      <checksum>B3CA4DE5</checksum>
     </file>
     <file>
       <filename>internal_gains.rb</filename>
@@ -453,7 +453,7 @@
       <filename>model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F0F4648E</checksum>
+      <checksum>F4C2E38F</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
@@ -711,7 +711,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F1AC47B0</checksum>
+      <checksum>EBA87096</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -783,7 +783,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F43A4E45</checksum>
+      <checksum>004558EA</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>
