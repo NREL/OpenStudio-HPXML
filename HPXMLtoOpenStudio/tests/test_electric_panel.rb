@@ -45,7 +45,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     # Upgrade
     # Not adding new HVAC
-    electric_panel.headroom = nil
+    electric_panel.headroom_spaces = nil
     electric_panel.rated_total_spaces = 14
     branch_circuits = electric_panel.branch_circuits
     service_feeders = electric_panel.service_feeders
