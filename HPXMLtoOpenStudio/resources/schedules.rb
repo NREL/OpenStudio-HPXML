@@ -1080,8 +1080,10 @@ class SchedulesFile
     return false
   end
 
-  # Assemble schedules from all detailed schedule CSVs into a hash.
+  # Assemble schedules from all detailed schedule CSVs into a hash and perform various
+  # error-checks and data validation.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param schedules_paths [Array<String>] array of file paths pointing to detailed schedule CSVs
   # @return [nil]
   def import(runner, schedules_paths)
