@@ -3197,6 +3197,7 @@ module Defaults
       service_feeders = electric_panel.service_feeders
 
       hpxml_bldg.heating_systems.each do |heating_system|
+        next if heating_system.is_shared_system
         next if heating_system.fraction_heat_load_served == 0
         next unless heating_system.service_feeders.empty?
 
@@ -3208,6 +3209,7 @@ module Defaults
       end
 
       hpxml_bldg.cooling_systems.each do |cooling_system|
+        next if cooling_system.is_shared_system
         next if cooling_system.fraction_cool_load_served == 0
         next unless cooling_system.service_feeders.empty?
 
