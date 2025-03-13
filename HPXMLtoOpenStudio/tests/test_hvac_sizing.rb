@@ -97,7 +97,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
           # Get more values for heat pump checks
           htg_load = autosized_bldg.hvac_plant.hdl_total
-          clg_load = autosized_bldg.hvac_plant.cdl_sens_total + autosized_bldg.hvac_plant.cdl_lat_total
+          clg_load = autosized_bldg.hvac_plant.cdl_sens_total
           hp = autosized_bldg.heat_pumps[0]
           # Test the sizing results before applying autosizing factors
           htg_cap = hp.heating_capacity
