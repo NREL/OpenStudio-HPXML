@@ -717,7 +717,7 @@ module Model
     return stl
   end
 
-  # Adds an EnergyManagementSystemSensor to the OpenStudio model.
+  # Adds an EnergyManagementSystemSensor object to the OpenStudio model.
   #
   # The EnergyManagementSystemSensor object gets information during the simulation
   # that can be used in custom calculations.
@@ -734,7 +734,7 @@ module Model
     return sensor
   end
 
-  # Adds an EnergyManagementSystemGlobalVariable to the OpenStudio model.
+  # Adds an EnergyManagementSystemGlobalVariable object to the OpenStudio model.
   #
   # The EnergyManagementSystemGlobalVariable object allows an EMS variable to be
   # global such that it can be used across EMS programs/subroutines.
@@ -746,7 +746,7 @@ module Model
     return OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, ems_friendly_name(var_name))
   end
 
-  # Adds an EnergyManagementSystemTrendVariable to the OpenStudio model.
+  # Adds an EnergyManagementSystemTrendVariable object to the OpenStudio model.
   #
   # The EnergyManagementSystemTrendVariable object creates a global EMS variable
   # that stores the recent history of an EMS variable for use in a calculation.
@@ -762,7 +762,7 @@ module Model
     return tvar
   end
 
-  # Adds an EnergyManagementSystemInternalVariable to the OpenStudio model.
+  # Adds an EnergyManagementSystemInternalVariable object to the OpenStudio model.
   #
   # The EnergyManagementSystemInternalVariable object is used to obtain static data from
   # elsewhere in the model.
@@ -779,7 +779,7 @@ module Model
     return ivar
   end
 
-  # Adds an EnergyManagementSystemActuator to the OpenStudio model.
+  # Adds an EnergyManagementSystemActuator object to the OpenStudio model.
   #
   # The EnergyManagementSystemActuator object specifies the properties or controls
   # of an EnergyPlus object that is to be overridden during the simulation.
@@ -798,7 +798,7 @@ module Model
     return act
   end
 
-  # Adds an EnergyManagementSystemProgram to the OpenStudio model.
+  # Adds an EnergyManagementSystemProgram object to the OpenStudio model.
   #
   # The EnergyManagementSystemProgram object allows custom calculations to be
   # performed within the EnergyPlus simulation in order to override the properties
@@ -815,7 +815,7 @@ module Model
     return prg
   end
 
-  # Adds an EnergyManagementSystemSubroutine to the OpenStudio model.
+  # Adds an EnergyManagementSystemSubroutine object to the OpenStudio model.
   #
   # The EnergyManagementSystemSubroutine object allows EMS code to be reused
   # across multiple EMS programs.
@@ -831,7 +831,7 @@ module Model
     return sbrt
   end
 
-  # Adds an EnergyManagementSystemProgramCallingManager to the OpenStudio model.
+  # Adds an EnergyManagementSystemProgramCallingManager object to the OpenStudio model.
   #
   # The EnergyManagementSystemProgramCallingManager object is used to specify when
   # an EMS program is run during the simulation.
@@ -850,7 +850,57 @@ module Model
     end
     return pcm
   end
+  
+  # Adds an EnergyManagementSystemOutputVariable object to the OpenStudio model.
+  #
+  # The EnergyManagementSystemOutputVariable object allows generating output for
+  # an EMS variable; the object can be referenced by an OutputVariable object.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] User-defined name for the new output variable
+  # @param ems_variable_name [String] EMS variable name to be output
+  # @param type_of_data [String] The nature of the variable ('averaged' or 'summed')
+  # @param update_frequency [String] Timestep the variable is associated with ('ZoneTimestep' or 'SystemTimestep')
+  # @param ems_program_or_subroutine [OpenStudio::Model::EnergyManagementSystemProgram or EnergyManagementSystemSubroutine] The EMS program/subroutine with the EMS variable
+  # @param units [String] The units for the output variable in standard EnergyPlus units
+  # @return [OpenStudio::Model::EnergyManagementSystemOutputVariable] The model object
+  def self.add_ems_output_variable(model, name:, ems_variable_name:, type_of_data:, update_frequency:, ems_program_or_subroutine:, units:)
+    ov = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, ems_variable_name)
+    ov.setName(name)
+    ov.setTypeOfDataInVariable(type_of_data)
+    ov.setUpdateFrequency(update_frequency)
+    ov.setEMSProgramOrSubroutineName(ems_program_or_subroutine)
+    ov.setUnits(units)
+    return ov
+  end
+  
+  # Adds an OutputVariable object to the OpenStudio model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param key_value [String] The specific object reference for reporting
+  # @param variable_name [String] The variable name as shown in the eplusout.rdd file
+  # @param reporting_frequency [String] Output reporting frequency ('detailed', 'timestep', 'hourly', 'daily', 'monthly', 'runperiod', or 'annual')
+  # @return [OpenStudio::Model::OutputVariable] The model object
+  def self.add_output_variable(model, key_value:, variable_name:, reporting_frequency:)
+    ov = OpenStudio::Model::OutputVariable.new(variable_name, model)
+    ov.setKeyValue(key_value)
+    ov.setReportingFrequency(reporting_frequency)
+    return ov
+  end
 
+  # Adds an OutputMeter object to the OpenStudio model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param meter_name [String] The meter name as shown in the eplusout.mdd file
+  # @param reporting_frequency [String] Output reporting frequency ('detailed', 'timestep', 'hourly', 'daily', 'monthly', 'runperiod', or 'annual')
+  # @return [OpenStudio::Model::OutputMeter] The model object
+  def self.add_output_meter(model, meter_name:, reporting_frequency:)
+    om = OpenStudio::Model::OutputMeter.new(model)
+    om.setName(meter_name)
+    om.setReportingFrequency(reporting_frequency)
+    return om
+  end
+  
   # Converts existing string to EMS friendly string.
   #
   # Source: openstudio-standards
