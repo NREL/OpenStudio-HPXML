@@ -1,0 +1,43 @@
+Option Name	heat_pump_type	heat_pump_heating_efficiency_type	heat_pump_heating_efficiency	heat_pump_cooling_efficiency_type	heat_pump_cooling_efficiency	heat_pump_cooling_compressor_type	heat_pump_cooling_sensible_heat_fraction	heat_pump_heating_capacity_retention_fraction	heat_pump_heating_capacity_retention_temp	heat_pump_compressor_lockout_temp	heat_pump_is_ducted	heat_pump_airflow_defect_ratio	heat_pump_charge_defect_ratio	heat_pump_crankcase_heater_watts	hvac_perf_data_capacity_type	hvac_perf_data_heating_outdoor_temperatures	hvac_perf_data_heating_min_speed_capacities	hvac_perf_data_heating_max_speed_capacities	hvac_perf_data_heating_min_speed_cops	hvac_perf_data_heating_max_speed_cops	hvac_perf_data_cooling_outdoor_temperatures	hvac_perf_data_cooling_min_speed_capacities	hvac_perf_data_cooling_max_speed_capacities	hvac_perf_data_cooling_min_speed_cops	hvac_perf_data_cooling_max_speed_cops
+None	none																								
+"ASHP, SEER 10, 6.2 HSPF"	air-to-air	HSPF	6.2	SEER	10	single stage																			
+"ASHP, SEER 10, 6.8 HSPF"	air-to-air	HSPF	6.8	SEER	10	single stage																			
+"ASHP, SEER 10.3, 7.0 HSPF"	air-to-air	HSPF	7	SEER	10.3	single stage																			
+"ASHP, SEER 11.5, 7.5 HSPF"	air-to-air	HSPF	7.5	SEER	11.5	single stage																			
+"ASHP, SEER 13, 7.7 HSPF"	air-to-air	HSPF	7.7	SEER	13	single stage	0.73																		
+"ASHP, SEER 13, 7.7 HSPF, Heating Capacity 17F"	air-to-air	HSPF	7.7	SEER	13	single stage	0.73	0.6	17																
+"ASHP, SEER 13, 7.7 HSPF, Lockout Temperatures"	air-to-air	HSPF	7.7	SEER	13	single stage	0.73	0.6	17	5															
+"ASHP, SEER 13, 8.0 HSPF"	air-to-air	HSPF	8	SEER	13	single stage																			
+"ASHP, SEER 14, 8.2 HSPF"	air-to-air	HSPF	8.2	SEER	14	single stage																			
+"ASHP, SEER 14.3, 8.5 HSPF"	air-to-air	HSPF	8.5	SEER	14.3	single stage																			
+"ASHP, SEER 15, 8.5 HSPF"	air-to-air	HSPF	8.5	SEER	15	single stage																			
+"ASHP, SEER 15, 9.0 HSPF"	air-to-air	HSPF	9	SEER	15	single stage																			
+"ASHP, SEER 16, 9.0 HSPF"	air-to-air	HSPF	9	SEER	16	single stage																			
+"ASHP, SEER 16, 9.2 HSPF"	air-to-air	HSPF	9.2	SEER	16	single stage																			
+"ASHP, SEER 17, 8.7 HSPF"	air-to-air	HSPF	8.7	SEER	17	two stage																			
+"ASHP, SEER 18, 9.3 HSPF"	air-to-air	HSPF	9.3	SEER	18	two stage																			
+"ASHP, SEER 20, 11 HSPF"	air-to-air	HSPF	11	SEER	20	variable speed																			
+"ASHP, SEER 22, 10 HSPF"	air-to-air	HSPF	10	SEER	22	variable speed																			
+"ASHP, SEER 24, 13 HSPF"	air-to-air	HSPF	13	SEER	24	variable speed																			
+"GSHP, EER 16.6, COP 3.6"	ground-to-air	COP	3.6	EER	16.6		0.73																		
+"GSHP, EER 16.6, COP 3.6, Airflow Defect Ratio"	ground-to-air	COP	3.6	EER	16.6		0.73					-0.25	-0.25												
+"GSHP, EER 20.2, COP 4.2"	ground-to-air	COP	4.2	EER	20.2																				
+"GSHP, EER 20.5, COP 4.0"	ground-to-air	COP	4	EER	20.5																				
+"MSHP, SEER 14.5, 8.2 HSPF"	mini-split	HSPF	8.2	SEER	14.5																				
+"MSHP, SEER 14.5, 8.2 HSPF, Ducted"	mini-split	HSPF	8.2	SEER	14.5																				
+"MSHP, SEER 16, 9.2 HSPF"	mini-split	HSPF	9.2	SEER	16																				
+"MSHP, SEER 17, 9.5 HSPF"	mini-split	HSPF	9.5	SEER	17																				
+"MSHP, SEER 17, 9.5 HSPF, Ducted"	mini-split	HSPF	9.5	SEER	17																				
+"MSHP, SEER 18.0, 9.6 HSPF"	mini-split	HSPF	9.6	SEER	18																				
+"MSHP, SEER 18.0, 9.6 HSPF, Ducted"	mini-split	HSPF	9.6	SEER	18																				
+"MSHP, SEER 19, 10 HSPF"	mini-split	HSPF	10	SEER	19	variable speed	0.73	0.6	17		true														
+"MSHP, SEER 20, 11 HSPF"	mini-split	HSPF	11	SEER	20																				
+"MSHP, SEER 24, 13 HSPF"	mini-split	HSPF	13	SEER	24																				
+"MSHP, SEER 25, 12.7 HSPF"	mini-split	HSPF	12.7	SEER	25																				
+"MSHP, SEER 25, 12.7 HSPF, Ducted"	mini-split	HSPF	12.7	SEER	25																				
+"MSHP, SEER 29.3, 14 HSPF"	mini-split	HSPF	14	SEER	29.3																				
+"MSHP, SEER 29.3, 14 HSPF, Ducted"	mini-split	HSPF	14	SEER	29.3																				
+"MSHP, SEER 33, 13.3 HSPF"	mini-split	HSPF	13.3	SEER	33																				
+"MSHP, SEER 33, 13.3 HSPF, Ducted"	mini-split	HSPF	13.3	SEER	33																				
+"PTHP, EER 11.4, COP 3.6"	packaged terminal heat pump	COP	3.6	EER	11.4		0.65	0.6	17																
+"Room AC w/ Reverse Cycle, EER 11.4"	room air conditioner with reverse cycle	COP	3.6	EER	11.4		0.65	0.6	17																

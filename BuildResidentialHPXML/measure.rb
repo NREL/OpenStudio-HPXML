@@ -1166,21 +1166,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_fuel_choices << HPXML::FuelTypeWoodPellets
     heating_system_fuel_choices << HPXML::FuelTypeCoal
 
-    # TODO: delete after HP refactor
-    cooling_efficiency_type_choices = OpenStudio::StringVector.new
-    cooling_efficiency_type_choices << HPXML::UnitsSEER
-    cooling_efficiency_type_choices << HPXML::UnitsSEER2
-    cooling_efficiency_type_choices << HPXML::UnitsEER
-    cooling_efficiency_type_choices << HPXML::UnitsCEER
-
-    # Need to keep compressor_type_choices, cooling_efficiency_type_choices until HP refactor
-
-    # TODO: delete after HP refactor
-    compressor_type_choices = OpenStudio::StringVector.new
-    compressor_type_choices << HPXML::HVACCompressorTypeSingleStage
-    compressor_type_choices << HPXML::HVACCompressorTypeTwoStage
-    compressor_type_choices << HPXML::HVACCompressorTypeVariableSpeed
-
     heating_system_choices = get_option_names('heating_system.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system', heating_system_choices, true)
@@ -1263,19 +1248,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    heat_pump_type_choices = OpenStudio::StringVector.new
-    heat_pump_type_choices << Constants::None
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpAirToAir
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpMiniSplit
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpGroundToAir
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpPTHP
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpRoom
-
-    heat_pump_heating_efficiency_type_choices = OpenStudio::StringVector.new
-    heat_pump_heating_efficiency_type_choices << HPXML::UnitsHSPF
-    heat_pump_heating_efficiency_type_choices << HPXML::UnitsHSPF2
-    heat_pump_heating_efficiency_type_choices << HPXML::UnitsCOP
-
     heat_pump_backup_type_choices = OpenStudio::StringVector.new
     heat_pump_backup_type_choices << Constants::None
     heat_pump_backup_type_choices << HPXML::HeatPumpBackupTypeIntegrated
@@ -1296,45 +1268,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingEmergency
     heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingSupplemental
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_type', heat_pump_type_choices, true)
-    arg.setDisplayName('Heat Pump: Type')
-    arg.setDescription("The type of heat pump. Use '#{Constants::None}' if there is no heat pump.")
-    arg.setDefaultValue(Constants::None)
-    args << arg
+    heat_pump_choices = get_option_names('heat_pump.tsv')
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_heating_efficiency_type', heat_pump_heating_efficiency_type_choices, true)
-    arg.setDisplayName('Heat Pump: Heating Efficiency Type')
-    arg.setDescription("The heating efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsHSPF} or #{HPXML::UnitsHSPF2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsCOP}.")
-    arg.setDefaultValue(HPXML::UnitsHSPF)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_efficiency', true)
-    arg.setDisplayName('Heat Pump: Heating Efficiency')
-    arg.setDescription('The rated heating efficiency value of the heat pump.')
-    arg.setDefaultValue(7.7)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_efficiency_type', cooling_efficiency_type_choices, true)
-    arg.setDisplayName('Heat Pump: Cooling Efficiency Type')
-    arg.setDescription("The cooling efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsSEER} or #{HPXML::UnitsSEER2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsEER}.")
-    arg.setDefaultValue(HPXML::UnitsSEER)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_efficiency', true)
-    arg.setDisplayName('Heat Pump: Cooling Efficiency')
-    arg.setDescription('The rated cooling efficiency value of the heat pump.')
-    arg.setDefaultValue(13.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_compressor_type', compressor_type_choices, false)
-    arg.setDisplayName('Heat Pump: Cooling Compressor Type')
-    arg.setDescription("The compressor type of the heat pump. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_sensible_heat_fraction', false)
-    arg.setDisplayName('Heat Pump: Cooling Sensible Heat Fraction')
-    arg.setDescription("The sensible heat fraction of the heat pump. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
-    arg.setUnits('Frac')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump', heat_pump_choices, true)
+    arg.setDisplayName('Heat Pump')
+    arg.setDescription('The heat pump type/efficiency.')
+    arg.setDefaultValue('None')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity', false)
@@ -1352,18 +1291,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Heating Autosizing Limit')
     arg.setDescription('The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.')
     arg.setUnits('Btu/hr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_fraction', false)
-    arg.setDisplayName('Heat Pump: Heating Capacity Retention Fraction')
-    arg.setDescription("The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_temp', false)
-    arg.setDisplayName('Heat Pump: Heating Capacity Retention Temperature')
-    arg.setDescription("The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. Required if the Heating Capacity Retention Fraction is provided.")
-    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_capacity', false)
@@ -1395,12 +1322,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The cooling load served by the heat pump.')
     arg.setUnits('Frac')
     arg.setDefaultValue(1)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_compressor_lockout_temp', false)
-    arg.setDisplayName('Heat Pump: Compressor Lockout Temperature')
-    arg.setDescription("The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
-    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_type', heat_pump_backup_type_choices, true)
@@ -1452,99 +1373,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_sizing_methodology', heat_pump_backup_sizing_choices, false)
     arg.setDisplayName('Heat Pump: Backup Sizing Methodology')
     arg.setDescription("The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_is_ducted', false)
-    arg.setDisplayName('Heat Pump: Is Ducted')
-    arg.setDescription("Whether the heat pump is ducted or not. Only used for #{HPXML::HVACTypeHeatPumpMiniSplit}. It's assumed that #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpGroundToAir} are ducted, and #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} are not ducted. If not provided, assumes not ducted.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_airflow_defect_ratio', false)
-    arg.setDisplayName('Heat Pump: Airflow Defect Ratio')
-    arg.setDescription("The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, ducted #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, assumes no defect.")
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_charge_defect_ratio', false)
-    arg.setDisplayName('Heat Pump: Charge Defect Ratio')
-    arg.setDescription('The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies to all heat pump types. If not provided, assumes no defect.')
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_crankcase_heater_watts', false)
-    arg.setDisplayName('Heat Pump: Crankcase Heater Power Watts')
-    arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    perf_data_capacity_type_choices = OpenStudio::StringVector.new
-    perf_data_capacity_type_choices << 'Absolute capacities'
-    perf_data_capacity_type_choices << 'Normalized capacity fractions'
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_perf_data_capacity_type', perf_data_capacity_type_choices, false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Capacity Type')
-    arg.setDescription('Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps).')
-    arg.setUnits('Absolute capacities')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_outdoor_temperatures', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Outdoor Temperatures')
-    arg.setDescription('Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 F. At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('F')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_capacities', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Speed Capacities')
-    arg.setDescription('Minimum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('Btu/hr or Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_max_speed_capacities', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Speed Capacities')
-    arg.setDescription('Maximum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('Btu/hr or Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_cops', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Speed COPs')
-    arg.setDescription('Minimum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('W/W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_max_speed_cops', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Speed COPs')
-    arg.setDescription('Maximum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('W/W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_outdoor_temperatures', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Outdoor Temperatures')
-    arg.setDescription('Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 F. At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('F')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_capacities', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Speed Capacities')
-    arg.setDescription('Minimum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('Btu/hr or Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_max_speed_capacities', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Speed Capacities')
-    arg.setDescription('Maximum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('Btu/hr or Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_cops', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Speed COPs')
-    arg.setDescription('Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('W/W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_max_speed_cops', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Speed COPs')
-    arg.setDescription('Maximum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('W/W')
     args << arg
 
     geothermal_loop_configuration_choices = OpenStudio::StringVector.new
@@ -3650,6 +3478,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # get_option_properties(args, 'wall_siding.tsv', args[:enclosure_wall_siding])
     get_option_properties(args, 'heating_system.tsv', args[:heating_system])
     get_option_properties(args, 'cooling_system.tsv', args[:cooling_system])
+    get_option_properties(args, 'heat_pump.tsv', args[:heat_pump])
 
     error = (args[:heating_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:heating_system_fraction_heat_load_served] > 0) && (args[:heat_pump_fraction_heat_load_served] > 0)
     errors << 'Multiple central heating systems are not currently supported.' if error
