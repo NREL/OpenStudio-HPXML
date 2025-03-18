@@ -2306,7 +2306,7 @@
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "heat_pump": "SEER 22, 10 HSPF, 30F Compressor Lockout",
+    "heat_pump": "ASHP, SEER 22, 10 HSPF, 30F Compressor Lockout",
     "heat_pump_backup_fuel": "natural gas",
     "heat_pump_backup_heating_efficiency": 0.95,
     "heat_pump_backup_heating_lockout_temp": 30
@@ -2616,7 +2616,7 @@
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance-autosize.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml",
-    "heat_pump": "Ductless Mini-Split AC, SEER 17, Normalized Capacity Fractions",
+    "cooling_system": "Ductless Mini-Split AC, SEER 17, Normalized Capacity Fractions",
     "cooling_system_cooling_capacity": null
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted.xml": {
