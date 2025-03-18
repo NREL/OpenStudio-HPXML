@@ -1511,8 +1511,8 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
          See :ref:`hpxml_locations` for descriptions.
   .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
   .. [#] For a crawlspace with a dirt floor, enter a thickness of zero.
-  .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ambient conditions).
-         So a basement slab edge adjacent to a garage or crawlspace, for example, should not be included.
+  .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ground or outdoor air conditions).
+         See the figure below for an example of calculating slab exposed perimeter.
   .. [#] If DepthBelowGrade not provided, defaults to zero for foundation types without walls.
          For foundation types with walls, DepthBelowGrade is ignored as the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value(s).
   .. [#] SystemIdentifier only required if ExteriorHorizontalInsulation is provided.
@@ -1522,6 +1522,15 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   .. [#] If GapInsulationRValue not provided, defaults to 5.0 if there is under slab (horizontal) insulation, otherwise 0.0.
   .. [#] If CarpetFraction not provided, defaults to 0.8 when adjacent to conditioned space, otherwise 0.0.
   .. [#] If CarpetRValue not provided, defaults to 2.0 when adjacent to conditioned space, otherwise 0.0.
+
+An example of calculating slab exposed perimeter is shown below:
+
+.. image:: images/slab_exposed_perimeter.png
+   :align: center
+
+As illustrated above, basement slab edge adjacent to a garage slab or crawlspace is not considered exposed perimeter.
+It is quite uncommon for a slab to have an exposed perimeter of zero.
+Heat transfer is only calculated for the length of exposed perimeter; the rest of the perimeter is assumed to have minimal heat transfer.
 
 Slab insulation locations can be visualized in the figure below:
 
