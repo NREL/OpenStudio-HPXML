@@ -4725,7 +4725,7 @@ Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
 
          \- **well pump**: ``PlugLoad[PlugLoadType=”well pump”]``
 
-         \- **electric vehicle charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]``
+         \- **electric vehicle charging**: ``PlugLoad[PlugLoadType=”electric vehicle charging”]`` or ``ElectricVehicleCharger``
 
   .. [#] Not allowed if LoadType is "lighting", "kitchen", "laundry", or "other"; otherwise, required.
   .. [#] A service feeder is created for any electric component not already referenced by a service feeder.
