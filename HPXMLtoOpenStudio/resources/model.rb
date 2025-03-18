@@ -850,7 +850,7 @@ module Model
     end
     return pcm
   end
-  
+
   # Adds an EnergyManagementSystemOutputVariable object to the OpenStudio model.
   #
   # The EnergyManagementSystemOutputVariable object allows generating output for
@@ -873,7 +873,7 @@ module Model
     ov.setUnits(units)
     return ov
   end
-  
+
   # Adds an OutputVariable object to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -882,7 +882,7 @@ module Model
   # @param reporting_frequency [String] Output reporting frequency ('detailed', 'timestep', 'hourly', 'daily', 'monthly', 'runperiod', or 'annual')
   # @return [OpenStudio::Model::OutputVariable] The model object
   def self.add_output_variable(model, key_value:, variable_name:, reporting_frequency:)
-    ov = OpenStudio::Model::OutputVariable.new(variable_name, model)
+    ov = OpenStudio::Model::OutputVariable.new(variable_name.to_s, model)
     ov.setKeyValue(key_value)
     ov.setReportingFrequency(reporting_frequency)
     return ov
@@ -900,7 +900,7 @@ module Model
     om.setReportingFrequency(reporting_frequency)
     return om
   end
-  
+
   # Converts existing string to EMS friendly string.
   #
   # Source: openstudio-standards

@@ -342,9 +342,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @return [Boolean] Success
   def modelOutputRequests(model, runner, user_arguments)
     return false if runner.halted
-    
+
     @model = model
-    
+
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
       return result
@@ -443,14 +443,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Peak Fuel outputs (annual only)
     @peak_fuels.values.each do |peak_fuel|
       # FIXME: Output:Table:Monthly not wrapped by OpenStudio
-      result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,#{peak_fuel.meter},Maximum;").get
+      # result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,#{peak_fuel.meter},Maximum;").get
     end
 
     # Peak Load outputs (annual only)
     @peak_loads.values.each do |peak_load|
-      ems_ov = Model.add_ems_output_variable(model, name: "#{peak_load.ems_variable}_peakload_outvar", ems_variable_name: peak_load.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: total_loads_program, units: 'J')
       # FIXME: Output:Table:Monthly not wrapped by OpenStudio
-      result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_load.report},2,#{ems_ov.name},Maximum;").get
+      # ems_ov = Model.add_ems_output_variable(model, name: "#{peak_load.ems_variable}_peakload_outvar", ems_variable_name: peak_load.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: total_loads_program, units: 'J')
+      # result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_load.report},2,#{ems_ov.name},Maximum;").get
     end
 
     # Unmet Hours (annual only)
@@ -500,7 +500,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Temperature outputs (timeseries only)
     if args[:include_timeseries_zone_temperatures]
       Model.add_output_variable(model, key_value: '*', variable_name: 'Zone Mean Air Temperature', reporting_frequency: args[:timeseries_frequency])
-      
+
       # For reporting temperature-scheduled spaces timeseries temperatures.
       keys = [HPXML::LocationOtherHeatedSpace,
               HPXML::LocationOtherMultifamilyBufferSpace,
@@ -514,7 +514,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         Model.add_output_variable(model, key_value: schedules[0].name.to_s.upcase, variable_name: 'Schedule Value', reporting_frequency: args[:timeseries_frequency])
       end
-      
+
       # Also report thermostat setpoints
       heated_zones.each do |heated_zone|
         Model.add_output_variable(model, key_value: heated_zone.upcase, variable_name: 'Zone Thermostat Heating Setpoint Temperature', reporting_frequency: args[:timeseries_frequency])

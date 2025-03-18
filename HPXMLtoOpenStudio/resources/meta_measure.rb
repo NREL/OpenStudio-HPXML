@@ -51,6 +51,15 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, run_measure
     return { success: success, runner: runner }
   end
 
+  # Apply reporting measure output requests
+  apply_model_output_requests(measures_dir, measures, runner, model)
+
+  # Translate model to workspace
+  forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
+  forward_translator.setExcludeLCCObjects(true)
+  workspace = forward_translator.translateModel(model)
+  success = report_ft_errors_warnings(forward_translator, rundir)
+
   # Remove unused objects automatically added by OpenStudio?
   remove_objects = []
   if model.alwaysOnContinuousSchedule.directUseCount == 0
@@ -67,14 +76,6 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, run_measure
 
     remove_objects << ['Schedule:Constant', sch.name.to_s]
   end
-
-  # Translate model to workspace
-  forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
-  forward_translator.setExcludeLCCObjects(true)
-  workspace = forward_translator.translateModel(model)
-  success = report_ft_errors_warnings(forward_translator, rundir)
-
-  # Remove objects
   remove_objects.uniq.each do |remove_object|
     workspace.getObjectByTypeAndName(remove_object[0].to_IddObjectType, remove_object[1]).get.remove
   end
@@ -245,7 +246,33 @@ def get_full_measure_path(measures_dir, measure_name, runner)
   register_error("Cannot find measure #{measure_name} in any of the measures_dirs: #{measures_dirs.join(', ')}.", runner)
 end
 
-# Apply OpenStudio measures and arguments (i.e., "energyPlusOutputRequests" method) corresponding to a provided Hash.
+# Apply reporting measure output requests (i.e., "modelOutputRequests" method).
+#
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
+# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
+# @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+# @param model [OpenStudio::Model::Model] OpenStudio Model object
+# @return [Boolean] True if EnergyPlus output requests have been applied successfully
+def apply_model_output_requests(measures_dir, measures, runner, model)
+  # Call each measure in the specified order
+  measures.keys.each do |measure_subdir|
+    # Gather measure arguments and call measure
+    full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
+    check_file_exists(full_measure_path, runner)
+    measure = get_measure_instance(full_measure_path)
+    measures[measure_subdir].each do |args|
+      next unless measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
+
+      argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
+      runner.setLastOpenStudioModel(model)
+      measure.modelOutputRequests(model, runner, argument_map)
+    end
+  end
+
+  return true
+end
+
+# Apply reporting measure output requests (i.e., "energyPlusOutputRequests" method).
 #
 # @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
