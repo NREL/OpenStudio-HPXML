@@ -2580,7 +2580,7 @@
   },
   "sample_files/base-hvac-install-quality-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "heat_pump": "PTHP, EER 11.4, COP 3.6, Airflow Defect Ratio",
+    "heat_pump": "GSHP, EER 16.6, COP 3.6, Airflow Defect Ratio",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml": {
