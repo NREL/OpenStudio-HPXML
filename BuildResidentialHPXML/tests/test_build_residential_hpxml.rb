@@ -501,13 +501,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['cooling_system'] = 'Central AC, SEER 13'
       args['cooling_system_cooling_capacity'] = 24000.0
       args['cooling_system_fraction_cool_load_served'] = 1
-      args['heat_pump_type'] = Constants::None
-      args['heat_pump_heating_efficiency_type'] = HPXML::UnitsHSPF
-      args['heat_pump_heating_efficiency'] = 7.7
-      args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsSEER
-      args['heat_pump_cooling_efficiency'] = 13.0
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeSingleStage
-      args['heat_pump_cooling_sensible_heat_fraction'] = 0.73
+      args['heat_pump'] = 'None'
       args['heat_pump_heating_capacity'] = 36000.0
       args['heat_pump_cooling_capacity'] = 36000.0
       args['heat_pump_fraction_heat_load_served'] = 1
@@ -795,7 +789,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-second-heating-system-portable-heater-to-heat-pump.xml'
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'
-      args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
+      args['heat_pump'] = 'ASHP, SEER 10, 6.2 HSPF'
       args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
       args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
       args['heat_pump_heating_capacity'] = 48000.0
@@ -809,23 +803,15 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-second-heating-system-fireplace-to-heat-pump.xml'
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'
-      args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
-      args['heat_pump_heating_efficiency'] = 10.0
-      args['heat_pump_cooling_efficiency'] = 19.0
+      args['heat_pump'] = 'MSHP, SEER 19, 10 HSPF'
       args['heat_pump_heating_capacity'] = 48000.0
-      args['heat_pump_is_ducted'] = true
       args['heat_pump_fraction_heat_load_served'] = 0.75
       args['heating_system_2_type'] = HPXML::HVACTypeFireplace
       args['heating_system_2_heating_capacity'] = 16000.0
     when 'extra-second-heating-system-boiler-to-heat-pump.xml'
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'
-      args['heat_pump_type'] = HPXML::HVACTypeHeatPumpGroundToAir
-      args['heat_pump_heating_efficiency_type'] = HPXML::UnitsCOP
-      args['heat_pump_heating_efficiency'] = 3.6
-      args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsEER
-      args['heat_pump_cooling_efficiency'] = 16.6
+      args['heat_pump'] = 'GSHP, EER 16.6, COP 3.6'
       args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
       args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
       args['heat_pump_fraction_heat_load_served'] = 0.75
@@ -944,24 +930,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-detailed-performance-autosize.xml'
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'
-      args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
-      args['heat_pump_heating_efficiency'] = 10.0
-      args['heat_pump_cooling_efficiency'] = 17.25
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
-      args['heat_pump_cooling_sensible_heat_fraction'] = 0.78
+      args['heat_pump'] = 'ASHP, SEER 17.25, 10 HPSF, Normalized Capacity Fractions'
       args.delete('heat_pump_heating_capacity')
       args.delete('heat_pump_cooling_capacity')
-      args['hvac_perf_data_capacity_type'] = 'Normalized capacity fractions'
-      args['hvac_perf_data_heating_outdoor_temperatures'] = '47.0, 17.0, 5.0'
-      args['hvac_perf_data_heating_min_speed_capacities'] = '0.28, 0.12, 0.05'
-      args['hvac_perf_data_heating_max_speed_capacities'] = '1.0, 0.69, 0.55'
-      args['hvac_perf_data_heating_min_speed_cops'] = '4.73, 1.84, 0.81'
-      args['hvac_perf_data_heating_max_speed_cops'] = '3.44, 2.66, 2.28'
-      args['hvac_perf_data_cooling_outdoor_temperatures'] = '95.0, 82.0'
-      args['hvac_perf_data_cooling_min_speed_capacities'] = '0.325, 0.37'
-      args['hvac_perf_data_cooling_max_speed_capacities'] = '1.0, 1.11'
-      args['hvac_perf_data_cooling_min_speed_cops'] = '4.47, 6.34'
-      args['hvac_perf_data_cooling_max_speed_cops'] = '2.71, 3.53'
     when 'extra-power-outage-periods.xml'
       args['schedules_unavailable_period_types'] = 'Power Outage, Power Outage'
       args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'
@@ -1136,10 +1107,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
     case hpxml_file
     when 'error-heating-system-and-heat-pump.xml'
       args['cooling_system'] = 'None'
-      args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
+      args['heat_pump'] = 'ASHP, SEER 10, 6.2 HSPF'
     when 'error-cooling-system-and-heat-pump.xml'
       args['heating_system'] = 'None'
-      args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
+      args['heat_pump'] = 'ASHP, SEER 10, 6.2 HSPF'
     when 'error-sfd-conditioned-basement-zero-foundation-height.xml'
       args['geometry_foundation_height'] = 0.0
       args.delete('foundation_wall_insulation_distance_to_bottom')
@@ -1160,9 +1131,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-second-heating-system-ducted-with-ducted-primary-heating.xml'
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'
-      args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
-      args['heat_pump_is_ducted'] = true
+      args['heat_pump'] = 'MSHP, SEER 14.5, 8.2 HSPF, Ducted'
       args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
       args['heating_system_2_type'] = HPXML::HVACTypeFurnace
     when 'error-sfa-no-building-num-units.xml'
