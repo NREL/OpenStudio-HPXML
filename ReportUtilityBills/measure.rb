@@ -149,23 +149,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return warnings.uniq
   end
 
-  # Return a vector of IdfObject's to request EnergyPlus objects needed by the run method.
+  # Adds OpenStudio model objects to requests desired outputs.
   #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [Array<OpenStudio::IdfObject>] array of OpenStudio IdfObject objects
-  def energyPlusOutputRequests(runner, user_arguments)
-    super(runner, user_arguments)
+  # @return [Boolean] Success
+  def modelOutputRequests(model, runner, user_arguments)
+    return false if runner.halted
 
-    result = OpenStudio::IdfObjectVector.new
-    return result if runner.halted
-
-    model = runner.lastOpenStudioModel
-    if model.empty?
-      return result
-    end
-
-    @model = model.get
+    @model = model
 
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
@@ -209,13 +202,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       next unless has_fuel[hpxml_fuel_map[fuel_type]]
       next if is_production && !has_pv # we don't need to request this meter if there isn't pv
 
-      result << OpenStudio::IdfObject.load("Output:Meter,#{fuel.meter},monthly;").get
+      Model.add_output_meter(model, meter_name: fuel.meter, reporting_frequency: 'monthly')
       if fuel_type == FT::Elec && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
-        result << OpenStudio::IdfObject.load("Output:Meter,#{fuel.meter},hourly;").get
+        Model.add_output_meter(model, meter_name: fuel.meter, reporting_frequency: 'hourly')
       end
     end
 
-    return result.uniq
+    return true
   end
 
   # Register to the runner each warning.
