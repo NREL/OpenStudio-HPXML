@@ -40,17 +40,17 @@ None	none
 "GSHP, EER 20.2, COP 4.2"	ground-to-air	COP	4.2	EER	20.2																				
 "GSHP, EER 20.5, COP 4.0"	ground-to-air	COP	4	EER	20.5																				
 "MSHP, SEER 14.5, 8.2 HSPF"	mini-split	HSPF	8.2	SEER	14.5	variable speed																			
-"MSHP, SEER 14.5, 8.2 HSPF, Ducted"	mini-split	HSPF	8.2	SEER	14.5	variable speed																			
+"MSHP, SEER 14.5, 8.2 HSPF, Ducted"	mini-split	HSPF	8.2	SEER	14.5	variable speed					true														
 "MSHP, SEER 16, 9.2 HSPF"	mini-split	HSPF	9.2	SEER	16	variable speed																			
 "MSHP, SEER 16.7, 11.3 HSPF, Detailed Performance"	mini-split	HSPF	11.3	SEER	16.7	variable speed	0.73				true				Absolute capacities	"47.0, 17.0, 5.0, -5.0"	"9200, 7063, 6310, 5683"	"48000, 36800, 32920, 29640"	"4.35, 2.92, 2.60, 2.49"	"3.21, 2.15, 1.93, 1.82"	"95.0, 82.0"	"9600, 10224"	"39000, 41587"	"4.02, 4.61"	"2.86, 3.29"
 "MSHP, SEER 16.7, 11.3 HSPF, Normalized Capacity Fractions"	mini-split	HSPF	11.3	SEER	16.7	variable speed	0.73				true				Normalized capacity fractions	"47.0, 17.0, 5.0, -5.0"	"0.26, 0.20, 0.18, 0.16"	"1.33, 1.02, 0.91, 0.82"	"4.35, 2.92, 2.60, 2.49"	"3.21, 2.15, 1.93, 1.82"	"95.0, 82.0"	"0.27, 0.28"	"1.08, 1.16"	"4.02, 4.61"	"2.86, 3.29"
 "MSHP, SEER 17, 9.5 HSPF"	mini-split	HSPF	9.5	SEER	17	variable speed																			
-"MSHP, SEER 17, 9.5 HSPF, Ducted"	mini-split	HSPF	9.5	SEER	17	variable speed																			
+"MSHP, SEER 17, 9.5 HSPF, Ducted"	mini-split	HSPF	9.5	SEER	17	variable speed					true														
 "MSHP, SEER 17, 10 HSPF, Ductless, Detailed Performance"	mini-split	HSPF	10	SEER	17	variable speed	0.73				false				Absolute capacities	"47.0, 17.0, 5.0, -13.0"	"11400, 5600, 3600, 2600"	"46500, 25000, 22000, 16000"	"3.48, 2.78, 1.88, 1.52"	"2.75, 2.11, 1.8, 1.31"	"95.0, 82.0"	"9100, 9900"	"36400, 43300"	"3.76, 4.61"	"2.45, 3.51"
 "MSHP, SEER 17, 10 HSPF, Ductless, Normalized Capacity Fractions"	mini-split	HSPF	10	SEER	17	variable speed	0.73				false				Normalized capacity fractions	"47.0, 17.0, 5.0, -13.0"	"0.30, 0.15, 0.09, 0.07"	"1.22, 0.66, 0.58, 0.42"	"3.48, 2.78, 1.88, 1.52"	"2.75, 2.11, 1.8, 1.31"	"95.0, 82.0"	"0.25, 0.28"	"1.01, 1.20"	"3.76, 4.61"	"2.45, 3.51"
 "MSHP, SEER 18.0, 9.6 HSPF"	mini-split	HSPF	9.6	SEER	18	variable speed																			
 "MSHP, SEER 18.0, 9.6 HSPF, Ducted"	mini-split	HSPF	9.6	SEER	18	variable speed																			
-"MSHP, SEER 19, 10 HSPF"	mini-split	HSPF	10	SEER	19	variable speed	0.73	0.6	17		true														
+"MSHP, SEER 19, 10 HSPF, Ducted"	mini-split	HSPF	10	SEER	19	variable speed	0.73	0.6	17		true														
 "MSHP, SEER 19, 10 HSPF, Airflow Defect Ratio"	mini-split	HSPF	10	SEER	19	variable speed	0.73	0.6	17		true	-0.25	-0.25												
 "MSHP, SEER 19, 10 HSPF, 30F Compressor Lockout"	mini-split	HSPF	10	SEER	19	variable speed	0.73	0.6	17	30	true														
 "MSHP, SEER 19, 10 HSPF, Ductless"	mini-split	HSPF	10	SEER	19	variable speed	0.73	0.6	17		false														
@@ -58,10 +58,10 @@ None	none
 "MSHP, SEER 20, 11 HSPF"	mini-split	HSPF	11	SEER	20	variable speed																			
 "MSHP, SEER 24, 13 HSPF"	mini-split	HSPF	13	SEER	24	variable speed																			
 "MSHP, SEER 25, 12.7 HSPF"	mini-split	HSPF	12.7	SEER	25	variable speed																			
-"MSHP, SEER 25, 12.7 HSPF, Ducted"	mini-split	HSPF	12.7	SEER	25	variable speed																			
+"MSHP, SEER 25, 12.7 HSPF, Ducted"	mini-split	HSPF	12.7	SEER	25	variable speed					true														
 "MSHP, SEER 29.3, 14 HSPF"	mini-split	HSPF	14	SEER	29.3	variable speed																			
-"MSHP, SEER 29.3, 14 HSPF, Ducted"	mini-split	HSPF	14	SEER	29.3	variable speed																			
+"MSHP, SEER 29.3, 14 HSPF, Ducted"	mini-split	HSPF	14	SEER	29.3	variable speed					true														
 "MSHP, SEER 33, 13.3 HSPF"	mini-split	HSPF	13.3	SEER	33	variable speed																			
-"MSHP, SEER 33, 13.3 HSPF, Ducted"	mini-split	HSPF	13.3	SEER	33	variable speed																			
+"MSHP, SEER 33, 13.3 HSPF, Ducted"	mini-split	HSPF	13.3	SEER	33	variable speed					true														
 "PTHP, EER 11.4, COP 3.6"	packaged terminal heat pump	COP	3.6	EER	11.4		0.65	0.6	17																
 "Room AC w/ Reverse Cycle, EER 11.4"	room air conditioner with reverse cycle	COP	3.6	EER	11.4		0.65	0.6	17																

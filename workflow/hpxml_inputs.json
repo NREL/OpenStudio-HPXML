@@ -2625,7 +2625,7 @@
     "heating_system_fraction_heat_load_served": 0,
     "cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0,
-    "heat_pump": "MSHP, SEER 19, 10 HSPF",
+    "heat_pump": "MSHP, SEER 19, 10 HSPF, Ducted",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
