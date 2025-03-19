@@ -442,15 +442,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Peak Fuel outputs (annual only)
     @peak_fuels.values.each do |peak_fuel|
-      # FIXME: Output:Table:Monthly not wrapped by OpenStudio
-      # result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,#{peak_fuel.meter},Maximum;").get
+      Model.add_output_table_monthly(model, name: peak_fuel.report, output_var_or_meter_name: peak_fuel.meter, aggregation_type: 'Maximum')
     end
 
     # Peak Load outputs (annual only)
     @peak_loads.values.each do |peak_load|
-      # FIXME: Output:Table:Monthly not wrapped by OpenStudio
-      # ems_ov = Model.add_ems_output_variable(model, name: "#{peak_load.ems_variable}_peakload_outvar", ems_variable_name: peak_load.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: total_loads_program, units: 'J')
-      # result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_load.report},2,#{ems_ov.name},Maximum;").get
+      ems_ov = Model.add_ems_output_variable(model, name: "#{peak_load.ems_variable}_peakload_outvar", ems_variable_name: peak_load.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: total_loads_program, units: 'J')
+      Model.add_output_table_monthly(model, name: peak_load.report, output_var_or_meter_name: ems_ov.name.to_s, aggregation_type: 'Maximum')
     end
 
     # Unmet Hours (annual only)
@@ -460,10 +458,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       ems_program = key == UHT::Driving ? unmet_driving_hrs_program : unmet_hours_program
 
       ems_ov = Model.add_ems_output_variable(model, name: "#{unmet_hour.ems_variable}_annual_outvar", ems_variable_name: unmet_hour.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: ems_program, units: 'hr')
-      Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name, reporting_frequency: 'runperiod')
+      Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name.to_s, reporting_frequency: 'runperiod')
       if args[:include_timeseries_unmet_hours]
         ems_ov = Model.add_ems_output_variable(model, name: "#{unmet_hour.ems_variable}_timeseries_outvar", ems_variable_name: unmet_hour.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: ems_program, units: 'hr')
-        Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name, reporting_frequency: args[:timeseries_frequency])
+        Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name.to_s, reporting_frequency: args[:timeseries_frequency])
       end
     end
 
@@ -472,10 +470,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if comp_loads_program.nil?
 
       ems_ov = Model.add_ems_output_variable(model, name: "#{comp_load.ems_variable}_annual_outvar", ems_variable_name: comp_load.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: comp_loads_program, units: 'J')
-      Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name, reporting_frequency: 'runperiod')
+      Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name.to_s, reporting_frequency: 'runperiod')
       if args[:include_timeseries_component_loads]
         ems_ov = Model.add_ems_output_variable(model, name: "#{comp_load.ems_variable}_timeseries_outvar", ems_variable_name: comp_load.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: comp_loads_program, units: 'J')
-        Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name, reporting_frequency: args[:timeseries_frequency])
+        Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name.to_s, reporting_frequency: args[:timeseries_frequency])
       end
     end
 
@@ -483,10 +481,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @loads.values.each do |load|
       if not load.ems_variable.nil?
         ems_ov = Model.add_ems_output_variable(model, name: "#{load.ems_variable}_annual_outvar", ems_variable_name: load.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: total_loads_program, units: 'J')
-        Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name, reporting_frequency: 'runperiod')
+        Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name.to_s, reporting_frequency: 'runperiod')
         if args[:include_timeseries_total_loads]
           ems_ov = Model.add_ems_output_variable(model, name: "#{load.ems_variable}_timeseries_outvar", ems_variable_name: load.ems_variable, type_of_data: 'Summed', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: total_loads_program, units: 'J')
-          Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name, reporting_frequency: args[:timeseries_frequency])
+          Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name.to_s, reporting_frequency: args[:timeseries_frequency])
         end
       end
       load.variables.each do |_sys_id, varkey, var|
@@ -528,7 +526,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if args[:include_timeseries_airflows]
       @airflows.each do |_airflow_type, airflow|
         ems_ov = Model.add_ems_output_variable(model, name: "#{airflow.ems_variable}_timeseries_outvar", ems_variable_name: airflow.ems_variable, type_of_data: 'Averaged', update_frequency: 'ZoneTimestep', ems_program_or_subroutine: total_airflows_program, units: 'm^3/s')
-        Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name, reporting_frequency: args[:timeseries_frequency])
+        Model.add_output_variable(model, key_value: '*', variable_name: ems_ov.name.to_s, reporting_frequency: args[:timeseries_frequency])
       end
     end
 

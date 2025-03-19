@@ -874,7 +874,8 @@ module Model
     return ov
   end
 
-  # Adds an OutputVariable object to the OpenStudio model.
+  # Adds an OutputVariable object to the OpenStudio model. If there is already an
+  # identical existing object on the model, returns that instead.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param key_value [String] The specific object reference for reporting
@@ -882,23 +883,65 @@ module Model
   # @param reporting_frequency [String] Output reporting frequency ('detailed', 'timestep', 'hourly', 'daily', 'monthly', 'runperiod', or 'annual')
   # @return [OpenStudio::Model::OutputVariable] The model object
   def self.add_output_variable(model, key_value:, variable_name:, reporting_frequency:)
-    ov = OpenStudio::Model::OutputVariable.new(variable_name.to_s, model)
+    model.getOutputVariables.each do |ov|
+      next unless ov.variableName == variable_name
+      next unless ov.keyValue == key_value
+      next unless ov.reportingFrequency == reporting_frequency
+
+      return ov # Duplicate of existing object
+    end
+    ov = OpenStudio::Model::OutputVariable.new(variable_name, model)
     ov.setKeyValue(key_value)
     ov.setReportingFrequency(reporting_frequency)
     return ov
   end
 
-  # Adds an OutputMeter object to the OpenStudio model.
+  # Adds an OutputMeter object to the OpenStudio model. If there is already an
+  # identical existing object on the model, returns that instead.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param meter_name [String] The meter name as shown in the eplusout.mdd file
   # @param reporting_frequency [String] Output reporting frequency ('detailed', 'timestep', 'hourly', 'daily', 'monthly', 'runperiod', or 'annual')
   # @return [OpenStudio::Model::OutputMeter] The model object
   def self.add_output_meter(model, meter_name:, reporting_frequency:)
+    model.getOutputMeters.each do |om|
+      next unless om.name == meter_name
+      next unless om.reportingFrequency == reporting_frequency
+
+      return om # Duplicate of existing object
+    end
     om = OpenStudio::Model::OutputMeter.new(model)
     om.setName(meter_name)
     om.setReportingFrequency(reporting_frequency)
     return om
+  end
+
+  # Adds an OutputTableMonthly to the OpenStudio model. If there is already an
+  # identical existing object on the model, returns that instead.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the output table
+  # @param digits_after_decimal [Integer] Number of digits after the decimal point
+  # @param output_var_or_meter_name [String] EnergyPlus Output:Variable or Output:Meter name
+  # @param aggregation_type [String] Aggregation type (SumOrAverage, Maximum, Minimum, etc.)
+  # @return [OpenStudio::Model::OutputTableMonthly] The model object
+  def self.add_output_table_monthly(model, name:, digits_after_decimal: 2, output_var_or_meter_name:, aggregation_type:)
+    model.getOutputTableMonthlys.each do |otm|
+      next unless otm.name.to_s == name
+      next unless otm.digitsAfterDecimal == digits_after_decimal
+      next unless otm.numberofMonthlyVariableGroups == 1
+
+      first_group = otm.getMonthlyVariableGroup(0).get
+      next unless first_group.variableOrMeterName == output_var_or_meter_name
+      next unless first_group.aggregationType == aggregation_type
+
+      return otm # Duplicate of existing object
+    end
+    otm = OpenStudio::Model::OutputTableMonthly.new(model)
+    otm.setName(name)
+    otm.setDigitsAfterDecimal(digits_after_decimal)
+    otm.addMonthlyVariableGroup(output_var_or_meter_name, aggregation_type)
+    return otm
   end
 
   # Converts existing string to EMS friendly string.
