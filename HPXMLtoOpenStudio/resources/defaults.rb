@@ -6416,6 +6416,7 @@ module Defaults
     set_hvac_degradation_coefficient(heating_system)
 
     # Default heating capacity maintenance from 17F to 47F
+    htg_ap.qm17full = nil
     if (heating_system.heating_capacity_17F.to_f > 0) && (heating_system.heating_capacity > 0)
       htg_ap.qm17full = heating_system.heating_capacity_17F / heating_system.heating_capacity
     elsif not heating_system.heating_capacity_fraction_17F.nil?
@@ -6423,8 +6424,15 @@ module Defaults
     elsif not heating_system.heating_detailed_performance_data.empty?
       nom_dp_47f = heating_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
       nom_dp_17f = heating_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
-      htg_ap.qm17full = nom_dp_17f.capacity / nom_dp_47f.capacity
-    else
+      if (not nom_dp_47f.nil?) && (not nom_dp_17f.nil?)
+        if (not nom_dp_17f.capacity.nil?) && (not nom_dp_47f.capacity.nil?)
+          htg_ap.qm17full = nom_dp_17f.capacity / nom_dp_47f.capacity
+        elsif not nom_dp_17f.capacity_fraction_of_nominal.nil?
+          htg_ap.qm17full = nom_dp_17f.capacity_fraction_of_nominal
+        end
+      end
+    end
+    if htg_ap.qm17full.nil?
       case heating_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
         htg_ap.qm17full = 0.59 # Approximately based on Cutler curves
