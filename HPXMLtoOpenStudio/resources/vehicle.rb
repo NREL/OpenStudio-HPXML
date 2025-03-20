@@ -48,7 +48,7 @@ module Vehicle
       return
     end
 
-    vehicle.additional_properties.location = ev_charger.location
+    vehicle.additional_properties.location = HPXML::LocationOutside
 
     if vehicle.fuel_economy_units == HPXML::UnitsKwhPerMile
       kwh_per_mile = vehicle.fuel_economy_combined

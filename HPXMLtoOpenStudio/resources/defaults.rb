@@ -3237,21 +3237,16 @@ module Defaults
 
       next if vehicle.ev_charger.nil?
 
-      apply_ev_charger(hpxml_bldg, vehicle.ev_charger)
+      apply_ev_charger(vehicle.ev_charger)
     end
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::ElectricVehicleCharger objects
   #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param ev_charger [HPXML::ElectricVehicleCharger] Object that defines a single electric vehicle charger
   # @return [nil]
-  def self.apply_ev_charger(hpxml_bldg, ev_charger)
-    default_values = get_ev_charger_values(hpxml_bldg.has_location(HPXML::LocationGarage))
-    if ev_charger.location.nil?
-      ev_charger.location = default_values[:location]
-      ev_charger.location_isdefaulted = true
-    end
+  def self.apply_ev_charger(ev_charger)
+    default_values = get_ev_charger_values()
     if ev_charger.charging_level.nil? && ev_charger.charging_power.nil?
       ev_charger.charging_level = default_values[:charging_level]
       ev_charger.charging_level_isdefaulted = true
@@ -5753,15 +5748,8 @@ module Defaults
   #
   # @param has_garage [Boolean] whether the HPXML Building object has a garage
   # @return [Hash] map of electric vehicle charger properties to default values
-  def self.get_ev_charger_values(has_garage = false)
-    if has_garage
-      location = HPXML::LocationGarage
-    else
-      location = HPXML::LocationOutside
-    end
-
-    return { location: location,
-             charging_level: 2,
+  def self.get_ev_charger_values()
+    return { charging_level: 2,
              level1_charging_power: 1600,
              level2_charging_power: 5690 } # Median L2 charging rate in EVWatts
   end

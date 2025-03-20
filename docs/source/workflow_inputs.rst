@@ -4699,13 +4699,10 @@ A single electric vehicle charger can be entered as a ``/HPXML/Building/Building
   Element               Type     Units  Constraints  Required  Default   Notes
   ====================  =======  =====  ===========  ========  ========  ============================================
   ``SystemIdentifier``  id                           Yes                 Unique identifier
-  ``Location``          string          See [#]_     No        See [#]_  Location of charger and attached EV when at home
   ``ChargingLevel``     integer         >= 1, <= 3   No        See [#]_  Charger power level
   ``ChargingPower``     double   W      > 0          No        See [#]_  Charger power output
   ====================  =======  =====  ===========  ========  ========  ============================================
 
-  .. [#] Location choices are "garage" or "outside".
-  .. [#] If Location not provided, defaults to "garage" if a garage is present, otherwise "outside".
   .. [#] If neither ChargingLevel nor ChargingPower provided, defaults to level 2.
   .. [#] If ChargingPower not provided, defaults to 1600 W if a level 1 charger, otherwise 5690 W per `EV Watts Public Database <https://www.osti.gov/biblio/1970735>`_.
 
