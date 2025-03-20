@@ -6425,9 +6425,9 @@ module Defaults
       nom_dp_47f = heating_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
       nom_dp_17f = heating_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
       if (not nom_dp_47f.nil?) && (not nom_dp_17f.nil?)
-        if (not nom_dp_17f.capacity.nil?) && (not nom_dp_47f.capacity.nil?)
+        if (nom_dp_17f.capacity.to_f > 0) && (nom_dp_47f.capacity.to_f > 0)
           htg_ap.qm17full = nom_dp_17f.capacity / nom_dp_47f.capacity
-        elsif not nom_dp_17f.capacity_fraction_of_nominal.nil?
+        elsif nom_dp_17f.capacity_fraction_of_nominal.to_f > 0
           htg_ap.qm17full = nom_dp_17f.capacity_fraction_of_nominal
         end
       end
@@ -6620,12 +6620,20 @@ module Defaults
         # Capacities @ LCT
         capacityLCTmax = capacity5max * (1.0 / (1.0 - hp_ap.qmslopeLCTmax * (5.0 - lct)))
         capacityLCTmin = capacity5min * (1.0 / (1.0 - hp_ap.qmslopeLCTmin * (5.0 - lct)))
-        capacityLCTfull = MathTools.interp2(capacity5full, capacity5min, capacity5max, capacityLCTmin, capacityLCTmax)
+        if capacityLCTmin > 0
+          capacityLCTfull = MathTools.interp2(capacity5full, capacity5min, capacity5max, capacityLCTmin, capacityLCTmax)
+        else
+          capacityLCTfull = 0.0
+        end
 
         # COPs @ LCT
         copLCTmin = cop5min * (1.0 - hp_ap.eirmslopeLCTmin * (5.0 - lct))
         copLCTmax = cop5max * (1.0 - hp_ap.eirmslopeLCTmax * (5.0 - lct))
-        copLCTfull = capacityLCTfull / MathTools.interp2(capacity5full / cop5full, capacity5min / cop5min, capacity5max / cop5max, capacityLCTmin / copLCTmin, capacityLCTmax / copLCTmax)
+        if capacityLCTfull > 0
+          copLCTfull = capacityLCTfull / MathTools.interp2(capacity5full / cop5full, capacity5min / cop5min, capacity5max / cop5max, capacityLCTmin / copLCTmin, capacityLCTmax / copLCTmax)
+        else
+          copLCTfull = MathTools.interp2(lct, 5.0, 17.0, cop5min, cop17min) # Arbitrary
+        end
       end
     end
 
