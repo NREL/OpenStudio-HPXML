@@ -499,7 +499,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['cooling_system_type'] = HPXML::HVACTypeCentralAirConditioner
       args['cooling_system_cooling_efficiency_type'] = HPXML::UnitsSEER
       args['cooling_system_cooling_efficiency'] = 13.0
-      args['cooling_system_cooling_compressor_type'] = HPXML::HVACCompressorTypeSingleStage
+      args['cooling_system_compressor_type'] = HPXML::HVACCompressorTypeSingleStage
       args['cooling_system_cooling_sensible_heat_fraction'] = 0.73
       args['cooling_system_cooling_capacity'] = 24000.0
       args['cooling_system_fraction_cool_load_served'] = 1
@@ -509,7 +509,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump_heating_efficiency'] = 7.7
       args['heat_pump_cooling_efficiency_type'] = HPXML::UnitsSEER
       args['heat_pump_cooling_efficiency'] = 13.0
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeSingleStage
+      args['heat_pump_compressor_type'] = HPXML::HVACCompressorTypeSingleStage
       args['heat_pump_cooling_sensible_heat_fraction'] = 0.73
       args['heat_pump_heating_capacity'] = 36000.0
       args['heat_pump_cooling_capacity'] = 36000.0
@@ -814,7 +814,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_type'] = Constants::None
       args['cooling_system_type'] = Constants::None
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
+      args['heat_pump_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
       args['heat_pump_heating_efficiency'] = 10.0
       args['heat_pump_cooling_efficiency'] = 19.0
       args['heat_pump_heating_capacity'] = 48000.0
@@ -951,7 +951,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
       args['heat_pump_heating_efficiency'] = 10.0
       args['heat_pump_cooling_efficiency'] = 17.25
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
+      args['heat_pump_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
       args['heat_pump_cooling_sensible_heat_fraction'] = 0.78
       args.delete('heat_pump_heating_capacity')
       args.delete('heat_pump_cooling_capacity')
@@ -1169,7 +1169,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_type'] = Constants::None
       args['cooling_system_type'] = Constants::None
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
+      args['heat_pump_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
       args['heat_pump_is_ducted'] = true
       args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
       args['heating_system_2_type'] = HPXML::HVACTypeFurnace

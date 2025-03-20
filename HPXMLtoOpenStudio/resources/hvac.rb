@@ -8,7 +8,7 @@ module HVAC
   AirSourceCoolRatedOWB = 75.0 # degF, Rated outdoor wetbulb for air-source systems, cooling
   AirSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for air-source systems, cooling
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
-  RatedCFMPerTon = 400.0 # cfm/ton of rated capacity, RESNET MINHERS Addendum 82
+  RatedCFMPerTon = 400.0 # cfm/ton of rated capacity, RESNET MINHERS Addendum 82 FIXME: Need to review
   CrankcaseHeaterTemp = 50.0 # degF, RESNET MINHERS Addendum 82
   MinCapacity = 1.0 # Btuh
   MinAirflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
@@ -326,7 +326,7 @@ module HVAC
       end
     end
 
-    # Calculate max rated cfm
+    # Calculate max rated cfm FIXME: Need to review
     max_rated_fan_cfm = -9999
     if not cooling_system.nil?
       clg_ap = cooling_system.additional_properties
@@ -2346,8 +2346,7 @@ module HVAC
   # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @return [nil]
   def self.process_detailed_performance_data(hvac_system, mode, max_rated_fan_cfm, weather_temp, hp_min_temp = nil)
-    detailed_performance_data_name = (mode == :clg) ? 'cooling_detailed_performance_data' : 'heating_detailed_performance_data'
-    detailed_performance_data = hvac_system.send(detailed_performance_data_name)
+    detailed_performance_data = (mode == :clg) ? hvac_system.cooling_detailed_performance_data : hvac_system.heating_detailed_performance_data
     hvac_ap = hvac_system.additional_properties
 
     datapoints_by_speed = { HPXML::CapacityDescriptionMinimum => [],
@@ -2438,7 +2437,7 @@ module HVAC
         min_power = 0.5 * dp82f.input_power
         odb_at_min_power = MathTools.interp2(min_power, dp82f.input_power, dp95f.input_power, 82.0, 95.0)
         odb_at_min_power = -999999.0 if dp82f.input_power >= dp95f.input_power # Exclude if power increasing at lower ODB temperatures
-        min_odb = [odb_at_min_power, 50.0].max
+        min_odb = [odb_at_min_power, 40.0].max
         if min_odb < user_odbs.min
           outdoor_dry_bulbs << [:min, min_odb]
         end
@@ -2450,7 +2449,7 @@ module HVAC
         end
 
         # Max heating OBD temperature
-        max_odb = 60
+        max_odb = 70.0
         if max_odb > user_odbs.max
           outdoor_dry_bulbs << [:max, max_odb]
         end

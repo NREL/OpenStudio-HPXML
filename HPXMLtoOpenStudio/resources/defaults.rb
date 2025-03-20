@@ -6416,11 +6416,14 @@ module Defaults
     set_hvac_degradation_coefficient(heating_system)
 
     # Default heating capacity maintenance from 17F to 47F
-    # FIXME: Need to also
     if (heating_system.heating_capacity_17F.to_f > 0) && (heating_system.heating_capacity > 0)
       htg_ap.qm17full = heating_system.heating_capacity_17F / heating_system.heating_capacity
     elsif not heating_system.heating_capacity_fraction_17F.nil?
       htg_ap.qm17full = heating_system.heating_capacity_fraction_17F
+    elsif not heating_system.heating_detailed_performance_data.empty?
+      nom_dp_47f = heating_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+      nom_dp_17f = heating_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+      htg_ap.qm17full = nom_dp_17f.capacity / nom_dp_47f.capacity
     else
       case heating_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
@@ -6482,6 +6485,8 @@ module Defaults
       htg_ap.qm5max = 0.866 # Q5max/Q17max
       htg_ap.qr5full = 0.988 # Q5full/Q5max
       htg_ap.qr5min = 0.321 # Q5min/Q5max
+      htg_ap.qmslopeLCTmax = -0.025 # (1.0 - Q5max/QLCTmax)/(5 - LCT)
+      htg_ap.qmslopeLCTmin = -0.024 # (1.0 - Q5min/QLCTmin)/(5 - LCT)
       htg_ap.eirr47full = 0.939 # (P47full/Q47full)/(P47max/Q47max)
       htg_ap.eirr47min = 0.730 # (P47min/Q47min)/(P47max/Q47max)
       htg_ap.eirm17full = 1.351 # (P17full/Q17full)/(P47full/Q47full)
@@ -6490,6 +6495,8 @@ module Defaults
       htg_ap.eirm5max = 1.164 # (P5max/Q5max)/(P17max/Q17max)
       htg_ap.eirr5full = 1.000 # (P5full/Q5full)/(P5max/Q5max)
       htg_ap.eirr5min = 0.866 # (P5min/Q5min)/(P5max/Q5max)
+      htg_ap.eirmslopeLCTmax = 0.012 # (1.0 - (PLCTmax/QLCTmax)/(P5max/Q5max))/(5 - LCT)
+      htg_ap.eirmslopeLCTmin = 0.012 # (1.0 - (PLCTmin/QLCTmin)/(P5min/Q5min))/(5 - LCT)
 
       hspf2_array = [7.0, 9.25, 11.5, 13.75, 16.0]
       qm17full_array = [0.5, 0.54, 0.62, 0.78, 1.10]
@@ -6517,6 +6524,7 @@ module Defaults
 
     capacity47full = heat_pump.heating_capacity
     capacity17full = heat_pump.heating_capacity_17F
+    lct = hp_ap.hp_min_temp
 
     case heat_pump.compressor_type
     when HPXML::HVACCompressorTypeSingleStage
@@ -6582,8 +6590,8 @@ module Defaults
       cop47min = cop47max / hp_ap.eirr47min
 
       # Capacities @ 17F
-      capacity17max = heat_pump.heating_capacity_17F / hp_ap.qr17full
-      capacity17min = heat_pump.heating_capacity_17F * hp_ap.qr17min / hp_ap.qr17full
+      capacity17max = capacity17full / hp_ap.qr17full
+      capacity17min = capacity17full * hp_ap.qr17min / hp_ap.qr17full
 
       # COPs @ 17F
       cop17full = hp_ap.cop47full / hp_ap.eirm17full
@@ -6599,6 +6607,16 @@ module Defaults
       cop5max = cop17max / hp_ap.eirm5max
       cop5full = cop5max / hp_ap.eirr5full
       cop5min = cop5max / hp_ap.eirr5min
+
+      # Capacities @ LCT
+      capacityLCTmax = capacity5max * (1.0 / (1.0 - hp_ap.qmslopeLCTmax * (5.0 - lct)))
+      capacityLCTmin = capacity5min * (1.0 / (1.0 - hp_ap.qmslopeLCTmin * (5.0 - lct)))
+      capacityLCTfull = MathTools.interp2(capacity5full, capacity5min, capacity5max, capacityLCTmin, capacityLCTmax)
+
+      # COPs @ LCT
+      copLCTmin = cop5min * (1.0 - hp_ap.eirmslopeLCTmin * (5.0 - lct))
+      copLCTmax = cop5max * (1.0 - hp_ap.eirmslopeLCTmax * (5.0 - lct))
+      copLCTfull = capacityLCTfull / MathTools.interp2(capacity5full / cop5full, capacity5min / cop5min, capacity5max / cop5max, capacityLCTmin / copLCTmin, capacityLCTmax / copLCTmax)
     end
 
     # Add detailed performance data
@@ -6658,6 +6676,24 @@ module Defaults
                                   capacity_description: HPXML::CapacityDescriptionMinimum,
                                   outdoor_temperature: 5,
                                   isdefaulted: true) unless capacity5min.nil?
+    # LCT, maximum speed
+    detailed_performance_data.add(capacity: Float(capacityLCTmax.round),
+                                  efficiency_cop: copLCTmax.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: lct,
+                                  isdefaulted: true) unless capacityLCTmax.nil?
+    # LCT, nominal speed
+    detailed_performance_data.add(capacity: Float(capacityLCTfull.round),
+                                  efficiency_cop: copLCTfull.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
+                                  outdoor_temperature: lct,
+                                  isdefaulted: true) unless capacityLCTfull.nil?
+    # LCT, minimum speed
+    detailed_performance_data.add(capacity: Float(capacityLCTmin.round),
+                                  efficiency_cop: copLCTmin.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: lct,
+                                  isdefaulted: true) unless capacityLCTmin.nil?
   end
 
   # Adds default heat pump or air conditioner detailed performance datapoints based on RESNET MINHERS Addendum 82.

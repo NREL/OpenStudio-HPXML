@@ -2022,6 +2022,19 @@ The type of cooling system. Use 'none' if there is no cooling system or if there
 
 <br/>
 
+**Cooling System: Cooling Compressor Type**
+
+The compressor type of the cooling system. Required for central air conditioner and mini-split.
+
+- **Name:** ``cooling_system_compressor_type``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `single stage`, `two stage`, `variable speed`
+
+<br/>
+
 **Cooling System: Efficiency Type**
 
 The efficiency type of the cooling system. System types central air conditioner and mini-split use SEER or SEER2. System types room air conditioner and packaged terminal air conditioner use EER or CEER. Ignored for system type evaporative cooler.
@@ -2043,19 +2056,6 @@ The rated efficiency value of the cooling system. Ignored for evaporative cooler
 - **Type:** ``Double``
 
 - **Required:** ``true``
-
-<br/>
-
-**Cooling System: Cooling Compressor Type**
-
-The compressor type of the cooling system. Required for central air conditioner and mini-split.
-
-- **Name:** ``cooling_system_cooling_compressor_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `single stage`, `two stage`, `variable speed`
 
 <br/>
 
@@ -2237,6 +2237,19 @@ The type of heat pump. Use 'none' if there is no heat pump.
 
 <br/>
 
+**Heat Pump: Cooling Compressor Type**
+
+The compressor type of the heat pump. Required for air-to-air and mini-split.
+
+- **Name:** ``heat_pump_compressor_type``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `single stage`, `two stage`, `variable speed`
+
+<br/>
+
 **Heat Pump: Heating Efficiency Type**
 
 The heating efficiency type of heat pump. System types air-to-air and mini-split use HSPF or HSPF2. System types ground-to-air, packaged terminal heat pump and room air conditioner with reverse cycle use COP.
@@ -2282,19 +2295,6 @@ The rated cooling efficiency value of the heat pump.
 - **Type:** ``Double``
 
 - **Required:** ``true``
-
-<br/>
-
-**Heat Pump: Cooling Compressor Type**
-
-The compressor type of the heat pump. Required for air-to-air and mini-split.
-
-- **Name:** ``heat_pump_cooling_compressor_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `single stage`, `two stage`, `variable speed`
 
 <br/>
 

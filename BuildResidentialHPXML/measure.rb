@@ -1264,6 +1264,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::HVACTypeCentralAirConditioner)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_compressor_type', compressor_type_choices, false)
+    arg.setDisplayName('Cooling System: Cooling Compressor Type')
+    arg.setDescription("The compressor type of the cooling system. Required for #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_efficiency_type', cooling_efficiency_type_choices, true)
     arg.setDisplayName('Cooling System: Efficiency Type')
     arg.setDescription("The efficiency type of the cooling system. System types #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} use #{HPXML::UnitsSEER} or #{HPXML::UnitsSEER2}. System types #{HPXML::HVACTypeRoomAirConditioner} and #{HPXML::HVACTypePTAC} use #{HPXML::UnitsEER} or #{HPXML::UnitsCEER}. Ignored for system type #{HPXML::HVACTypeEvaporativeCooler}.")
@@ -1274,11 +1279,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooling System: Efficiency')
     arg.setDescription("The rated efficiency value of the cooling system. Ignored for #{HPXML::HVACTypeEvaporativeCooler}.")
     arg.setDefaultValue(13.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_compressor_type', compressor_type_choices, false)
-    arg.setDisplayName('Cooling System: Cooling Compressor Type')
-    arg.setDescription("The compressor type of the cooling system. Required for #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_sensible_heat_fraction', false)
@@ -1397,6 +1397,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants::None)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_compressor_type', compressor_type_choices, false)
+    arg.setDisplayName('Heat Pump: Cooling Compressor Type')
+    arg.setDescription("The compressor type of the heat pump. Required for #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_heating_efficiency_type', heat_pump_heating_efficiency_type_choices, true)
     arg.setDisplayName('Heat Pump: Heating Efficiency Type')
     arg.setDescription("The heating efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsHSPF} or #{HPXML::UnitsHSPF2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsCOP}.")
@@ -1419,11 +1424,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Cooling Efficiency')
     arg.setDescription('The rated cooling efficiency value of the heat pump.')
     arg.setDefaultValue(13.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_compressor_type', compressor_type_choices, false)
-    arg.setDisplayName('Heat Pump: Cooling Compressor Type')
-    arg.setDescription("The compressor type of the heat pump. Required for #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_sensible_heat_fraction', false)
@@ -3850,9 +3850,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include? args[:cooling_system_type]
-      compressor_type = args[:cooling_system_cooling_compressor_type]
+      compressor_type = args[:cooling_system_compressor_type]
     elsif [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? args[:heat_pump_type]
-      compressor_type = args[:heat_pump_cooling_compressor_type]
+      compressor_type = args[:heat_pump_compressor_type]
     end
 
     hvac_perf_data_heating_args_initialized = [!args[:hvac_perf_data_heating_outdoor_temperatures].nil?,
@@ -5727,7 +5727,7 @@ module HPXMLFile
     return if cooling_system_type == Constants::None
 
     if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system_type
-      compressor_type = args[:cooling_system_cooling_compressor_type]
+      compressor_type = args[:cooling_system_compressor_type]
     end
 
     if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
@@ -5904,7 +5904,7 @@ module HPXMLFile
     end
 
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-      compressor_type = args[:heat_pump_cooling_compressor_type]
+      compressor_type = args[:heat_pump_compressor_type]
     end
 
     case args[:heat_pump_heating_efficiency_type]
