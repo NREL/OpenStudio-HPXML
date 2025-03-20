@@ -6608,15 +6608,17 @@ module Defaults
       cop5full = cop5max / hp_ap.eirr5full
       cop5min = cop5max / hp_ap.eirr5min
 
-      # Capacities @ LCT
-      capacityLCTmax = capacity5max * (1.0 / (1.0 - hp_ap.qmslopeLCTmax * (5.0 - lct)))
-      capacityLCTmin = capacity5min * (1.0 / (1.0 - hp_ap.qmslopeLCTmin * (5.0 - lct)))
-      capacityLCTfull = MathTools.interp2(capacity5full, capacity5min, capacity5max, capacityLCTmin, capacityLCTmax)
+      if lct < 5
+        # Capacities @ LCT
+        capacityLCTmax = capacity5max * (1.0 / (1.0 - hp_ap.qmslopeLCTmax * (5.0 - lct)))
+        capacityLCTmin = capacity5min * (1.0 / (1.0 - hp_ap.qmslopeLCTmin * (5.0 - lct)))
+        capacityLCTfull = MathTools.interp2(capacity5full, capacity5min, capacity5max, capacityLCTmin, capacityLCTmax)
 
-      # COPs @ LCT
-      copLCTmin = cop5min * (1.0 - hp_ap.eirmslopeLCTmin * (5.0 - lct))
-      copLCTmax = cop5max * (1.0 - hp_ap.eirmslopeLCTmax * (5.0 - lct))
-      copLCTfull = capacityLCTfull / MathTools.interp2(capacity5full / cop5full, capacity5min / cop5min, capacity5max / cop5max, capacityLCTmin / copLCTmin, capacityLCTmax / copLCTmax)
+        # COPs @ LCT
+        copLCTmin = cop5min * (1.0 - hp_ap.eirmslopeLCTmin * (5.0 - lct))
+        copLCTmax = cop5max * (1.0 - hp_ap.eirmslopeLCTmax * (5.0 - lct))
+        copLCTfull = capacityLCTfull / MathTools.interp2(capacity5full / cop5full, capacity5min / cop5min, capacity5max / cop5max, capacityLCTmin / copLCTmin, capacityLCTmax / copLCTmax)
+      end
     end
 
     # Add detailed performance data
