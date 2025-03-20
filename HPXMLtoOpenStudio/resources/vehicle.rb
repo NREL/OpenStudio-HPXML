@@ -48,6 +48,8 @@ module Vehicle
       return
     end
 
+    # We don't use the EV/charger location in the HPXML because it doesn't currently affect simulation results.
+    # See https://github.com/NREL/OpenStudio-HPXML/pull/1961
     vehicle.additional_properties.location = HPXML::LocationOutside
 
     if vehicle.fuel_economy_units == HPXML::UnitsKwhPerMile

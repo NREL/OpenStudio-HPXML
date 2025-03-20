@@ -3246,16 +3246,15 @@ module Defaults
   # @param ev_charger [HPXML::ElectricVehicleCharger] Object that defines a single electric vehicle charger
   # @return [nil]
   def self.apply_ev_charger(ev_charger)
-    default_values = get_ev_charger_values()
     if ev_charger.charging_level.nil? && ev_charger.charging_power.nil?
-      ev_charger.charging_level = default_values[:charging_level]
+      ev_charger.charging_level = 2
       ev_charger.charging_level_isdefaulted = true
     end
     if ev_charger.charging_power.nil?
       if ev_charger.charging_level == 1
-        ev_charger.charging_power = default_values[:level1_charging_power]
+        ev_charger.charging_power = 1600.0
       elsif ev_charger.charging_level >= 2
-        ev_charger.charging_power = default_values[:level2_charging_power]
+        ev_charger.charging_power = 5690.0
       end
       ev_charger.charging_power_isdefaulted = true
     end
@@ -5741,17 +5740,6 @@ module Defaults
              fuel_economy_units: HPXML::UnitsKwhPerMile,
              fraction_charged_home: 0.8,
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity
-  end
-
-  # Get default location, charging power, and charging level for an electric vehicle charger.
-  # The default location is the garage if one is present.
-  #
-  # @param has_garage [Boolean] whether the HPXML Building object has a garage
-  # @return [Hash] map of electric vehicle charger properties to default values
-  def self.get_ev_charger_values()
-    return { charging_level: 2,
-             level1_charging_power: 1600,
-             level2_charging_power: 5690 } # Median L2 charging rate in EVWatts
   end
 
   # Gets the default values for a dehumidifier
