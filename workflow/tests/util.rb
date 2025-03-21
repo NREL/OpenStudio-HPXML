@@ -363,14 +363,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include?('CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues.')
     end
     # Evaporative coolers
-    # FIXME: Can we remove after Julien works on this?
     if hpxml_bldg.cooling_systems.count { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler } > 0
-      # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
-      # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
-      # Manually removing Controller:MechanicalVentilation from idf eliminates these two warnings.
-      # FUTURE: Can we update OS to allow removing it?
-      next if message.include?('Zone') && message.include?('is not accounted for by Controller:MechanicalVentilation object')
-      next if message.include?('PEOPLE object for zone') && message.include?('is not accounted for by Controller:MechanicalVentilation object')
       # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
       next if message.include?('GetAirPathData: AirLoopHVAC') && message.include?('has no Controllers')
       # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.

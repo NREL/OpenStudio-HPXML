@@ -74,11 +74,6 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, run_measure
   workspace = forward_translator.translateModel(model)
   success = report_ft_errors_warnings(forward_translator, rundir)
 
-  # FIXME: Temporary workaround
-  model.getControllerMechanicalVentilations.each do |cmv|
-    remove_objects << ['Controller:MechanicalVentilation', cmv.name.to_s]
-  end
-
   # Remove objects
   remove_objects.uniq.each do |remove_object|
     workspace.getObjectByTypeAndName(remove_object[0].to_IddObjectType, remove_object[1]).get.remove
