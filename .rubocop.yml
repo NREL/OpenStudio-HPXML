@@ -1,7 +1,20 @@
 AllCops:
   DisabledByDefault: true
 
-Layout:
+Layout/EndOfLine:
+  Enabled: false
+Layout/LineLength:
+  AutoCorrect: false
+  Enabled: false
+Layout/RescueEnsureAlignment:
+  AutoCorrect: true
+Layout/SpaceBeforeBrackets:
+  Enabled: true
+Layout/LineContinuationLeadingSpace: # new in 1.31
+  Enabled: true
+Layout/LineContinuationSpacing: # new in 1.31
+  Enabled: true
+Layout/LineEndStringConcatenationIndentation: # new in 1.18
   Enabled: true
 Lint/DeprecatedClassMethods:
   Enabled: true
@@ -30,9 +43,15 @@ Lint/UselessAssignment:
 Style/AndOr:
   Enabled: true
 Style/Documentation:
-  Enabled: true
+  Exclude:
+    - '**/tests/*.rb'
+    - 'workflow/**/*.rb'
+    - 'tasks.rb'
 Style/DocumentationMethod:
-  Enabled: true
+  Exclude:
+    - '**/tests/*.rb'
+    - 'workflow/**/*.rb'
+    - 'tasks.rb'
 Style/FrozenStringLiteralComment:
   Enabled: true
 Style/HashSyntax:
