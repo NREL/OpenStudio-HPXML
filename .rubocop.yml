@@ -1,6 +1,8 @@
 AllCops:
   DisabledByDefault: true
 
+Layout:
+  Enabled: True
 Layout/EndOfLine:
   Enabled: false
 Layout/LineLength:
