@@ -363,6 +363,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include?('CalcCBF: SHR adjusted to achieve valid outlet air properties and the simulation continues.')
     end
     # Evaporative coolers
+    # FIXME: Can we remove after Julien works on this?
     if hpxml_bldg.cooling_systems.count { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler } > 0
       # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
       # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
