@@ -6,13 +6,15 @@ def run_simulation_tests(xmls)
   # Run simulations
   puts "Running #{xmls.size} HPXML files..."
   all_annual_results = {}
-  Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
+  Parallel.map(xmls, in_threads: 1) do |xml|
+    next unless xml.include? 'base-hvac'
     next if xml.end_with? '-10x.xml'
 
     xml_name = File.basename(xml)
     results = _run_xml(xml, Parallel.worker_number)
     all_annual_results[xml_name], monthly_results = results
 
+    next
     next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
     next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
 

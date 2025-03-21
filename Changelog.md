@@ -7,6 +7,7 @@ __New Features__
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.
   - Allows optional EER or EER2 inputs (`AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value`) for central air conditioners/heat pumps and mini-splits.
+  - Allows optional maximum airflow rate (`HeatingAirflowCFM` and/or `CoolingAirflowCFM`) for central heat pumps and mini-splits.
   - Updates to detailed performance datapoints:
     - **Breaking Change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
     - Detailed performance datapoints can now be specified for single stage and two stage equipment too.
@@ -123,7 +124,7 @@ __New Features__
   - Allows shared batteries (batteries serving multiple dwelling units).
   - Updated default CFIS fan power to 0.58 W/cfm.
   - Removed natural ventilation availability RH constraint; HR constraint remains.
-  - Refrigerator and freezer schedules may now be based on ambient temperature using new `TemperatureScheduleCoefficients` and `ConstantScheduleCoefficients` inputs; the refrigerator default schedule uses these new inputs.  
+  - Refrigerator and freezer schedules may now be based on ambient temperature using new `TemperatureScheduleCoefficients` and `ConstantScheduleCoefficients` inputs; the refrigerator default schedule uses these new inputs.
   - Default schedules updated for cooking ranges, lighting, plug loads, televisions, hot water recirculation pumps, and occupant heat gains.
   - Adds schedule inputs for hot water recirculation pumps and general water use internal gains.
   - Updated water heater installation default location.
@@ -365,7 +366,7 @@ __New Features__
 - Utility bill calculations:
   - **Breaking change**: Removes utility rate and PV related arguments from the ReportUtilityBills measure in lieu of HPXML file inputs.
   - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
-  - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.  
+  - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.
 - Lithium ion battery:
   - Allows detailed charging/discharging schedules via CSV files.
   - Allows setting round trip efficiency.
@@ -406,7 +407,7 @@ __Bugfixes__
 - Fixes possible "Could not identify surface type for surface" error.
 - Fixes possible ruby error when defaulting water heater location.
 - Battery round trip efficiency now correctly affects results.
-- BuildResidentialHPXML measure: 
+- BuildResidentialHPXML measure:
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 
 ## OpenStudio-HPXML v1.4.0
@@ -539,7 +540,7 @@ __New Features__
 - Relaxes requirement for heating (or cooling) setpoints so that they are only needed if heating (or cooling) equipment is present.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
-- Allows modeling PTAC and PTHP HVAC systems. 
+- Allows modeling PTAC and PTHP HVAC systems.
 - Allows user inputs for partition wall mass and furniture mass.
 
 __Bugfixes__
@@ -569,7 +570,7 @@ __New Features__
 - Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
 - Removes limitation that a shared water heater serving a shared laundry room can't also serve dwelling unit fixtures (i.e., FractionDHWLoadServed is no longer required to be zero).
 - Adds IDs to schematron validation errors/warnings when possible.
-- Moves additional error-checking from the ruby measure to the schematron validator. 
+- Moves additional error-checking from the ruby measure to the schematron validator.
 
 __Bugfixes__
 - Fixes room air conditioner performance curve.
@@ -722,7 +723,7 @@ __New Features__
 - Modeling improvements:
   - Improved calculation for infiltration height
   - Infiltration & mechanical ventilation now combined using ASHRAE 62.2 Normative Appendix C.
-- Runtime improvements: 
+- Runtime improvements:
   - Optimized ruby require calls.
   - Skip ViewFactor calculations when not needed (i.e., no conditioned basement).
 - Error-checking:

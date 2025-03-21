@@ -4229,7 +4229,7 @@ module HVAC
   # @param obj_name [String] Name for the OpenStudio object
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
   # @param defect_ratio [TODO] TODO
-  # @param hvac_ap [TODO] TODO
+  # @param hvac_ap [HPXML::AdditionalProperties] AdditionalProperties object for the HVAC system
   # @return [nil]
   def self.add_installation_quality_ems_program(fault_program, tin_sensor, tout_sensor, airflow_rated_defect_ratio, clg_or_htg_coil, model, f_chg, obj_name, mode, defect_ratio, hvac_ap)
     if mode == :clg
