@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-$zip_csv_data = nil
+$weather_lookup_cache = {}
 
 # Collection of methods related to defaulting optional inputs in the HPXML
 # that were not provided.
@@ -935,7 +935,7 @@ module Defaults
   def self.apply_climate_and_risk_zones(hpxml_bldg, weather, unit_num)
     if (not weather.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
       weather_data = lookup_weather_data_from_wmo(weather.header.WMONumber)
-      if not weather_data.nil?
+      if not weather_data.empty?
         hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: weather_data[:zipcode_iecc_zone],
                                                                  year: 2006,
                                                                  zone_isdefaulted: true,
@@ -1921,13 +1921,13 @@ module Defaults
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.compressor_type.nil?
 
-      cooling_system.compressor_type = get_hvac_compressor_type(cooling_system.cooling_system_type, cooling_system.cooling_efficiency_seer)
+      cooling_system.compressor_type = get_hvac_compressor_type(cooling_system.cooling_system_type)
       cooling_system.compressor_type_isdefaulted = true
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless heat_pump.compressor_type.nil?
 
-      heat_pump.compressor_type = get_hvac_compressor_type(heat_pump.heat_pump_type, heat_pump.cooling_efficiency_seer)
+      heat_pump.compressor_type = get_hvac_compressor_type(heat_pump.heat_pump_type)
       heat_pump.compressor_type_isdefaulted = true
     end
 
@@ -3237,30 +3237,24 @@ module Defaults
 
       next if vehicle.ev_charger.nil?
 
-      apply_ev_charger(hpxml_bldg, vehicle.ev_charger)
+      apply_ev_charger(vehicle.ev_charger)
     end
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::ElectricVehicleCharger objects
   #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param ev_charger [HPXML::ElectricVehicleCharger] Object that defines a single electric vehicle charger
   # @return [nil]
-  def self.apply_ev_charger(hpxml_bldg, ev_charger)
-    default_values = get_ev_charger_values(hpxml_bldg.has_location(HPXML::LocationGarage))
-    if ev_charger.location.nil?
-      ev_charger.location = default_values[:location]
-      ev_charger.location_isdefaulted = true
-    end
+  def self.apply_ev_charger(ev_charger)
     if ev_charger.charging_level.nil? && ev_charger.charging_power.nil?
-      ev_charger.charging_level = default_values[:charging_level]
+      ev_charger.charging_level = 2
       ev_charger.charging_level_isdefaulted = true
     end
     if ev_charger.charging_power.nil?
       if ev_charger.charging_level == 1
-        ev_charger.charging_power = default_values[:level1_charging_power]
+        ev_charger.charging_power = 1600.0
       elsif ev_charger.charging_level >= 2
-        ev_charger.charging_power = default_values[:level2_charging_power]
+        ev_charger.charging_power = 5690.0
       end
       ev_charger.charging_power_isdefaulted = true
     end
@@ -4373,8 +4367,8 @@ module Defaults
       HPXML::ExteriorShadingTypeDeciduousTree => 0.0, # Assume fully opaque
       HPXML::ExteriorShadingTypeEvergreenTree => 0.0, # Assume fully opaque
       HPXML::ExteriorShadingTypeOther => 0.5, # Assume half opaque
-      HPXML::ExteriorShadingTypeSolarFilm => 0.3, # Based on MulTEA engineering manual
-      HPXML::ExteriorShadingTypeSolarScreens => 0.7, # Based on MulTEA engineering manual
+      HPXML::ExteriorShadingTypeSolarFilm => 0.7, # Based on MulTEA engineering manual
+      HPXML::ExteriorShadingTypeSolarScreens => 0.3, # Based on MulTEA engineering manual
     }
 
     ext_sf_summer = c_map[window.exterior_shading_type]
@@ -4494,12 +4488,12 @@ module Defaults
   def self.get_weather_station_csv_data
     zipcode_csv_filepath = File.join(File.dirname(__FILE__), 'data', 'zipcode_weather_stations.csv')
 
-    if $zip_csv_data.nil?
+    if $weather_lookup_cache[:csv_data].nil?
       # Note: We don't use the CSV library here because it's slow for large files
-      $zip_csv_data = File.readlines(zipcode_csv_filepath).map(&:strip)
+      $weather_lookup_cache[:csv_data] = File.readlines(zipcode_csv_filepath).map { |r| r.strip.split(',') }
     end
 
-    return $zip_csv_data
+    return $weather_lookup_cache[:csv_data]
   end
 
   # Gets the default TMY3 EPW weather station for the specified zipcode. If the exact
@@ -4508,6 +4502,11 @@ module Defaults
   # @param zipcode [String] Zipcode of interest
   # @return [Hash] Mapping with keys for every column name in zipcode_weather_stations.csv
   def self.lookup_weather_data_from_zipcode(zipcode)
+    if not $weather_lookup_cache["zipcode_#{zipcode}"].nil?
+      # Use cache
+      return $weather_lookup_cache["zipcode_#{zipcode}"]
+    end
+
     begin
       zipcode3 = zipcode[0, 3]
       zipcode_int = Integer(Float(zipcode[0, 5])) # Convert to 5-digit integer
@@ -4522,13 +4521,11 @@ module Defaults
     col_names = nil
     zip_csv_data.each_with_index do |row, i|
       if i == 0 # header
-        col_names = row.split(',').map { |x| x.to_sym }
+        col_names = row.map { |x| x.to_sym }
         next
       end
-      next if row.nil?
-      next unless row.start_with?(zipcode3) # Only allow match if first 3 digits are the same
-
-      row = row.split(',')
+      next if row.nil? || row.empty?
+      next unless row[0].start_with?(zipcode3) # Only allow match if first 3 digits are the same
 
       if row[0].size != 5
         fail "Zip code '#{row[0]}' in zipcode_weather_stations.csv does not have 5 digits."
@@ -4542,15 +4539,17 @@ module Defaults
           weather_station[col_name] = row[j]
         end
       end
-      if distance == 0
-        return weather_station # Exact match
-      end
+      next unless distance == 0
+
+      $weather_lookup_cache["zipcode_#{zipcode}"] = weather_station
+      return weather_station # Exact match
     end
 
     if weather_station.empty?
       fail "Zip code '#{zipcode}' could not be found in zipcode_weather_stations.csv"
     end
 
+    $weather_lookup_cache["zipcode_#{zipcode}"] = weather_station
     return weather_station
   end
 
@@ -4559,30 +4558,34 @@ module Defaults
   # @param wmo [String] Weather station World Meteorological Organization (WMO) number
   # @return [Hash or nil] Mapping with keys for every column name in zipcode_weather_stations.csv if WMO is found, otherwise nil
   def self.lookup_weather_data_from_wmo(wmo)
+    if not $weather_lookup_cache["wmo_#{wmo}"].nil?
+      # Use cache
+      return $weather_lookup_cache["wmo_#{wmo}"]
+    end
+
     zip_csv_data = get_weather_station_csv_data()
 
+    weather_station = {}
     col_names = nil
     wmo_idx = nil
     zip_csv_data.each_with_index do |row, i|
       if i == 0 # header
-        col_names = row.split(',').map { |x| x.to_sym }
+        col_names = row.map { |x| x.to_sym }
         wmo_idx = col_names.index(:station_wmo)
         next
       end
-      next if row.nil?
-
-      row = row.split(',')
+      next if row.nil? || row.empty?
 
       next unless row[wmo_idx] == wmo
 
-      weather_station = {}
       col_names.each_with_index do |col_name, j|
         weather_station[col_name] = row[j]
       end
-      return weather_station
+      break
     end
 
-    return
+    $weather_lookup_cache["wmo_#{wmo}"] = weather_station
+    return weather_station
   end
 
   # Gets the default number of bathrooms in the dwelling unit.
@@ -5437,22 +5440,9 @@ module Defaults
   # Gets the default compressor type for a HVAC system.
   #
   # @param hvac_type [String] The type of cooling system or heat pump (HPXML::HVACTypeXXX)
-  # @param seer [Double] Cooling efficiency
   # @return [String] Compressor type (HPXML::HVACCompressorTypeXXX)
-  def self.get_hvac_compressor_type(hvac_type, seer)
+  def self.get_hvac_compressor_type(hvac_type)
     case hvac_type
-    when HPXML::HVACTypeCentralAirConditioner,
-         HPXML::HVACTypeHeatPumpAirToAir
-      if seer <= 15
-        return HPXML::HVACCompressorTypeSingleStage
-      elsif seer <= 21
-        return HPXML::HVACCompressorTypeTwoStage
-      elsif seer > 21
-        return HPXML::HVACCompressorTypeVariableSpeed
-      end
-    when HPXML::HVACTypeMiniSplitAirConditioner,
-         HPXML::HVACTypeHeatPumpMiniSplit
-      return HPXML::HVACCompressorTypeVariableSpeed
     when HPXML::HVACTypePTAC,
          HPXML::HVACTypeHeatPumpPTHP,
          HPXML::HVACTypeHeatPumpRoom,
@@ -5750,24 +5740,6 @@ module Defaults
              fuel_economy_units: HPXML::UnitsKwhPerMile,
              fraction_charged_home: 0.8,
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity
-  end
-
-  # Get default location, charging power, and charging level for an electric vehicle charger.
-  # The default location is the garage if one is present.
-  #
-  # @param has_garage [Boolean] whether the HPXML Building object has a garage
-  # @return [Hash] map of electric vehicle charger properties to default values
-  def self.get_ev_charger_values(has_garage = false)
-    if has_garage
-      location = HPXML::LocationGarage
-    else
-      location = HPXML::LocationOutside
-    end
-
-    return { location: location,
-             charging_level: 2,
-             level1_charging_power: 1600,
-             level2_charging_power: 5690 } # Median L2 charging rate in EVWatts
   end
 
   # Gets the default values for a dehumidifier
