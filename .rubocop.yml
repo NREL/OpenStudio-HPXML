@@ -1,23 +1,14 @@
 AllCops:
   DisabledByDefault: true
+  NewCops: enable
 
 Layout:
-  Enabled: True
+  Enabled: true
 Layout/EndOfLine:
   Enabled: false
 Layout/LineLength:
   AutoCorrect: false
   Enabled: false
-Layout/RescueEnsureAlignment:
-  AutoCorrect: true
-Layout/SpaceBeforeBrackets:
-  Enabled: true
-Layout/LineContinuationLeadingSpace: # new in 1.31
-  Enabled: true
-Layout/LineContinuationSpacing: # new in 1.31
-  Enabled: true
-Layout/LineEndStringConcatenationIndentation: # new in 1.18
-  Enabled: true
 Lint/DeprecatedClassMethods:
   Enabled: true
 Lint/DuplicateElsifCondition:
