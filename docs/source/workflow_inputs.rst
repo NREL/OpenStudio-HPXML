@@ -1511,8 +1511,8 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
          See :ref:`hpxml_locations` for descriptions.
   .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
   .. [#] For a crawlspace with a dirt floor, enter a thickness of zero.
-  .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ambient conditions).
-         So a basement slab edge adjacent to a garage or crawlspace, for example, should not be included.
+  .. [#] ExposedPerimeter includes any slab length that falls along the perimeter of the building's footprint (i.e., is exposed to ground or outdoor air conditions).
+         See the figure below for an example of calculating slab exposed perimeter.
   .. [#] If DepthBelowGrade not provided, defaults to zero for foundation types without walls.
          For foundation types with walls, DepthBelowGrade is ignored as the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value(s).
   .. [#] SystemIdentifier only required if ExteriorHorizontalInsulation is provided.
@@ -1522,6 +1522,15 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   .. [#] If GapInsulationRValue not provided, defaults to 5.0 if there is under slab (horizontal) insulation, otherwise 0.0.
   .. [#] If CarpetFraction not provided, defaults to 0.8 when adjacent to conditioned space, otherwise 0.0.
   .. [#] If CarpetRValue not provided, defaults to 2.0 when adjacent to conditioned space, otherwise 0.0.
+
+An example of calculating slab exposed perimeter is shown below:
+
+.. image:: images/slab_exposed_perimeter.png
+   :align: center
+
+As illustrated above, basement slab edge adjacent to a garage slab or crawlspace is not considered exposed perimeter.
+It is quite uncommon for a slab to have an exposed perimeter of zero.
+Heat transfer is only calculated for the length of exposed perimeter; the rest of the perimeter is assumed to have minimal heat transfer.
 
 Slab insulation locations can be visualized in the figure below:
 
@@ -1649,9 +1658,9 @@ Either winter/summer shading coefficients can be directly provided, or they can 
 
          \- **external overhangs** or **awnings**: C1=0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
 
-         \- **solar screens**: C1=0.7
+         \- **solar screens**: C1=0.3 (Based on Table A.3.4 of `MulTEA Engineering Manual Version 1 <https://weatherization.ornl.gov/wp-content/uploads/2018/08/MulTEAEngineeringManualORNLTM2018-813.pdf>`_)
 
-         \- **solar film**: C1=0.3
+         \- **solar film**: C1=0.7 (Based on Table A.3.4 of `MulTEA Engineering Manual Version 1 <https://weatherization.ornl.gov/wp-content/uploads/2018/08/MulTEAEngineeringManualORNLTM2018-813.pdf>`_)
 
          \- **deciduous tree** or **evergreen tree**: C1=0.0
 
@@ -2012,19 +2021,21 @@ If the skylight has a shaft, additional information is entered in ``Skylight``.
 HPXML Doors
 ***********
 
-Each opaque door is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Doors/Door``.
+Each door with opaque area is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Doors/Door``.
 
   ============================================  =================  ============  ========================  ========  =========  ==============================
   Element                                       Type               Units         Constraints               Required  Default    Notes
   ============================================  =================  ============  ========================  ========  =========  ==============================
   ``SystemIdentifier``                          id                                                         Yes                  Unique identifier
   ``AttachedToWall``                            idref                            See [#]_                  Yes                  ID of attached wall
-  ``Area``                                      double             ft2           > 0                       Yes                  Total area
+  ``Area``                                      double             ft2           > 0                       Yes                  Total opaque area [#]_
   ``Azimuth`` or ``Orientation``                integer or string  deg           >= 0, <= 359 or See [#]_  No        See [#]_   Direction (clockwise from North)
   ``RValue``                                    double             F-ft2-hr/Btu  > 0                       Yes                  R-value [#]_
   ============================================  =================  ============  ========================  ========  =========  ==============================
 
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
+  .. [#] Any *glass* area in the door should be modeled using :ref:`windowinputs`.
+         For example, if a 30 ft2 door has 10 ft2 of glass, the door area should be entered as 20 ft2 (with a separate ``Window`` for the remaining 10 ft2).
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation nor AttachedToWall azimuth provided, defaults to the azimuth with the largest surface area defined in the HPXML file.
   .. [#] RValue includes interior/exterior air films and presence of any storm door.
@@ -4561,14 +4572,14 @@ Simple Inputs
 
 A simple solar hot water system is entered as a ``/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem``.
 
-  ====================  =======  =====  ===========  ========  ========  ======================
-  Element               Type     Units  Constraints  Required  Default   Notes
-  ====================  =======  =====  ===========  ========  ========  ======================
-  ``SystemIdentifier``  id                           Yes                 Unique identifier
-  ``SystemType``        string          hot water    Yes                 Type of solar thermal system
-  ``SolarFraction``     double   frac   > 0, <= 1    Yes                 Solar fraction [#]_
-  ``ConnectedTo``       idref           See [#]_     No [#]_   <none>    Connected water heater
-  ====================  =======  =====  ===========  ========  ========  ======================
+  ====================  =======  =====  ============  ========  ========  ======================
+  Element               Type     Units  Constraints   Required  Default   Notes
+  ====================  =======  =====  ============  ========  ========  ======================
+  ``SystemIdentifier``  id                            Yes                 Unique identifier
+  ``SystemType``        string          hot water     Yes                 Type of solar thermal system
+  ``SolarFraction``     double   frac   > 0, <= 0.99  Yes                 Solar fraction [#]_
+  ``ConnectedTo``       idref           See [#]_      No [#]_   <none>    Connected water heater
+  ====================  =======  =====  ============  ========  ========  ======================
 
   .. [#] Portion of total conventional hot water heating load (delivered energy plus tank standby losses).
          Can be obtained from `Directory of SRCC OG-300 Solar Water Heating System Ratings <https://solar-rating.org/programs/og-300-program/>`_ or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
@@ -4788,13 +4799,10 @@ A single electric vehicle charger can be entered as a ``/HPXML/Building/Building
   Element               Type     Units  Constraints  Required  Default   Notes
   ====================  =======  =====  ===========  ========  ========  ============================================
   ``SystemIdentifier``  id                           Yes                 Unique identifier
-  ``Location``          string          See [#]_     No        See [#]_  Location of charger and attached EV when at home
   ``ChargingLevel``     integer         >= 1, <= 3   No        See [#]_  Charger power level
   ``ChargingPower``     double   W      > 0          No        See [#]_  Charger power output
   ====================  =======  =====  ===========  ========  ========  ============================================
 
-  .. [#] Location choices are "garage" or "outside".
-  .. [#] If Location not provided, defaults to "garage" if a garage is present, otherwise "outside".
   .. [#] If neither ChargingLevel nor ChargingPower provided, defaults to level 2.
   .. [#] If ChargingPower not provided, defaults to 1600 W if a level 1 charger, otherwise 5690 W per `EV Watts Public Database <https://www.osti.gov/biblio/1970735>`_.
 

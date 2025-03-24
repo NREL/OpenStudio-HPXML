@@ -2698,7 +2698,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem[h:SolarFraction]'>
       <sch:assert role='ERROR' test='count(h:SystemType) = 1'>Expected 1 element(s) for xpath: SystemType</sch:assert>
       <sch:assert role='ERROR' test='h:SystemType[text()="hot water"] or not(h:SystemType)'>Expected SystemType to be 'hot water'</sch:assert>
-      <sch:assert role='ERROR' test='number(h:SolarFraction) &lt; 1 or not(h:SolarFraction)'>Expected SolarFraction to be less than 1</sch:assert>
+      <sch:assert role='ERROR' test='number(h:SolarFraction) &lt;= 0.99 or not(h:SolarFraction)'>Expected SolarFraction to be less than or equal to 0.99</sch:assert>
       <sch:assert role='ERROR' test='count(h:ConnectedTo) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ConnectedTo</sch:assert> <!-- See [WaterHeatingSystem] (any type) -->
     </sch:rule>
   </sch:pattern>
@@ -2813,8 +2813,6 @@
     <sch:pattern>
     <sch:title>[ElectricVehicleCharger]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:ElectricVehicleChargers/h:ElectricVehicleCharger'>
-      <sch:assert role='ERROR' test='count(h:Location) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Location</sch:assert>
-      <sch:assert role='ERROR' test='h:Location[text()="garage" or text()="outside"] or not(h:Location)'>Expected Location to be 'garage' or 'outside'</sch:assert>
       <sch:assert role='ERROR' test='count(h:ChargingLevel) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ChargingLevel</sch:assert>
       <sch:assert role='ERROR' test='count(h:ChargingPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ChargingPower</sch:assert>
     </sch:rule>
