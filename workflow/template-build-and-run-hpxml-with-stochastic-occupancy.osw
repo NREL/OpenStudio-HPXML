@@ -52,7 +52,7 @@
         "heating_system_heating_capacity": 36000.0,
         "heating_system_heating_efficiency": 0.92,
         "heating_system_type": "Furnace",
-        "hpxml_path": "../built.xml",
+        "hpxml_path": "run/built.xml",
         "hvac_control_cooling_weekday_setpoint": "78",
         "hvac_control_cooling_weekend_setpoint": "78",
         "hvac_control_heating_weekday_setpoint": "68",
@@ -82,16 +82,16 @@
     },
     {
       "arguments": {
-        "hpxml_path": "../built.xml",
+        "hpxml_path": "run/built.xml",
         "output_csv_path": "stochastic.csv",
-        "hpxml_output_path": "../built-stochastic-schedules.xml"
+        "hpxml_output_path": "run/built-stochastic-schedules.xml"
       },
       "measure_dir_name": "BuildResidentialScheduleFile"
     },
     {
       "arguments": {
-        "hpxml_path": "../built-stochastic-schedules.xml",
-        "output_dir": "..",
+        "hpxml_path": "run/built-stochastic-schedules.xml",
+        "output_dir": "run",
         "debug": false,
         "add_component_loads": false,
         "skip_validation": false
