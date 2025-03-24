@@ -2149,7 +2149,7 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ``extension/FanMotorType``                              string              See [#]_         No        See [#]_        Blower fan model type [#]_
   ``extension/FanPowerWattsPerCFM``                       double   W/cfm      >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed [#]_
   ``extension/AirflowDefectRatio``                        double   frac       >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
-  ``extension/HeatingAirflowCFM``                         double   cfm        >= 0             No        See [#]_        Maximum airflow rate [#]_
+  ``extension/HeatingAirflowCFM``                         double   cfm        >= 0             No        See [#]_        Maximum installed heating airflow rate
   ``extension/HeatingAutosizingFactor``                   double   frac       > 0              No        1.0             Heating autosizing capacity multiplier
   ``extension/HeatingAutosizingLimit``                    double   Btu/hr     > 0              No                        Heating autosizing capacity limit
   ======================================================  =======  =========  ===============  ========  ==============  ================================================
@@ -2177,7 +2177,6 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] If HeatingAirflowCFM not provided, defaults to 240 cfm/ton.
-  .. [#] If AirflowDefectRatio is not zero, HeatingAirflowCFM is the same as InstalledAirflow in the above equation.
 
 .. _hvac_heating_wall_furnace:
 
@@ -2476,7 +2475,7 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm        >= 0                     No        See [#]_        Blower fan efficiency at maximum fan speed [#]_
   ``extension/AirflowDefectRatio``                                  double   frac         >= -0.9, <= 9            No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double   frac         >= -0.9, <= 9            No        0.0             Deviation between design/installed refrigerant charges [#]_
-  ``extension/CoolingAirflowCFM``                                   double   cfm          >= 0                     No        See [#]_        Maximum airflow rate [#]_
+  ``extension/CoolingAirflowCFM``                                   double   cfm          >= 0                     No        See [#]_        Maximum installed cooling airflow rate
   ``extension/CrankcaseHeaterPowerWatts``                           double   W            >= 0                     No        See [#]_        Crankcase heater power
   ``extension/CoolingAutosizingFactor``                             double   frac         > 0                      No        1.0             Cooling autosizing capacity multiplier
   ``extension/CoolingAutosizingLimit``                              double   Btu/hr       > 0                      No                        Cooling autosizing capacity limit
@@ -2497,7 +2496,7 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
   .. [#] In addition, EER must be < SEER; EER2 must be <= SEER2.
-  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73*SEER2 + 1.47) for single stage, (0.63*SEER2 + 2.34) for two stage, and (0.31*SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
+  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
   .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 (assumed to be a split system).
   .. [#] If SensibleHeatFraction not provided, defaults to 0.73 for single/two stage and 0.78 for variable speed.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
@@ -2512,7 +2511,6 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] If CoolingAirflowCFM not provided, defaults to 360 cfm/ton.
-  .. [#] If AirflowDefectRatio is not zero, CoolingAirflowCFM is the same as InstalledAirflow in the above equation.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
 
 .. _hvac_cooling_room_ac:
@@ -2663,7 +2661,7 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0                     No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double    frac    >= -0.9, <= 9            No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac    >= -0.9, <= 9            No        0.0             Deviation between design/installed refrigerant charges [#]_
-  ``extension/CoolingAirflowCFM``                                   double    cfm     >= 0                     No        See [#]_        Maximum airflow rate [#]_
+  ``extension/CoolingAirflowCFM``                                   double    cfm     >= 0                     No        See [#]_        Maximum installed cooling airflow rate
   ``extension/CrankcaseHeaterPowerWatts``                           double    W       >= 0                     No        See [#]_        Crankcase heater power
   ``extension/CoolingAutosizingFactor``                             double    frac    > 0                      No        1.0             Cooling autosizing capacity multiplier
   ``extension/CoolingAutosizingLimit``                              double    Btu/hr  > 0                      No                        Cooling autosizing capacity limit
@@ -2683,7 +2681,7 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] In addition, EER must be < SEER; EER2 must be <= SEER2.
-  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73*SEER2 + 1.47) for single stage, (0.63*SEER2 + 2.34) for two stage, and (0.31*SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
+  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
   .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] FanMotorType choices are "PSC" (Permanent Split Capacitor) and "BPM" (Brushless Permanent Magnet).
@@ -2695,7 +2693,6 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] If CoolingAirflowCFM not provided, defaults to 360 cfm/ton.
-  .. [#] If AirflowDefectRatio is not zero, CoolingAirflowCFM is the same as InstalledAirflow in the above equation.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
 
 .. _hvac_cooling_shared_chiller:
@@ -2817,8 +2814,8 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
-  ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        See [#]_        Maximum heating airflow rate [#]_
-  ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        See [#]_        Maximum cooling airflow rate [#]_
+  ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        See [#]_        Maximum installed heating airflow rate
+  ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        See [#]_        Maximum installed cooling airflow rate
   ``extension/CrankcaseHeaterPowerWatts``                           double   W         >= 0                      No        See [#]_        Crankcase heater power
   ``extension/PanHeaterPowerWatts``                                 double   W         >= 0                      No        150.0           Pan heater power
   ``extension/PanHeaterControlType``                                string             See [#]_                  No        continuous      Pan heater control type [#]_
@@ -2852,7 +2849,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
   .. [#] In addition, EER must be < SEER; EER2 must be <= SEER2.
-  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73*SEER2 + 1.47) for single stage, (0.63*SEER2 + 2.34) for two stage, and (0.31*SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
+  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
   .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 (assumed to be a split system).
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 (assumed to be a split system).
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
@@ -2868,10 +2865,8 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
-  .. [#] If HeatingAirflowCFM not provided, defaults to 360 cfm/ton.
-  .. [#] If AirflowDefectRatio is not zero, HeatingAirflowCFM is the same as InstalledAirflow in the above equation.
-  .. [#] If CoolingAirflowCFM not provided, defaults to 360 cfm/ton.
-  .. [#] If AirflowDefectRatio is not zero, CoolingAirflowCFM is the same as InstalledAirflow in the above equation.
+  .. [#] If HeatingAirflowCFM not provided, defaults to 360 cfm/ton if CoolingAirflowCFM also not provided, otherwise HeatingCapacity * CoolingAirflowCFM / CoolingCapacity.
+  .. [#] If CoolingAirflowCFM not provided, defaults to 360 cfm/ton if HeatingAirflowCFM also not provided, otherwise CoolingCapacity * HeatingAirflowCFM / HeatingCapacity.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
   .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
   .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
@@ -2913,8 +2908,8 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
-  ``extension/HeatingAirflowCFM``                                   double    cfm       >= 0                      No        See [#]_        Maximum heating airflow rate [#]_
-  ``extension/CoolingAirflowCFM``                                   double    cfm       >= 0                      No        See [#]_        Maximum cooling airflow rate [#]_
+  ``extension/HeatingAirflowCFM``                                   double    cfm       >= 0                      No        See [#]_        Maximum installed heating airflow rate
+  ``extension/CoolingAirflowCFM``                                   double    cfm       >= 0                      No        See [#]_        Maximum installed cooling airflow rate
   ``extension/CrankcaseHeaterPowerWatts``                           double    W         >= 0                      No        See [#]_        Crankcase heater power
   ``extension/PanHeaterPowerWatts``                                 double    W         >= 0                      No        150.0           Pan heater power
   ``extension/PanHeaterControlType``                                string              See [#]_                  No        continuous      Pan heater control type [#]_
@@ -2946,7 +2941,7 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] In addition, EER must be < SEER; EER2 must be <= SEER2.
-  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73*SEER2 + 1.47) for single stage, (0.63*SEER2 + 2.34) for two stage, and (0.31*SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
+  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
   .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 if ducted and HSPF = HSPF2 / 0.90 if ductless.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
@@ -2962,10 +2957,8 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
-  .. [#] If HeatingAirflowCFM not provided, defaults to 360 cfm/ton.
-  .. [#] If AirflowDefectRatio is not zero, HeatingAirflowCFM is the same as InstalledAirflow in the above equation.
-  .. [#] If CoolingAirflowCFM not provided, defaults to 360 cfm/ton.
-  .. [#] If AirflowDefectRatio is not zero, CoolingAirflowCFM is the same as InstalledAirflow in the above equation.
+  .. [#] If HeatingAirflowCFM not provided, defaults to 360 cfm/ton if CoolingAirflowCFM also not provided, otherwise HeatingCapacity * CoolingAirflowCFM / CoolingCapacity.
+  .. [#] If CoolingAirflowCFM not provided, defaults to 360 cfm/ton if HeatingAirflowCFM also not provided, otherwise CoolingCapacity * HeatingAirflowCFM / HeatingCapacity.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
   .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
   .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
@@ -3106,6 +3099,8 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                 double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
+  ``extension/HeatingAirflowCFM``                  double    cfm     >= 0             No        See [#]_        Maximum installed heating airflow rate
+  ``extension/CoolingAirflowCFM``                  double    cfm     >= 0             No        See [#]_        Maximum installed cooling airflow rate
   ``extension/CoolingAutosizingFactor``            double    frac    > 0              No        1.0             Cooling autosizing capacity multiplier
   ``extension/HeatingAutosizingFactor``            double    frac    > 0              No        1.0             Heating autosizing capacity multiplier
   ``extension/CoolingAutosizingLimit``             double    Btu/hr  > 0              No                        Cooling autosizing capacity limit
@@ -3148,6 +3143,8 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
+  .. [#] If HeatingAirflowCFM not provided, defaults to 360 cfm/ton if CoolingAirflowCFM also not provided, otherwise HeatingCapacity * CoolingAirflowCFM / CoolingCapacity.
+  .. [#] If CoolingAirflowCFM not provided, defaults to 360 cfm/ton if HeatingAirflowCFM also not provided, otherwise CoolingCapacity * HeatingAirflowCFM / HeatingCapacity.
 
 .. _hvac_hp_water_loop:
 

@@ -1979,6 +1979,34 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if ['base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml'].include? hpxml_file
       hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 12.3
     end
+    if hpxml_file.include? 'base-hvac-install-quality'
+      furnace_cfm_per_btuh = 275.0 / UnitConversions.convert(1, 'ton', 'Btu/hr')
+      compressor_cfm_per_btuh = 375.0 / UnitConversions.convert(1, 'ton', 'Btu/hr')
+      hpxml_bldg.heating_systems.each do |heating_system|
+        if heating_system.heating_system_type = HPXML::HVACTypeFurnace
+          heating_system.heating_airflow_cfm = (heating_system.heating_capacity * furnace_cfm_per_btuh).round
+        else
+          heating_system.heating_airflow_cfm = (heating_system.heating_capacity * compressor_cfm_per_btuh).round
+        end
+      end
+      hpxml_bldg.cooling_systems.each do |cooling_system|
+        cooling_system.cooling_airflow_cfm = (cooling_system.cooling_capacity * compressor_cfm_per_btuh).round
+      end
+      hpxml_bldg.heat_pumps.each do |heat_pump|
+        if not heat_pump.heating_capacity.nil?
+          heat_pump.heating_airflow_cfm = (heat_pump.heating_capacity * compressor_cfm_per_btuh).round
+        else
+          heating_capacity = heat_pump.heating_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal && dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB }.capacity
+          heat_pump.heating_airflow_cfm = (heating_capacity * compressor_cfm_per_btuh).round
+        end
+        if not heat_pump.cooling_capacity.nil?
+          heat_pump.cooling_airflow_cfm = (heat_pump.cooling_capacity * compressor_cfm_per_btuh).round
+        else
+          cooling_capacity = heat_pump.cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal && dp.outdoor_temperature = HVAC::AirSourceCoolRatedODB }.capacity
+          heat_pump.cooling_airflow_cfm = (cooling_capacity * compressor_cfm_per_btuh).round
+        end
+      end
+    end
     hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler &&
          heating_system.heating_system_fuel == HPXML::FuelTypeNaturalGas &&
