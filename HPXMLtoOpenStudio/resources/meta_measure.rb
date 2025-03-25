@@ -189,7 +189,7 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
   if not osw_out.nil?
     # Create a workflow based on the measures we're going to call. Convenient for debugging.
     workflowJSON = OpenStudio::WorkflowJSON.new
-    workflowJSON.setOswPath(File.expand_path(runner.workflow.absoluteRootDir.to_s + "/#{osw_out}"))
+    workflowJSON.setOswPath(File.join(runner.workflow.absoluteRootDir.to_s, osw_out))
     workflowJSON.addMeasurePath('measures')
     workflowJSON.addMeasurePath('resources/hpxml-measures')
     steps = OpenStudio::WorkflowStepVector.new
