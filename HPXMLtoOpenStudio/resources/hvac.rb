@@ -333,9 +333,9 @@ module HVAC
     end
 
     # Calculate rated/installed fan airflow rates
-    rated_cfm = -999
-    htg_cfm, clg_cfm = nil, nil
-    fan_cfms = []
+    rated_cfm = -999 # rated airflow rate, used for net-to-gross calculations
+    htg_cfm, clg_cfm = nil, nil # supply heating/cooling airflow rates, used for AirLoopHVAC:UnitarySystem
+    fan_cfms = [] # supply heating/cooling airflow rates at all speeds, used for Fan:SystemModel
     if not cooling_system.nil?
       clg_capacity_tons = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton')
       clg_cfm = cooling_system.cooling_airflow_cfm # the *maximum* installed cooling airflow rate
@@ -347,6 +347,11 @@ module HVAC
       clg_ap.cool_capacity_ratios.each do |capacity_ratio|
         clg_ap.cool_rated_cfms << clg_rated_cfm * capacity_ratio
         fan_cfms << clg_cfm * (capacity_ratio / clg_ap.cool_capacity_ratios[-1])
+      end
+
+      if (cooling_system.is_a? HPXML::CoolingSystem) && cooling_system.has_integrated_heating
+        htg_cfm = cooling_system.integrated_heating_system_airflow_cfm
+        fan_cfms << htg_cfm
       end
     end
     if not heating_system.nil?
