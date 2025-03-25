@@ -42,11 +42,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return tbl.outputValues[idx1 * t2_tbl_values.size + idx2]
   end
 
-  def test_resnet_model
+  def test_resnet_dx_model
     # Test to verify the model is consistent with RESNET's NEEP-Statistical-Model.xlsm
     # Spreadsheet can be found in https://github.com/NREL/OpenStudio-HPXML/pull/1879
 
-    tol = 0.03 # 3%, higher tolerance because expected values from spreadsheet are not rounded like they are in the RESNET Standard
+    tol = 0.02 # 2%, higher tolerance because expected values from spreadsheet are not rounded like they are in the RESNET Standard
 
     # ============== #
     # Variable Speed #
@@ -74,17 +74,17 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # FIXME: Once airflows are addressed, add fan power and expand to more ODB temperatures
     expected_clg_cfms = [91.7, 266.7, 285.6]
     expected_clg_cops = {
-      # 104 => [3.28, 3.03, 2.83],
+      104 => [3.28, 3.03, 2.83],
       95 => [3.88, 3.64, 3.40],
       82 => [5.12, 4.93, 4.62],
-      # 55.6 => [11.57, 12.60, 11.89],
+      55.6 => [11.57, 12.60, 11.89],
       # 40 => [12.23, 13.38, 12.63],
     }
     expected_clg_capacities = {
-      # 104 => [2656.5, 7870.8, 8458.1],
+      104 => [2656.5, 7870.8, 8458.1],
       95 => [2761.8, 8220.8, 8834.6],
       82 => [2914.0, 8726.3, 9378.3],
-      # 55.6 => [3222.6, 9751.5, 10481.0],
+      55.6 => [3222.6, 9751.5, 10481.0],
       # 40 => [3405.6, 10359.4, 11134.9],
     }
     expected_htg_cfms = [86.7, 290.0, 319.2]
@@ -93,14 +93,14 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       47 => [3.39, 2.76, 2.61],
       17 => [2.20, 2.01, 1.80],
       5 => [1.74, 1.53, 1.54],
-      # -20 => [1.20, 1.05, 1.05],
+      -20 => [1.20, 1.05, 1.05],
     }
     expected_htg_capacities = {
       70 => [2187.8, 9341.9, 9521.0],
       47 => [2591.2, 8421.9, 9214.5],
       17 => [3117.4, 7221.9, 8814.8],
       5 => [2542.6, 7579.3, 7588.7],
-      # -20 => [1587.3, 4580.7, 4554.1],
+      -20 => [1587.3, 4580.7, 4554.1],
     }
 
     # Check cooling coil
@@ -157,14 +157,14 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       104 => [3.29, 3.13],
       95 => [3.81, 3.64],
       82 => [4.78, 4.59],
-      # 42.3 => [12.26, 12.36],
+      42.3 => [12.26, 12.36],
       # 40 => [12.38, 12.47],
     }
     expected_clg_capacities = {
       104 => [5635.8, 7840.8],
       95 => [5912.3, 8220.8],
       82 => [6311.7, 8769.7],
-      # 42.3 => [7531.5, 10446.4],
+      42.3 => [7531.5, 10446.4],
       # 40 => [7602.0, 10543.2],
     }
     expected_htg_cfms = [206.4, 290.0]
@@ -233,14 +233,14 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       104 => 3.23,
       95 => 3.96,
       82 => 5.61,
-      # 57.7 => 16.26,
+      57.7 => 16.26,
       # 40 => 17.48,
     }
     expected_clg_capacities = {
       104 => 7987.6,
       95 => 8367.6,
       82 => 8916.6,
-      # 57.7 => 9943.7,
+      57.7 => 9943.7,
       # 40 => 10690.1,
     }
     expected_htg_cfm = 290.0
