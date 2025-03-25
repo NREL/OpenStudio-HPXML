@@ -346,7 +346,7 @@ module HVAC
       clg_ap.cool_rated_cfms = []
       clg_ap.cool_capacity_ratios.each do |capacity_ratio|
         clg_ap.cool_rated_cfms << clg_rated_cfm * capacity_ratio
-        fan_cfms << clg_capacity_tons * clg_cfm * (capacity_ratio / clg_ap.cool_capacity_ratios[-1])
+        fan_cfms << clg_cfm * (capacity_ratio / clg_ap.cool_capacity_ratios[-1])
       end
     end
     if not heating_system.nil?
@@ -360,7 +360,7 @@ module HVAC
         htg_ap.heat_rated_cfms = []
         htg_ap.heat_capacity_ratios.each do |capacity_ratio|
           htg_ap.heat_rated_cfms << htg_rated_cfm * capacity_ratio
-          fan_cfms << htg_capacity_tons * htg_cfm * (capacity_ratio / htg_ap.heat_capacity_ratios[-1])
+          fan_cfms << htg_cfm * (capacity_ratio / htg_ap.heat_capacity_ratios[-1])
         end
       else
         fan_cfms << htg_cfm
