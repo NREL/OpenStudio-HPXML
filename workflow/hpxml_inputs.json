@@ -2107,7 +2107,7 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "heat_pump": "ASHP, SEER 22, 10 HSPF, Heating Capacity17F",
+    "heat_pump": "ASHP, SEER 22, 10 HSPF, Heating Capacity 17F",
     "heat_pump_heating_capacity": 18000,
     "heat_pump_cooling_capacity": 18000,
     "heat_pump_backup_type": "separate",
