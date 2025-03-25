@@ -341,7 +341,7 @@ module HVAC
       clg_cfm = cooling_system.cooling_airflow_cfm # the *maximum* installed cooling airflow rate
 
       clg_rated_cfm = clg_capacity_tons * clg_ap.cool_rated_cfm_per_ton
-      rated_cfm = [rated_cfm, clg_rated_cfm].max
+      rated_cfm = clg_rated_cfm
 
       clg_ap.cool_rated_cfms = []
       clg_ap.cool_capacity_ratios.each do |capacity_ratio|
@@ -360,7 +360,7 @@ module HVAC
 
       if is_heatpump
         htg_rated_cfm = htg_capacity_tons * htg_ap.heat_rated_cfm_per_ton
-        rated_cfm = [rated_cfm, htg_rated_cfm].max
+        rated_cfm = htg_rated_cfm if rated_cfm.nil?
 
         htg_ap.heat_rated_cfms = []
         htg_ap.heat_capacity_ratios.each do |capacity_ratio|
@@ -2417,6 +2417,11 @@ module HVAC
       # Calculate gross values for all datapoints
       datapoints.each do |dp|
         convert_datapoint_net_to_gross(dp, mode, speed_index, hvac_system, rated_cfm)
+        if dp.gross_capacity <= 0
+          fail "Double check inputs for '#{hvac_system.id}'; calculated negative gross capacity for mode=#{mode}, speed=#{capacity_description}, outdoor_temperature=#{dp.outdoor_temperature}"
+        elsif dp.gross_input_power <= 0
+          fail "Double check inputs for '#{hvac_system.id}'; calculated negative gross input power for mode=#{mode}, speed=#{capacity_description}, outdoor_temperature=#{dp.outdoor_temperature}"
+        end
       end
 
       # Determine min/max ODB temperatures to extrapolate to, to cover full range of equipment operation.

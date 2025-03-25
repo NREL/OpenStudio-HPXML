@@ -71,36 +71,35 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    # FIXME: Once airflows are addressed, add fan power and expand to more ODB temperatures
     expected_clg_cfms = [91.7, 266.7, 285.6]
     expected_clg_cops = {
-      104 => [3.28, 3.03, 2.83],
-      95 => [3.88, 3.64, 3.40],
-      82 => [5.12, 4.93, 4.62],
-      55.6 => [11.57, 12.60, 11.89],
-      # 40 => [12.23, 13.38, 12.63],
+      104 => [3.29, 3.08, 2.88],
+      95 => [3.89, 3.71, 3.47],
+      82 => [5.14, 5.05, 4.74],
+      55.6 => [11.66, 13.24, 12.53],
+      # 40 => [12.32, 14.06, 13.31],
     }
     expected_clg_capacities = {
-      104 => [2656.5, 7870.8, 8458.1],
-      95 => [2761.8, 8220.8, 8834.6],
-      82 => [2914.0, 8726.3, 9378.3],
-      55.6 => [3222.6, 9751.5, 10481.0],
-      # 40 => [3405.6, 10359.4, 11134.9],
+      104 => [2658.3, 7905.7, 8500.3],
+      95 => [2763.7, 8255.7, 8876.7],
+      82 => [2915.9, 8761.2, 9420.4],
+      55.6 => [3224.5, 9786.4, 10523.2],
+      # 40 => [3407.5, 10394.3, 11177.0],
     }
     expected_htg_cfms = [86.7, 290.0, 319.2]
     expected_htg_cops = {
-      70 => [8.39, 3.56, 3.81],
-      47 => [3.39, 2.76, 2.61],
-      17 => [2.20, 2.01, 1.80],
+      70 => [8.44, 3.60, 3.88],
+      47 => [3.40, 2.79, 2.63],
+      17 => [2.20, 2.02, 1.81],
       5 => [1.74, 1.53, 1.54],
       -20 => [1.20, 1.05, 1.05],
     }
     expected_htg_capacities = {
-      70 => [2187.8, 9341.9, 9521.0],
-      47 => [2591.2, 8421.9, 9214.5],
-      17 => [3117.4, 7221.9, 8814.8],
-      5 => [2542.6, 7579.3, 7588.7],
-      -20 => [1587.3, 4580.7, 4554.1],
+      70 => [2186.2, 9298.0, 9463.7],
+      47 => [2589.6, 8378.0, 9157.3],
+      17 => [3115.8, 7178.0, 8757.6],
+      5 => [2541.1, 7535.3, 7531.5],
+      -20 => [1585.7, 4536.7, 4496.8],
     }
 
     # Check cooling coil
@@ -154,33 +153,33 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for [min, rated] speeds
     expected_clg_cfms = [194.0, 266.7]
     expected_clg_cops = {
-      104 => [3.29, 3.13],
-      95 => [3.81, 3.64],
-      82 => [4.78, 4.59],
-      42.3 => [12.26, 12.36],
-      # 40 => [12.38, 12.47],
+      104 => [3.33, 3.19],
+      95 => [3.86, 3.71],
+      82 => [4.84, 4.69],
+      42.3 => [12.58, 12.93],
+      # 40 => [12.70, 13.05],
     }
     expected_clg_capacities = {
-      104 => [5635.8, 7840.8],
-      95 => [5912.3, 8220.8],
-      82 => [6311.7, 8769.7],
-      42.3 => [7531.5, 10446.4],
-      # 40 => [7602.0, 10543.2],
+      104 => [5650.4, 7875.7],
+      95 => [5926.9, 8255.7],
+      82 => [6326.3, 8804.6],
+      42.3 => [7546.1, 10481.3],
+      # 40 => [7616.5, 10578.2],
     }
     expected_htg_cfms = [206.4, 290.0]
     expected_htg_cops = {
-      70 => [4.16, 3.62],
-      47 => [3.24, 2.80],
-      17 => [2.36, 2.03],
-      5 => [2.08, 1.78],
-      0 => [1.97, 1.69],
+      70 => [4.19, 3.66],
+      47 => [3.26, 2.83],
+      17 => [2.37, 2.04],
+      5 => [2.09, 1.79],
+      0 => [1.98, 1.70],
     }
     expected_htg_capacities = {
-      70 => [6736.4, 9341.9],
-      47 => [6081.8, 8421.9],
-      17 => [5227.9, 7221.9],
-      5 => [4886.3, 6741.9],
-      0 => [4744.0, 6541.9],
+      70 => [6719.2, 9298.0],
+      47 => [6064.5, 8378.0],
+      17 => [5210.6, 7178.0],
+      5 => [4869.1, 6698.0],
+      0 => [4726.7, 6498.0],
     }
 
     # Check cooling coil
@@ -230,33 +229,33 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for rated speed
     expected_clg_cfm = 266.7
     expected_clg_cops = {
-      104 => 3.23,
-      95 => 3.96,
-      82 => 5.61,
-      57.7 => 16.26,
-      # 40 => 17.48,
+      104 => 3.24,
+      95 => 3.98,
+      82 => 5.64,
+      57.7 => 16.52,
+      # 40 => 17.76,
     }
     expected_clg_capacities = {
-      104 => 7987.6,
-      95 => 8367.6,
-      82 => 8916.6,
-      57.7 => 9943.7,
-      # 40 => 10690.1,
+      104 => 7996.7,
+      95 => 8376.7,
+      82 => 8925.7,
+      57.7 => 9952.8,
+      # 40 => 10699.2,
     }
     expected_htg_cfm = 290.0
     expected_htg_cops = {
-      70 => 4.34,
-      47 => 3.32,
-      17 => 2.37,
-      5 => 2.07,
+      70 => 4.36,
+      47 => 3.33,
+      17 => 2.38,
+      5 => 2.08,
       0 => 1.96,
     }
     expected_htg_capacities = {
-      70 => 9210.3,
-      47 => 8290.3,
-      17 => 7090.3,
-      5 => 6610.3,
-      0 => 6410.3,
+      70 => 9199.6,
+      47 => 8279.6,
+      17 => 7079.6,
+      5 => 6599.6,
+      0 => 6399.6,
     }
 
     hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
@@ -322,7 +321,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated] speeds
-    expected_clg_cops_95 = [4.62, 4.44]
+    expected_clg_cops_95 = [4.68, 4.52]
     expected_clg_capacities_95 = [5204, 7234]
 
     # Check cooling coil
@@ -349,7 +348,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [5.93, 4.52, 4.23]
+    expected_clg_cops_95 = [5.93, 4.68, 4.39]
     expected_clg_capacities_95 = [1996, 7213, 7747]
 
     # Check cooling coil
@@ -831,9 +830,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated] speeds
-    expected_clg_cops_95 = [4.62, 4.44]
+    expected_clg_cops_95 = [4.68, 4.52]
     expected_clg_capacities_95 = [7806, 10851]
-    expected_htg_cops_47 = [3.96, 3.44]
+    expected_htg_cops_47 = [3.96, 3.48]
     expected_htg_capacities_47 = [7394, 10250]
 
     # Get HPXML values
@@ -882,9 +881,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [3.84, 4.30, 4.02]
+    expected_clg_cops_95 = [3.84, 4.45, 4.17]
     expected_clg_capacities_95 = [4296, 10819, 11620]
-    expected_htg_cops_47 = [4.34, 3.56, 3.36]
+    expected_htg_cops_47 = [4.34, 3.62, 3.42]
     expected_htg_capacities_47 = [3151, 10282, 11269]
 
     # Get HPXML values
@@ -950,9 +949,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [4.56, 2.91, 2.91]
+    expected_clg_cops_95 = [4.56, 2.98, 2.98]
     expected_clg_capacities_95 = [3501, 10825, 10825]
-    expected_htg_cops_47 = [4.73, 3.63, 3.63]
+    expected_htg_cops_47 = [4.73, 3.69, 3.69]
     expected_htg_capacities_47 = [2894, 10222, 10222]
 
     # Get HPXML values
@@ -1082,7 +1081,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 3537)
+    _check_advanced_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 3473)
 
     # Dual fuel heat pump test
     args_hash = {}
@@ -1097,7 +1096,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1249)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1229)
 
     # Separate backup heat pump test
     args_hash = {}
@@ -1112,7 +1111,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 2373.9, backup_fuel, 0.06667, 677)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 2373.9, backup_fuel, 0.06667, 684)
 
     # Small capacity test
     args_hash = {}
@@ -1140,9 +1139,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [5.67, 3.88, 3.62]
+    expected_clg_cops_95 = [5.67, 3.97, 3.71]
     expected_clg_capacities_95 = [2838, 10709, 11490]
-    expected_htg_cops_47 = [4.63, 3.73, 3.52]
+    expected_htg_cops_47 = [4.63, 3.78, 3.57]
     expected_htg_capacities_47 = [3156, 10392, 11408]
 
     # Check cooling coil
@@ -1188,9 +1187,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     backup_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [5.35, 3.98, 3.72]
+    expected_clg_cops_95 = [5.35, 4.11, 3.85]
     expected_clg_capacities_95 = [2957, 10819, 11620]
-    expected_htg_cops_47 = [4.34, 3.56, 3.36]
+    expected_htg_cops_47 = [4.34, 3.62, 3.42]
     expected_htg_capacities_47 = [3151, 10282, 11269]
 
     # Check cooling coil
@@ -1242,10 +1241,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [3.77, 2.59, 2.55]
+    expected_clg_cops_95 = [3.77, 2.67, 2.63]
     expected_clg_capacities_95 = [2669, 10674, 10795]
-    expected_htg_cops_47 = [3.49, 2.74, 2.85]
-    expected_htg_capacities_47 = [3337, 10992, 13363]
+    expected_htg_cops_47 = [3.49, 2.78, 2.92]
+    expected_htg_capacities_47 = [3337, 10992, 13185]
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -1285,7 +1284,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [5.67, 3.88, 3.62]
+    expected_clg_cops_95 = [5.67, 3.97, 3.71]
     expected_clg_capacities_95 = [1892, 7139, 7660]
 
     # Check cooling coil

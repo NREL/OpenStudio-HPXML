@@ -2052,21 +2052,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 13.0
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 6.8
-    hpxml_bldg.heat_pumps[0].heating_capacity_17F = 9876
+    hpxml_bldg.heat_pumps[0].heating_capacity_17F = 11728
     hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
     hpxml_bldg.heat_pumps[0].crankcase_heater_watts = 40.0
     hpxml_bldg.heat_pumps[0].pan_heater_watts = 99.0
     hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeDefrost
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 9876, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 11728, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test w/ heating capacity fraction 17F
-    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = 0.1
+    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = 0.5
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 11728, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test defaults - SEER2/HSPF2/EER
     hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = nil
@@ -2077,7 +2077,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = 8.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 11728, 34567, 13.3, 13.0, 6.8, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test autosizing with factors
     hpxml_bldg.heat_pumps[0].cooling_capacity = nil
@@ -2430,14 +2430,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].cooling_capacity = 12345
     hpxml_bldg.heat_pumps[0].heating_capacity = 23456
     hpxml_bldg.heat_pumps[0].backup_heating_capacity = 34567
-    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = 0.1
+    hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = 0.5
     hpxml_bldg.heat_pumps[0].crankcase_heater_watts = 40.0
     hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 11.0
     hpxml_bldg.heat_pumps[0].pan_heater_watts = 99.0
     hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeDefrost
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 2346, 34567, 18.05, 11.0, 8.5, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, 12345, 23456, 11728, 34567, 18.05, 11.0, 8.5, 40.0, 1.0, 1.0, 1.0, 99.0, HPXML::HVACPanHeaterControlTypeDefrost)
 
     # Test w/ heating capacity 17F
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = 9876
