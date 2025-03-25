@@ -360,7 +360,7 @@ module HVAC
 
       if is_heatpump
         htg_rated_cfm = htg_capacity_tons * htg_ap.heat_rated_cfm_per_ton
-        rated_cfm = htg_rated_cfm if rated_cfm.nil?
+        rated_cfm = htg_rated_cfm if rated_cfm.to_f < MinAirflow
 
         htg_ap.heat_rated_cfms = []
         htg_ap.heat_capacity_ratios.each do |capacity_ratio|
