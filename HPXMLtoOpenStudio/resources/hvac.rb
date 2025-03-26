@@ -2421,36 +2421,41 @@ module HVAC
         # Max cooling ODB temperature
         max_odb = weather_temp
         if max_odb > user_odbs.max
-          outdoor_dry_bulbs << [:max, max_odb]
+          outdoor_dry_bulbs << [:max, max_odb, nil]
         end
 
-        # Min cooling ODB temperature
+        # Min cooling ODB temperature(s)
         dp82f = datapoints.find { |dp| dp.outdoor_temperature == 82.0 }
         dp95f = datapoints.find { |dp| dp.outdoor_temperature == 95.0 }
-        min_power = 0.5 * dp82f.input_power
-        odb_at_min_power = MathTools.interp2(min_power, dp82f.input_power, dp95f.input_power, 82.0, 95.0)
-        odb_at_min_power = -999999.0 if dp82f.input_power >= dp95f.input_power # Exclude if power increasing at lower ODB temperatures
-        min_odb = [odb_at_min_power, 40.0].max
-        if min_odb < user_odbs.min
-          outdoor_dry_bulbs << [:min, min_odb]
+        if dp82f.input_power < dp95f.input_power
+          # If power decreasing at lower ODB temperatures, add datapoint at 50% power
+          min_power = 0.5 * dp82f.input_power
+          odb_at_min_power = MathTools.interp2(min_power, dp82f.input_power, dp95f.input_power, 82.0, 95.0)
+          if odb_at_min_power < user_odbs.min
+            outdoor_dry_bulbs << [:min, odb_at_min_power]
+          end
+        end
+        min_odb = 40.0
+        if min_odb < user_odbs.min && (odb_at_min_power.nil? || min_odb < odb_at_min_power)
+          outdoor_dry_bulbs << [:min, min_odb, min_power]
         end
       else
         # Min heating ODB temperature
         min_odb = [hp_min_temp, weather_temp].max
         if min_odb < user_odbs.min
-          outdoor_dry_bulbs << [:min, min_odb]
+          outdoor_dry_bulbs << [:min, min_odb, nil]
         end
 
         # Max heating OBD temperature
         max_odb = 70.0
         if max_odb > user_odbs.max
-          outdoor_dry_bulbs << [:max, max_odb]
+          outdoor_dry_bulbs << [:max, max_odb, nil]
         end
       end
 
       # Add new datapoint at min/max ODB temperatures
       n_tries = 1000
-      outdoor_dry_bulbs.each do |target_type, target_odb|
+      outdoor_dry_bulbs.each do |target_type, target_odb, min_power_constraint|
         if mode == :clg
           new_dp = HPXML::CoolingPerformanceDataPoint.new(nil)
         else
@@ -2461,6 +2466,11 @@ module HVAC
           new_dp.outdoor_temperature = target_odb
           new_dp.capacity = extrapolate_datapoint(datapoints, capacity_description, target_odb, :capacity).round
           new_dp.input_power = extrapolate_datapoint(datapoints, capacity_description, target_odb, :input_power)
+          if (not min_power_constraint.nil?)
+            if new_dp.input_power < min_power_constraint
+              new_dp.input_power = min_power_constraint
+            end
+          end
           new_dp.efficiency_cop = (new_dp.capacity / new_dp.input_power).round(4)
           convert_datapoint_net_to_gross(new_dp, mode, speed_index, hvac_system)
 
