@@ -2752,8 +2752,8 @@
     "heat_pump_charge_defect_ratio": -0.25,
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
-  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-2-speed.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml",
+  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-2-speed-advanced.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-advanced.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
     "heat_pump_charge_defect_ratio": -0.25,
     "hvac_blower_fan_watts_per_cfm": 0.365

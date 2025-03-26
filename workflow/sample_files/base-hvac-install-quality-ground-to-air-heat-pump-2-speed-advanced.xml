@@ -10,6 +10,9 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
+        <AdvancedResearchFeatures>
+          <GeothermalModelType>advanced</GeothermalModelType>
+        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
