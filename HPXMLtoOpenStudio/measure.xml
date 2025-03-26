@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b36464f4-53fb-4c2b-a0cc-8ad82ec6868c</version_id>
-  <version_modified>2025-03-26T21:11:43Z</version_modified>
+  <version_id>a5edc9cf-dec5-4e06-b66a-ea6180835831</version_id>
+  <version_modified>2025-03-26T22:48:08Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -399,7 +399,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A05FBF87</checksum>
+      <checksum>82B6DF99</checksum>
     </file>
     <file>
       <filename>internal_gains.rb</filename>
@@ -694,12 +694,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>93120E27</checksum>
-    </file>
-    <file>
-      <filename>results_design_load_details.json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4578819C</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>

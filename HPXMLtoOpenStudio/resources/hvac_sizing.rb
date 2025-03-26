@@ -2937,7 +2937,7 @@ module HVACSizing
            HPXML::HVACTypeHeatPumpRoom].include? heating_type
 
       hvac_heating_speed = get_nominal_speed(hvac_heating_ap, false)
-      process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed, oversize_limit, oversize_delta, hpxml_bldg)
+      process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed, oversize_limit, oversize_delta, hpxml_bldg, hpxml_header)
 
       hvac_sizings.Heat_Capacity_Supp = calculate_heat_pump_backup_load(mj, hvac_heating, hvac_sizings.Heat_Load_Supp, hvac_sizings.Heat_Capacity, hvac_heating_speed, hpxml_bldg)
       if (heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
@@ -3745,7 +3745,7 @@ module HVACSizing
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, cool_cap_adj_factor, hvac_system, hvac_heating_speed,
-                                        oversize_limit, oversize_delta, hpxml_bldg)
+                                        oversize_limit, oversize_delta, hpxml_bldg, hpxml_header)
 
     if not hvac_heating.backup_heating_switchover_temp.nil?
       min_compressor_temp = hvac_heating.backup_heating_switchover_temp
@@ -3757,7 +3757,7 @@ module HVACSizing
       # Calculate the heating load at the switchover temperature to limit unutilized capacity
       temp_heat_design_temp = hpxml_bldg.header.manualj_heating_design_temp
       hpxml_bldg.header.manualj_heating_design_temp = min_compressor_temp
-      alternate_all_hvac_sizings = calculate(runner, weather, hpxml_bldg, [hvac_system], update_hpxml: false)[0]
+      alternate_all_hvac_sizings = calculate(runner, weather, hpxml_bldg, [hvac_system], hpxml_header, update_hpxml: false)[0]
       heating_load = alternate_all_hvac_sizings[hvac_system].Heat_Load
       heating_temp = min_compressor_temp
       hpxml_bldg.header.manualj_heating_design_temp = temp_heat_design_temp
