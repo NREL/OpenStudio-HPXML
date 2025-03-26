@@ -2015,55 +2015,6 @@ module Defaults
       heating_system.fan_coil_watts = nil
     end
 
-    # Default AC/HP sensible heat ratio
-    hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless cooling_system.cooling_shr.nil?
-
-      case cooling_system.cooling_system_type
-      when HPXML::HVACTypeCentralAirConditioner
-        case cooling_system.compressor_type
-        when HPXML::HVACCompressorTypeSingleStage
-          cooling_system.cooling_shr = 0.73
-        when HPXML::HVACCompressorTypeTwoStage
-          cooling_system.cooling_shr = 0.73
-        when HPXML::HVACCompressorTypeVariableSpeed
-          cooling_system.cooling_shr = 0.78
-        end
-        cooling_system.cooling_shr_isdefaulted = true
-      when HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC
-        cooling_system.cooling_shr = 0.65
-        cooling_system.cooling_shr_isdefaulted = true
-      when HPXML::HVACTypeMiniSplitAirConditioner
-        cooling_system.cooling_shr = 0.73
-        cooling_system.cooling_shr_isdefaulted = true
-      end
-    end
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless heat_pump.cooling_shr.nil?
-
-      case heat_pump.heat_pump_type
-      when HPXML::HVACTypeHeatPumpAirToAir
-        case heat_pump.compressor_type
-        when HPXML::HVACCompressorTypeSingleStage
-          heat_pump.cooling_shr = 0.73
-        when HPXML::HVACCompressorTypeTwoStage
-          heat_pump.cooling_shr = 0.73
-        when HPXML::HVACCompressorTypeVariableSpeed
-          heat_pump.cooling_shr = 0.78
-        end
-        heat_pump.cooling_shr_isdefaulted = true
-      when HPXML::HVACTypeHeatPumpMiniSplit
-        heat_pump.cooling_shr = 0.73
-        heat_pump.cooling_shr_isdefaulted = true
-      when HPXML::HVACTypeHeatPumpGroundToAir
-        heat_pump.cooling_shr = 0.73
-        heat_pump.cooling_shr_isdefaulted = true
-      when HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom
-        heat_pump.cooling_shr = 0.65
-        heat_pump.cooling_shr_isdefaulted = true
-      end
-    end
-
     # GSHP pump power
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
@@ -6295,7 +6246,6 @@ module Defaults
       clg_ap.cool_cap_fflow_spec = [1.0, 0.0, 0.0]
       clg_ap.cool_eir_fflow_spec = [1.0, 0.0, 0.0]
       clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_ceer, 'Btu/hr', 'W')]
-      HVAC.set_cool_rated_shrs_gross(cooling_system)
       return
     end
 
@@ -6357,7 +6307,6 @@ module Defaults
     clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
     clg_ap.cool_cap_ft_spec = [3.717717741, -0.09918866, 0.000964488, 0.005887776, -0.000012808, -0.000132822]
     clg_ap.cool_eir_ft_spec = [-3.400341169, 0.135184783, -0.001037932, -0.007852322, 0.000183438, -0.000142548]
-    HVAC.set_cool_rated_shrs_gross(cooling_system)
   end
 
   # Sets heating performance factors based on RESNET MINHERS Addendum 82.

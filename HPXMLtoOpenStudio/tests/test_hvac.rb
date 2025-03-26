@@ -121,6 +121,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
         assert_in_epsilon(capacity, cap_adj * UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
       end
     end
+    clg_coil.stages.each do |stage|
+      assert_equal(HVAC::GrossSHR, stage.grossRatedSensibleHeatRatio.get)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
@@ -201,6 +204,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
         assert_in_epsilon(capacity, cap_adj * UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
       end
     end
+    clg_coil.stages.each do |stage|
+      assert_equal(HVAC::GrossSHR, stage.grossRatedSensibleHeatRatio.get)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
@@ -275,6 +281,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       cap_adj = _get_table_lookup_factor(clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve, HVAC::AirSourceCoolRatedIWB, odb)
       assert_in_epsilon(capacity, cap_adj * UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
     end
+    assert_equal(HVAC::GrossSHR, clg_coil.ratedSensibleHeatRatio.get)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
