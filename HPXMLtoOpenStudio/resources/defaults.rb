@@ -99,7 +99,7 @@ module Defaults
     all_zone_loads, all_space_loads = apply_hvac_sizing(runner, hpxml_bldg, weather)
 
     # These need to be applied after sizing HVAC capacities/airflows
-    apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
+    apply_detailed_performance_data(hpxml_bldg)
     apply_cfis_fan_power(hpxml_bldg)
     apply_crankcase_heating(hpxml_bldg)
 
@@ -1900,7 +1900,8 @@ module Defaults
       next unless HVAC.is_room_dx_hvac_system(hvac_system)
       next unless hvac_system.cooling_efficiency_ceer.nil?
 
-      hvac_system.cooling_efficiency_ceer = HVAC.calc_ceer_from_eer(hvac_system.cooling_efficiency_eer).round(2)
+      # Source: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
+      hvac_system.cooling_efficiency_ceer = (hvac_system.cooling_efficiency_eer / 1.01).round(2)
       hvac_system.cooling_efficiency_ceer_isdefaulted = true
       hvac_system.cooling_efficiency_eer = nil
     end
@@ -2297,9 +2298,8 @@ module Defaults
       case cooling_system.cooling_system_type
       when HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner,
            HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC
-        # Note: We use HP cooling curve so that a central AC behaves the same.
-        HVAC.set_fan_power_rated(cooling_system)
-        HVAC.set_cool_curves_dx_air_source(cooling_system)
+        set_hvac_fan_power_rated(cooling_system)
+        set_hvac_cooling_performance(cooling_system)
 
       when HPXML::HVACTypeEvaporativeCooler
         clg_ap.effectiveness = 0.72 # Assumption from HEScore
@@ -2313,19 +2313,21 @@ module Defaults
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
-      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_heat_cfm_per_ton_simple()
+      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       case heat_pump.heat_pump_type
       when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom
-        HVAC.set_fan_power_rated(heat_pump)
-        HVAC.set_heat_pump_temperatures(heat_pump, runner)
-        HVAC.set_cool_curves_dx_air_source(heat_pump)
-        HVAC.set_heat_curves_dx_air_source(heat_pump)
+        set_hvac_fan_power_rated(heat_pump)
+        set_heat_pump_control_temperatures(heat_pump, runner)
+        set_hvac_cooling_performance(heat_pump)
+        set_hvac_heating_performance(heat_pump)
 
       when HPXML::HVACTypeHeatPumpGroundToAir
-        HVAC.set_heat_pump_temperatures(heat_pump, runner)
+        set_heat_pump_control_temperatures(heat_pump, runner)
+        set_hvac_cooling_performance(heat_pump)
+        set_hvac_heating_performance(heat_pump)
 
         if heat_pump.geothermal_loop.nil?
           if not unit_num.nil?
@@ -2390,7 +2392,7 @@ module Defaults
           heat_pump.geothermal_loop.shank_spacing_isdefaulted = true
         end
       when HPXML::HVACTypeHeatPumpWaterLoopToAir
-        HVAC.set_heat_pump_temperatures(heat_pump, runner)
+        set_heat_pump_control_temperatures(heat_pump, runner)
 
       end
     end
@@ -2398,55 +2400,39 @@ module Defaults
 
   # Assigns default values for omitted optional inputs in the HPXML::CoolingPerformanceDataPoint
   # and HPXML::HeatingPerformanceDataPoint objects.
-  # Currently these objects are only used for variable-speed air source systems.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
+  def self.apply_detailed_performance_data(hpxml_bldg)
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       is_hp = hvac_system.is_a? HPXML::HeatPump
       system_type = is_hp ? hvac_system.heat_pump_type : hvac_system.cooling_system_type
+      if [HPXML::HVACTypeHeatPumpPTHP,
+          HPXML::HVACTypeHeatPumpRoom].include? system_type
+        set_heating_capacity_17F(hvac_system)
+        next
+      end
       next unless [HPXML::HVACTypeCentralAirConditioner,
                    HPXML::HVACTypeMiniSplitAirConditioner,
                    HPXML::HVACTypeHeatPumpAirToAir,
-                   HPXML::HVACTypeHeatPumpMiniSplit,
-                   HPXML::HVACTypeHeatPumpPTHP,
-                   HPXML::HVACTypeHeatPumpRoom].include? system_type
+                   HPXML::HVACTypeHeatPumpMiniSplit].include? system_type
 
-      if hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-
-        hvac_ap = hvac_system.additional_properties
-        if hvac_system.cooling_detailed_performance_data.empty?
-          HVAC.set_cool_detailed_performance_data(hvac_system)
-        else
-          detailed_performance_data = hvac_system.cooling_detailed_performance_data
-          expand_detailed_performance_data(detailed_performance_data, hvac_system.cooling_capacity)
-          # override some properties based on detailed performance data
-          cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
-          cool_max_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
-          cool_min_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
-          hvac_ap.cool_capacity_ratios = [cool_min_capacity / cool_rated_capacity, 1.0, cool_max_capacity / cool_rated_capacity]
-          hvac_ap.cool_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.cool_capacity_ratios, hvac_ap.cool_rated_cfm_per_ton, hvac_ap.cool_rated_airflow_rate)
-        end
-        if is_hp
-          if hvac_system.heating_detailed_performance_data.empty?
-            set_heating_capacity_17F(hvac_system)
-            HVAC.set_heat_detailed_performance_data(hvac_system)
-          else
-            detailed_performance_data = hvac_system.heating_detailed_performance_data
-            expand_detailed_performance_data(detailed_performance_data, hvac_system.heating_capacity)
-            set_heating_capacity_17F(hvac_system)
-
-            # override some properties based on detailed performance data
-            heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
-            heat_max_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
-            heat_min_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.capacity, 1.0].max
-            hvac_ap.heat_capacity_ratios = [heat_min_capacity / heat_rated_capacity, 1.0, heat_max_capacity / heat_rated_capacity]
-            hvac_ap.heat_fan_speed_ratios = HVAC.calc_fan_speed_ratios(hvac_ap.heat_capacity_ratios, hvac_ap.heat_rated_cfm_per_ton, hvac_ap.heat_rated_airflow_rate)
-          end
-        end
+      # Cooling
+      if hvac_system.cooling_detailed_performance_data.empty?
+        set_detailed_performance_data_cooling(hvac_system)
       else
-        set_heating_capacity_17F(hvac_system) if is_hp
+        expand_detailed_performance_data(:clg, hvac_system)
+      end
+
+      next unless is_hp
+
+      # Heating
+      if hvac_system.heating_detailed_performance_data.empty?
+        set_heating_capacity_17F(hvac_system)
+        set_detailed_performance_data_heating(hvac_system)
+      else
+        expand_detailed_performance_data(:htg, hvac_system)
+        set_heating_capacity_17F(hvac_system)
       end
     end
   end
@@ -2454,12 +2440,23 @@ module Defaults
   # This method assigns default values for omitted optional inputs in detailed performance data by:
   # 1. Assigns capacities with fractions.
   # 2. Add the nominal speed capacity and cop calculated with other temperature with nominal speed data
-  # Currently these objects are only used for variable-speed air source systems.
   #
-  # @param detailed_performance_data [HPXML::HeatingDetailedPerformanceData or HPXML::CoolingDetailedPerformanceData] HPXML HeatingDetailedPerformanceData or CoolingDetailedPerformanceData array that contains HeatingPerformanceDataPoint or CoolingPerformanceDataPoint
-  # @param nominal_capacity [Double] Nominal heating/cooling capacity
+  # @param mode [Symbol] Heating (:htg) or cooling (:clg)
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [nil]
-  def self.expand_detailed_performance_data(detailed_performance_data, nominal_capacity)
+  def self.expand_detailed_performance_data(mode, hvac_system)
+    hvac_ap = hvac_system.additional_properties
+
+    if mode == :clg
+      detailed_performance_data = hvac_system.cooling_detailed_performance_data
+      rated_odb = HVAC::AirSourceCoolRatedODB
+      nominal_capacity = hvac_system.cooling_capacity
+    elsif mode == :htg
+      detailed_performance_data = hvac_system.heating_detailed_performance_data
+      rated_odb = HVAC::AirSourceHeatRatedODB
+      nominal_capacity = hvac_system.heating_capacity
+    end
+
     # process capacity fraction of nominal
     detailed_performance_data.each do |dp|
       next unless dp.capacity.nil?
@@ -2469,9 +2466,9 @@ module Defaults
     end
 
     all_outdoor_odbs = detailed_performance_data.map { |dp| dp.outdoor_temperature }.uniq.sort
+
     # All temperatures with nominal speed
     nom_odbs = all_outdoor_odbs.select { |odb| not detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.nil? }
-    return if nom_odbs.size == all_outdoor_odbs.size # all data specified
 
     all_outdoor_odbs.each do |odb|
       # no nominal speed data point
@@ -2482,23 +2479,77 @@ module Defaults
                                     outdoor_temperature: odb,
                                     isdefaulted: true)
       added_dp = detailed_performance_data[-1]
-      [:capacity, :efficiency_cop].each do |property|
-        round_digit = (property == :capacity ? 1 : 4)
-        neighbor_property_max = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.send(property)
-        neighbor_property_nom = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionNominal) }.send(property)
-        neighbor_property_min = detailed_performance_data.find { |dp| (dp.outdoor_temperature == neighbor_temp) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.send(property)
-        target_property_max = detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.send(property)
-        target_property_min = detailed_performance_data.find { |dp| (dp.outdoor_temperature == odb) && (dp.capacity_description == HPXML::CapacityDescriptionMinimum) }.send(property)
-        nominal_property_odb = HVAC.calc_nominal_speed_property_with_other_datapoints(target_property_min, target_property_max, neighbor_property_nom, neighbor_property_min, neighbor_property_max).round(round_digit)
-        added_dp.send("#{property}=", nominal_property_odb)
+      neighbor_dps = detailed_performance_data.select { |dp| dp.outdoor_temperature == neighbor_temp }
+      target_dps = detailed_performance_data.select { |dp| dp.outdoor_temperature == odb }
+
+      neighbor_dp_max = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }
+      neighbor_dp_nom = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }
+      neighbor_dp_min = neighbor_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+      target_dp_max = target_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }
+      target_dp_min = target_dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }
+
+      # Net capacity
+      case hvac_system.compressor_type
+      when HPXML::HVACCompressorTypeTwoStage
+        neighbor_nom_capacity = neighbor_dp_nom.capacity
+        neighbor_min_capacity = neighbor_dp_min.capacity
+        target_min_capacity = target_dp_min.capacity
+        capacity = neighbor_nom_capacity * target_min_capacity / neighbor_min_capacity
+      when HPXML::HVACCompressorTypeVariableSpeed
+        neighbor_max_capacity = neighbor_dp_max.capacity
+        neighbor_nom_capacity = neighbor_dp_nom.capacity
+        neighbor_min_capacity = neighbor_dp_min.capacity
+        target_max_capacity = target_dp_max.capacity
+        target_min_capacity = target_dp_min.capacity
+        capacity = MathTools.interp2(neighbor_nom_capacity, neighbor_min_capacity, neighbor_max_capacity, target_min_capacity, target_max_capacity)
       end
+      added_dp.capacity = Float(capacity.round)
+
+      # Net power
+      case hvac_system.compressor_type
+      when HPXML::HVACCompressorTypeTwoStage
+        neighbor_nom_power = neighbor_dp_nom.capacity / neighbor_dp_nom.efficiency_cop
+        neighbor_min_power = neighbor_dp_min.capacity / neighbor_dp_min.efficiency_cop
+        target_min_power = target_dp_min.capacity / neighbor_dp_min.efficiency_cop
+        input_power = neighbor_nom_power * target_min_power / neighbor_min_power
+      when HPXML::HVACCompressorTypeVariableSpeed
+        neighbor_max_power = neighbor_dp_max.capacity / neighbor_dp_max.efficiency_cop
+        neighbor_nom_power = neighbor_dp_nom.capacity / neighbor_dp_nom.efficiency_cop
+        neighbor_min_power = neighbor_dp_min.capacity / neighbor_dp_min.efficiency_cop
+        target_max_power = target_dp_max.capacity / target_dp_max.efficiency_cop
+        target_min_power = target_dp_min.capacity / neighbor_dp_min.efficiency_cop
+        input_power = MathTools.interp2(neighbor_nom_power, neighbor_min_power, neighbor_max_power, target_min_power, target_max_power)
+      end
+      added_dp.efficiency_cop = (added_dp.capacity / input_power).round(4)
+    end
+
+    # override some properties based on detailed performance data
+    dps = detailed_performance_data.select { |dp| dp.outdoor_temperature == rated_odb }
+    capacities = []
+    case hvac_system.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
+    when HPXML::HVACCompressorTypeTwoStage
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.capacity, 1.0].max
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
+    when HPXML::HVACCompressorTypeVariableSpeed
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMinimum }.capacity, 1.0].max
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity, 1.0].max
+      capacities << [dps.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity, 1.0].max
+    end
+    capacity_ratios = capacities.map { |capacity| capacity / [nominal_capacity, 1.0].max }
+
+    if mode == :clg
+      hvac_ap.cool_capacity_ratios = capacity_ratios
+    elsif mode == :htg
+      hvac_ap.heat_capacity_ratios = capacity_ratios
     end
   end
 
   # TODO
   #
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @return [TODO] TODO
+  # @return [nil]
   def self.set_heating_capacity_17F(heat_pump)
     return unless heat_pump.heating_capacity_17F.nil?
 
@@ -2506,7 +2557,8 @@ module Defaults
       rated_capacity_17 = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
       heat_pump.heating_capacity_17F = rated_capacity_17
     else
-      heat_pump.heating_capacity_17F = (heat_pump.heating_capacity * HVAC.get_heating_capacity_fraction_17F(heat_pump)).round
+      hp_ap = heat_pump.additional_properties
+      heat_pump.heating_capacity_17F = (heat_pump.heating_capacity * hp_ap.qm17full).round
     end
     heat_pump.heating_capacity_17F_isdefaulted = true
     heat_pump.heating_capacity_fraction_17F = nil
@@ -5553,14 +5605,10 @@ module Defaults
   # @param [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump]
   # @return [String] Compressor type (HPXML::HVACCompressorTypeXXX)
   def self.get_hvac_compressor_type(hvac_system)
-    hvac_type = (hvac_system.is_a? HPXML::HeatPump) ? hvac_system.heat_pump_type : hvac_system.cooling_system_type
-    case hvac_type
-    when HPXML::HVACTypePTAC,
-         HPXML::HVACTypeHeatPumpPTHP,
-         HPXML::HVACTypeHeatPumpRoom,
-         HPXML::HVACTypeRoomAirConditioner
+    if HVAC.is_room_dx_hvac_system(hvac_system)
       return HPXML::HVACCompressorTypeSingleStage
     end
+
     return
   end
 
@@ -6121,5 +6169,602 @@ module Defaults
     sens_gains = (-1227.0 - 409.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
     lat_gains = (1245.0 + 415.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
     return sens_gains * 365.0, lat_gains * 365.0
+  end
+
+  # Sets the default assumed rated ran power (W/cfm) for the HVAC system.
+  #
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
+  # @return [nil]
+  def self.set_hvac_fan_power_rated(hvac_system)
+    hvac_ap = hvac_system.additional_properties
+    if HVAC.is_room_dx_hvac_system(hvac_system)
+      # Fan not separately modeled
+      hvac_ap.fan_power_rated = 0.0
+    else
+      # Based on RESNET MINHERS Addendum 82
+      psc_ducted_watts_per_cfm = 0.414 # W/cfm, PSC fan
+      psc_ductless_watts_per_cfm = 0.414 # W/cfm, PSC fan
+      bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
+      bpm_ductless_watts_per_cfm = 0.171 # W/cfm, BPM fan
+      if hvac_system.distribution_system.nil?
+        hvac_ap.fan_power_rated = (hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_ductless_watts_per_cfm : bpm_ductless_watts_per_cfm
+      else
+        hvac_ap.fan_power_rated = (hvac_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_ducted_watts_per_cfm : bpm_ducted_watts_per_cfm
+      end
+    end
+  end
+
+  # Sets the default control temperatures (min compressor and max backup heating
+  # temperatures) for the heat pump.
+  #
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @return [nil]
+  def self.set_heat_pump_control_temperatures(heat_pump, runner)
+    hp_ap = heat_pump.additional_properties
+
+    # Gets:
+    # 1. Minimum temperature (F) for HP compressor operation
+    # 2. Maximum temperature (F) for HP supplemental heating operation
+    if not heat_pump.backup_heating_switchover_temp.nil?
+      hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
+      hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp
+    else
+      hp_ap.hp_min_temp = heat_pump.compressor_lockout_temp
+      hp_ap.supp_max_temp = heat_pump.backup_heating_lockout_temp
+    end
+
+    # Error-checking
+    # Can't do this in Schematron because temperatures can be defaulted
+    if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+      hp_backup_fuel = heat_pump.backup_heating_fuel
+    elsif not heat_pump.backup_system.nil?
+      hp_backup_fuel = heat_pump.backup_system.heating_system_fuel
+    end
+    if hp_backup_fuel == HPXML::FuelTypeElectricity
+      if (not hp_ap.hp_min_temp.nil?) && (not hp_ap.supp_max_temp.nil?) && ((hp_ap.hp_min_temp - hp_ap.supp_max_temp).abs < 5)
+        if not heat_pump.backup_heating_switchover_temp.nil?
+          runner.registerError('Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.')
+        else
+          runner.registerError('Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.')
+        end
+      end
+    end
+  end
+
+  # Sets the degradation coefficient and Part Load Factor (PLF) curve for the HVAC system.
+  #
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
+  # @return [nil]
+  def self.set_hvac_degradation_coefficient(hvac_system)
+    hvac_ap = hvac_system.additional_properties
+
+    # Degradation coefficient
+    if HVAC.is_room_dx_hvac_system(hvac_system)
+      hvac_ap.c_d = 0.22
+    else
+      # Per RESNET MINHERS Addendum 82
+      case hvac_system.compressor_type
+      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+        hvac_ap.c_d = 0.08
+      when HPXML::HVACCompressorTypeVariableSpeed
+        hvac_ap.c_d = 0.40
+      end
+    end
+
+    # PLF curve (linear part load model)
+    hvac_ap.plf_fplr_spec = [(1.0 - hvac_ap.c_d), hvac_ap.c_d, 0.0]
+  end
+
+  # Sets default HVAC cooling performance values.
+  #
+  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
+  # @return nil
+  def self.set_hvac_cooling_performance(cooling_system)
+    # Calculates COP82min from SEER2 using bi-linear interpolation per RESNET MINERS Addendum 82
+    def self.interpolate_seer2(seer2, eer2, seer2_array, seer2_eer2_ratio_array, cop82min_array)
+      seer2_eer2_ratio = seer2 / eer2
+      x1, x2 = seer2_array.min_by(2) { |x| (x - seer2).abs }.sort
+      y1, y2 = seer2_eer2_ratio_array.min_by(2) { |x| (x - seer2_eer2_ratio).abs }.sort
+      x_indexes = [x1, x2].map { |x| seer2_array.find_index(x) }.sort
+      y_indexes = [y1, y2].map { |y| seer2_eer2_ratio_array.find_index(y) }.sort
+      fx1y1 = cop82min_array[x_indexes[0]][y_indexes[0]]
+      fx1y2 = cop82min_array[x_indexes[0]][y_indexes[1]]
+      fx2y1 = cop82min_array[x_indexes[1]][y_indexes[0]]
+      fx2y2 = cop82min_array[x_indexes[1]][y_indexes[1]]
+      return MathTools.interp4(seer2, seer2_eer2_ratio, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
+    end
+
+    clg_ap = cooling_system.additional_properties
+
+    # Based on RESNET MINHERS Addendum 82
+    clg_ap.cool_cap_fflow_spec = [0.718664047, 0.41797409, -0.136638137]
+    clg_ap.cool_eir_fflow_spec = [1.143487507, -0.13943972, -0.004047787]
+
+    if cooling_system.is_a?(HPXML::HeatPump) && cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      return
+    end
+
+    set_hvac_degradation_coefficient(cooling_system)
+
+    if HVAC.is_room_dx_hvac_system(cooling_system)
+      clg_ap.cool_capacity_ratios = [1.0]
+      clg_ap.cool_cap_ft_spec = [3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]
+      clg_ap.cool_eir_ft_spec = [-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]
+      clg_ap.cool_rated_cfm_per_ton = 312.0 # medium speed
+      clg_ap.cool_cap_fflow_spec = [1.0, 0.0, 0.0]
+      clg_ap.cool_eir_fflow_spec = [1.0, 0.0, 0.0]
+      clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_ceer, 'Btu/hr', 'W')]
+      HVAC.set_cool_rated_shrs_gross(cooling_system)
+      return
+    end
+
+    seer2 = cooling_system.cooling_efficiency_seer2
+    eer2 = cooling_system.cooling_efficiency_eer2
+    compressor_type = cooling_system.compressor_type
+
+    clg_ap.cop95full = UnitConversions.convert(cooling_system.cooling_efficiency_eer2, 'Btu/hr', 'W')
+
+    # Based on RESNET MINHERS Addendum 82
+    case compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      clg_ap.qm95full = 0.936 # Q95full/Q82full
+
+      clg_ap.cop82full = UnitConversions.convert(seer2 / (1.0 - 0.5 * clg_ap.c_d), 'Btu/hr', 'W')
+
+      clg_ap.cool_capacity_ratios = [1.0]
+
+    when HPXML::HVACCompressorTypeTwoStage
+      clg_ap.qm95full = 0.936 # Q95full/Q82full
+      clg_ap.eirm95full = 1.244 # (P95full/Q95full)/(P82full/Q82full)
+      clg_ap.qrcmin = 0.728 # Qmin/Qfull for all temperatures
+
+      seer2_array = [6.0, 22.0]
+      seer2_eer2_ratio_array = [1.000, 2.400]
+      cop82min_array = [[1.777, 2.105],
+                        [6.517, 7.717]]
+      clg_ap.cop82min = interpolate_seer2(seer2, eer2, seer2_array, seer2_eer2_ratio_array, cop82min_array)
+
+      clg_ap.cop95min = clg_ap.cop82min / clg_ap.eirm95full
+      clg_ap.cop82full = clg_ap.cop95full * clg_ap.eirm95full
+
+      clg_ap.cool_capacity_ratios = [clg_ap.qrcmin, 1.0]
+
+    when HPXML::HVACCompressorTypeVariableSpeed
+      clg_ap.qr95full = 0.934 # Q95full/Q95max
+      clg_ap.qm95max = 0.940 # Q95max/Q82max
+      clg_ap.qm95min = 0.948 # Q95min/Q82min
+      clg_ap.eirr95full = 0.928 # (P95full/Q95full)/(P95max/Q95max)
+      clg_ap.eirm95max = 1.326 # (P95max/Q95max)/(P82max/Q82max)
+      clg_ap.eirm95min = 1.315 # (P95min/Q95min)/(P82min/Q82min)
+
+      seer2_array = [14.0, 24.5, 35.0]
+      seer2_eer2_ratio_array = [1.000, 1.747, 2.120, 2.307, 2.400]
+      cop82min_array = [[4.047, 6.175, 14.240, 19.508, 23.029],
+                        [7.061, 10.289, 23.262, 31.842, 37.513],
+                        [10.058, 14.053, 30.962, 42.388, 49.863]]
+      clg_ap.cop82min = interpolate_seer2(seer2, eer2, seer2_array, seer2_eer2_ratio_array, cop82min_array)
+
+      clg_ap.cop95max = clg_ap.cop95full * clg_ap.eirr95full
+      clg_ap.cop95min = clg_ap.cop82min / clg_ap.eirm95min
+      clg_ap.cop82max = clg_ap.cop95max * clg_ap.eirm95max
+      clg_ap.cop82full = MathTools.interp2(clg_ap.cop95full, clg_ap.cop95min, clg_ap.cop95max, clg_ap.cop82min, clg_ap.cop82max)
+      clg_ap.qr95min = 1.0 / clg_ap.qr95full * (0.029 + 0.369 * clg_ap.cop82max / clg_ap.cop82min) # Q95min/Q95max
+
+      clg_ap.cool_capacity_ratios = [clg_ap.qr95min, 1.0, 1.0 / clg_ap.qr95full]
+    end
+
+    clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+    clg_ap.cool_cap_ft_spec = [3.717717741, -0.09918866, 0.000964488, 0.005887776, -0.000012808, -0.000132822]
+    clg_ap.cool_eir_ft_spec = [-3.400341169, 0.135184783, -0.001037932, -0.007852322, 0.000183438, -0.000142548]
+    HVAC.set_cool_rated_shrs_gross(cooling_system)
+  end
+
+  # Sets heating performance factors based on RESNET MINHERS Addendum 82.
+  #
+  #
+  # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
+  # @return nil
+  def self.set_hvac_heating_performance(heating_system)
+    # Calculates COP47full from HSPF2 using bi-linear interpolation per RESNET MINERS Addendum 82
+    def self.interpolate_hspf2(hspf2, qm17full, hspf2_array, qm17full_array, cop47full_array)
+      x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }.sort
+      y1, y2 = qm17full_array.min_by(2) { |x| (x - qm17full).abs }.sort
+      x_indexes = [x1, x2].map { |x| hspf2_array.find_index(x) }.sort
+      y_indexes = [y1, y2].map { |y| qm17full_array.find_index(y) }.sort
+      fx1y1 = cop47full_array[x_indexes[0]][y_indexes[0]]
+      fx1y2 = cop47full_array[x_indexes[0]][y_indexes[1]]
+      fx2y1 = cop47full_array[x_indexes[1]][y_indexes[0]]
+      fx2y2 = cop47full_array[x_indexes[1]][y_indexes[1]]
+      return MathTools.interp4(hspf2, qm17full, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
+    end
+
+    htg_ap = heating_system.additional_properties
+
+    # Based on RESNET MINHERS Addendum 82
+    htg_ap.heat_cap_fflow_spec = [0.694045465, 0.474207981, -0.168253446]
+    htg_ap.heat_eir_fflow_spec = [2.185418751, -1.942827919, 0.757409168]
+
+    if heating_system.is_a?(HPXML::HeatPump) && heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      return
+    end
+
+    set_hvac_degradation_coefficient(heating_system)
+
+    # Default heating capacity maintenance from 17F to 47F
+    htg_ap.qm17full = nil
+    if (heating_system.heating_capacity_17F.to_f > 0) && (heating_system.heating_capacity > 0)
+      htg_ap.qm17full = heating_system.heating_capacity_17F / heating_system.heating_capacity
+    elsif not heating_system.heating_capacity_fraction_17F.nil?
+      htg_ap.qm17full = heating_system.heating_capacity_fraction_17F
+    elsif not heating_system.heating_detailed_performance_data.empty?
+      nom_dp_47f = heating_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+      nom_dp_17f = heating_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17 && dp.capacity_description == HPXML::CapacityDescriptionNominal }
+      if (not nom_dp_47f.nil?) && (not nom_dp_17f.nil?)
+        if (nom_dp_17f.capacity.to_f > 0) && (nom_dp_47f.capacity.to_f > 0)
+          htg_ap.qm17full = nom_dp_17f.capacity / nom_dp_47f.capacity
+        elsif nom_dp_17f.capacity_fraction_of_nominal.to_f > 0
+          htg_ap.qm17full = nom_dp_17f.capacity_fraction_of_nominal
+        end
+      end
+    end
+    if htg_ap.qm17full.nil?
+      case heating_system.compressor_type
+      when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
+        htg_ap.qm17full = 0.59 # Approximately based on Cutler curves
+      when HPXML::HVACCompressorTypeVariableSpeed
+        # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+        htg_ap.qm17full = (0.0329 * HVAC.calc_hspf_from_hspf2(heating_system) + 0.3996).round(4)
+      end
+    end
+
+    if HVAC.is_room_dx_hvac_system(heating_system)
+      htg_ap.heat_capacity_ratios = [1.0]
+      htg_ap.heat_cap_ft_spec = HVAC.calc_heat_cap_ft_spec(htg_ap.qm17full)
+      htg_ap.heat_eir_ft_spec = [0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]
+      htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+      return
+    end
+
+    hspf2 = heating_system.heating_efficiency_hspf2
+    compressor_type = heating_system.compressor_type
+
+    # Based on RESNET MINHERS Addendum 82
+    case compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      htg_ap.eirm17full = 1.356 # (P17full/Q17full)/(P47full/Q47full)
+
+      hspf2_array = [5.0, 6.5, 8.0, 9.5, 11.0]
+      qm17full_array = [0.5, 0.533, 0.6, 0.7333, 1.0]
+      cop47full_array = [[1.971, 1.963, 1.946, 1.915, 1.904],
+                         [2.844, 2.801, 2.720, 2.589, 2.498],
+                         [3.933, 3.819, 3.622, 3.318, 3.102],
+                         [5.327, 5.085, 4.683, 4.111, 3.718],
+                         [7.178, 6.699, 5.951, 4.975, 4.345]]
+      htg_ap.cop47full = interpolate_hspf2(hspf2, htg_ap.qm17full, hspf2_array, qm17full_array, cop47full_array)
+
+      htg_ap.heat_capacity_ratios = [1.0]
+
+    when HPXML::HVACCompressorTypeTwoStage
+      htg_ap.eirm17full = 1.356 # (P17full/Q17full)/(P47full/Q47full)
+      htg_ap.qrhmin = 0.712 # Qmin/Qfull
+      htg_ap.eirrhmin = 0.850 # (Pmin/Qmin)/(Pfull/Qfull)
+
+      hspf2_array = [5.0, 6.5, 8.0, 9.5, 11.0]
+      qm17full_array = [0.5, 0.533, 0.6, 0.7333, 1.0]
+      cop47full_array = [[1.794, 1.779, 1.757, 1.720, 1.659],
+                         [2.592, 2.540, 2.456, 2.325, 2.176],
+                         [3.583, 3.464, 3.270, 2.980, 2.703],
+                         [4.852, 4.611, 4.227, 3.691, 3.239],
+                         [6.536, 6.073, 5.371, 4.467, 3.785]]
+      htg_ap.cop47full = interpolate_hspf2(hspf2, htg_ap.qm17full, hspf2_array, qm17full_array, cop47full_array)
+
+      htg_ap.heat_capacity_ratios = [htg_ap.qrhmin, 1.0]
+
+    when HPXML::HVACCompressorTypeVariableSpeed
+      htg_ap.qr47full = 0.908 # Q47full/Q47max
+      htg_ap.qr47min = 0.272 # Q47min/Q47max
+      htg_ap.qr17full = 0.817 # Q17full/Q17max
+      htg_ap.qr17min = 0.341 # Q17min/Q17max
+      htg_ap.qm5max = 0.866 # Q5max/Q17max
+      htg_ap.qr5full = 0.988 # Q5full/Q5max
+      htg_ap.qr5min = 0.321 # Q5min/Q5max
+      htg_ap.qmslopeLCTmax = -0.025 # (1.0 - Q5max/QLCTmax)/(5 - LCT)
+      htg_ap.qmslopeLCTmin = -0.024 # (1.0 - Q5min/QLCTmin)/(5 - LCT)
+      htg_ap.eirr47full = 0.939 # (P47full/Q47full)/(P47max/Q47max)
+      htg_ap.eirr47min = 0.730 # (P47min/Q47min)/(P47max/Q47max)
+      htg_ap.eirm17full = 1.351 # (P17full/Q17full)/(P47full/Q47full)
+      htg_ap.eirr17full = 0.902 # (P17full/Q17full)/(P17max/Q17max)
+      htg_ap.eirr17min = 0.798 # (P17min/Q17min)/(P17max/Q17max)
+      htg_ap.eirm5max = 1.164 # (P5max/Q5max)/(P17max/Q17max)
+      htg_ap.eirr5full = 1.000 # (P5full/Q5full)/(P5max/Q5max)
+      htg_ap.eirr5min = 0.866 # (P5min/Q5min)/(P5max/Q5max)
+      htg_ap.eirmslopeLCTmax = 0.012 # (1.0 - (PLCTmax/QLCTmax)/(P5max/Q5max))/(5 - LCT)
+      htg_ap.eirmslopeLCTmin = 0.012 # (1.0 - (PLCTmin/QLCTmin)/(P5min/Q5min))/(5 - LCT)
+
+      hspf2_array = [7.0, 9.25, 11.5, 13.75, 16.0]
+      qm17full_array = [0.5, 0.54, 0.62, 0.78, 1.10]
+      cop47full_array = [[2.762, 2.696, 2.579, 2.467, 2.345],
+                         [4.149, 3.941, 3.627, 3.305, 3.091],
+                         [5.934, 5.490, 4.821, 4.167, 3.834],
+                         [8.392, 7.463, 6.190, 5.054, 4.573],
+                         [11.948, 10.060, 7.779, 5.967, 5.307]]
+      htg_ap.cop47full = interpolate_hspf2(hspf2, htg_ap.qm17full, hspf2_array, qm17full_array, cop47full_array)
+
+      htg_ap.heat_capacity_ratios = [htg_ap.qr47min / htg_ap.qr47full, 1.0, 1.0 / htg_ap.qr47full]
+    end
+
+    htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+    htg_ap.heat_cap_ft_spec = [0.568706266, -0.000747282, -0.0000103432, 0.00945408, 0.000050812, -0.00000677828]
+    htg_ap.heat_eir_ft_spec = [0.722917608, 0.003520184, 0.000143097, -0.005760341, 0.000141736, -0.000216676]
+  end
+
+  # Adds default heat pump detailed performance datapoints based on RESNET MINHERS Addendum 82.
+  #
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @return [nil]
+  def self.set_detailed_performance_data_heating(heat_pump)
+    hp_ap = heat_pump.additional_properties
+
+    capacity47full = heat_pump.heating_capacity
+    capacity17full = heat_pump.heating_capacity_17F
+    lct = hp_ap.hp_min_temp
+
+    case heat_pump.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      # COPs @ 17F
+      cop17full = hp_ap.cop47full / hp_ap.eirm17full
+
+      # Capacities @ 5F
+      if capacity47full > 0
+        capacity5full = MathTools.interp2(5.0, 17.0, 47.0, capacity17full, capacity47full)
+      else
+        capacity5full = 0.0
+      end
+
+      # COPs @ 5F
+      if capacity5full > 0
+        cop5full = capacity5full / MathTools.interp2(5.0, 17.0, 47.0, capacity17full / cop17full, capacity47full / hp_ap.cop47full)
+      else
+        cop5full = MathTools.interp2(5.0, 17.0, 47.0, cop17full, hp_ap.cop47full) # Arbitrary
+      end
+
+    when HPXML::HVACCompressorTypeTwoStage
+      # Capacities @ 47F
+      capacity47min = capacity47full * hp_ap.heat_capacity_ratios[0]
+
+      # COPs @ 47F
+      cop47min = hp_ap.cop47full / hp_ap.eirrhmin
+
+      # Capacities @ 17F
+      capacity17min = capacity17full * hp_ap.qrhmin
+
+      # COPs @ 17F
+      cop17full = hp_ap.cop47full / hp_ap.eirm17full
+      cop17min = cop17full / hp_ap.eirrhmin
+
+      # Capacities @ 5F
+      if capacity47full > 0
+        capacity5full = MathTools.interp2(5.0, 17.0, 47.0, capacity17full, capacity47full)
+        capacity5min = MathTools.interp2(5.0, 17.0, 47.0, capacity17min, capacity47min)
+      else
+        capacity5full = 0.0
+        capacity5min = 0.0
+      end
+
+      # COPs @ 5F
+      if capacity5full > 0
+        cop5full = capacity5full / MathTools.interp2(5.0, 17.0, 47.0, capacity17full / cop17full, capacity47full / hp_ap.cop47full)
+      else
+        cop5full = MathTools.interp2(5.0, 17.0, 47.0, cop17full, hp_ap.cop47full) # Arbitrary
+      end
+      if capacity5min > 0
+        cop5min = capacity5min / MathTools.interp2(5.0, 17.0, 47.0, capacity17min / cop17min, capacity47min / cop47min)
+      else
+        cop5min = MathTools.interp2(5.0, 17.0, 47.0, cop17min, cop47min) # Arbitrary
+      end
+
+    when HPXML::HVACCompressorTypeVariableSpeed
+      # Capacities @ 47F
+      capacity47max = capacity47full * hp_ap.heat_capacity_ratios[-1]
+      capacity47min = capacity47full * hp_ap.heat_capacity_ratios[0]
+
+      # COPs @ 47F
+      cop47max = hp_ap.cop47full * hp_ap.eirr47full
+      cop47min = cop47max / hp_ap.eirr47min
+
+      # Capacities @ 17F
+      capacity17max = capacity17full / hp_ap.qr17full
+      capacity17min = capacity17full * hp_ap.qr17min / hp_ap.qr17full
+
+      # COPs @ 17F
+      cop17full = hp_ap.cop47full / hp_ap.eirm17full
+      cop17max = cop17full * hp_ap.eirr17full
+      cop17min = cop17max / hp_ap.eirr17min
+
+      # Capacities @ 5F
+      capacity5max = capacity17max * hp_ap.qm5max
+      capacity5full = capacity5max * hp_ap.qr5full
+      capacity5min = capacity5full * hp_ap.qr5min / hp_ap.qr5full
+
+      # COPs @ 5F
+      cop5max = cop17max / hp_ap.eirm5max
+      cop5full = cop5max / hp_ap.eirr5full
+      cop5min = cop5max / hp_ap.eirr5min
+
+      if lct < 5
+        # Capacities @ LCT
+        capacityLCTmax = capacity5max * (1.0 / (1.0 - hp_ap.qmslopeLCTmax * (5.0 - lct)))
+        capacityLCTmin = capacity5min * (1.0 / (1.0 - hp_ap.qmslopeLCTmin * (5.0 - lct)))
+        if capacityLCTmin > 0
+          capacityLCTfull = MathTools.interp2(capacity5full, capacity5min, capacity5max, capacityLCTmin, capacityLCTmax)
+        else
+          capacityLCTfull = 0.0
+        end
+
+        # COPs @ LCT
+        copLCTmin = cop5min * (1.0 - hp_ap.eirmslopeLCTmin * (5.0 - lct))
+        copLCTmax = cop5max * (1.0 - hp_ap.eirmslopeLCTmax * (5.0 - lct))
+        if capacityLCTfull > 0
+          copLCTfull = capacityLCTfull / MathTools.interp2(capacity5full / cop5full, capacity5min / cop5min, capacity5max / cop5max, capacityLCTmin / copLCTmin, capacityLCTmax / copLCTmax)
+        else
+          copLCTfull = MathTools.interp2(lct, 5.0, 17.0, cop5min, cop17min) # Arbitrary
+        end
+      end
+    end
+
+    # Add detailed performance data
+    detailed_performance_data = heat_pump.heating_detailed_performance_data
+
+    # 47F, maximum speed
+    detailed_performance_data.add(capacity: Float(capacity47max.round),
+                                  efficiency_cop: cop47max.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 47,
+                                  isdefaulted: true) unless capacity47max.nil?
+    # 47F, nominal speed
+    detailed_performance_data.add(capacity: Float(capacity47full.round),
+                                  efficiency_cop: hp_ap.cop47full.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
+                                  outdoor_temperature: 47,
+                                  isdefaulted: true)
+    # 47F, minimum speed
+    detailed_performance_data.add(capacity: Float(capacity47min.round),
+                                  efficiency_cop: cop47min.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: 47,
+                                  isdefaulted: true) unless capacity47min.nil?
+    # 17F, maximum speed
+    detailed_performance_data.add(capacity: Float(capacity17max.round),
+                                  efficiency_cop: cop17max.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 17,
+                                  isdefaulted: true) unless capacity17max.nil?
+    # 17F, nominal speed
+    detailed_performance_data.add(capacity: Float(capacity17full.round),
+                                  efficiency_cop: cop17full.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
+                                  outdoor_temperature: 17,
+                                  isdefaulted: true)
+    # 17F, minimum speed
+    detailed_performance_data.add(capacity: Float(capacity17min.round),
+                                  efficiency_cop: cop17min.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: 17,
+                                  isdefaulted: true) unless capacity17min.nil?
+    # 5F, maximum speed
+    detailed_performance_data.add(capacity: Float(capacity5max.round),
+                                  efficiency_cop: cop5max.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 5,
+                                  isdefaulted: true) unless capacity5max.nil?
+    # 5F, nominal speed
+    detailed_performance_data.add(capacity: Float(capacity5full.round),
+                                  efficiency_cop: cop5full.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
+                                  outdoor_temperature: 5,
+                                  isdefaulted: true) unless capacity5full.nil?
+    # 5F, minimum speed
+    detailed_performance_data.add(capacity: Float(capacity5min.round),
+                                  efficiency_cop: cop5min.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: 5,
+                                  isdefaulted: true) unless capacity5min.nil?
+    # LCT, maximum speed
+    detailed_performance_data.add(capacity: Float(capacityLCTmax.round),
+                                  efficiency_cop: copLCTmax.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: lct,
+                                  isdefaulted: true) unless capacityLCTmax.nil?
+    # LCT, nominal speed
+    detailed_performance_data.add(capacity: Float(capacityLCTfull.round),
+                                  efficiency_cop: copLCTfull.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
+                                  outdoor_temperature: lct,
+                                  isdefaulted: true) unless capacityLCTfull.nil?
+    # LCT, minimum speed
+    detailed_performance_data.add(capacity: Float(capacityLCTmin.round),
+                                  efficiency_cop: copLCTmin.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: lct,
+                                  isdefaulted: true) unless capacityLCTmin.nil?
+  end
+
+  # Adds default heat pump or air conditioner detailed performance datapoints based on RESNET MINHERS Addendum 82.
+  #
+  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
+  # @return [nil]
+  def self.set_detailed_performance_data_cooling(cooling_system)
+    clg_ap = cooling_system.additional_properties
+
+    capacity95full = cooling_system.cooling_capacity
+
+    case cooling_system.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      # Capacity @ 82F
+      capacity82full = capacity95full / clg_ap.qm95full
+
+    when HPXML::HVACCompressorTypeTwoStage
+      # Capacities @ 95F
+      capacity95min = capacity95full * clg_ap.cool_capacity_ratios[0]
+
+      # Capacities @ 82F
+      capacity82full = capacity95full / clg_ap.qm95full
+      capacity82min = capacity82full * clg_ap.cool_capacity_ratios[0]
+
+    when HPXML::HVACCompressorTypeVariableSpeed
+      # Capacities @ 95F
+      capacity95max = capacity95full * clg_ap.cool_capacity_ratios[-1]
+      capacity95min = capacity95full * clg_ap.cool_capacity_ratios[0]
+
+      # Capacities @ 82F
+      capacity82max = capacity95max / clg_ap.qm95max
+      capacity82min = capacity95min / clg_ap.qm95min
+      if capacity95full > 0
+        capacity82full = MathTools.interp2(capacity95full, capacity95min, capacity95max, capacity82min, capacity82max)
+      else
+        capacity82full = 0.0
+      end
+    end
+
+    # Add detailed performance data
+    detailed_performance_data = cooling_system.cooling_detailed_performance_data
+
+    # 95F, maximum speed
+    detailed_performance_data.add(capacity: Float(capacity95max.round),
+                                  efficiency_cop: clg_ap.cop95max.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 95,
+                                  isdefaulted: true) unless capacity95max.nil?
+    # 95F, nominal speed
+    detailed_performance_data.add(capacity: Float(capacity95full.round),
+                                  efficiency_cop: clg_ap.cop95full.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
+                                  outdoor_temperature: 95,
+                                  isdefaulted: true)
+    # 95F, minimum speed
+    detailed_performance_data.add(capacity: Float(capacity95min.round),
+                                  efficiency_cop: clg_ap.cop95min.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: 95,
+                                  isdefaulted: true) unless capacity95min.nil?
+    # 82F, maximum speed
+    detailed_performance_data.add(capacity: Float(capacity82max.round),
+                                  efficiency_cop: clg_ap.cop82max.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMaximum,
+                                  outdoor_temperature: 82,
+                                  isdefaulted: true) unless capacity82max.nil?
+    # 82F, nominal speed
+    detailed_performance_data.add(capacity: Float(capacity82full.round),
+                                  efficiency_cop: clg_ap.cop82full.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionNominal,
+                                  outdoor_temperature: 82,
+                                  isdefaulted: true)
+    # 82F, minimum speed
+    detailed_performance_data.add(capacity: Float(capacity82min.round),
+                                  efficiency_cop: clg_ap.cop82min.round(4),
+                                  capacity_description: HPXML::CapacityDescriptionMinimum,
+                                  outdoor_temperature: 82,
+                                  isdefaulted: true) unless capacity82min.nil?
   end
 end
