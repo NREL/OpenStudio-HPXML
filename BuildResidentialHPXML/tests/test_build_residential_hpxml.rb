@@ -498,9 +498,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump_cooling_capacity'] = 36000.0
       args['heat_pump_fraction_heat_load_served'] = 1
       args['heat_pump_fraction_cool_load_served'] = 1
-      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-      args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
-      args['heat_pump_backup_heating_efficiency'] = 1
+      args['heat_pump_backup'] = 'Electricity, Integrated, 100% Efficiency'
       args['heat_pump_backup_heating_capacity'] = 36000.0
       args['geothermal_loop_configuration'] = Constants::None
       args['hvac_control_heating_weekday_setpoint'] = 68
@@ -782,8 +780,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'
       args['heat_pump'] = 'ASHP, SEER 10, 6.2 HSPF'
-      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-      args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
+      args['heat_pump_backup'] = 'Electricity, Integrated, 100% Efficiency'
       args['heat_pump_heating_capacity'] = 48000.0
       args['heat_pump_fraction_heat_load_served'] = 0.75
       args['ducts_supply_leakage_to_outside_value'] = 0.0
@@ -804,8 +801,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'
       args['heat_pump'] = 'GSHP, EER 16.6, COP 3.6'
-      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeIntegrated
-      args['heat_pump_backup_fuel'] = HPXML::FuelTypeElectricity
+      args['heat_pump_backup'] = 'Electricity, Integrated, 100% Efficiency'
       args['heat_pump_fraction_heat_load_served'] = 0.75
       args['heating_system_2_type'] = HPXML::HVACTypeBoiler
     when 'extra-enclosure-windows-shading.xml'
@@ -1123,7 +1119,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'
       args['heat_pump'] = 'MSHP, SEER 14.5, 8.2 HSPF, Ducted'
-      args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
+      args['heat_pump_backup'] = 'Separate'
       args['heating_system_2_type'] = HPXML::HVACTypeFurnace
     when 'error-sfa-no-building-num-units.xml'
       args.delete('geometry_building_num_units')

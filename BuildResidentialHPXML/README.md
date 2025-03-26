@@ -2055,7 +2055,7 @@ The heat pump type/efficiency.
 
 - **Required:** ``true``
 
-- **Choices:** `None`, `ASHP, SEER 10, 6.2 HSPF`, `ASHP, SEER 10, 6.8 HSPF`, `ASHP, SEER 10.3, 7.0 HSPF`, `ASHP, SEER 11.5, 7.5 HSPF`, `ASHP, SEER 13, 7.7 HSPF`, `ASHP, SEER 13, 7.7 HSPF, Heating Capacity 17F`, `ASHP, SEER 13, 7.7 HSPF, Airflow Defect Ratio`, `ASHP, SEER 13, 7.7 HSPF, 5F Compressor Lockout`, `ASHP, SEER 13, 7.7 HSPF, 25F Compressor Lockout`, `ASHP, SEER 13, 7.7 HSPF, 30F Compressor Lockout`, `ASHP, SEER2 12.4, HSPF2 6.5, Heating Capacity 17F`, `ASHP, SEER 13, 7.7 HSPF, Lockout Temperatures`, `ASHP, SEER 13, 8.0 HSPF`, `ASHP, SEER 13, 9.85 HSPF`, `ASHP, SEER 14, 8.2 HSPF`, `ASHP, SEER 14.3, 8.5 HSPF`, `ASHP, SEER 15, 8.5 HSPF`, `ASHP, SEER 15, 9.0 HSPF`, `ASHP, SEER 16, 9.0 HSPF`, `ASHP, SEER 16, 9.2 HSPF`, `ASHP, SEER 17, 8.7 HSPF`, `ASHP, SEER 18, 9.3 HSPF`, `ASHP, SEER 18, 9.3 HSPF, Airflow Defect Ratio`, `ASHP, SEER 18, 9.3 HSPF, 30F Compressor Lockout`, `ASHP, SEER 20, 11 HSPF`, `ASHP, SEER 22, 10 HSPF`, `ASHP, SEER 22, 10 HSPF, Airflow Defect Ratio`, `ASHP, SEER 22, 10 HSPF, Heating Capacity17F`, `ASHP, SEER 22, 10 HSPF, 30F Compressor Lockout`, `ASHP, SEER 17.25, 10 HPSF, Normalized Capacity Fractions`, `ASHP, SEER 17.5, 9.5 HSPF, Detailed Performance`, `ASHP, SEER 17.5, 9.5 HSPF, Normalized Capacity Fractions`, `ASHP, SEER 17.5, 9.5 HSPF, Detailed Performance, Airflow Defect Ratio`, `ASHP, SEER 17.5, 9.5 HSPF, Detailed Performance Heating Only`, `ASHP, SEER 24, 13 HSPF`, `GSHP, EER 16.6, COP 3.6`, `GSHP, EER 16.6, COP 3.6, Airflow Defect Ratio`, `GSHP, EER 20.2, COP 4.2`, `GSHP, EER 20.5, COP 4.0`, `MSHP, SEER 14.5, 8.2 HSPF`, `MSHP, SEER 14.5, 8.2 HSPF, Ducted`, `MSHP, SEER 16, 9.2 HSPF`, `MSHP, SEER 16.7, 11.3 HSPF, Detailed Performance`, `MSHP, SEER 16.7, 11.3 HSPF, Normalized Capacity Fractions`, `MSHP, SEER 17, 9.5 HSPF`, `MSHP, SEER 17, 9.5 HSPF, Ducted`, `MSHP, SEER 17, 10 HSPF, Ductless, Detailed Performance`, `MSHP, SEER 17, 10 HSPF, Ductless, Normalized Capacity Fractions`, `MSHP, SEER 18.0, 9.6 HSPF`, `MSHP, SEER 18.0, 9.6 HSPF, Ducted`, `MSHP, SEER 19, 10 HSPF, Ducted`, `MSHP, SEER 19, 10 HSPF, Airflow Defect Ratio`, `MSHP, SEER 19, 10 HSPF, 30F Compressor Lockout`, `MSHP, SEER 19, 10 HSPF, Ductless`, `MSHP, SEER 19, 10 HSPF, Ductless, Detailed Performance`, `MSHP, SEER 20, 11 HSPF`, `MSHP, SEER 24, 13 HSPF`, `MSHP, SEER 25, 12.7 HSPF`, `MSHP, SEER 25, 12.7 HSPF, Ducted`, `MSHP, SEER 29.3, 14 HSPF`, `MSHP, SEER 29.3, 14 HSPF, Ducted`, `MSHP, SEER 33, 13.3 HSPF`, `MSHP, SEER 33, 13.3 HSPF, Ducted`, `PTHP, EER 11.4, COP 3.6`, `Room AC w/ Reverse Cycle, EER 11.4`
+- **Choices:** `None`, `ASHP, SEER 10, 6.2 HSPF`, `ASHP, SEER 10, 6.8 HSPF`, `ASHP, SEER 10.3, 7.0 HSPF`, `ASHP, SEER 11.5, 7.5 HSPF`, `ASHP, SEER 13, 7.7 HSPF`, `ASHP, SEER 13, 7.7 HSPF, Heating Capacity 17F`, `ASHP, SEER 13, 7.7 HSPF, Airflow Defect Ratio`, `ASHP, SEER 13, 7.7 HSPF, 5F Compressor Lockout`, `ASHP, SEER 13, 7.7 HSPF, 25F Compressor Lockout`, `ASHP, SEER 13, 7.7 HSPF, 30F Compressor Lockout`, `ASHP, SEER2 12.4, HSPF2 6.5, Heating Capacity 17F`, `ASHP, SEER 13, 7.7 HSPF, Lockout Temperatures`, `ASHP, SEER 13, 8.0 HSPF`, `ASHP, SEER 13, 9.85 HSPF`, `ASHP, SEER 14, 8.2 HSPF`, `ASHP, SEER 14.3, 8.5 HSPF`, `ASHP, SEER 15, 8.5 HSPF`, `ASHP, SEER 15, 9.0 HSPF`, `ASHP, SEER 16, 9.0 HSPF`, `ASHP, SEER 16, 9.2 HSPF, Heating Capacity 5F`, `ASHP, SEER 16, 9.2 HSPF, -20F Compressor Lockout`, `ASHP, SEER 17, 8.7 HSPF`, `ASHP, SEER 18, 9.3 HSPF`, `ASHP, SEER 18, 9.3 HSPF, Airflow Defect Ratio`, `ASHP, SEER 18, 9.3 HSPF, 30F Compressor Lockout`, `ASHP, SEER 20, 11 HSPF`, `ASHP, SEER 20, 11 HSPF, Heating Capacity 5F`, `ASHP, SEER 22, 10 HSPF`, `ASHP, SEER 22, 10 HSPF, Default Capacity Retention`, `ASHP, SEER 22, 10 HSPF, Airflow Defect Ratio`, `ASHP, SEER 22, 10 HSPF, Heating Capacity 17F`, `ASHP, SEER 22, 10 HSPF, 30F Compressor Lockout`, `ASHP, SEER 17.25, 10 HPSF, Normalized Capacity Fractions`, `ASHP, SEER 17.5, 9.5 HSPF, Detailed Performance`, `ASHP, SEER 17.5, 9.5 HSPF, Normalized Capacity Fractions`, `ASHP, SEER 17.5, 9.5 HSPF, Detailed Performance, Airflow Defect Ratio`, `ASHP, SEER 17.5, 9.5 HSPF, Detailed Performance Heating Only`, `ASHP, SEER 24, 13 HSPF`, `ASHP, SEER 24, 13 HSPF, Heating Capacity 5F`, `GSHP, EER 16.6, COP 3.6`, `GSHP, EER 16.6, COP 3.6, Airflow Defect Ratio`, `GSHP, EER 20.2, COP 4.2`, `GSHP, EER 20.5, COP 4.0`, `MSHP, SEER 14.5, 8.2 HSPF`, `MSHP, SEER 14.5, 8.2 HSPF, Ducted`, `MSHP, SEER 16, 9.2 HSPF`, `MSHP, SEER 16.7, 11.3 HSPF, Detailed Performance`, `MSHP, SEER 16.7, 11.3 HSPF, Normalized Capacity Fractions`, `MSHP, SEER 17, 9.5 HSPF`, `MSHP, SEER 17, 9.5 HSPF, Ducted`, `MSHP, SEER 17, 10 HSPF, Ductless, Detailed Performance`, `MSHP, SEER 17, 10 HSPF, Ductless, Normalized Capacity Fractions`, `MSHP, SEER 18.0, 9.6 HSPF`, `MSHP, SEER 18.0, 9.6 HSPF, Ducted`, `MSHP, SEER 19, 10 HSPF, Ducted`, `MSHP, SEER 19, 10 HSPF, Airflow Defect Ratio`, `MSHP, SEER 19, 10 HSPF, 30F Compressor Lockout`, `MSHP, SEER 19, 10 HSPF, Ductless`, `MSHP, SEER 19, 10 HSPF, Ductless, Detailed Performance`, `MSHP, SEER 20, 11 HSPF`, `MSHP, SEER 24, 13 HSPF`, `MSHP, SEER 25, 12.7 HSPF`, `MSHP, SEER 25, 12.7 HSPF, Ducted`, `MSHP, SEER 29.3, 14 HSPF`, `MSHP, SEER 29.3, 14 HSPF, Ducted`, `MSHP, SEER 33, 13.3 HSPF`, `MSHP, SEER 33, 13.3 HSPF, Ducted`, `PTHP, EER 11.4, COP 3.6`, `Room AC w/ Reverse Cycle, EER 11.4`
 
 <br/>
 
@@ -2161,14 +2161,14 @@ The cooling load served by the heat pump.
 
 **Heat Pump: Backup Type**
 
-The backup type of the heat pump. If 'integrated', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If 'separate', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.
+The type, fuel type, and efficiency of the heat pump backup. Use 'none' if there is no backup heating. If Backup Type is 'separate', Heating System 2 is used to specify the backup.
 
-- **Name:** ``heat_pump_backup_type``
+- **Name:** ``heat_pump_backup``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `integrated`, `separate`
+- **Choices:** `None`, `Electricity, Integrated, 100% Efficiency`, `Electricity, Integrated, 100% Efficiency, 35F Lockout`, `Natural Gas, Integrated, 95% AFUE, 30F Lockout`, `Natural Gas, Integrated, 95% AFUE, 45F Lockout`, `Separate`, `Separate, 30F Lockout`
 
 <br/>
 
@@ -2196,30 +2196,6 @@ The maximum capacity limit applied to the auto-sizing methodology if Backup Type
 
 <br/>
 
-**Heat Pump: Backup Fuel Type**
-
-The backup fuel type of the heat pump. Only applies if Backup Type is 'integrated'.
-
-- **Name:** ``heat_pump_backup_fuel``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`
-
-<br/>
-
-**Heat Pump: Backup Rated Efficiency**
-
-The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise. Only applies if Backup Type is 'integrated'.
-
-- **Name:** ``heat_pump_backup_heating_efficiency``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
 **Heat Pump: Backup Heating Capacity**
 
 The backup output heating capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#backup'>Backup</a>) is used. Only applies if Backup Type is 'integrated'.
@@ -2228,19 +2204,6 @@ The backup output heating capacity of the heat pump. If not provided, the OS-HPX
 - **Type:** ``Double``
 
 - **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Backup Heating Lockout Temperature**
-
-The temperature above which the heat pump backup system is disabled. If both this and Compressor Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies for both Backup Type of 'integrated' and 'separate'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#backup'>Backup</a>) is used.
-
-- **Name:** ``heat_pump_backup_heating_lockout_temp``
-- **Type:** ``Double``
-
-- **Units:** ``F``
 
 - **Required:** ``false``
 

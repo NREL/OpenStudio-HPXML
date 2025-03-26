@@ -95,9 +95,7 @@
     "heat_pump": "None",
     "heat_pump_fraction_heat_load_served": 0,
     "heat_pump_fraction_cool_load_served": 0,
-    "heat_pump_backup_type": "none",
-    "heat_pump_backup_fuel": "electricity",
-    "heat_pump_backup_heating_efficiency": 0,
+    "heat_pump_backup": "None",
     "heating_system_2_type": "none",
     "heating_system_2_fuel": "electricity",
     "heating_system_2_heating_efficiency": 0,
@@ -382,10 +380,8 @@
     "heat_pump": "ASHP, SEER 10, 6.8 HSPF",
     "heat_pump_cooling_capacity": 56100,
     "heat_pump_heating_capacity": 56100,
-    "heat_pump_backup_type": "integrated",
-    "heat_pump_backup_fuel": "electricity",
+    "heat_pump_backup": "Electricity, Integrated, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 34121,
-    "heat_pump_backup_heating_efficiency": 1.0,
     "heat_pump_fraction_heat_load_served": 1.0,
     "heat_pump_fraction_cool_load_served": 1.0
   },
@@ -678,9 +674,7 @@
     "heat_pump": "None",
     "heat_pump_fraction_heat_load_served": 0,
     "heat_pump_fraction_cool_load_served": 0,
-    "heat_pump_backup_type": "none",
-    "heat_pump_backup_fuel": "electricity",
-    "heat_pump_backup_heating_efficiency": 0,
+    "heat_pump_backup": "None",
     "heating_system_2_type": "none",
     "heating_system_2_fuel": "electricity",
     "heating_system_2_heating_efficiency": 0,
@@ -1234,7 +1228,7 @@
     "heat_pump_cooling_capacity": 12000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
-    "heat_pump_backup_type": "none"
+    "heat_pump_backup": "None"
   },
   "sample_files/base-bldgtype-mf-unit-shared-laundry-room.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
@@ -2025,8 +2019,7 @@
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
-    "heat_pump_backup_type": "integrated",
-    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup": "Electricity, Integrated, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml": {
@@ -2048,8 +2041,7 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_capacity": 0,
     "heat_pump_fraction_heat_load_served": 0,
-    "heat_pump_backup_type": "none",
-    "heat_pump_backup_heating_efficiency": 0
+    "heat_pump_backup": "None"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -2059,7 +2051,7 @@
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump": "ASHP, SEER 13, 7.7 HSPF, 5F Compressor Lockout",
-    "heat_pump_backup_heating_lockout_temp": 35,
+    "heat_pump_backup": "Electricity, Integrated, 100% Efficiency, 35F Lockout",
     "hvac_control_heating_weekday_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64",
     "hvac_control_heating_weekend_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64"
   },
@@ -2110,7 +2102,7 @@
     "heat_pump": "ASHP, SEER 22, 10 HSPF, Heating Capacity 17F",
     "heat_pump_heating_capacity": 18000,
     "heat_pump_cooling_capacity": 18000,
-    "heat_pump_backup_type": "separate",
+    "heat_pump_backup": "Separate",
     "heating_system_2_type": "Boiler",
     "heating_system_2_fuel": "natural gas",
     "heating_system_2_heating_efficiency": 0.8,
@@ -2128,7 +2120,7 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
     "heat_pump": "ASHP, SEER 22, 10 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup_heating_lockout_temp": 30
+    "heat_pump_backup": "Separate, 30F Lockout"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml"
@@ -2272,8 +2264,7 @@
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
-    "heat_pump_backup_type": "integrated",
-    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup": "Electricity, Integrated, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-dse.xml": {
@@ -2282,21 +2273,17 @@
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump": "ASHP, SEER 13, 7.7 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup_fuel": "natural gas",
-    "heat_pump_backup_heating_efficiency": 0.95,
-    "heat_pump_backup_heating_lockout_temp": 30
+    "heat_pump_backup": "Natural Gas, Integrated, 95% AFUE, 30F Lockout"
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-lockout-temperatures.xml": {
     "parent_hpxml": "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml",
     "heat_pump": "ASHP, SEER 13, 7.7 HSPF, 25F Compressor Lockout",
-    "heat_pump_backup_heating_lockout_temp": 45
+    "heat_pump_backup": "Natural Gas, Integrated, 95% AFUE, 45F Lockout"
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
     "heat_pump": "ASHP, SEER 18, 9.3 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup_fuel": "natural gas",
-    "heat_pump_backup_heating_efficiency": 0.95,
-    "heat_pump_backup_heating_lockout_temp": 30
+    "heat_pump_backup": "Natural Gas, Integrated, 95% AFUE, 30F Lockout"
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed-advanced-defrost.xml": {
     "parent_hpxml": "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml",
@@ -2305,16 +2292,12 @@
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "heat_pump": "ASHP, SEER 22, 10 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup_fuel": "natural gas",
-    "heat_pump_backup_heating_efficiency": 0.95,
-    "heat_pump_backup_heating_lockout_temp": 30
+    "heat_pump_backup": "Natural Gas, Integrated, 95% AFUE, 30F Lockout"
   },
   "sample_files/base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
     "heat_pump": "MSHP, SEER 19, 10 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup_fuel": "natural gas",
-    "heat_pump_backup_heating_efficiency": 0.95,
-    "heat_pump_backup_heating_lockout_temp": 30
+    "heat_pump_backup": "Natural Gas, Integrated, 95% AFUE, 30F Lockout"
   },
   "sample_files/base-hvac-ducts-leakage-cfm50.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2490,17 +2473,16 @@
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
-    "heat_pump_backup_type": "none"
+    "heat_pump_backup": "None"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-integrated.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "heat_pump_backup_type": "integrated",
-    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup": "Electricity, Integrated, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-stove.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "heat_pump_backup_type": "separate",
+    "heat_pump_backup": "Separate",
     "heating_system_2_type": "Stove",
     "heating_system_2_fuel": "fuel oil",
     "heating_system_2_heating_efficiency": 0.6,
@@ -2525,8 +2507,7 @@
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "heat_pump_heating_capacity": 0,
     "heat_pump_fraction_heat_load_served": 0,
-    "heat_pump_backup_type": "none",
-    "heat_pump_backup_heating_efficiency": 0
+    "heat_pump_backup": "None"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-heating-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
@@ -2628,8 +2609,7 @@
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
-    "heat_pump_backup_type": "integrated",
-    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup": "Electricity, Integrated, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000,
     "ducts_supply_leakage_to_outside_value": 15,
     "ducts_return_leakage_to_outside_value": 5,
@@ -2652,8 +2632,7 @@
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
     "heat_pump_heating_capacity": 0,
     "heat_pump_fraction_heat_load_served": 0,
-    "heat_pump_backup_type": "none",
-    "heat_pump_backup_heating_efficiency": 0
+    "heat_pump_backup": "None"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-heating-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
@@ -2671,8 +2650,7 @@
   "sample_files/base-hvac-mini-split-heat-pump-ductless.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
     "heat_pump": "MSHP, SEER 19, 10 HSPF, Ductless",
-    "heat_pump_backup_type": "none",
-    "heat_pump_backup_heating_efficiency": 0
+    "heat_pump_backup": "None"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
@@ -2705,7 +2683,7 @@
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "heat_pump_heating_capacity": 18000,
     "heat_pump_cooling_capacity": 18000,
-    "heat_pump_backup_type": "separate",
+    "heat_pump_backup": "Separate",
     "heating_system_2_type": "Stove",
     "heating_system_2_fuel": "fuel oil",
     "heating_system_2_heating_efficiency": 0.6,
@@ -2719,8 +2697,7 @@
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml",
-    "heat_pump_backup_type": "integrated",
-    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup": "Electricity, Integrated, 100% Efficiency",
     "simulation_control_defrost_model_type": "advanced"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml": {
@@ -2777,8 +2754,7 @@
   "sample_files/base-hvac-pthp.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "heat_pump": "PTHP, EER 11.4, COP 3.6",
-    "heat_pump_backup_type": "integrated",
-    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup": "Electricity, Integrated, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-pthp-cfis.xml": {
