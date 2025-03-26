@@ -1212,8 +1212,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   end
 
   def test_autosizing_limits
-    clg_autosizing_limits = { true => 1000, false => 100000 }
-    htg_autosizing_limits = { true => 1200, false => 120000 }
+    clg_autosizing_limits = { true => 15000, false => 100000 }
+    htg_autosizing_limits = { true => 18000, false => 120000 }
     for clg_limit, cal in clg_autosizing_limits
       for htg_limit, hal in htg_autosizing_limits
         args_hash = {}
