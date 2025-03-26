@@ -332,33 +332,29 @@ module HVAC
       end
     end
 
-    # Calculate installed/rated fan airflow rates
-    heat_cfms, cool_cfms = [], [] # installed heating/cooling airflow rates at all speeds
+    # Calculate fan heating/cooling airflow rates at all speeds
+    fan_cfms = []
     if not cooling_system.nil?
-      clg_ap.cool_rated_cfms = [] # rated cooling airflow rates at all speeds
+      clg_cfm = cooling_system.cooling_airflow_cfm
       clg_ap.cool_capacity_ratios.each do |capacity_ratio|
-        cool_cfms << cooling_system.cooling_airflow_cfm * (capacity_ratio / clg_ap.cool_capacity_ratios[-1])
-        clg_ap.cool_rated_cfms << clg_ap.cool_rated_cfm_per_ton * UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'ton') * capacity_ratio
+        fan_cfms << clg_cfm * capacity_ratio
       end
       if (cooling_system.is_a? HPXML::CoolingSystem) && cooling_system.has_integrated_heating
-        heat_cfms = [cooling_system.integrated_heating_system_airflow_cfm]
+        htg_cfm = cooling_system.integrated_heating_system_airflow_cfm
+        fan_cfms << htg_cfm
       end
     end
     if not heating_system.nil?
       if is_heatpump
-        htg_ap.heat_rated_cfms = [] # rated heating airflow rates at all speeds
+        htg_cfm = heating_system.heating_airflow_cfm
         htg_ap.heat_capacity_ratios.each do |capacity_ratio|
-          heat_cfms << heating_system.heating_airflow_cfm * (capacity_ratio / htg_ap.heat_capacity_ratios[-1])
-          htg_ap.heat_rated_cfms << htg_ap.heat_rated_cfm_per_ton * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton') * capacity_ratio
+          fan_cfms << htg_cfm * capacity_ratio
         end
       else
-        heat_cfms = [heating_system.heating_airflow_cfm]
+        htg_cfm = heating_system.heating_airflow_cfm
+        fan_cfms << htg_cfm
       end
     end
-    fan_cfms = (heat_cfms + cool_cfms)
-    max_heat_cfm = heat_cfms.max.to_f
-    max_cool_cfm = cool_cfms.max.to_f
-    max_cfm = fan_cfms.max
 
     if not cooling_system.nil?
       # Cooling Coil
@@ -382,7 +378,7 @@ module HVAC
         # Defrost calculations
         if hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
           q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, hpxml_bldg.building_construction.number_of_units,
-                                                                                      max_cfm, max_heat_cfm, fan_watts_per_cfm)
+                                                                                      fan_cfms.max, htg_cfm * htg_ap.heat_capacity_ratios[-1], fan_watts_per_cfm)
         elsif hpxml_header.defrost_model_type != HPXML::AdvancedResearchDefrostModelTypeStandard
           fail 'unknown defrost model type.'
         end
@@ -434,7 +430,7 @@ module HVAC
     end
 
     # Unitary System
-    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, max_heat_cfm, max_cool_cfm, supp_max_temp)
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, supp_max_temp)
 
     # Unitary System Performance
     if (not clg_ap.nil?) && (clg_ap.cool_capacity_ratios.size > 1)
@@ -452,7 +448,7 @@ module HVAC
     end
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, hvac_sequential_load_fracs, max_cfm, heating_system, hvac_unavailable_periods)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, hvac_sequential_load_fracs, [htg_cfm.to_f, clg_cfm.to_f].max, heating_system, hvac_unavailable_periods)
 
     add_backup_staging_ems_program(model, air_loop_unitary, htg_supp_coil, control_zone, htg_coil)
     apply_installation_quality_ems_program(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
@@ -2364,19 +2360,25 @@ module HVAC
   #
   # @param dp [HPXML::CoolingDetailedPerformanceData or HPXML::HeatingDetailedPerformanceData] The detailed performance data point of interest
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
-  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @param speed_index [Integer] Array index for the given speed
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [nil]
   def self.convert_datapoint_net_to_gross(dp, mode, speed_index, hvac_system)
     hvac_ap = hvac_system.additional_properties
-    nominal_speed_index = (hvac_system.compressor_type == HPXML::HVACCompressorTypeSingleStage ? 0 : 1)
-    rated_cfm = hvac_ap.cool_rated_cfms[nominal_speed_index] # Should be based on cooling per AHRI
-    rated_cfm = hvac_ap.heat_rated_cfms[nominal_speed_index] if rated_cfm < MinAirflow # Resort to heating if we get a HP w/ heating only
-    if mode == :htg
-      fan_ratio = hvac_ap.heat_rated_cfms[speed_index] / rated_cfm
-    else
-      fan_ratio = hvac_ap.cool_rated_cfms[speed_index] / rated_cfm
+
+    # Calculate rated cfm based on cooling per AHRI
+    rated_cfm = hvac_ap.cool_rated_cfm_per_ton * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+    if rated_cfm < MinAirflow # Resort to heating if we get a HP w/ only heating
+      rated_cfm = hvac_ap.heat_rated_cfm_per_ton * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
     end
+
+    if mode == :htg
+      fan_cfm = hvac_ap.heat_rated_cfm_per_ton * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton') * hvac_ap.heat_capacity_ratios[speed_index]
+    else
+      fan_cfm = hvac_ap.cool_rated_cfm_per_ton * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton') * hvac_ap.cool_capacity_ratios[speed_index]
+    end
+
+    fan_ratio = fan_cfm / rated_cfm
     fan_power = calculate_fan_power(hvac_ap.fan_power_rated * rated_cfm, fan_ratio, hvac_system)
     dp.gross_capacity, dp.gross_efficiency_cop = convert_net_to_gross_capacity_cop(dp.capacity, fan_power, mode, dp.efficiency_cop)
     dp.input_power = dp.capacity / dp.efficiency_cop # Btu/hr
@@ -2658,24 +2660,24 @@ module HVAC
     end
   end
 
-  # TODO
+  # Creates and returns a DX cooling coil object with specified performance.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
   # @param weather_max_drybulb [Double] Maximum outdoor drybulb temperature
   # @param has_deadband_control [Boolean] Whether to apply on off thermostat deadband
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::CoilCoolingDXSingleSpeed or OpenStudio::Model::CoilCoolingDXMultiSpeed] The new cooling coil
   def self.create_dx_cooling_coil(model, obj_name, cooling_system, weather_max_drybulb, has_deadband_control = false)
     clg_ap = cooling_system.additional_properties
 
     if cooling_system.cooling_detailed_performance_data.empty?
-      net_capacity = cooling_system.cooling_capacity * clg_ap.cool_capacity_ratios[0]
-      fan_power = clg_ap.fan_power_rated * clg_ap.cool_rated_cfms[0]
+      net_capacity = cooling_system.cooling_capacity
+      fan_power = clg_ap.fan_power_rated * clg_ap.cool_rated_cfm_per_ton * UnitConversions.convert(net_capacity, 'Btu/hr', 'ton')
       gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :clg)[0]
       clg_ap.cool_rated_capacities_net = [net_capacity]
       clg_ap.cool_rated_capacities_gross = [gross_capacity]
-      fail 'Unexpected error.' if clg_ap.cool_capacity_ratios.size != 1
+      fail 'Unexpected error.' if clg_ap.cool_capacity_ratios.size != 1 || clg_ap.cool_capacity_ratios[0] != 1
     else
       process_detailed_performance_data(cooling_system, :clg, weather_max_drybulb)
     end
@@ -2825,7 +2827,7 @@ module HVAC
     return clg_coil
   end
 
-  # TODO
+  # Creates and returns a DX heating coil object with specified performance.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
@@ -2834,17 +2836,17 @@ module HVAC
   # @param defrost_model_type [String] Defrost model type (HPXML::AdvancedResearchDefrostModelTypeXXX)
   # @param p_dot_defrost [TODO] TODO
   # @param has_deadband_control [Boolean] Whether to apply on off thermostat deadband
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] The new heating coil
   def self.create_dx_heating_coil(model, obj_name, heating_system, weather_min_drybulb, defrost_model_type, p_dot_defrost, has_deadband_control = false)
     htg_ap = heating_system.additional_properties
 
     if heating_system.heating_detailed_performance_data.empty?
-      net_capacity = heating_system.heating_capacity * htg_ap.heat_capacity_ratios[0]
-      fan_power = htg_ap.fan_power_rated * htg_ap.cool_rated_cfms[0]
+      net_capacity = heating_system.heating_capacity
+      fan_power = htg_ap.fan_power_rated * htg_ap.heat_rated_cfm_per_ton * UnitConversions.convert(net_capacity, 'Btu/hr', 'ton')
       gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :htg)[0]
       htg_ap.heat_rated_capacities_net = [net_capacity]
       htg_ap.heat_rated_capacities_gross = [gross_capacity]
-      fail 'Unexpected error.' if htg_ap.heat_capacity_ratios.size != 1
+      fail 'Unexpected error.' if htg_ap.heat_capacity_ratios.size != 1 || htg_ap.heat_capacity_ratios[0] != 1
     else
       process_detailed_performance_data(heating_system, :htg, weather_min_drybulb, htg_ap.hp_min_temp)
     end
