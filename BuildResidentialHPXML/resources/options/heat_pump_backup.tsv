@@ -12,10 +12,10 @@ None	none
 "Fuel Oil, Integrated, 60% AFUE, 40F Lockout"	integrated	fuel oil	0.6	40
 "Fuel Oil, Integrated, 76% AFUE, 40F Lockout"	integrated	fuel oil	0.76	40
 "Fuel Oil, Integrated, 80% AFUE, 40F Lockout"	integrated	fuel oil	0.8	40
-				
+"Fuel Oil, Integrated, 92.5% AFUE, 40F Lockout"	integrated	fuel oil	0.925	40
 "Propane, Integrated, 60% AFUE, 40F Lockout"	integrated	propane	0.6	40
 "Propane, Integrated, 76% AFUE, 40F Lockout"	integrated	propane	0.76	40
 "Propane, Integrated, 80% AFUE, 40F Lockout"	integrated	propane	0.8	40
-				
+"Propane, Integrated, 92.5% AFUE, 40F Lockout"	integrated	propane	0.925	40
 Separate	separate			
 "Separate, 30F Lockout"	separate			30
