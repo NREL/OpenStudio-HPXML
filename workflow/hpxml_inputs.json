@@ -2631,17 +2631,29 @@
     "heat_pump_fraction_cool_load_served": 1,
     "heat_pump_backup_type": "none"
   },
+  "sample_files/base-hvac-ground-to-air-heat-pump-1-speed-advanced.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
+    "simulation_control_geothermal_model_type": "advanced"
+  },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_efficiency": 4.0,
     "heat_pump_cooling_efficiency": 20.5,
     "heat_pump_cooling_compressor_type": "two stage"
   },
+  "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-advanced.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml",
+    "simulation_control_geothermal_model_type": "advanced"
+  },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_efficiency": 4.4,
     "heat_pump_cooling_efficiency": 30.9,
     "heat_pump_cooling_compressor_type": "variable speed"
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-advanced.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml",
+    "simulation_control_geothermal_model_type": "advanced"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-integrated.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",

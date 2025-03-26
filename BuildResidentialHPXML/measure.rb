@@ -127,6 +127,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for an improved model that better accounts for load and energy use during defrost; using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
+    geothermal_model_type_choices = OpenStudio::StringVector.new
+    geothermal_model_type_choices << HPXML::AdvancedResearchGeothermalModelTypeSimple
+    geothermal_model_type_choices << HPXML::AdvancedResearchGeothermalModelTypeAdvanced
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('simulation_control_geothermal_model_type', geothermal_model_type_choices, false)
+    arg.setDisplayName('Simulation Control: Geothermal Model Type')
+    arg.setDescription("Research feature to select the type of geothermal model. Use #{HPXML::AdvancedResearchGeothermalModelTypeSimple} for simple E+ geothermal coil modeling. Use #{HPXML::AdvancedResearchGeothermalModelTypeAdvanced} for an improved model that better accounts for coil staging; using #{HPXML::AdvancedResearchGeothermalModelTypeAdvanced} may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_onoff_thermostat_deadband', false)
     arg.setDisplayName('Simulation Control: HVAC On-Off Thermostat Deadband')
     arg.setDescription('Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.')
@@ -4304,6 +4312,13 @@ module HPXMLFile
         errors << "'Simulation Control: Defrost Model Type' cannot vary across dwelling units."
       end
       hpxml.header.defrost_model_type = args[:simulation_control_defrost_model_type]
+    end
+
+    if not args[:simulation_control_geothermal_model_type].nil?
+      if (not hpxml.header.geothermal_model_type.nil?) && (hpxml.header.geothermal_model_type != args[:simulation_control_geothermal_model_type])
+        errors << "'Simulation Control: Geothermal Model Type' cannot vary across dwelling units."
+      end
+      hpxml.header.geothermal_model_type = args[:simulation_control_geothermal_model_type]
     end
 
     if not args[:simulation_control_onoff_thermostat_deadband].nil?

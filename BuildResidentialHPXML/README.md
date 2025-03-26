@@ -193,6 +193,19 @@ Research feature to select the type of defrost model. Use standard for default E
 
 <br/>
 
+**Simulation Control: Geothermal Model Type**
+
+Research feature to select the type of geothermal model. Use simple for simple E+ geothermal coil modeling. Use advanced for an improved model that better accounts for coil staging; using advanced may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+
+- **Name:** ``simulation_control_geothermal_model_type``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `simple`, `advanced`
+
+<br/>
+
 **Simulation Control: HVAC On-Off Thermostat Deadband**
 
 Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.

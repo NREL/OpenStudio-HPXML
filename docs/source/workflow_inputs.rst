@@ -109,6 +109,7 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   ``DefrostModelType``                    string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
   ``OnOffThermostatDeadbandTemperature``  double    F        > 0 [#]_          No                  Temperature difference between cut-in and cut-out temperature for HVAC operation [#]_
   ``HeatPumpBackupCapacityIncrement``     double    Btu/hr   > 0 [#]_          No                  Capacity increment of multi-stage heat pump backup systems [#]_
+  ``GeothermalModelType``                 string             See [#]_          No        simple    Geothermal heat pump sytem model type [#]_
   ======================================  ========  =======  ================  ========  ========  ========================================================
 
   .. [#] The default value of 7 is an average value found in the literature when calibrating timeseries EnergyPlus indoor temperatures to field data.
@@ -131,6 +132,9 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   .. [#] HeatPumpBackupCapacityIncrement is currently only allowed with a 1 minute timestep.
   .. [#] HeatPumpBackupCapacityIncrement allows modeling multi-stage electric heat pump backup with time-based staging.
          If not provided, the heat pump backup is modeled with a single stage.
+  .. [#] GeothermalModelType choices are "simple" and "advanced".
+  .. [#] Use "simple" for simplified single-speed coil model.
+         Use "advanced" for variable-speed coil model, it also supports single-speed geothermal systems. Using "advanced" may impact simulation runtime.
 
 HPXML Emissions Scenarios
 *************************
