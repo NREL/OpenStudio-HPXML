@@ -876,7 +876,7 @@ module HVAC
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
-    add_pump_power_ems_program(model, pump_w, pump, air_loop_unitary)
+    add_pump_power_ems_program(model, pump, air_loop_unitary)
 
     if heat_pump.is_shared_system
       # Shared pump power per ANSI/RESNET/ICC 301-2022 Section 4.4.5.1 (pump runs 8760)
@@ -1055,7 +1055,7 @@ module HVAC
     plant_loop.addSupplyBranchForComponent(boiler)
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     boiler.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
-    add_pump_power_ems_program(model, pump_w, pump, boiler)
+    add_pump_power_ems_program(model, pump, boiler)
 
     if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
@@ -2500,7 +2500,7 @@ module HVAC
   # @param pump [TODO] TODO
   # @param heating_object [TODO] TODO
   # @return [nil]
-  def self.add_pump_power_ems_program(model, pump_w, pump, heating_object)
+  def self.add_pump_power_ems_program(model, pump, heating_object)
     # EMS is used to set the pump power.
     # Without EMS, the pump power will vary according to the plant loop part load ratio
     # (based on flow rate) rather than the boiler part load ratio (based on load).
@@ -2554,7 +2554,7 @@ module HVAC
     pump_program.addLine("Set pump_total_eff = #{pump_rated_mfr_var.name} / 1000 * #{pump.ratedPumpHead} / #{pump.ratedPowerConsumption.get}")
     pump_program.addLine("Set pump_vfr = #{pump_mfr_sensor.name} / 1000")
     pump_program.addLine('If pump_vfr > 0')
-    pump_program.addLine("  Set #{pump_pressure_rise_act.name} = #{pump_w} * heating_plr * pump_total_eff / pump_vfr")
+    pump_program.addLine("  Set #{pump_pressure_rise_act.name} = #{pump.ratedPowerConsumption.get} * heating_plr * pump_total_eff / pump_vfr")
     pump_program.addLine('Else')
     pump_program.addLine("  Set #{pump_pressure_rise_act.name} = 0")
     pump_program.addLine('EndIf')
