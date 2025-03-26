@@ -3811,7 +3811,6 @@ module HVACSizing
       end
     end
 
-    # FIXME: For cooling, should this be sensible or total capacity?
     return cfm_per_ton * UnitConversions.convert(capacity, 'Btu/hr', 'ton')
   end
 

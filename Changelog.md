@@ -7,7 +7,6 @@ __New Features__
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.
   - Allows optional EER or EER2 inputs (`AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value`) for central air conditioners/heat pumps and mini-splits.
-  - Allows optional maximum airflow rate (`HeatingAirflowCFM` and/or `CoolingAirflowCFM`) for central and mini-split air conditioners, heat pumps, and furnaces.
   - Updates to detailed performance datapoints:
     - **Breaking Change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
     - Detailed performance datapoints can now be specified for single stage and two stage equipment too.
