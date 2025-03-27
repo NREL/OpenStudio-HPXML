@@ -598,6 +598,7 @@ module HVAC
         coeff: hp_ap.cool_power_curve_spec[0]
       )
       clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
+      clg_coil.setName(obj_name + ' clg coil')
       clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
       clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
       clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
@@ -637,6 +638,7 @@ module HVAC
         min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
       )
       clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.new(model, plf_fplr_curve)
+      clg_coil.setName(obj_name + ' clg coil')
       clg_coil.setNominalTimeforCondensatetoBeginLeavingtheCoil(1000)
       clg_coil.setInitialMoistureEvaporationRateDividedbySteadyStateACLatentCapacity(1.5)
       clg_coil.setNominalSpeedLevel(num_speeds)
@@ -707,6 +709,7 @@ module HVAC
         min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
       )
       htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.new(model, plf_fplr_curve)
+      htg_coil.setName(obj_name + ' htg coil')
       htg_coil.setNominalSpeedLevel(num_speeds)
       htg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(htg_cfm_rated, 'cfm', 'm^3/s'))
       htg_coil.setRatedWaterFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
@@ -2546,12 +2549,57 @@ module HVAC
         key_name: heating_object.name
       )
     elsif heating_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-      heating_plr_sensor = Model.add_ems_sensor(
-        model,
-        name: "#{heating_object.name} plr s",
-        output_var_or_meter_name: 'Unitary System Part Load Ratio',
-        key_name: heating_object.name
-      )
+      htg_coil = heating_object.heatingCoil.get
+      clg_coil = heating_object.coolingCoil.get
+      # GHP model, variable speed coils
+      if htg_coil.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
+        htg_coil = htg_coil.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.get
+        clg_coil = clg_coil.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.get
+        heating_plr_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{htg_coil.name} plr s",
+          output_var_or_meter_name: 'Heating Coil Part Load Ratio',
+          key_name: htg_coil.name
+        )
+        heating_nsl_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{htg_coil.name} nsl s",
+          output_var_or_meter_name: 'Heating Coil Neighboring Speed Levels Ratio',
+          key_name: htg_coil.name
+        )
+        heating_usl_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{htg_coil.name} usl s",
+          output_var_or_meter_name: 'Heating Coil Upper Speed Level',
+          key_name: htg_coil.name
+        )
+        cooling_plr_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{clg_coil.name} plr s",
+          output_var_or_meter_name: 'Cooling Coil Part Load Ratio',
+          key_name: clg_coil.name
+        )
+        cooling_nsl_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{clg_coil.name} nsl s",
+          output_var_or_meter_name: 'Cooling Coil Neighboring Speed Levels Ratio',
+          key_name: clg_coil.name
+        )
+        cooling_usl_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{clg_coil.name} usl s",
+          output_var_or_meter_name: 'Cooling Coil Upper Speed Level',
+          key_name: clg_coil.name
+        )
+      # GHP model, single speed coils
+      else
+        heating_plr_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{heating_object.name} plr s",
+          output_var_or_meter_name: 'Unitary System Part Load Ratio',
+          key_name: heating_object.name
+        )
+      end
     end
 
     pump_mfr_sensor = Model.add_ems_sensor(
@@ -2582,11 +2630,57 @@ module HVAC
       model,
       name: "#{pump.name} power program"
     )
-    pump_program.addLine("Set heating_plr = #{heating_plr_sensor.name}")
+    if cooling_plr_sensor.nil?
+      pump_program.addLine("Set hvac_plr = #{heating_plr_sensor.name}")
+    else
+      pump_program.addLine("Set heating_pump_vfr_max = #{htg_coil.speeds[-1].referenceUnitRatedWaterFlowRate}")
+      pump_program.addLine("Set cooling_pump_vfr_max = #{clg_coil.speeds[-1].referenceUnitRatedWaterFlowRate}")
+      pump_program.addLine('Set htg_flow_rate = 0.0')
+      pump_program.addLine('Set clg_flow_rate = 0.0')
+      (1..htg_coil.speeds.size).each do |i|
+        # Initialization
+        pump_program.addLine("Set heating_pump_vfr_#{i} = #{htg_coil.speeds[i - 1].referenceUnitRatedWaterFlowRate}")
+        pump_program.addLine("Set heating_fraction_time_#{i} = 0.0")
+      end
+      pump_program.addLine("If #{heating_usl_sensor.name} == 1")
+      pump_program.addLine("  Set heating_fraction_time_1 = #{heating_plr_sensor.name}")
+      (1..(htg_coil.speeds.size - 1)).each do |i|
+        pump_program.addLine("ElseIf #{heating_usl_sensor.name} == #{i + 1}")
+        pump_program.addLine("  Set heating_fraction_time_#{i} = 1.0 - #{heating_nsl_sensor.name}")
+        pump_program.addLine("  Set heating_fraction_time_#{i + 1} = #{heating_nsl_sensor.name}")
+      end
+      pump_program.addLine('EndIf')
+      # sum up to get the actual flow rate
+      (1..htg_coil.speeds.size).each do |i|
+        pump_program.addLine("Set htg_flow_rate = htg_flow_rate + heating_fraction_time_#{i} * heating_pump_vfr_#{i}")
+      end
+      pump_program.addLine('Set heating_plr = htg_flow_rate / heating_pump_vfr_max')
+
+      # Cooling
+      (1..clg_coil.speeds.size).each do |i|
+        # Initialization
+        pump_program.addLine("Set cooling_pump_vfr_#{i} = #{clg_coil.speeds[i - 1].referenceUnitRatedWaterFlowRate}")
+        pump_program.addLine("Set cooling_fraction_time_#{i} = 0.0")
+      end
+      pump_program.addLine("If #{cooling_usl_sensor.name} == 1")
+      pump_program.addLine("  Set cooling_fraction_time_1 = #{heating_plr_sensor.name}")
+      (1..(clg_coil.speeds.size - 1)).each do |i|
+        pump_program.addLine("ElseIf (#{cooling_usl_sensor.name}) == #{i + 1}")
+        pump_program.addLine("  Set cooling_fraction_time_#{i} = 1.0 - #{cooling_nsl_sensor.name}")
+        pump_program.addLine("  Set cooling_fraction_time_#{i + 1} = #{cooling_nsl_sensor.name}")
+      end
+      pump_program.addLine('EndIf')
+      # sum up to get the actual flow rate
+      (1..clg_coil.speeds.size).each do |i|
+        pump_program.addLine("Set clg_flow_rate = clg_flow_rate + cooling_fraction_time_#{i} * heating_pump_vfr_#{i}")
+      end
+      pump_program.addLine('Set cooling_plr = clg_flow_rate / cooling_pump_vfr_max')
+      pump_program.addLine('Set hvac_plr = @Max cooling_plr heating_plr')
+    end
     pump_program.addLine("Set pump_total_eff = #{pump_rated_mfr_var.name} / 1000 * #{pump.ratedPumpHead} / #{pump.ratedPowerConsumption.get}")
     pump_program.addLine("Set pump_vfr = #{pump_mfr_sensor.name} / 1000")
     pump_program.addLine('If pump_vfr > 0')
-    pump_program.addLine("  Set #{pump_pressure_rise_act.name} = #{pump.ratedPowerConsumption.get} * heating_plr * pump_total_eff / pump_vfr")
+    pump_program.addLine("  Set #{pump_pressure_rise_act.name} = #{pump.ratedPowerConsumption.get} * hvac_plr * pump_total_eff / pump_vfr")
     pump_program.addLine('Else')
     pump_program.addLine("  Set #{pump_pressure_rise_act.name} = 0")
     pump_program.addLine('EndIf')
