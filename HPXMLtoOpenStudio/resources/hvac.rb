@@ -2285,8 +2285,7 @@ module HVAC
         hp_ap.heat_eir_fflow_spec = [[2.796, -3.0886, 1.3858]]
         hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]]
         hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]]
-        # FIXME: Rated condition is the same as DX coil E+ conditions, so followed the same approach here, please review
-        set_cool_rated_shrs_gross(heat_pump)
+        hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr]
         # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
         cool_cop_ratios = [1.0]
         heat_cop_ratios = [1.0]
@@ -2332,8 +2331,7 @@ module HVAC
         #                           [1.1679, -0.3215, 0.1535]]
         hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 2
         hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 2
-        # FIXME: Rated condition is the same as DX coil E+ conditions, so followed the same approach here, please review
-        set_cool_rated_shrs_gross(heat_pump)
+        hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr] * 2
         # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
         cool_cop_ratios = [1.102827763, 1.0]
         heat_cop_ratios = [1.161791639, 1.0]
@@ -2381,8 +2379,7 @@ module HVAC
         hp_ap.heat_eir_fflow_spec = [[1.0, 0.0, 0.0]] * 5
         hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 5
         hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 5
-        # FIXME: Rated condition is the same as DX coil E+ conditions, so followed the same approach here, please review
-        set_cool_rated_shrs_gross(heat_pump)
+        hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr] * 5
         # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
         cool_cop_ratios = [1.285116034, 1.360219899, 1.298730993, 1.15020145, 1]
         # FIXME: Review this, data looks suspicious
