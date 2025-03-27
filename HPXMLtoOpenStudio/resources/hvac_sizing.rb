@@ -2664,7 +2664,7 @@ module HVACSizing
       hr_indoor_cooling_rated = Psychrometrics.w_fT_Twb_P(HVAC::AirSourceCoolRatedIDB, HVAC::AirSourceCoolRatedIWB, rated_barometric_pressure_psi) # [lbm/lbm]
 
       # Calculate A_o using rated conditions; used to calculate an initial estimate of the design SHR
-      a_o_rated = Psychrometrics.CoilAoFactor(HVAC::AirSourceCoolRatedIDB, rated_barometric_pressure_psi, UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr'), cool_cfm_rated, HVAC::GrossSHR, hr_indoor_cooling_rated)
+      a_o_rated = Psychrometrics.CoilAoFactor(HVAC::AirSourceCoolRatedIDB, rated_barometric_pressure_psi, UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr'), cool_cfm_rated, clg_ap.cool_rated_shr_gross, hr_indoor_cooling_rated)
       cool_cap_design = hvac_sizings.Cool_Load_Tot
 
       # initial estimate for design airflow rate [cfm]
@@ -2720,7 +2720,7 @@ module HVACSizing
 
           # Determine rated capacities
           hvac_sizings.Cool_Capacity = cool_cap_design / total_cap_curve_value
-          hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+          hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
 
           # Determine the final sensible capacity at design using the SHR
           cool_sens_cap_design = cool_cap_design * design_shr
@@ -2739,14 +2739,14 @@ module HVACSizing
 
           # rated capacities
           hvac_sizings.Cool_Capacity = cool_cap_design / total_cap_curve_value
-          hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+          hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
 
           # Recalculate the design sensible capacity in case the oversizing limit on total cap has been used
           cool_sens_cap_design = cool_cap_design * design_shr
 
         else
           hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
-          hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+          hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
 
           cool_sens_cap_design = hvac_sizings.Cool_Capacity * total_cap_curve_value * design_shr
         end
@@ -2768,7 +2768,7 @@ module HVACSizing
       total_cap_curve_value = odb_adj * idb_adj
 
       hvac_sizings.Cool_Capacity = (hvac_sizings.Cool_Load_Tot / total_cap_curve_value)
-      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
 
       hvac_sizings.Cool_Airflow = calc_airflow_rate_user(hvac_sizings.Cool_Capacity, clg_ap.cool_rated_cfm_per_ton)
 
@@ -2781,7 +2781,7 @@ module HVACSizing
       total_cap_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, entering_temp, clg_ap.cool_cap_ft_spec)
 
       hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
-      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
 
       hvac_sizings.Cool_Airflow = calc_airflow_rate_user(hvac_sizings.Cool_Capacity, clg_ap.cool_rated_cfm_per_ton)
 
@@ -2803,7 +2803,7 @@ module HVACSizing
       bypass_factor_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, mj.cool_setpoint, gshp_coil_bf_ft_spec)
 
       hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value # Note: cool_cap_design = hvac_sizings.Cool_Load_Tot
-      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
 
       cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
                                  (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
@@ -2818,7 +2818,7 @@ module HVACSizing
       # Limit total capacity via oversizing limit
       cool_cap_design = [cool_cap_design, oversize_limit * hvac_sizings.Cool_Load_Tot].min
       hvac_sizings.Cool_Capacity = cool_cap_design / total_cap_curve_value
-      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
 
       # Recalculate the air flow rate in case the oversizing limit has been used
       cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
@@ -2916,7 +2916,7 @@ module HVACSizing
         hvac_sizings.Cool_Capacity = [hvac_sizings.Cool_Capacity, hvac_sizings.Heat_Capacity].max
         hvac_sizings.Heat_Capacity = hvac_sizings.Cool_Capacity
 
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
         cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
                                    (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
                                    (80.0 - mj.cool_setpoint) / cooling_delta_t))
@@ -3138,7 +3138,7 @@ module HVACSizing
 
       prev_capacity = hvac_sizings.Cool_Capacity
       hvac_sizings.Cool_Capacity *= cap_clg_ratio
-      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * HVAC::GrossSHR
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
       if prev_capacity > 0 # Preserve cfm/ton
         hvac_sizings.Cool_Airflow = hvac_sizings.Cool_Airflow * hvac_sizings.Cool_Capacity / prev_capacity
       else
@@ -5309,7 +5309,6 @@ module HVACSizing
         hvac_cooling.integrated_heating_system_airflow_cfm = Float(hvac_sizings.Heat_Airflow.round)
         hvac_cooling.integrated_heating_system_airflow_cfm_isdefaulted = true
       end
-      hvac_cooling.additional_properties.cooling_capacity_sensible = Float(hvac_sizings.Cool_Capacity_Sens.round)
 
       # Cooling airflow
       hvac_cooling.cooling_airflow_cfm = Float(hvac_sizings.Cool_Airflow.round)

@@ -42,7 +42,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return tbl.outputValues[idx1 * t2_tbl_values.size + idx2]
   end
 
-  def test_resnet_dx_model
+  def test_resnet_dx_ac_and_hp
     # Test to verify the model is consistent with RESNET's NEEP-Statistical-Model.xlsm
     # Spreadsheet can be found in https://github.com/NREL/OpenStudio-HPXML/pull/1879
 
@@ -122,7 +122,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       end
     end
     clg_coil.stages.each do |stage|
-      assert_equal(HVAC::GrossSHR, stage.grossRatedSensibleHeatRatio.get)
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
     end
 
     # Check heating coil
@@ -205,7 +205,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       end
     end
     clg_coil.stages.each do |stage|
-      assert_equal(HVAC::GrossSHR, stage.grossRatedSensibleHeatRatio.get)
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
     end
 
     # Check heating coil
@@ -281,7 +281,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       cap_adj = _get_table_lookup_factor(clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve, HVAC::AirSourceCoolRatedIWB, odb)
       assert_in_epsilon(capacity, cap_adj * UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
     end
-    assert_equal(HVAC::GrossSHR, clg_coil.ratedSensibleHeatRatio.get)
+    assert_equal(0.708, clg_coil.ratedSensibleHeatRatio.get)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
@@ -341,6 +341,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_clg_capacities_95.each_with_index do |capacity, i|
       assert_in_epsilon(capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+    end
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -367,6 +370,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     expected_clg_capacities_95.each_with_index do |capacity, i|
       assert_in_epsilon(capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
     end
 
     # Check EMS
@@ -414,6 +420,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
       assert_in_epsilon(cop, clg_coil.ratedCOP, 0.001)
       assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+      assert_equal(0.65, clg_coil.ratedSensibleHeatRatio.get)
 
       next unless not cooling_system.integrated_heating_system_capacity.nil?
 
@@ -447,6 +454,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     assert_in_epsilon(cop, clg_coil.ratedCOP, 0.001)
     assert_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+    assert_equal(0.65, clg_coil.ratedSensibleHeatRatio.get)
   end
 
   def test_ptac_with_heating_electricity
@@ -471,6 +479,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     assert_in_epsilon(cop, clg_coil.ratedCOP, 0.001)
     assert_in_epsilon(cool_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+    assert_equal(0.65, clg_coil.ratedSensibleHeatRatio.get)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -501,6 +510,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     assert_in_epsilon(cop, clg_coil.ratedCOP, 0.001)
     assert_in_epsilon(cool_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+    assert_equal(0.65, clg_coil.ratedSensibleHeatRatio.get)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -530,6 +540,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     assert_in_epsilon(cop_cool, clg_coil.ratedCOP, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+    assert_equal(0.65, clg_coil.ratedSensibleHeatRatio.get)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
@@ -564,6 +575,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
     assert_in_epsilon(cop_cool, clg_coil.ratedCOP, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+    assert_equal(0.65, clg_coil.ratedSensibleHeatRatio.get)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
@@ -857,6 +869,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_clg_capacities_95.each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
@@ -907,6 +922,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     expected_clg_capacities_95.each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
     end
 
     # Check heating coil
@@ -973,6 +991,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     expected_clg_capacities_95.each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
     end
 
     # Check heating coil
@@ -1161,6 +1182,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_clg_capacities_95.each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
@@ -1208,6 +1232,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     expected_clg_capacities_95.each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
+    end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
     end
 
     # Check heating coil
@@ -1263,6 +1290,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_clg_capacities_95.each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+    end
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
@@ -1304,6 +1334,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_clg_capacities_95.each_with_index do |clg_capacity, i|
       assert_in_epsilon(clg_capacity, clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 0.01)
     end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+    end
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -1327,6 +1360,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     clg_coil = model.getCoilCoolingWaterToAirHeatPumpEquationFits[0]
     assert_in_epsilon(5.84, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+    assert_in_epsilon(0.708, clg_coil.ratedSensibleCoolingCapacity.get / clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpEquationFits.size)

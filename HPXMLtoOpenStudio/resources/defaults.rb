@@ -6233,6 +6233,7 @@ module Defaults
     clg_ap.cool_eir_fflow_spec = [1.143487507, -0.13943972, -0.004047787]
 
     if cooling_system.is_a?(HPXML::HeatPump) && cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      clg_ap.cool_rated_shr_gross = 0.708
       return
     end
 
@@ -6246,6 +6247,7 @@ module Defaults
       clg_ap.cool_cap_fflow_spec = [1.0, 0.0, 0.0]
       clg_ap.cool_eir_fflow_spec = [1.0, 0.0, 0.0]
       clg_ap.cool_rated_cops = [UnitConversions.convert(cooling_system.cooling_efficiency_ceer, 'Btu/hr', 'W')]
+      clg_ap.cool_rated_shr_gross = 0.65
       return
     end
 
@@ -6307,6 +6309,7 @@ module Defaults
     clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
     clg_ap.cool_cap_ft_spec = [3.717717741, -0.09918866, 0.000964488, 0.005887776, -0.000012808, -0.000132822]
     clg_ap.cool_eir_ft_spec = [-3.400341169, 0.135184783, -0.001037932, -0.007852322, 0.000183438, -0.000142548]
+    clg_ap.cool_rated_shr_gross = 0.708
   end
 
   # Sets heating performance factors based on RESNET MINHERS Addendum 82.

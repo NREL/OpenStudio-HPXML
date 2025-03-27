@@ -9,7 +9,6 @@ module HVAC
   AirSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for air-source systems, cooling
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
   RatedCFMPerTon = 400.0 # cfm/ton of rated capacity, RESNET MINHERS Addendum 82
-  GrossSHR = 0.708 # Gross SHR at AHRI "A" conditions for each speed, RESNET MINHERS Addendum 82
   CrankcaseHeaterTemp = 50.0 # degF, RESNET MINHERS Addendum 82
   MinCapacity = 1.0 # Btuh
   MinAirflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
@@ -600,7 +599,7 @@ module HVAC
     clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
     clg_coil.setRatedEnteringAirWetBulbTemperature(UnitConversions.convert(67, 'F', 'C'))
     clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
-    clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(hp_ap.cooling_capacity_sensible, 'Btu/hr', 'W'))
+    clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity * hp_ap.cool_rated_shr_gross, 'Btu/hr', 'W'))
     clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
     # Heating Coil
@@ -2789,7 +2788,7 @@ module HVAC
         # Coil COP calculation based on system type
         clg_coil.setRatedCOP(clg_ap.cool_rated_cops[i])
         clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C'))
-        clg_coil.setRatedSensibleHeatRatio(GrossSHR)
+        clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shr_gross)
         clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
         clg_coil.setMaximumCyclingRate(3.0)
@@ -2812,7 +2811,7 @@ module HVAC
         end
         stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
         stage.setGrossRatedCoolingCOP(clg_ap.cool_rated_cops[i])
-        stage.setGrossRatedSensibleHeatRatio(GrossSHR)
+        stage.setGrossRatedSensibleHeatRatio(clg_ap.cool_rated_shr_gross)
         stage.setNominalTimeforCondensateRemovaltoBegin(1000)
         stage.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
@@ -5042,7 +5041,6 @@ module HVAC
     hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity = [hp_sys.cooling_capacity, MinCapacity].max
       hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm, MinAirflow].max
-      hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible, MinCapacity].max
       hp_sys.heating_capacity = [hp_sys.heating_capacity, MinCapacity].max
       hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm, MinAirflow].max
       hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, MinCapacity].max unless hp_sys.heating_capacity_17F.nil?
@@ -5098,7 +5096,6 @@ module HVAC
     hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity *= unit_multiplier
       hp_sys.cooling_airflow_cfm *= unit_multiplier
-      hp_sys.additional_properties.cooling_capacity_sensible *= unit_multiplier
       hp_sys.heating_capacity *= unit_multiplier
       hp_sys.heating_airflow_cfm *= unit_multiplier
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
