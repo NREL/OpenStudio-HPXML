@@ -619,7 +619,7 @@
     "slab_carpet_fraction": 0,
     "slab_carpet_r": 0,
     "ceiling_assembly_r": 39.3,
-    "enclosure_roof_material": "ASphalt/Fiberglass Shingles, Medium Dark",
+    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium Dark",
     "roof_assembly_r": 2.3,
     "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
