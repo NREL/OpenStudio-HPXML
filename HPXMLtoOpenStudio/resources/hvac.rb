@@ -880,6 +880,7 @@ module HVAC
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
     add_pump_power_ems_program(model, pump, air_loop_unitary)
+    add_fan_pump_mass_flow_rate_ems_program(model, pump, htg_coil, clg_coil, heat_pump)
 
     if heat_pump.is_shared_system
       # Shared pump power per ANSI/RESNET/ICC 301-2022 Section 4.4.5.1 (pump runs 8760)
@@ -2690,6 +2691,75 @@ module HVAC
       model,
       name: "#{pump_program.name} calling manager",
       calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
+      ems_programs: [pump_program]
+    )
+  end
+
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param pump_w [TODO] TODO
+  # @param pump [TODO] TODO
+  # @param heating_object [TODO] TODO
+  # @return [nil]
+  def self.add_fan_pump_mass_flow_rate_ems_program(model, pump, htg_coil, clg_coil, heat_pump)
+    # EMS is used to set the pump power.
+    # Without EMS, the pump power will vary according to the plant loop part load ratio
+    # (based on flow rate) rather than the boiler part load ratio (based on load).
+    return unless heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+
+    return # exclude for now since the node mass flow limit needs to be resolved first
+
+    hp_ap = heat_pump.additional_properties
+
+    # Sensors
+    htg_coil_plr_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{htg_coil.name} plr s",
+      output_var_or_meter_name: 'Heating Coil Part Load Ratio',
+      key_name: htg_coil.name
+    )
+
+    clg_coil_plr_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{clg_coil.name} plr s",
+      output_var_or_meter_name: 'Cooling Coil Part Load Ratio',
+      key_name: clg_coil.name
+    )
+
+    # Actuator
+    pump_mfr_act = Model.add_ems_actuator(
+      name: "#{pump.name} mfr act",
+      model_object: pump,
+      comp_type_and_control: EPlus::EMSActuatorPumpMassFlowRate
+    )
+    # node_mfr_act = Model.add_ems_actuator(
+    #  name: "node mfr act",
+    #   model_object: pump,
+    #  comp_type_and_control: EPlus::EMSActuatorNodeMassFlowRateSetpoint
+    # )
+
+    # Program
+    # See https://bigladdersoftware.com/epx/docs/9-3/ems-application-guide/hvac-systems-001.html#pump
+    pump_program = Model.add_ems_program(
+      model,
+      name: "#{pump.name} mfr program"
+    )
+    pump_program.addLine("If #{htg_coil_plr_sensor.name} > 0.01 && #{htg_coil_plr_sensor.name} < 1.0")
+    pump_program.addLine("Set clippled_plr = (@MAX #{htg_coil_plr_sensor.name} 0.01)")
+    pump_program.addLine("Set #{pump_mfr_act.name} = clippled_plr * #{UnitConversions.convert(heat_pump.geothermal_loop.loop_flow, 'gal/min', 'm^3/s')}  * #{hp_ap.heat_capacity_ratios[0]} * 1000.0")
+    pump_program.addLine("ElseIf #{clg_coil_plr_sensor.name} > 0.01 && #{clg_coil_plr_sensor.name} < 1.0")
+    pump_program.addLine("Set clippled_plr = (@MAX #{clg_coil_plr_sensor.name} 0.01)")
+    pump_program.addLine("Set #{pump_mfr_act.name} = clippled_plr * #{UnitConversions.convert(heat_pump.geothermal_loop.loop_flow, 'gal/min', 'm^3/s')} * #{hp_ap.cool_capacity_ratios[0]} * 1000.0")
+    pump_program.addLine('Else')
+    pump_program.addLine("Set #{pump_mfr_act.name} = NULL")
+    pump_program.addLine('EndIf')
+
+    # Calling Point
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{pump_program.name} calling manager",
+      calling_point: 'InsideHVACSystemIterationLoop',
       ems_programs: [pump_program]
     )
   end
