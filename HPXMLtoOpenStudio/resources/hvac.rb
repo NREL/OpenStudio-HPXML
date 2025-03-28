@@ -697,7 +697,8 @@ module HVAC
         speed.setReferenceUnitRatedAirFlowRate(UnitConversions.convert(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * hp_ap.cool_capacity_ratios[i] * hp_ap.cool_rated_cfm_per_ton[i], 'cfm', 'm^3/s'))
         # FIXME: Please Review
         # The catalog Water flow rates are 6.7GPM and 9.0GPM at each speed, the ratio is close to capacity ratios, and our default loop_flow calculation is based on capacity, so I used capacity ratios here.
-        speed.setReferenceUnitRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.cool_capacity_ratios[i])
+        speed_wfr = heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed ? UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') : UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.cool_capacity_ratios[i]
+        speed.setReferenceUnitRatedWaterFlowRate(speed_wfr) # Set to maximum then actuate by EMS to avoid Node mass flow rate issue
         speed.setReferenceUnitWasteHeatFractionofInputPowerAtRatedConditions(0.0)
         clg_coil.addSpeed(speed)
       end
@@ -764,7 +765,8 @@ module HVAC
         speed.setReferenceUnitRatedAirFlow(UnitConversions.convert(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * hp_ap.heat_capacity_ratios[i] * hp_ap.heat_rated_cfm_per_ton[i], 'cfm', 'm^3/s'))
         # FIXME: Please Review
         # The catalog Water flow rates are 6.7GPM and 9.0GPM at each speed, the ratio is close to capacity ratios, and our default loop_flow calculation is based on capacity, so I used capacity ratios here.
-        speed.setReferenceUnitRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.heat_capacity_ratios[i])
+        speed_wfr = heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed ? UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') : UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.heat_capacity_ratios[i]
+        speed.setReferenceUnitRatedWaterFlowRate(speed_wfr) # Set to maximum then actuate by EMS to avoid Node mass flow rate issue
         speed.setReferenceUnitWasteHeatFractionofInputPowerAtRatedConditions(0.0)
         htg_coil.addSpeed(speed)
       end
@@ -879,8 +881,8 @@ module HVAC
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
-    add_pump_power_ems_program(model, pump, air_loop_unitary)
-    add_fan_pump_mass_flow_rate_ems_program(model, pump, htg_coil, clg_coil, heat_pump)
+    add_pump_power_ems_program(model, pump, air_loop_unitary, heat_pump)
+    add_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil, heat_pump)
 
     if heat_pump.is_shared_system
       # Shared pump power per ANSI/RESNET/ICC 301-2022 Section 4.4.5.1 (pump runs 8760)
@@ -1059,7 +1061,7 @@ module HVAC
     plant_loop.addSupplyBranchForComponent(boiler)
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     boiler.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
-    add_pump_power_ems_program(model, pump, boiler)
+    add_pump_power_ems_program(model, pump, boiler, heating_system)
 
     if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
@@ -2536,7 +2538,7 @@ module HVAC
   # @param pump [TODO] TODO
   # @param heating_object [TODO] TODO
   # @return [nil]
-  def self.add_pump_power_ems_program(model, pump, heating_object)
+  def self.add_pump_power_ems_program(model, pump, heating_object, hvac_system)
     # EMS is used to set the pump power.
     # Without EMS, the pump power will vary according to the plant loop part load ratio
     # (based on flow rate) rather than the boiler part load ratio (based on load).
@@ -2634,13 +2636,14 @@ module HVAC
     if cooling_plr_sensor.nil?
       pump_program.addLine("Set hvac_plr = #{heating_plr_sensor.name}")
     else
+      hvac_ap = hvac_system.additional_properties
       pump_program.addLine("Set heating_pump_vfr_max = #{htg_coil.speeds[-1].referenceUnitRatedWaterFlowRate}")
       pump_program.addLine("Set cooling_pump_vfr_max = #{clg_coil.speeds[-1].referenceUnitRatedWaterFlowRate}")
       pump_program.addLine('Set htg_flow_rate = 0.0')
       pump_program.addLine('Set clg_flow_rate = 0.0')
       (1..htg_coil.speeds.size).each do |i|
         # Initialization
-        pump_program.addLine("Set heating_pump_vfr_#{i} = #{htg_coil.speeds[i - 1].referenceUnitRatedWaterFlowRate}")
+        pump_program.addLine("Set heating_pump_vfr_#{i} = heating_pump_vfr_max * #{hvac_ap.heat_capacity_ratios[i - 1]}")
         pump_program.addLine("Set heating_fraction_time_#{i} = 0.0")
       end
       pump_program.addLine("If #{heating_usl_sensor.name} == 1")
@@ -2660,7 +2663,7 @@ module HVAC
       # Cooling
       (1..clg_coil.speeds.size).each do |i|
         # Initialization
-        pump_program.addLine("Set cooling_pump_vfr_#{i} = #{clg_coil.speeds[i - 1].referenceUnitRatedWaterFlowRate}")
+        pump_program.addLine("Set cooling_pump_vfr_#{i} = cooling_pump_vfr_max * #{hvac_ap.cool_capacity_ratios[i - 1]}")
         pump_program.addLine("Set cooling_fraction_time_#{i} = 0.0")
       end
       pump_program.addLine("If #{cooling_usl_sensor.name} == 1")
@@ -2702,29 +2705,29 @@ module HVAC
   # @param pump [TODO] TODO
   # @param heating_object [TODO] TODO
   # @return [nil]
-  def self.add_fan_pump_mass_flow_rate_ems_program(model, pump, htg_coil, clg_coil, heat_pump)
+  def self.add_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil, heat_pump)
     # EMS is used to set the pump power.
     # Without EMS, the pump power will vary according to the plant loop part load ratio
     # (based on flow rate) rather than the boiler part load ratio (based on load).
     return unless heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
 
-    return # exclude for now since the node mass flow limit needs to be resolved first
+    # return # exclude for now since the node mass flow limit needs to be resolved first
 
     hp_ap = heat_pump.additional_properties
 
     # Sensors
-    htg_coil_plr_sensor = Model.add_ems_sensor(
+    htg_load_sensor = Model.add_ems_sensor(
       model,
-      name: "#{htg_coil.name} plr s",
-      output_var_or_meter_name: 'Heating Coil Part Load Ratio',
-      key_name: htg_coil.name
+      name: "#{control_zone.name} predicted heating loads",
+      output_var_or_meter_name: 'Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate',
+      key_name: control_zone.name
     )
 
-    clg_coil_plr_sensor = Model.add_ems_sensor(
+    clg_load_sensor = Model.add_ems_sensor(
       model,
-      name: "#{clg_coil.name} plr s",
-      output_var_or_meter_name: 'Cooling Coil Part Load Ratio',
-      key_name: clg_coil.name
+      name: "#{control_zone.name} predicted cooling loads",
+      output_var_or_meter_name: 'Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate',
+      key_name: control_zone.name
     )
 
     # Actuator
@@ -2745,12 +2748,12 @@ module HVAC
       model,
       name: "#{pump.name} mfr program"
     )
-    pump_program.addLine("If #{htg_coil_plr_sensor.name} > 0.01 && #{htg_coil_plr_sensor.name} < 1.0")
-    pump_program.addLine("Set clippled_plr = (@MAX #{htg_coil_plr_sensor.name} 0.01)")
-    pump_program.addLine("Set #{pump_mfr_act.name} = clippled_plr * #{UnitConversions.convert(heat_pump.geothermal_loop.loop_flow, 'gal/min', 'm^3/s')}  * #{hp_ap.heat_capacity_ratios[0]} * 1000.0")
-    pump_program.addLine("ElseIf #{clg_coil_plr_sensor.name} > 0.01 && #{clg_coil_plr_sensor.name} < 1.0")
-    pump_program.addLine("Set clippled_plr = (@MAX #{clg_coil_plr_sensor.name} 0.01)")
-    pump_program.addLine("Set #{pump_mfr_act.name} = clippled_plr * #{UnitConversions.convert(heat_pump.geothermal_loop.loop_flow, 'gal/min', 'm^3/s')} * #{hp_ap.cool_capacity_ratios[0]} * 1000.0")
+    pump_program.addLine("If #{htg_load_sensor.name} > 0.0 && #{clg_load_sensor.name} > 0.0") # Heating loads
+    pump_program.addLine("Set estimated_plr = (@ABS #{htg_load_sensor.name}) / #{htg_coil.ratedHeatingCapacityAtSelectedNominalSpeedLevel}")
+    pump_program.addLine("Set #{pump_mfr_act.name} = estimated_plr * #{UnitConversions.convert(heat_pump.geothermal_loop.loop_flow, 'gal/min', 'm^3/s')} * 1000.0")
+    pump_program.addLine("ElseIf #{htg_load_sensor.name} < 0.0 && #{clg_load_sensor.name} < 0.0") # Cooling loads
+    pump_program.addLine("Set estimated_plr = (@ABS #{clg_load_sensor.name}) / #{clg_coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel}")
+    pump_program.addLine("Set #{pump_mfr_act.name} = estimated_plr * #{UnitConversions.convert(heat_pump.geothermal_loop.loop_flow, 'gal/min', 'm^3/s')} * 1000.0")
     pump_program.addLine('Else')
     pump_program.addLine("Set #{pump_mfr_act.name} = NULL")
     pump_program.addLine('EndIf')
@@ -2759,7 +2762,7 @@ module HVAC
     Model.add_ems_program_calling_manager(
       model,
       name: "#{pump_program.name} calling manager",
-      calling_point: 'InsideHVACSystemIterationLoop',
+      calling_point: 'AfterPredictorBeforeHVACManagers',
       ems_programs: [pump_program]
     )
   end
