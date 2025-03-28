@@ -1060,65 +1060,6 @@ module Geometry
     return walls_top, foundation_top
   end
 
-  # Get the largest z difference for a surface.
-  #
-  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [Double] the max z value minus the min x value
-  def self.get_surface_height(surface)
-    zvalues = get_surface_z_values(surfaceArray: [surface])
-    zrange = zvalues.max - zvalues.min
-    return zrange
-  end
-
-  # Return an array of x values for surfaces passed in.
-  # The values will be relative to the parent origin.
-  # This was intended for spaces.
-  #
-  # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of x-coordinates (ft)
-  def self.get_surface_x_values(surfaceArray:)
-    xValueArray = []
-    surfaceArray.each do |surface|
-      surface.vertices.each do |vertex|
-        xValueArray << UnitConversions.convert(vertex.x, 'm', 'ft').round(5)
-      end
-    end
-    return xValueArray
-  end
-
-  # Return an array of y values for surfaces passed in.
-  # The values will be relative to the parent origin.
-  # This was intended for spaces.
-  #
-  # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of y-coordinates (ft)
-  def self.get_surface_y_values(surfaceArray:)
-    yValueArray = []
-    surfaceArray.each do |surface|
-      surface.vertices.each do |vertex|
-        yValueArray << UnitConversions.convert(vertex.y, 'm', 'ft').round(5)
-      end
-    end
-    return yValueArray
-  end
-
-  # Return an array of z values for surfaces passed in.
-  # The values will be relative to the parent origin.
-  # This was intended for spaces.
-  #
-  # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of z-coordinates (ft)
-  def self.get_surface_z_values(surfaceArray:)
-    # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-    zValueArray = []
-    surfaceArray.each do |surface|
-      surface.vertices.each do |vertex|
-        zValueArray << UnitConversions.convert(vertex.z, 'm', 'ft').round(5)
-      end
-    end
-    return zValueArray
-  end
-
   # Get the default number of occupants.
   #
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
@@ -1979,22 +1920,6 @@ module Geometry
     end
 
     return spaces[location]
-  end
-
-  # Determine the length of an OpenStudio Surface by calculating the maximum difference between x and y coordinates.
-  #
-  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [Double] length of the OpenStudio Surface (ft)
-  def self.get_surface_length(surface)
-    xvalues = get_surface_x_values(surfaceArray: [surface])
-    yvalues = get_surface_y_values(surfaceArray: [surface])
-    xrange = xvalues.max - xvalues.min
-    yrange = yvalues.max - yvalues.min
-    if xrange > yrange
-      return xrange
-    end
-
-    return yrange
   end
 
   # Calculates the minimum buffer distance that the parent surface
