@@ -2842,25 +2842,28 @@ module Airflow
   # @param hor_lk_frac [Double] Fraction of leakage that is in the floor and ceiling
   # @param neutral_level [Double] Fraction of space height at which the indoor-outdoor pressure difference due to stack effect is zero
   # @param location [String] The location of interest (HPXML::LocationXXX)
-  # @param height [Double] Height of the space (ft)
+  # @param space_height [Double] Height of the space (ft)
   # @return [Array<Double, Double>] Wind and stack coefficients
-  def self.calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, location, height = nil)
+  def self.calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, location, space_height = nil)
     site_ap = hpxml_bldg.site.additional_properties
-    if height.nil?
-      height = Geometry.calculate_zone_height(hpxml_bldg, location)
+    if space_height.nil?
+      space_height = Geometry.calculate_zone_height(hpxml_bldg, location)
     end
+
+    # Get distance above ground for the space
     walls_top, foundation_top = Geometry.get_foundation_and_walls_top(hpxml_bldg)
     if [HPXML::LocationConditionedSpace, HPXML::LocationGarage].include? location
-      height_above_ground = foundation_top
+      space_height_ag = foundation_top
     elsif [HPXML::LocationAtticVented].include? location
-      height_above_ground = walls_top
+      space_height_ag = walls_top
     else
       fail "Unexpected location: #{location}"
     end
-    f_t_SG = site_ap.site_terrain_multiplier * ((height + height_above_ground) / 32.8)**site_ap.site_terrain_exponent / (site_ap.terrain_multiplier * (site_ap.height / 32.8)**site_ap.terrain_exponent)
+
+    f_t_SG = site_ap.site_terrain_multiplier * ((space_height + space_height_ag) / 32.8)**site_ap.site_terrain_exponent / (site_ap.terrain_multiplier * (site_ap.height / 32.8)**site_ap.terrain_exponent)
     f_s_SG = 2.0 / 3.0 * (1 + hor_lk_frac / 2.0) * (2.0 * neutral_level * (1.0 - neutral_level))**0.5 / (neutral_level**0.5 + (1.0 - neutral_level)**0.5)
     f_w_SG = site_ap.s_g_shielding_coef * (1.0 - hor_lk_frac)**(1.0 / 3.0) * f_t_SG
-    c_s_SG = f_s_SG**2.0 * Gravity * height / UnitConversions.convert(AssumedInsideTemp, 'F', 'R')
+    c_s_SG = f_s_SG**2.0 * Gravity * space_height / UnitConversions.convert(AssumedInsideTemp, 'F', 'R')
     c_w_SG = f_w_SG**2.0
     return c_w_SG, c_s_SG
   end
