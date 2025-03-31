@@ -1281,12 +1281,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(13.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_sensible_heat_fraction', false)
-    arg.setDisplayName('Cooling System: Cooling Sensible Heat Fraction')
-    arg.setDescription("The sensible heat fraction of the cooling system. Ignored for #{HPXML::HVACTypeEvaporativeCooler}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.")
-    arg.setUnits('Frac')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_capacity', false)
     arg.setDisplayName('Cooling System: Cooling Capacity')
     arg.setDescription("The output cooling capacity of the cooling system. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='#{docs_base_url}#evaporative-cooler'>Evaporative Cooler</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.")
@@ -1424,12 +1418,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Cooling Efficiency')
     arg.setDescription('The rated cooling efficiency value of the heat pump.')
     arg.setDefaultValue(13.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_sensible_heat_fraction', false)
-    arg.setDisplayName('Heat Pump: Cooling Sensible Heat Fraction')
-    arg.setDescription("The sensible heat fraction of the heat pump. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
-    arg.setUnits('Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity', false)
@@ -5722,10 +5710,6 @@ module HPXMLFile
     end
 
     if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
-      cooling_shr = args[:cooling_system_cooling_sensible_heat_fraction]
-    end
-
-    if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
       case args[:cooling_system_cooling_efficiency_type]
       when HPXML::UnitsSEER
         cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
@@ -5765,7 +5749,6 @@ module HPXMLFile
                                    cooling_autosizing_limit: args[:cooling_system_cooling_autosizing_limit],
                                    fraction_cool_load_served: args[:cooling_system_fraction_cool_load_served],
                                    compressor_type: compressor_type,
-                                   cooling_shr: cooling_shr,
                                    cooling_efficiency_seer: cooling_efficiency_seer,
                                    cooling_efficiency_seer2: cooling_efficiency_seer2,
                                    cooling_efficiency_eer: cooling_efficiency_eer,
@@ -5940,7 +5923,6 @@ module HPXMLFile
                               heating_capacity_fraction_17F: args[:heat_pump_heating_capacity_fraction_17F],
                               compressor_type: compressor_type,
                               compressor_lockout_temp: args[:heat_pump_compressor_lockout_temp],
-                              cooling_shr: args[:heat_pump_cooling_sensible_heat_fraction],
                               cooling_capacity: args[:heat_pump_cooling_capacity],
                               cooling_autosizing_factor: args[:heat_pump_cooling_autosizing_factor],
                               cooling_autosizing_limit: args[:heat_pump_cooling_autosizing_limit],
