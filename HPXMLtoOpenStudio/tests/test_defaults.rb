@@ -3951,7 +3951,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_vehicle_values(default_hpxml_bldg.vehicles[0], default_hpxml_bldg.ev_chargers[0], HPXML::BatteryTypeLithiumIon, nil, 987.0, nil, 876.0, 5000, 10, 5.55, HPXML::UnitsMilePerKwh, 0.75, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, 3, 99)
 
-    # FIXME: Test w/ mpge
+    # Test w/ mpge
     hpxml_bldg.vehicles[0].fuel_economy_combined = 107.0
     hpxml_bldg.vehicles[0].fuel_economy_units = HPXML::UnitsMPGe
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
