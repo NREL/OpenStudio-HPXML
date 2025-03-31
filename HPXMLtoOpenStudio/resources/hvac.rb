@@ -2709,11 +2709,8 @@ module HVAC
     # EMS is used to set the pump power.
     # Without EMS, the pump power will vary according to the plant loop part load ratio
     # (based on flow rate) rather than the boiler part load ratio (based on load).
+    return unless [HPXML::AdvancedResearchGeothermalModelTypeAdvanced].include? hpxml_header.geothermal_model_type
     return unless heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-
-    # return # exclude for now since the node mass flow limit needs to be resolved first
-
-    hp_ap = heat_pump.additional_properties
 
     # Sensors
     htg_load_sensor = Model.add_ems_sensor(
