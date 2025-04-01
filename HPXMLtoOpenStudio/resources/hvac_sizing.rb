@@ -3785,7 +3785,8 @@ module HVACSizing
          HPXML::HVACTypeMiniSplitAirConditioner,
          HPXML::HVACTypeHeatPumpAirToAir,
          HPXML::HVACTypeHeatPumpMiniSplit,
-         HPXML::HVACTypeHeatPumpGroundToAir
+         HPXML::HVACTypeHeatPumpGroundToAir,
+         HPXML::HVACTypeHeatPumpWaterLoopToAir
       cfm_per_ton = 360.0
     else
       begin
