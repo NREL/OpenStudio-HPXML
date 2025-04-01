@@ -6,6 +6,7 @@ Option Name	heating_system_2_type	heating_system_2_heating_efficiency
 "Fuel Boiler, 80% AFUE"	Boiler	0.8
 "Fuel Boiler, 90% AFUE"	Boiler	0.9
 "Fuel Boiler, 92.5% AFUE"	Boiler	0.925
+"Fuel Boiler, 100% AFUE"	Boiler	1
 "Fuel Fireplace, 60% Efficiency"	Fireplace	0.6
 "Fuel Fireplace, 100% Efficiency"	Fireplace	1
 "Fuel Furnace, 60% AFUE"	Furnace	0.6
