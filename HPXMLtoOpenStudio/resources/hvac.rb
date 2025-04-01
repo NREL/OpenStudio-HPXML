@@ -8,7 +8,7 @@ module HVAC
   AirSourceCoolRatedOWB = 75.0 # degF, Rated outdoor wetbulb for air-source systems, cooling
   AirSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for air-source systems, cooling
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
-  RatedCFMPerTon = 400.0 # cfm/ton of rated capacity
+  RatedCFMPerTon = 400.0 # cfm/ton of rated capacity, RESNET MINHERS Addendum 82
   CrankcaseHeaterTemp = 50.0 # degF, RESNET MINHERS Addendum 82
   MinCapacity = 1.0 # Btuh
   MinAirflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
@@ -599,7 +599,7 @@ module HVAC
     clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
     clg_coil.setRatedEnteringAirWetBulbTemperature(UnitConversions.convert(67, 'F', 'C'))
     clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
-    clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(hp_ap.cooling_capacity_sensible, 'Btu/hr', 'W'))
+    clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity * hp_ap.cool_rated_shr_gross, 'Btu/hr', 'W'))
     clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
     # Heating Coil
@@ -1586,8 +1586,6 @@ module HVAC
     hp_ap.cool_cap_curve_spec = [[-5.45013866666657, 7.42301402824225, -1.43760846638838, 0.249103937703341, 0.0378875477019811]]
     hp_ap.cool_power_curve_spec = [[-4.21572180554818, 0.322682268675807, 4.56870615863483, 0.154605773589744, -0.167531037948482]]
     hp_ap.cool_sh_curve_spec = [[0.56143829895505, 18.7079597251858, -19.1482655264078, -0.138154731772664, 0.4823357726442, -0.00164644360129174]]
-
-    hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr]
 
     # E+ equation fit coil coefficients following approach from Tang's thesis:
     # See Appendix B Figure B.3 of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
@@ -2790,7 +2788,7 @@ module HVAC
         # Coil COP calculation based on system type
         clg_coil.setRatedCOP(clg_ap.cool_rated_cops[i])
         clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C'))
-        clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
+        clg_coil.setRatedSensibleHeatRatio(clg_ap.cool_rated_shr_gross)
         clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
         clg_coil.setMaximumCyclingRate(3.0)
@@ -2813,7 +2811,7 @@ module HVAC
         end
         stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
         stage.setGrossRatedCoolingCOP(clg_ap.cool_rated_cops[i])
-        stage.setGrossRatedSensibleHeatRatio(clg_ap.cool_rated_shrs_gross[i])
+        stage.setGrossRatedSensibleHeatRatio(clg_ap.cool_rated_shr_gross)
         stage.setNominalTimeforCondensateRemovaltoBegin(1000)
         stage.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
@@ -3023,38 +3021,6 @@ module HVAC
     end
 
     return htg_coil
-  end
-
-  # TODO
-  #
-  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
-  # @return [nil]
-  def self.set_cool_rated_shrs_gross(cooling_system)
-    clg_ap = cooling_system.additional_properties
-
-    if is_room_dx_hvac_system(cooling_system)
-      clg_ap.cool_rated_shrs_gross = [cooling_system.cooling_shr] # We don't model the fan separately, so set gross == net
-    else
-      # rated shr gross and fan speed ratios
-      dB_rated = HVAC::AirSourceCoolRatedIDB
-      win = 0.01118470 # Humidity ratio corresponding to 80F dry bulb/67F wet bulb (from EnergyPlus)
-
-      if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
-        cool_nominal_cfm_per_ton = clg_ap.cool_rated_cfm_per_ton
-      else
-        cool_nominal_cfm_per_ton = (clg_ap.cool_rated_cfm_per_ton - clg_ap.cool_rated_cfm_per_ton * clg_ap.cool_capacity_ratios[0]) / (clg_ap.cool_capacity_ratios[-1] - clg_ap.cool_capacity_ratios[0]) * (1.0 - clg_ap.cool_capacity_ratios[0]) + clg_ap.cool_rated_cfm_per_ton * clg_ap.cool_capacity_ratios[0]
-      end
-
-      p_atm = UnitConversions.convert(1, 'atm', 'psi')
-
-      ao = Psychrometrics.CoilAoFactor(dB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, cooling_system.cooling_shr, win)
-
-      clg_ap.cool_rated_shrs_gross = []
-      clg_ap.cool_capacity_ratios.each do |capacity_ratio|
-        # Calculate the SHR for each speed. Use maximum value of 0.98 to prevent E+ bypass factor calculation errors
-        clg_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(dB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), clg_ap.cool_rated_cfm_per_ton * capacity_ratio, ao, win), 0.98].min
-      end
-    end
   end
 
   # Return the time needed to reach full capacity based on c_d assumption, used for degradation EMS program.
@@ -5075,7 +5041,6 @@ module HVAC
     hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity = [hp_sys.cooling_capacity, MinCapacity].max
       hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm, MinAirflow].max
-      hp_sys.additional_properties.cooling_capacity_sensible = [hp_sys.additional_properties.cooling_capacity_sensible, MinCapacity].max
       hp_sys.heating_capacity = [hp_sys.heating_capacity, MinCapacity].max
       hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm, MinAirflow].max
       hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, MinCapacity].max unless hp_sys.heating_capacity_17F.nil?
@@ -5131,7 +5096,6 @@ module HVAC
     hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_sys.cooling_capacity *= unit_multiplier
       hp_sys.cooling_airflow_cfm *= unit_multiplier
-      hp_sys.additional_properties.cooling_capacity_sensible *= unit_multiplier
       hp_sys.heating_capacity *= unit_multiplier
       hp_sys.heating_airflow_cfm *= unit_multiplier
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?

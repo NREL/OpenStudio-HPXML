@@ -162,7 +162,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-research-features-onoff-thermostat-negative-value' => ['Expected OnOffThermostatDeadbandTemperature to be greater than 0'],
                             'hvac-research-features-onoff-thermostat-two-heat-pumps' => ['Expected at maximum one cooling system for each Building',
                                                                                          'Expected at maximum one heating system for each Building'],
-                            'hvac-shr-low' => ["The value '0.4' must be greater than '0.5'"],
                             'hvac-sizing-humidity-setpoint' => ['Expected ManualJInputs/HumiditySetpoint to be less than 1'],
                             'hvac-sizing-daily-temp-range' => ["Expected ManualJInputs/DailyTemperatureRange to be 'low' or 'medium' or 'high'"],
                             'hvac-negative-crankcase-heater-watts' => ['Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.0.'],
@@ -587,9 +586,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'hvac-mshp-not-var-speed'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless.xml')
         hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
-      when 'hvac-shr-low'
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.cooling_systems[0].cooling_shr = 0.4
       when 'hvac-sizing-humidity-setpoint'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.manualj_humidity_setpoint = 50

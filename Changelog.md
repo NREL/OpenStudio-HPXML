@@ -7,6 +7,7 @@ __New Features__
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.
   - Allows optional EER or EER2 inputs (`AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value`) for central air conditioners/heat pumps and mini-splits.
+  - Deprecates SHR inputs (e.g., `CoolingSensibleHeatFraction`); they are no longer used.
   - Updates to detailed performance datapoints:
     - **Breaking Change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
     - Detailed performance datapoints can now be specified for single stage and two stage equipment too.
@@ -35,6 +36,7 @@ __Bugfixes__
 - Fixes default shading coefficients for window solar screens and solar film.
 - Fixes `SolarFraction` documentation/error-checking for solar thermal systems; must now be <= 0.99.
 - Fixes whole house fans so that they are unavailable during vacancies.
+- Fixes error if there's a vented attic with zero roof pitch.
 - BuildResidentialHPXML measure: Fixes error when specifying a combi boiler as the water heater type and a *shared* boiler as the heating system type.
 - BuildResidentialScheduleFile measure: Fixes out-of-sync shifting of occupancy and end use schedule resulting in activities even when there is no occupancy.
 - BuildResidentialScheduleFile measure: Fixes a small bug in sink schedule generation resulting in more concentrated schedule.
