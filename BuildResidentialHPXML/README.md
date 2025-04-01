@@ -2374,7 +2374,7 @@ The type/efficiency of the second heating system. Efficiency is Rated AFUE or Pe
 
 - **Required:** ``true``
 
-- **Choices:** `Electric Baseboard, 100% Efficiency`, `Electric Portable Heater, 100% Efficiency`, `Fuel Boiler, 60% AFUE`, `Fuel Boiler, 76% AFUE`, `Fuel Boiler, 80% AFUE`, `Fuel Boiler, 90% AFUE`, `Fuel Boiler, 92.5% AFUE`, `Fuel Fireplace, 60% Efficiency`, `Fuel Fireplace, 100% Efficiency`, `Fuel Furnace, 60% AFUE`, `Fuel Furnace, 76% AFUE`, `Fuel Furnace, 80% AFUE`, `Fuel Furnace, 92.5% AFUE`, `Fuel Furnace, 100% AFUE`, `Fuel Wall Furnace, 60% AFUE`, `Fuel Wall Furnace, 68% AFUE`, `Fuel Floor Furnace, 60% AFUE`, `Fuel Floor Furnace, 68% AFUE`, `Stove, 60% Efficiency`, `Stove, 68% Efficiency`, `None`
+- **Choices:** `Electric Baseboard, 100% Efficiency`, `Electric Portable Heater, 100% Efficiency`, `Fuel Boiler, 60% AFUE`, `Fuel Boiler, 76% AFUE`, `Fuel Boiler, 80% AFUE`, `Fuel Boiler, 90% AFUE`, `Fuel Boiler, 92.5% AFUE`, `Fuel Boiler, 100% AFUE`, `Fuel Fireplace, 60% Efficiency`, `Fuel Fireplace, 100% Efficiency`, `Fuel Furnace, 60% AFUE`, `Fuel Furnace, 76% AFUE`, `Fuel Furnace, 80% AFUE`, `Fuel Furnace, 92.5% AFUE`, `Fuel Furnace, 100% AFUE`, `Fuel Wall Furnace, 60% AFUE`, `Fuel Wall Furnace, 68% AFUE`, `Fuel Floor Furnace, 60% AFUE`, `Fuel Floor Furnace, 68% AFUE`, `Stove, 60% Efficiency`, `Stove, 68% Efficiency`, `None`
 
 <br/>
 
