@@ -1082,7 +1082,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.06667, 1375)
+    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.06667, 1389)
 
     # Single Speed heat pump test
     args_hash = {}
@@ -1096,7 +1096,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.1, 1528)
+    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.1, 1605)
 
     # Ductless heat pump test
     args_hash = {}
@@ -1109,7 +1109,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 3453)
+    _check_advanced_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 3444)
 
     # Dual fuel heat pump test
     args_hash = {}
@@ -1124,7 +1124,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1229)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1260)
 
     # Separate backup heat pump test
     args_hash = {}
@@ -1139,7 +1139,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 2373.9, backup_fuel, 0.06667, 656)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 2373.9, backup_fuel, 0.06667, 663)
 
     # Small capacity test
     args_hash = {}
@@ -1158,7 +1158,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     supp_htg_power = 131.88
     backup_fuel = EPlus.fuel_type(heat_pump.backup_heating_fuel)
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 131.88, backup_fuel, 0.1, 40.6)
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 131.88, backup_fuel, 0.1, 42.9)
   end
 
   def test_mini_split_heat_pump_ductless
@@ -1682,10 +1682,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
+    [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
-    end
-    [0.7, 0.7].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
     end
   end
@@ -1698,10 +1696,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
+    [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
-    end
-    [0.70, 0.70].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
     end
 
@@ -1711,10 +1707,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
+    [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
-    end
-    [0.70, 0.70].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
     end
   end
@@ -1765,7 +1759,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
+    [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
   end
@@ -1778,7 +1772,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
+    [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
   end
@@ -1848,7 +1842,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    [0.749, 0.749].each_with_index do |rated_airflow_ratio, i|
+    [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
   end
@@ -1861,10 +1855,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
+    [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
-    end
-    [0.70, 0.70].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
     end
   end

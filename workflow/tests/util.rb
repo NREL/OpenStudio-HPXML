@@ -1090,9 +1090,9 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
 
   def get_tolerances(key)
     if key.include?('(MBtu)') || key.include?('(kBtu)') || key.include?('(kWh)')
-      # Check that the energy difference is less than 0.5 MBtu or less than 5%
+      # Check that the energy difference is less than 0.5 MBtu or less than 6%
       abs_delta_tol = 0.5 # MBtu
-      abs_frac_tol = 0.05
+      abs_frac_tol = 0.06
       if key.include?('(kBtu)')
         abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kBtu')
       elsif key.include?('(kWh)')

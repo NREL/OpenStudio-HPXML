@@ -1614,7 +1614,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.5, HPXML::HVACFanMotorTypePSC, nil, 0, 0, nil, 11.4, 9.79, 20.6, 1.0)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.5, HPXML::HVACFanMotorTypePSC, nil, 0, 0, nil, 11.4, 9.79, 21.3, 1.0)
   end
 
   def test_room_air_conditioners
@@ -1704,7 +1704,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer2 = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.18, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 18.05, 12.05, 17.9, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.18, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 18.05, 12.05, 18.6, 1.0)
 
     # Test defaults w/ ductless
     hpxml_bldg.cooling_systems[0].distribution_system.delete
@@ -2116,7 +2116,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].pan_heater_control_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.5, HPXML::HVACFanMotorTypePSC, nil, nil, 0, 0, nil, nil, nil, nil, 13.3, 13.0, 6.8, 25.9, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.5, HPXML::HVACFanMotorTypePSC, nil, nil, 0, 0, nil, nil, nil, nil, 13.3, 13.0, 6.8, 26.0, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous)
 
     # Test w/ detailed performance data
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
@@ -3335,7 +3335,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     vent_fan.cfis_control_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, 400.0, 305.4, 1.0, HPXML::CFISModeAirHandler, true, HPXML::CFISControlTypeOptimized)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, 360.0, 305.4, 1.0, HPXML::CFISModeAirHandler, true, HPXML::CFISControlTypeOptimized)
 
     # Test inputs not overridden by defaults w/ CFIS & supplemental fan
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
