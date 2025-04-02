@@ -1355,7 +1355,10 @@ class ReportSimulationOutputTest < Minitest::Test
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'none',
                   'user_output_variables' => 'Zone People Occupant Count, Zone People Total Heating Energy, Foo, Surface Construction Index' }
-    _annual_csv, _timeseries_csv, _run_log = _test_measure(args_hash)
+    annual_csv, timeseries_csv, run_log = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+    assert(!File.readlines(run_log).any? { |line| line.include?("Request for output variable 'Foo'") })
   end
 
   def test_timeseries_energyplus_output_meters
