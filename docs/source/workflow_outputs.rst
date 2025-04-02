@@ -335,6 +335,7 @@ Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Peak building electricity outputs are listed below.
+Values are calculated as the maximum energy use for any individual timestep divided by the timestep length.
 
   ==================================  =============================================================
   Type                                Notes
@@ -354,6 +355,7 @@ Peak Building Loads
 ~~~~~~~~~~~~~~~~~~~
 
 Peak building loads are listed below.
+Values are calculated as the maximum load for any individual timestep divided by the timestep length.
 
   =======================================  ==================================
   Type                                     Notes

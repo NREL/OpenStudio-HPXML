@@ -331,6 +331,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         args[key] = false
       end
+      args[:user_output_variables] = nil
+      args[:user_output_meters] = nil
     end
     return args
   end
