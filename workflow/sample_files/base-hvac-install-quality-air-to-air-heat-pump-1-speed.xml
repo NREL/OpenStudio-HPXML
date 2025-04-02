@@ -328,7 +328,6 @@
               <HeatingCapacity>36000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
-              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -350,10 +349,7 @@
                 <AirflowDefectRatio>-0.25</AirflowDefectRatio>
                 <ChargeDefectRatio>-0.25</ChargeDefectRatio>
                 <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
+                <HeatingCapacityFraction17F>0.6</HeatingCapacityFraction17F>
               </extension>
             </HeatPump>
           </HVACPlant>

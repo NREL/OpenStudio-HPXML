@@ -67,7 +67,6 @@ The ``in.xml`` output file will include autosized HVAC capacities as well as som
         <Units>SEER</Units>
         <Value>13.0</Value>
       </AnnualCoolingEfficiency>
-      <SensibleHeatFraction dataSource='software'>0.73</SensibleHeatFraction>
       <extension>
         <AirflowDefectRatio dataSource='software'>0.0</AirflowDefectRatio>
         <ChargeDefectRatio dataSource='software'>0.0</ChargeDefectRatio>

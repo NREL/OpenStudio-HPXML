@@ -331,7 +331,6 @@
               <HeatingCapacity>36000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>variable speed</CompressorType>
-              <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -350,10 +349,7 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
+                <HeatingCapacityFraction17F>0.6</HeatingCapacityFraction17F>
               </extension>
             </HeatPump>
             <HeatPump>
@@ -364,7 +360,6 @@
               <HeatingCapacity>36000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>variable speed</CompressorType>
-              <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -383,10 +378,7 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
+                <HeatingCapacityFraction17F>0.6</HeatingCapacityFraction17F>
               </extension>
             </HeatPump>
           </HVACPlant>

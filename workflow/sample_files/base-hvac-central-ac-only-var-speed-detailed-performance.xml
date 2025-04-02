@@ -337,7 +337,6 @@
                 <Units>SEER</Units>
                 <Value>17.5</Value>
               </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.78</SensibleHeatFraction>
               <CoolingDetailedPerformanceData>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>95.0</OutdoorTemperature>
@@ -346,6 +345,15 @@
                   <Efficiency>
                     <Units>COP</Units>
                     <Value>4.47</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>95.0</OutdoorTemperature>
+                  <Capacity>36000.0</Capacity>
+                  <CapacityDescription>nominal</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>2.64</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>

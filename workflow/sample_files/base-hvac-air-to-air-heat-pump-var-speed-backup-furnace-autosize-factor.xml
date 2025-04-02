@@ -342,7 +342,6 @@
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CompressorType>variable speed</CompressorType>
-              <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
               <BackupType>separate</BackupType>
               <BackupSystem idref='HeatingSystem1'/>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
@@ -356,10 +355,7 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
+                <HeatingCapacityFraction17F>0.6</HeatingCapacityFraction17F>
                 <CoolingAutosizingFactor>1.7</CoolingAutosizingFactor>
                 <HeatingAutosizingFactor>1.4</HeatingAutosizingFactor>
                 <CoolingAutosizingLimit>53000.0</CoolingAutosizingLimit>
