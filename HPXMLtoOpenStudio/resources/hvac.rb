@@ -1901,7 +1901,7 @@ module HVAC
     when HPXML::HVACCompressorTypeTwoStage
       return [0.7353, 1.0]
     when HPXML::HVACCompressorTypeVariableSpeed
-      return [0.3, 0.4, 0.6, 0.8, 1.0]
+      return [0.4802, 1.0]
     end
 
     fail 'Unable to get cooling capacity ratios.'
@@ -2096,7 +2096,7 @@ module HVAC
     when HPXML::HVACCompressorTypeTwoStage
       return [0.7374, 1.0]
     when HPXML::HVACCompressorTypeVariableSpeed
-      return [0.3, 0.4, 0.6, 0.8, 1.0]
+      return [0.4473, 1.0]
     end
 
     fail 'Unable to get cooling capacity ratios.'
@@ -2180,47 +2180,6 @@ module HVAC
 
   # TODO
   #
-  # @param compressor_type [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_cool_cfm_per_ton_gshp(compressor_type)
-    # cfm/ton of rated capacity
-    if compressor_type == HPXML::HVACCompressorTypeSingleStage
-      return [400.0]
-    elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
-      # Fixeme: Review this, calculated based on rated cfm / rated monimal capacity for ClimateMaster Model SE036
-      # 1100CFM - PART LOAD (Speed 1)
-      # 1200CFM - FULL LOAD (Speed 2)
-      return [470.4205, 377.3585]
-    elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      return [400.0] * 5
-    else
-      fail 'Compressor type not supported.'
-    end
-  end
-
-  # TODO
-  #
-  # @param compressor_type [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_heat_cfm_per_ton_gshp(compressor_type)
-    # cfm/ton of rated capacity
-    case compressor_type
-    when HPXML::HVACCompressorTypeSingleStage
-      return [400.0]
-    when HPXML::HVACCompressorTypeTwoStage
-      # Fixeme: Review this, calculated based on rated cfm / rated monimal capacity for ClimateMaster Model SE036
-      # 1100CFM - PART LOAD (Speed 1)
-      # 1200CFM - FULL LOAD (Speed 2)
-      return [397.5904, 319.8465]
-    when HPXML::HVACCompressorTypeVariableSpeed
-      return [400.0] * 5
-    else
-      fail 'Compressor type not supported.'
-    end
-  end
-
-  # TODO
-  #
   # @param heat_pump [TODO] TODO
   # @param hpxml_header [HPXML::Header] HPXML Header object
   # @return [nil]
@@ -2228,8 +2187,8 @@ module HVAC
     hp_ap = heat_pump.additional_properties
     hp_ap.cool_capacity_ratios = get_cool_capacity_ratios_gshp(heat_pump)
     hp_ap.heat_capacity_ratios = get_heat_capacity_ratios_gshp(heat_pump)
-    hp_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton_gshp(heat_pump.compressor_type)
-    hp_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton_gshp(heat_pump.compressor_type)
+    hp_ap.cool_rated_cfm_per_ton = [400.0] * hp_ap.cool_capacity_ratios.size
+    hp_ap.heat_rated_cfm_per_ton = [400.0] * hp_ap.heat_capacity_ratios.size
     hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
     hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
     hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
@@ -2346,51 +2305,44 @@ module HVAC
         # Cooling Curves
         # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
         # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-        # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+        # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
         # Using E+ rated conditions:
         # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
-        hp_ap.cool_cap_ft_spec = [[0.5590909317, 0.0201307804, 0.0003357362, -0.0032389461, 0.0000572853, -0.0000555322],
-                                  [0.5192391433, 0.0184369833, 0.0003265018, 0.0000000000, 0.0000000000, 0.0000000000],
-                                  [0.5192391433, 0.0184369833, 0.0003265018, 0.0000000000, 0.0000000000, 0.0000000000],
-                                  [0.5192391433, 0.0184369833, 0.0003265018, 0.0000000000, 0.0000000000, 0.0000000000],
-                                  [0.5174041770, 0.0185728459, 0.0003253145, 0.0007650541, -0.0000214820, -0.0000096113]]
-        hp_ap.cool_eir_ft_spec = [[0.4516259743, -0.0163370426, 0.0004668814, 0.0054853221, 0.0006820569, -0.0001026120],
-                                  [0.4623422306, -0.0165658652, 0.0004736142, 0.0036796400, 0.0007390693, -0.0001044123],
-                                  [0.5004884833, -0.0170374670, 0.0004857461, -0.0002137149, 0.0008347323, -0.0001048486],
-                                  [0.5442861673, -0.0172191819, 0.0004866580, -0.0003751004, 0.0007839877, -0.0000979527],
-                                  [0.5918102458, -0.0174105230, 0.0004872206, 0.0001100120, 0.0007091371, -0.0000899456]]
-        # FIXME: Placeholders
-        hp_ap.cool_cap_fflow_spec = [[1.0, 0.0, 0.0]] * 5
-        hp_ap.cool_eir_fflow_spec = [[1.0, 0.0, 0.0]] * 5
-        hp_ap.cool_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 5
-        hp_ap.cool_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 5
+        hp_ap.cool_cap_ft_spec = [[1.3397293008, -0.0474800765, 0.0021636831, 0.0055773535, -0.0002350114, -0.0002458509],
+                                  [1.2143128834, -0.0459226877, 0.0020331628, 0.0086998093, -0.0002669140, -0.0001763187]]
+        hp_ap.cool_eir_ft_spec = [[-0.0049682877, 0.0554193005, -0.0015790347, -0.0010670650, 0.0011493038, -0.0008236210],
+                                  [0.0569949694, 0.0527820535, -0.0015763180, 0.0077339260, 0.0008175629, -0.0007157989]]
+        hp_ap.cool_cap_fflow_spec = [[1.1092, -0.5299, 0.4312],
+                                     [0.9216, -0.1021, 0.1874]]
+        hp_ap.cool_eir_fflow_spec = [[2.2938, -2.2648, 0.9631],
+                                     [1.9175, -1.374, 0.4646]]
+        hp_ap.cool_cap_fwf_spec = [[1.0571, -0.1696, 0.1125],
+                                   [0.8681, 0.2108, -0.0789]]
+        hp_ap.cool_eir_fwf_spec = [[1.0354, 0.0413, -0.0767],
+                                   [1.2527, -0.3579, 0.1052]]
 
         # Heating Curves
         # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
         # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-        # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+        # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
         # Using E+ rated conditions:
         # Heating: Indoor air at 70F DB; Entering water temperature: 70F
-        hp_ap.heat_cap_ft_spec = [[1.0128891163, 0.0036035207, -0.0002241760, -0.0053926299, 0.0002969470, -0.0000169439],
-                                  [1.0285838226, 0.0032471729, -0.0002179489, 0.0000000000, 0.0000000000, 0.0000000000],
-                                  [1.0285838226, 0.0032471729, -0.0002179489, 0.0000000000, 0.0000000000, 0.0000000000],
-                                  [1.0285838226, 0.0032471729, -0.0002179489, 0.0000000000, 0.0000000000, 0.0000000000],
-                                  [1.0146710123, 0.0032631630, -0.0002174299, 0.0013359382, -0.0000318157, -0.0000015249]]
-        hp_ap.heat_eir_ft_spec = [[1.0157952250, 0.0244751587, 0.0003055485, -0.0194090369, 0.0000832607, -0.0006642242],
-                                  [1.0679580079, 0.0255670315, 0.0003176271, -0.0272059347, 0.0003059987, -0.0006984755],
-                                  [1.1268510194, 0.0267638655, 0.0003267871, -0.0342910400, 0.0004932978, -0.0007481587],
-                                  [1.1537773125, 0.0275830073, 0.0003319436, -0.0367006979, 0.0005403807, -0.0007854742],
-                                  [1.1697963854, 0.0281975115, 0.0003338538, -0.0370695484, 0.0005247111, -0.0008192941]]
-        # FIXME: Placeholders
-        hp_ap.heat_cap_fflow_spec = [[1.0, 0.0, 0.0]] * 5
-        hp_ap.heat_eir_fflow_spec = [[1.0, 0.0, 0.0]] * 5
-        hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 5
-        hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 5
-        hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr] * 5
-        # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
-        cool_cop_ratios = [1.285116034, 1.360219899, 1.298730993, 1.15020145, 1]
-        # FIXME: Review this, data looks suspicious
-        heat_cop_ratios = [0.95, 1.066666667, 1.112195122, 1.066666667, 1]
+        hp_ap.heat_cap_ft_spec = [[0.6955336002, -0.0028528869, -0.0000005012, 0.0201138223, -0.0000590002, -0.0000749701],
+                                  [0.6975737864, -0.0028810803, -0.0000005015, 0.0206468583, -0.0000891526, -0.0000733087]]
+        hp_ap.heat_eir_ft_spec = [[0.8755777079, 0.0309984461, 0.0001099592, -0.0174543325, 0.0001819203, -0.0004948405],
+                                  [0.7627294076, 0.0273612308, 0.0001023412, -0.0145638547, 0.0001886431, -0.0003647958]]
+        hp_ap.heat_cap_fflow_spec = [[0.8676, 0.1122, 0.0195],
+                                     [0.9498, -0.0298, 0.0812]]
+        hp_ap.heat_eir_fflow_spec = [[1.4426, -0.4465, 0.0064],
+                                     [1.1158, 0.282, -0.4071]]
+        hp_ap.heat_cap_fwf_spec = [[0.8576, 0.1653, -0.0229],
+                                   [0.7452, 0.3922, -0.1374]]
+        hp_ap.heat_eir_fwf_spec = [[1.3488, -0.6335, 0.2846],
+                                   [1.0679, -0.0926, 0.0247]]
+        hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr] * 2
+        # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
+        cool_cop_ratios = [1.059467645, 1.0]
+        heat_cop_ratios = [1.15012987, 1.0]
       end
     end
 
