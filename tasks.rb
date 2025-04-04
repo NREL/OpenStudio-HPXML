@@ -1853,6 +1853,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 heat_pump_fuel: HPXML::FuelTypeElectricity,
                                 heating_capacity: 4800,
                                 cooling_capacity: 4800,
+                                compressor_type: HPXML::HVACCompressorTypeSingleStage,
                                 backup_type: HPXML::HeatPumpBackupTypeIntegrated,
                                 backup_heating_fuel: HPXML::FuelTypeElectricity,
                                 backup_heating_capacity: 3412,
