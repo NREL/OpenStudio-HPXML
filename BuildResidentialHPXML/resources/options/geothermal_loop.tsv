@@ -1,0 +1,13 @@
+Option Name	geothermal_loop_configuration	geothermal_loop_borefield_configuration	geothermal_loop_loop_flow	geothermal_loop_boreholes_count	geothermal_loop_boreholes_length	geothermal_loop_boreholes_spacing	geothermal_loop_boreholes_diameter	geothermal_loop_grout_type	geothermal_loop_pipe_type	geothermal_loop_pipe_diameter
+"Vertical Loop, Lopsided U Borefield, Detailed"	vertical	Lopsided U	10	9	315	16.4	5.9	standard	standard	"1\"" pipe"
+"Vertical Loop, Rectangular Borefield, Detailed"	vertical	Rectangle	1	2	100	3	5	thermally enhanced	thermally enhanced	"1\"" pipe"
+"Vertical Loop, Default, Specified Loop Flow"	vertical		1							
+"Vertical Loop, Default, Specified Borehole Count"	vertical			2						
+"Vertical Loop, Default, Specified Borehole Length"	vertical				300					
+"Vertical Loop, Default, Specified Loop Flow and Borehole Count"	vertical		2	3						
+"Vertical Loop, Default, Specified Borehole Count and Length"	vertical			4	400					
+"Vertical Loop, Default, Specified Loop Flow and Borehole Length"	vertical		5		450					
+"Vertical Loop, Default, Thermally Enhanced Grout"	vertical							thermally enhanced		
+"Vertical Loop, Default, Thermally Enhanced Pipe"	vertical								thermally enhanced	
+"Vertical Loop, Default"	vertical									
+None	none									
