@@ -1348,82 +1348,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
     args << arg
 
-    geothermal_loop_configuration_choices = OpenStudio::StringVector.new
-    geothermal_loop_configuration_choices << Constants::None
-    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationDiagonal
-    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationHorizontal
-    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationOther
-    geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationVertical
+    geothermal_loop_choices = get_option_names('geothermal_loop.tsv')
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_configuration', geothermal_loop_configuration_choices, false)
-    arg.setDisplayName('Geothermal Loop: Configuration')
-    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
-    args << arg
-
-    geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
-    valid_bore_configs = HVACSizing.get_geothermal_loop_valid_configurations
-    valid_bore_configs.keys.each do |valid_bore_config|
-      geothermal_loop_borefield_configuration_choices << valid_bore_config
-    end
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_borefield_configuration', geothermal_loop_borefield_configuration_choices, false)
-    arg.setDisplayName('Geothermal Loop: Borefield Configuration')
-    arg.setDescription("Borefield configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_loop_flow', false)
-    arg.setDisplayName('Geothermal Loop: Loop Flow')
-    arg.setDescription("Water flow rate through the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    arg.setUnits('gpm')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geothermal_loop_boreholes_count', false)
-    arg.setDisplayName('Geothermal Loop: Boreholes Count')
-    arg.setDescription("Number of boreholes. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    arg.setUnits('#')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_length', false)
-    arg.setDisplayName('Geothermal Loop: Boreholes Length')
-    arg.setDescription("Average length of each borehole (vertical). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    arg.setUnits('ft')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_spacing', false)
-    arg.setDisplayName('Geothermal Loop: Boreholes Spacing')
-    arg.setDescription("Distance between bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    arg.setUnits('ft')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_diameter', false)
-    arg.setDisplayName('Geothermal Loop: Boreholes Diameter')
-    arg.setDescription("Diameter of bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    arg.setUnits('in')
-    args << arg
-
-    geothermal_loop_grout_or_pipe_type_choices = OpenStudio::StringVector.new
-    geothermal_loop_grout_or_pipe_type_choices << HPXML::GeothermalLoopGroutOrPipeTypeStandard
-    geothermal_loop_grout_or_pipe_type_choices << HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_grout_type', geothermal_loop_grout_or_pipe_type_choices, false)
-    arg.setDisplayName('Geothermal Loop: Grout Type')
-    arg.setDescription("Grout type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_pipe_type', geothermal_loop_grout_or_pipe_type_choices, false)
-    arg.setDisplayName('Geothermal Loop: Pipe Type')
-    arg.setDescription("Pipe type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    args << arg
-
-    geothermal_loop_pipe_diameter_choices = OpenStudio::StringVector.new
-    geothermal_loop_pipe_diameter_choices << '3/4" pipe'
-    geothermal_loop_pipe_diameter_choices << '1" pipe'
-    geothermal_loop_pipe_diameter_choices << '1-1/4" pipe'
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_pipe_diameter', geothermal_loop_pipe_diameter_choices, false)
-    arg.setDisplayName('Geothermal Loop: Pipe Diameter')
-    arg.setDescription("Pipe diameter of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
-    arg.setUnits('in')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop', geothermal_loop_choices, false)
+    arg.setDisplayName('Geothermal Loop')
+    arg.setDescription("The geothermal loop configuration (only #{HPXML::GeothermalLoopLoopConfigurationVertical} is currently supported), borefield configuration, grout/pipe type, and other numerical inputs that specify a detailed geothermal loop.")
     args << arg
 
     heating_system_2_choices = get_option_names('heating_system_2.tsv')
@@ -3381,6 +3310,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @return [Array<String>] array of warnings
   def argument_warnings(args)
     warnings = []
+
+    # need to update the args hash w/ detailed geothermal loop here 
+    # b.c. argument_warnings is called before argument_errors in validate_arguments
+    get_option_properties(args, 'geothermal_loop.tsv', args[:geothermal_loop])
 
     max_uninsulated_floor_rvalue = 6.0
     max_uninsulated_ceiling_rvalue = 3.0

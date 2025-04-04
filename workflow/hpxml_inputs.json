@@ -2484,16 +2484,7 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "geothermal_loop_configuration": "vertical",
-    "geothermal_loop_borefield_configuration": "Lopsided U",
-    "geothermal_loop_loop_flow": 10.0,
-    "geothermal_loop_boreholes_count": 9,
-    "geothermal_loop_boreholes_length": 315.0,
-    "geothermal_loop_boreholes_spacing": 16.4,
-    "geothermal_loop_boreholes_diameter": 5.9,
-    "geothermal_loop_grout_type": "standard",
-    "geothermal_loop_pipe_type": "standard",
-    "geothermal_loop_pipe_diameter": "1\" pipe",
+    "geothermal_loop": "Vertical Loop, Lopsided U Borefield, Detailed",
     "site_ground_diffusivity": 0.03,
     "site_soil_and_moisture_type": "sand, dry"
   },
