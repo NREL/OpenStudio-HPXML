@@ -3648,14 +3648,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # Create HPXML file
     hpxml_path = args[:hpxml_path]
     unless (Pathname.new hpxml_path).absolute?
-      hpxml_path = File.expand_path(hpxml_path)
+      hpxml_path = File.join(runner.workflow.absoluteRootDir.to_s, hpxml_path)
     end
 
     # Existing HPXML File
     if not args[:existing_hpxml_path].nil?
       existing_hpxml_path = args[:existing_hpxml_path]
       unless (Pathname.new existing_hpxml_path).absolute?
-        existing_hpxml_path = File.expand_path(existing_hpxml_path)
+        existing_hpxml_path = File.join(runner.workflow.absoluteRootDir.to_s, existing_hpxml_path)
       end
     end
 
