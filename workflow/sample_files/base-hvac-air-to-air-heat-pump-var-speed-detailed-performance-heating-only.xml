@@ -352,6 +352,44 @@
                 <Units>HSPF</Units>
                 <Value>9.5</Value>
               </AnnualHeatingEfficiency>
+              <CoolingDetailedPerformanceData>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>95.0</OutdoorTemperature>
+                  <Capacity>11900.0</Capacity>
+                  <CapacityDescription>minimum</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>4.47</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>95.0</OutdoorTemperature>
+                  <Capacity>36000.0</Capacity>
+                  <CapacityDescription>maximum</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>2.64</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>82.0</OutdoorTemperature>
+                  <Capacity>13400.0</Capacity>
+                  <CapacityDescription>minimum</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>6.33</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>82.0</OutdoorTemperature>
+                  <Capacity>40500.0</Capacity>
+                  <CapacityDescription>maximum</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>3.46</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+              </CoolingDetailedPerformanceData>
               <HeatingDetailedPerformanceData>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>47.0</OutdoorTemperature>
