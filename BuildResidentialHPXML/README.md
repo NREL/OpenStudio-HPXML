@@ -2235,133 +2235,16 @@ The auto-sizing methodology to use when the heat pump backup capacity is not pro
 
 <br/>
 
-**Geothermal Loop: Configuration**
+**Geothermal Loop**
 
-Configuration of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.
+The geothermal loop configuration (only vertical is currently supported), borefield configuration, grout/pipe type, and other numerical inputs that specify a detailed geothermal loop.
 
-- **Name:** ``geothermal_loop_configuration``
+- **Name:** ``geothermal_loop``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `none`, `vertical`
-
-<br/>
-
-**Geothermal Loop: Borefield Configuration**
-
-Borefield configuration of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_borefield_configuration``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `Rectangle`, `Open Rectangle`, `C`, `L`, `U`, `Lopsided U`
-
-<br/>
-
-**Geothermal Loop: Loop Flow**
-
-Water flow rate through the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_loop_flow``
-- **Type:** ``Double``
-
-- **Units:** ``gpm``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Boreholes Count**
-
-Number of boreholes. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_boreholes_count``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Boreholes Length**
-
-Average length of each borehole (vertical). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_boreholes_length``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Boreholes Spacing**
-
-Distance between bores. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_boreholes_spacing``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Boreholes Diameter**
-
-Diameter of bores. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_boreholes_diameter``
-- **Type:** ``Double``
-
-- **Units:** ``in``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Grout Type**
-
-Grout type of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_grout_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `standard`, `thermally enhanced`
-
-<br/>
-
-**Geothermal Loop: Pipe Type**
-
-Pipe type of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_pipe_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `standard`, `thermally enhanced`
-
-<br/>
-
-**Geothermal Loop: Pipe Diameter**
-
-Pipe diameter of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_pipe_diameter``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `3/4" pipe`, `1" pipe`, `1-1/4" pipe`
+- **Choices:** `Vertical Loop, Lopsided U Borefield, Detailed`, `Vertical Loop, Rectangular Borefield, Detailed`, `Vertical Loop, Default, Specified Loop Flow`, `Vertical Loop, Default, Specified Borehole Count`, `Vertical Loop, Default, Specified Borehole Length`, `Vertical Loop, Default, Specified Loop Flow and Borehole Count`, `Vertical Loop, Default, Specified Borehole Count and Length`, `Vertical Loop, Default, Specified Loop Flow and Borehole Length`, `Vertical Loop, Default, Thermally Enhanced Grout`, `Vertical Loop, Default, Thermally Enhanced Pipe`, `Vertical Loop, Default`, `None`
 
 <br/>
 

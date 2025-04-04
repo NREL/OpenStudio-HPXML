@@ -3311,8 +3311,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def argument_warnings(args)
     warnings = []
 
-    # need to update the args hash w/ detailed geothermal loop here 
-    # b.c. argument_warnings is called before argument_errors in validate_arguments
+    # need to update the args hash w/ detailed geothermal loop info here
+    # b.c. argument_warnings is called BEFORE argument_errors in validate_arguments
+    # and argument_warnings requires the detailed geothermal loop info
     get_option_properties(args, 'geothermal_loop.tsv', args[:geothermal_loop])
 
     max_uninsulated_floor_rvalue = 6.0
