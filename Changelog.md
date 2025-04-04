@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- Updates to OpenStudio 3.10/EnergyPlus 25.1.
 - HVAC modeling updates:
   - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps.
 - Electric vehicle enhancements:
