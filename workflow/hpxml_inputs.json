@@ -2151,10 +2151,6 @@
     "heat_pump": "Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance",
     "additional_properties": "HeatPump=YORK HMH7|HeatPumpAHRICert#=206921308"
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-heating-only.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml",
-    "heat_pump": "Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance"
-  },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml",
     "heat_pump": "Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance"
@@ -2707,7 +2703,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "PTAC, EER 10.7"
+    "cooling_system": "Packaged Terminal AC, EER 10.7"
   },
   "sample_files/base-hvac-ptac-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
@@ -2721,13 +2717,13 @@
   },
   "sample_files/base-hvac-ptac-with-heating-electricity.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
-    "cooling_system": "PTAC, EER 10.7, Electric Heating",
+    "cooling_system": "Packaged Terminal AC, EER 10.7, Electric Heating",
     "cooling_system_integrated_heating_system_capacity": 36000,
     "cooling_system_integrated_heating_system_fraction_heat_load_served": 1
   },
   "sample_files/base-hvac-ptac-with-heating-natural-gas.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
-    "cooling_system": "PTAC, EER 10.7, 80% AFUE Gas Heating",
+    "cooling_system": "Packaged Terminal AC, EER 10.7, 80% AFUE Gas Heating",
     "cooling_system_integrated_heating_system_capacity": 36000,
     "cooling_system_integrated_heating_system_fraction_heat_load_served": 1
   },
@@ -3672,8 +3668,7 @@
     "simulation_control_timestep": 30
   },
   "sample_files/base-zones-spaces.xml": {
-    "parent_hpxml": "sample_files/base-enclosure-garage.xml",
-    "cooling_system": "Central AC, SEER 13"
+    "parent_hpxml": "sample_files/base-enclosure-garage.xml"
   },
   "sample_files/base-zones-spaces-multiple.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
@@ -3681,7 +3676,6 @@
     "heating_system_fraction_heat_load_served": 0.5,
     "cooling_system_cooling_capacity": 12000,
     "cooling_system_fraction_cool_load_served": 0.5,
-    "cooling_system": "Central AC, SEER 13",
     "ducts_supply_leakage_to_outside_value": 37.5,
     "ducts_return_leakage_to_outside_value": 12.5,
     "ducts_supply_surface_area": 75,
