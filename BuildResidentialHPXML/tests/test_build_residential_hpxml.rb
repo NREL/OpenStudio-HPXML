@@ -499,7 +499,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump_fraction_cool_load_served'] = 1
       args['heat_pump_backup'] = 'Integrated, Electricity, 100% Efficiency'
       args['heat_pump_backup_heating_capacity'] = 36000.0
-      args['geothermal_loop_configuration'] = Constants::None
+      args['geothermal_loop'] = 'None'
       args['hvac_control_heating_weekday_setpoint'] = 68
       args['hvac_control_heating_weekend_setpoint'] = 68
       args['hvac_control_cooling_weekday_setpoint'] = 78
@@ -1281,7 +1281,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
     when 'warning-geothermal-loop-but-no-gshp.xml'
-      args['geothermal_loop_configuration'] = HPXML::GeothermalLoopLoopConfigurationVertical
+      args['geothermal_loop'] = 'Vertical Loop, Default'
     end
   end
 
