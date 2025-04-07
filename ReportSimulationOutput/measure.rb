@@ -221,7 +221,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_detailed_zone_conditions', false)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_zone_conditions', false)
     arg.setDisplayName('Generate Timeseries Output: Detailed Zone Conditions')
     arg.setDescription('Generates timeseries detailed temperatures and humidities for each thermal zone.')
     arg.setDefaultValue(false)
@@ -534,7 +534,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Detailed air condition outputs (timeseries only)
-    if args[:include_timeseries_detailed_zone_conditions]
+    if args[:include_timeseries_zone_conditions]
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Air Relative Humidity,#{args[:timeseries_frequency]};").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Air Humidity Ratio,#{args[:timeseries_frequency]};").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Dewpoint Temperature,#{args[:timeseries_frequency]};").get
@@ -1203,7 +1203,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Zone detailed conditions
-    if args[:include_timeseries_detailed_zone_conditions]
+    if args[:include_timeseries_zone_conditions]
       def sanitize_name(name)
         return name.gsub('_', ' ').split.map(&:capitalize).join(' ')
       end
