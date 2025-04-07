@@ -703,13 +703,21 @@ module HVAC
         speed.setReferenceUnitWasteHeatFractionofInputPowerAtRatedConditions(0.0)
         clg_coil.addSpeed(speed)
       end
-      # TODO: Curve placeholder
-      plf_fplr_curve = Model.add_curve_quadratic(
-        model,
-        name: 'Heat-PLF-fPLR',
-        coeff: [1, 0, 0],
-        min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
-      )
+      if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+        plf_fplr_curve = Model.add_curve_quadratic(
+          model,
+          name: 'Heat-PLF-fPLR',
+          coeff: [1, 0, 0],
+          min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+        )
+      else
+        plf_fplr_curve = Model.add_curve_cubic(
+          model,
+          name: 'Heat-PLF-fPLR',
+          coeff: [0.4603, 1.6416, -1.8588, 0.7605],
+          min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+        )
+      end
       htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.new(model, plf_fplr_curve)
       htg_coil.setName(obj_name + ' htg coil')
       htg_coil.setNominalSpeedLevel(num_speeds)
@@ -766,7 +774,7 @@ module HVAC
         speed.setReferenceUnitRatedAirFlow(UnitConversions.convert(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * hp_ap.heat_capacity_ratios[i] * hp_ap.heat_rated_cfm_per_ton[i], 'cfm', 'm^3/s'))
         # FIXME: Please Review
         # The catalog Water flow rates are 6.7GPM and 9.0GPM at each speed, the ratio is close to capacity ratios, and our default loop_flow calculation is based on capacity, so I used capacity ratios here.
-        speed_wfr = heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed ? UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') : UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.heat_capacity_ratios[i]
+        speed_wfr = UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.heat_capacity_ratios[i]
         speed.setReferenceUnitRatedWaterFlowRate(speed_wfr) # Set to maximum then actuate by EMS to avoid Node mass flow rate issue
         speed.setReferenceUnitWasteHeatFractionofInputPowerAtRatedConditions(0.0)
         htg_coil.addSpeed(speed)
@@ -883,7 +891,7 @@ module HVAC
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
     add_pump_power_ems_program(model, pump, air_loop_unitary, heat_pump)
-    add_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil, heat_pump, hpxml_header)
+    # add_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil, heat_pump, hpxml_header)
 
     if heat_pump.is_shared_system
       # Shared pump power per ANSI/RESNET/ICC 301-2022 Section 4.4.5.1 (pump runs 8760)
@@ -2316,10 +2324,10 @@ module HVAC
                                      [0.9216, -0.1021, 0.1874]]
         hp_ap.cool_eir_fflow_spec = [[2.2938, -2.2648, 0.9631],
                                      [1.9175, -1.374, 0.4646]]
-        hp_ap.cool_cap_fwf_spec = [[1.0571, -0.1696, 0.1125],
-                                   [0.8681, 0.2108, -0.0789]]
-        hp_ap.cool_eir_fwf_spec = [[1.0354, 0.0413, -0.0767],
-                                   [1.2527, -0.3579, 0.1052]]
+        hp_ap.cool_cap_fwf_spec = [[1.0386, -0.2037, 0.1651],
+                                   [0.8606, 0.2687, -0.1293]]
+        hp_ap.cool_eir_fwf_spec = [[1.066, 0.052, -0.118],
+                                   [1.2961, -0.4762, 0.18]]
 
         # Heating Curves
         # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
@@ -2335,10 +2343,10 @@ module HVAC
                                      [0.9498, -0.0298, 0.0812]]
         hp_ap.heat_eir_fflow_spec = [[1.4426, -0.4465, 0.0064],
                                      [1.1158, 0.282, -0.4071]]
-        hp_ap.heat_cap_fwf_spec = [[0.8576, 0.1653, -0.0229],
-                                   [0.7452, 0.3922, -0.1374]]
-        hp_ap.heat_eir_fwf_spec = [[1.3488, -0.6335, 0.2846],
-                                   [1.0679, -0.0926, 0.0247]]
+        hp_ap.heat_cap_fwf_spec = [[0.8364, 0.197, -0.0333],
+                                   [0.727, 0.55, -0.277]]
+        hp_ap.heat_eir_fwf_spec = [[1.3491, -0.7744, 0.4253],
+                                   [1.0833, -0.1351, 0.0517]]
         hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr] * 2
         # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
         cool_cop_ratios = [1.059467645, 1.0]
