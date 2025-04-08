@@ -631,13 +631,21 @@ module HVAC
       htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
     elsif [HPXML::AdvancedResearchGeothermalModelTypeAdvanced].include? hpxml_header.geothermal_model_type
       num_speeds = hp_ap.cool_capacity_ratios.size
-      # TODO: Curve placeholder
-      plf_fplr_curve = Model.add_curve_quadratic(
-        model,
-        name: 'Cool-PLF-fPLR',
-        coeff: [1, 0, 0],
-        min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
-      )
+      if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+        plf_fplr_curve = Model.add_curve_quadratic(
+          model,
+          name: 'Cool-PLF-fPLR',
+          coeff: [1, 0, 0],
+          min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+        )
+      else
+        plf_fplr_curve = Model.add_curve_cubic(
+          model,
+          name: 'Cool-PLF-fPLR',
+          coeff: [0.4603, 1.6416, -1.8588, 0.7605],
+          min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+        )
+      end
       clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.new(model, plf_fplr_curve)
       clg_coil.setName(obj_name + ' clg coil')
       clg_coil.setNominalTimeforCondensatetoBeginLeavingtheCoil(1000)
