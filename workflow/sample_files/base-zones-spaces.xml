@@ -690,9 +690,6 @@
                 <Units>SEER</Units>
                 <Value>13.0</Value>
               </AnnualCoolingEfficiency>
-              <extension>
-                <CrankcaseHeaterPowerWatts>50.0</CrankcaseHeaterPowerWatts>
-              </extension>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>

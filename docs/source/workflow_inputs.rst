@@ -2172,7 +2172,7 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
          If there is a cooling system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanMotorType.
   .. [#] If FanMotorType is not provided and if there is a cooling system attached to the DistributionSystem, defaults to "PSC" if the attached cooling system CompressorType is "single stage", else "BPM"; If there's no cooling system attached, defaults to "PSC" if AFUE <= 0.9, else "BPM".
   .. [#] If there is a cooling system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
-  .. [#] If FanPowerWattsPerCFM is not provided, defaulted to 0 W/cfm if gravity distribution system, else defaults to 0.5 W/cfm if FanMotorType is "PSC", else 0.375 W/cfm if FanMotorType is "BPM".
+  .. [#] If FanPowerWattsPerCFM not provided, defaults to 0 W/cfm if gravity distribution system, else 0.5 W/cfm if FanMotorType is "PSC", else 0.375 W/cfm if FanMotorType is "BPM".
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
 
@@ -2499,7 +2499,7 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
          If there is a heating system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanMotorType.
   .. [#] If FanMotorType is not provided, defaults to using attached furnace FanMotorType if available, else "PSC" if CompressorType is "single stage", else "BPM".
   .. [#] If there is a heating system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
-  .. [#] If FanPowerWattsPerCFM not provided, defaults to using attached furnace W/cfm if available, else defaulted to 0.5 W/cfm if FanMotorType is "PSC", else 0.375 W/cfm if FanMotorType is "BPM".
+  .. [#] If FanPowerWattsPerCFM not provided, defaults to using attached furnace W/cfm if available, else 0.5 W/cfm if FanMotorType is "PSC", else 0.375 W/cfm if FanMotorType is "BPM".
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
@@ -2649,7 +2649,7 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh  > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                    No        <none>          Cooling detailed performance data [#]_
   ``extension/FanMotorType``                                        string            See [#]_                 No        BPM             Blower fan model type
-  ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0                     No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0 [#]_                No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                                  double    frac    >= -0.9, <= 9            No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac    >= -0.9, <= 9            No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double    W       >= 0                     No        See [#]_        Crankcase heater power
@@ -2675,6 +2675,8 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] FanMotorType choices are "PSC" (Permanent Split Capacitor) and "BPM" (Brushless Permanent Magnet).
+         If there is a heating system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanMotorType.
+  .. [#] If there is a heating system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
   .. [#] FanPowerWattsPerCFM defaults to 0.07 W/cfm for ductless systems and 0.18 W/cfm for ducted systems.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          A non-zero airflow defect can only be applied for systems attached to a distribution system.
