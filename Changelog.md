@@ -2,15 +2,16 @@
 
 __New Features__
 - HVAC modeling updates:
-  - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps.
-  - **Breaking Change**: Replaces `HeatingCapacityRetention[Fraction | Temperature]` with `HeatingCapacityFraction17F`.
+  - **Breaking change**: `CompressorType` required for central and mini-split air conditioners and heat pumps.
+  - **Breaking change**: Replaces `HeatingCapacityRetention[Fraction | Temperature]` with `HeatingCapacityFraction17F`.
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.
   - Allows optional EER or EER2 inputs (`AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value`) for central air conditioners/heat pumps and mini-splits.
   - Deprecates SHR inputs (e.g., `CoolingSensibleHeatFraction`); they are no longer used.
+  - Added optional `extension/FanMotorType`, changed rated fan power (w/cfm) and measured FanPowerWattsPerCFM assumptions to be based on fan motor type.
   - Updates design airflow rates to use cfm/ton assumptions rather than Manual S-based approach.
   - Updates to detailed performance datapoints:
-    - **Breaking Change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
+    - **Breaking change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
     - Detailed performance datapoints can now be specified for single stage and two stage equipment too.
     - Adds more error-checking to ensure appropriate data inputs.
 - Electric vehicle enhancements:
@@ -88,9 +89,6 @@ __New Features__
   - Optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed AC/ASHP systems and time-based realistic staging for two speed AC/ASHP systems.
   - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
-- RESNET HVAC modeling appendix:
-  - Added optional `extension/FanMotorType`, changed rated fan power (w/cfm) and measured FanPowerWattsPerCFM assumptions to be based on fan motor type.
-  - Updated the fan power calculation at each speed to be based on fan model type and whether ducted.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaced `slab_under_width` and `slab_perimeter_depth` arguments with `slab_under_insulation_width` and `slab_perimeter_insulation_depth`
   - **Breaking change**: Replaced `schedules_vacancy_periods`, `schedules_power_outage_periods`, and `schedules_power_outage_periods_window_natvent_availability` arguments with `schedules_unavailable_period_types`, `schedules_unavailable_period_dates`, and `schedules_unavailable_period_window_natvent_availabilities`; this improves flexibility for handling more unavailable period types.
