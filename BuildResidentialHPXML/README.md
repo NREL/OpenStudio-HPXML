@@ -254,7 +254,7 @@ The soil and moisture type, used to inform ground conductivity and diffusivity. 
 
 - **Required:** ``false``
 
-- **Choices:** `Unknown`, `Clay, Dry`, `Clay, Mixed`, `Clay, Wet`, `Gravel, Dry`, `Gravel, Mixed`, `Gravel, Wet`, `Loam, Dry`, `Loam, Mixed`, `Loam, Wet`, `Sand, Dry`, `Sand, Mixed`, `Sand, Wet`, `Silt, Dry`, `Silt, Mixed`, `Silt, Wet`, `0.5 Conductivity`, `0.8 Conductivity`, `1.1 Conductivity`, `1.4 Conductivity`, `1.7 Conductivity`, `2.0 Conductivity`, `2.3 Conductivity`, `2.6 Conductivity`
+- **Choices:** `Unknown`, `Clay, Dry`, `Clay, Mixed`, `Clay, Wet`, `Gravel, Dry`, `Gravel, Mixed`, `Gravel, Wet`, `Loam, Dry`, `Loam, Mixed`, `Loam, Wet`, `Sand, Dry`, `Sand, Mixed`, `Sand, Wet`, `Silt, Dry`, `Silt, Mixed`, `Silt, Wet`, `0.5 Conductivity`, `0.8 Conductivity`, `1.1 Conductivity`, `1.4 Conductivity`, `1.44 Conductivity`, `1.7 Conductivity`, `2.0 Conductivity`, `2.3 Conductivity`, `2.6 Conductivity`
 
 <br/>
 
