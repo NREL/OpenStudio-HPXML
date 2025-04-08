@@ -672,7 +672,7 @@ module HVAC
           model,
           name: "Cool-CAP-fWF#{i + 1}",
           coeff: hp_ap.cool_cap_fwf_spec[i],
-          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+          min_x: 0.45, max_x: 2, min_y: 0, max_y: 2
         )
         eir_ft_curve = Model.add_curve_biquadratic(
           model,
@@ -690,7 +690,7 @@ module HVAC
           model,
           name: "Cool-EIR-fWF#{i + 1}",
           coeff: hp_ap.cool_eir_fwf_spec[i],
-          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+          min_x: 0.45, max_x: 2, min_y: 0, max_y: 2
         )
         # Recoverable heat modifier as a function of indoor wet-bulb and water entering temperatures.
         waste_heat_ft = Model.add_curve_biquadratic(
@@ -747,7 +747,7 @@ module HVAC
           model,
           name: "Heat-CAP-fWF#{i + 1}",
           coeff: hp_ap.heat_cap_fwf_spec[i],
-          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+          min_x: 0.45, max_x: 2, min_y: 0, max_y: 2
         )
         eir_ft_curve = Model.add_curve_biquadratic(
           model,
@@ -765,7 +765,7 @@ module HVAC
           model,
           name: "Heat-EIR-fWF#{i + 1}",
           coeff: hp_ap.heat_eir_fwf_spec[i],
-          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+          min_x: 0.45, max_x: 2, min_y: 0, max_y: 2
         )
         # Recoverable heat modifier as a function of indoor wet-bulb and water entering temperatures.
         waste_heat_ft = Model.add_curve_biquadratic(
@@ -2282,12 +2282,10 @@ module HVAC
                                      [0.8551, 0.1688, -0.0238]]
         hp_ap.cool_eir_fflow_spec = [[0.7931, 0.2623, -0.0552],
                                      [0.8241, 0.1523, 0.0234]]
-        # hp_ap.cool_cap_fwf_spec = [[0.8387, 0.2903, -0.129],
-        #                           [0.815, 0.325, -0.14]]
-        # hp_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
-        #                           [1.5872, -1.055, 0.4678]]
-        hp_ap.cool_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 2
-        hp_ap.cool_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 2
+        hp_ap.cool_cap_fwf_spec = [[0.8387, 0.2903, -0.129],
+                                   [0.815, 0.325, -0.14]]
+        hp_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
+                                   [1.5872, -1.055, 0.4678]]
 
         # Heating Curves
         # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
@@ -2303,12 +2301,10 @@ module HVAC
                                      [0.8264, 0.1593, 0.0143]]
         hp_ap.heat_eir_fflow_spec = [[1.2006, -0.1943, -0.0062],
                                      [1.2568, -0.2856, 0.0288]]
-        # hp_ap.heat_cap_fwf_spec = [[0.7112, 0.5027, -0.2139],
-        #                           [0.769, 0.399, -0.168]]
-        # hp_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
-        #                           [1.1679, -0.3215, 0.1535]]
-        hp_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]] * 2
-        hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]] * 2
+        hp_ap.heat_cap_fwf_spec = [[0.7112, 0.5027, -0.2139],
+                                   [0.769, 0.399, -0.168]]
+        hp_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
+                                   [1.1679, -0.3215, 0.1535]]
         hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr] * 2
         # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
         cool_cop_ratios = [1.102827763, 1.0]
@@ -2702,17 +2698,17 @@ module HVAC
     )
     pump_program.addLine("If #{htg_load_sensor.name} > 0.0 && #{clg_load_sensor.name} > 0.0") # Heating loads
     pump_program.addLine("  Set estimated_plr = (@ABS #{htg_load_sensor.name}) / #{htg_coil.ratedHeatingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
-    pump_program.addLine("  Set estimated_mfr = estimated_plr * #{htg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel} * 1000.0")
-    pump_program.addLine("  If estimated_mfr < #{htg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
-    pump_program.addLine("    Set #{pump_mfr_act.name} = estimated_mfr")
+    pump_program.addLine("  Set estimated_vfr = estimated_plr * #{htg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
+    pump_program.addLine("  If estimated_vfr < #{htg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
+    pump_program.addLine("    Set #{pump_mfr_act.name} = estimated_vfr * 1000.0")
     pump_program.addLine('  Else')
     pump_program.addLine("    Set #{pump_mfr_act.name} = NULL")
     pump_program.addLine('  EndIf')
     pump_program.addLine("ElseIf #{htg_load_sensor.name} < 0.0 && #{clg_load_sensor.name} < 0.0") # Cooling loads
     pump_program.addLine("  Set estimated_plr = (@ABS #{clg_load_sensor.name}) / #{clg_coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
-    pump_program.addLine("  Set estimated_mfr = estimated_plr * #{clg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel} * 1000.0")
-    pump_program.addLine("  If estimated_mfr < #{clg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
-    pump_program.addLine("    Set #{pump_mfr_act.name} = estimated_mfr")
+    pump_program.addLine("  Set estimated_vfr = estimated_plr * #{clg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
+    pump_program.addLine("  If estimated_vfr < #{clg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
+    pump_program.addLine("    Set #{pump_mfr_act.name} = estimated_vfr * 1000.0")
     pump_program.addLine('  Else')
     pump_program.addLine("    Set #{pump_mfr_act.name} = NULL")
     pump_program.addLine('  EndIf')
