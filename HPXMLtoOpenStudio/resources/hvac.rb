@@ -699,7 +699,6 @@ module HVAC
           coeff: [1, 0, 0, 0, 0, 0]
         )
         speed = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFitSpeedData.new(model, cap_ft_curve, cap_faf_curve, cap_fwf_curve, eir_ft_curve, eir_faf_curve, eir_fwf_curve, waste_heat_ft)
-        # Net or gross?
         speed.setReferenceUnitGrossRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W') * hp_ap.cool_capacity_ratios[i])
         speed.setReferenceUnitGrossRatedSensibleHeatRatio(hp_ap.cool_rated_shrs_gross[i])
         speed.setReferenceUnitGrossRatedCoolingCOP(hp_ap.cool_rated_cops[i])
@@ -728,7 +727,6 @@ module HVAC
       htg_coil.setNominalSpeedLevel(num_speeds)
       htg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(htg_cfm_rated, 'cfm', 'm^3/s'))
       htg_coil.setRatedWaterFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
-      # Check: Net or gross?
       htg_coil.setRatedHeatingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
       for i in 0..(num_speeds - 1)
         cap_ft_curve = Model.add_curve_biquadratic(
@@ -2698,7 +2696,8 @@ module HVAC
     )
     pump_program.addLine("If #{htg_load_sensor.name} > 0.0 && #{clg_load_sensor.name} > 0.0") # Heating loads
     pump_program.addLine("  Set estimated_plr = (@ABS #{htg_load_sensor.name}) / #{htg_coil.ratedHeatingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
-    pump_program.addLine("  Set estimated_vfr = estimated_plr * #{htg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
+    pump_program.addLine("  Set max_vfr_htg = #{htg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
+    pump_program.addLine('  Set estimated_vfr = estimated_plr * max_vfr_htg')
     pump_program.addLine("  If estimated_vfr < #{htg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
     pump_program.addLine("    Set #{pump_mfr_act.name} = estimated_vfr * 1000.0")
     pump_program.addLine('  Else')
@@ -2706,7 +2705,8 @@ module HVAC
     pump_program.addLine('  EndIf')
     pump_program.addLine("ElseIf #{htg_load_sensor.name} < 0.0 && #{clg_load_sensor.name} < 0.0") # Cooling loads
     pump_program.addLine("  Set estimated_plr = (@ABS #{clg_load_sensor.name}) / #{clg_coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
-    pump_program.addLine("  Set estimated_vfr = estimated_plr * #{clg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
+    pump_program.addLine("  Set max_vfr_clg = #{clg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
+    pump_program.addLine('  Set estimated_vfr = estimated_plr * max_vfr_clg')
     pump_program.addLine("  If estimated_vfr < #{clg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
     pump_program.addLine("    Set #{pump_mfr_act.name} = estimated_vfr * 1000.0")
     pump_program.addLine('  Else')
