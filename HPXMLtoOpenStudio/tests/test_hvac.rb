@@ -1361,12 +1361,14 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(5.84, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
     assert_in_epsilon(0.708, clg_coil.ratedSensibleCoolingCapacity.get / clg_coil.ratedTotalCoolingCapacity.get, 0.01)
+    assert_in_epsilon(0.566, clg_coil.ratedAirFlowRate.get, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpEquationFits.size)
     htg_coil = model.getCoilHeatingWaterToAirHeatPumpEquationFits[0]
     assert_in_epsilon(3.94, htg_coil.ratedHeatingCoefficientofPerformance, 0.01)
     assert_in_epsilon(htg_capacity, htg_coil.ratedHeatingCapacity.get, 0.01)
+    assert_in_epsilon(0.566, htg_coil.ratedAirFlowRate.get, 0.01)
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
