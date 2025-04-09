@@ -377,6 +377,7 @@ module HVAC
 
         # Defrost calculations
         if hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
+          # FIXME: Double check value passed for design_airflow. Should it incorporate airflow defect ratio? Nominal or max speed?
           q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, hpxml_bldg.building_construction.number_of_units,
                                                                                       fan_cfms.max, htg_cfm * htg_ap.heat_capacity_ratios[-1], fan_watts_per_cfm)
         elsif hpxml_header.defrost_model_type != HPXML::AdvancedResearchDefrostModelTypeStandard
@@ -4422,7 +4423,6 @@ module HVAC
 
     cool_airflow_rated_defect_ratio = []
     if (not clg_coil.nil?) && (cooling_system.fraction_cool_load_served > 0)
-      clg_ap = cooling_system.additional_properties
       clg_cfm = cooling_system.cooling_airflow_cfm
       if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized || clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
         cool_airflow_rated_defect_ratio = [UnitConversions.convert(clg_cfm, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
@@ -4433,7 +4433,6 @@ module HVAC
 
     heat_airflow_rated_defect_ratio = []
     if (not htg_coil.nil?) && (heating_system.fraction_heat_load_served > 0)
-      htg_ap = heating_system.additional_properties
       htg_cfm = heating_system.heating_airflow_cfm
       if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
         heat_airflow_rated_defect_ratio = [UnitConversions.convert(htg_cfm, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0]
@@ -4952,6 +4951,7 @@ module HVAC
   # @param rated_cfm_per_ton [TODO] TODO
   # @return [TODO] TODO
   def self.calc_rated_airflow(capacity, rated_cfm_per_ton)
+    # FIXME: Double-check that we should be using this
     return UnitConversions.convert(capacity, 'Btu/hr', 'ton') * UnitConversions.convert(rated_cfm_per_ton, 'cfm', 'm^3/s')
   end
 
