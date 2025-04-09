@@ -2653,7 +2653,7 @@ module HVACSizing
       total_cap_curve_value = odb_adj * idb_adj
 
       cool_cap_rated = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
-      cool_cfm_rated = UnitConversions.convert(cool_cap_rated, 'btu/hr', 'ton') * clg_ap.cool_rated_cfm_per_ton
+      cool_cfm_rated = HVAC.calc_rated_airflow(cool_cap_rated, clg_ap.cool_rated_cfm_per_ton, 'cfm')
 
       rated_barometric_pressure_psi = UnitConversions.convert(1, 'atm', 'psi') # assume rated pressure is at sea level
 
@@ -3049,9 +3049,8 @@ module HVACSizing
       clg_ap = hvac_cooling.additional_properties
 
       if cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
-        cool_cfm_m3s = UnitConversions.convert(hvac_sizings.Cool_Airflow, 'cfm', 'm^3/s')
-        cool_airflow_rated_ratio = cool_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizings.Cool_Capacity, clg_ap.cool_rated_cfm_per_ton)
-        cool_airflow_rated_defect_ratio = cool_cfm_m3s * (1 + cool_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizings.Cool_Capacity, clg_ap.cool_rated_cfm_per_ton)
+        cool_airflow_rated_ratio = hvac_sizings.Cool_Airflow / HVAC.calc_rated_airflow(hvac_sizings.Cool_Capacity, clg_ap.cool_rated_cfm_per_ton, 'cfm')
+        cool_airflow_rated_defect_ratio = hvac_sizings.Cool_Airflow * (1 + cool_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizings.Cool_Capacity, clg_ap.cool_rated_cfm_per_ton, 'cfm')
       else
         cool_airflow_rated_ratio = 1.0 # actual air flow is equal to rated (before applying defect ratio) in current methodology
         cool_airflow_rated_defect_ratio = 1 + cool_airflow_defect_ratio
@@ -3112,9 +3111,8 @@ module HVACSizing
       htg_ap = hvac_heating.additional_properties
 
       if heating_type != HPXML::HVACTypeHeatPumpGroundToAir
-        heat_cfm_m3s = UnitConversions.convert(hvac_sizings.Heat_Airflow, 'cfm', 'm^3/s')
-        heat_airflow_rated_ratio = heat_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizings.Heat_Capacity, htg_ap.heat_rated_cfm_per_ton)
-        heat_airflow_rated_defect_ratio = heat_cfm_m3s * (1 + heat_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizings.Heat_Capacity, htg_ap.heat_rated_cfm_per_ton)
+        heat_airflow_rated_ratio = hvac_sizings.Heat_Airflow / HVAC.calc_rated_airflow(hvac_sizings.Heat_Capacity, htg_ap.heat_rated_cfm_per_ton, 'cfm')
+        heat_airflow_rated_defect_ratio = hvac_sizings.Heat_Airflow * (1 + heat_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizings.Heat_Capacity, htg_ap.heat_rated_cfm_per_ton, 'cfm')
       else
         heat_airflow_rated_ratio = 1.0 # actual air flow is equal to rated (before applying defect ratio) in current methodology
         heat_airflow_rated_defect_ratio = 1 + heat_airflow_defect_ratio

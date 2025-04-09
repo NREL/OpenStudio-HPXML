@@ -561,8 +561,6 @@ module HVAC
 
     htg_cfm = heat_pump.heating_airflow_cfm
     clg_cfm = heat_pump.cooling_airflow_cfm
-    htg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? htg_cfm : (htg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
-    clg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? clg_cfm : (clg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
 
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = EPlus::FluidWater
@@ -594,7 +592,7 @@ module HVAC
     clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
     clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
     clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
-    clg_coil.setRatedAirFlowRate(UnitConversions.convert(clg_cfm_rated, 'cfm', 'm^3/s'))
+    clg_coil.setRatedAirFlowRate(calc_rated_airflow(heat_pump.cooling_capacity, hp_ap.cool_rated_cfm_per_ton, 'm^3/s'))
     clg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
     clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(80, 'F', 'C'))
     clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
@@ -617,7 +615,7 @@ module HVAC
     htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model, htg_cap_curve, htg_power_curve)
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedHeatingCoefficientofPerformance(hp_ap.heat_rated_cops[0])
-    htg_coil.setRatedAirFlowRate(UnitConversions.convert(htg_cfm_rated, 'cfm', 'm^3/s'))
+    htg_coil.setRatedAirFlowRate(calc_rated_airflow(heat_pump.heating_capacity, hp_ap.heat_rated_cfm_per_ton, 'm^3/s'))
     htg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
     htg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(60, 'F', 'C'))
     htg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(70, 'F', 'C'))
@@ -2366,15 +2364,15 @@ module HVAC
     hvac_ap = hvac_system.additional_properties
 
     # Calculate rated cfm based on cooling per AHRI
-    rated_cfm = hvac_ap.cool_rated_cfm_per_ton * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+    rated_cfm = calc_rated_airflow(hvac_system.cooling_capacity, hvac_ap.cool_rated_cfm_per_ton, 'cfm')
     if rated_cfm < MinAirflow # Resort to heating if we get a HP w/ only heating
-      rated_cfm = hvac_ap.heat_rated_cfm_per_ton * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+      rated_cfm = calc_rated_airflow(hvac_system.heating_capacity, hvac_ap.heat_rated_cfm_per_ton, 'cfm')
     end
 
     if mode == :htg
-      fan_cfm = hvac_ap.heat_rated_cfm_per_ton * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton') * hvac_ap.heat_capacity_ratios[speed_index]
+      fan_cfm = calc_rated_airflow(hvac_system.heating_capacity, hvac_ap.heat_rated_cfm_per_ton, 'cfm') * hvac_ap.heat_capacity_ratios[speed_index]
     else
-      fan_cfm = hvac_ap.cool_rated_cfm_per_ton * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton') * hvac_ap.cool_capacity_ratios[speed_index]
+      fan_cfm = calc_rated_airflow(hvac_system.cooling_capacity, hvac_ap.cool_rated_cfm_per_ton, 'cfm') * hvac_ap.cool_capacity_ratios[speed_index]
     end
 
     fan_ratio = fan_cfm / rated_cfm
@@ -2682,8 +2680,8 @@ module HVAC
 
     if cooling_system.cooling_detailed_performance_data.empty?
       net_capacity = cooling_system.cooling_capacity
-      fan_power = clg_ap.fan_power_rated * clg_ap.cool_rated_cfm_per_ton * UnitConversions.convert(net_capacity, 'Btu/hr', 'ton')
-      gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :clg)[0]
+      rated_fan_power = clg_ap.fan_power_rated * calc_rated_airflow(net_capacity, clg_ap.cool_rated_cfm_per_ton, 'cfm')
+      gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, rated_fan_power, :clg)[0]
       clg_ap.cool_rated_capacities_net = [net_capacity]
       clg_ap.cool_rated_capacities_gross = [gross_capacity]
       fail 'Unexpected error.' if clg_ap.cool_capacity_ratios.size != 1 || clg_ap.cool_capacity_ratios[0] != 1
@@ -2795,7 +2793,7 @@ module HVAC
         clg_coil.setMaximumCyclingRate(3.0)
         clg_coil.setLatentCapacityTimeConstant(45.0)
         clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities_gross[i], 'Btu/hr', 'W'))
-        clg_coil.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton))
+        clg_coil.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton, 'm^3/s'))
       else
         if clg_coil.nil?
           clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
@@ -2819,7 +2817,7 @@ module HVAC
         stage.setMaximumCyclingRate(3.0)
         stage.setLatentCapacityTimeConstant(45.0)
         stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(clg_ap.cool_rated_capacities_gross[i], 'Btu/hr', 'W'))
-        stage.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton))
+        stage.setRatedAirFlowRate(calc_rated_airflow(clg_ap.cool_rated_capacities_net[i], clg_ap.cool_rated_cfm_per_ton, 'm^3/s'))
         clg_coil.addStage(stage)
       end
     end
@@ -2851,8 +2849,8 @@ module HVAC
 
     if heating_system.heating_detailed_performance_data.empty?
       net_capacity = heating_system.heating_capacity
-      fan_power = htg_ap.fan_power_rated * htg_ap.heat_rated_cfm_per_ton * UnitConversions.convert(net_capacity, 'Btu/hr', 'ton')
-      gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, fan_power, :htg)[0]
+      rated_fan_power = htg_ap.fan_power_rated * calc_rated_airflow(net_capacity, htg_ap.heat_rated_cfm_per_ton, 'cfm')
+      gross_capacity = convert_net_to_gross_capacity_cop(net_capacity, rated_fan_power, :htg)[0]
       htg_ap.heat_rated_capacities_net = [net_capacity]
       htg_ap.heat_rated_capacities_gross = [gross_capacity]
       fail 'Unexpected error.' if htg_ap.heat_capacity_ratios.size != 1 || htg_ap.heat_capacity_ratios[0] != 1
@@ -2962,7 +2960,7 @@ module HVAC
           htg_coil.setRatedCOP(heating_system.heating_efficiency_cop)
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
-        htg_coil.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton))
+        htg_coil.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton, 'm^3/s'))
         defrost_time_fraction = 0.1 if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced # 6 min/hr
       else
         if htg_coil.nil?
@@ -2980,7 +2978,7 @@ module HVAC
         stage.setGrossRatedHeatingCOP(htg_ap.heat_rated_cops[i])
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
         stage.setGrossRatedHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
-        stage.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton))
+        stage.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton, 'm^3/s'))
         htg_coil.addStage(stage)
         defrost_time_fraction = 0.06667 if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced # 4 min/hr
       end
@@ -4945,14 +4943,14 @@ module HVAC
     return applied
   end
 
-  # TODO
+  # Calculates the rated airflow rate for a given speed.
   #
-  # @param capacity [TODO] TODO
-  # @param rated_cfm_per_ton [TODO] TODO
-  # @return [TODO] TODO
-  def self.calc_rated_airflow(capacity, rated_cfm_per_ton)
-    # FIXME: Double-check that we should be using this
-    return UnitConversions.convert(capacity, 'Btu/hr', 'ton') * UnitConversions.convert(rated_cfm_per_ton, 'cfm', 'm^3/s')
+  # @param net_rated_capacity [Double] Net rated capacity for the given speed (Btu/hr)
+  # @param rated_cfm_per_ton [Double] Rated airflow rate (cfm/ton)
+  # @param output_units [string] Airflow rate units ('cfm' or 'm^3/s')
+  # @return [Double] Rated airflow rate in the specified output units
+  def self.calc_rated_airflow(net_rated_capacity, rated_cfm_per_ton, output_units)
+    return UnitConversions.convert(net_rated_capacity, 'Btu/hr', 'ton') * UnitConversions.convert(rated_cfm_per_ton, 'cfm', output_units)
   end
 
   # TODO
