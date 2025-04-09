@@ -2960,11 +2960,11 @@ module HVACSizing
       end
       hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
       if hvac_sizings.Cool_Capacity > 0
-        # For single stage compressor, when heating capacity is much larger than cooling capacity,
-        # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
-        # Fixme: Assume this shouldn't be applied to var speed system, but should this apply to two speed?
-        if hvac_sizings.Heat_Capacity >= 1.5 * hvac_sizings.Cool_Capacity && ([HPXML::HVACCompressorTypeSingleStage].include? hvac_heating.compressor_type)
-          hvac_sizings.Heat_Capacity *= 0.75
+        if (hpxml_header.geothermal_model_type == HPXML::AdvancedResearchGeothermalModelTypeSimple) && (hvac_heating.compressor_type == HPXML::HVACCompressorTypeSingleStage)
+          # For single stage compressor, when heating capacity is much larger than cooling capacity,
+          # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
+          # Currently only keep it for simple ghp models
+          hvac_sizings.Heat_Capacity *= 0.75 if (hvac_sizings.Heat_Capacity >= 1.5 * hvac_sizings.Cool_Capacity)
         end
         hvac_sizings.Cool_Capacity = [hvac_sizings.Cool_Capacity, hvac_sizings.Heat_Capacity].max
         hvac_sizings.Heat_Capacity = hvac_sizings.Cool_Capacity
