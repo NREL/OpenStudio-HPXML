@@ -2865,7 +2865,6 @@ module HVACSizing
       elsif [HPXML::AdvancedResearchGeothermalModelTypeAdvanced].include? hpxml_header.geothermal_model_type
         hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
         total_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(mj.cool_indoor_wetbulb, 'F', 'C'), UnitConversions.convert(entering_temp, 'F', 'C'), hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed])
-        # Fixme: should we also calculate airflow and water flow curve values and multiply them altogether with FT curve value?
         hvac_sizings.Cool_Airflow, hvac_sizings.Cool_Capacity, hvac_sizings.Cool_Capacity_Sens, design_shr = adjust_cooling_capacities_by_sizing_at_design(mj, hvac_cooling_ap, hvac_sizings, cooling_delta_t, hpxml_bldg.header.manualj_humidity_setpoint, total_cap_curve_value, hvac_cooling_speed, undersize_limit, oversize_limit, HVAC::GroundSourceCoolRatedIDB, HVAC::GroundSourceCoolRatedIWB)
       end
 
