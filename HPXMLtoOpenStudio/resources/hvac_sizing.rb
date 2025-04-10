@@ -3776,9 +3776,9 @@ module HVACSizing
       return 2.0 * hpxml_bldg.building_construction.conditioned_floor_area
     end
 
-    if (mode == :htg) && hvac_system.respond_to?(:heating_airflow_cfm) && (not hvac_system.heating_airflow_cfm.nil?)
+    if (mode == :htg) && hvac_system.respond_to?(:heating_airflow_cfm) && (not hvac_system.heating_airflow_cfm.nil?) && (not hvac_system.heating_capacity.nil?)
       cfm_per_ton = hvac_system.heating_airflow_cfm / UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
-    elsif (mode == :clg) && hvac_system.respond_to?(:cooling_airflow_cfm) && (not hvac_system.cooling_airflow_cfm.nil?)
+    elsif (mode == :clg) && hvac_system.respond_to?(:cooling_airflow_cfm) && (not hvac_system.cooling_airflow_cfm.nil?) && (not hvac_system.cooling_capacity.nil?)
       cfm_per_ton = hvac_system.cooling_airflow_cfm / UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
     else
       case hvac_type
