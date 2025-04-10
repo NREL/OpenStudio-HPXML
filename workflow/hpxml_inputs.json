@@ -2740,6 +2740,12 @@
     "heat_pump_charge_defect_ratio": -0.25,
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
+  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-var-speed-advanced.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-advanced.xml",
+    "heat_pump_airflow_defect_ratio": -0.25,
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
+  },
   "sample_files/base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml",
     "cooling_system_airflow_defect_ratio": -0.25,

@@ -134,7 +134,8 @@ These features may require shorter timesteps, allow more sophisticated simulatio
          If not provided, the heat pump backup is modeled with a single stage.
   .. [#] GeothermalModelType choices are "simple" and "advanced".
   .. [#] Use "simple" for simplified single-speed coil model.
-         Use "advanced" for variable-speed coil model, it also supports single-speed geothermal systems. Using "advanced" may impact simulation runtime.
+         Use "advanced" for variable-speed coil model, it also supports single-speed geothermal systems. 
+         The "advanced" geothermal heat pump models with desuperheater are not supported yet, see :ref:`water_heater_desuperheater`. Using "advanced" may impact simulation runtime.
 
 HPXML Emissions Scenarios
 *************************
@@ -4240,6 +4241,8 @@ If the water heater uses a desuperheater, additional information is entered in `
   .. warning::
 
     A desuperheater is currently not allow if detailed water heater setpoint schedules are used.
+
+    A desuperheater is currently not allow if ``GeothermalModelType`` is "advanced", see :ref:`hpxml_simulation_control`.
 
 HPXML Hot Water Distribution
 ****************************

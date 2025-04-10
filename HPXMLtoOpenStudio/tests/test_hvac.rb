@@ -1529,6 +1529,44 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
     assert_in_epsilon(program_values['FF_AF_clg'].sum, cooling_cfm / rated_airflow_cfm_clg, 0.01)
     assert_in_epsilon(program_values['FF_AF_htg'].sum, heating_cfm / rated_airflow_cfm_htg, 0.01)
+
+    ['base-hvac-install-quality-ground-to-air-heat-pump-2-speed-advanced.xml',
+     'base-hvac-install-quality-ground-to-air-heat-pump-var-speed-advanced.xml'].each do |filename|
+      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, filename))
+      model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+      # Get HPXML values
+      heat_pump = hpxml_bldg.heat_pumps[0]
+      charge_defect = heat_pump.charge_defect_ratio
+      fan_watts_cfm = heat_pump.fan_watts_per_cfm
+
+      # model objects:
+      # Unitary system
+      assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+      unitary_system = model.getAirLoopHVACUnitarySystems[0]
+
+      # Cooling coil
+      assert_equal(1, model.getCoilCoolingWaterToAirHeatPumpVariableSpeedEquationFits.size)
+
+      # Heating coil
+      assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpVariableSpeedEquationFits.size)
+
+      # Fan
+      fan = unitary_system.supplyFan.get.to_FanSystemModel.get
+      assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
+
+      # Check installation quality EMS
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+
+      # defect ratios in EMS is calculated correctly
+      assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
+      [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
+        assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+      end
+      [0.702, 0.702].each_with_index do |rated_airflow_ratio, i|
+        assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+      end
+    end
   end
 
   def test_install_quality_mini_split_air_conditioner
