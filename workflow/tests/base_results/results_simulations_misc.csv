@@ -299,6 +299,7 @@ base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml,0.0,0.0,0.0,1354.
 base-hvac-install-quality-furnace-gas-only.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,2017.0,1806.6,2017.0,2017.0,1806.6,2017.0,25.159,0.0,0.0
 base-hvac-install-quality-ground-to-air-heat-pump-1-speed.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,3837.5,3096.2,3837.5,3837.5,3096.2,3837.5,24.154,17.515,0.0
 base-hvac-install-quality-ground-to-air-heat-pump-2-speed-advanced.xml,2.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,4163.3,2872.4,4163.3,4163.3,2872.4,4163.3,24.129,18.692,0.0
+base-hvac-install-quality-ground-to-air-heat-pump-var-speed-advanced.xml,5.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,4157.8,2455.3,4157.8,4157.8,2455.3,4157.8,23.43,18.892,0.0
 base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1975.2,3069.5,3069.5,1975.2,3069.5,3069.5,0.0,14.271,0.0
 base-hvac-install-quality-mini-split-heat-pump-ducted.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,4924.5,2965.3,4924.5,4924.5,2965.3,4924.5,19.461,14.288,0.0
 base-hvac-mini-split-air-conditioner-only-ducted.xml,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1975.2,2696.9,2696.9,1975.2,2696.9,2696.9,0.0,14.089,0.0
