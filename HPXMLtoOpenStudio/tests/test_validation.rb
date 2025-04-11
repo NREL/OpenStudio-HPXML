@@ -167,6 +167,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-negative-crankcase-heater-watts' => ['Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.0.'],
                             'incomplete-integrated-heating' => ['Expected 1 element(s) for xpath: IntegratedHeatingSystemFractionHeatLoadServed'],
                             'invalid-airflow-defect-ratio' => ['Expected extension/AirflowDefectRatio to be 0'],
+                            'invalid-airflow-rates' => ['Expected extension/HeatingAirflowCFM to be greater than or equal to 0',
+                                                        'Expected extension/CoolingAirflowCFM to be greater than or equal to 0'],
                             'invalid-assembly-effective-rvalue' => ["Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
                             'invalid-battery-capacities-ah' => ['Expected UsableCapacity to be less than NominalCapacity'],
                             'invalid-battery-capacities-kwh' => ['Expected UsableCapacity to be less than NominalCapacity'],
@@ -601,6 +603,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'invalid-airflow-defect-ratio'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless.xml')
         hpxml_bldg.heat_pumps[0].airflow_defect_ratio = -0.25
+      when 'invalid-airflow-rates'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.heating_systems[0].heating_airflow_cfm = -1
+        hpxml_bldg.cooling_systems[0].cooling_airflow_cfm = -1
       when 'invalid-assembly-effective-rvalue'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.walls[0].insulation_assembly_r_value = 0.0

@@ -2258,13 +2258,14 @@ module Defaults
       end
     end
     hpxml_bldg.heating_systems.each do |heating_system|
+      htg_ap = heating_system.additional_properties
       next unless [HPXML::HVACTypeStove,
                    HPXML::HVACTypeSpaceHeater,
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
-      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+      htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       case heat_pump.heat_pump_type
@@ -6234,6 +6235,7 @@ module Defaults
 
     if cooling_system.is_a?(HPXML::HeatPump) && cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
       clg_ap.cool_rated_shr_gross = 0.708
+      clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
       return
     end
 
@@ -6338,6 +6340,7 @@ module Defaults
     htg_ap.heat_eir_fflow_spec = [2.185418751, -1.942827919, 0.757409168]
 
     if heating_system.is_a?(HPXML::HeatPump) && heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
       return
     end
 

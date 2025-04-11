@@ -8,7 +8,8 @@ __New Features__
   - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.
   - Allows optional EER or EER2 inputs (`AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value`) for central air conditioners/heat pumps and mini-splits.
   - Deprecates SHR inputs (e.g., `CoolingSensibleHeatFraction`); they are no longer used.
-  - Added optional `extension/FanMotorType`, changed rated fan power (w/cfm) and measured FanPowerWattsPerCFM assumptions to be based on fan motor type.
+  - Allows optional `extension/FanMotorType` input; updates `FanPowerWattsPerCFM` defaults to be based on fan motor type.
+  - Allows optional `extension/HeatingAirflowCFM` (and `CoolingAirflowCFM`) inputs to specify design airflow rates.
   - Updates design airflow rates to use cfm/ton assumptions rather than Manual S-based approach.
   - Updates to detailed performance datapoints:
     - **Breaking change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
