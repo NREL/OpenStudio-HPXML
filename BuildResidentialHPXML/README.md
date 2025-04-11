@@ -245,42 +245,16 @@ Presence of nearby buildings, trees, obstructions for infiltration model. If not
 
 <br/>
 
-**Site: Soil and Moisture Type**
+**Site: Soil Type**
 
-Type of soil and moisture. This is used to inform ground conductivity and diffusivity. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The soil and moisture type, used to inform ground conductivity and diffusivity. Specific numerical inputs ([Btu/hr-ft-F] or [ft^2/hr]) override the soil and moisture type input.
 
-- **Name:** ``site_soil_and_moisture_type``
+- **Name:** ``site_soil_type``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `clay, dry`, `clay, mixed`, `clay, wet`, `gravel, dry`, `gravel, mixed`, `gravel, wet`, `loam, dry`, `loam, mixed`, `loam, wet`, `sand, dry`, `sand, mixed`, `sand, wet`, `silt, dry`, `silt, mixed`, `silt, wet`, `unknown, dry`, `unknown, mixed`, `unknown, wet`
-
-<br/>
-
-**Site: Ground Conductivity**
-
-Conductivity of the ground soil. If provided, overrides the previous site and moisture type input.
-
-- **Name:** ``site_ground_conductivity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr-ft-F``
-
-- **Required:** ``false``
-
-<br/>
-
-**Site: Ground Diffusivity**
-
-Diffusivity of the ground soil. If provided, overrides the previous site and moisture type input.
-
-- **Name:** ``site_ground_diffusivity``
-- **Type:** ``Double``
-
-- **Units:** ``ft^2/hr``
-
-- **Required:** ``false``
+- **Choices:** `Unknown`, `Clay, Dry`, `Clay, Mixed`, `Clay, Wet`, `Gravel, Dry`, `Gravel, Mixed`, `Gravel, Wet`, `Loam, Dry`, `Loam, Mixed`, `Loam, Wet`, `Sand, Dry`, `Sand, Mixed`, `Sand, Wet`, `Silt, Dry`, `Silt, Mixed`, `Silt, Wet`, `0.5 Conductivity`, `0.8 Conductivity`, `1.1 Conductivity`, `1.4 Conductivity`, `1.44 Conductivity`, `1.7 Conductivity`, `2.0 Conductivity`, `2.3 Conductivity`, `2.6 Conductivity`
 
 <br/>
 
@@ -1150,29 +1124,16 @@ Assembly R-value for the ceiling (attic floor).
 
 <br/>
 
-**Roof: Material Type**
+**Enclosure: Roof Material**
 
-The material type of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
+The material type/color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
 
-- **Name:** ``roof_material_type``
+- **Name:** ``enclosure_roof_material``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `asphalt or fiberglass shingles`, `concrete`, `cool roof`, `slate or tile shingles`, `expanded polystyrene sheathing`, `metal surfacing`, `plastic/rubber/synthetic sheeting`, `shingles`, `wood shingles or shakes`
-
-<br/>
-
-**Roof: Color**
-
-The color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
-
-- **Name:** ``roof_color``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `dark`, `light`, `medium`, `medium dark`, `reflective`
+- **Choices:** `Asphalt/Fiberglass Shingles, Dark`, `Asphalt/Fiberglass Shingles, Medium Dark`, `Asphalt/Fiberglass Shingles, Medium`, `Asphalt/Fiberglass Shingles, Light`, `Asphalt/Fiberglass Shingles, Reflective`, `Tile/Slate, Dark`, `Tile/Slate, Medium Dark`, `Tile/Slate, Medium`, `Tile/Slate, Light`, `Tile/Slate, Reflective`, `Metal, Dark`, `Metal, Medium Dark`, `Metal, Medium`, `Metal, Light`, `Metal, Reflective`, `Wood Shingles/Shakes, Dark`, `Wood Shingles/Shakes, Medium Dark`, `Wood Shingles/Shakes, Medium`, `Wood Shingles/Shakes, Light`, `Wood Shingles/Shakes, Reflective`, `Shingles, Dark`, `Shingles, Medium Dark`, `Shingles, Medium`, `Shingles, Light`, `Shingles, Reflective`, `Synthetic Sheeting, Dark`, `Synthetic Sheeting, Medium Dark`, `Synthetic Sheeting, Medium`, `Synthetic Sheeting, Light`, `Synthetic Sheeting, Reflective`, `EPS Sheathing, Dark`, `EPS Sheathing, Medium Dark`, `EPS Sheathing, Medium`, `EPS Sheathing, Light`, `EPS Sheathing, Reflective`, `Concrete, Dark`, `Concrete, Medium Dark`, `Concrete, Medium`, `Concrete, Light`, `Concrete, Reflective`, `Cool Roof`
 
 <br/>
 
@@ -1228,29 +1189,16 @@ The type of walls.
 
 <br/>
 
-**Wall: Siding Type**
+**Enclosure: Wall Siding**
 
-The siding type of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-walls'>HPXML Walls</a>) is used.
+The siding type/color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-walls'>HPXML Walls</a>) is used.
 
-- **Name:** ``wall_siding_type``
+- **Name:** ``enclosure_wall_siding``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `aluminum siding`, `asbestos siding`, `brick veneer`, `composite shingle siding`, `fiber cement siding`, `masonite siding`, `none`, `stucco`, `synthetic stucco`, `vinyl siding`, `wood siding`
-
-<br/>
-
-**Wall: Color**
-
-The color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-walls'>HPXML Walls</a>) is used.
-
-- **Name:** ``wall_color``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `dark`, `light`, `medium`, `medium dark`, `reflective`
+- **Choices:** `Aluminum, Dark`, `Aluminum, Medium`, `Aluminum, Medium Dark`, `Aluminum, Light`, `Aluminum, Reflective`, `Brick, Dark`, `Brick, Medium`, `Brick, Medium Dark`, `Brick, Light`, `Brick, Reflective`, `Fiber-Cement, Dark`, `Fiber-Cement, Medium`, `Fiber-Cement, Medium Dark`, `Fiber-Cement, Light`, `Fiber-Cement, Reflective`, `Asbestos, Dark`, `Asbestos, Medium`, `Asbestos, Medium Dark`, `Asbestos, Light`, `Asbestos, Reflective`, `Composition Shingle, Dark`, `Composition Shingle, Medium`, `Composition Shingle, Medium Dark`, `Composition Shingle, Light`, `Composition Shingle, Reflective`, `Stucco, Dark`, `Stucco, Medium`, `Stucco, Medium Dark`, `Stucco, Light`, `Stucco, Reflective`, `Vinyl, Dark`, `Vinyl, Medium`, `Vinyl, Medium Dark`, `Vinyl, Light`, `Vinyl, Reflective`, `Wood, Dark`, `Wood, Medium`, `Wood, Medium Dark`, `Wood, Light`, `Wood, Reflective`, `Synthetic Stucco, Dark`, `Synthetic Stucco, Medium`, `Synthetic Stucco, Medium Dark`, `Synthetic Stucco, Light`, `Synthetic Stucco, Reflective`, `Masonite, Dark`, `Masonite, Medium`, `Masonite, Medium Dark`, `Masonite, Light`, `Masonite, Reflective`, `None`
 
 <br/>
 
@@ -1820,53 +1768,16 @@ R-value of the opaque door(s).
 
 <br/>
 
-**Air Leakage: Leakiness Description**
+**Air Leakage**
 
-Qualitative description of infiltration. If provided, the Year Built of the home is required. Either provide this input or provide a numeric air leakage value below.
+The Leakiness Description (qualitative), or numeric air leakage value (ACH or CFM at specified pressure, nACH or nCFM, or ELA.
 
-- **Name:** ``air_leakage_leakiness_description``
+- **Name:** ``air_leakage``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `very tight`, `tight`, `average`, `leaky`, `very leaky`
-
-<br/>
-
-**Air Leakage: Units**
-
-The unit of measure for the air leakage if providing a numeric air leakage value.
-
-- **Name:** ``air_leakage_units``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `ACH`, `CFM`, `ACHnatural`, `CFMnatural`, `EffectiveLeakageArea`
-
-<br/>
-
-**Air Leakage: House Pressure**
-
-The house pressure relative to outside if providing a numeric air leakage value. Required when units are ACH or CFM.
-
-- **Name:** ``air_leakage_house_pressure``
-- **Type:** ``Double``
-
-- **Units:** ``Pa``
-
-- **Required:** ``false``
-
-<br/>
-
-**Air Leakage: Value**
-
-Numeric air leakage value. For 'EffectiveLeakageArea', provide value in sq. in. If provided, overrides Leakiness Description input.
-
-- **Name:** ``air_leakage_value``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `Very Tight`, `Tight`, `Average`, `Leaky`, `Very Leaky`, `0.25 ACH50`, `0.5 ACH50`, `0.75 ACH50`, `1 ACH50`, `1.5 ACH50`, `2 ACH50`, `2.25 ACH50`, `3 ACH50`, `3.57 ACH50`, `3.75 ACH50`, `4 ACH50`, `4.5 ACH50`, `5 ACH50`, `5.25 ACH50`, `6 ACH50`, `7 ACH50`, `7.5 ACH50`, `8 ACH50`, `10 ACH50`, `11.25 ACH50`, `12.16 ACH50`, `15 ACH50`, `18.5 ACH50`, `20 ACH50`, `25 ACH50`, `30 ACH50`, `40 ACH50`, `50 ACH50`, `2.8 ACH45`, `0.2 nACH`, `0.335 nACH`, `0.375 nACH`, `0.67 nACH`, `1.5 nACH`, `72 nCFM`, `79.8 sq. in. ELA`, `123 sq. in. ELA`, `1080 CFM50`, `1008.5 CFM45`
 
 <br/>
 
@@ -1894,16 +1805,16 @@ Presence of flue or chimney with combustion air from conditioned space; used for
 
 <br/>
 
-**Heating System: Type**
+**Heating System**
 
-The type of heating system. Use 'none' if there is no heating system or if there is a heat pump serving a heating load.
+The heating system type/efficiency. Efficiency is Rated AFUE or Percent as a Fraction. Use 'none' if there is no heating system or if there is a heat pump serving a heating load.
 
-- **Name:** ``heating_system_type``
+- **Name:** ``heating_system``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `Furnace`, `WallFurnace`, `FloorFurnace`, `Boiler`, `ElectricResistance`, `Stove`, `SpaceHeater`, `Fireplace`, `Shared Boiler w/ Baseboard`, `Shared Boiler w/ Ductless Fan Coil`
+- **Choices:** `None`, `Electric Resistance`, `Central Furnace, 60% AFUE`, `Central Furnace, 64% AFUE`, `Central Furnace, 68% AFUE`, `Central Furnace, 72% AFUE`, `Central Furnace, 76% AFUE`, `Central Furnace, 78% AFUE`, `Central Furnace, 80% AFUE`, `Central Furnace, 85% AFUE`, `Central Furnace, 90% AFUE`, `Central Furnace, 92% AFUE`, `Central Furnace, 92% AFUE, Pilot Light`, `Central Furnace, 92% AFUE, Grade 3 Installation`, `Central Furnace, 92.5% AFUE`, `Central Furnace, 96% AFUE`, `Central Furnace, 98% AFUE`, `Central Furnace, 100% AFUE`, `Wall Furnace, 60% AFUE`, `Wall Furnace, 68% AFUE`, `Wall Furnace, 82% AFUE`, `Wall Furnace, 98% AFUE`, `Wall Furnace, 100% AFUE`, `Floor Furnace, 60% AFUE`, `Floor Furnace, 70% AFUE`, `Floor Furnace, 80% AFUE`, `Floor Furnace, 80% AFUE, Pilot Light`, `Boiler, 72% AFUE`, `Boiler, 76% AFUE`, `Boiler, 80% AFUE`, `Boiler, 82% AFUE`, `Boiler, 85% AFUE`, `Boiler, 90% AFUE`, `Boiler, 92% AFUE`, `Boiler, 92% AFUE, Pilot Light`, `Boiler, 95% AFUE`, `Boiler, 96% AFUE`, `Boiler, 98% AFUE`, `Boiler, 100% AFUE`, `Shared Boiler w/ Baseboard, 78% AFUE`, `Shared Boiler w/ Baseboard, 92% AFUE`, `Shared Boiler w/ Baseboard, 100% AFUE`, `Shared Boiler w/ Fan Coil, 78% AFUE`, `Shared Boiler w/ Fan Coil, 92% AFUE`, `Shared Boiler w/ Fan Coil, 100% AFUE`, `Stove, 60% Efficiency`, `Stove, 70% Efficiency`, `Stove, 80% Efficiency`, `Space Heater, 60% Efficiency`, `Space Heater, 70% Efficiency`, `Space Heater, 80% Efficiency`, `Space Heater, 92% Efficiency`, `Space Heater, 100% Efficiency`, `Fireplace, 60% Efficiency`, `Fireplace, 70% Efficiency`, `Fireplace, 80% Efficiency`, `Fireplace, 100% Efficiency`
 
 <br/>
 
@@ -1917,19 +1828,6 @@ The fuel type of the heating system. Ignored for ElectricResistance.
 - **Required:** ``true``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`, `coal`
-
-<br/>
-
-**Heating System: Rated AFUE or Percent**
-
-The rated heating efficiency value of the heating system.
-
-- **Name:** ``heating_system_heating_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
 
 <br/>
 
@@ -1983,92 +1881,16 @@ The heating load served by the heating system.
 
 <br/>
 
-**Heating System: Pilot Light**
+**Cooling System**
 
-The fuel usage of the pilot light. Applies only to Furnace, WallFurnace, FloorFurnace, Stove, Boiler, and Fireplace with non-electric fuel type. If not provided, assumes no pilot light.
+The cooling system type, efficiency type, and efficiency. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.
 
-- **Name:** ``heating_system_pilot_light``
-- **Type:** ``Double``
-
-- **Units:** ``Btuh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heating System: Airflow Defect Ratio**
-
-The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heating system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to Furnace. If not provided, assumes no defect.
-
-- **Name:** ``heating_system_airflow_defect_ratio``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooling System: Type**
-
-The type of cooling system. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.
-
-- **Name:** ``cooling_system_type``
+- **Name:** ``cooling_system``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `central air conditioner`, `room air conditioner`, `evaporative cooler`, `mini-split`, `packaged terminal air conditioner`
-
-<br/>
-
-**Cooling System: Efficiency Type**
-
-The efficiency type of the cooling system. System types central air conditioner and mini-split use SEER or SEER2. System types room air conditioner and packaged terminal air conditioner use EER or CEER. Ignored for system type evaporative cooler.
-
-- **Name:** ``cooling_system_cooling_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `SEER`, `SEER2`, `EER`, `CEER`
-
-<br/>
-
-**Cooling System: Efficiency**
-
-The rated efficiency value of the cooling system. Ignored for evaporative cooler.
-
-- **Name:** ``cooling_system_cooling_efficiency``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Cooling System: Cooling Compressor Type**
-
-The compressor type of the cooling system. Only applies to central air conditioner and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#central-air-conditioner'>Central Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.
-
-- **Name:** ``cooling_system_cooling_compressor_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `single stage`, `two stage`, `variable speed`
-
-<br/>
-
-**Cooling System: Cooling Sensible Heat Fraction**
-
-The sensible heat fraction of the cooling system. Ignored for evaporative cooler. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#central-air-conditioner'>Central Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner'>Room Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.
-
-- **Name:** ``cooling_system_cooling_sensible_heat_fraction``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Central AC, SEER 8`, `Central AC, SEER 10`, `Central AC, SEER 13`, `Central AC, SEER 13, Grade 3 Installation`, `Central AC, SEER 14`, `Central AC, SEER 15`, `Central AC, SEER 16`, `Central AC, SEER 17`, `Central AC, SEER 17.5, Normalized Detailed Performance`, `Central AC, SEER 17.5, Absolute Detailed Performance`, `Central AC, SEER 18`, `Central AC, SEER 18, Grade 3 Installation`, `Central AC, SEER 21`, `Central AC, SEER 24`, `Central AC, SEER 24, Grade 3 Installation`, `Central AC, SEER 24.5`, `Central AC, SEER 27`, `Central AC, SEER2 12.4`, `Mini-Split AC, SEER 13`, `Mini-Split AC, SEER 17`, `Mini-Split AC, SEER 17, Normalized Detailed Performance`, `Mini-Split AC, SEER 17, Absolute Detailed Performance`, `Mini-Split AC, SEER 19`, `Mini-Split AC, SEER 19, Ducted`, `Mini-Split AC, SEER 19, Ducted, Grade 3 Installation`, `Mini-Split AC, SEER 24`, `Mini-Split AC, SEER 25`, `Mini-Split AC, SEER 29.3`, `Mini-Split AC, SEER 33`, `Room AC, EER 8.5`, `Room AC, EER 8.5, Electric Heating`, `Room AC, EER 9.8`, `Room AC, EER 10.7`, `Room AC, EER 12.0`, `Room AC, CEER 8.4`, `Packaged Terminal AC, EER 10.7`, `Packaged Terminal AC, EER 10.7, Electric Heating`, `Packaged Terminal AC, EER 10.7, 80% AFUE Gas Heating`, `Evaporative Cooler`, `Evaporative Cooler, Ducted`
 
 <br/>
 
@@ -2122,82 +1944,6 @@ The cooling load served by the cooling system.
 
 <br/>
 
-**Cooling System: Is Ducted**
-
-Whether the cooling system is ducted or not. Only used for mini-split and evaporative cooler. It's assumed that central air conditioner is ducted, and room air conditioner and packaged terminal air conditioner are not ducted.
-
-- **Name:** ``cooling_system_is_ducted``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooling System: Airflow Defect Ratio**
-
-The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the cooling system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to central air conditioner and ducted mini-split. If not provided, assumes no defect.
-
-- **Name:** ``cooling_system_airflow_defect_ratio``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooling System: Charge Defect Ratio**
-
-The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the cooling system per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies only to central air conditioner and mini-split. If not provided, assumes no defect.
-
-- **Name:** ``cooling_system_charge_defect_ratio``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooling System: Crankcase Heater Power Watts**
-
-Cooling system crankcase heater power consumption in Watts. Applies only to central air conditioner, room air conditioner, packaged terminal air conditioner and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#central-air-conditioner'>Central Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner'>Room Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.
-
-- **Name:** ``cooling_system_crankcase_heater_watts``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooling System: Integrated Heating System Fuel Type**
-
-The fuel type of the heating system integrated into cooling system. Only used for packaged terminal air conditioner and room air conditioner.
-
-- **Name:** ``cooling_system_integrated_heating_system_fuel``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`, `coal`
-
-<br/>
-
-**Cooling System: Integrated Heating System Efficiency**
-
-The rated heating efficiency value of the heating system integrated into cooling system. Only used for packaged terminal air conditioner and room air conditioner.
-
-- **Name:** ``cooling_system_integrated_heating_system_efficiency_percent``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
 **Cooling System: Integrated Heating System Heating Capacity**
 
 The output heating capacity of the heating system integrated into cooling system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner'>Room Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>) is used. Only used for room air conditioner and packaged terminal air conditioner.
@@ -2224,90 +1970,16 @@ The heating load served by the heating system integrated into cooling system. On
 
 <br/>
 
-**Heat Pump: Type**
+**Heat Pump**
 
-The type of heat pump. Use 'none' if there is no heat pump.
+The heat pump type/efficiency.
 
-- **Name:** ``heat_pump_type``
+- **Name:** ``heat_pump``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `air-to-air`, `mini-split`, `ground-to-air`, `packaged terminal heat pump`, `room air conditioner with reverse cycle`
-
-<br/>
-
-**Heat Pump: Heating Efficiency Type**
-
-The heating efficiency type of heat pump. System types air-to-air and mini-split use HSPF or HSPF2. System types ground-to-air, packaged terminal heat pump and room air conditioner with reverse cycle use COP.
-
-- **Name:** ``heat_pump_heating_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `HSPF`, `HSPF2`, `COP`
-
-<br/>
-
-**Heat Pump: Heating Efficiency**
-
-The rated heating efficiency value of the heat pump.
-
-- **Name:** ``heat_pump_heating_efficiency``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Heat Pump: Cooling Efficiency Type**
-
-The cooling efficiency type of heat pump. System types air-to-air and mini-split use SEER or SEER2. System types ground-to-air, packaged terminal heat pump and room air conditioner with reverse cycle use EER.
-
-- **Name:** ``heat_pump_cooling_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `SEER`, `SEER2`, `EER`, `CEER`
-
-<br/>
-
-**Heat Pump: Cooling Efficiency**
-
-The rated cooling efficiency value of the heat pump.
-
-- **Name:** ``heat_pump_cooling_efficiency``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Heat Pump: Cooling Compressor Type**
-
-The compressor type of the heat pump. Only applies to air-to-air and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.
-
-- **Name:** ``heat_pump_cooling_compressor_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `single stage`, `two stage`, `variable speed`
-
-<br/>
-
-**Heat Pump: Cooling Sensible Heat Fraction**
-
-The sensible heat fraction of the heat pump. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.
-
-- **Name:** ``heat_pump_cooling_sensible_heat_fraction``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Central HP, SEER 8, 6.0 HSPF`, `Central HP, SEER 10, 6.2 HSPF`, `Central HP, SEER 10, 6.8 HSPF`, `Central HP, SEER 10.3, 7.0 HSPF`, `Central HP, SEER 11.5, 7.5 HSPF`, `Central HP, SEER 13, 7.7 HSPF`, `Central HP, SEER 13, 7.7 HSPF, 5F Compressor Lockout`, `Central HP, SEER 13, 7.7 HSPF, 25F Compressor Lockout`, `Central HP, SEER 13, 7.7 HSPF, 30F Compressor Lockout`, `Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F`, `Central HP, SEER 13, 7.7 HSPF, Grade 3 Installation`, `Central HP, SEER 13, 8.0 HSPF`, `Central HP, SEER 13, 9.85 HSPF`, `Central HP, SEER 14, 8.2 HSPF`, `Central HP, SEER 14.3, 8.5 HSPF`, `Central HP, SEER 15, 8.5 HSPF`, `Central HP, SEER 15, 9.0 HSPF`, `Central HP, SEER 16, 9.0 HSPF`, `Central HP, SEER 16, 9.2 HSPF, -20F Compressor Lockout`, `Central HP, SEER 16, 9.2 HSPF, Heating Capacity 5F`, `Central HP, SEER 17, 8.7 HSPF`, `Central HP, SEER 17.25, 10 HPSF, Normalized Detailed Performance`, `Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance`, `Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance`, `Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance, Grade 3 Installation`, `Central HP, SEER 18, 9.3 HSPF`, `Central HP, SEER 18, 9.3 HSPF, 30F Compressor Lockout`, `Central HP, SEER 18, 9.3 HSPF, Grade 3 Installation`, `Central HP, SEER 20, 11 HSPF`, `Central HP, SEER 20, 11 HSPF, Heating Capacity 5F`, `Central HP, SEER 22, 10 HSPF`, `Central HP, SEER 22, 10 HSPF, Grade 3 Installation`, `Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout`, `Central HP, SEER 24, 13 HSPF`, `Central HP, SEER 24, 13 HSPF, Heating Capacity 5F`, `Central HP, SEER2 12.4, HSPF2 6.5, Heating Capacity 17F`, `Mini-Split HP, SEER 14.5, 8.2 HSPF`, `Mini-Split HP, SEER 14.5, 8.2 HSPF, Ducted`, `Mini-Split HP, SEER 16, 9.2 HSPF`, `Mini-Split HP, SEER 16.7, 11.3 HSPF, Absolute Detailed Performance`, `Mini-Split HP, SEER 16.7, 11.3 HSPF, Normalized Detailed Performance`, `Mini-Split HP, SEER 17, 9.5 HSPF`, `Mini-Split HP, SEER 17, 9.5 HSPF, Ducted`, `Mini-Split HP, SEER 17, 10 HSPF, Absolute Detailed Performance`, `Mini-Split HP, SEER 17, 10 HSPF, Normalized Detailed Performance`, `Mini-Split HP, SEER 18.0, 9.6 HSPF`, `Mini-Split HP, SEER 18.0, 9.6 HSPF, Ducted`, `Mini-Split HP, SEER 19, 10 HSPF, Ducted`, `Mini-Split HP, SEER 19, 10 HSPF, Grade 3 Installation`, `Mini-Split HP, SEER 19, 10 HSPF, 30F Compressor Lockout`, `Mini-Split HP, SEER 19, 10 HSPF`, `Mini-Split HP, SEER 19, 10 HSPF, Absolute Detailed Performance`, `Mini-Split HP, SEER 20, 11 HSPF`, `Mini-Split HP, SEER 24, 13 HSPF`, `Mini-Split HP, SEER 25, 12.7 HSPF`, `Mini-Split HP, SEER 25, 12.7 HSPF, Ducted`, `Mini-Split HP, SEER 29.3, 14 HSPF`, `Mini-Split HP, SEER 29.3, 14 HSPF, Ducted`, `Mini-Split HP, SEER 33, 13.3 HSPF`, `Mini-Split HP, SEER 33, 13.3 HSPF, Ducted`, `Geothermal HP, EER 16.6, COP 3.6`, `Geothermal HP, EER 16.6, COP 3.6, Grade 3 Installation`, `Geothermal HP, EER 18.2, COP 3.7`, `Geothermal HP, EER 19.4, COP 3.8`, `Geothermal HP, EER 20.2, COP 4.2`, `Geothermal HP, EER 20.5, COP 4.0`, `Packaged Terminal HP, EER 11.4, COP 3.6`, `Room AC w/ Reverse Cycle, EER 11.4, COP 3.6`
 
 <br/>
 
@@ -2343,32 +2015,6 @@ The maximum capacity limit applied to the auto-sizing methodology. If not provid
 - **Type:** ``Double``
 
 - **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Heating Capacity Retention Fraction**
-
-The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except ground-to-air. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
-
-- **Name:** ``heat_pump_heating_capacity_retention_fraction``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Heating Capacity Retention Temperature**
-
-The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except ground-to-air. Required if the Heating Capacity Retention Fraction is provided.
-
-- **Name:** ``heat_pump_heating_capacity_retention_temp``
-- **Type:** ``Double``
-
-- **Units:** ``F``
 
 - **Required:** ``false``
 
@@ -2437,29 +2083,16 @@ The cooling load served by the heat pump.
 
 <br/>
 
-**Heat Pump: Compressor Lockout Temperature**
-
-The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than ground-to-air. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
-
-- **Name:** ``heat_pump_compressor_lockout_temp``
-- **Type:** ``Double``
-
-- **Units:** ``F``
-
-- **Required:** ``false``
-
-<br/>
-
 **Heat Pump: Backup Type**
 
-The backup type of the heat pump. If 'integrated', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If 'separate', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.
+The type, fuel type, and efficiency of the heat pump backup. Use 'none' if there is no backup heating. If Backup Type is 'separate', Heating System 2 is used to specify the backup.
 
-- **Name:** ``heat_pump_backup_type``
+- **Name:** ``heat_pump_backup``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `integrated`, `separate`
+- **Choices:** `None`, `Integrated, Electricity, 100% Efficiency`, `Integrated, Electricity, 100% Efficiency, 35F Lockout`, `Integrated, Natural Gas, 95% AFUE, 30F Lockout`, `Integrated, Natural Gas, 60% AFUE, 40F Lockout`, `Integrated, Natural Gas, 76% AFUE, 40F Lockout`, `Integrated, Natural Gas, 80% AFUE, 40F Lockout`, `Integrated, Natural Gas, 92.5% AFUE, 40F Lockout`, `Integrated, Natural Gas, 95% AFUE, 40F Lockout`, `Integrated, Natural Gas, 95% AFUE, 45F Lockout`, `Integrated, Fuel Oil, 60% AFUE, 40F Lockout`, `Integrated, Fuel Oil, 76% AFUE, 40F Lockout`, `Integrated, Fuel Oil, 80% AFUE, 40F Lockout`, `Integrated, Fuel Oil, 92.5% AFUE, 40F Lockout`, `Integrated, Propane, 60% AFUE, 40F Lockout`, `Integrated, Propane, 76% AFUE, 40F Lockout`, `Integrated, Propane, 80% AFUE, 40F Lockout`, `Integrated, Propane, 92.5% AFUE, 40F Lockout`, `Separate`, `Separate, 30F Lockout`, `Separate, -20F Lockout`
 
 <br/>
 
@@ -2487,30 +2120,6 @@ The maximum capacity limit applied to the auto-sizing methodology if Backup Type
 
 <br/>
 
-**Heat Pump: Backup Fuel Type**
-
-The backup fuel type of the heat pump. Only applies if Backup Type is 'integrated'.
-
-- **Name:** ``heat_pump_backup_fuel``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`
-
-<br/>
-
-**Heat Pump: Backup Rated Efficiency**
-
-The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise. Only applies if Backup Type is 'integrated'.
-
-- **Name:** ``heat_pump_backup_heating_efficiency``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
 **Heat Pump: Backup Heating Capacity**
 
 The backup output heating capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#backup'>Backup</a>) is used. Only applies if Backup Type is 'integrated'.
@@ -2519,19 +2128,6 @@ The backup output heating capacity of the heat pump. If not provided, the OS-HPX
 - **Type:** ``Double``
 
 - **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Backup Heating Lockout Temperature**
-
-The temperature above which the heat pump backup system is disabled. If both this and Compressor Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies for both Backup Type of 'integrated' and 'separate'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#backup'>Backup</a>) is used.
-
-- **Name:** ``heat_pump_backup_heating_lockout_temp``
-- **Type:** ``Double``
-
-- **Units:** ``F``
 
 - **Required:** ``false``
 
@@ -2563,319 +2159,29 @@ The auto-sizing methodology to use when the heat pump backup capacity is not pro
 
 <br/>
 
-**Heat Pump: Is Ducted**
+**Geothermal Loop**
 
-Whether the heat pump is ducted or not. Only used for mini-split. It's assumed that air-to-air and ground-to-air are ducted, and packaged terminal heat pump and room air conditioner with reverse cycle are not ducted. If not provided, assumes not ducted.
+The geothermal loop configuration (only vertical is currently supported), borefield configuration, grout/pipe type, and other numerical inputs that specify a detailed geothermal loop.
 
-- **Name:** ``heat_pump_is_ducted``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Airflow Defect Ratio**
-
-The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to air-to-air, ducted mini-split, and ground-to-air. If not provided, assumes no defect.
-
-- **Name:** ``heat_pump_airflow_defect_ratio``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Charge Defect Ratio**
-
-The refrigerant charge defect ratio, defined as (InstalledCharge - DesignCharge) / DesignCharge, of the heat pump per ANSI/RESNET/ACCA Standard 310. A value of zero means no refrigerant charge defect. Applies to all heat pump types. If not provided, assumes no defect.
-
-- **Name:** ``heat_pump_charge_defect_ratio``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Crankcase Heater Power Watts**
-
-Heat Pump crankcase heater power consumption in Watts. Applies only to air-to-air, mini-split, packaged terminal heat pump and room air conditioner with reverse cycle. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
-
-- **Name:** ``heat_pump_crankcase_heater_watts``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Capacity Type**
-
-Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps).
-
-- **Name:** ``hvac_perf_data_capacity_type``
+- **Name:** ``geothermal_loop``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `Absolute capacities`, `Normalized capacity fractions`
+- **Choices:** `None`, `Vertical Loop, Default`, `Vertical Loop, Default, Specified Loop Flow`, `Vertical Loop, Default, Specified Borehole Count`, `Vertical Loop, Default, Specified Borehole Length`, `Vertical Loop, Default, Specified Loop Flow and Borehole Count`, `Vertical Loop, Default, Specified Borehole Count and Length`, `Vertical Loop, Default, Specified Loop Flow and Borehole Length`, `Vertical Loop, Default, Thermally Enhanced Grout`, `Vertical Loop, Default, Thermally Enhanced Pipe`, `Vertical Loop, Lopsided U Borefield, Detailed`, `Vertical Loop, Rectangular Borefield, Detailed`
 
 <br/>
 
-**HVAC Detailed Performance Data: Heating Outdoor Temperatures**
+**Heating System 2**
 
-Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 F. At least two performance data points are required using a comma-separated list.
+The type/efficiency of the second heating system. Efficiency is Rated AFUE or Percent as a Fraction. If a heat pump is specified and the backup type is 'separate', this heating system represents 'separate' backup heating.
 
-- **Name:** ``hvac_perf_data_heating_outdoor_temperatures``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Heating Minimum Speed Capacities**
-
-Minimum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_heating_min_speed_capacities``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Heating Maximum Speed Capacities**
-
-Maximum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_heating_max_speed_capacities``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Heating Minimum Speed COPs**
-
-Minimum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_heating_min_speed_cops``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Heating Maximum Speed COPs**
-
-Maximum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_heating_max_speed_cops``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Cooling Outdoor Temperatures**
-
-Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 F. At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_cooling_outdoor_temperatures``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Cooling Minimum Speed Capacities**
-
-Minimum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_cooling_min_speed_capacities``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Cooling Maximum Speed Capacities**
-
-Maximum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_cooling_max_speed_capacities``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Cooling Minimum Speed COPs**
-
-Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_cooling_min_speed_cops``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Detailed Performance Data: Cooling Maximum Speed COPs**
-
-Maximum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
-
-- **Name:** ``hvac_perf_data_cooling_max_speed_cops``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Configuration**
-
-Configuration of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.
-
-- **Name:** ``geothermal_loop_configuration``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `none`, `vertical`
-
-<br/>
-
-**Geothermal Loop: Borefield Configuration**
-
-Borefield configuration of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_borefield_configuration``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `Rectangle`, `Open Rectangle`, `C`, `L`, `U`, `Lopsided U`
-
-<br/>
-
-**Geothermal Loop: Loop Flow**
-
-Water flow rate through the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_loop_flow``
-- **Type:** ``Double``
-
-- **Units:** ``gpm``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Boreholes Count**
-
-Number of boreholes. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_boreholes_count``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Boreholes Length**
-
-Average length of each borehole (vertical). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_boreholes_length``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Boreholes Spacing**
-
-Distance between bores. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_boreholes_spacing``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Boreholes Diameter**
-
-Diameter of bores. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_boreholes_diameter``
-- **Type:** ``Double``
-
-- **Units:** ``in``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geothermal Loop: Grout Type**
-
-Grout type of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_grout_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `standard`, `thermally enhanced`
-
-<br/>
-
-**Geothermal Loop: Pipe Type**
-
-Pipe type of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_pipe_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `standard`, `thermally enhanced`
-
-<br/>
-
-**Geothermal Loop: Pipe Diameter**
-
-Pipe diameter of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
-
-- **Name:** ``geothermal_loop_pipe_diameter``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `3/4" pipe`, `1" pipe`, `1-1/4" pipe`
-
-<br/>
-
-**Heating System 2: Type**
-
-The type of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents 'separate' backup heating. For ducted heat pumps where the backup heating system is a 'Furnace', the backup would typically be characterized as 'integrated' in that the furnace and heat pump share the same distribution system and blower fan; a 'Furnace' as 'separate' backup to a ducted heat pump is not supported.
-
-- **Name:** ``heating_system_2_type``
+- **Name:** ``heating_system_2``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `Furnace`, `WallFurnace`, `FloorFurnace`, `Boiler`, `ElectricResistance`, `Stove`, `SpaceHeater`, `Fireplace`
+- **Choices:** `None`, `Electric Resistance`, `Central Furnace, 60% AFUE`, `Central Furnace, 64% AFUE`, `Central Furnace, 68% AFUE`, `Central Furnace, 72% AFUE`, `Central Furnace, 76% AFUE`, `Central Furnace, 78% AFUE`, `Central Furnace, 80% AFUE`, `Central Furnace, 85% AFUE`, `Central Furnace, 90% AFUE`, `Central Furnace, 92% AFUE`, `Central Furnace, 92% AFUE, Pilot Light`, `Central Furnace, 92% AFUE, Grade 3 Installation`, `Central Furnace, 92.5% AFUE`, `Central Furnace, 96% AFUE`, `Central Furnace, 98% AFUE`, `Central Furnace, 100% AFUE`, `Wall Furnace, 60% AFUE`, `Wall Furnace, 68% AFUE`, `Wall Furnace, 82% AFUE`, `Wall Furnace, 98% AFUE`, `Wall Furnace, 100% AFUE`, `Floor Furnace, 60% AFUE`, `Floor Furnace, 70% AFUE`, `Floor Furnace, 80% AFUE`, `Floor Furnace, 80% AFUE, Pilot Light`, `Boiler, 72% AFUE`, `Boiler, 76% AFUE`, `Boiler, 80% AFUE`, `Boiler, 82% AFUE`, `Boiler, 85% AFUE`, `Boiler, 90% AFUE`, `Boiler, 92% AFUE`, `Boiler, 92% AFUE, Pilot Light`, `Boiler, 95% AFUE`, `Boiler, 96% AFUE`, `Boiler, 98% AFUE`, `Boiler, 100% AFUE`, `Shared Boiler w/ Baseboard, 78% AFUE`, `Shared Boiler w/ Baseboard, 92% AFUE`, `Shared Boiler w/ Baseboard, 100% AFUE`, `Shared Boiler w/ Fan Coil, 78% AFUE`, `Shared Boiler w/ Fan Coil, 92% AFUE`, `Shared Boiler w/ Fan Coil, 100% AFUE`, `Stove, 60% Efficiency`, `Stove, 70% Efficiency`, `Stove, 80% Efficiency`, `Space Heater, 60% Efficiency`, `Space Heater, 70% Efficiency`, `Space Heater, 80% Efficiency`, `Space Heater, 92% Efficiency`, `Space Heater, 100% Efficiency`, `Fireplace, 60% Efficiency`, `Fireplace, 70% Efficiency`, `Fireplace, 80% Efficiency`, `Fireplace, 100% Efficiency`
 
 <br/>
 
@@ -2889,19 +2195,6 @@ The fuel type of the second heating system. Ignored for ElectricResistance.
 - **Required:** ``true``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`, `coal`
-
-<br/>
-
-**Heating System 2: Rated AFUE or Percent**
-
-The rated heating efficiency value of the second heating system.
-
-- **Name:** ``heating_system_2_heating_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
 
 <br/>
 
