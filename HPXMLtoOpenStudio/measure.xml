@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>34ea5164-6167-4e22-914a-f70f3fab207f</version_id>
-  <version_modified>2025-04-11T23:53:10Z</version_modified>
+  <version_id>62aa0282-4dc5-41e2-b2ce-028819f2934f</version_id>
+  <version_modified>2025-04-11T23:55:27Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,13 +183,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5629CCEC</checksum>
+      <checksum>C8CE8641</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C7584347</checksum>
+      <checksum>0280370B</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -351,7 +351,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B9F6B522</checksum>
+      <checksum>513168FF</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
