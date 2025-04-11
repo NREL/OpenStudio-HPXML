@@ -1,4 +1,4 @@
-Option Name	configuration	borefield_configuration	loop_flow	boreholes_count	boreholes_length	boreholes_spacing	boreholes_diameter	grout_type	pipe_type	pipe_diameter
+Option Name	Configuration	Borefield Configuration	Loop Flow [gpm]	Boreholes Count [#]	Boreholes Length [ft]	Boreholes Spacing [ft]	Boreholes Diameter [in]	Grout Type	Pipe Type	Pipe Diameter
 None	none									
 "Vertical Loop, Default"	vertical									
 "Vertical Loop, Default, Specified Loop Flow"	vertical		1							

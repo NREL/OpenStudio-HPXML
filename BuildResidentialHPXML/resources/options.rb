@@ -32,8 +32,11 @@ def get_option_properties(args, tsv_file_name, option_name)
     row.each do |key, value|
       next if key == 'Option Name'
 
+      if key.include? '[' # strip units
+        key = key[0..key.index('[') - 1].strip
+      end
       tsv_name = File.basename(tsv_file_name, File.extname(tsv_file_name))
-      final_key = "#{tsv_name}_#{key}".to_sym
+      final_key = "#{tsv_name}_#{key.downcase.gsub(' ', '_')}".to_sym
 
       if not args[final_key].nil?
         fail "Duplicate value assigned to #{key}."
