@@ -543,7 +543,7 @@ module HVAC
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherFile] Weather object containing EPW information
-  # @param heat_pump [TODO] TODO
+  # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param hvac_sequential_load_fracs [Array<Double>] Array of daily fractions of remaining heating/cooling load to bet met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param ground_conductivity [TODO] TODO
@@ -641,6 +641,7 @@ module HVAC
           min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
         )
       else
+        # Derived from: https://www.e3s-conferences.org/articles/e3sconf/pdf/2018/19/e3sconf_eko-dok2018_00139.pdf
         plf_fplr_curve = Model.add_curve_cubic(
           model,
           name: 'Cool-PLF-fPLR',
@@ -718,6 +719,7 @@ module HVAC
           min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
         )
       else
+        # Derived from: https://www.e3s-conferences.org/articles/e3sconf/pdf/2018/19/e3sconf_eko-dok2018_00139.pdf
         plf_fplr_curve = Model.add_curve_cubic(
           model,
           name: 'Heat-PLF-fPLR',
@@ -930,7 +932,7 @@ module HVAC
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param heat_pump [TODO] TODO
+  # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param hvac_sequential_load_fracs [Array<Double>] Array of daily fractions of remaining heating/cooling load to bet met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
@@ -1904,10 +1906,10 @@ module HVAC
     fail 'Unable to get cooling capacity ratios.'
   end
 
-  # TODO
+  # Geothermal heat pump cooling capacity ratios for advanced model (variable-speed coils)
   #
-  # @param heat_pump [TODO] TODO
-  # @return [TODO] TODO
+  # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
+  # @return [Array<Double, Double>] Cooling apacity ratios at each speed
   def self.get_cool_capacity_ratios_gshp(heat_pump)
     # For each speed, ratio of capacity to nominal capacity
     case heat_pump.compressor_type
@@ -2099,10 +2101,10 @@ module HVAC
     fail 'Unable to get heating capacity ratios.'
   end
 
-  # TODO
+  # Geothermal heat pump heating capacity ratios for advanced model (variable-speed coils)
   #
-  # @param heat_pump [TODO] TODO
-  # @return [TODO] TODO
+  # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
+  # @return [Array<Double, Double>] Heating capacity ratios at each speed
   def self.get_heat_capacity_ratios_gshp(heat_pump)
     # For each speed, ratio of capacity to nominal capacity
     case heat_pump.compressor_type
@@ -2193,24 +2195,24 @@ module HVAC
     end
   end
 
-  # TODO
+  # Set geothermal heat pump additional properties for modeling
   #
-  # @param heat_pump [TODO] TODO
+  # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param hpxml_header [HPXML::Header] HPXML Header object
   # @return [nil]
   def self.set_curves_gshp(heat_pump, hpxml_header)
     hp_ap = heat_pump.additional_properties
-    hp_ap.cool_capacity_ratios = get_cool_capacity_ratios_gshp(heat_pump)
-    hp_ap.heat_capacity_ratios = get_heat_capacity_ratios_gshp(heat_pump)
-    hp_ap.cool_rated_cfm_per_ton = [400.0] * hp_ap.cool_capacity_ratios.size
-    hp_ap.heat_rated_cfm_per_ton = [400.0] * hp_ap.heat_capacity_ratios.size
-    hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
-    hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
-    hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
-    hp_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, hp_ap.heat_rated_airflow_rate)
 
     case hpxml_header.geothermal_model_type
     when HPXML::AdvancedResearchGeothermalModelTypeSimple
+      hp_ap.cool_capacity_ratios = [1.0]
+      hp_ap.heat_capacity_ratios = [1.0]
+      hp_ap.cool_rated_cfm_per_ton = [400.0]
+      hp_ap.heat_rated_cfm_per_ton = [400.0]
+      hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
+      hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
+      hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
+      hp_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, hp_ap.heat_rated_airflow_rate)
 
       # E+ equation fit coil coefficients generated following approach in Tang's thesis:
       # See Appendix B of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
@@ -2239,12 +2241,20 @@ module HVAC
       heat_cop_ratios = [1.0]
 
     when HPXML::AdvancedResearchGeothermalModelTypeAdvanced
+      hp_ap.cool_capacity_ratios = get_cool_capacity_ratios_gshp(heat_pump)
+      hp_ap.heat_capacity_ratios = get_heat_capacity_ratios_gshp(heat_pump)
+      hp_ap.cool_rated_cfm_per_ton = [400.0] * hp_ap.cool_capacity_ratios.size
+      hp_ap.heat_rated_cfm_per_ton = [400.0] * hp_ap.heat_capacity_ratios.size
+      hp_ap.cool_rated_airflow_rate = hp_ap.cool_rated_cfm_per_ton[-1]
+      hp_ap.cool_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.cool_capacity_ratios, hp_ap.cool_rated_cfm_per_ton, hp_ap.cool_rated_airflow_rate)
+      hp_ap.heat_rated_airflow_rate = hp_ap.heat_rated_cfm_per_ton[-1]
+      hp_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(hp_ap.heat_capacity_ratios, hp_ap.heat_rated_cfm_per_ton, hp_ap.heat_rated_airflow_rate)
       case heat_pump.compressor_type
       when HPXML::HVACCompressorTypeSingleStage
         # Cooling Curves
         # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
         # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-        # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+        # Catalog data from : https://files.climatemaster.com/Genesis-GS-Series-Product-Catalog.pdf, p180
         # Using E+ rated conditions:
         # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
         hp_ap.cool_cap_ft_spec = [[0.3926140238, 0.0297981297, 0.0000000582, 0.0123906803, -0.0003014284, -0.0001113698]]
@@ -2257,7 +2267,7 @@ module HVAC
         # Heating Curves
         # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
         # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-        # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+        # Catalog data from : https://files.climatemaster.com/Genesis-GS-Series-Product-Catalog.pdf, p180
         # Using E+ rated conditions:
         # Heating: Indoor air at 70F DB; Entering water temperature: 70F
         hp_ap.heat_cap_ft_spec = [[0.7353127278, -0.0035056759, -0.0000439615, 0.0204411095, -0.0000320781, -0.0001322685]]
@@ -2268,7 +2278,6 @@ module HVAC
         hp_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]]
         # TODO: Use default gross SHR after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
         hp_ap.cool_rated_shrs_gross = [heat_pump.cooling_shr]
-        # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
         cool_cop_ratios = [1.0]
         heat_cop_ratios = [1.0]
       when HPXML::HVACCompressorTypeTwoStage
