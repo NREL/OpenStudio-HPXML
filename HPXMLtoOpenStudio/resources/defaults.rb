@@ -2313,7 +2313,6 @@ module Defaults
 
         HVAC.set_gshp_assumptions(heat_pump, weather)
         HVAC.set_curves_gshp(heat_pump, hpxml_header)
-        puts heat_pump.additional_properties
 
         if heat_pump.geothermal_loop.bore_spacing.nil?
           heat_pump.geothermal_loop.bore_spacing = 16.4 # ft, distance between bores
