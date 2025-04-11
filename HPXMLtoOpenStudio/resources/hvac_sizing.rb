@@ -3776,11 +3776,26 @@ module HVACSizing
       return 2.0 * hpxml_bldg.building_construction.conditioned_floor_area
     end
 
-    if (mode == :htg) && hvac_system.respond_to?(:heating_airflow_cfm) && (not hvac_system.heating_airflow_cfm.nil?) && (not hvac_system.heating_capacity.nil?)
-      cfm_per_ton = hvac_system.heating_airflow_cfm / UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
-    elsif (mode == :clg) && hvac_system.respond_to?(:cooling_airflow_cfm) && (not hvac_system.cooling_airflow_cfm.nil?) && (not hvac_system.cooling_capacity.nil?)
-      cfm_per_ton = hvac_system.cooling_airflow_cfm / UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
-    else
+    cfm_per_ton = nil
+
+    # Check if user-specified design airflow rate
+    if mode == :htg
+      if hvac_system.respond_to?(:heating_airflow_cfm) && (not hvac_system.heating_airflow_cfm.nil?) && (not hvac_system.heating_capacity.nil?)
+        cfm_per_ton = hvac_system.heating_airflow_cfm / UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+      elsif hvac_system.is_a?(HPXML::HeatPump) && (not hvac_system.cooling_airflow_cfm.nil?) && (not hvac_system.cooling_capacity.nil?)
+        # Use DX cooling cfm/ton if provided instead
+        cfm_per_ton = hvac_system.cooling_airflow_cfm / UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+      end
+    elsif mode == :clg
+      if hvac_system.respond_to?(:cooling_airflow_cfm) && (not hvac_system.cooling_airflow_cfm.nil?) && (not hvac_system.cooling_capacity.nil?)
+        cfm_per_ton = hvac_system.cooling_airflow_cfm / UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+      elsif hvac_system.is_a?(HPXML::HeatPump) && (not hvac_system.heating_airflow_cfm.nil?) && (not hvac_system.heating_capacity.nil?)
+        # Use DX heating cfm/ton if provided instead
+        cfm_per_ton = hvac_system.heating_airflow_cfm / UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+      end
+    end
+
+    if cfm_per_ton.nil?
       case hvac_type
       when HPXML::HVACTypeFurnace,
            HPXML::HVACTypeBoiler # boiler needed here in case of ducted fan coil

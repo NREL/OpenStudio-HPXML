@@ -2122,63 +2122,73 @@ module Defaults
     end
 
     # Fan watts/cfm
+    (hpxml_bldg.heating_systems + hpxml_bldg.cooling_systems).each do |hvac_system|
+      next unless hvac_system.fan_watts_per_cfm.nil?
+
+      if hvac_system.respond_to?(:attached_heating_system) && (not hvac_system.attached_heating_system.nil?) && (not hvac_system.attached_heating_system.fan_watts_per_cfm.nil?)
+        hvac_system.fan_watts_per_cfm = hvac_system.attached_heating_system.fan_watts_per_cfm
+        hvac_system.fan_watts_per_cfm_isdefaulted = true
+      elsif hvac_system.respond_to?(:attached_cooling_system) && (not hvac_system.attached_cooling_system.nil?) && (not hvac_system.attached_cooling_system.fan_watts_per_cfm.nil?)
+        hvac_system.fan_watts_per_cfm = hvac_system.attached_cooling_system.fan_watts_per_cfm
+        hvac_system.fan_watts_per_cfm_isdefaulted = true
+      end
+    end
+
     psc_watts_per_cfm = 0.5 # W/cfm, PSC fan
     bpm_watts_per_cfm = 0.375 # W/cfm, BPM fan
     mini_split_ductless_watts_per_cfm = 0.07 # W/cfm
     mini_split_ducted_watts_per_cfm = 0.18 # W/cfm
+
     hpxml_bldg.heating_systems.each do |heating_system|
       case heating_system.heating_system_type
       when HPXML::HVACTypeFurnace
-        if heating_system.fan_watts_per_cfm.nil?
-          if (not heating_system.distribution_system.nil?) && (heating_system.distribution_system.air_type == HPXML::AirTypeGravity)
-            heating_system.fan_watts_per_cfm = 0.0
-          else
-            heating_system.fan_watts_per_cfm = (heating_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
-          end
-          heating_system.fan_watts_per_cfm_isdefaulted = true
+        next unless heating_system.fan_watts_per_cfm.nil?
+
+        if (not heating_system.distribution_system.nil?) && (heating_system.distribution_system.air_type == HPXML::AirTypeGravity)
+          heating_system.fan_watts_per_cfm = 0.0
+        else
+          heating_system.fan_watts_per_cfm = (heating_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
         end
+        heating_system.fan_watts_per_cfm_isdefaulted = true
       when HPXML::HVACTypeStove
-        if heating_system.fan_watts.nil?
-          heating_system.fan_watts = 40.0 # W
-          heating_system.fan_watts_isdefaulted = true
-        end
+        next unless heating_system.fan_watts.nil?
+
+        heating_system.fan_watts = 40.0
+        heating_system.fan_watts_isdefaulted = true
       when HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace,
            HPXML::HVACTypeSpaceHeater, HPXML::HVACTypeFireplace
-        if heating_system.fan_watts.nil?
-          heating_system.fan_watts = 0.0 # W/cfm, assume no fan power
-          heating_system.fan_watts_isdefaulted = true
-        end
+        next unless heating_system.fan_watts.nil?
+
+        heating_system.fan_watts = 0.0 # assume no fan power
+        heating_system.fan_watts_isdefaulted = true
       end
     end
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless cooling_system.fan_watts_per_cfm.nil?
+      case cooling_system.cooling_system_type
+      when HPXML::HVACTypeCentralAirConditioner
+        next unless cooling_system.fan_watts_per_cfm.nil?
 
-      if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_watts_per_cfm.nil?)
-        cooling_system.fan_watts_per_cfm = cooling_system.attached_heating_system.fan_watts_per_cfm
+        cooling_system.fan_watts_per_cfm = (cooling_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
         cooling_system.fan_watts_per_cfm_isdefaulted = true
-      else
-        case cooling_system.cooling_system_type
-        when HPXML::HVACTypeCentralAirConditioner
-          cooling_system.fan_watts_per_cfm = (cooling_system.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
-          cooling_system.fan_watts_per_cfm_isdefaulted = true
-        when HPXML::HVACTypeMiniSplitAirConditioner
-          cooling_system.fan_watts_per_cfm = cooling_system.distribution_system.nil? ? mini_split_ductless_watts_per_cfm : mini_split_ducted_watts_per_cfm
-          cooling_system.fan_watts_per_cfm_isdefaulted = true
-        when HPXML::HVACTypeEvaporativeCooler
-          # Depends on airflow rate, so defaulted in hvac_sizing.rb
-        end
+      when HPXML::HVACTypeMiniSplitAirConditioner
+        next unless cooling_system.fan_watts_per_cfm.nil?
+
+        cooling_system.fan_watts_per_cfm = cooling_system.distribution_system.nil? ? mini_split_ductless_watts_per_cfm : mini_split_ducted_watts_per_cfm
+        cooling_system.fan_watts_per_cfm_isdefaulted = true
       end
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fan_watts_per_cfm.nil?
-
       case heat_pump.heat_pump_type
       when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir
+        next unless heat_pump.fan_watts_per_cfm.nil?
+
         heat_pump.fan_watts_per_cfm = (heat_pump.fan_motor_type == HPXML::HVACFanMotorTypePSC) ? psc_watts_per_cfm : bpm_watts_per_cfm
         heat_pump.fan_watts_per_cfm_isdefaulted = true
       when HPXML::HVACTypeHeatPumpMiniSplit
+        next unless heat_pump.fan_watts_per_cfm.nil?
+
         heat_pump.fan_watts_per_cfm = heat_pump.distribution_system.nil? ? mini_split_ductless_watts_per_cfm : mini_split_ducted_watts_per_cfm
         heat_pump.fan_watts_per_cfm_isdefaulted = true
       end

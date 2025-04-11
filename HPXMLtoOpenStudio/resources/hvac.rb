@@ -302,8 +302,8 @@ module HVAC
           else
             obj_name = Constants::ObjectTypeCentralAirConditionerAndFurnace
             # error checking for fan power
-            if (cooling_system.fan_watts_per_cfm.to_f != heating_system.fan_watts_per_cfm.to_f)
-              fail "Fan powers for heating system '#{heating_system.id}' and cooling system '#{cooling_system.id}' are attached to a single distribution system and therefore must be the same."
+            if (not cooling_system.fan_watts_per_cfm.nil?) && (not heating_system.fan_watts_per_cfm.nil?) && (cooling_system.fan_watts_per_cfm != heating_system.fan_watts_per_cfm)
+              fail "Fan powers for heating system '#{heating_system.id}' (#{heating_system.fan_watts_per_cfm} W/cfm) and cooling system '#{cooling_system.id}' (#{cooling_system.fan_watts_per_cfm} W/cfm) are attached to a single distribution system and therefore must be the same."
             end
           end
         when HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC
