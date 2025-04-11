@@ -51,12 +51,6 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
-        <extension>
-          <AdditionalProperties>
-            <HeatPump>YORK HMH7</HeatPump>
-            <HeatPumpAHRICert>206921308</HeatPumpAHRICert>
-          </AdditionalProperties>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -331,7 +325,9 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CompressorType>variable speed</CompressorType>
+              <HeatingCapacity>36000.0</HeatingCapacity>
+              <CoolingCapacity>36000.0</CoolingCapacity>
+              <CompressorType>two stage</CompressorType>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -343,133 +339,100 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>17.5</Value>
+                <Value>18.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>9.5</Value>
+                <Value>9.3</Value>
               </AnnualHeatingEfficiency>
               <CoolingDetailedPerformanceData>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>95.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.33</CapacityFractionOfNominal>
+                  <Capacity>24000.0</Capacity>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>4.47</Value>
+                    <Value>4.1</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>95.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.0</CapacityFractionOfNominal>
+                  <Capacity>36000.0</Capacity>
                   <CapacityDescription>nominal</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>2.64</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>95.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.0</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>2.64</Value>
+                    <Value>3.6</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>82.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.37</CapacityFractionOfNominal>
+                  <Capacity>29000.0</Capacity>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>6.33</Value>
+                    <Value>5.4</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>82.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.13</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
+                  <Capacity>39000.0</Capacity>
+                  <CapacityDescription>nominal</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>3.46</Value>
+                    <Value>4.8</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
               </CoolingDetailedPerformanceData>
               <HeatingDetailedPerformanceData>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>47.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.28</CapacityFractionOfNominal>
+                  <Capacity>24500.0</Capacity>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>4.68</Value>
+                    <Value>3.9</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>47.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.0</CapacityFractionOfNominal>
+                  <Capacity>36000.0</Capacity>
                   <CapacityDescription>nominal</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>3.4</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>47.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>1.0</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>3.4</Value>
+                    <Value>3.1</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>17.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.1</CapacityFractionOfNominal>
+                  <Capacity>14200.0</Capacity>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>1.57</Value>
+                    <Value>3.0</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>17.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.69</CapacityFractionOfNominal>
+                  <Capacity>21600.0</Capacity>
                   <CapacityDescription>nominal</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>2.58</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>17.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.69</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>2.58</Value>
+                    <Value>2.3</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>5.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.03</CapacityFractionOfNominal>
+                  <Capacity>9900.0</Capacity>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
-                    <Value>0.47</Value>
-                  </Efficiency>
-                </PerformanceDataPoint>
-                <PerformanceDataPoint>
-                  <OutdoorTemperature>5.0</OutdoorTemperature>
-                  <CapacityFractionOfNominal>0.55</CapacityFractionOfNominal>
-                  <CapacityDescription>maximum</CapacityDescription>
-                  <Efficiency>
-                    <Units>COP</Units>
-                    <Value>2.63</Value>
+                    <Value>2.2</Value>
                   </Efficiency>
                 </PerformanceDataPoint>
               </HeatingDetailedPerformanceData>
+              <extension>
+                <HeatingCapacityFraction17F>0.6</HeatingCapacityFraction17F>
+              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>

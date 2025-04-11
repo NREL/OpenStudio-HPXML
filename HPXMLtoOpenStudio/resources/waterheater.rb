@@ -1941,7 +1941,7 @@ module Waterheater
   # @param t_set_c [Double] Water heater setpoint including deadband (C)
   # @param loc_space [OpenStudio::Model::Space] The space where the water heater is located
   # @param loc_schedule [OpenStudio::Model::ScheduleConstant] The temperature schedule, if not located in a space
-  # @param u [Double] Tank loss coefficient (FIXME)
+  # @param u [Double] Tank loss coefficient (Btu/F-ft2-hr)
   # @param ua [Double] Tank loss UA factor (Btu/hr-F)
   # @param eta_c [Double] Burner efficiency (frac)
   # @param is_dsh_storage [Boolean] True if this is a desuperheater storage tank
