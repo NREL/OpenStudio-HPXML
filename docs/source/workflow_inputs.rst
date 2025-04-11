@@ -2173,7 +2173,7 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
          If there is a cooling system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanMotorType.
   .. [#] If FanMotorType is not provided and if there is a cooling system attached to the DistributionSystem, defaults to "PSC" if the attached cooling system CompressorType is "single stage", else "BPM"; If there's no cooling system attached, defaults to "PSC" if AFUE <= 0.9, else "BPM".
   .. [#] If there is a cooling system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanPowerWattsPerCFM.
-  .. [#] If FanPowerWattsPerCFM not provided, defaults to 0 W/cfm if gravity distribution system, else 0.5 W/cfm if FanMotorType is "PSC", else 0.375 W/cfm if FanMotorType is "BPM".
+  .. [#] If FanPowerWattsPerCFM not provided, defaults to using attached central air conditioner W/cfm if available, else 0 W/cfm if gravity distribution system, else 0.5 W/cfm if FanMotorType is "PSC", else 0.375 W/cfm if FanMotorType is "BPM".
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
 
@@ -2805,8 +2805,8 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``extension/HeatingCapacityFraction17F``                          double   frac      >= 0, < 1                 No        See [#]_        Heating output capacity at 17F divided by heating output capacity at 47F [#]_
   ``extension/FanMotorType``                                        string             See [#]_                  No        See [#]_        Blower fan model type
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        360 cfm/ton     Blower fan heating design airflow rate
-  ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        360 cfm/ton     Blower fan cooling design airflow rate
+  ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        See [#]_        Blower fan heating design airflow rate
+  ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        See [#]_        Blower fan cooling design airflow rate
   ``extension/AirflowDefectRatio``                                  double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflow rates [#]_
   ``extension/ChargeDefectRatio``                                   double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double   W         >= 0                      No        See [#]_        Crankcase heater power
@@ -2852,6 +2852,8 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] FanMotorType choices are "PSC" (Permanent Split Capacitor) and "BPM" (Brushless Permanent Magnet).
   .. [#] If FanMotorType is not provided, defaults to "PSC" if CompressorType is "single stage", else "BPM".
   .. [#] If FanPowerWattsPerCFM not provided, defaults to 0.5 W/cfm if FanMotorType is "PSC", else 0.375 W/cfm if FanMotorType is "BPM".
+  .. [#] If HeatingAirflowCFM not provided, defaults to cfm/ton based on CoolingAirflowCFM if provided, else 360 cfm/ton.
+  .. [#] If CoolingAirflowCFM not provided, defaults to cfm/ton based on HeatingAirflowCFM if provided, else 360 cfm/ton.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
@@ -2895,8 +2897,8 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   ``extension/HeatingCapacityFraction17F``                          double    frac      >= 0, < 1                 No        See [#]_        Heating output capacity at 17F divided by heating output capacity at 47F [#]_
   ``extension/FanMotorType``                                        string              See [#]_                  No        BPM             Blower fan model type
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/HeatingAirflowCFM``                                   double    cfm       >= 0                      No        360 cfm/ton     Blower fan heating design airflow rate
-  ``extension/CoolingAirflowCFM``                                   double    cfm       >= 0                      No        360 cfm/ton     Blower fan cooling design airflow rate
+  ``extension/HeatingAirflowCFM``                                   double    cfm       >= 0                      No        See [#]_        Blower fan heating design airflow rate
+  ``extension/CoolingAirflowCFM``                                   double    cfm       >= 0                      No        See [#]_        Blower fan cooling design airflow rate
   ``extension/AirflowDefectRatio``                                  double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflow rates [#]_
   ``extension/ChargeDefectRatio``                                   double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double    W         >= 0                      No        See [#]_        Crankcase heater power
@@ -2940,6 +2942,8 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
          Either input approach can be used, but not both.
   .. [#] FanMotorType choices are "PSC" (Permanent Split Capacitor) and "BPM" (Brushless Permanent Magnet).
   .. [#] FanPowerWattsPerCFM defaults to 0.07 W/cfm for ductless systems and 0.18 W/cfm for ducted systems.
+  .. [#] If HeatingAirflowCFM not provided, defaults to cfm/ton based on CoolingAirflowCFM if provided, else 360 cfm/ton.
+  .. [#] If CoolingAirflowCFM not provided, defaults to cfm/ton based on HeatingAirflowCFM if provided, else 360 cfm/ton.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          A non-zero airflow defect can only be applied for systems attached to a distribution system.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
@@ -3081,8 +3085,8 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   ``extension/SharedLoopWatts``                    double    W       >= 0             See [#]_                  Shared pump power [#]_
   ``extension/FanMotorType``                       string            See [#]_         No        See [#]_        Blower fan model type
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/HeatingAirflowCFM``                  double    cfm     >= 0             No        360 cfm/ton     Blower fan heating design airflow rate
-  ``extension/CoolingAirflowCFM``                  double    cfm     >= 0             No        360 cfm/ton     Blower fan cooling design airflow rate
+  ``extension/HeatingAirflowCFM``                  double    cfm     >= 0             No        See [#]_        Blower fan heating design airflow rate
+  ``extension/CoolingAirflowCFM``                  double    cfm     >= 0             No        See [#]_        Blower fan cooling design airflow rate
   ``extension/AirflowDefectRatio``                 double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflow rates [#]_
   ``extension/ChargeDefectRatio``                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CoolingAutosizingFactor``            double    frac    > 0              No        1.0             Cooling autosizing capacity multiplier
@@ -3122,6 +3126,8 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   .. [#] FanMotorType choices are "PSC" (Permanent Split Capacitor) and "BPM" (Brushless Permanent Magnet).
   .. [#] If FanMotorType is not provided, defaults to "PSC" if COP <= 8.75/3.2, else "BPM".
   .. [#] If FanPowerWattsPerCFM not provided, defaults to 0.5 W/cfm if FanMotorType is "PSC", else 0.375 W/cfm if FanMotorType is "BPM".
+  .. [#] If HeatingAirflowCFM not provided, defaults to cfm/ton based on CoolingAirflowCFM if provided, else 360 cfm/ton.
+  .. [#] If CoolingAirflowCFM not provided, defaults to cfm/ton based on HeatingAirflowCFM if provided, else 360 cfm/ton.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
