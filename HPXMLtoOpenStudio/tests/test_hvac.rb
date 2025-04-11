@@ -1849,6 +1849,46 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       assert_in_epsilon(cool_rated_airflow_ratio * cool_design_airflow_mult, program_values['FF_AF_clg'][i], 0.01)
       assert_in_epsilon(heat_rated_airflow_ratio * heat_design_airflow_mult, program_values['FF_AF_htg'][i], 0.01)
     end
+
+    # Test without heating design airflow rate
+    args_hash = {}
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-install-quality-mini-split-heat-pump-ducted.xml')
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = nil
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm *= cool_design_airflow_mult
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml_bldg.heat_pumps[0]
+
+    # Check installation quality EMS
+    program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+
+    for i in 0.._get_num_speeds(heat_pump.compressor_type) - 1
+      assert_in_epsilon(cool_rated_airflow_ratio * cool_design_airflow_mult, program_values['FF_AF_clg'][i], 0.01)
+      assert_in_epsilon(heat_rated_airflow_ratio * cool_design_airflow_mult, program_values['FF_AF_htg'][i], 0.01)
+    end
+
+    # Test without cooling design airflow rate
+    args_hash = {}
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-install-quality-mini-split-heat-pump-ducted.xml')
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm *= heat_design_airflow_mult
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml_bldg.heat_pumps[0]
+
+    # Check installation quality EMS
+    program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+
+    for i in 0.._get_num_speeds(heat_pump.compressor_type) - 1
+      assert_in_epsilon(cool_rated_airflow_ratio * heat_design_airflow_mult, program_values['FF_AF_clg'][i], 0.01)
+      assert_in_epsilon(heat_rated_airflow_ratio * heat_design_airflow_mult, program_values['FF_AF_htg'][i], 0.01)
+    end
   end
 
   def test_custom_seasons

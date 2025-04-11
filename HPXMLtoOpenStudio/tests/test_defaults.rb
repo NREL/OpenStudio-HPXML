@@ -1589,8 +1589,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
 
-    # Test watts/cfm based on fan model type
+    # Test watts/cfm based on attached heating system
     hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = nil
+    hpxml_bldg.heating_systems.add(id: 'HeatingSystem1',
+                                   distribution_system_idref: hpxml_bldg.hvac_distributions[0].id,
+                                   heating_system_type: HPXML::HVACTypeFurnace,
+                                   heating_system_fuel: HPXML::FuelTypeElectricity,
+                                   heating_efficiency_afue: 1,
+                                   fraction_heat_load_served: 1.0,
+                                   fan_watts_per_cfm: 0.55)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.55, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
+
+    # Test watts/cfm based on fan model type
+    hpxml_bldg.heating_systems[0].delete
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.375, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.4, 11.0, 40.0, 1.2)
@@ -1755,6 +1768,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   def test_furnaces
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.66
     hpxml_bldg.heating_systems[0].fan_watts_per_cfm = 0.66
     hpxml_bldg.heating_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
     hpxml_bldg.heating_systems[0].airflow_defect_ratio = -0.22
@@ -1772,8 +1786,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, HPXML::HVACFanMotorTypeBPM, nil, -0.22, nil, true, 999, 1.2)
 
-    # Test watts/cfm based on fan model type
+    # Test watts/cfm based on attached cooling system
     hpxml_bldg.heating_systems[0].fan_watts_per_cfm = nil
+    hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.55
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.55, HPXML::HVACFanMotorTypeBPM, nil, -0.22, nil, true, 999, 1.2)
+
+    # Test watts/cfm based on fan model type
+    hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.375, HPXML::HVACFanMotorTypeBPM, nil, -0.22, nil, true, 999, 1.2)

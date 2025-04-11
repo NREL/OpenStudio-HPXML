@@ -1211,7 +1211,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-research-features-num-unit-greater-than-one' => ['NumberofUnits greater than 1 is not supported for on-off thermostat deadband.',
                                                                                    'NumberofUnits greater than 1 is not supported for multi-staging backup coil.'],
                             'hvac-gshp-invalid-num-bore-holes' => ["Number of bore holes (5) with borefield configuration 'Lopsided U' not supported."],
-                            'hvac-inconsistent-fan-powers' => ["Fan powers for heating system 'HeatingSystem1' and cooling system 'CoolingSystem1' are attached to a single distribution system and therefore must be the same."],
+                            'hvac-inconsistent-fan-powers' => ["Fan powers for heating system 'HeatingSystem1' (0.45 W/cfm) and cooling system 'CoolingSystem1' (0.55 W/cfm) are attached to a single distribution system and therefore must be the same."],
                             'hvac-invalid-distribution-system-type' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
                             'hvac-shared-boiler-multiple' => ['More than one shared heating system found.'],
                             'hvac-shared-chiller-multiple' => ['More than one shared cooling system found.'],
