@@ -112,7 +112,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Model.reset(runner, model)
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
-    set_file_paths(args)
+    set_file_paths(runner, args)
 
     begin
       hpxml = create_hpxml_object(runner, args)
@@ -177,16 +177,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
-  def set_file_paths(args)
+  def set_file_paths(runner, args)
     if not (Pathname.new args[:hpxml_path]).absolute?
-      args[:hpxml_path] = File.expand_path(args[:hpxml_path])
+      args[:hpxml_path] = File.join(runner.workflow.absoluteRootDir.to_s, args[:hpxml_path])
     end
     if not File.exist?(args[:hpxml_path]) && args[:hpxml_path].downcase.end_with?('.xml')
       fail "'#{args[:hpxml_path]}' does not exist or is not an .xml file."
     end
 
     if not (Pathname.new args[:output_dir]).absolute?
-      args[:output_dir] = File.expand_path(args[:output_dir])
+      args[:output_dir] = File.join(runner.workflow.absoluteRootDir.to_s, args[:output_dir])
     end
 
     if File.extname(args[:annual_output_file_name]).length == 0

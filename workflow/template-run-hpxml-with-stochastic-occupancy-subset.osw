@@ -6,17 +6,17 @@
   "steps": [
     {
       "arguments": {
-        "hpxml_path": "../../sample_files/base.xml",
+        "hpxml_path": "sample_files/base.xml",
         "output_csv_path": "stochastic.csv",
-        "hpxml_output_path": "../built-stochastic-schedules.xml",
+        "hpxml_output_path": "run/built-stochastic-schedules.xml",
         "schedules_column_names": "cooking_range, dishwasher, hot_water_dishwasher, clothes_washer, hot_water_clothes_washer, clothes_dryer, hot_water_fixtures"
       },
       "measure_dir_name": "BuildResidentialScheduleFile"
     },
     {
       "arguments": {
-        "hpxml_path": "../built-stochastic-schedules.xml",
-        "output_dir": "..",
+        "hpxml_path": "run/built-stochastic-schedules.xml",
+        "output_dir": "run",
         "debug": false,
         "add_component_loads": false,
         "skip_validation": false
