@@ -736,7 +736,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
       # Values for rated speed
-      expected_clg_cop_95 = 4.51
+      expected_clg_cop_95 = 3.76
       expected_clg_capacity_95 = 11040
       expected_htg_cop_47 = 2.99
       expected_htg_capacity_47 = 10077
