@@ -535,8 +535,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Detailed air condition outputs (timeseries only)
     if args[:include_timeseries_zone_conditions]
-      result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Air Relative Humidity,#{args[:timeseries_frequency]};").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Air Humidity Ratio,#{args[:timeseries_frequency]};").get
+      result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Air Relative Humidity,#{args[:timeseries_frequency]};").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Dewpoint Temperature,#{args[:timeseries_frequency]};").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Radiant Temperature,#{args[:timeseries_frequency]};").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Operative Temperature,#{args[:timeseries_frequency]};").get
@@ -1215,44 +1215,44 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         zone_names << zone.name.to_s.upcase
       end
 
-      # Zone relative humidities
-      zone_names.sort.each do |zone_name|
-        @zone_temps["#{zone_name} Relative Humidity"] = ZoneTemp.new
-        @zone_temps["#{zone_name} Relative Humidity"].name = "Relative Humidity: #{sanitize_name(zone_name)}"
-        @zone_temps["#{zone_name} Relative Humidity"].timeseries_units = '%'
-        @zone_temps["#{zone_name} Relative Humidity"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Air Relative Humidity'], 1, 0, args[:timeseries_frequency])
-      end
-
       # Zone humidity ratios
       zone_names.sort.each do |zone_name|
-        @zone_temps["#{zone_name} Humidity Ratio"] = ZoneTemp.new
-        @zone_temps["#{zone_name} Humidity Ratio"].name = "Humidity Ratio: #{sanitize_name(zone_name)}"
-        @zone_temps["#{zone_name} Humidity Ratio"].timeseries_units = 'lb Water Air per lb Dry Air' # TODO could report as unitless instead
-        @zone_temps["#{zone_name} Humidity Ratio"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Air Humidity Ratio'], 1, 0, args[:timeseries_frequency])
+        @zone_conds["#{zone_name} Humidity Ratio"] = ZoneCond.new
+        @zone_conds["#{zone_name} Humidity Ratio"].name = "Humidity Ratio: #{sanitize_name(zone_name)}"
+        @zone_conds["#{zone_name} Humidity Ratio"].timeseries_units = 'lb Water Air per lb Dry Air' # TODO could report as unitless instead
+        @zone_conds["#{zone_name} Humidity Ratio"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Air Humidity Ratio'], 1, 0, args[:timeseries_frequency])
+      end
+
+      # Zone relative humidities
+      zone_names.sort.each do |zone_name|
+        @zone_conds["#{zone_name} Relative Humidity"] = ZoneCond.new
+        @zone_conds["#{zone_name} Relative Humidity"].name = "Relative Humidity: #{sanitize_name(zone_name)}"
+        @zone_conds["#{zone_name} Relative Humidity"].timeseries_units = '%'
+        @zone_conds["#{zone_name} Relative Humidity"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Air Relative Humidity'], 1, 0, args[:timeseries_frequency])
       end
 
       # Zone dewpoint temperatures
       zone_names.sort.each do |zone_name|
-        @zone_temps["#{zone_name} Dewpoint Temperature"] = ZoneTemp.new
-        @zone_temps["#{zone_name} Dewpoint Temperature"].name = "Dewpoint Temperature: #{sanitize_name(zone_name)}"
-        @zone_temps["#{zone_name} Dewpoint Temperature"].timeseries_units = 'F'
-        @zone_temps[zone_name].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Air Dewpoint Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        @zone_conds["#{zone_name} Dewpoint Temperature"] = ZoneCond.new
+        @zone_conds["#{zone_name} Dewpoint Temperature"].name = "Dewpoint Temperature: #{sanitize_name(zone_name)}"
+        @zone_conds["#{zone_name} Dewpoint Temperature"].timeseries_units = 'F'
+        @zone_conds["#{zone_name} Dewpoint Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Air Dewpoint Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
       end
 
       # Zone mean radiant temperatures
       zone_names.sort.each do |zone_name|
-        @zone_temps["#{zone_name} Mean Radiant Temperature"] = ZoneTemp.new
-        @zone_temps["#{zone_name} Mean Radiant Temperature"].name = "Mean Radiant Temperature: #{sanitize_name(zone_name)}"
-        @zone_temps["#{zone_name} Mean Radiant Temperature"].timeseries_units = 'F'
-        @zone_temps["#{zone_name} Mean Radiant Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Radiant Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        @zone_conds["#{zone_name} Radiant Temperature"] = ZoneCond.new
+        @zone_conds["#{zone_name} Radiant Temperature"].name = "Radiant Temperature: #{sanitize_name(zone_name)}"
+        @zone_conds["#{zone_name} Radiant Temperature"].timeseries_units = 'F'
+        @zone_conds["#{zone_name} Radiant Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Radiant Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
       end
 
       # Zone operative temperatures
       zone_names.sort.each do |zone_name|
-        @zone_temps["#{zone_name} Operative Temperature"] = ZoneTemp.new
-        @zone_temps["#{zone_name} Operative Temperature"].name = "Operative Temperature: #{sanitize_name(zone_name)}"
-        @zone_temps["#{zone_name} Operative Temperature"].timeseries_units = 'F'
-        @zone_temps["#{zone_name} Operative Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Operative Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        @zone_conds["#{zone_name} Operative Temperature"] = ZoneCond.new
+        @zone_conds["#{zone_name} Operative Temperature"].name = "Operative Temperature: #{sanitize_name(zone_name)}"
+        @zone_conds["#{zone_name} Operative Temperature"].timeseries_units = 'F'
+        @zone_conds["#{zone_name} Operative Temperature"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Operative Temperature'], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
       end
     end
 
