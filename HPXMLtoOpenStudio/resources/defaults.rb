@@ -1900,8 +1900,7 @@ module Defaults
       next unless HVAC.is_room_dx_hvac_system(hvac_system)
       next unless hvac_system.cooling_efficiency_ceer.nil?
 
-      # Source: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
-      hvac_system.cooling_efficiency_ceer = (hvac_system.cooling_efficiency_eer / 1.01).round(2)
+      hvac_system.cooling_efficiency_ceer = HVAC.calc_ceer_from_eer(hvac_system).round(2)
       hvac_system.cooling_efficiency_ceer_isdefaulted = true
       hvac_system.cooling_efficiency_eer = nil
     end
@@ -2239,17 +2238,7 @@ module Defaults
       end
       next unless hvac_system.cooling_efficiency_eer.nil? && hvac_system.cooling_efficiency_eer2.nil?
 
-      # Regressions based on Central ACs & HPs in ENERGY STAR product lists
-      seer2 = hvac_system.cooling_efficiency_seer2
-      case hvac_system.compressor_type
-      when HPXML::HVACCompressorTypeSingleStage
-        eer2 = [0.73 * seer2 + 1.47, seer2].min
-      when HPXML::HVACCompressorTypeTwoStage
-        eer2 = [0.63 * seer2 + 2.34, seer2].min
-      when HPXML::HVACCompressorTypeVariableSpeed
-        eer2 = [0.31 * seer2 + 6.45, seer2].min
-      end
-      hvac_system.cooling_efficiency_eer2 = eer2.round(2)
+      hvac_system.cooling_efficiency_eer2 = get_hvac_eer2(hvac_system).round(2)
       hvac_system.cooling_efficiency_eer2_isdefaulted = true
     end
 
@@ -4118,7 +4107,7 @@ module Defaults
           plug_load.monthly_multipliers_isdefaulted = true
         end
       when HPXML::PlugLoadTypeWellPump
-        default_annual_kwh = get_detault_well_pump_annual_energy(cfa, nbeds, n_occ, unit_type)
+        default_annual_kwh = get_default_well_pump_annual_energy(cfa, nbeds, n_occ, unit_type)
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true
@@ -4192,7 +4181,7 @@ module Defaults
         end
       when HPXML::FuelLoadTypeLighting
         if fuel_load.therm_per_year.nil?
-          fuel_load.therm_per_year = get_detault_gas_lighting_annual_energy(cfa, nbeds, n_occ, unit_type)
+          fuel_load.therm_per_year = get_default_gas_lighting_annual_energy(cfa, nbeds, n_occ, unit_type)
           fuel_load.therm_per_year_isdefaulted = true
         end
         if fuel_load.frac_sensible.nil?
@@ -5574,6 +5563,25 @@ module Defaults
     return
   end
 
+  # Gets the default EER for a HVAC system.
+  #
+  # @param [HPXML::CoolingSystem or HPXML::HeatPump]
+  # @return [Double] Cooling EER2 (Btu/Wh)
+  def self.get_hvac_eer2(hvac_system)
+    seer2 = hvac_system.cooling_efficiency_seer2
+    seer2 = HVAC.calc_seer2_from_seer(hvac_system) if seer2.nil?
+
+    # Regressions based on Central ACs & HPs in ENERGY STAR product lists
+    case hvac_system.compressor_type
+    when HPXML::HVACCompressorTypeSingleStage
+      return [0.73 * seer2 + 1.47, seer2].min
+    when HPXML::HVACCompressorTypeTwoStage
+      return [0.63 * seer2 + 2.34, seer2].min
+    when HPXML::HVACCompressorTypeVariableSpeed
+      return [0.31 * seer2 + 6.45, seer2].min
+    end
+  end
+
   # Gets the default fan power for a ceiling fan.
   #
   # Source: ANSI/RESNET/ICC 301
@@ -6047,7 +6055,7 @@ module Defaults
   # @param n_occ [Double] Number of occupants in the dwelling unit
   # @param unit_type [String] Type of dwelling unit (HXPML::ResidentialTypeXXX)
   # @return [Double] Annual energy use (kWh/yr)
-  def self.get_detault_well_pump_annual_energy(cfa, nbeds, n_occ, unit_type)
+  def self.get_default_well_pump_annual_energy(cfa, nbeds, n_occ, unit_type)
     if n_occ == 0
       # Operational calculation w/ zero occupants, zero out energy use
       return 0.0
@@ -6083,7 +6091,7 @@ module Defaults
   # @param n_occ [Double] Number of occupants in the dwelling unit
   # @param unit_type [String] Type of dwelling unit (HXPML::ResidentialTypeXXX)
   # @return [Double] Annual energy use (therm/yr)
-  def self.get_detault_gas_lighting_annual_energy(cfa, nbeds, n_occ, unit_type)
+  def self.get_default_gas_lighting_annual_energy(cfa, nbeds, n_occ, unit_type)
     if n_occ == 0
       # Operational calculation w/ zero occupants, zero out energy use
       return 0.0

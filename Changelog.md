@@ -5,12 +5,12 @@ __New Features__
   - **Breaking change**: `CompressorType` required for central and mini-split air conditioners and heat pumps.
   - **Breaking change**: Replaces `HeatingCapacityRetention[Fraction | Temperature]` with `HeatingCapacityFraction17F`.
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
-  - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central heat pumps and mini-splits; defaults to assuming a pan heater is present.
-  - Allows optional EER or EER2 inputs (`AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value`) for central air conditioners/heat pumps and mini-splits.
+  - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central and mini-split heat pumps; defaults to assuming a pan heater is present.
+  - Allows optional EER2 or EER inputs (`AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value`) for central and mini-split air conditioners and heat pumps.
   - Deprecates SHR inputs (e.g., `CoolingSensibleHeatFraction`); they are no longer used.
-  - Allows optional `extension/FanMotorType` input; updates `FanPowerWattsPerCFM` defaults to be based on fan motor type.
-  - Allows optional `extension/HeatingAirflowCFM` (and `CoolingAirflowCFM`) inputs to specify design airflow rates.
-  - Updates design airflow rates to use cfm/ton assumptions rather than Manual S-based approach.
+  - Allows optional `extension/FanMotorType` input for central equipment; updates `FanPowerWattsPerCFM` defaults to be based on fan motor type.
+  - Allows optional design airflow rate inputs (`extension/HeatingAirflowCFM` and `extension/CoolingAirflowCFM`).
+  - Updates default design airflow rates to use cfm/ton assumptions rather than Manual S-based approach.
   - Updates to detailed performance datapoints:
     - **Breaking change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
     - Detailed performance datapoints can now be specified for single stage and two stage equipment too.

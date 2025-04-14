@@ -5145,6 +5145,24 @@ module HVAC
     end
   end
 
+  # Calculates rated EER (older metric) from rated EER2 (newer metric).
+  #
+  # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
+  # Note that this is a regression based on products on the market, not a conversion.
+  #
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
+  # @return [Double] EER value (Btu/Wh)
+  def self.calc_eer_from_eer2(hvac_system)
+    # Note: There are less common system types (packaged, small duct high velocity,
+    # and space-constrained) that we don't handle here.
+    is_ducted = !hvac_system.distribution_system_idref.nil?
+    if is_ducted # Ducted split system
+      return hvac_system.cooling_efficiency_eer2 / 0.95
+    else # Ductless systems
+      return hvac_system.cooling_efficiency_eer2 / 1.00
+    end
+  end
+
   # Calculates rated EER2 (newer metric) from rated EER (older metric).
   #
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
@@ -5168,7 +5186,7 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # This is based on a regression of products, not a translation.
   #
-  # @param heat_pump [HPXML::HeatPump]  The HPXML Heat Pump system of interest
+  # @param heat_pump [HPXML::HeatPump] The HPXML Heat Pump of interest
   # @return [Double] HSPF value (Btu/Wh)
   def self.calc_hspf_from_hspf2(heat_pump)
     # Note: There are less common system types (packaged, small duct high velocity,
@@ -5186,7 +5204,7 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # This is based on a regression of products, not a translation.
   #
-  # @param heat_pump [HPXML::HeatPump]  The HPXML Heat Pump system of interest
+  # @param heat_pump [HPXML::HeatPump] The HPXML Heat Pump of interest
   # @return [Double] HSPF2 value (Btu/Wh)
   def self.calc_hspf2_from_hspf(heat_pump)
     # Note: There are less common system types (packaged, small duct high velocity,
@@ -5197,6 +5215,26 @@ module HVAC
     else # Ductless system
       return heat_pump.heating_efficiency_hspf * 0.90
     end
+  end
+
+  # Calculates rated CEER (newer metric) from rated EER (older metric).
+  #
+  # Source: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
+  #
+  # @param cooling_system [HPXML::CoolingSystem] The HPXML Cooling System of interest
+  # @return [Double] CEER value (Btu/Wh)
+  def self.calc_ceer_from_eer(cooling_system)
+    return cooling_system.cooling_efficiency_eer / 1.01
+  end
+
+  # Calculates rated EER (older metric) from rated CEER (newer metric).
+  #
+  # Source: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
+  #
+  # @param cooling_system [HPXML::CoolingSystem] The HPXML Cooling System of interest
+  # @return [Double] EER value (Btu/Wh)
+  def self.calc_eer_from_ceer(cooling_system)
+    return cooling_system.cooling_efficiency_ceer * 1.01
   end
 
   # Check provided HVAC system and distribution types against what is allowed.

@@ -2466,8 +2466,8 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   ``CoolingCapacity``                                               double   Btu/hr       >= 0                     No        autosized [#]_  Cooling output capacity
   ``CompressorType``                                                string                See [#]_                 Yes                       Type of compressor
   ``FractionCoolLoadServed``                                        double   frac         >= 0, <= 1 [#]_          Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh       > 0                      Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double   Btu/Wh       > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER2" or Units="SEER"]/Value``  double   Btu/Wh       > 0                      Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value``    double   Btu/Wh       > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                        No        <none>          Cooling detailed performance data [#]_
   ``extension/FanMotorType``                                        string                See [#]_                 No        See [#]_        Blower fan model type
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm        >= 0 [#]_                No        See [#]_        Blower fan efficiency at maximum fan speed
@@ -2492,10 +2492,10 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
-  .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
-  .. [#] In addition, EER must be < SEER; EER2 must be <= SEER2.
-  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
-  .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 (assumed to be a split system).
+  .. [#] If SEER provided, converted to SEER2 using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER2 = SEER * 0.95 (assumed to be a split system).
+  .. [#] In addition, EER2 must be <= SEER2; EER must be < SEER.
+  .. [#] If neither EER2 nor EER provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
+  .. [#] If EER provided, converted to EER2 using ANSI/RESNET/ICC 301-2022 Addendum C, where EER2 = EER * 0.95 (assumed to be a split system).
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] FanMotorType choices are "PSC" (Permanent Split Capacitor) and "BPM" (Brushless Permanent Magnet).
          If there is a heating system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanMotorType.
@@ -2526,7 +2526,7 @@ Each room air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``CoolingSystemFuel``                                           string          electricity           Yes                       Fuel type
   ``CoolingCapacity``                                             double  Btu/hr  >= 0                  No        autosized [#]_  Cooling output capacity
   ``FractionCoolLoadServed``                                      double  frac    >= 0, <= 1 [#]_       Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``  double  Btu/Wh  > 0                   Yes                       Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="CEER" or Units="EER"]/Value``  double  Btu/Wh  > 0                   Yes                       Rated cooling efficiency
   ``IntegratedHeatingSystemFuel``                                 string          See [#]_              No        <none>          Fuel type of integrated heater
   ``extension/CrankcaseHeaterPowerWatts``                         double  W       >= 0                  No        0.0             Crankcase heater power
   ``extension/CoolingAutosizingFactor``                           double  frac    > 0                   No        1.0             Cooling autosizing capacity multiplier
@@ -2572,7 +2572,7 @@ Each packaged terminal air conditioner (PTAC) is entered as a ``/HPXML/Building/
   ``CoolingSystemFuel``                                           string          electricity                        Yes                       Fuel type
   ``CoolingCapacity``                                             double  Btu/hr  >= 0                               No        autosized [#]_  Cooling output capacity
   ``FractionCoolLoadServed``                                      double  frac    >= 0, <= 1 [#]_                    Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``  double  Btu/Wh  > 0                                Yes                       Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="CEER" or Units="EER"]/Value``  double  Btu/Wh  > 0                                Yes                       Rated cooling efficiency
   ``IntegratedHeatingSystemFuel``                                 string          See [#]_                           No        <none>          Fuel type of integrated heater
   ``extension/CrankcaseHeaterPowerWatts``                         double  W       >= 0                               No        0.0             Crankcase heater power
   ``extension/CoolingAutosizingFactor``                           double  frac    > 0                                No        1.0             Cooling autosizing capacity multiplier
@@ -2647,8 +2647,8 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   ``CoolingCapacity``                                               double    Btu/hr  >= 0                     No        autosized [#]_  Cooling output capacity
   ``CompressorType``                                                string            variable speed           Yes                       Type of compressor
   ``FractionCoolLoadServed``                                        double    frac    >= 0, <= 1 [#]_          Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh  > 0                      Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh  > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER2" or Units="SEER"]/Value``  double    Btu/Wh  > 0                      Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value``    double    Btu/Wh  > 0 [#]_                 No        See [#]_        Rated cooling efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                    No        <none>          Cooling detailed performance data [#]_
   ``extension/FanMotorType``                                        string            See [#]_                 No        BPM             Blower fan model type
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0 [#]_                No        See [#]_        Blower fan efficiency at maximum fan speed
@@ -2672,10 +2672,10 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
-  .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
-  .. [#] In addition, EER must be < SEER; EER2 must be <= SEER2.
-  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
-  .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 if ducted and SEER = SEER2 if ductless.
+  .. [#] If SEER provided, converted to SEER2 using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER2 = SEER * 0.95 if ducted and SEER2 = SEER if ductless.
+  .. [#] In addition, EER2 must be <= SEER2; EER must be < SEER.
+  .. [#] If neither EER2 nor EER provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
+  .. [#] If EER provided, converted to EER2 using ANSI/RESNET/ICC 301-2022 Addendum C, where EER2 = EER * 0.95 if ducted and EER2 = EER if ductless.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] FanMotorType choices are "PSC" (Permanent Split Capacitor) and "BPM" (Brushless Permanent Magnet).
          If there is a heating system attached to the DistributionSystem, the heating and cooling systems cannot have different values for FanMotorType.
@@ -2789,17 +2789,17 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``DistributionSystem``                                            idref              See [#]_                  Yes                       ID of attached distribution system
   ``HeatPumpType``                                                  string             air-to-air                Yes                       Type of heat pump
   ``HeatPumpFuel``                                                  string             electricity               Yes                       Fuel type
-  ``HeatingCapacity``                                               double   Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity at 47F (excluding any backup heating)
-  ``HeatingCapacity17F``                                            double   Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F, if available
+  ``HeatingCapacity``                                               double   Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity at 47F
+  ``HeatingCapacity17F``                                            double   Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F
   ``CoolingCapacity``                                               double   Btu/hr    >= 0                      No        autosized [#]_  Cooling output capacity
   ``CompressorType``                                                string             See [#]_                  Yes                       Type of compressor
   ``CompressorLockoutTemperature``                                  double   F                                   No        See [#]_        Minimum outdoor temperature for compressor operation
   ``BackupType``                                                    string             See [#]_                  No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                        double   frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                        double   frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double   Btu/Wh    > 0 [#]_                  No        See [#]_        Rated cooling efficiency [#]_
-  ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER2" or Units="SEER"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value``    double   Btu/Wh    > 0 [#]_                  No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualHeatingEfficiency[Units="HSPF2" or Units="HSPF"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                      No        <none>          Cooling detailed performance data [#]_
   ``HeatingDetailedPerformanceData``                                element                                      No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityFraction17F``                          double   frac      >= 0, < 1                 No        See [#]_        Heating output capacity at 17F divided by heating output capacity at 47F [#]_
@@ -2839,11 +2839,11 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
          Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
-  .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
-  .. [#] In addition, EER must be < SEER; EER2 must be <= SEER2.
-  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
-  .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 (assumed to be a split system).
-  .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 (assumed to be a split system).
+  .. [#] If SEER provided, converted to SEER2 using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER2 = SEER * 0.95 (assumed to be a split system).
+  .. [#] In addition, EER2 must be <= SEER2; EER must be < SEER.
+  .. [#] If neither EER2 nor EER provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
+  .. [#] If EER provided, converted to EER2 using ANSI/RESNET/ICC 301-2022 Addendum C, where EER2 = EER * 0.95 (assumed to be a split system).
+  .. [#] If HSPF provided, converted to HSPF2 using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF2 = HSPF * 0.85 (assumed to be a split system).
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] If HeatingDetailedPerformanceData is provided, see :ref:`htg_detailed_perf_data`.
   .. [#] If neither extension/HeatingCapacityFraction17F nor HeatingCapacity17F nor HeatingDetailedPerformanceData provided, heating capacity fraction at 17F defaults to 0.59 for single/two stage and 0.0329 * HSPF + 0.3996 for variable speed.
@@ -2881,17 +2881,17 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   ``DistributionSystem``                                            idref               See [#]_                  No                        ID of attached distribution system, if present
   ``HeatPumpType``                                                  string              mini-split                Yes                       Type of heat pump
   ``HeatPumpFuel``                                                  string              electricity               Yes                       Fuel type
-  ``HeatingCapacity``                                               double    Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity at 47F (excluding any backup heating)
-  ``HeatingCapacity17F``                                            double    Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F, if available
+  ``HeatingCapacity``                                               double    Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity at 47F
+  ``HeatingCapacity17F``                                            double    Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F
   ``CoolingCapacity``                                               double    Btu/hr    >= 0                      No        autosized [#]_  Cooling output capacity
   ``CompressorType``                                                string              variable speed            Yes                       Type of compressor
   ``CompressorLockoutTemperature``                                  double    F                                   No        See [#]_        Minimum outdoor temperature for compressor operation
   ``BackupType``                                                    string              See [#]_                  No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                        double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                        double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
-  ``AnnualCoolingEfficiency[Units="EER" or Units="EER2"]/Value``    double    Btu/Wh    > 0 [#]_                  No        See [#]_        Rated cooling efficiency [#]_
-  ``AnnualHeatingEfficiency[Units="HSPF" or Units="HSPF2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="SEER2" or Units="SEER"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
+  ``AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value``    double    Btu/Wh    > 0 [#]_                  No        See [#]_        Rated cooling efficiency [#]_
+  ``AnnualHeatingEfficiency[Units="HSPF2" or Units="HSPF"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated heating efficiency [#]_
   ``CoolingDetailedPerformanceData``                                element                                       No        <none>          Cooling detailed performance data [#]_
   ``HeatingDetailedPerformanceData``                                element                                       No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityFraction17F``                          double    frac      >= 0, < 1                 No        See [#]_        Heating output capacity at 17F divided by heating output capacity at 47F [#]_
@@ -2930,11 +2930,11 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
          Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
-  .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
-  .. [#] In addition, EER must be < SEER; EER2 must be <= SEER2.
-  .. [#] If neither EER nor EER2 provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
-  .. [#] If EER2 provided, converted to EER using ANSI/RESNET/ICC 301-2022 Addendum C, where EER = EER2 / 0.95 if ducted and SEER = SEER2 if ductless.
-  .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 if ducted and HSPF = HSPF2 / 0.90 if ductless.
+  .. [#] If SEER provided, converted to SEER2 using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER2 = SEER * 0.95 if ducted and SEER2 = SEER if ductless.
+  .. [#] In addition, EER2 must be <= SEER2; EER must be < SEER.
+  .. [#] If neither EER2 nor EER provided, EER2 defaults to (0.73 * SEER2 + 1.47) for single stage, (0.63 * SEER2 + 2.34) for two stage, and (0.31 * SEER2 + 6.45) for variable speed, based on a regression analysis of `ENERGY STAR products <https://www.energystar.gov/products>`_.
+  .. [#] If EER provided, converted to EER2 using ANSI/RESNET/ICC 301-2022 Addendum C, where EER2 = EER * 0.95 if ducted and EER2 = EER if ductless.
+  .. [#] If HSPF provided, converted to HSPF2 using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF2 = HSPF * 0.85 if ducted and HSPF2 = HSPF * 0.90 if ductless.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
   .. [#] If HeatingDetailedPerformanceData is provided, see :ref:`htg_detailed_perf_data`.
   .. [#] If neither extension/HeatingCapacityFraction17F nor HeatingCapacity17F nor HeatingDetailedPerformanceData provided, heating capacity fraction at 17F defaults to 0.0329 * HSPF + 0.3996.
@@ -2970,14 +2970,14 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
   ``DistributionSystem``                                           idref               See [#]_                     No                        ID of attached distribution system
   ``HeatPumpType``                                                 string              packaged terminal heat pump  Yes                       Type of heat pump
   ``HeatPumpFuel``                                                 string              electricity                  Yes                       Fuel type
-  ``HeatingCapacity``                                              double    Btu/hr    >= 0                         No        autosized [#]_  Heating output capacity at 47F (excluding any backup heating)
-  ``HeatingCapacity17F``                                           double    Btu/hr    >= 0, <= HeatingCapacity     No                        Heating output capacity at 17F, if available
+  ``HeatingCapacity``                                              double    Btu/hr    >= 0                         No        autosized [#]_  Heating output capacity at 47F
+  ``HeatingCapacity17F``                                           double    Btu/hr    >= 0, <= HeatingCapacity     No                        Heating output capacity at 17F
   ``CoolingCapacity``                                              double    Btu/hr    >= 0                         No        autosized [#]_  Cooling output capacity
   ``CompressorLockoutTemperature``                                 double    F                                      No        See [#]_        Minimum outdoor temperature for compressor operation
   ``BackupType``                                                   string              See [#]_                     No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                       double    frac      >= 0, <= 1 [#]_              Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                       double    frac      >= 0, <= 1 [#]_              Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh    > 0                          Yes                       Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="CEER" or Units="EER"]/Value``   double    Btu/Wh    > 0                          Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                          Yes                       Rated heating efficiency
   ``extension/HeatingCapacityFraction17F``                         double    frac      >= 0, < 1                    No        See [#]_        Heating output capacity at 17F divided by heating output capacity at 47F [#]_
   ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                         No        0.0             Crankcase heater power
@@ -3020,14 +3020,14 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   ``DistributionSystem``                                           idref               See [#]_                                 No                        ID of attached distribution system
   ``HeatPumpType``                                                 string              room air conditioner with reverse cycle  Yes                       Type of heat pump
   ``HeatPumpFuel``                                                 string              electricity                              Yes                       Fuel type
-  ``HeatingCapacity``                                              double    Btu/hr    >= 0                                     No        autosized [#]_  Heating output capacity at 47F (excluding any backup heating)
-  ``HeatingCapacity17F``                                           double    Btu/hr    >= 0, <= HeatingCapacity                 No                        Heating output capacity at 17F, if available
+  ``HeatingCapacity``                                              double    Btu/hr    >= 0                                     No        autosized [#]_  Heating output capacity at 47F
+  ``HeatingCapacity17F``                                           double    Btu/hr    >= 0, <= HeatingCapacity                 No                        Heating output capacity at 17F
   ``CoolingCapacity``                                              double    Btu/hr    >= 0                                     No        autosized [#]_  Cooling output capacity
   ``CompressorLockoutTemperature``                                 double    F                                                  No        See [#]_        Minimum outdoor temperature for compressor operation
   ``BackupType``                                                   string              See [#]_                                 No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                       double    frac      >= 0, <= 1 [#]_                          Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                       double    frac      >= 0, <= 1 [#]_                          Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh    > 0                                      Yes                       Rated cooling efficiency
+  ``AnnualCoolingEfficiency[Units="CEER" or Units="EER"]/Value``   double    Btu/Wh    > 0                                      Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                                      Yes                       Rated heating efficiency
   ``extension/HeatingCapacityFraction17F``                         double    frac      >= 0, < 1                                No        See [#]_        Heating output capacity at 17F divided by heating output capacity 1t 47F [#]_
   ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                                     No        0.0             Crankcase heater power
@@ -3072,7 +3072,7 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   ``IsSharedSystem``                               boolean                            No        false           Whether it has a shared hydronic circulation loop [#]_
   ``HeatPumpType``                                 string            ground-to-air    Yes                       Type of heat pump
   ``HeatPumpFuel``                                 string            electricity      Yes                       Fuel type
-  ``HeatingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Heating output capacity (excluding any backup heating)
+  ``HeatingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
   ``CoolingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Cooling output capacity
   ``BackupType``                                   string            See [#]_         No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                       double    frac    >= 0, <= 1 [#]_  Yes                       Fraction of heating load served
