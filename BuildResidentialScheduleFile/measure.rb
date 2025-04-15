@@ -104,7 +104,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     hpxml_path = args[:hpxml_path]
     unless (Pathname.new hpxml_path).absolute?
-      hpxml_path = File.expand_path(hpxml_path)
+      hpxml_path = File.join(runner.workflow.absoluteRootDir.to_s, hpxml_path)
     end
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
@@ -112,7 +112,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     hpxml_output_path = args[:hpxml_output_path]
     unless (Pathname.new hpxml_output_path).absolute?
-      hpxml_output_path = File.expand_path(hpxml_output_path)
+      hpxml_output_path = File.join(runner.workflow.absoluteRootDir.to_s, hpxml_output_path)
     end
     args[:hpxml_output_path] = hpxml_output_path
 

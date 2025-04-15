@@ -6,16 +6,16 @@
   "steps": [
     {
       "arguments": {
-        "hpxml_path": "../../sample_files/base.xml",
+        "hpxml_path": "sample_files/base.xml",
         "output_csv_path": "stochastic.csv",
-        "hpxml_output_path": "../built-stochastic-schedules.xml"
+        "hpxml_output_path": "run/built-stochastic-schedules.xml"
       },
       "measure_dir_name": "BuildResidentialScheduleFile"
     },
     {
       "arguments": {
-        "hpxml_path": "../built-stochastic-schedules.xml",
-        "output_dir": "..",
+        "hpxml_path": "run/built-stochastic-schedules.xml",
+        "output_dir": "run",
         "debug": false,
         "add_component_loads": false,
         "skip_validation": false
