@@ -2913,7 +2913,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # End uses
 
       if object.to_CoilHeatingDXSingleSpeed.is_initialized || object.to_CoilHeatingDXMultiSpeed.is_initialized
-        return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
+        vars = { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
+        if object.additionalProperties.getFeatureAsDouble('FractionHeatLoadServed').is_initialized && object.additionalProperties.getFeatureAsDouble('FractionHeatLoadServed').get <= 0
+          # HP only provides cooling, allocate crankcase to cooling end use
+          vars[[FT::Elec, EUT::Cooling]] = ["Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"]
+        else
+          # Allocate crankcase to heating end use
+          vars[[FT::Elec, EUT::Heating]] << "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"
+        end
+        return vars
 
       elsif object.to_CoilHeatingElectric.is_initialized || object.to_CoilHeatingElectricMultiStage.is_initialized
         if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get

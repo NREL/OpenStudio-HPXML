@@ -3014,6 +3014,7 @@ module HVAC
     htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C'))
     htg_coil.setCrankcaseHeaterCapacity(heating_system.crankcase_heater_watts)
     htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
+    htg_coil.additionalProperties.setFeature('FractionHeatLoadServed', heating_system.fraction_heat_load_served) # Used by reporting measure
     if has_deadband_control
       # Apply startup capacity degradation
       add_capacity_degradation_ems_proram(model, htg_ap, htg_coil.name.get, false, cap_fff_curve_0, eir_fff_curve_0)
