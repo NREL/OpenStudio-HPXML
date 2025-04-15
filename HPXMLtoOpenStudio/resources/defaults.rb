@@ -2217,7 +2217,11 @@ module Defaults
       case heat_pump.heat_pump_type
       when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit
         if heat_pump.pan_heater_watts.nil?
-          heat_pump.pan_heater_watts = 150.0 # W, per RESNET MINHERS Addendum 82
+          if heat_pump.fraction_heat_load_served > 0
+            heat_pump.pan_heater_watts = 150.0 # W, per RESNET MINHERS Addendum 82
+          else
+            heat_pump.pan_heater_watts = 0.0
+          end
           heat_pump.pan_heater_watts_isdefaulted = true
         end
         if heat_pump.pan_heater_control_type.nil? && heat_pump.pan_heater_watts > 0
