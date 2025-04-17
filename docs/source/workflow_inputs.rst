@@ -2509,7 +2509,7 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET MINHERS Addendum 82.
-  .. [#} EquipmentType choices are "split system", "packaged system", "small duct high velocity system", or "space constrained system".
+  .. [#] EquipmentType choices are "split system", "packaged system", "small duct high velocity system", or "space constrained system".
 
 .. _hvac_cooling_room_ac:
 
@@ -2866,7 +2866,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
   .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
          If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode and the outdoor temperature is below 32F.
-  .. [#} EquipmentType choices are "split system", "packaged system", "small duct high velocity system", or "space constrained system".
+  .. [#] EquipmentType choices are "split system", "packaged system", "small duct high velocity system", or "space constrained system".
 
 .. _hvac_hp_mini_split:
 
