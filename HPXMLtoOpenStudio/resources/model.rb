@@ -388,7 +388,7 @@ module Model
   # @param name [String] Name for the OpenStudio object
   # @param rated_power [Double] Design power consumption (W)
   # @return [OpenStudio::Model::PumpVariableSpeed] The model object
-  def self.add_pump_variable_speed(model, name:, rated_power:)
+  def self.add_pump_variable_speed(model, name:, rated_power:, control_type: EPlus::PumpControlTypeIntermittent)
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(name)
     pump.setMotorEfficiency(0.85)
@@ -408,7 +408,7 @@ module Model
     pump.setCoefficient3ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient4ofthePartLoadPerformanceCurve(0)
     pump.setMinimumFlowRate(0)
-    pump.setPumpControlType('Intermittent')
+    pump.setPumpControlType(control_type)
     return pump
   end
 
@@ -483,7 +483,7 @@ module Model
   # @param min_x [Double] Minimum allowable value for x
   # @param max_x [Double] Maximum allowable value for x
   # @return [OpenStudio::Model::CurveCubic] The model object
-  def self.add_curve_cubic(model, name:, coeff:, min_x: nil, max_x: nil)
+  def self.add_curve_cubic(model, name:, coeff:, min_x: nil, max_x: nil, min_y: nil, max_y: nil)
     curve = OpenStudio::Model::CurveCubic.new(model)
     curve.setName(name)
     curve.setCoefficient1Constant(coeff[0])
@@ -492,6 +492,8 @@ module Model
     curve.setCoefficient4xPOW3(coeff[3])
     curve.setMinimumValueofx(min_x) unless min_x.nil?
     curve.setMaximumValueofx(max_x) unless max_x.nil?
+    curve.setMinimumCurveOutput(min_y) unless min_y.nil?
+    curve.setMaximumCurveOutput(max_y) unless max_y.nil?
     return curve
   end
 
