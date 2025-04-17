@@ -1865,6 +1865,22 @@ module Defaults
       end
     end
 
+    # Default equipment type
+    (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+      next unless hvac_system.equipment_type.nil?
+
+      if hvac_system.is_a?(HPXML::CoolingSystem)
+        next unless [HPXML::HVACTypeCentralAirConditioner,
+                     HPXML::HVACTypeMiniSplitAirConditioner].include? hvac_system.cooling_system_type
+      elsif hvac_system.is_a?(HPXML::HeatPump)
+        next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                     HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_system.heat_pump_type
+      end
+
+      hvac_system.equipment_type = HPXML::HVACEquipmentTypeSplit
+      hvac_system.equipment_type_isdefaulted = true
+    end
+
     # Convert SEER/EER/HSPF to SEER2/EER2/HSPF2
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)

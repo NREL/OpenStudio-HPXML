@@ -212,6 +212,10 @@ class HPXML < Object
   HVACDistributionTypeAir = 'AirDistribution'
   HVACDistributionTypeDSE = 'DSE'
   HVACDistributionTypeHydronic = 'HydronicDistribution'
+  HVACEquipmentTypeSplit = 'split system'
+  HVACEquipmentTypePackaged = 'packaged system'
+  HVACEquipmentTypeSDHV = 'small duct high velocity system'
+  HVACEquipmentTypeSpaceConstrained = 'space constrained system'
   HVACTypeBoiler = 'Boiler'
   HVACTypeCentralAirConditioner = 'central air conditioner'
   HVACTypeChiller = 'chiller'
@@ -6742,6 +6746,7 @@ class HPXML < Object
              :integrated_heating_system_fraction_heat_load_served, # [Double] IntegratedHeatingSystemFractionHeatLoadServed (frac)
              :airflow_defect_ratio,                                # [Double] extension/AirflowDefectRatio (frac)
              :charge_defect_ratio,                                 # [Double] extension/ChargeDefectRatio (frac)
+             :fan_motor_type,                                      # [String] extension/FanMotorType
              :fan_watts_per_cfm,                                   # [Double] extension/FanPowerWattsPerCFM (W/cfm)
              :cooling_design_airflow_cfm,                          # [Double] extension/CoolingDesignAirflowCFM (cfm)
              :integrated_heating_system_airflow_cfm,               # [Double] extension/HeatingDesignAirflowCFM (cfm)
@@ -6751,7 +6756,7 @@ class HPXML < Object
              :crankcase_heater_watts,                              # [Double] extension/CrankcaseHeaterPowerWatts (W)
              :cooling_autosizing_factor,                           # [Double] extension/CoolingAutosizingFactor (frac)
              :cooling_autosizing_limit,                            # [Double] extension/CoolingAutosizingLimit (Btu/hr)
-             :fan_motor_type,                                      # [String] extension/FanMotorType
+             :equipment_type,                                      # [String] extension/EquipmentType (HPXML::HVACEquipmentTypeXXX)
              :clg_seed_id,                                         # [String] extension/CoolingSeedId
              :htg_seed_id]                                         # [String] extension/HeatingSeedId
     attr_reader(*CLASS_ATTRS)
@@ -6913,6 +6918,7 @@ class HPXML < Object
       XMLHelper.add_extension(cooling_system, 'CrankcaseHeaterPowerWatts', @crankcase_heater_watts, :float, @crankcase_heater_watts_isdefaulted) unless @crankcase_heater_watts.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingAutosizingFactor', @cooling_autosizing_factor, :float, @cooling_autosizing_factor_isdefaulted) unless @cooling_autosizing_factor.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingAutosizingLimit', @cooling_autosizing_limit, :float, @cooling_autosizing_limit_isdefaulted) unless @cooling_autosizing_limit.nil?
+      XMLHelper.add_extension(cooling_system, 'EquipmentType', @equipment_type, :string, @equipment_type_isdefaulted) unless @equipment_type.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
       XMLHelper.add_extension(cooling_system, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
       if @primary_system
@@ -6964,6 +6970,7 @@ class HPXML < Object
       @crankcase_heater_watts = XMLHelper.get_value(cooling_system, 'extension/CrankcaseHeaterPowerWatts', :float)
       @cooling_autosizing_factor = XMLHelper.get_value(cooling_system, 'extension/CoolingAutosizingFactor', :float)
       @cooling_autosizing_limit = XMLHelper.get_value(cooling_system, 'extension/CoolingAutosizingLimit', :float)
+      @equipment_type = XMLHelper.get_value(cooling_system, 'extension/EquipmentType', :string)
       @clg_seed_id = XMLHelper.get_value(cooling_system, 'extension/CoolingSeedId', :string)
       @htg_seed_id = XMLHelper.get_value(cooling_system, 'extension/HeatingSeedId', :string)
       primary_cooling_system = HPXML::get_idref(XMLHelper.get_element(cooling_system, '../PrimarySystems/PrimaryCoolingSystem'))
@@ -7058,6 +7065,7 @@ class HPXML < Object
              :geothermal_loop_idref,               # [String] AttachedToGeothermalLoop/@idref
              :airflow_defect_ratio,                # [Double] extension/AirflowDefectRatio (frac)
              :charge_defect_ratio,                 # [Double] extension/ChargeDefectRatio (frac)
+             :fan_motor_type,                      # [String] extension/FanMotorType
              :fan_watts_per_cfm,                   # [Double] extension/FanPowerWattsPerCFM (W/cfm)
              :heating_design_airflow_cfm,          # [Double] extension/HeatingDesignAirflowCFM (cfm)
              :cooling_design_airflow_cfm,          # [Double] extension/CoolingDesignAirflowCFM (cfm)
@@ -7074,7 +7082,7 @@ class HPXML < Object
              :cooling_autosizing_limit,            # [Double] extension/CoolingAutosizingLimit (Btu/hr)
              :heating_autosizing_limit,            # [Double] extension/HeatingAutosizingLimit (Btu/hr)
              :backup_heating_autosizing_limit,     # [Double] extension/BackupHeatingAutosizingLimit (Btu/hr)
-             :fan_motor_type,                      # [String] extension/FanMotorType
+             :equipment_type,                      # [String] extension/EquipmentType (HPXML::HVACEquipmentTypeXXX)
              :htg_seed_id,                         # [String] extension/HeatingSeedId
              :clg_seed_id]                         # [String] extension/CoolingSeedId
     attr_reader(*CLASS_ATTRS)
@@ -7306,6 +7314,7 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'CoolingAutosizingLimit', @cooling_autosizing_limit, :float, @cooling_autosizing_limit_isdefaulted) unless @cooling_autosizing_limit.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAutosizingLimit', @heating_autosizing_limit, :float, @heating_autosizing_limit_isdefaulted) unless @heating_autosizing_limit.nil?
       XMLHelper.add_extension(heat_pump, 'BackupHeatingAutosizingLimit', @backup_heating_autosizing_limit, :float, @backup_heating_autosizing_limit_isdefaulted) unless @backup_heating_autosizing_limit.nil?
+      XMLHelper.add_extension(heat_pump, 'EquipmentType', @equipment_type, :string, @equipment_type_isdefaulted) unless @equipment_type.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
       if @primary_heating_system
@@ -7380,6 +7389,7 @@ class HPXML < Object
       @cooling_autosizing_limit = XMLHelper.get_value(heat_pump, 'extension/CoolingAutosizingLimit', :float)
       @heating_autosizing_limit = XMLHelper.get_value(heat_pump, 'extension/HeatingAutosizingLimit', :float)
       @backup_heating_autosizing_limit = XMLHelper.get_value(heat_pump, 'extension/BackupHeatingAutosizingLimit', :float)
+      @equipment_type = XMLHelper.get_value(heat_pump, 'extension/EquipmentType', :string)
       @htg_seed_id = XMLHelper.get_value(heat_pump, 'extension/HeatingSeedId', :string)
       @clg_seed_id = XMLHelper.get_value(heat_pump, 'extension/CoolingSeedId', :string)
       primary_heating_system = HPXML::get_idref(XMLHelper.get_element(heat_pump, '../PrimarySystems/PrimaryHeatingSystem'))

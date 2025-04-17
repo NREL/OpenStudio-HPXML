@@ -9,6 +9,7 @@ __New Features__
   - Allows optional EER2 or EER inputs (`AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value`) for central and mini-split air conditioners and heat pumps.
   - Deprecates SHR inputs (e.g., `CoolingSensibleHeatFraction`); they are no longer used.
   - Allows optional `extension/FanMotorType` input for central equipment; updates `FanPowerWattsPerCFM` defaults to be based on fan motor type.
+  - Allows optional `extension/EquipmentType` inputs for central air conditioners and heat pumps; only used for SEER/SEER2, EER/EER2, and HSPF/HSPF2 conversions.
   - Allows optional design airflow rate inputs (`extension/HeatingDesignAirflowCFM` and `extension/CoolingDesignAirflowCFM`).
   - Updates default design airflow rates to use cfm/ton assumptions rather than Manual S-based approach.
   - Updates to detailed performance datapoints:

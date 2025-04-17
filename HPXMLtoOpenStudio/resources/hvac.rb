@@ -5131,11 +5131,21 @@ module HVAC
   # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
   # @return [Double] SEER value (Btu/Wh)
   def self.calc_seer_from_seer2(hvac_system)
-    # Note: There are less common system types (packaged, small duct high velocity,
-    # and space-constrained) that we don't handle here.
     is_ducted = !hvac_system.distribution_system_idref.nil?
-    if is_ducted # Ducted split system
-      return hvac_system.cooling_efficiency_seer2 / 0.95
+    if is_ducted
+      case hvac_system.equipment_type
+      when HPXML::HVACEquipmentTypeSplit,
+           HPXML::HVACEquipmentTypePackaged
+        return hvac_system.cooling_efficiency_seer2 / 0.95
+      when HPXML::HVACEquipmentTypeSDHV
+        return hvac_system.cooling_efficiency_seer2 / 1.00
+      when HPXML::HVACEquipmentTypeSpaceConstrained
+        if hvac_system.is_a?(HPXML::HeatPump)
+          return hvac_system.cooling_efficiency_seer2 / 0.99
+        elsif hvac_system.is_a?(HPXML::CoolingSystem)
+          return hvac_system.cooling_efficiency_seer2 / 0.97
+        end
+      end
     else # Ductless systems
       return hvac_system.cooling_efficiency_seer2 / 1.00
     end
@@ -5149,11 +5159,21 @@ module HVAC
   # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
   # @return [Double] SEER2 value (Btu/Wh)
   def self.calc_seer2_from_seer(hvac_system)
-    # Note: There are less common system types (packaged, small duct high velocity,
-    # and space-constrained) that we don't handle here.
     is_ducted = !hvac_system.distribution_system_idref.nil?
-    if is_ducted # Ducted split system
-      return hvac_system.cooling_efficiency_seer * 0.95
+    if is_ducted
+      case hvac_system.equipment_type
+      when HPXML::HVACEquipmentTypeSplit,
+           HPXML::HVACEquipmentTypePackaged
+        return hvac_system.cooling_efficiency_seer * 0.95
+      when HPXML::HVACEquipmentTypeSDHV
+        return hvac_system.cooling_efficiency_seer * 1.00
+      when HPXML::HVACEquipmentTypeSpaceConstrained
+        if hvac_system.is_a?(HPXML::HeatPump)
+          return hvac_system.cooling_efficiency_seer * 0.99
+        elsif hvac_system.is_a?(HPXML::CoolingSystem)
+          return hvac_system.cooling_efficiency_seer * 0.97
+        end
+      end
     else # Ductless systems
       return hvac_system.cooling_efficiency_seer * 1.00
     end
@@ -5167,11 +5187,21 @@ module HVAC
   # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
   # @return [Double] EER value (Btu/Wh)
   def self.calc_eer_from_eer2(hvac_system)
-    # Note: There are less common system types (packaged, small duct high velocity,
-    # and space-constrained) that we don't handle here.
     is_ducted = !hvac_system.distribution_system_idref.nil?
-    if is_ducted # Ducted split system
-      return hvac_system.cooling_efficiency_eer2 / 0.95
+    if is_ducted
+      case hvac_system.equipment_type
+      when HPXML::HVACEquipmentTypeSplit
+        HPXML::HVACEquipmentTypePackaged
+        return hvac_system.cooling_efficiency_eer2 / 0.95
+      when HPXML::HVACEquipmentTypeSDHV
+        return hvac_system.cooling_efficiency_eer2 / 1.00
+      when HPXML::HVACEquipmentTypeSpaceConstrained
+        if hvac_system.is_a?(HPXML::HeatPump)
+          return hvac_system.cooling_efficiency_eer2 / 0.99
+        elsif hvac_system.is_a?(HPXML::CoolingSystem)
+          return hvac_system.cooling_efficiency_eer2 / 0.97
+        end
+      end
     else # Ductless systems
       return hvac_system.cooling_efficiency_eer2 / 1.00
     end
@@ -5185,11 +5215,21 @@ module HVAC
   # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
   # @return [Double] EER2 value (Btu/Wh)
   def self.calc_eer2_from_eer(hvac_system)
-    # Note: There are less common system types (packaged, small duct high velocity,
-    # and space-constrained) that we don't handle here.
     is_ducted = !hvac_system.distribution_system_idref.nil?
-    if is_ducted # Ducted split system
-      return hvac_system.cooling_efficiency_eer * 0.95
+    if is_ducted
+      case hvac_system.equipment_type
+      when HPXML::HVACEquipmentTypeSplit,
+           HPXML::HVACEquipmentTypePackaged
+        return hvac_system.cooling_efficiency_eer * 0.95
+      when HPXML::HVACEquipmentTypeSDHV
+        return hvac_system.cooling_efficiency_eer * 1.00
+      when HPXML::HVACEquipmentTypeSpaceConstrained
+        if hvac_system.is_a?(HPXML::HeatPump)
+          return hvac_system.cooling_efficiency_eer * 0.99
+        elsif hvac_system.is_a?(HPXML::CoolingSystem)
+          return hvac_system.cooling_efficiency_eer * 0.97
+        end
+      end
     else # Ductless systems
       return hvac_system.cooling_efficiency_eer * 1.00
     end
@@ -5203,11 +5243,16 @@ module HVAC
   # @param heat_pump [HPXML::HeatPump] The HPXML Heat Pump of interest
   # @return [Double] HSPF value (Btu/Wh)
   def self.calc_hspf_from_hspf2(heat_pump)
-    # Note: There are less common system types (packaged, small duct high velocity,
-    # and space-constrained) that we don't handle here.
     is_ducted = !heat_pump.distribution_system_idref.nil?
-    if is_ducted # Ducted split system
-      return heat_pump.heating_efficiency_hspf2 / 0.85
+    if is_ducted
+      case heat_pump.equipment_type
+      when HPXML::HVACEquipmentTypeSplit,
+           HPXML::HVACEquipmentTypeSDHV,
+           HPXML::HVACEquipmentTypeSpaceConstrained
+        return heat_pump.heating_efficiency_hspf2 / 0.85
+      when HPXML::HVACEquipmentTypePackaged
+        return heat_pump.heating_efficiency_hspf2 / 0.84
+      end
     else # Ductless system
       return heat_pump.heating_efficiency_hspf2 / 0.90
     end
@@ -5221,11 +5266,16 @@ module HVAC
   # @param heat_pump [HPXML::HeatPump] The HPXML Heat Pump of interest
   # @return [Double] HSPF2 value (Btu/Wh)
   def self.calc_hspf2_from_hspf(heat_pump)
-    # Note: There are less common system types (packaged, small duct high velocity,
-    # and space-constrained) that we don't handle here.
     is_ducted = !heat_pump.distribution_system_idref.nil?
-    if is_ducted # Ducted split system
-      return heat_pump.heating_efficiency_hspf * 0.85
+    if is_ducted
+      case heat_pump.equipment_type
+      when HPXML::HVACEquipmentTypeSplit,
+           HPXML::HVACEquipmentTypeSDHV,
+           HPXML::HVACEquipmentTypeSpaceConstrained
+        return heat_pump.heating_efficiency_hspf * 0.85
+      when HPXML::HVACEquipmentTypePackaged
+        return heat_pump.heating_efficiency_hspf * 0.84
+      end
     else # Ductless system
       return heat_pump.heating_efficiency_hspf * 0.90
     end
