@@ -605,8 +605,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].airflow_defect_ratio = -0.25
       when 'invalid-airflow-rates'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.heating_systems[0].heating_airflow_cfm = -1
-        hpxml_bldg.cooling_systems[0].cooling_airflow_cfm = -1
+        hpxml_bldg.heating_systems[0].heating_design_airflow_cfm = -1
+        hpxml_bldg.cooling_systems[0].cooling_design_airflow_cfm = -1
       when 'invalid-assembly-effective-rvalue'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.walls[0].insulation_assembly_r_value = 0.0

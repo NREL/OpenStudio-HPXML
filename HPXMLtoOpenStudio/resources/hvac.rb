@@ -335,7 +335,7 @@ module HVAC
     # Calculate fan heating/cooling airflow rates at all speeds
     fan_cfms = []
     if not cooling_system.nil?
-      clg_cfm = cooling_system.cooling_airflow_cfm
+      clg_cfm = clg_ap.cooling_actual_airflow_cfm
       clg_ap.cool_capacity_ratios.each do |capacity_ratio|
         fan_cfms << clg_cfm * capacity_ratio
       end
@@ -346,12 +346,12 @@ module HVAC
     end
     if not heating_system.nil?
       if is_heatpump
-        htg_cfm = heating_system.heating_airflow_cfm
+        htg_cfm = htg_ap.heating_actual_airflow_cfm
         htg_ap.heat_capacity_ratios.each do |capacity_ratio|
           fan_cfms << htg_cfm * capacity_ratio
         end
       else
-        htg_cfm = heating_system.heating_airflow_cfm
+        htg_cfm = htg_ap.heating_actual_airflow_cfm
         fan_cfms << htg_cfm
       end
     end
@@ -487,7 +487,7 @@ module HVAC
     obj_name = Constants::ObjectTypeEvaporativeCooler
 
     clg_ap = cooling_system.additional_properties
-    clg_cfm = cooling_system.cooling_airflow_cfm
+    clg_cfm = clg_ap.cooling_actual_airflow_cfm
 
     # Evap Cooler
     evap_cooler = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
@@ -559,8 +559,8 @@ module HVAC
     geothermal_loop = heat_pump.geothermal_loop
     hp_ap = heat_pump.additional_properties
 
-    htg_cfm = heat_pump.heating_airflow_cfm
-    clg_cfm = heat_pump.cooling_airflow_cfm
+    htg_cfm = hp_ap.heating_actual_airflow_cfm
+    clg_cfm = hp_ap.cooling_actual_airflow_cfm
 
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = EPlus::FluidWater
@@ -765,7 +765,8 @@ module HVAC
 
     obj_name = Constants::ObjectTypeWaterLoopHeatPump
 
-    htg_cfm = heat_pump.heating_airflow_cfm
+    hp_ap = heat_pump.additional_properties
+    htg_cfm = hp_ap.heating_actual_airflow_cfm
 
     # Cooling Coil (none)
     clg_coil = nil
@@ -1039,6 +1040,8 @@ module HVAC
   def self.apply_unit_heater(model, heating_system, hvac_sequential_load_fracs, control_zone, hvac_unavailable_periods)
     obj_name = Constants::ObjectTypeUnitHeater
 
+    htg_ap = heating_system.additional_properties
+
     # Heating Coil
     efficiency = heating_system.heating_efficiency_afue
     efficiency = heating_system.heating_efficiency_percent if efficiency.nil?
@@ -1054,7 +1057,7 @@ module HVAC
     htg_coil.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
 
     # Fan
-    htg_cfm = heating_system.heating_airflow_cfm
+    htg_cfm = htg_ap.heating_actual_airflow_cfm
     fan_watts_per_cfm = heating_system.fan_watts / htg_cfm
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [htg_cfm], heating_system)
     add_fan_pump_disaggregation_ems_program(model, fan, htg_coil, nil, nil, heating_system)
@@ -4422,7 +4425,7 @@ module HVAC
 
     cool_airflow_rated_defect_ratio = []
     if (not clg_coil.nil?) && (cooling_system.fraction_cool_load_served > 0)
-      clg_cfm = cooling_system.cooling_airflow_cfm
+      clg_cfm = clg_ap.cooling_actual_airflow_cfm
       if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized || clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
         cool_airflow_rated_defect_ratio = [UnitConversions.convert(clg_cfm, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
       elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
@@ -4432,7 +4435,7 @@ module HVAC
 
     heat_airflow_rated_defect_ratio = []
     if (not htg_coil.nil?) && (heating_system.fraction_heat_load_served > 0)
-      htg_cfm = heating_system.heating_airflow_cfm
+      htg_cfm = htg_ap.heating_actual_airflow_cfm
       if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
         heat_airflow_rated_defect_ratio = [UnitConversions.convert(htg_cfm, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0]
       elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
@@ -5024,12 +5027,14 @@ module HVAC
   def self.ensure_nonzero_sizing_values(hpxml_bldg)
     speed_descriptions = [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionNominal, HPXML::CapacityDescriptionMaximum]
     hpxml_bldg.heating_systems.each do |htg_sys|
+      htg_ap = htg_sys.additional_properties
       htg_sys.heating_capacity = [htg_sys.heating_capacity, MinCapacity].max
-      htg_sys.heating_airflow_cfm = [htg_sys.heating_airflow_cfm, MinAirflow].max unless htg_sys.heating_airflow_cfm.nil?
+      htg_ap.heating_actual_airflow_cfm = [htg_ap.heating_actual_airflow_cfm, MinAirflow].max unless htg_ap.heating_actual_airflow_cfm.nil?
     end
     hpxml_bldg.cooling_systems.each do |clg_sys|
+      clg_ap = clg_sys.additional_properties
       clg_sys.cooling_capacity = [clg_sys.cooling_capacity, MinCapacity].max
-      clg_sys.cooling_airflow_cfm = [clg_sys.cooling_airflow_cfm, MinAirflow].max
+      clg_ap.cooling_actual_airflow_cfm = [clg_ap.cooling_actual_airflow_cfm, MinAirflow].max
       next if clg_sys.cooling_detailed_performance_data.empty?
 
       clg_sys.cooling_detailed_performance_data.each do |dp|
@@ -5038,10 +5043,11 @@ module HVAC
       end
     end
     hpxml_bldg.heat_pumps.each do |hp_sys|
+      hp_ap = hp_sys.additional_properties
       hp_sys.cooling_capacity = [hp_sys.cooling_capacity, MinCapacity].max
-      hp_sys.cooling_airflow_cfm = [hp_sys.cooling_airflow_cfm, MinAirflow].max
+      hp_ap.cooling_actual_airflow_cfm = [hp_ap.cooling_actual_airflow_cfm, MinAirflow].max
       hp_sys.heating_capacity = [hp_sys.heating_capacity, MinCapacity].max
-      hp_sys.heating_airflow_cfm = [hp_sys.heating_airflow_cfm, MinAirflow].max
+      hp_ap.heating_actual_airflow_cfm = [hp_ap.heating_actual_airflow_cfm, MinAirflow].max
       hp_sys.heating_capacity_17F = [hp_sys.heating_capacity_17F, MinCapacity].max unless hp_sys.heating_capacity_17F.nil?
       hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, MinCapacity].max unless hp_sys.backup_heating_capacity.nil?
       if not hp_sys.heating_detailed_performance_data.empty?
@@ -5073,8 +5079,10 @@ module HVAC
   def self.apply_unit_multiplier(hpxml_bldg, hpxml_header)
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     hpxml_bldg.heating_systems.each do |htg_sys|
+      hp_ap = htg_sys.additional_properties
       htg_sys.heating_capacity *= unit_multiplier
-      htg_sys.heating_airflow_cfm *= unit_multiplier unless htg_sys.heating_airflow_cfm.nil?
+      htg_sys.heating_design_airflow_cfm *= unit_multiplier unless htg_sys.heating_design_airflow_cfm.nil?
+      hp_ap.heating_actual_airflow_cfm *= unit_multiplier unless hp_ap.heating_actual_airflow_cfm.nil?
       htg_sys.pilot_light_btuh *= unit_multiplier unless htg_sys.pilot_light_btuh.nil?
       htg_sys.electric_auxiliary_energy *= unit_multiplier unless htg_sys.electric_auxiliary_energy.nil?
       htg_sys.fan_watts *= unit_multiplier unless htg_sys.fan_watts.nil?
@@ -5083,8 +5091,10 @@ module HVAC
       end
     end
     hpxml_bldg.cooling_systems.each do |clg_sys|
+      clg_ap = clg_sys.additional_properties
       clg_sys.cooling_capacity *= unit_multiplier
-      clg_sys.cooling_airflow_cfm *= unit_multiplier
+      clg_sys.cooling_design_airflow_cfm *= unit_multiplier
+      clg_ap.cooling_actual_airflow_cfm *= unit_multiplier
       clg_sys.crankcase_heater_watts *= unit_multiplier unless clg_sys.crankcase_heater_watts.nil?
       clg_sys.integrated_heating_system_capacity *= unit_multiplier unless clg_sys.integrated_heating_system_capacity.nil?
       clg_sys.integrated_heating_system_airflow_cfm *= unit_multiplier unless clg_sys.integrated_heating_system_airflow_cfm.nil?
@@ -5093,10 +5103,13 @@ module HVAC
       end
     end
     hpxml_bldg.heat_pumps.each do |hp_sys|
+      hp_ap = hp_sys.additional_properties
       hp_sys.cooling_capacity *= unit_multiplier
-      hp_sys.cooling_airflow_cfm *= unit_multiplier
+      hp_sys.cooling_design_airflow_cfm *= unit_multiplier
+      hp_ap.cooling_actual_airflow_cfm *= unit_multiplier
       hp_sys.heating_capacity *= unit_multiplier
-      hp_sys.heating_airflow_cfm *= unit_multiplier
+      hp_sys.heating_design_airflow_cfm *= unit_multiplier
+      hp_ap.heating_actual_airflow_cfm *= unit_multiplier
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
       hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
       hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?

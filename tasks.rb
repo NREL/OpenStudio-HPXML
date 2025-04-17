@@ -1988,7 +1988,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     end
     if hpxml_file.include? 'base-hvac-install-quality'
       hpxml_bldg.hvac_systems.each do |hvac_system|
-        if hvac_system.respond_to? :heating_airflow_cfm
+        if hvac_system.respond_to? :heating_design_airflow_cfm
           if not hvac_system.heating_capacity.nil?
             heating_capacity_tons = UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
           else
@@ -1996,12 +1996,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
             heating_capacity_tons = UnitConversions.convert(nom_dp_47F.capacity, 'Btu/hr', 'ton')
           end
           if hvac_system.is_a?(HPXML::HeatingSystem) && hvac_system.heating_system_type == HPXML::HVACTypeFurnace
-            hvac_system.heating_airflow_cfm = (240 * heating_capacity_tons).round
+            hvac_system.heating_design_airflow_cfm = (240 * heating_capacity_tons).round
           else
-            hvac_system.heating_airflow_cfm = (360 * heating_capacity_tons).round
+            hvac_system.heating_design_airflow_cfm = (360 * heating_capacity_tons).round
           end
         end
-        next unless hvac_system.respond_to? :cooling_airflow_cfm
+        next unless hvac_system.respond_to? :cooling_design_airflow_cfm
 
         if not hvac_system.cooling_capacity.nil?
           cooling_capacity_tons = UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
@@ -2009,7 +2009,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
           nom_dp_95F = hvac_system.cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal && dp.outdoor_temperature == 95.0 }
           cooling_capacity_tons = UnitConversions.convert(nom_dp_95F.capacity, 'Btu/hr', 'ton')
         end
-        hvac_system.cooling_airflow_cfm = (360 * cooling_capacity_tons).round
+        hvac_system.cooling_design_airflow_cfm = (360 * cooling_capacity_tons).round
       end
     end
 
