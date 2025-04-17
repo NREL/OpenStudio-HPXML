@@ -2012,6 +2012,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hvac_system.cooling_airflow_cfm = (360 * cooling_capacity_tons).round
       end
     end
+    if hpxml_file.include? 'space-constrained'
+      (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
+        hvac_system.equipment_type = HPXML::HVACEquipmentTypeSpaceConstrained
+      end
+    end
 
     # ------------------ #
     # HPXML WaterHeating #
