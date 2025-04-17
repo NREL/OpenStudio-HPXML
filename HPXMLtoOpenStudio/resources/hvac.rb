@@ -583,6 +583,13 @@ module HVAC
 
     # Cooling Coil
     if [HPXML::AdvancedResearchGeothermalModelTypeSimple].include? hpxml_header.geothermal_model_type
+      # Derived from: https://www.e3s-conferences.org/articles/e3sconf/pdf/2018/19/e3sconf_eko-dok2018_00139.pdf
+      plf_fplr_curve = Model.add_curve_cubic(
+        model,
+        name: 'Cool-PLF-fPLR',
+        coeff: [0.4603, 1.6416, -1.8588, 0.7605],
+        min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+      )
       clg_total_cap_curve = Model.add_curve_quad_linear(
         model,
         name: "#{obj_name} clg total cap curve",
@@ -600,6 +607,7 @@ module HVAC
       )
       clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
       clg_coil.setName(obj_name + ' clg coil')
+      clg_coil.setPartLoadFractionCorrelationCurve(plf_fplr_curve)
       clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
       clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
       clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
@@ -612,6 +620,13 @@ module HVAC
       clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
       clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(hp_ap.cooling_capacity_sensible, 'Btu/hr', 'W'))
       # Heating Coil
+      # Derived from: https://www.e3s-conferences.org/articles/e3sconf/pdf/2018/19/e3sconf_eko-dok2018_00139.pdf
+      plf_fplr_curve = Model.add_curve_cubic(
+        model,
+        name: 'Heat-PLF-fPLR',
+        coeff: [0.4603, 1.6416, -1.8588, 0.7605],
+        min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+      )
       htg_cap_curve = Model.add_curve_quad_linear(
         model,
         name: "#{obj_name} htg cap curve",
@@ -624,6 +639,7 @@ module HVAC
       )
       htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model, htg_cap_curve, htg_power_curve)
       htg_coil.setName(obj_name + ' htg coil')
+      htg_coil.setPartLoadFractionCorrelationCurve(plf_fplr_curve)
       htg_coil.setRatedHeatingCoefficientofPerformance(hp_ap.heat_rated_cops[0])
       htg_coil.setRatedAirFlowRate(UnitConversions.convert(htg_cfm_rated, 'cfm', 'm^3/s'))
       htg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
@@ -637,7 +653,7 @@ module HVAC
         plf_fplr_curve = Model.add_curve_quadratic(
           model,
           name: 'Cool-PLF-fPLR',
-          coeff: [1, 0, 0],
+          coeff: [0.269, 2.6814, -3.3095, 1.3674],
           min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
         )
       else
@@ -715,7 +731,7 @@ module HVAC
         plf_fplr_curve = Model.add_curve_quadratic(
           model,
           name: 'Heat-PLF-fPLR',
-          coeff: [1, 0, 0],
+          coeff: [0.269, 2.6814, -3.3095, 1.3674],
           min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
         )
       else
