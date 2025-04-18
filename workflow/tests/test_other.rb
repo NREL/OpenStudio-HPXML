@@ -222,13 +222,14 @@ class WorkflowOtherTest < Minitest::Test
     refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
   end
 
-  def test_run_defaulted_in_xml
+  def test_run_defaulted_in_xml_with_hvac_installation_quality
     # Check that if we simulate the in.xml file (HPXML w/ defaults), we get
-    # the same results as the original HPXML.
+    # the same results as the original HPXML for a home with HVAC installation
+    # defects.
 
     # Run base.xml
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
-    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml')
     command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
     system(command, err: File::NULL)
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
