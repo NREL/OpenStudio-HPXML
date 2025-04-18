@@ -19,7 +19,7 @@ class WorkflowOtherTest < Minitest::Test
       output_format = 'csv' if output_format == 'csv_dview'
 
       # Check for output files
-      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack')) # Produced because --debug flag if used
       assert(File.exist? File.join(File.dirname(xml), 'run', "results_annual.#{output_format}"))
       assert(File.exist? File.join(File.dirname(xml), 'run', "results_timeseries.#{output_format}"))
       assert(File.exist?(File.join(File.dirname(xml), 'run', "results_bills.#{output_format}")))
@@ -52,7 +52,6 @@ class WorkflowOtherTest < Minitest::Test
     assert(File.exist? File.join(File.dirname(xml), 'run', 'in.epJSON'))
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
   end
 
@@ -67,7 +66,6 @@ class WorkflowOtherTest < Minitest::Test
     assert(File.exist? File.join(File.dirname(xml), 'run', 'in.idf'))
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
   end
 
@@ -79,7 +77,6 @@ class WorkflowOtherTest < Minitest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
 
     # Check component loads don't exist
@@ -107,7 +104,6 @@ class WorkflowOtherTest < Minitest::Test
       system(command, err: File::NULL)
 
       # Check for output files
-      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'in.schedules.csv'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'stochastic.csv'))
@@ -142,7 +138,6 @@ class WorkflowOtherTest < Minitest::Test
       system(command, err: File::NULL)
 
       # Check for output files
-      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
 
       timeseries_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
@@ -184,7 +179,6 @@ class WorkflowOtherTest < Minitest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries_timestep.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries_hourly.csv'))
@@ -217,9 +211,8 @@ class WorkflowOtherTest < Minitest::Test
     # Check for annual results (design load/capacities only)
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
 
-    # Check for no idf or output file
+    # Check for no idf
     refute(File.exist? File.join(File.dirname(xml), 'run', 'in.idf'))
-    refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
   end
 
   def test_run_defaulted_in_xml
@@ -287,7 +280,6 @@ class WorkflowOtherTest < Minitest::Test
       system(command, err: File::NULL)
 
       # Check for output files
-      assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'eplusout.msgpack')) unless skip_simulation
       assert(File.exist? File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')) unless skip_simulation
 
       # Check for debug files
