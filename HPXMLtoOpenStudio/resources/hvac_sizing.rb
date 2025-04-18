@@ -5148,6 +5148,7 @@ module HVACSizing
   # @return [nil]
   def self.assign_to_hpxml_system(hvac_heating, hvac_cooling, hvac_sizings)
     if not hvac_heating.nil?
+      htg_ap = hvac_heating.additional_properties
 
       # Heating capacity
       if hvac_heating.heating_capacity.nil? || ((hvac_heating.heating_capacity - hvac_sizings.Heat_Capacity).abs >= 1.0)
@@ -5205,14 +5206,15 @@ module HVACSizing
       end
 
       # Heating installed/actual airflow rate
-      hvac_heating.additional_properties.heating_actual_airflow_cfm = hvac_sizings.Heat_Airflow
+      htg_ap.heating_actual_airflow_cfm = hvac_sizings.Heat_Airflow
       if hvac_heating.respond_to?(:airflow_defect_ratio)
-        hvac_heating.additional_properties.heating_actual_airflow_cfm *= (1.0 + hvac_heating.airflow_defect_ratio.to_f)
+        htg_ap.heating_actual_airflow_cfm *= (1.0 + hvac_heating.airflow_defect_ratio.to_f)
       end
+      htg_ap.heating_actual_airflow_cfm = Float(htg_ap.heating_actual_airflow_cfm.round)
 
       # Heating geothermal loop
       if hvac_heating.is_a? HPXML::HeatPump
-        hvac_heating.additional_properties.GSHP_G_Functions = hvac_sizings.GSHP_G_Functions
+        htg_ap.GSHP_G_Functions = hvac_sizings.GSHP_G_Functions
 
         geothermal_loop = hvac_heating.geothermal_loop
         if not geothermal_loop.nil?
@@ -5238,6 +5240,7 @@ module HVACSizing
     end
 
     if not hvac_cooling.nil?
+      clg_ap = hvac_cooling.additional_properties
 
       # Cooling capacity
       if hvac_cooling.cooling_capacity.nil? || ((hvac_cooling.cooling_capacity - hvac_sizings.Cool_Capacity).abs >= 1.0)
@@ -5275,10 +5278,11 @@ module HVACSizing
       end
 
       # Cooling installed/actual airflow rate
-      hvac_cooling.additional_properties.cooling_actual_airflow_cfm = hvac_sizings.Cool_Airflow
+      clg_ap.cooling_actual_airflow_cfm = hvac_sizings.Cool_Airflow
       if hvac_cooling.respond_to?(:airflow_defect_ratio)
-        hvac_cooling.additional_properties.cooling_actual_airflow_cfm *= (1.0 + hvac_cooling.airflow_defect_ratio.to_f)
+        clg_ap.cooling_actual_airflow_cfm *= (1.0 + hvac_cooling.airflow_defect_ratio.to_f)
       end
+      clg_ap.cooling_actual_airflow_cfm = Float(clg_ap.cooling_actual_airflow_cfm.round)
     end
   end
 
