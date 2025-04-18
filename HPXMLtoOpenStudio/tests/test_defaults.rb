@@ -5377,15 +5377,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(type, furniture_mass.type)
   end
 
-  def _test_default_central_air_conditioner_values(cooling_system, fan_watts_per_cfm, fan_motor_type, cooling_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
+  def _test_default_central_air_conditioner_values(cooling_system, fan_watts_per_cfm, fan_motor_type, cooling_design_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
                                                    cooling_capacity, cooling_efficiency_seer2, cooling_efficiency_eer2, crankcase_heater_watts, cooling_autosizing_factor,
                                                    equipment_type)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
     assert_equal(fan_motor_type, cooling_system.fan_motor_type)
-    if cooling_airflow_cfm.nil? # nil implies an autosized value
-      assert(cooling_system.cooling_airflow_cfm > 0)
+    if cooling_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(cooling_system.cooling_design_airflow_cfm > 0)
     else
-      assert_in_delta(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm, 1.0)
+      assert_in_delta(cooling_design_airflow_cfm, cooling_system.cooling_design_airflow_cfm, 1.0)
     end
     assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, cooling_system.airflow_defect_ratio)
@@ -5409,11 +5409,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(equipment_type, cooling_system.equipment_type)
   end
 
-  def _test_default_room_air_conditioner_ptac_values(cooling_system, cooling_airflow_cfm, cooling_capacity, crankcase_heater_watts, cooling_autosizing_factor, cooling_efficiency_ceer)
-    if cooling_airflow_cfm.nil? # nil implies an autosized value
-      assert(cooling_system.cooling_airflow_cfm > 0)
+  def _test_default_room_air_conditioner_ptac_values(cooling_system, cooling_design_airflow_cfm, cooling_capacity, crankcase_heater_watts, cooling_autosizing_factor, cooling_efficiency_ceer)
+    if cooling_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(cooling_system.cooling_design_airflow_cfm > 0)
     else
-      assert_in_delta(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm, 1.0)
+      assert_in_delta(cooling_design_airflow_cfm, cooling_system.cooling_design_airflow_cfm, 1.0)
     end
     assert_equal(crankcase_heater_watts, cooling_system.crankcase_heater_watts)
     assert_equal(cooling_autosizing_factor, cooling_system.cooling_autosizing_factor)
@@ -5425,11 +5425,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_evap_cooler_values(cooling_system, cooling_airflow_cfm, cooling_capacity, cooling_autosizing_factor)
-    if cooling_airflow_cfm.nil? # nil implies an autosized value
-      assert(cooling_system.cooling_airflow_cfm > 0)
+  def _test_default_evap_cooler_values(cooling_system, cooling_design_airflow_cfm, cooling_capacity, cooling_autosizing_factor)
+    if cooling_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(cooling_system.cooling_design_airflow_cfm > 0)
     else
-      assert_in_delta(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm, 1.0)
+      assert_in_delta(cooling_design_airflow_cfm, cooling_system.cooling_design_airflow_cfm, 1.0)
     end
     assert_equal(cooling_autosizing_factor, cooling_system.cooling_autosizing_factor)
     if cooling_capacity.nil?
@@ -5439,14 +5439,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_mini_split_air_conditioner_values(cooling_system, fan_watts_per_cfm, fan_motor_type, cooling_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
+  def _test_default_mini_split_air_conditioner_values(cooling_system, fan_watts_per_cfm, fan_motor_type, cooling_design_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
                                                       cooling_capacity, cooling_efficiency_seer2, cooling_efficiency_eer2, crankcase_heater_watts, cooling_autosizing_factor)
     assert_equal(fan_watts_per_cfm, cooling_system.fan_watts_per_cfm)
     assert_equal(fan_motor_type, cooling_system.fan_motor_type)
-    if cooling_airflow_cfm.nil? # nil implies an autosized value
-      assert(cooling_system.cooling_airflow_cfm > 0)
+    if cooling_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(cooling_system.cooling_design_airflow_cfm > 0)
     else
-      assert_in_delta(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm, 1.0)
+      assert_in_delta(cooling_design_airflow_cfm, cooling_system.cooling_design_airflow_cfm, 1.0)
     end
     assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, cooling_system.airflow_defect_ratio)
@@ -5469,7 +5469,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_furnace_values(heating_system, fan_watts_per_cfm, fan_motor_type, heating_airflow_cfm, airflow_defect_ratio, heating_capacity,
+  def _test_default_furnace_values(heating_system, fan_watts_per_cfm, fan_motor_type, heating_design_airflow_cfm, airflow_defect_ratio, heating_capacity,
                                    pilot_light, pilot_light_btuh, heating_autosizing_factor)
     assert_equal(fan_watts_per_cfm, heating_system.fan_watts_per_cfm)
     if fan_motor_type.nil?
@@ -5477,10 +5477,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(fan_motor_type, heating_system.fan_motor_type)
     end
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heating_system.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heating_system.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heating_system.heating_design_airflow_cfm, 1.0)
     end
     assert_equal(airflow_defect_ratio, heating_system.airflow_defect_ratio)
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
@@ -5497,12 +5497,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_wall_furnace_values(heating_system, fan_watts, heating_airflow_cfm, heating_capacity, heating_autosizing_factor)
+  def _test_default_wall_furnace_values(heating_system, fan_watts, heating_design_airflow_cfm, heating_capacity, heating_autosizing_factor)
     assert_equal(fan_watts, heating_system.fan_watts)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heating_system.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heating_system.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heating_system.heating_design_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
@@ -5512,12 +5512,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_floor_furnace_values(heating_system, fan_watts, heating_airflow_cfm, heating_capacity, pilot_light, pilot_light_btuh, heating_autosizing_factor)
+  def _test_default_floor_furnace_values(heating_system, fan_watts, heating_design_airflow_cfm, heating_capacity, pilot_light, pilot_light_btuh, heating_autosizing_factor)
     assert_equal(fan_watts, heating_system.fan_watts)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heating_system.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heating_system.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heating_system.heating_design_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
@@ -5553,12 +5553,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_stove_values(heating_system, fan_watts, heating_airflow_cfm, heating_capacity, pilot_light, pilot_light_btuh, heating_autosizing_factor)
+  def _test_default_stove_values(heating_system, fan_watts, heating_design_airflow_cfm, heating_capacity, pilot_light, pilot_light_btuh, heating_autosizing_factor)
     assert_equal(fan_watts, heating_system.fan_watts)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heating_system.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heating_system.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heating_system.heating_design_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
@@ -5574,12 +5574,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_space_heater_values(heating_system, fan_watts, heating_airflow_cfm, heating_capacity, heating_autosizing_factor)
+  def _test_default_space_heater_values(heating_system, fan_watts, heating_design_airflow_cfm, heating_capacity, heating_autosizing_factor)
     assert_equal(fan_watts, heating_system.fan_watts)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heating_system.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heating_system.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heating_system.heating_design_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
@@ -5589,12 +5589,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_fireplace_values(heating_system, fan_watts, heating_airflow_cfm, heating_capacity, pilot_light, pilot_light_btuh, heating_autosizing_factor)
+  def _test_default_fireplace_values(heating_system, fan_watts, heating_design_airflow_cfm, heating_capacity, pilot_light, pilot_light_btuh, heating_autosizing_factor)
     assert_equal(fan_watts, heating_system.fan_watts)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heating_system.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heating_system.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heating_system.heating_design_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
@@ -5611,7 +5611,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_air_to_air_heat_pump_values(heat_pump, fan_watts_per_cfm, fan_motor_type,
-                                                cooling_airflow_cfm, heating_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
+                                                cooling_design_airflow_cfm, heating_design_airflow_cfm, charge_defect_ratio, airflow_defect_ratio,
                                                 cooling_capacity, heating_capacity, heating_capacity_17F, backup_heating_capacity,
                                                 cooling_efficiency_seer2, cooling_efficiency_eer2, heating_efficiency_hspf2,
                                                 crankcase_heater_watts, heating_autosizing_factor, cooling_autosizing_factor,
@@ -5619,15 +5619,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                                 equipment_type)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
     assert_equal(fan_motor_type, heat_pump.fan_motor_type)
-    if cooling_airflow_cfm.nil? # nil implies an autosized value
-      assert(heat_pump.cooling_airflow_cfm > 0)
+    if cooling_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heat_pump.cooling_design_airflow_cfm > 0)
     else
-      assert_in_delta(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm, 1.0)
+      assert_in_delta(cooling_design_airflow_cfm, heat_pump.cooling_design_airflow_cfm, 1.0)
     end
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heat_pump.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heat_pump.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heat_pump.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heat_pump.heating_design_airflow_cfm, 1.0)
     end
     assert_equal(charge_defect_ratio, heat_pump.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, heat_pump.airflow_defect_ratio)
@@ -5698,18 +5698,18 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_pthp_values(heat_pump, heating_airflow_cfm, cooling_airflow_cfm, cooling_capacity, heating_capacity, heating_capacity_17F,
+  def _test_default_pthp_values(heat_pump, heating_design_airflow_cfm, cooling_design_airflow_cfm, cooling_capacity, heating_capacity, heating_capacity_17F,
                                 crankcase_heater_watts, heating_autosizing_factor, cooling_autosizing_factor,
                                 backup_heating_autosizing_factor)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heat_pump.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heat_pump.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heat_pump.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heat_pump.heating_design_airflow_cfm, 1.0)
     end
-    if cooling_airflow_cfm.nil? # nil implies an autosized value
-      assert(heat_pump.cooling_airflow_cfm > 0)
+    if cooling_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heat_pump.cooling_design_airflow_cfm > 0)
     else
-      assert_in_delta(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm, 1.0)
+      assert_in_delta(cooling_design_airflow_cfm, heat_pump.cooling_design_airflow_cfm, 1.0)
     end
     assert_equal(crankcase_heater_watts, heat_pump.crankcase_heater_watts)
     assert_equal(heating_autosizing_factor, heat_pump.heating_autosizing_factor)
@@ -5732,22 +5732,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_mini_split_heat_pump_values(heat_pump, fan_watts_per_cfm, fan_motor_type, heating_airflow_cfm, cooling_airflow_cfm,
+  def _test_default_mini_split_heat_pump_values(heat_pump, fan_watts_per_cfm, fan_motor_type, heating_design_airflow_cfm, cooling_design_airflow_cfm,
                                                 charge_defect_ratio, airflow_defect_ratio, cooling_capacity, heating_capacity, heating_capacity_17F,
                                                 backup_heating_capacity, cooling_efficiency_seer2, cooling_efficiency_eer2, heating_efficiency_hspf2,
                                                 crankcase_heater_watts, heating_autosizing_factor, cooling_autosizing_factor,
                                                 backup_heating_autosizing_factor, pan_heater_watts, pan_heater_control_type)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
     assert_equal(fan_motor_type, heat_pump.fan_motor_type)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heat_pump.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heat_pump.heating_design_airflow_cfm > 0)
     else
-      assert_in_delta(heating_airflow_cfm, heat_pump.heating_airflow_cfm, 1.0)
+      assert_in_delta(heating_design_airflow_cfm, heat_pump.heating_design_airflow_cfm, 1.0)
     end
-    if cooling_airflow_cfm.nil? # nil implies an autosized value
-      assert(heat_pump.cooling_airflow_cfm > 0)
+    if cooling_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heat_pump.cooling_design_airflow_cfm > 0)
     else
-      assert_in_delta(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm, 1.0)
+      assert_in_delta(cooling_design_airflow_cfm, heat_pump.cooling_design_airflow_cfm, 1.0)
     end
     assert_equal(charge_defect_ratio, heat_pump.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, heat_pump.airflow_defect_ratio)
@@ -5813,21 +5813,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_ground_to_air_heat_pump_values(heat_pump, pump_watts_per_ton, fan_watts_per_cfm, fan_motor_type, heating_airflow_cfm, cooling_airflow_cfm,
+  def _test_default_ground_to_air_heat_pump_values(heat_pump, pump_watts_per_ton, fan_watts_per_cfm, fan_motor_type, heating_design_airflow_cfm, cooling_design_airflow_cfm,
                                                    airflow_defect_ratio, cooling_capacity, heating_capacity,
                                                    backup_heating_capacity)
     assert_equal(pump_watts_per_ton, heat_pump.pump_watts_per_ton)
     assert_equal(fan_watts_per_cfm, heat_pump.fan_watts_per_cfm)
     assert_equal(fan_motor_type, heat_pump.fan_motor_type)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heat_pump.heating_airflow_cfm > 0)
+    if heating_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heat_pump.heating_design_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heat_pump.heating_airflow_cfm)
+      assert_equal(heating_design_airflow_cfm, heat_pump.heating_design_airflow_cfm)
     end
-    if cooling_airflow_cfm.nil? # nil implies an autosized value
-      assert(heat_pump.cooling_airflow_cfm > 0)
+    if cooling_design_airflow_cfm.nil? # nil implies an autosized value
+      assert(heat_pump.cooling_design_airflow_cfm > 0)
     else
-      assert_equal(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm)
+      assert_equal(cooling_design_airflow_cfm, heat_pump.cooling_design_airflow_cfm)
     end
     assert_equal(airflow_defect_ratio, heat_pump.airflow_defect_ratio)
     if cooling_capacity.nil?

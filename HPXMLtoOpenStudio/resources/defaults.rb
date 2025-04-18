@@ -2964,11 +2964,12 @@ module Defaults
       # Get max blower airflow rate
       blower_flow_rate = nil
       hvac_systems.each do |hvac_system|
-        if hvac_system.respond_to?(:heating_airflow_cfm) && hvac_system.heating_airflow_cfm > blower_flow_rate.to_f
-          blower_flow_rate = hvac_system.heating_airflow_cfm
+        hvac_ap = hvac_system.additional_properties
+        if hvac_ap.respond_to?(:heating_actual_airflow_cfm) && hvac_ap.heating_actual_airflow_cfm > blower_flow_rate.to_f
+          blower_flow_rate = hvac_ap.heating_actual_airflow_cfm
         end
-        if hvac_system.respond_to?(:cooling_airflow_cfm) && hvac_system.cooling_airflow_cfm > blower_flow_rate.to_f
-          blower_flow_rate = hvac_system.cooling_airflow_cfm
+        if hvac_ap.respond_to?(:cooling_actual_airflow_cfm) && hvac_ap.cooling_actual_airflow_cfm > blower_flow_rate.to_f
+          blower_flow_rate = hvac_ap.cooling_actual_airflow_cfm
         end
       end
       fail 'Unexpected error.' if blower_flow_rate.to_f == 0

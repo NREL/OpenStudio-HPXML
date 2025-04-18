@@ -71,7 +71,6 @@ module HVACSizing
       apply_hvac_installation_quality(mj, hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
       apply_hvac_autosizing_factors_and_limits(hvac_sizings, hvac_heating, hvac_cooling)
       apply_hvac_final_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
-      apply_hvac_final_airflows(hvac_sizings, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling, hpxml_bldg)
       @all_hvac_sizings[hvac_system] = hvac_sizings
 
@@ -3547,27 +3546,6 @@ module HVACSizing
     return valid_num_bores
   end
 
-  # Updates the HVAC equipment airflows rates to incorporate any airflow defects (HVAC
-  # installation quality issues).
-  #
-  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
-  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
-  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @return [nil]
-  def self.apply_hvac_final_airflows(hvac_sizings, hvac_heating, hvac_cooling)
-    if (not hvac_heating.nil?) && hvac_heating.respond_to?(:airflow_defect_ratio)
-      if hvac_sizings.Heat_Airflow > 0
-        hvac_sizings.Heat_Airflow *= (1.0 + hvac_heating.airflow_defect_ratio.to_f)
-      end
-    end
-
-    if (not hvac_cooling.nil?) && hvac_cooling.respond_to?(:airflow_defect_ratio)
-      if hvac_sizings.Cool_Airflow > 0
-        hvac_sizings.Cool_Airflow *= (1.0 + hvac_cooling.airflow_defect_ratio.to_f)
-      end
-    end
-  end
-
   # Calculates the heat pump's heating capacity at the specified outdoor/indoor temperatures, as a fraction
   # of the heat pump's nominal heating capacity.
   #
@@ -3780,18 +3758,18 @@ module HVACSizing
 
     # Check if user-specified design airflow rate
     if mode == :htg
-      if hvac_system.respond_to?(:heating_airflow_cfm) && (not hvac_system.heating_airflow_cfm.nil?) && (not hvac_system.heating_capacity.nil?)
-        cfm_per_ton = hvac_system.heating_airflow_cfm / UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
-      elsif hvac_system.is_a?(HPXML::HeatPump) && (not hvac_system.cooling_airflow_cfm.nil?) && (not hvac_system.cooling_capacity.nil?)
+      if hvac_system.respond_to?(:heating_design_airflow_cfm) && (not hvac_system.heating_design_airflow_cfm.nil?) && (not hvac_system.heating_capacity.nil?)
+        cfm_per_ton = hvac_system.heating_design_airflow_cfm / UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+      elsif hvac_system.is_a?(HPXML::HeatPump) && (not hvac_system.cooling_design_airflow_cfm.nil?) && (not hvac_system.cooling_capacity.nil?)
         # Use DX cooling cfm/ton if provided instead
-        cfm_per_ton = hvac_system.cooling_airflow_cfm / UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+        cfm_per_ton = hvac_system.cooling_design_airflow_cfm / UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
       end
     elsif mode == :clg
-      if hvac_system.respond_to?(:cooling_airflow_cfm) && (not hvac_system.cooling_airflow_cfm.nil?) && (not hvac_system.cooling_capacity.nil?)
-        cfm_per_ton = hvac_system.cooling_airflow_cfm / UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
-      elsif hvac_system.is_a?(HPXML::HeatPump) && (not hvac_system.heating_airflow_cfm.nil?) && (not hvac_system.heating_capacity.nil?)
+      if hvac_system.respond_to?(:cooling_design_airflow_cfm) && (not hvac_system.cooling_design_airflow_cfm.nil?) && (not hvac_system.cooling_capacity.nil?)
+        cfm_per_ton = hvac_system.cooling_design_airflow_cfm / UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+      elsif hvac_system.is_a?(HPXML::HeatPump) && (not hvac_system.heating_design_airflow_cfm.nil?) && (not hvac_system.heating_capacity.nil?)
         # Use DX heating cfm/ton if provided instead
-        cfm_per_ton = hvac_system.heating_airflow_cfm / UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+        cfm_per_ton = hvac_system.heating_design_airflow_cfm / UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
       end
     end
 
@@ -5170,6 +5148,7 @@ module HVACSizing
   # @return [nil]
   def self.assign_to_hpxml_system(hvac_heating, hvac_cooling, hvac_sizings)
     if not hvac_heating.nil?
+      htg_ap = hvac_heating.additional_properties
 
       # Heating capacity
       if hvac_heating.heating_capacity.nil? || ((hvac_heating.heating_capacity - hvac_sizings.Heat_Capacity).abs >= 1.0)
@@ -5216,19 +5195,26 @@ module HVACSizing
         end
       end
 
-      # Heating design/installed airflow rates
+      # Heating design airflow rate
       if not (hvac_heating.is_a?(HPXML::HeatingSystem) &&
               [HPXML::HVACTypeBoiler,
                HPXML::HVACTypeElectricResistance].include?(hvac_heating.heating_system_type))
-        if hvac_heating.heating_airflow_cfm.nil? || ((hvac_heating.heating_airflow_cfm - hvac_sizings.Heat_Airflow).abs >= 1.0)
-          hvac_heating.heating_airflow_cfm = Float(hvac_sizings.Heat_Airflow.round)
-          hvac_heating.heating_airflow_cfm_isdefaulted = true
+        if hvac_heating.heating_design_airflow_cfm.nil? || ((hvac_heating.heating_design_airflow_cfm - hvac_sizings.Heat_Airflow).abs >= 1.0)
+          hvac_heating.heating_design_airflow_cfm = Float(hvac_sizings.Heat_Airflow.round)
+          hvac_heating.heating_design_airflow_cfm_isdefaulted = true
         end
       end
 
+      # Heating installed/actual airflow rate
+      htg_ap.heating_actual_airflow_cfm = hvac_sizings.Heat_Airflow
+      if hvac_heating.respond_to?(:airflow_defect_ratio)
+        htg_ap.heating_actual_airflow_cfm *= (1.0 + hvac_heating.airflow_defect_ratio.to_f)
+      end
+      htg_ap.heating_actual_airflow_cfm = Float(htg_ap.heating_actual_airflow_cfm.round)
+
       # Heating geothermal loop
       if hvac_heating.is_a? HPXML::HeatPump
-        hvac_heating.additional_properties.GSHP_G_Functions = hvac_sizings.GSHP_G_Functions
+        htg_ap.GSHP_G_Functions = hvac_sizings.GSHP_G_Functions
 
         geothermal_loop = hvac_heating.geothermal_loop
         if not geothermal_loop.nil?
@@ -5254,6 +5240,7 @@ module HVACSizing
     end
 
     if not hvac_cooling.nil?
+      clg_ap = hvac_cooling.additional_properties
 
       # Cooling capacity
       if hvac_cooling.cooling_capacity.nil? || ((hvac_cooling.cooling_capacity - hvac_sizings.Cool_Capacity).abs >= 1.0)
@@ -5284,11 +5271,18 @@ module HVACSizing
         hvac_cooling.integrated_heating_system_airflow_cfm_isdefaulted = true
       end
 
-      # Cooling design/installed airflow rates
-      if hvac_cooling.cooling_airflow_cfm.nil? || ((hvac_cooling.cooling_airflow_cfm - hvac_sizings.Cool_Airflow).abs >= 1.0)
-        hvac_cooling.cooling_airflow_cfm = Float(hvac_sizings.Cool_Airflow.round)
-        hvac_cooling.cooling_airflow_cfm_isdefaulted = true
+      # Cooling design airflow rate
+      if hvac_cooling.cooling_design_airflow_cfm.nil? || ((hvac_cooling.cooling_design_airflow_cfm - hvac_sizings.Cool_Airflow).abs >= 1.0)
+        hvac_cooling.cooling_design_airflow_cfm = Float(hvac_sizings.Cool_Airflow.round)
+        hvac_cooling.cooling_design_airflow_cfm_isdefaulted = true
       end
+
+      # Cooling installed/actual airflow rate
+      clg_ap.cooling_actual_airflow_cfm = hvac_sizings.Cool_Airflow
+      if hvac_cooling.respond_to?(:airflow_defect_ratio)
+        clg_ap.cooling_actual_airflow_cfm *= (1.0 + hvac_cooling.airflow_defect_ratio.to_f)
+      end
+      clg_ap.cooling_actual_airflow_cfm = Float(clg_ap.cooling_actual_airflow_cfm.round)
     end
   end
 

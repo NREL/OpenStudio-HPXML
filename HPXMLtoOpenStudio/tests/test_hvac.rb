@@ -1662,8 +1662,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       if cool_capacity.nil?
         cool_capacity = heat_pump.cooling_detailed_performance_data.find { |dp| dp.capacity_description == HPXML::CapacityDescriptionNominal && dp.outdoor_temperature == 95.0 }.capacity
       end
-      heat_design_airflow_cfm = heat_pump.heating_airflow_cfm
-      cool_design_airflow_cfm = heat_pump.cooling_airflow_cfm
+      heat_design_airflow_cfm = heat_pump.heating_design_airflow_cfm
+      cool_design_airflow_cfm = heat_pump.cooling_design_airflow_cfm
       charge_defect = heat_pump.charge_defect_ratio
       fan_watts_cfm = heat_pump.fan_watts_per_cfm
 
@@ -1708,7 +1708,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       fan_watts_cfm2 = heating_system.fan_watts_per_cfm
       airflow_defect = cooling_system.airflow_defect_ratio
       cool_capacity = cooling_system.cooling_capacity
-      cool_design_airflow_cfm = cooling_system.cooling_airflow_cfm
+      cool_design_airflow_cfm = cooling_system.cooling_design_airflow_cfm
 
       # Unitary system
       assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -1763,8 +1763,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     airflow_defect = heat_pump.airflow_defect_ratio
     heat_capacity = heat_pump.heating_capacity
     cool_capacity = heat_pump.cooling_capacity
-    heat_design_airflow_cfm = heat_pump.heating_airflow_cfm
-    cool_design_airflow_cfm = heat_pump.cooling_airflow_cfm
+    heat_design_airflow_cfm = heat_pump.heating_design_airflow_cfm
+    cool_design_airflow_cfm = heat_pump.cooling_design_airflow_cfm
 
     # Unitary system
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -1793,7 +1793,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     cooling_system = hpxml_bldg.cooling_systems[0]
     airflow_defect = cooling_system.airflow_defect_ratio
     cool_capacity = cooling_system.cooling_capacity
-    cool_design_airflow_cfm = cooling_system.cooling_airflow_cfm
+    cool_design_airflow_cfm = cooling_system.cooling_design_airflow_cfm
 
     # Check installation quality EMS
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
@@ -1814,8 +1814,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     airflow_defect = heat_pump.airflow_defect_ratio
     heat_capacity = heat_pump.heating_capacity
     cool_capacity = heat_pump.cooling_capacity
-    heat_design_airflow_cfm = heat_pump.heating_airflow_cfm
-    cool_design_airflow_cfm = heat_pump.cooling_airflow_cfm
+    heat_design_airflow_cfm = heat_pump.heating_design_airflow_cfm
+    cool_design_airflow_cfm = heat_pump.cooling_design_airflow_cfm
 
     # Check installation quality EMS
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
@@ -1834,8 +1834,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = @tmp_hpxml_path
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-install-quality-mini-split-heat-pump-ducted.xml')
-    hpxml_bldg.heat_pumps[0].heating_airflow_cfm *= heat_design_airflow_mult
-    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm *= cool_design_airflow_mult
+    hpxml_bldg.heat_pumps[0].heating_design_airflow_cfm *= heat_design_airflow_mult
+    hpxml_bldg.heat_pumps[0].cooling_design_airflow_cfm *= cool_design_airflow_mult
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
@@ -1854,8 +1854,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = @tmp_hpxml_path
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-install-quality-mini-split-heat-pump-ducted.xml')
-    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = nil
-    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm *= cool_design_airflow_mult
+    hpxml_bldg.heat_pumps[0].heating_design_airflow_cfm = nil
+    hpxml_bldg.heat_pumps[0].cooling_design_airflow_cfm *= cool_design_airflow_mult
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
@@ -1874,8 +1874,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = @tmp_hpxml_path
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-install-quality-mini-split-heat-pump-ducted.xml')
-    hpxml_bldg.heat_pumps[0].heating_airflow_cfm *= heat_design_airflow_mult
-    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = nil
+    hpxml_bldg.heat_pumps[0].heating_design_airflow_cfm *= heat_design_airflow_mult
+    hpxml_bldg.heat_pumps[0].cooling_design_airflow_cfm = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
