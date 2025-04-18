@@ -222,8 +222,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_zone_conditions', false)
-    arg.setDisplayName('Generate Timeseries Output: Detailed Zone Conditions')
-    arg.setDescription('Generates timeseries detailed temperatures and humidities for each thermal zone.')
+    arg.setDisplayName('Generate Timeseries Output: Zone Conditions')
+    arg.setDescription('Generates timeseries temperatures and humidities for each thermal zone.')
     arg.setDefaultValue(false)
     args << arg
 
