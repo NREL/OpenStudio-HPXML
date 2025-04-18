@@ -1134,15 +1134,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    # TODO
+    #
+    # @param name [TODO] TODO
+    # @return [TODO] TODO
+    def sanitize_name(name)
+      return name.gsub('_', ' ').split.map(&:capitalize).join(' ')
+    end
+
     # Zone temperatures
     if args[:include_timeseries_zone_temperatures]
-      # TODO
-      #
-      # @param name [TODO] TODO
-      # @return [TODO] TODO
-      def sanitize_name(name)
-        return name.gsub('_', ' ').split.map(&:capitalize).join(' ')
-      end
 
       # Zone temperatures
       zone_names = []
@@ -1206,14 +1207,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Zone detailed conditions
     if args[:include_timeseries_zone_conditions]
-      def sanitize_name(name)
-        return name.gsub('_', ' ').split.map(&:capitalize).join(' ')
-      end
 
       # Get zones, excluding zones used for modeling workarounds
       zone_names = []
       @model.getThermalZones.each do |zone|
         next if zone.floorArea <= 1
+
         zone_names << zone.name.to_s.upcase
       end
 
@@ -2514,6 +2513,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     attr_accessor()
   end
 
+  # TODO
   class ZoneCond < BaseOutput
     def initialize
       super()
