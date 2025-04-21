@@ -2615,7 +2615,7 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-1-speed-advanced.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "simulation_control_geothermal_model_type": "advanced"
+    "simulation_control_ground_to_air_heat_pump_model_type": "advanced"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2625,7 +2625,7 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-advanced.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml",
-    "simulation_control_geothermal_model_type": "advanced"
+    "simulation_control_ground_to_air_heat_pump_model_type": "advanced"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2635,7 +2635,7 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-advanced.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml",
-    "simulation_control_geothermal_model_type": "advanced"
+    "simulation_control_ground_to_air_heat_pump_model_type": "advanced"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-integrated.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",

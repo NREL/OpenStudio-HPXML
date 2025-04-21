@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
         <AdvancedResearchFeatures>
-          <GeothermalModelType>advanced</GeothermalModelType>
+          <GroundToAirHeatPumpModelType>advanced</GroundToAirHeatPumpModelType>
         </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>

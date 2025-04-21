@@ -569,8 +569,8 @@ module HVAC
 
     htg_cfm = heat_pump.heating_airflow_cfm
     clg_cfm = heat_pump.cooling_airflow_cfm
-    htg_cfm_rated = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * hp_ap.heat_capacity_ratios[-1] * hp_ap.heat_rated_cfm_per_ton[-1]
-    clg_cfm_rated = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * hp_ap.cool_capacity_ratios[-1] * hp_ap.cool_rated_cfm_per_ton[-1]
+    htg_air_flow_rated = calc_rated_airflow(heat_pump.heating_capacity, hp_ap.heat_rated_cfm_per_ton[-1])
+    clg_air_flow_rated = calc_rated_airflow(heat_pump.cooling_capacity, hp_ap.cool_rated_cfm_per_ton[-1])
 
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = EPlus::FluidWater
@@ -582,7 +582,7 @@ module HVAC
     geothermal_loop.num_bore_holes *= unit_multiplier
 
     # Cooling Coil
-    if [HPXML::AdvancedResearchGeothermalModelTypeSimple].include? hpxml_header.geothermal_model_type
+    if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple].include? hpxml_header.ground_to_air_heat_pump_model_type
       # Derived from: https://www.e3s-conferences.org/articles/e3sconf/pdf/2018/19/e3sconf_eko-dok2018_00139.pdf
       plf_fplr_curve = Model.add_curve_cubic(
         model,
@@ -611,7 +611,7 @@ module HVAC
       clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
       clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
       clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
-      clg_coil.setRatedAirFlowRate(UnitConversions.convert(clg_cfm_rated, 'cfm', 'm^3/s'))
+      clg_coil.setRatedAirFlowRate(clg_air_flow_rated)
       clg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
       clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(80, 'F', 'C'))
       clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
@@ -641,13 +641,13 @@ module HVAC
       htg_coil.setName(obj_name + ' htg coil')
       htg_coil.setPartLoadFractionCorrelationCurve(plf_fplr_curve)
       htg_coil.setRatedHeatingCoefficientofPerformance(hp_ap.heat_rated_cops[0])
-      htg_coil.setRatedAirFlowRate(UnitConversions.convert(htg_cfm_rated, 'cfm', 'm^3/s'))
+      htg_coil.setRatedAirFlowRate(htg_air_flow_rated)
       htg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
       htg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(60, 'F', 'C'))
       htg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(70, 'F', 'C'))
       # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
       htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
-    elsif [HPXML::AdvancedResearchGeothermalModelTypeAdvanced].include? hpxml_header.geothermal_model_type
+    elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced].include? hpxml_header.ground_to_air_heat_pump_model_type
       num_speeds = hp_ap.cool_capacity_ratios.size
       if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         plf_fplr_curve = Model.add_curve_cubic(
@@ -670,7 +670,7 @@ module HVAC
       clg_coil.setNominalTimeforCondensatetoBeginLeavingtheCoil(1000)
       clg_coil.setInitialMoistureEvaporationRateDividedbySteadyStateACLatentCapacity(1.5)
       clg_coil.setNominalSpeedLevel(num_speeds)
-      clg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(clg_cfm_rated, 'cfm', 'm^3/s'))
+      clg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(clg_air_flow_rated)
       clg_coil.setRatedWaterFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
       # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
       clg_coil.setGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
@@ -746,7 +746,7 @@ module HVAC
       htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.new(model, plf_fplr_curve)
       htg_coil.setName(obj_name + ' htg coil')
       htg_coil.setNominalSpeedLevel(num_speeds)
-      htg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(htg_cfm_rated, 'cfm', 'm^3/s'))
+      htg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(htg_air_flow_rated)
       htg_coil.setRatedWaterFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
       # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
       htg_coil.setRatedHeatingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
@@ -914,7 +914,7 @@ module HVAC
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
     add_pump_power_ems_program(model, pump, air_loop_unitary, heat_pump)
-    if (heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed) && (hpxml_header.geothermal_model_type == HPXML::AdvancedResearchGeothermalModelTypeAdvanced)
+    if (heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed) && (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced)
       add_ghp_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil)
     end
 
@@ -2219,8 +2219,8 @@ module HVAC
   def self.set_curves_gshp(heat_pump, hpxml_header)
     hp_ap = heat_pump.additional_properties
 
-    case hpxml_header.geothermal_model_type
-    when HPXML::AdvancedResearchGeothermalModelTypeSimple
+    case hpxml_header.ground_to_air_heat_pump_model_type
+    when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple
       hp_ap.cool_capacity_ratios = [1.0]
       hp_ap.heat_capacity_ratios = [1.0]
       hp_ap.cool_rated_cfm_per_ton = [400.0]
@@ -2256,7 +2256,7 @@ module HVAC
       cool_cop_ratios = [1.0]
       heat_cop_ratios = [1.0]
 
-    when HPXML::AdvancedResearchGeothermalModelTypeAdvanced
+    when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced
       hp_ap.cool_capacity_ratios = get_cool_capacity_ratios_gshp(heat_pump)
       hp_ap.heat_capacity_ratios = get_heat_capacity_ratios_gshp(heat_pump)
       hp_ap.cool_rated_cfm_per_ton = [400.0] * hp_ap.cool_capacity_ratios.size
@@ -2391,8 +2391,8 @@ module HVAC
     rated_pump_watts_per_ton = 30.0 # ANSI/RESNET/ICC 301, estimated pump power required to overcome the internal resistance of the ground-water heat exchanger under AHRI test conditions for a closed loop system
     power_f = rated_fan_watts_per_cfm * hp_ap.cool_rated_cfm_per_ton[-1] / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
     power_p = rated_pump_watts_per_ton / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
-    cool_eir_rated = UnitConversions.convert(((hp_ap.cool_capacity_ratios[-1] - UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.cooling_efficiency_eer - power_f - power_p), 'Wh', 'Btu')
-    heat_eir_rated = (hp_ap.heat_capacity_ratios[-1] + UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.heating_efficiency_cop - UnitConversions.convert(power_f + power_p, 'Wh', 'Btu')
+    cool_eir_rated = UnitConversions.convert(((1 - UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.cooling_efficiency_eer - power_f - power_p), 'Wh', 'Btu')
+    heat_eir_rated = (1 + UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.heating_efficiency_cop - UnitConversions.convert(power_f + power_p, 'Wh', 'Btu')
     hp_ap.cool_rated_cops = []
     hp_ap.heat_rated_cops = []
     for i in 0..(cool_cop_ratios.size - 1)
@@ -2523,12 +2523,12 @@ module HVAC
     )
   end
 
-  # TODO
+  # Create EMS program to correctly account for pump power consumption based on heating object part load ratio
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param pump_w [TODO] TODO
-  # @param pump [TODO] TODO
-  # @param heating_object [TODO] TODO
+  # @param pump [OpenStudio::Model::PumpVariableSpeed] OpenStudio variable-speed pump object
+  # @param heating_object [OpenStudio::Model::AirLoopHVACUnitarySystem or OpenStudio::Model::BoilerHotWater] OpenStudio unitary system object or boiler object
+  # @param hvac_system [HPXML::HeatPump or HPXML::HeatingSystem] HPXML heat pump or heating system object
   # @return [nil]
   def self.add_pump_power_ems_program(model, pump, heating_object, hvac_system)
     # EMS is used to set the pump power.

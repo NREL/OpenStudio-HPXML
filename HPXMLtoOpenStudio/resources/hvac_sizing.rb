@@ -2825,7 +2825,7 @@ module HVACSizing
 
       entering_temp = hvac_cooling_ap.design_chw
 
-      if [HPXML::AdvancedResearchGeothermalModelTypeSimple].include? hpxml_header.geothermal_model_type
+      if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple].include? hpxml_header.ground_to_air_heat_pump_model_type
         hvac_cooling_speed = 0 # Only model one speed
         # TODO: replace hardcoded bypass factor and curve?
         gshp_coil_bf = 0.0806
@@ -2862,7 +2862,7 @@ module HVACSizing
                                    (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
                                    (80.0 - mj.cool_setpoint) / cooling_delta_t))
         hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
-      elsif [HPXML::AdvancedResearchGeothermalModelTypeAdvanced].include? hpxml_header.geothermal_model_type
+      elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced].include? hpxml_header.ground_to_air_heat_pump_model_type
         hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
         total_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(mj.cool_indoor_wetbulb, 'F', 'C'), UnitConversions.convert(entering_temp, 'F', 'C'), hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed])
         hvac_sizings.Cool_Airflow, hvac_sizings.Cool_Capacity, hvac_sizings.Cool_Capacity_Sens, design_shr = adjust_cooling_capacities_by_sizing_at_design(mj, hvac_cooling_ap, hvac_sizings, cooling_delta_t, hpxml_bldg.header.manualj_humidity_setpoint, total_cap_curve_value, hvac_cooling_speed, undersize_limit, oversize_limit, HVAC::GroundSourceCoolRatedIDB, HVAC::GroundSourceCoolRatedIWB)
@@ -2947,19 +2947,19 @@ module HVACSizing
 
     elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heating_type
       entering_temp = hvac_heating_ap.design_hw
-      if [HPXML::AdvancedResearchGeothermalModelTypeSimple].include? hpxml_header.geothermal_model_type
+      if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple].include? hpxml_header.ground_to_air_heat_pump_model_type
         hvac_heating_speed = 0 # Only model one speed
         hvac_sizings.Heat_Airflow = hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed] * UnitConversions.convert(hvac_sizings.Heat_Load, 'Btu/hr', 'ton')
         htg_cap_curve_value = calc_gshp_htg_curve_value(hvac_heating_ap.heat_cap_curve_spec[hvac_heating_speed], mj.heat_setpoint, entering_temp, hvac_sizings.Heat_Airflow)
         hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load / htg_cap_curve_value
-      elsif [HPXML::AdvancedResearchGeothermalModelTypeAdvanced].include? hpxml_header.geothermal_model_type
+      elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced].include? hpxml_header.ground_to_air_heat_pump_model_type
         hvac_heating_speed = get_nominal_speed(hvac_heating_ap, false)
         htg_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(mj.heat_setpoint, 'F', 'C'), UnitConversions.convert(entering_temp, 'F', 'C'), hvac_heating_ap.heat_cap_ft_spec[hvac_heating_speed])
         hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load / htg_cap_curve_value
       end
       hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
       if hvac_sizings.Cool_Capacity > 0
-        if (hpxml_header.geothermal_model_type == HPXML::AdvancedResearchGeothermalModelTypeSimple) && (hvac_heating.compressor_type == HPXML::HVACCompressorTypeSingleStage)
+        if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple) && (hvac_heating.compressor_type == HPXML::HVACCompressorTypeSingleStage)
           # For single stage compressor, when heating capacity is much larger than cooling capacity,
           # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
           # Currently only keep it for simple ghp models
@@ -2968,12 +2968,12 @@ module HVACSizing
         hvac_sizings.Cool_Capacity = [hvac_sizings.Cool_Capacity, hvac_sizings.Heat_Capacity].max
         hvac_sizings.Heat_Capacity = hvac_sizings.Cool_Capacity
 
-        if [HPXML::AdvancedResearchGeothermalModelTypeSimple].include? hpxml_header.geothermal_model_type
+        if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple].include? hpxml_header.ground_to_air_heat_pump_model_type
           hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr_rated
           cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
                                      (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
                                      (80.0 - mj.cool_setpoint) / cooling_delta_t))
-        elsif [HPXML::AdvancedResearchGeothermalModelTypeAdvanced].include? hpxml_header.geothermal_model_type
+        elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced].include? hpxml_header.ground_to_air_heat_pump_model_type
           cool_load_sens_cap_design = hvac_sizings.Cool_Capacity * total_cap_curve_value * design_shr
         end
 
