@@ -4240,9 +4240,9 @@ If the water heater uses a desuperheater, additional information is entered in `
 
   .. warning::
 
-    A desuperheater is currently not allow if detailed water heater setpoint schedules are used.
+    A desuperheater is currently not allowed if detailed water heater setpoint schedules are used.
 
-    A desuperheater is currently not allow if ``GroundToAirHeatPumpModelType`` is "advanced", see :ref:`hpxml_simulation_control`.
+    A desuperheater is currently not allowed if ``GroundToAirHeatPumpModelType`` is "advanced", see :ref:`hpxml_simulation_control`.
 
 HPXML Hot Water Distribution
 ****************************

@@ -2,9 +2,8 @@
 
 __New Features__
 - HVAC modeling updates:
-  - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps.
-  - Allows modeling two-speed and variable-speed geothermal heat pumps with `CompressorType` to be "two stage" or "variable speed".
-  - Optional input `h:SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType` to choose the "simple" or "advanced" geothermal heat pump models, "advanced" geothermal model uses E+ variable speed coils.
+  - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps as well as ground-to-air heat pumps.
+  - Optional input `SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType` to choose "simple" (default) or "advanced"; "advanced" ground-to-air heat pump model better accounts for coil staging.
 - Electric vehicle enhancements:
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
