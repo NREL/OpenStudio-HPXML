@@ -43,6 +43,9 @@
           <Soil>
             <SoilType>sand</SoilType>
             <MoistureType>dry</MoistureType>
+            <extension>
+              <Diffusivity>0.03</Diffusivity>
+            </extension>
           </Soil>
         </Site>
         <BuildingConstruction>
@@ -362,6 +365,7 @@
               <Pipe>
                 <Type>standard</Type>
                 <Diameter>1.0</Diameter>
+                <ShankSpacing>2.5</ShankSpacing>
               </Pipe>
               <extension>
                 <BorefieldConfiguration>Lopsided U</BorefieldConfiguration>

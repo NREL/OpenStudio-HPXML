@@ -5580,7 +5580,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                     grout_type: args[:geothermal_loop_grout_type],
                                     pipe_type: args[:geothermal_loop_pipe_type],
                                     pipe_diameter: pipe_diameter,
-                                    shank_spacing: args[:geothermal_loop_shank_spacing])
+                                    shank_spacing: args[:geothermal_loop_pipe_shank_spacing])
     hpxml_bldg.heat_pumps[-1].geothermal_loop_idref = hpxml_bldg.geothermal_loops[-1].id
   end
 

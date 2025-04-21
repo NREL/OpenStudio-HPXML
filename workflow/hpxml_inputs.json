@@ -2462,7 +2462,7 @@
   "sample_files/base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "geothermal_loop": "Vertical Loop, Lopsided U Borefield, Detailed",
-    "site_soil_type": "Sand, Dry"
+    "site_soil_type": "Sand, Dry, 0.03 Diffusivity"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
