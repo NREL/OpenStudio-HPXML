@@ -3798,7 +3798,7 @@ module HVACSizing
       end
     end
 
-    return cfm_per_ton * UnitConversions.convert(capacity, 'Btu/hr', 'ton')
+    return Float((cfm_per_ton * UnitConversions.convert(capacity, 'Btu/hr', 'ton')).round)
   end
 
   # Calculates the ground source heat pump's total/sensible cooling capacities at the design conditions as a fraction of the nominal cooling capacity.
