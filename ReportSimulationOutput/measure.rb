@@ -1136,6 +1136,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # TODO
     #
+    # @param @model [TODO] TODO
+    # @return [TODO] TODO
+    def get_zone_names(runner)
+      zone_names = []
+
+      model = runner.lastOpenStudioModel
+      if model.empty?
+        return result
+      else
+        model.get.getThermalZones.each do |zone|
+          next unless zone.floorArea > 1
+          zone_names << zone.name.to_s.upcase
+        end
+      end
+
+      return zone_names
+    end
+
+    # TODO
+    #
     # @param name [TODO] TODO
     # @return [TODO] TODO
     def sanitize_name(name)
@@ -1145,14 +1165,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Zone temperatures
     if args[:include_timeseries_zone_temperatures]
 
-      # Zone temperatures
-      zone_names = []
-      @model.getThermalZones.each do |zone|
-        next if zone.floorArea <= 1
-
-        zone_names << zone.name.to_s.upcase
-      end
-      zone_names.sort.each do |zone_name|
+      get_zone_names(runner).sort.each do |zone_name|
         @zone_temps[zone_name] = ZoneTemp.new
         @zone_temps[zone_name].name = "Temperature: #{sanitize_name(zone_name)}"
         @zone_temps[zone_name].timeseries_units = 'F'
@@ -1208,16 +1221,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Zone detailed conditions
     if args[:include_timeseries_zone_conditions]
 
-      # Get zones, excluding zones used for modeling workarounds
-      zone_names = []
-      @model.getThermalZones.each do |zone|
-        next if zone.floorArea <= 1
-
-        zone_names << zone.name.to_s.upcase
-      end
-
       # Zone humidity ratios
-      zone_names.sort.each do |zone_name|
+      get_zone_names(runner).sort.each do |zone_name|
         @zone_conds["#{zone_name} Humidity Ratio"] = ZoneCond.new
         @zone_conds["#{zone_name} Humidity Ratio"].name = "Humidity Ratio: #{sanitize_name(zone_name)}"
         @zone_conds["#{zone_name} Humidity Ratio"].timeseries_units = 'lb Water Air per lb Dry Air' # TODO could report as unitless instead
@@ -1225,7 +1230,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       # Zone relative humidities
-      zone_names.sort.each do |zone_name|
+      get_zone_names(runner).sort.each do |zone_name|
         @zone_conds["#{zone_name} Relative Humidity"] = ZoneCond.new
         @zone_conds["#{zone_name} Relative Humidity"].name = "Relative Humidity: #{sanitize_name(zone_name)}"
         @zone_conds["#{zone_name} Relative Humidity"].timeseries_units = '%'
@@ -1233,7 +1238,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       # Zone dewpoint temperatures
-      zone_names.sort.each do |zone_name|
+      get_zone_names(runner).sort.each do |zone_name|
         @zone_conds["#{zone_name} Dewpoint Temperature"] = ZoneCond.new
         @zone_conds["#{zone_name} Dewpoint Temperature"].name = "Dewpoint Temperature: #{sanitize_name(zone_name)}"
         @zone_conds["#{zone_name} Dewpoint Temperature"].timeseries_units = 'F'
@@ -1241,7 +1246,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       # Zone mean radiant temperatures
-      zone_names.sort.each do |zone_name|
+      get_zone_names(runner).sort.each do |zone_name|
         @zone_conds["#{zone_name} Radiant Temperature"] = ZoneCond.new
         @zone_conds["#{zone_name} Radiant Temperature"].name = "Radiant Temperature: #{sanitize_name(zone_name)}"
         @zone_conds["#{zone_name} Radiant Temperature"].timeseries_units = 'F'
@@ -1249,7 +1254,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
 
       # Zone operative temperatures
-      zone_names.sort.each do |zone_name|
+      get_zone_names(runner).sort.each do |zone_name|
         @zone_conds["#{zone_name} Operative Temperature"] = ZoneCond.new
         @zone_conds["#{zone_name} Operative Temperature"].name = "Operative Temperature: #{sanitize_name(zone_name)}"
         @zone_conds["#{zone_name} Operative Temperature"].timeseries_units = 'F'
