@@ -4489,6 +4489,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            roof_type: args[:roof_material_type],
                            roof_color: args[:roof_material_color],
+                           solar_absorptance: args[:roof_material_solar_absorptance],
+                           emittance: args[:roof_material_emittance],
                            pitch: args[:geometry_roof_pitch],
                            insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
@@ -4560,6 +4562,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                 area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                                 siding: siding,
                                 color: args[:wall_siding_color],
+                                solar_absorptance: args[:wall_siding_solar_absorptance],
+                                emittance: args[:wall_siding_emittance],
                                 insulation_assembly_r_value: insulation_assembly_r_value)
       @surface_ids[surface.name.to_s] = hpxml_bldg.rim_joists[-1].id
     end
@@ -4630,6 +4634,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            attic_wall_type: attic_wall_type,
                            siding: siding,
                            color: args[:wall_siding_color],
+                           solar_absorptance: args[:wall_siding_solar_absorptance],
+                           emittance: args[:wall_siding_emittance],
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'))
       @surface_ids[surface.name.to_s] = hpxml_bldg.walls[-1].id
 
@@ -5573,7 +5579,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                     bore_diameter: args[:geothermal_loop_boreholes_diameter],
                                     grout_type: args[:geothermal_loop_grout_type],
                                     pipe_type: args[:geothermal_loop_pipe_type],
-                                    pipe_diameter: pipe_diameter)
+                                    pipe_diameter: pipe_diameter,
+                                    shank_spacing: args[:geothermal_loop_shank_spacing])
     hpxml_bldg.heat_pumps[-1].geothermal_loop_idref = hpxml_bldg.geothermal_loops[-1].id
   end
 

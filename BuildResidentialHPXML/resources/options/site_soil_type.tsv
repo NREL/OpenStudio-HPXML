@@ -10,6 +10,7 @@ Unknown	unknown	mixed
 "Loam, Mixed"	loam	mixed		
 "Loam, Wet"	loam	wet		
 "Sand, Dry"	sand	dry		
+"Sand, Dry, 0.03 Diffusivity"	sand	dry		0.03
 "Sand, Mixed"	sand	mixed		
 "Sand, Wet"	sand	wet		
 "Silt, Dry"	silt	dry		
@@ -19,7 +20,6 @@ Unknown	unknown	mixed
 0.8 Conductivity			0.8	
 1.1 Conductivity			1.1	
 1.4 Conductivity			1.4	
-1.44 Conductivity				0.03
 1.7 Conductivity			1.7	
 2.0 Conductivity			2	
 2.3 Conductivity			2.3	
