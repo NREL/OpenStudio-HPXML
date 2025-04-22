@@ -287,18 +287,6 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
-  (hpxml_bldg.roofs + hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |surface|
-    surface.solar_absorptance = 0.75
-    surface.emittance = 0.9
-    if surface.is_a? HPXML::Roof
-      surface.roof_color = nil
-      surface.roof_type = nil
-    else
-      surface.color = nil
-      surface.siding = nil
-    end
-  end
-
   hpxml_bldg.hvac_distributions.clear
   hpxml_bldg.hvac_distributions.add(id: 'HVACDistribution1',
                                     distribution_system_type: HPXML::HVACDistributionTypeDSE,

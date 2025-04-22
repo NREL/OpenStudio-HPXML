@@ -470,6 +470,8 @@
     "air_leakage": "79.8 sq. in. ELA",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "geometry_unit_num_bedrooms": 2,
+    "enclosure_roof_material": "0.75 Solar Absorptance",
+    "enclosure_wall_siding": "0.75 Solar Absorptance",
     "wall_assembly_r": 17.54,
     "floor_over_foundation_assembly_r": 30.3,
     "ceiling_assembly_r": 38.46,
