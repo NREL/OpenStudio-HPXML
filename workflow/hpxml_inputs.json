@@ -42,12 +42,12 @@
     "slab_carpet_fraction": 0,
     "slab_carpet_r": 0,
     "ceiling_assembly_r": 18.45,
-    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
+    "enclosure_roof_material": "0.6 Solar Absorptance",
     "roof_assembly_r": 1.99,
     "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
-    "enclosure_wall_siding": "Wood, Medium",
+    "enclosure_wall_siding": "0.6 Solar Absorptance",
     "wall_assembly_r": 11.76,
     "window_front_wwr": 0,
     "window_back_wwr": 0,
@@ -254,8 +254,8 @@
   },
   "tests/ASHRAE_Standard_140/L202AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AC.xml",
-    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Reflective",
-    "enclosure_wall_siding": "Wood, Reflective"
+    "enclosure_roof_material": "0.2 Solar Absorptance",
+    "enclosure_wall_siding": "0.2 Solar Absorptance"
   },
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -343,8 +343,8 @@
   },
   "tests/ASHRAE_Standard_140/L202AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AL.xml",
-    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Reflective",
-    "enclosure_wall_siding": "Wood, Reflective"
+    "enclosure_roof_material": "0.2 Solar Absorptance",
+    "enclosure_wall_siding": "0.2 Solar Absorptance"
   },
   "tests/HERS_HVAC/HVAC1a.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -470,6 +470,8 @@
     "air_leakage": "79.8 sq. in. ELA",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "geometry_unit_num_bedrooms": 2,
+    "enclosure_roof_material": "0.75 Solar Absorptance",
+    "enclosure_wall_siding": "0.75 Solar Absorptance",
     "wall_assembly_r": 17.54,
     "floor_over_foundation_assembly_r": 30.3,
     "ceiling_assembly_r": 38.46,
@@ -2462,7 +2464,7 @@
   "sample_files/base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "geothermal_loop": "Vertical Loop, Lopsided U Borefield, Detailed",
-    "site_soil_type": "1.44 Conductivity"
+    "site_soil_type": "Sand, Dry, 0.03 Diffusivity"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",

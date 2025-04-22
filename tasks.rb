@@ -194,25 +194,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
   hpxml_bldg.foundations.reverse_each do |foundation|
     foundation.delete
   end
-  hpxml_bldg.roofs.each do |roof|
-    if roof.roof_color == HPXML::ColorReflective
-      roof.solar_absorptance = 0.2
-    else
-      roof.solar_absorptance = 0.6
-    end
-    roof.emittance = 0.9
-    roof.roof_color = nil
-    roof.roof_type = nil
-  end
   (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
-    if wall.color == HPXML::ColorReflective
-      wall.solar_absorptance = 0.2
-    else
-      wall.solar_absorptance = 0.6
-    end
-    wall.emittance = 0.9
-    wall.color = nil
-    wall.siding = nil
     if wall.is_a?(HPXML::Wall)
       if wall.attic_wall_type == HPXML::AtticWallTypeGable
         wall.insulation_assembly_r_value = 2.15
@@ -304,18 +286,6 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
 
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
-
-  (hpxml_bldg.roofs + hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |surface|
-    surface.solar_absorptance = 0.75
-    surface.emittance = 0.9
-    if surface.is_a? HPXML::Roof
-      surface.roof_color = nil
-      surface.roof_type = nil
-    else
-      surface.color = nil
-      surface.siding = nil
-    end
-  end
 
   hpxml_bldg.hvac_distributions.clear
   hpxml_bldg.hvac_distributions.add(id: 'HVACDistribution1',
@@ -1985,11 +1955,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
-    end
-    if hpxml_file.include? 'base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'
-      hpxml_bldg.geothermal_loops[0].shank_spacing = 2.5
-      hpxml_bldg.site.soil_type = 'sand'
-      hpxml_bldg.site.moisture_type = 'dry'
     end
     hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler &&

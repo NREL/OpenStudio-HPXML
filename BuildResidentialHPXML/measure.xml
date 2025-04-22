@@ -286,6 +286,10 @@
           <display_name>Sand, Dry</display_name>
         </choice>
         <choice>
+          <value>Sand, Dry, 0.03 Diffusivity</value>
+          <display_name>Sand, Dry, 0.03 Diffusivity</display_name>
+        </choice>
+        <choice>
           <value>Sand, Mixed</value>
           <display_name>Sand, Mixed</display_name>
         </choice>
@@ -320,10 +324,6 @@
         <choice>
           <value>1.4 Conductivity</value>
           <display_name>1.4 Conductivity</display_name>
-        </choice>
-        <choice>
-          <value>1.44 Conductivity</value>
-          <display_name>1.44 Conductivity</display_name>
         </choice>
         <choice>
           <value>1.7 Conductivity</value>
@@ -1686,6 +1686,22 @@
           <value>Cool Roof</value>
           <display_name>Cool Roof</display_name>
         </choice>
+        <choice>
+          <value>0.2 Solar Absorptance</value>
+          <display_name>0.2 Solar Absorptance</display_name>
+        </choice>
+        <choice>
+          <value>0.4 Solar Absortpance</value>
+          <display_name>0.4 Solar Absortpance</display_name>
+        </choice>
+        <choice>
+          <value>0.6 Solar Absorptance</value>
+          <display_name>0.6 Solar Absorptance</display_name>
+        </choice>
+        <choice>
+          <value>0.75 Solar Absorptance</value>
+          <display_name>0.75 Solar Absorptance</display_name>
+        </choice>
       </choices>
     </argument>
     <argument>
@@ -1809,6 +1825,10 @@
       <required>false</required>
       <model_dependent>false</model_dependent>
       <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
         <choice>
           <value>Aluminum, Dark</value>
           <display_name>Aluminum, Dark</display_name>
@@ -2010,8 +2030,20 @@
           <display_name>Masonite, Reflective</display_name>
         </choice>
         <choice>
-          <value>None</value>
-          <display_name>None</display_name>
+          <value>0.2 Solar Absorptance</value>
+          <display_name>0.2 Solar Absorptance</display_name>
+        </choice>
+        <choice>
+          <value>0.4 Solar Absortpance</value>
+          <display_name>0.4 Solar Absortpance</display_name>
+        </choice>
+        <choice>
+          <value>0.6 Solar Absorptance</value>
+          <display_name>0.6 Solar Absorptance</display_name>
+        </choice>
+        <choice>
+          <value>0.75 Solar Absorptance</value>
+          <display_name>0.75 Solar Absorptance</display_name>
         </choice>
       </choices>
     </argument>
@@ -8700,7 +8732,7 @@
       <filename>options/geothermal_loop.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DE6EA53D</checksum>
+      <checksum>5F46BDFE</checksum>
     </file>
     <file>
       <filename>options/heat_pump.tsv</filename>
@@ -8730,19 +8762,19 @@
       <filename>options/roof_material.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D9137BBF</checksum>
+      <checksum>F0C8B0C8</checksum>
     </file>
     <file>
       <filename>options/site_soil_type.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>00E1700E</checksum>
+      <checksum>2D5E0959</checksum>
     </file>
     <file>
       <filename>options/wall_siding.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>542136CE</checksum>
+      <checksum>533F5E68</checksum>
     </file>
     <file>
       <filename>options.rb</filename>
