@@ -308,8 +308,10 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
     surface.emittance = 0.9
     if surface.is_a? HPXML::Roof
       surface.roof_color = nil
+      surface.roof_type = nil
     else
       surface.color = nil
+      surface.siding = nil
     end
   end
 
