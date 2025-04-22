@@ -502,15 +502,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_control_heating_weekend_setpoint'] = 68
       args['hvac_control_cooling_weekday_setpoint'] = 78
       args['hvac_control_cooling_weekend_setpoint'] = 78
-      args['ducts_leakage_units'] = HPXML::UnitsCFM25
-      args['ducts_supply_leakage_to_outside_value'] = 75.0
-      args['ducts_return_leakage_to_outside_value'] = 25.0
-      args['ducts_supply_insulation_r'] = 4.0
-      args['ducts_return_insulation_r'] = 0.0
+      args['ducts_supply'] = '75 CFM25 Leakage to Outside, R-4, 150 sq. ft.'
+      args['ducts_return'] = '25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
       args['ducts_supply_location'] = HPXML::LocationAtticUnvented
       args['ducts_return_location'] = HPXML::LocationAtticUnvented
-      args['ducts_supply_surface_area'] = 150.0
-      args['ducts_return_surface_area'] = 50.0
       args['ducts_number_of_return_registers'] = 2
       args['heating_system_2'] = 'None'
       args['heating_system_2_fuel'] = HPXML::FuelTypeElectricity
@@ -684,12 +679,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_area_back'] = 0
       args['window_area_left'] = 0
       args['window_area_right'] = 0
-      args['ducts_supply_leakage_to_outside_value'] = 0.0
-      args['ducts_return_leakage_to_outside_value'] = 0.0
+      args['ducts_supply'] = '0 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.'
+      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
-      args['ducts_supply_insulation_r'] = 0.0
-      args['ducts_return_insulation_r'] = 0.0
       args['ducts_number_of_return_registers'] = 1
       args['door_area'] = 20.0
       args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
@@ -754,8 +747,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_fuel'] = HPXML::FuelTypeElectricity
       args['heating_system_heating_capacity'] = 48000.0
       args['heating_system_fraction_heat_load_served'] = 0.75
-      args['ducts_supply_leakage_to_outside_value'] = 0.0
-      args['ducts_return_leakage_to_outside_value'] = 0.0
+      args['ducts_supply'] = '0 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.'
+      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['heating_system_2'] = 'Space Heater, 100% Efficiency'
@@ -779,8 +772,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump_backup'] = 'Integrated, Electricity, 100% Efficiency'
       args['heat_pump_heating_capacity'] = 48000.0
       args['heat_pump_fraction_heat_load_served'] = 0.75
-      args['ducts_supply_leakage_to_outside_value'] = 0.0
-      args['ducts_return_leakage_to_outside_value'] = 0.0
+      args['ducts_supply'] = '0 CFM25 Leakage to Outside, R-4, 150 sq. ft.'
+      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['heating_system_2'] = 'Space Heater, 100% Efficiency'
@@ -921,8 +914,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'
     when 'extra-sfa-atticroof-flat.xml'
       args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
-      args['ducts_supply_leakage_to_outside_value'] = 0.0
-      args['ducts_return_leakage_to_outside_value'] = 0.0
+      args['ducts_supply'] = '0 CFM25 Leakage to Outside, R-4, 150 sq. ft.'
+      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
       args['ducts_supply_location'] = HPXML::LocationBasementConditioned
       args['ducts_return_location'] = HPXML::LocationBasementConditioned
     when 'extra-sfa-atticroof-conditioned-eaves-gable.xml'

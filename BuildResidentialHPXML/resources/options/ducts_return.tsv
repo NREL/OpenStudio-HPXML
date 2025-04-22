@@ -1,0 +1,67 @@
+Option Name	Leakage Units	Leakage to Outside Value	Insulation R [h-ft^2-R/Btu]	Buried Insulation Level	Surface Area [ft^2]	Fraction Rectangular [frac]
+None	Percent	0	0			
+"0% Leakage to Outside, Uninsulated"	Percent	0	0			
+"2% Leakage to Outside, Uninsulated"	Percent	0.02	0			
+"2% Leakage to Outside, R-4"	Percent	0.02	4			
+"2% Leakage to Outside, R-6"	Percent	0.02	6			
+"2% Leakage to Outside, R-8"	Percent	0.02	8			
+"2.5% Leakage to Outside, Uninsulated"	Percent	0.025	0			
+"2.5% Leakage to Outside, R-4"	Percent	0.025	4			
+"2.5% Leakage to Outside, R-6"	Percent	0.025	6			
+"2.5% Leakage to Outside, R-8"	Percent	0.025	8			
+"3.3% Leakage to Outside, Uninsulated"	Percent	0.033	0			
+"3.3% Leakage to Outside, R-4"	Percent	0.033	4			
+"3.3% Leakage to Outside, R-6"	Percent	0.033	6			
+"3.3% Leakage to Outside, R-8"	Percent	0.033	8			
+"4.7% Leakage to Outside, Uninsulated"	Percent	0.047	0			
+"4.7% Leakage to Outside, R-4"	Percent	0.047	4			
+"4.7% Leakage to Outside, R-6"	Percent	0.047	6			
+"4.7% Leakage to Outside, R-8"	Percent	0.047	8			
+"5% Leakage to Outside, Uninsulated"	Percent	0.05	0			
+"5% Leakage to Outside, Uninsulated, 50 sq. ft."	Percent	0.05	0		50	
+"5% Leakage to Outside, R-4"	Percent	0.05	4			
+"5% Leakage to Outside, R-6"	Percent	0.05	6			
+"5% Leakage to Outside, R-8"	Percent	0.05	8			
+"6.7% Leakage to Outside, Uninsulated"	Percent	0.067	0			
+"6.7% Leakage to Outside, R-4"	Percent	0.067	4			
+"6.7% Leakage to Outside, R-6"	Percent	0.067	6			
+"6.7% Leakage to Outside, R-8"	Percent	0.067	8			
+"7.5% Leakage to Outside, Uninsulated"	Percent	0.075	0			
+"7.5% Leakage to Outside, R-4"	Percent	0.075	4			
+"7.5% Leakage to Outside, R-6"	Percent	0.075	6			
+"7.5% Leakage to Outside, R-8"	Percent	0.075	8			
+"8% Leakage to Outside, Uninsulated"	Percent	0.08	0			
+"8% Leakage to Outside, R-4"	Percent	0.08	4			
+"8% Leakage to Outside, R-6"	Percent	0.08	6			
+"8% Leakage to Outside, R-8"	Percent	0.08	8			
+"10% Leakage to Outside, Uninsulated"	Percent	0.1	0			
+"10% Leakage to Outside, R-4"	Percent	0.1	4			
+"10% Leakage to Outside, R-6"	Percent	0.1	6			
+"10% Leakage to Outside, R-10"	Percent	0.1	8			
+"11.3% Leakage to Outside, Uninsulated"	Percent	0.113	0			
+"11.3% Leakage to Outside, R-4"	Percent	0.113	4			
+"11.3% Leakage to Outside, R-6"	Percent	0.113	6			
+"11.3% Leakage to Outside, R-8"	Percent	0.113	8			
+"17.7% Leakage to Outside, Uninsulated"	Percent	0.177	0			
+"17.7% Leakage to Outside, R-4"	Percent	0.177	4			
+"17.7% Leakage to Outside, R-6"	Percent	0.177	6			
+"17.7% Leakage to Outside, R-8"	Percent	0.177	8			
+"28.3% Leakage to Outside, Uninsulated"	Percent	0.283	0			
+"28.3% Leakage to Outside, R-4"	Percent	0.283	4			
+"28.3% Leakage to Outside, R-6"	Percent	0.283	6			
+"28.3% Leakage to Outside, R-8"	Percent	0.283	8			
+"25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft."	CFM25	25	0		50	
+"25 CFM25 Leakage to Outside, Uninsulated, 37.5 sq. ft."	CFM25	25	0		37.5	
+"25 CFM25 Leakage to Outside, R-4, 50 sq. ft., Deeply Buried"	CFM25	25	4	deeply buried	50	
+"25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., Round"	CFM25	25	0		50	0
+"25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., Rectangular"	CFM25	25	0		50	1
+"25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., 75% Rectangular"	CFM25	25	0		50	0.75
+"0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft."	CFM25	0	0		50	
+"0 CFM25 Leakage to Outside, Uninsulated"	CFM25	0	0			
+"0 CFM 25 Leakage to Outside, Uninsulated, 77 sq. ft."	CFM25	0	0		77	
+"0 CFM25 Leakage to Outside, R-6, 77 sq. ft."	CFM25	0	6		77	
+"125 CFM25 Leakage to Outside, R-6, 77 sq. ft."	CFM25	125	6		77	
+"125 CFM50 Leakage to Outside, Uninsulated, 50 sq. ft."	CFM50	125	0		50	
+"5 CFM25 Leakage to Outside, Uninsulated, 10 sq. ft."	CFM25	5	0		10	
+"2.5 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft."	CFM25	2.5	0		50	
+"12.5 CFM25 Leakage to Outside, Uninsulated, 25 sq. ft."	CFM25	12.5	0		25	

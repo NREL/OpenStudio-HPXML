@@ -2327,27 +2327,16 @@ The blower fan efficiency at maximum fan speed. Applies only to split (not packa
 
 <br/>
 
-**Ducts: Leakage Units**
+**Ducts: Supply**
 
-The leakage units of the ducts.
+The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.
 
-- **Name:** ``ducts_leakage_units``
+- **Name:** ``ducts_supply``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `CFM25`, `CFM50`, `Percent`
-
-<br/>
-
-**Ducts: Supply Leakage to Outside Value**
-
-The leakage value to outside for the supply ducts.
-
-- **Name:** ``ducts_supply_leakage_to_outside_value``
-- **Type:** ``Double``
-
-- **Required:** ``true``
+- **Choices:** `None`, `0% Leakage to Outside, Uninsulated`, `4% Leakage to Outside, Uninsulated`, `4% Leakage to Outside, R-4`, `4% Leakage to Outside, R-6`, `4% Leakage to Outside, R-8`, `5% Leakage to Outside, Uninsulated`, `5% Leakage to Outside, R-4`, `5% Leakage to Outside, R-6`, `5% Leakage to Outside, R-8`, `6.7% Leakage to Outside, Uninsulated`, `6.7% Leakage to Outside, R-4`, `6.7% Leakage to Outside, R-6`, `6.7% Leakage to Outside, R-8`, `9.3% Leakage to Outside, Uninsulated`, `9.3% Leakage to Outside, R-4`, `9.3% Leakage to Outside, R-6`, `9.3% Leakage to Outside, R-8`, `10% Leakage to Outside, Uninsulated`, `10% Leakage to Outside, R-4`, `10% Leakage to Outside, R-4, 150 sq. ft.`, `10% Leakage to Outside, R-6`, `10% Leakage to Outside, R-8`, `13.3% Leakage to Outside, Uninsulated`, `13.3% Leakage to Outside, R-4`, `13.3% Leakage to Outside, R-6`, `13.3% Leakage to Outside, R-8`, `15% Leakage to Outside, Uninsulated`, `15% Leakage to Outside, R-4`, `15% Leakage to Outside, R-6`, `15% Leakage to Outside, R-8`, `16% Leakage to Outside, Uninsulated`, `16% Leakage to Outside, R-4`, `16% Leakage to Outside, R-6`, `16% Leakage to Outside, R-8`, `20% Leakage to Outside, Uninsulated`, `20% Leakage to Outside, R-4`, `20% Leakage to Outside, R-6`, `20% Leakage to Outside, R-8`, `22.7% Leakage to Outside, Uninsulated`, `22.7% Leakage to Outside, R-4`, `22.7% Leakage to Outside, R-6`, `22.7% Leakage to Outside, R-8`, `35.3% Leakage to Outside, Uninsulated`, `35.3% Leakage to Outside, R-4`, `35.3% Leakage to Outside, R-6`, `35.3% Leakage to Outside, R-8`, `56.7% Leakage to Outside, Uninsulated`, `56.7% Leakage to Outside, R-4`, `56.7% Leakage to Outside, R-6`, `56.7% Leakage to Outside, R-8`, `0 CFM25 Leakage to Outside, Uninsulated`, `0 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.`, `0 CFM25 Leakage to Outside, R-4, 150 sq. ft.`, `0 CFM25 Leakage to Outside, Uninsulated, 308 sq. ft.`, `0 CFM25 Leakage to Outside, R-6, 308 sq. ft.`, `5 CFM25 Leakage to Outside, R-4, 150 sq. ft.`, `7.5 CFM25 Leakage to Outside, R-4, 150 sq. ft.`, `15 CFM25 Leakage to Outside, Uninsulated, 30 sq. ft.`, `37.5 CFM25 Leakage to Outside, R-4, 75 sq. ft.`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft.`, `75 CFM25 Leakage to Outside, R-4, 112.5 sq. ft.`, `75 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Deeply Buried`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Round`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Rectangular`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft., 25% Rectangular`, `125 CFM25 Leakage to Outside, R-6, 308 sq. ft.`, `100 CFM50 Leakage to Outside, R-4, 150 sq. ft.`
 
 <br/>
 
@@ -2364,45 +2353,6 @@ The location of the supply ducts. If not provided, the OS-HPXML default (see <a 
 
 <br/>
 
-**Ducts: Supply Insulation R-Value**
-
-The nominal insulation r-value of the supply ducts excluding air films. Use 0 for uninsulated ducts.
-
-- **Name:** ``ducts_supply_insulation_r``
-- **Type:** ``Double``
-
-- **Units:** ``h-ft^2-R/Btu``
-
-- **Required:** ``true``
-
-<br/>
-
-**Ducts: Supply Buried Insulation Level**
-
-Whether the supply ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.
-
-- **Name:** ``ducts_supply_buried_insulation_level``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `not buried`, `partially buried`, `fully buried`, `deeply buried`
-
-<br/>
-
-**Ducts: Supply Surface Area**
-
-The supply ducts surface area in the given location. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
-
-- **Name:** ``ducts_supply_surface_area``
-- **Type:** ``Double``
-
-- **Units:** ``ft^2``
-
-- **Required:** ``false``
-
-<br/>
-
 **Ducts: Supply Area Fraction**
 
 The fraction of supply ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
@@ -2416,27 +2366,16 @@ The fraction of supply ducts surface area in the given location. Only used if Su
 
 <br/>
 
-**Ducts: Supply Fraction Rectangular**
+**Ducts: Return**
 
-The fraction of supply ducts that are rectangular (as opposed to round); this affects the duct effective R-value used for modeling. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
+The return duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.
 
-- **Name:** ``ducts_supply_fraction_rectangular``
-- **Type:** ``Double``
-
-- **Units:** ``frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Ducts: Return Leakage to Outside Value**
-
-The leakage value to outside for the return ducts.
-
-- **Name:** ``ducts_return_leakage_to_outside_value``
-- **Type:** ``Double``
+- **Name:** ``ducts_return``
+- **Type:** ``Choice``
 
 - **Required:** ``true``
+
+- **Choices:** `None`, `0% Leakage to Outside, Uninsulated`, `2% Leakage to Outside, Uninsulated`, `2% Leakage to Outside, R-4`, `2% Leakage to Outside, R-6`, `2% Leakage to Outside, R-8`, `2.5% Leakage to Outside, Uninsulated`, `2.5% Leakage to Outside, R-4`, `2.5% Leakage to Outside, R-6`, `2.5% Leakage to Outside, R-8`, `3.3% Leakage to Outside, Uninsulated`, `3.3% Leakage to Outside, R-4`, `3.3% Leakage to Outside, R-6`, `3.3% Leakage to Outside, R-8`, `4.7% Leakage to Outside, Uninsulated`, `4.7% Leakage to Outside, R-4`, `4.7% Leakage to Outside, R-6`, `4.7% Leakage to Outside, R-8`, `5% Leakage to Outside, Uninsulated`, `5% Leakage to Outside, Uninsulated, 50 sq. ft.`, `5% Leakage to Outside, R-4`, `5% Leakage to Outside, R-6`, `5% Leakage to Outside, R-8`, `6.7% Leakage to Outside, Uninsulated`, `6.7% Leakage to Outside, R-4`, `6.7% Leakage to Outside, R-6`, `6.7% Leakage to Outside, R-8`, `7.5% Leakage to Outside, Uninsulated`, `7.5% Leakage to Outside, R-4`, `7.5% Leakage to Outside, R-6`, `7.5% Leakage to Outside, R-8`, `8% Leakage to Outside, Uninsulated`, `8% Leakage to Outside, R-4`, `8% Leakage to Outside, R-6`, `8% Leakage to Outside, R-8`, `10% Leakage to Outside, Uninsulated`, `10% Leakage to Outside, R-4`, `10% Leakage to Outside, R-6`, `10% Leakage to Outside, R-10`, `11.3% Leakage to Outside, Uninsulated`, `11.3% Leakage to Outside, R-4`, `11.3% Leakage to Outside, R-6`, `11.3% Leakage to Outside, R-8`, `17.7% Leakage to Outside, Uninsulated`, `17.7% Leakage to Outside, R-4`, `17.7% Leakage to Outside, R-6`, `17.7% Leakage to Outside, R-8`, `28.3% Leakage to Outside, Uninsulated`, `28.3% Leakage to Outside, R-4`, `28.3% Leakage to Outside, R-6`, `28.3% Leakage to Outside, R-8`, `25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.`, `25 CFM25 Leakage to Outside, Uninsulated, 37.5 sq. ft.`, `25 CFM25 Leakage to Outside, R-4, 50 sq. ft., Deeply Buried`, `25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., Round`, `25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., Rectangular`, `25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., 75% Rectangular`, `0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.`, `0 CFM25 Leakage to Outside, Uninsulated`, `0 CFM 25 Leakage to Outside, Uninsulated, 77 sq. ft.`, `0 CFM25 Leakage to Outside, R-6, 77 sq. ft.`, `125 CFM25 Leakage to Outside, R-6, 77 sq. ft.`, `125 CFM50 Leakage to Outside, Uninsulated, 50 sq. ft.`, `5 CFM25 Leakage to Outside, Uninsulated, 10 sq. ft.`, `2.5 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.`, `12.5 CFM25 Leakage to Outside, Uninsulated, 25 sq. ft.`
 
 <br/>
 
@@ -2450,45 +2389,6 @@ The location of the return ducts. If not provided, the OS-HPXML default (see <a 
 - **Required:** ``false``
 
 - **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `crawlspace`, `crawlspace - vented`, `crawlspace - unvented`, `crawlspace - conditioned`, `attic`, `attic - vented`, `attic - unvented`, `garage`, `exterior wall`, `under slab`, `roof deck`, `outside`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`, `manufactured home belly`
-
-<br/>
-
-**Ducts: Return Insulation R-Value**
-
-The nominal insulation r-value of the return ducts excluding air films. Use 0 for uninsulated ducts.
-
-- **Name:** ``ducts_return_insulation_r``
-- **Type:** ``Double``
-
-- **Units:** ``h-ft^2-R/Btu``
-
-- **Required:** ``true``
-
-<br/>
-
-**Ducts: Return Buried Insulation Level**
-
-Whether the return ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.
-
-- **Name:** ``ducts_return_buried_insulation_level``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `not buried`, `partially buried`, `fully buried`, `deeply buried`
-
-<br/>
-
-**Ducts: Return Surface Area**
-
-The return ducts surface area in the given location. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
-
-- **Name:** ``ducts_return_surface_area``
-- **Type:** ``Double``
-
-- **Units:** ``ft^2``
-
-- **Required:** ``false``
 
 <br/>
 
@@ -2513,19 +2413,6 @@ The number of return registers of the ducts. Only used to calculate default retu
 - **Type:** ``Integer``
 
 - **Units:** ``#``
-
-- **Required:** ``false``
-
-<br/>
-
-**Ducts: Return Fraction Rectangular**
-
-The fraction of return ducts that are rectangular (as opposed to round); this affects the duct effective R-value used for modeling. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
-
-- **Name:** ``ducts_return_fraction_rectangular``
-- **Type:** ``Double``
-
-- **Units:** ``frac``
 
 - **Required:** ``false``
 
