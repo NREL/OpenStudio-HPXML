@@ -58,7 +58,7 @@ None	Percent	0	0
 "25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., 75% Rectangular"	CFM25	25	0		50	0.75
 "0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft."	CFM25	0	0		50	
 "0 CFM25 Leakage to Outside, Uninsulated"	CFM25	0	0			
-"0 CFM 25 Leakage to Outside, Uninsulated, 77 sq. ft."	CFM25	0	0		77	
+"0 CFM25 Leakage to Outside, Uninsulated, 77 sq. ft."	CFM25	0	0		77	
 "0 CFM25 Leakage to Outside, R-6, 77 sq. ft."	CFM25	0	6		77	
 "125 CFM25 Leakage to Outside, R-6, 77 sq. ft."	CFM25	125	6		77	
 "125 CFM50 Leakage to Outside, Uninsulated, 50 sq. ft."	CFM50	125	0		50	
