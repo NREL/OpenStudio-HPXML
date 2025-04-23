@@ -13,6 +13,7 @@ __New Features__
   - Removes generation of stochastic schedules for building components not present in the HPXML file.
 - Output updates:
   - **Breaking change**: Adds generator electricity produced to *total* fuel/energy use; previously it was only included in *net* values.
+  - Adds optional new outputs for timeseries zone conditions (humidity ratio and relative humidity and dewpoint, radiant, and operative temperatures).
   - Adds new outputs for *net* peak electricity (summer/winter/annual); same as *total* peak electricity outputs but subtracts power produced by PV.
   - Avoids writing the E+ eplustbl.htm by default; use the debug flag to get it.
   - Deletes the eplusout\*.msgpack files by default (run_simulation.rb only); use the debug flag to preserve them.
