@@ -1225,7 +1225,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       get_zone_names(runner).sort.each do |zone_name|
         @zone_conds["#{zone_name} Humidity Ratio"] = ZoneCond.new
         @zone_conds["#{zone_name} Humidity Ratio"].name = "Humidity Ratio: #{sanitize_name(zone_name)}"
-        @zone_conds["#{zone_name} Humidity Ratio"].timeseries_units = 'lb Water Air per lb Dry Air' # TODO could report as unitless instead
+        @zone_conds["#{zone_name} Humidity Ratio"].timeseries_units = 'fraction'
         @zone_conds["#{zone_name} Humidity Ratio"].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Air Humidity Ratio'], 1, 0, args[:timeseries_frequency])
       end
 
