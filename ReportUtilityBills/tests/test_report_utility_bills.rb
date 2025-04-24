@@ -79,7 +79,7 @@ class ReportUtilityBillsTest < Minitest::Test
                                              fuel_oil_marginal_rate: 3.495346153846154)
 
     # Check for presence of fuels once
-    has_fuel = @hpxml_bldg.has_fuels(@hpxml.to_doc)
+    has_fuel = @hpxml_bldg.has_fuels()
     Defaults.apply_header(@hpxml_header, @hpxml_bldg, nil)
     Defaults.apply_utility_bill_scenarios(nil, @hpxml_header, @hpxml_bldg, has_fuel)
 
@@ -288,10 +288,10 @@ class ReportUtilityBillsTest < Minitest::Test
     # Check that we can successfully look up "auto" rates for every state and every fuel type.
     Constants::StateCodesMap.keys.each do |state_code|
       fuel_types.each do |fuel_type|
-        flat_rate, average_rate = UtilityBills.get_rates_from_eia_data(nil, state_code, fuel_type, 1) # fixed_charge > 0 ensures marginal_rate != average_rate
-        refute_nil(flat_rate)
+        marginal_rate, average_rate = UtilityBills.get_rates_from_eia_data(nil, state_code, fuel_type, 1) # fixed_charge > 0 ensures marginal_rate != average_rate
+        refute_nil(marginal_rate)
         if [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].include? fuel_type
-          assert_operator(flat_rate, :<, average_rate)
+          assert_operator(marginal_rate, :<, average_rate)
         else
           assert_nil(average_rate)
         end
@@ -300,10 +300,10 @@ class ReportUtilityBillsTest < Minitest::Test
 
     # Check that we can successfully look up "auto" rates for the US too.
     fuel_types.each do |fuel_type|
-      flat_rate, average_rate = UtilityBills.get_rates_from_eia_data(nil, 'US', fuel_type, 1) # fixed_charge > 0 ensures marginal_rate != average_rate
-      refute_nil(flat_rate)
+      marginal_rate, average_rate = UtilityBills.get_rates_from_eia_data(nil, 'US', fuel_type, 1) # fixed_charge > 0 ensures marginal_rate != average_rate
+      refute_nil(marginal_rate)
       if [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].include? fuel_type
-        assert_operator(flat_rate, :<, average_rate)
+        assert_operator(marginal_rate, :<, average_rate)
       else
         assert_nil(average_rate)
       end
@@ -322,10 +322,10 @@ class ReportUtilityBillsTest < Minitest::Test
     # Check that we can successfully provide rates for every state and every fuel type.
     Constants::StateCodesMap.keys.each do |state_code|
       fuel_types.each do |fuel_type|
-        flat_rate, average_rate = UtilityBills.get_rates_from_eia_data(nil, state_code, fuel_type, 1, marginal_rate) # fixed_charge > 0 ensures marginal_rate != average_rate
-        assert_equal(flat_rate, marginal_rate)
+        marginal_rate, average_rate = UtilityBills.get_rates_from_eia_data(nil, state_code, fuel_type, 1, marginal_rate) # fixed_charge > 0 ensures marginal_rate != average_rate
+        assert_equal(marginal_rate, marginal_rate)
         if [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].include? fuel_type
-          assert_operator(flat_rate, :<, average_rate)
+          assert_operator(marginal_rate, :<, average_rate)
         else
           assert_nil(average_rate)
         end
@@ -334,10 +334,10 @@ class ReportUtilityBillsTest < Minitest::Test
 
     # Check that we can successfully provide rates for the US too.
     fuel_types.each do |fuel_type|
-      flat_rate, average_rate = UtilityBills.get_rates_from_eia_data(nil, 'US', fuel_type, 1, marginal_rate) # fixed_charge > 0 ensures marginal_rate != average_rate
-      assert_equal(flat_rate, marginal_rate)
+      marginal_rate, average_rate = UtilityBills.get_rates_from_eia_data(nil, 'US', fuel_type, 1, marginal_rate) # fixed_charge > 0 ensures marginal_rate != average_rate
+      assert_equal(marginal_rate, marginal_rate)
       if [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas].include? fuel_type
-        assert_operator(flat_rate, :<, average_rate)
+        assert_operator(marginal_rate, :<, average_rate)
       else
         assert_nil(average_rate)
       end
@@ -1176,15 +1176,16 @@ class ReportUtilityBillsTest < Minitest::Test
 
       values = col[1..-1].map { |v| Float(v) }
 
-      if col_name == 'Electricity [kWh]'
+      case col_name
+      when 'Electricity [kWh]'
         fuels[[FT::Elec, false]].timeseries = values
-      elsif col_name == 'Gas [therm]'
+      when 'Gas [therm]'
         fuels[[FT::Gas, false]].timeseries = values
-      elsif col_name == 'Propane [gal]'
+      when 'Propane [gal]'
         fuels[[FT::Propane, false]].timeseries = values
-      elsif col_name == 'Oil [gal]'
+      when 'Oil [gal]'
         fuels[[FT::Oil, false]].timeseries = values
-      elsif col_name == "PV_#{pv_size_kw}kW [kWh]"
+      when "PV_#{pv_size_kw}kW [kWh]"
         fuels[[FT::Elec, true]].timeseries = values
       end
     end

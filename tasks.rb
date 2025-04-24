@@ -21,12 +21,24 @@ def create_hpxmls
   schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
   schema_validator = XMLValidator.get_xml_validator(schema_path)
 
-  schedules_regenerated = []
+  # Delete all stochastic schedule files (they will be regenerated below)
+  stochastic_sched_basename = 'occupancy-stochastic'
+  stochastic_csvs = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'schedule_files', "#{stochastic_sched_basename}*.csv")
+  Dir.glob(stochastic_csvs).each { |file| File.delete(file) }
+
+  # Specify list of sample files that should not regenerate schedule CSVs. These files test simulation timesteps
+  # that differ from the stochastic schedule timestep. If we were to call the BuildResidentialScheduleFile
+  # measure, it will generate a stochastic schedule that matches the simulation timestep; so we skip it and just
+  # use the stochastic schedule generated from another HPXML file.
+  schedule_skip_list = [
+    'base-schedules-detailed-occupancy-stochastic-10-mins.xml',
+    'base-simcontrol-timestep-10-mins-occupancy-stochastic-60-mins.xml'
+  ]
 
   puts "Generating #{json_inputs.size} HPXML files..."
 
-  json_inputs.keys.each_with_index do |hpxml_filename, i|
-    puts "[#{i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
+  json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
+    puts "[#{hpxml_i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
     abs_hpxml_files << File.absolute_path(hpxml_path)
 
@@ -65,21 +77,28 @@ def create_hpxmls
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
       if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
         suffix = "_#{i}" if i > 1
-        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
+        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
       end
 
       # Re-generate stochastic schedule CSV?
-      csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? 'occupancy-stochastic' }
-      if (not csv_path.nil?) && (not schedules_regenerated.include? csv_path)
+      prev_csv_path = nil
+      csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? stochastic_sched_basename }
+      if (not csv_path.nil?) && !schedule_skip_list.include?(File.basename(hpxml_path))
         sch_args = { 'hpxml_path' => hpxml_path,
                      'output_csv_path' => csv_path,
                      'hpxml_output_path' => hpxml_path,
                      'building_id' => "MyBuilding#{suffix}" }
         measures['BuildResidentialScheduleFile'] = [sch_args]
-        schedules_regenerated << csv_path
+
+        # Rename existing file (if found) for later comparison
+        csv_path = File.expand_path(File.join(File.dirname(hpxml_path), csv_path))
+        if File.exist? csv_path
+          prev_csv_path = csv_path + '.prev'
+          File.rename(csv_path, prev_csv_path)
+        end
       end
 
       # Apply measure
@@ -94,6 +113,17 @@ def create_hpxmls
         puts "\nError: Did not successfully generate #{hpxml_filename}."
         exit!
       end
+
+      # Make sure newly generated schedule CSV matches previously generated schedule CSV
+      next if prev_csv_path.nil?
+
+      csv_data = File.read(csv_path)
+      prev_csv_data = File.read(prev_csv_path)
+      if csv_data != prev_csv_data
+        puts "Error: Two different schedule CSVs (see #{File.basename(csv_path)} vs #{File.basename(prev_csv_path)}) were generated for the same filename."
+        exit!
+      end
+      File.delete(prev_csv_path)
     end
 
     hpxml = HPXML.new(hpxml_path: hpxml_path)
@@ -122,6 +152,11 @@ def create_hpxmls
   end
 
   puts "\n"
+
+  # Delete stochastic schedule backup file
+  dirs.each do |dir|
+    Dir.glob("#{workflow_dir}/#{dir}/*_bak.xml").each { |file| File.delete(file) }
+  end
 
   # Print warnings about extra files
   dirs.each do |dir|
@@ -167,6 +202,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     end
     roof.emittance = 0.9
     roof.roof_color = nil
+    roof.roof_type = nil
   end
   (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
     if wall.color == HPXML::ColorReflective
@@ -176,6 +212,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     end
     wall.emittance = 0.9
     wall.color = nil
+    wall.siding = nil
     if wall.is_a?(HPXML::Wall)
       if wall.attic_wall_type == HPXML::AtticWallTypeGable
         wall.insulation_assembly_r_value = 2.15
@@ -273,8 +310,10 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
     surface.emittance = 0.9
     if surface.is_a? HPXML::Roof
       surface.roof_color = nil
+      surface.roof_type = nil
     else
       surface.color = nil
+      surface.siding = nil
     end
   end
 
@@ -296,11 +335,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   # HPXML Header #
   # ------------ #
 
-  # General logic for all files
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
-  # Logic that can only be applied based on the file name
   if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
     hpxml_bldg.header.allow_increased_fixed_capacities = true
   elsif ['base-misc-emissions.xml'].include? hpxml_file
@@ -323,7 +360,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   end
 
   hpxml.buildings.each do |hpxml_bldg|
-    # Logic that can only be applied based on the file name
     if ['base-misc-emissions.xml'].include? hpxml_file
       hpxml_bldg.egrid_region = 'Western'
       hpxml_bldg.egrid_subregion = 'RMPA'
@@ -334,10 +370,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML BuildingSummary #
     # --------------------- #
 
-    # General logic for all files
     hpxml_bldg.site.available_fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
 
-    # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
         'base-schedules-simple-power-outage.xml',
@@ -541,7 +575,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Enclosure #
     # --------------- #
 
-    # General logic for all files
     (hpxml_bldg.roofs + hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |surface|
       surface.solar_absorptance = 0.7
       surface.emittance = 0.92
@@ -592,18 +625,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       skylight.interior_shading_factor_winter = 1.0
     end
 
-    # Logic that can only be applied based on the file name
     if ['base-bldgtype-mf-unit-adjacent-to-multifamily-buffer-space.xml',
         'base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml',
         'base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml',
-        'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml'].include? hpxml_file
-      if hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-multifamily-buffer-space.xml'
+        'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml',
+        'base-bldgtype-mf-unit-adjacent-to-other-housing-unit-basement.xml'].include? hpxml_file
+      if hpxml_file.include? 'multifamily-buffer-space'
         adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
-      elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml'
+      elsif hpxml_file.include? 'non-freezing-space'
         adjacent_to = HPXML::LocationOtherNonFreezingSpace
-      elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml'
+      elsif hpxml_file.include? 'other-heated-space'
         adjacent_to = HPXML::LocationOtherHeatedSpace
-      elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml'
+      elsif hpxml_file.include? 'other-housing-unit'
         adjacent_to = HPXML::LocationOtherHousingUnit
       end
       wall = hpxml_bldg.walls.select { |w|
@@ -611,10 +644,13 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                  w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
              }[0]
       wall.exterior_adjacent_to = adjacent_to
-      hpxml_bldg.floors[0].exterior_adjacent_to = adjacent_to
       hpxml_bldg.floors[1].exterior_adjacent_to = adjacent_to
-      if hpxml_file != 'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml'
+      if hpxml_file.include? 'basement'
+        hpxml_bldg.rim_joists[1].exterior_adjacent_to = adjacent_to
+        hpxml_bldg.foundation_walls[1].exterior_adjacent_to = adjacent_to
+      elsif !hpxml_file.include? 'other-housing-unit'
         wall.insulation_assembly_r_value = 23
+        hpxml_bldg.floors[0].exterior_adjacent_to = adjacent_to
         hpxml_bldg.floors[0].insulation_assembly_r_value = 18.7
         hpxml_bldg.floors[1].insulation_assembly_r_value = 18.7
       end
@@ -1448,10 +1484,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         window.overhangs_distance_to_bottom_of_window = 0.0
       end
     end
-    if ['base-enclosure-2stories-garage.xml',
-        'base-enclosure-garage.xml',
-        'base-zones-spaces.xml',
-        'base-zones-spaces-multiple.xml'].include? hpxml_file
+    if hpxml_bldg.has_location(HPXML::LocationGarage)
       grg_wall = hpxml_bldg.walls.select { |w|
                    w.interior_adjacent_to == HPXML::LocationGarage &&
                      w.exterior_adjacent_to == HPXML::LocationOutside
@@ -1486,28 +1519,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML HVAC #
     # ---------- #
 
-    # General logic
-    hpxml_bldg.heating_systems.each do |heating_system|
-      if heating_system.heating_system_type == HPXML::HVACTypeBoiler &&
-         heating_system.heating_system_fuel == HPXML::FuelTypeNaturalGas &&
-         !heating_system.is_shared_system
-        heating_system.electric_auxiliary_energy = 200
-      elsif [HPXML::HVACTypeFloorFurnace,
-             HPXML::HVACTypeWallFurnace,
-             HPXML::HVACTypeFireplace,
-             HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
-        heating_system.fan_watts = 0
-      elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
-        heating_system.fan_watts = 40
-      end
-    end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-        heat_pump.pump_watts_per_ton = 30.0
+        heat_pump.pump_watts_per_ton = 100.0
       end
     end
-
-    # Logic that can only be applied based on the file name
     if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
       # Handle chiller/cooling tower
       if hpxml_file.include? 'chiller'
@@ -1608,9 +1624,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].number_of_units_served = 6
       hpxml_bldg.heat_pumps[0].pump_watts_per_ton = 0.0
     end
-    if hpxml_file.include? 'eae'
-      hpxml_bldg.heating_systems[0].electric_auxiliary_energy = 500.0
-    else
+    if !hpxml_file.include? 'eae'
       if hpxml_file.include? 'shared-boiler'
         hpxml_bldg.heating_systems[0].shared_loop_watts = 600
       end
@@ -1682,18 +1696,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hvac_distributions[0].ducts[2].duct_surface_area = 37.5
       hpxml_bldg.hvac_distributions[0].ducts[3].duct_location = HPXML::LocationConditionedSpace
       hpxml_bldg.hvac_distributions[0].ducts[3].duct_surface_area = 12.5
-      if hpxml_file == 'base-hvac-ducts-area-fractions.xml'
-        hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area = nil
-        hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area = nil
-        hpxml_bldg.hvac_distributions[0].ducts[2].duct_surface_area = nil
-        hpxml_bldg.hvac_distributions[0].ducts[3].duct_surface_area = nil
-        hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_area = 0.75
-        hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_area = 0.75
-        hpxml_bldg.hvac_distributions[0].ducts[2].duct_fraction_area = 0.25
-        hpxml_bldg.hvac_distributions[0].ducts[3].duct_fraction_area = 0.25
-        hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 4050.0
-        hpxml_bldg.hvac_distributions[0].number_of_return_registers = 3
-      end
     elsif ['base-hvac-ducts-effective-rvalue.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_insulation_r_value = nil
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_insulation_r_value = nil
@@ -1828,15 +1830,13 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                      cooling_system_fuel: HPXML::FuelTypeElectricity,
                                      cooling_capacity: 9600,
                                      fraction_cool_load_served: 0.1333,
-                                     cooling_efficiency_eer: 8.5,
-                                     cooling_shr: 0.65)
+                                     cooling_efficiency_eer: 8.5)
       hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
                                      cooling_system_type: HPXML::HVACTypePTAC,
                                      cooling_system_fuel: HPXML::FuelTypeElectricity,
                                      cooling_capacity: 9600,
                                      fraction_cool_load_served: 0.1333,
-                                     cooling_efficiency_eer: 10.7,
-                                     cooling_shr: 0.65)
+                                     cooling_efficiency_eer: 10.7)
       hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
                                 distribution_system_idref: hpxml_bldg.hvac_distributions[4].id,
                                 heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
@@ -1852,7 +1852,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 heating_efficiency_hspf: 7.7,
                                 cooling_efficiency_seer: 13,
                                 heating_capacity_17F: 4800 * 0.6,
-                                cooling_shr: 0.73,
                                 compressor_type: HPXML::HVACCompressorTypeSingleStage)
       hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
                                 distribution_system_idref: hpxml_bldg.hvac_distributions[5].id,
@@ -1868,8 +1867,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 fraction_cool_load_served: 0.2,
                                 heating_efficiency_cop: 3.6,
                                 cooling_efficiency_eer: 16.6,
-                                cooling_shr: 0.73,
-                                pump_watts_per_ton: 30.0)
+                                pump_watts_per_ton: 100.0)
       hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
                                 heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
                                 heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -1884,7 +1882,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 heating_efficiency_hspf: 10,
                                 cooling_efficiency_seer: 19,
                                 heating_capacity_17F: 4800 * 0.6,
-                                cooling_shr: 0.73,
+                                compressor_type: HPXML::HVACCompressorTypeVariableSpeed,
                                 primary_cooling_system: true,
                                 primary_heating_system: true)
     elsif ['base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml'].include? hpxml_file
@@ -1979,19 +1977,30 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if hpxml_file.include? 'base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'
       hpxml_bldg.geothermal_loops[0].shank_spacing = 2.5
     end
-    if hpxml_file.include? 'HERS_HVAC'
-      hpxml_bldg.hvac_distributions.clear
-      hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
-                                        distribution_system_type: HPXML::HVACDistributionTypeDSE,
-                                        annual_heating_dse: 1.0,
-                                        annual_cooling_dse: 1.0)
+    hpxml_bldg.heating_systems.each do |heating_system|
+      if heating_system.heating_system_type == HPXML::HVACTypeBoiler &&
+         heating_system.heating_system_fuel == HPXML::FuelTypeNaturalGas &&
+         !heating_system.is_shared_system
+        heating_system.electric_auxiliary_energy = 200
+      elsif hpxml_file.include? 'eae'
+        heating_system.electric_auxiliary_energy = 500
+      else
+        heating_system.electric_auxiliary_energy = nil
+      end
+      if [HPXML::HVACTypeFloorFurnace,
+          HPXML::HVACTypeWallFurnace,
+          HPXML::HVACTypeFireplace,
+          HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
+        heating_system.fan_watts = 0
+      elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
+        heating_system.fan_watts = 40
+      end
     end
 
     # ------------------ #
     # HPXML WaterHeating #
     # ------------------ #
 
-    # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
         'base-schedules-simple-power-outage.xml',
@@ -2108,7 +2117,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML VentilationFan #
     # -------------------- #
 
-    # Logic that can only be applied based on the file name
     if ['base-bldgtype-mf-unit-shared-mechvent-multiple.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       fan_type: HPXML::MechVentTypeSupply,
@@ -2305,7 +2313,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Generation #
     # ---------------- #
 
-    # Logic that can only be applied based on the file name
     if ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.pv_systems[0].year_modules_manufactured = 2015
     elsif ['base-misc-generators.xml',
@@ -2346,11 +2353,23 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.batteries[0].usable_capacity_kwh = nil
     end
 
+    # ------------- #
+    # HPXML Vehicle #
+    # ------------- #
+
+    if ['base-vehicle-multiple.xml'].include? hpxml_file
+      hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
+                              vehicle_type: HPXML::VehicleTypeHybrid,
+                              fuel_economy_units: HPXML::UnitsMPG,
+                              fuel_economy_combined: 44.0,
+                              miles_per_year: 15000.0,
+                              hours_per_week: 10.0)
+    end
+
     # ---------------- #
     # HPXML Appliances #
     # ---------------- #
 
-    # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
         'base-schedules-simple-power-outage.xml',
@@ -2440,7 +2459,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Lighting #
     # -------------- #
 
-    # Logic that can only be applied based on the file name
     if ['base-lighting-ceiling-fans.xml',
         'base-lighting-ceiling-fans-label-energy-use.xml'].include? hpxml_file
       hpxml_bldg.ceiling_fans[0].weekday_fractions = '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
@@ -2498,7 +2516,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML MiscLoads #
     # --------------- #
 
-    # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
         'base-schedules-simple-power-outage.xml',
@@ -2621,47 +2638,27 @@ if ARGV[0].to_sym == :update_measures
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
-  # Apply rubocop
-  cops = ['Layout',
-          'Lint/DeprecatedClassMethods',
-          'Lint/DuplicateElsifCondition',
-          'Lint/DuplicateHashKey',
-          'Lint/DuplicateMethods',
-          'Lint/InterpolationCheck',
-          'Lint/LiteralAsCondition',
-          'Lint/RedundantStringCoercion',
-          'Lint/SelfAssignment',
-          'Lint/UnderscorePrefixedVariableName',
-          'Lint/UnusedBlockArgument',
-          'Lint/UnusedMethodArgument',
-          'Lint/UselessAssignment',
-          'Style/AndOr',
-          'Style/Documentation',
-          'Style/DocumentationMethod',
-          'Style/FrozenStringLiteralComment',
-          'Style/HashSyntax',
-          'Style/Next',
-          'Style/NilComparison',
-          'Style/RedundantParentheses',
-          'Style/RedundantSelf',
-          'Style/ReturnNil',
-          'Style/SelfAssignment',
-          'Style/StringLiterals',
-          'Style/StringLiteralsInInterpolation']
+  # Apply rubocop (uses .rubocop.yml)
   commands = ["\"require 'rubocop/rake_task' \"",
               "\"require 'stringio' \"",
-              "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--autocorrect', '--format', 'simple', '--only', '#{cops.join(',')}'] end\"",
+              "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--autocorrect-all', '--format', 'simple'] end\"",
               '"Rake.application[:rubocop].invoke"']
   command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
   system(command)
 
+  # Update a BuildResidentialHPXML/resources file when the OS-HPXML version changes.
+  # This will ensure that the BuildResidentialHPXML measure.xml is appropriately updated.
+  # Without this, the BuildResidentialHPXML measure has no differences and so OpenStudio
+  # would skip updating it.
+  version_txt_path = File.join(File.dirname(__FILE__), 'BuildResidentialHPXML/resources/version.txt')
+  File.write(version_txt_path, Digest::MD5.hexdigest(Version::OS_HPXML_Version))
+
   # Update measures XMLs
   puts 'Updating measure.xmls...'
   Dir['**/measure.xml'].each do |measure_xml|
     measure_dir = File.dirname(measure_xml)
-    # Using classic to work around https://github.com/NREL/OpenStudio/issues/5045
-    command = "#{OpenStudio.getOpenStudioCLI} classic measure -u '#{measure_dir}'"
+    command = "#{OpenStudio.getOpenStudioCLI} measure -u '#{measure_dir}'"
     system(command, [:out, :err] => File::NULL)
   end
 
@@ -2753,7 +2750,8 @@ if ARGV[0].to_sym == :create_release_zips
       exit!
     end
 
-    fonts_dir = File.join(File.dirname(__FILE__), 'documentation', '_static', 'fonts')
+    # Remove large fonts dir to keep package smaller
+    fonts_dir = File.join(File.dirname(__FILE__), 'documentation', '_static', 'css', 'fonts')
     if Dir.exist? fonts_dir
       FileUtils.rm_r(fonts_dir)
     end

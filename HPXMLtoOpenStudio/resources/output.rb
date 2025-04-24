@@ -2,6 +2,10 @@
 
 # Collection of methods related to output reporting or writing output files.
 module Outputs
+  MeterCustomElectricityTotal = 'Electricity:Total'
+  MeterCustomElectricityNet = 'Electricity:Net'
+  MeterCustomElectricityPV = 'Electricity:PV'
+
   # Add EMS programs for output reporting. In the case where a whole SFA/MF building is
   # being simulated, these programs are added to the whole building (merged) model, not
   # the individual dwelling unit models.
@@ -419,10 +423,8 @@ module Outputs
 
           key = { 'Window' => :windows_solar,
                   'Skylight' => :skylights_solar }[surface_type]
-          vars = { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
+          vars = { 'Surface Window Transmitted Solar Radiation Rate' => 'ss_trans_in',
                    'Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate' => 'ss_back_out',
-                   'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
-                   'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
                    'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_trans_out' }
 
           surfaces_sensors[key] << []
@@ -682,10 +684,9 @@ module Outputs
         surface_sensors.each do |sensors|
           s = "Set hr_#{k} = hr_#{k}"
           sensors.each do |sensor|
-            # remove ss_net if switch
-            if sensor.name.to_s.start_with?('ss_net', 'ss_sol_abs', 'ss_trans_in')
-              s += " - #{sensor.name}"
-            elsif sensor.name.to_s.start_with?('ss_sw_abs', 'ss_trans_out', 'ss_back_out')
+            if sensor.name.to_s.start_with?('ss_trans_in', 'ss_infra', 'ss_glaz')
+              s += " - #{sensor.name} * ZoneTimestep * 3600"
+            elsif sensor.name.to_s.start_with?('ss_trans_out', 'ss_back_out')
               s += " + #{sensor.name} * ZoneTimestep * 3600"
             else
               s += " + #{sensor.name}"
@@ -900,6 +901,7 @@ module Outputs
     ocf.setOutputCSV(debug)
     ocf.setOutputSQLite(debug)
     ocf.setOutputPerfLog(debug)
+    ocf.setOutputTabular(debug)
   end
 
   # Store some data for use in reporting measure.
@@ -948,11 +950,11 @@ module Outputs
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param debug [Boolean] If true, writes the OSM/EPW files to the output dir
   # @param output_dir [String] Path of the output files directory
-  # @param epw_path [String] Path to the EPW weather file
   # @return [nil]
-  def self.write_debug_files(runner, model, debug, output_dir, epw_path)
+  def self.write_debug_files(runner, model, weather, debug, output_dir)
     return unless debug
 
     # Write OSM file to run dir
@@ -962,7 +964,7 @@ module Outputs
 
     # Copy EPW file to run dir
     epw_output_path = File.join(output_dir, 'in.epw')
-    FileUtils.cp(epw_path, epw_output_path)
+    FileUtils.cp(weather.epw_path, epw_output_path)
   end
 
   # Calculates total HVAC capacities (across all HVAC systems) for a given HPXML Building.
@@ -1189,6 +1191,81 @@ module Outputs
       elsif output_format == 'msgpack'
         require 'msgpack'
         File.open(output_file_path, "#{mode}b") { |json| h.to_msgpack(json) }
+      end
+    end
+  end
+
+  # Creates custom output meters that are used across reporting measures.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @return [nil]
+  def self.create_custom_meters(model)
+    # Create custom meters:
+    # - Total Electricity (Electricity:Facility plus EV charging, batteries, generators)
+    # - Net Electricity (above plus PV)
+    # - PV Electricity
+
+    total_key_vars = []
+    net_key_vars = []
+    pv_key_vars = []
+    model.getElectricLoadCenterDistributions.each do |elcd|
+      # Batteries & EV charging output variables
+      if elcd.electricalStorage.is_initialized
+        elcs = elcd.electricalStorage.get
+        if elcs.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeVehicle
+          net_key_vars << [elcs.name.to_s.upcase, 'Electric Storage Production Decrement Energy']
+          total_key_vars << net_key_vars[-1]
+        elsif elcs.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeBattery
+          net_key_vars << [elcs.name.to_s.upcase, 'Electric Storage Production Decrement Energy']
+          total_key_vars << net_key_vars[-1]
+          net_key_vars << [elcs.name.to_s.upcase, 'Electric Storage Discharge Energy']
+          total_key_vars << net_key_vars[-1]
+        end
+      end
+
+      # PV output meters
+      elcd.generators.each do |generator|
+        next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypePhotovoltaics
+
+        net_key_vars << ['', 'Photovoltaic:ElectricityProduced']
+        pv_key_vars << net_key_vars[-1]
+        net_key_vars << ['', 'PowerConversion:ElectricityProduced']
+        pv_key_vars << net_key_vars[-1]
+      end
+
+      # Generator output meter
+      elcd.generators.each do |generator|
+        next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeGenerator
+
+        net_key_vars << ['', 'Cogeneration:ElectricityProduced']
+        total_key_vars << net_key_vars[-1]
+      end
+    end
+
+    # Create Total/Net meters
+    { MeterCustomElectricityTotal => total_key_vars,
+      MeterCustomElectricityNet => net_key_vars }.each do |meter_name, key_vars|
+      if key_vars.empty?
+        # Avoid OpenStudio warnings if nothing to decrement
+        meter = OpenStudio::Model::MeterCustom.new(model)
+        key_vars << ['', 'Electricity:Facility']
+      else
+        meter = OpenStudio::Model::MeterCustomDecrement.new(model, 'Electricity:Facility')
+      end
+      meter.setName(meter_name)
+      meter.setFuelType(EPlus::FuelTypeElectricity)
+      key_vars.uniq.each do |key_var|
+        meter.addKeyVarGroup(key_var[0], key_var[1])
+      end
+    end
+
+    # Create PV meter
+    if not pv_key_vars.empty?
+      meter = OpenStudio::Model::MeterCustom.new(model)
+      meter.setName(MeterCustomElectricityPV)
+      meter.setFuelType(EPlus::FuelTypeElectricity)
+      pv_key_vars.uniq.each do |key_var|
+        meter.addKeyVarGroup(key_var[0], key_var[1])
       end
     end
   end

@@ -17,6 +17,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
   def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+    File.delete(File.join(File.dirname(__FILE__), 'in.schedules.csv')) if File.exist? File.join(File.dirname(__FILE__), 'in.schedules.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
   end
@@ -205,7 +206,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants::ObjectTypeNaturalVentilation} program")
     assert_in_epsilon(14.5, UnitConversions.convert(program_values['NVArea'].sum, 'cm^2', 'ft^2'), 0.01)
     assert_in_epsilon(0.000109, program_values['Cs'].sum, 0.01)
-    assert_in_epsilon(0.000068, program_values['Cw'].sum, 0.01)
+    assert_in_epsilon(0.000071, program_values['Cw'].sum, 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(program_values['WHF_Flow'].sum, 'm^3/s', 'cfm'), 0.01)
 
     # Check natural ventilation is available 3 days/wk
@@ -222,7 +223,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants::ObjectTypeNaturalVentilation} program")
     assert_in_epsilon(14.5, UnitConversions.convert(program_values['NVArea'].sum, 'cm^2', 'ft^2'), 0.01)
     assert_in_epsilon(0.000109, program_values['Cs'].sum, 0.01)
-    assert_in_epsilon(0.000068, program_values['Cw'].sum, 0.01)
+    assert_in_epsilon(0.000071, program_values['Cw'].sum, 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(program_values['WHF_Flow'].sum, 'm^3/s', 'cfm'), 0.01)
 
     # Check natural ventilation is available 7 days/wk
@@ -371,6 +372,31 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
   def test_mechanical_ventilation_cfis
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-mechvent-cfis.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation }
+    vent_fan_cfm = vent_fan.oa_unit_flow_rate
+    vent_fan_power = vent_fan.fan_power
+    vent_fan_operation = vent_fan.hours_in_operation / 24.0
+
+    # Check infiltration/ventilation program
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants::ObjectTypeInfiltration} program")
+    assert_in_epsilon(vent_fan_cfm, UnitConversions.convert(program_values['oa_cfm_ah'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_sup'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_exh'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(vent_fan_power, program_values['ah_fan_w'].sum, 0.01)
+    assert_in_epsilon(vent_fan_operation, program_values['f_operation'].sum, 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['Qrange'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['Qbath'].sum, 'm^3/s', 'cfm'), 0.01)
+    # Load actuators
+    assert_equal(1, get_oed_for_ventilation(model, "#{Constants::ObjectTypeMechanicalVentilationHouseFan} sensible load").size)
+    assert_equal(1, get_oed_for_ventilation(model, "#{Constants::ObjectTypeMechanicalVentilationHouseFan} latent load").size)
+  end
+
+  def test_mechanical_ventilation_cfis_pthp
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-pthp-cfis.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -901,6 +927,34 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
       effective_r = Defaults.get_duct_effective_r_value(nominal_r, HPXML::DuctTypeReturn, HPXML::DuctBuriedInsulationDeep, f_rect_return)
       assert_in_epsilon(expected_r, effective_r, 0.1)
     end
+  end
+
+  def test_operational_0_occupants
+    args_hash = {}
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    hpxml, hpxml_bldg = _create_hpxml('base-residents-0.xml')
+    hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
+                                    fan_location: HPXML::LocationBath,
+                                    used_for_local_ventilation: true)
+    hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
+                                    fan_location: HPXML::LocationKitchen,
+                                    used_for_local_ventilation: true)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+
+    # Check no natural ventilation or whole house fan
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants::ObjectTypeNaturalVentilation} program")
+    assert_equal(0, UnitConversions.convert(program_values['NVArea'].sum, 'cm^2', 'ft^2'))
+    assert_equal(0, UnitConversions.convert(program_values['WHF_Flow'].sum, 'm^3/s', 'cfm'))
+
+    # Check no clothes dryer venting
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants::ObjectTypeInfiltration} program")
+    assert_equal(0, UnitConversions.convert(program_values['Qdryer'].sum, 'm^3/s', 'cfm'))
+
+    # Check no kitchen/bath local ventilation
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants::ObjectTypeInfiltration} program")
+    assert_equal(0, UnitConversions.convert(program_values['Qrange'].sum, 'm^3/s', 'cfm'))
+    assert_equal(0, UnitConversions.convert(program_values['Qbath'].sum, 'm^3/s', 'cfm'))
   end
 
   def _test_measure(args_hash)

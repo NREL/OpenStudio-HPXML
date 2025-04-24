@@ -12,18 +12,24 @@ module MiscLoads
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_plug_loads(runner, model, spaces, hpxml_bldg, hpxml_header, schedules_file)
+    if hpxml_bldg.building_occupancy.number_of_residents == 0 && (not hpxml_header.apply_ashrae140_assumptions)
+      # Operational calculation w/ zero occupants, zero out energy use
+      return
+    end
+
     hpxml_bldg.plug_loads.each do |plug_load|
-      if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
+      case plug_load.plug_load_type
+      when HPXML::PlugLoadTypeOther
         obj_name = Constants::ObjectTypeMiscPlugLoads
-      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
+      when HPXML::PlugLoadTypeTelevision
         obj_name = Constants::ObjectTypeMiscTelevision
-      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+      when HPXML::PlugLoadTypeElectricVehicleCharging
         obj_name = Constants::ObjectTypeMiscElectricVehicleCharging
-      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
+      when HPXML::PlugLoadTypeWellPump
         obj_name = Constants::ObjectTypeMiscWellPump
       end
       if obj_name.nil?
-        runner.registerWarning("Unexpected plug load type '#{plug_load.plug_load_type}'. The plug load will not be modeled.")
+        # Warning issued by Schematron validator
         next
       end
 
@@ -53,13 +59,14 @@ module MiscLoads
 
     # Create schedule
     sch = nil
-    if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
+    case plug_load.plug_load_type
+    when HPXML::PlugLoadTypeOther
       col_name = SchedulesFile::Columns[:PlugLoadsOther].name
-    elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
+    when HPXML::PlugLoadTypeTelevision
       col_name = SchedulesFile::Columns[:PlugLoadsTV].name
-    elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+    when HPXML::PlugLoadTypeElectricVehicleCharging
       col_name = SchedulesFile::Columns[:PlugLoadsVehicle].name
-    elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
+    when HPXML::PlugLoadTypeWellPump
       col_name = SchedulesFile::Columns[:PlugLoadsWellPump].name
     end
     if not schedules_file.nil?
@@ -110,16 +117,22 @@ module MiscLoads
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_fuel_loads(runner, model, spaces, hpxml_bldg, hpxml_header, schedules_file)
+    if hpxml_bldg.building_occupancy.number_of_residents == 0
+      # Operational calculation w/ zero occupants, zero out energy use
+      return
+    end
+
     hpxml_bldg.fuel_loads.each do |fuel_load|
-      if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
+      case fuel_load.fuel_load_type
+      when HPXML::FuelLoadTypeGrill
         obj_name = Constants::ObjectTypeMiscGrill
-      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
+      when HPXML::FuelLoadTypeLighting
         obj_name = Constants::ObjectTypeMiscLighting
-      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
+      when HPXML::FuelLoadTypeFireplace
         obj_name = Constants::ObjectTypeMiscFireplace
       end
       if obj_name.nil?
-        runner.registerWarning("Unexpected fuel load type '#{fuel_load.fuel_load_type}'. The fuel load will not be modeled.")
+        # Warning issued by Schematron validator
         next
       end
 
@@ -148,11 +161,12 @@ module MiscLoads
 
     # Create schedule
     sch = nil
-    if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
+    case fuel_load.fuel_load_type
+    when HPXML::FuelLoadTypeGrill
       col_name = SchedulesFile::Columns[:FuelLoadsGrill].name
-    elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
+    when HPXML::FuelLoadTypeLighting
       col_name = SchedulesFile::Columns[:FuelLoadsLighting].name
-    elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
+    when HPXML::FuelLoadTypeFireplace
       col_name = SchedulesFile::Columns[:FuelLoadsFireplace].name
     end
     if not schedules_file.nil?

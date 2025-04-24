@@ -37,6 +37,7 @@ module PV
 
     # Apply unit multiplier
     max_power = pv_system.max_power_output * unit_multiplier
+    return if max_power <= 0
 
     if pv_system.is_shared_system
       # Apportion to single dwelling unit by # bedrooms
@@ -64,22 +65,29 @@ module PV
     gpvwatts.setSystemLosses(pv_system.system_losses_fraction)
     gpvwatts.setTiltAngle(pv_system.array_tilt)
     gpvwatts.setAzimuthAngle(pv_system.array_azimuth)
-    if (pv_system.tracking == HPXML::PVTrackingTypeFixed) && (pv_system.location == HPXML::LocationRoof)
-      gpvwatts.setArrayType('FixedRoofMounted')
-    elsif (pv_system.tracking == HPXML::PVTrackingTypeFixed) && (pv_system.location == HPXML::LocationGround)
-      gpvwatts.setArrayType('FixedOpenRack')
-    elsif pv_system.tracking == HPXML::PVTrackingType1Axis
+    gpvwatts.additionalProperties.setFeature('ObjectType', Constants::ObjectTypePhotovoltaics)
+
+    case pv_system.tracking
+    when HPXML::PVTrackingTypeFixed
+      if pv_system.location == HPXML::LocationRoof
+        gpvwatts.setArrayType('FixedRoofMounted')
+      elsif pv_system.location == HPXML::LocationGround
+        gpvwatts.setArrayType('FixedOpenRack')
+      end
+    when HPXML::PVTrackingType1Axis
       gpvwatts.setArrayType('OneAxis')
-    elsif pv_system.tracking == HPXML::PVTrackingType1AxisBacktracked
+    when HPXML::PVTrackingType1AxisBacktracked
       gpvwatts.setArrayType('OneAxisBacktracking')
-    elsif pv_system.tracking == HPXML::PVTrackingType2Axis
+    when HPXML::PVTrackingType2Axis
       gpvwatts.setArrayType('TwoAxis')
     end
-    if pv_system.module_type == HPXML::PVModuleTypeStandard
+
+    case pv_system.module_type
+    when HPXML::PVModuleTypeStandard
       gpvwatts.setModuleType('Standard')
-    elsif pv_system.module_type == HPXML::PVModuleTypePremium
+    when HPXML::PVModuleTypePremium
       gpvwatts.setModuleType('Premium')
-    elsif pv_system.module_type == HPXML::PVModuleTypeThinFilm
+    when HPXML::PVModuleTypeThinFilm
       gpvwatts.setModuleType('ThinFilm')
     end
 

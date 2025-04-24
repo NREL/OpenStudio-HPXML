@@ -9,10 +9,9 @@ module Location
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param epw_path [String] Path to the EPW weather file
   # @return [nil]
-  def self.apply(model, weather, hpxml_bldg, hpxml_header, epw_path)
-    apply_weather_file(model, epw_path)
+  def self.apply(model, weather, hpxml_bldg, hpxml_header)
+    apply_weather_file(model, weather)
     apply_year(model, hpxml_header, weather)
     apply_site(model, hpxml_bldg)
     apply_dst(model, hpxml_bldg)
@@ -22,10 +21,10 @@ module Location
   # Sets the OpenStudio WeatherFile object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param epw_path [String] Path to the EPW weather file
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [nil]
-  def self.apply_weather_file(model, epw_path)
-    OpenStudio::Model::WeatherFile.setWeatherFile(model, OpenStudio::EpwFile.new(epw_path))
+  def self.apply_weather_file(model, weather)
+    OpenStudio::Model::WeatherFile.setWeatherFile(model, weather.epw_file)
   end
 
   # Set latitude, longitude, time zone, and elevation on the OpenStudio Site object.
@@ -34,13 +33,16 @@ module Location
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_site(model, hpxml_bldg)
-    # Note: None of these affect the model; see https://github.com/NREL/EnergyPlus/issues/10579.
     site = model.getSite
     site.setName("#{hpxml_bldg.city}_#{hpxml_bldg.state_code}")
     site.setLatitude(hpxml_bldg.latitude)
     site.setLongitude(hpxml_bldg.longitude)
     site.setTimeZone(hpxml_bldg.time_zone_utc_offset)
     site.setElevation(UnitConversions.convert(hpxml_bldg.elevation, 'ft', 'm').round)
+
+    # Tell EnergyPlus to use these values, not what's in the weather station (which
+    # may be at a very different, e.g., elevation)
+    site.setKeepSiteLocationInformation(true)
   end
 
   # Set calendar year on the OpenStudio YearDescription object.

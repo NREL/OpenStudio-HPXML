@@ -326,7 +326,6 @@
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>0.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
-              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -338,7 +337,7 @@
                 <Value>3.6</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
+                <PumpPowerWattsPerTon>100.0</PumpPowerWattsPerTon>
               </extension>
             </HeatPump>
           </HVACPlant>
