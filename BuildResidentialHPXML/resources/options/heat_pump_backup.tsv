@@ -1,4 +1,4 @@
-Option Name	type	fuel	heating_efficiency	heating_lockout_temp
+Option Name	Type	Fuel	Heating Efficiency [Frac]	Heating Lockout Temp [F]
 None	none			
 "Integrated, Electricity, 100% Efficiency"	integrated	electricity	1	
 "Integrated, Electricity, 100% Efficiency, 35F Lockout"	integrated	electricity	1	35

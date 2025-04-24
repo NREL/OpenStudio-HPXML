@@ -1345,11 +1345,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W/CFM')
     args << arg
 
-    duct_leakage_units_choices = OpenStudio::StringVector.new
-    duct_leakage_units_choices << HPXML::UnitsCFM25
-    duct_leakage_units_choices << HPXML::UnitsCFM50
-    duct_leakage_units_choices << HPXML::UnitsPercent
-
     duct_location_choices = OpenStudio::StringVector.new
     duct_location_choices << HPXML::LocationConditionedSpace
     duct_location_choices << HPXML::LocationBasementConditioned
@@ -1372,45 +1367,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationOtherNonFreezingSpace
     duct_location_choices << HPXML::LocationManufacturedHomeBelly
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_leakage_units', duct_leakage_units_choices, true)
-    arg.setDisplayName('Ducts: Leakage Units')
-    arg.setDescription('The leakage units of the ducts.')
-    arg.setDefaultValue(HPXML::UnitsPercent)
-    args << arg
+    ducts_supply_choices = get_option_names('ducts_supply.tsv')
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_leakage_to_outside_value', true)
-    arg.setDisplayName('Ducts: Supply Leakage to Outside Value')
-    arg.setDescription('The leakage value to outside for the supply ducts.')
-    arg.setDefaultValue(0.1)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply', ducts_supply_choices, true)
+    arg.setDisplayName('Ducts: Supply')
+    arg.setDescription('The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.')
+    arg.setDefaultValue('10% Leakage to Outside, Uninsulated')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_location', duct_location_choices, false)
     arg.setDisplayName('Ducts: Supply Location')
     arg.setDescription("The location of the supply ducts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_insulation_r', true)
-    arg.setDisplayName('Ducts: Supply Insulation R-Value')
-    arg.setDescription('The nominal insulation r-value of the supply ducts excluding air films. Use 0 for uninsulated ducts.')
-    arg.setUnits('h-ft^2-R/Btu')
-    arg.setDefaultValue(0)
-    args << arg
-
-    duct_buried_level_choices = OpenStudio::StringVector.new
-    duct_buried_level_choices << HPXML::DuctBuriedInsulationNone
-    duct_buried_level_choices << HPXML::DuctBuriedInsulationPartial
-    duct_buried_level_choices << HPXML::DuctBuriedInsulationFull
-    duct_buried_level_choices << HPXML::DuctBuriedInsulationDeep
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_buried_insulation_level', duct_buried_level_choices, false)
-    arg.setDisplayName('Ducts: Supply Buried Insulation Level')
-    arg.setDescription('Whether the supply ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_surface_area', false)
-    arg.setDisplayName('Ducts: Supply Surface Area')
-    arg.setDescription("The supply ducts surface area in the given location. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
-    arg.setUnits('ft^2')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_surface_area_fraction', false)
@@ -1419,39 +1386,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_fraction_rectangular', false)
-    arg.setDisplayName('Ducts: Supply Fraction Rectangular')
-    arg.setDescription("The fraction of supply ducts that are rectangular (as opposed to round); this affects the duct effective R-value used for modeling. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
-    arg.setUnits('frac')
-    args << arg
+    ducts_return_choices = get_option_names('ducts_return.tsv')
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_leakage_to_outside_value', true)
-    arg.setDisplayName('Ducts: Return Leakage to Outside Value')
-    arg.setDescription('The leakage value to outside for the return ducts.')
-    arg.setDefaultValue(0.1)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_return', ducts_return_choices, true)
+    arg.setDisplayName('Ducts: Return')
+    arg.setDescription('The return duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.')
+    arg.setDefaultValue('10% Leakage to Outside, Uninsulated')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_return_location', duct_location_choices, false)
     arg.setDisplayName('Ducts: Return Location')
     arg.setDescription("The location of the return ducts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_insulation_r', true)
-    arg.setDisplayName('Ducts: Return Insulation R-Value')
-    arg.setDescription('The nominal insulation r-value of the return ducts excluding air films. Use 0 for uninsulated ducts.')
-    arg.setUnits('h-ft^2-R/Btu')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_return_buried_insulation_level', duct_buried_level_choices, false)
-    arg.setDisplayName('Ducts: Return Buried Insulation Level')
-    arg.setDescription('Whether the return ducts are buried in, e.g., attic loose-fill insulation. Partially buried ducts have insulation that does not cover the top of the ducts. Fully buried ducts have insulation that just covers the top of the ducts. Deeply buried ducts have insulation that continues above the top of the ducts.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_surface_area', false)
-    arg.setDisplayName('Ducts: Return Surface Area')
-    arg.setDescription("The return ducts surface area in the given location. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
-    arg.setUnits('ft^2')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_surface_area_fraction', false)
@@ -1464,12 +1409,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Ducts: Number of Return Registers')
     arg.setDescription("The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
     arg.setUnits('#')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_fraction_rectangular', false)
-    arg.setDisplayName('Ducts: Return Fraction Rectangular')
-    arg.setDescription("The fraction of return ducts that are rectangular (as opposed to round); this affects the duct effective R-value used for modeling. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
-    arg.setUnits('frac')
     args << arg
 
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
@@ -3576,6 +3515,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     get_option_properties(args, 'heating_system_2.tsv', args[:heating_system_2])
     get_option_properties(args, 'site_soil_type.tsv', args[:site_soil_type])
     get_option_properties(args, 'air_leakage.tsv', args[:air_leakage])
+    get_option_properties(args, 'ducts_supply.tsv', args[:ducts_supply])
+    get_option_properties(args, 'ducts_return.tsv', args[:ducts_return])
 
     error = (args[:heating_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:heating_system_fraction_heat_load_served] > 0) && (args[:heat_pump_fraction_heat_load_served] > 0)
     errors << 'Multiple central heating systems are not currently supported.' if error
@@ -3653,58 +3594,58 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    hp_perf_data_heating_args_initialized = [!args[:heat_pump_perf_data_heating_outdoor_temperatures].nil?,
-                                             !args[:heat_pump_perf_data_heating_min_speed_capacities].nil?,
-                                             !args[:heat_pump_perf_data_heating_max_speed_capacities].nil?,
-                                             !args[:heat_pump_perf_data_heating_min_speed_cops].nil?,
-                                             !args[:heat_pump_perf_data_heating_max_speed_cops].nil?]
-    error = (hp_perf_data_heating_args_initialized.uniq.size != 1)
+    hp_detailed_performance_data_heating_args_initialized = [!args[:heat_pump_detailed_performance_data_heating_outdoor_temperatures].nil?,
+                                                             !args[:heat_pump_detailed_performance_data_heating_min_speed_capacities].nil?,
+                                                             !args[:heat_pump_detailed_performance_data_heating_max_speed_capacities].nil?,
+                                                             !args[:heat_pump_detailed_performance_data_heating_min_speed_cops].nil?,
+                                                             !args[:heat_pump_detailed_performance_data_heating_max_speed_cops].nil?]
+    error = (hp_detailed_performance_data_heating_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required heating detailed performance data arguments.' if error
 
-    if hp_perf_data_heating_args_initialized.uniq.size == 1 && hp_perf_data_heating_args_initialized.uniq[0]
-      heating_data_points_lengths = [args[:heat_pump_perf_data_heating_outdoor_temperatures].count(','),
-                                     args[:heat_pump_perf_data_heating_min_speed_capacities].count(','),
-                                     args[:heat_pump_perf_data_heating_max_speed_capacities].count(','),
-                                     args[:heat_pump_perf_data_heating_min_speed_cops].count(','),
-                                     args[:heat_pump_perf_data_heating_max_speed_cops].count(',')]
+    if hp_detailed_performance_data_heating_args_initialized.uniq.size == 1 && hp_detailed_performance_data_heating_args_initialized.uniq[0]
+      heating_data_points_lengths = [args[:heat_pump_detailed_performance_data_heating_outdoor_temperatures].count(','),
+                                     args[:heat_pump_detailed_performance_data_heating_min_speed_capacities].count(','),
+                                     args[:heat_pump_detailed_performance_data_heating_max_speed_capacities].count(','),
+                                     args[:heat_pump_detailed_performance_data_heating_min_speed_cops].count(','),
+                                     args[:heat_pump_detailed_performance_data_heating_max_speed_cops].count(',')]
 
       error = (heating_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed heating performance data arguments does not have enough comma-separated elements specified.' if error
     end
 
-    hp_perf_data_cooling_args_initialized = [!args[:heat_pump_perf_data_cooling_outdoor_temperatures].nil?,
-                                             !args[:heat_pump_perf_data_cooling_min_speed_capacities].nil?,
-                                             !args[:heat_pump_perf_data_cooling_max_speed_capacities].nil?,
-                                             !args[:heat_pump_perf_data_cooling_min_speed_cops].nil?,
-                                             !args[:heat_pump_perf_data_cooling_max_speed_cops].nil?]
-    error = (hp_perf_data_cooling_args_initialized.uniq.size != 1)
+    hp_detailed_performance_data_cooling_args_initialized = [!args[:heat_pump_detailed_performance_data_cooling_outdoor_temperatures].nil?,
+                                                             !args[:heat_pump_detailed_performance_data_cooling_min_speed_capacities].nil?,
+                                                             !args[:heat_pump_detailed_performance_data_cooling_max_speed_capacities].nil?,
+                                                             !args[:heat_pump_detailed_performance_data_cooling_min_speed_cops].nil?,
+                                                             !args[:heat_pump_detailed_performance_data_cooling_max_speed_cops].nil?]
+    error = (hp_detailed_performance_data_cooling_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required cooling detailed performance data arguments.' if error
 
-    if hp_perf_data_cooling_args_initialized.uniq.size == 1 && hp_perf_data_cooling_args_initialized.uniq[0]
-      hp_cooling_data_points_lengths = [args[:heat_pump_perf_data_cooling_outdoor_temperatures].count(','),
-                                        args[:heat_pump_perf_data_cooling_min_speed_capacities].count(','),
-                                        args[:heat_pump_perf_data_cooling_max_speed_capacities].count(','),
-                                        args[:heat_pump_perf_data_cooling_min_speed_cops].count(','),
-                                        args[:heat_pump_perf_data_cooling_max_speed_cops].count(',')]
+    if hp_detailed_performance_data_cooling_args_initialized.uniq.size == 1 && hp_detailed_performance_data_cooling_args_initialized.uniq[0]
+      hp_cooling_data_points_lengths = [args[:heat_pump_detailed_performance_data_cooling_outdoor_temperatures].count(','),
+                                        args[:heat_pump_detailed_performance_data_cooling_min_speed_capacities].count(','),
+                                        args[:heat_pump_detailed_performance_data_cooling_max_speed_capacities].count(','),
+                                        args[:heat_pump_detailed_performance_data_cooling_min_speed_cops].count(','),
+                                        args[:heat_pump_detailed_performance_data_cooling_max_speed_cops].count(',')]
 
       error = (hp_cooling_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
     end
 
-    cooling_system_perf_data_cooling_args_initialized = [!args[:cooling_system_perf_data_cooling_outdoor_temperatures].nil?,
-                                                         !args[:cooling_system_perf_data_cooling_min_speed_capacities].nil?,
-                                                         !args[:cooling_system_perf_data_cooling_max_speed_capacities].nil?,
-                                                         !args[:cooling_system_perf_data_cooling_min_speed_cops].nil?,
-                                                         !args[:cooling_system_perf_data_cooling_max_speed_cops].nil?]
-    error = (cooling_system_perf_data_cooling_args_initialized.uniq.size != 1)
+    cooling_system_detailed_performance_data_cooling_args_initialized = [!args[:cooling_system_detailed_performance_data_cooling_outdoor_temperatures].nil?,
+                                                                         !args[:cooling_system_detailed_performance_data_cooling_min_speed_capacities].nil?,
+                                                                         !args[:cooling_system_detailed_performance_data_cooling_max_speed_capacities].nil?,
+                                                                         !args[:cooling_system_detailed_performance_data_cooling_min_speed_cops].nil?,
+                                                                         !args[:cooling_system_detailed_performance_data_cooling_max_speed_cops].nil?]
+    error = (cooling_system_detailed_performance_data_cooling_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required cooling detailed performance data arguments.' if error
 
-    if cooling_system_perf_data_cooling_args_initialized.uniq.size == 1 && cooling_system_perf_data_cooling_args_initialized.uniq[0]
-      cooling_system_cooling_data_points_lengths = [args[:cooling_system_perf_data_cooling_outdoor_temperatures].count(','),
-                                                    args[:cooling_system_perf_data_cooling_min_speed_capacities].count(','),
-                                                    args[:cooling_system_perf_data_cooling_max_speed_capacities].count(','),
-                                                    args[:cooling_system_perf_data_cooling_min_speed_cops].count(','),
-                                                    args[:cooling_system_perf_data_cooling_max_speed_cops].count(',')]
+    if cooling_system_detailed_performance_data_cooling_args_initialized.uniq.size == 1 && cooling_system_detailed_performance_data_cooling_args_initialized.uniq[0]
+      cooling_system_cooling_data_points_lengths = [args[:cooling_system_detailed_performance_data_cooling_outdoor_temperatures].count(','),
+                                                    args[:cooling_system_detailed_performance_data_cooling_min_speed_capacities].count(','),
+                                                    args[:cooling_system_detailed_performance_data_cooling_max_speed_capacities].count(','),
+                                                    args[:cooling_system_detailed_performance_data_cooling_min_speed_cops].count(','),
+                                                    args[:cooling_system_detailed_performance_data_cooling_max_speed_cops].count(',')]
 
       error = (cooling_system_cooling_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
@@ -4540,12 +4481,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.site.shielding_of_home = args[:site_shielding_of_home]
     hpxml_bldg.site.ground_conductivity = args[:site_soil_type_ground_conductivity]
     hpxml_bldg.site.ground_diffusivity = args[:site_soil_type_ground_diffusivity]
-
-    if not args[:site_soil_type_soil_and_moisture_type].nil?
-      soil_type, moisture_type = args[:site_soil_type_soil_and_moisture_type].split(', ')
-      hpxml_bldg.site.soil_type = soil_type
-      hpxml_bldg.site.moisture_type = moisture_type
-    end
+    hpxml_bldg.site.soil_type = args[:site_soil_type_soil_type]
+    hpxml_bldg.site.moisture_type = args[:site_soil_type_moisture_type]
 
     hpxml_bldg.site.site_type = args[:site_type]
 
@@ -4807,6 +4744,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            roof_type: args[:roof_material_type],
                            roof_color: args[:roof_material_color],
+                           solar_absorptance: args[:roof_material_solar_absorptance],
+                           emittance: args[:roof_material_emittance],
                            pitch: args[:geometry_roof_pitch],
                            insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
@@ -4878,6 +4817,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                 area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                                 siding: siding,
                                 color: args[:wall_siding_color],
+                                solar_absorptance: args[:wall_siding_solar_absorptance],
+                                emittance: args[:wall_siding_emittance],
                                 insulation_assembly_r_value: insulation_assembly_r_value)
       @surface_ids[surface.name.to_s] = hpxml_bldg.rim_joists[-1].id
     end
@@ -4948,6 +4889,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            attic_wall_type: attic_wall_type,
                            siding: siding,
                            color: args[:wall_siding_color],
+                           solar_absorptance: args[:wall_siding_solar_absorptance],
+                           emittance: args[:wall_siding_emittance],
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'))
       @surface_ids[surface.name.to_s] = hpxml_bldg.walls[-1].id
 
@@ -5568,10 +5511,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
-      cooling_shr = args[:cooling_system_cooling_sensible_heat_fraction]
-    end
-
-    if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
       case args[:cooling_system_cooling_efficiency_type]
       when HPXML::UnitsSEER
         cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
@@ -5600,7 +5539,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       integrated_heating_system_fuel = args[:cooling_system_integrated_heating_system_fuel]
       integrated_heating_system_fraction_heat_load_served = args[:cooling_system_integrated_heating_system_fraction_heat_load_served]
       integrated_heating_system_capacity = args[:cooling_system_integrated_heating_system_capacity]
-      integrated_heating_system_efficiency_percent = args[:cooling_system_integrated_heating_system_efficiency_percent]
+      integrated_heating_system_efficiency_percent = args[:cooling_system_integrated_heating_system_efficiency]
     end
 
     hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
@@ -5611,7 +5550,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    cooling_autosizing_limit: args[:cooling_system_cooling_autosizing_limit],
                                    fraction_cool_load_served: args[:cooling_system_fraction_cool_load_served],
                                    compressor_type: compressor_type,
-                                   cooling_shr: cooling_shr,
                                    cooling_efficiency_seer: cooling_efficiency_seer,
                                    cooling_efficiency_seer2: cooling_efficiency_seer2,
                                    cooling_efficiency_eer: cooling_efficiency_eer,
@@ -5624,23 +5562,23 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    integrated_heating_system_capacity: integrated_heating_system_capacity,
                                    integrated_heating_system_efficiency_percent: integrated_heating_system_efficiency_percent,
                                    integrated_heating_system_fraction_heat_load_served: integrated_heating_system_fraction_heat_load_served)
-    if (not args[:cooling_system_perf_data_cooling_outdoor_temperatures].nil?) && [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type) && compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      cooling_system_perf_data_capacity_type = args[:cooling_system_perf_data_capacity_type]
-      cooling_system_perf_data_cooling_outdoor_temperatures = args[:cooling_system_perf_data_cooling_outdoor_temperatures].split(',').map(&:strip)
-      cooling_system_perf_data_cooling_min_speed_capacities = args[:cooling_system_perf_data_cooling_min_speed_capacities].split(',').map(&:strip)
-      cooling_system_perf_data_cooling_max_speed_capacities = args[:cooling_system_perf_data_cooling_max_speed_capacities].split(',').map(&:strip)
-      cooling_system_perf_data_cooling_min_speed_cops = args[:cooling_system_perf_data_cooling_min_speed_cops].split(',').map(&:strip)
-      cooling_system_perf_data_cooling_max_speed_cops = args[:cooling_system_perf_data_cooling_max_speed_cops].split(',').map(&:strip)
+    if (not args[:cooling_system_detailed_performance_data_cooling_outdoor_temperatures].nil?) && [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type) && compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      cooling_system_detailed_performance_data_capacity_type = args[:cooling_system_detailed_performance_data_capacity_type]
+      cooling_system_detailed_performance_data_cooling_outdoor_temperatures = args[:cooling_system_detailed_performance_data_cooling_outdoor_temperatures].split(',').map(&:strip)
+      cooling_system_detailed_performance_data_cooling_min_speed_capacities = args[:cooling_system_detailed_performance_data_cooling_min_speed_capacities].split(',').map(&:strip)
+      cooling_system_detailed_performance_data_cooling_max_speed_capacities = args[:cooling_system_detailed_performance_data_cooling_max_speed_capacities].split(',').map(&:strip)
+      cooling_system_detailed_performance_data_cooling_min_speed_cops = args[:cooling_system_detailed_performance_data_cooling_min_speed_cops].split(',').map(&:strip)
+      cooling_system_detailed_performance_data_cooling_max_speed_cops = args[:cooling_system_detailed_performance_data_cooling_max_speed_cops].split(',').map(&:strip)
 
       cooling_system_perf_data = hpxml_bldg.cooling_systems[0].cooling_detailed_performance_data
-      cooling_system_perf_data_data_points = cooling_system_perf_data_cooling_outdoor_temperatures.zip(cooling_system_perf_data_cooling_min_speed_capacities,
-                                                                                                       cooling_system_perf_data_cooling_max_speed_capacities,
-                                                                                                       cooling_system_perf_data_cooling_min_speed_cops,
-                                                                                                       cooling_system_perf_data_cooling_max_speed_cops)
-      cooling_system_perf_data_data_points.each do |cooling_perf_data_data_point|
-        outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = cooling_perf_data_data_point
+      cooling_system_detailed_performance_data_data_points = cooling_system_detailed_performance_data_cooling_outdoor_temperatures.zip(cooling_system_detailed_performance_data_cooling_min_speed_capacities,
+                                                                                                                                       cooling_system_detailed_performance_data_cooling_max_speed_capacities,
+                                                                                                                                       cooling_system_detailed_performance_data_cooling_min_speed_cops,
+                                                                                                                                       cooling_system_detailed_performance_data_cooling_max_speed_cops)
+      cooling_system_detailed_performance_data_data_points.each do |cooling_detailed_performance_data_data_point|
+        outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = cooling_detailed_performance_data_data_point
 
-        case cooling_system_perf_data_capacity_type
+        case cooling_system_detailed_performance_data_capacity_type
         when 'Absolute capacities'
           min_speed_capacity = Float(min_speed_cap_or_frac)
           max_speed_capacity = Float(max_speed_cap_or_frac)
@@ -5754,7 +5692,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               heating_capacity_retention_temp: args[:heat_pump_heating_capacity_retention_temp],
                               compressor_type: compressor_type,
                               compressor_lockout_temp: args[:heat_pump_compressor_lockout_temp],
-                              cooling_shr: args[:heat_pump_cooling_sensible_heat_fraction],
                               cooling_capacity: args[:heat_pump_cooling_capacity],
                               cooling_autosizing_factor: args[:heat_pump_cooling_autosizing_factor],
                               cooling_autosizing_limit: args[:heat_pump_cooling_autosizing_limit],
@@ -5781,23 +5718,23 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               primary_cooling_system: args[:heat_pump_fraction_cool_load_served] > 0)
 
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump_type) && compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      if (not args[:heat_pump_perf_data_heating_outdoor_temperatures].nil?) && (args[:heat_pump_fraction_heat_load_served] > 0)
-        hp_perf_data_capacity_type = args[:heat_pump_perf_data_capacity_type]
-        hp_perf_data_heating_outdoor_temperatures = args[:heat_pump_perf_data_heating_outdoor_temperatures].split(',').map(&:strip)
-        hp_perf_data_heating_min_speed_capacities = args[:heat_pump_perf_data_heating_min_speed_capacities].split(',').map(&:strip)
-        hp_perf_data_heating_max_speed_capacities = args[:heat_pump_perf_data_heating_max_speed_capacities].split(',').map(&:strip)
-        hp_perf_data_heating_min_speed_cops = args[:heat_pump_perf_data_heating_min_speed_cops].split(',').map(&:strip)
-        hp_perf_data_heating_max_speed_cops = args[:heat_pump_perf_data_heating_max_speed_cops].split(',').map(&:strip)
+      if (not args[:heat_pump_detailed_performance_data_heating_outdoor_temperatures].nil?) && (args[:heat_pump_fraction_heat_load_served] > 0)
+        hp_detailed_performance_data_capacity_type = args[:heat_pump_detailed_performance_data_capacity_type]
+        hp_detailed_performance_data_heating_outdoor_temperatures = args[:heat_pump_detailed_performance_data_heating_outdoor_temperatures].split(',').map(&:strip)
+        hp_detailed_performance_data_heating_min_speed_capacities = args[:heat_pump_detailed_performance_data_heating_min_speed_capacities].split(',').map(&:strip)
+        hp_detailed_performance_data_heating_max_speed_capacities = args[:heat_pump_detailed_performance_data_heating_max_speed_capacities].split(',').map(&:strip)
+        hp_detailed_performance_data_heating_min_speed_cops = args[:heat_pump_detailed_performance_data_heating_min_speed_cops].split(',').map(&:strip)
+        hp_detailed_performance_data_heating_max_speed_cops = args[:heat_pump_detailed_performance_data_heating_max_speed_cops].split(',').map(&:strip)
 
         htg_perf_data = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data
-        heating_perf_data_data_points = hp_perf_data_heating_outdoor_temperatures.zip(hp_perf_data_heating_min_speed_capacities,
-                                                                                      hp_perf_data_heating_max_speed_capacities,
-                                                                                      hp_perf_data_heating_min_speed_cops,
-                                                                                      hp_perf_data_heating_max_speed_cops)
-        heating_perf_data_data_points.each do |heating_perf_data_data_point|
-          outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = heating_perf_data_data_point
+        heating_detailed_performance_data_data_points = hp_detailed_performance_data_heating_outdoor_temperatures.zip(hp_detailed_performance_data_heating_min_speed_capacities,
+                                                                                                                      hp_detailed_performance_data_heating_max_speed_capacities,
+                                                                                                                      hp_detailed_performance_data_heating_min_speed_cops,
+                                                                                                                      hp_detailed_performance_data_heating_max_speed_cops)
+        heating_detailed_performance_data_data_points.each do |heating_detailed_performance_data_data_point|
+          outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = heating_detailed_performance_data_data_point
 
-          case hp_perf_data_capacity_type
+          case hp_detailed_performance_data_capacity_type
           when 'Absolute capacities'
             min_speed_capacity = Float(min_speed_cap_or_frac)
             max_speed_capacity = Float(max_speed_cap_or_frac)
@@ -5819,23 +5756,23 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         end
       end
 
-      if (not args[:heat_pump_perf_data_cooling_outdoor_temperatures].nil?) && (args[:heat_pump_fraction_cool_load_served] > 0)
-        hp_perf_data_capacity_type = args[:heat_pump_perf_data_capacity_type]
-        hp_perf_data_cooling_outdoor_temperatures = args[:heat_pump_perf_data_cooling_outdoor_temperatures].split(',').map(&:strip)
-        hp_perf_data_cooling_min_speed_capacities = args[:heat_pump_perf_data_cooling_min_speed_capacities].split(',').map(&:strip)
-        hp_perf_data_cooling_max_speed_capacities = args[:heat_pump_perf_data_cooling_max_speed_capacities].split(',').map(&:strip)
-        hp_perf_data_cooling_min_speed_cops = args[:heat_pump_perf_data_cooling_min_speed_cops].split(',').map(&:strip)
-        hp_perf_data_cooling_max_speed_cops = args[:heat_pump_perf_data_cooling_max_speed_cops].split(',').map(&:strip)
+      if (not args[:heat_pump_detailed_performance_data_cooling_outdoor_temperatures].nil?) && (args[:heat_pump_fraction_cool_load_served] > 0)
+        hp_detailed_performance_data_capacity_type = args[:heat_pump_detailed_performance_data_capacity_type]
+        hp_detailed_performance_data_cooling_outdoor_temperatures = args[:heat_pump_detailed_performance_data_cooling_outdoor_temperatures].split(',').map(&:strip)
+        hp_detailed_performance_data_cooling_min_speed_capacities = args[:heat_pump_detailed_performance_data_cooling_min_speed_capacities].split(',').map(&:strip)
+        hp_detailed_performance_data_cooling_max_speed_capacities = args[:heat_pump_detailed_performance_data_cooling_max_speed_capacities].split(',').map(&:strip)
+        hp_detailed_performance_data_cooling_min_speed_cops = args[:heat_pump_detailed_performance_data_cooling_min_speed_cops].split(',').map(&:strip)
+        hp_detailed_performance_data_cooling_max_speed_cops = args[:heat_pump_detailed_performance_data_cooling_max_speed_cops].split(',').map(&:strip)
 
         hp_clg_perf_data = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data
-        hp_cooling_perf_data_data_points = hp_perf_data_cooling_outdoor_temperatures.zip(hp_perf_data_cooling_min_speed_capacities,
-                                                                                         hp_perf_data_cooling_max_speed_capacities,
-                                                                                         hp_perf_data_cooling_min_speed_cops,
-                                                                                         hp_perf_data_cooling_max_speed_cops)
-        hp_cooling_perf_data_data_points.each do |hp_cooling_perf_data_data_point|
-          outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = hp_cooling_perf_data_data_point
+        hp_cooling_detailed_performance_data_data_points = hp_detailed_performance_data_cooling_outdoor_temperatures.zip(hp_detailed_performance_data_cooling_min_speed_capacities,
+                                                                                                                         hp_detailed_performance_data_cooling_max_speed_capacities,
+                                                                                                                         hp_detailed_performance_data_cooling_min_speed_cops,
+                                                                                                                         hp_detailed_performance_data_cooling_max_speed_cops)
+        hp_cooling_detailed_performance_data_data_points.each do |hp_cooling_detailed_performance_data_data_point|
+          outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = hp_cooling_detailed_performance_data_data_point
 
-          case hp_perf_data_capacity_type
+          case hp_detailed_performance_data_capacity_type
           when 'Absolute capacities'
             min_speed_capacity = Float(min_speed_cap_or_frac)
             max_speed_capacity = Float(max_speed_cap_or_frac)
@@ -5897,7 +5834,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                     bore_diameter: args[:geothermal_loop_boreholes_diameter],
                                     grout_type: args[:geothermal_loop_grout_type],
                                     pipe_type: args[:geothermal_loop_pipe_type],
-                                    pipe_diameter: pipe_diameter)
+                                    pipe_diameter: pipe_diameter,
+                                    shank_spacing: args[:geothermal_loop_pipe_shank_spacing])
     hpxml_bldg.heat_pumps[-1].geothermal_loop_idref = hpxml_bldg.geothermal_loops[-1].id
   end
 
@@ -6074,12 +6012,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @return [nil]
   def set_duct_leakages(args, hvac_distribution)
     hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                    duct_leakage_units: args[:ducts_leakage_units],
+                                                    duct_leakage_units: args[:ducts_supply_leakage_units],
                                                     duct_leakage_value: args[:ducts_supply_leakage_to_outside_value],
                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
     hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                    duct_leakage_units: args[:ducts_leakage_units],
+                                                    duct_leakage_units: args[:ducts_return_leakage_units],
                                                     duct_leakage_value: args[:ducts_return_leakage_to_outside_value],
                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   end

@@ -195,25 +195,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
   hpxml_bldg.foundations.reverse_each do |foundation|
     foundation.delete
   end
-  hpxml_bldg.roofs.each do |roof|
-    if roof.roof_color == HPXML::ColorReflective
-      roof.solar_absorptance = 0.2
-    else
-      roof.solar_absorptance = 0.6
-    end
-    roof.emittance = 0.9
-    roof.roof_color = nil
-    roof.roof_type = nil
-  end
   (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
-    if wall.color == HPXML::ColorReflective
-      wall.solar_absorptance = 0.2
-    else
-      wall.solar_absorptance = 0.6
-    end
-    wall.emittance = 0.9
-    wall.color = nil
-    wall.siding = nil
     if wall.is_a?(HPXML::Wall)
       if wall.attic_wall_type == HPXML::AtticWallTypeGable
         wall.insulation_assembly_r_value = 2.15
@@ -306,18 +288,6 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
-  (hpxml_bldg.roofs + hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |surface|
-    surface.solar_absorptance = 0.75
-    surface.emittance = 0.9
-    if surface.is_a? HPXML::Roof
-      surface.roof_color = nil
-      surface.roof_type = nil
-    else
-      surface.color = nil
-      surface.siding = nil
-    end
-  end
-
   hpxml_bldg.hvac_distributions.clear
   hpxml_bldg.hvac_distributions.add(id: 'HVACDistribution1',
                                     distribution_system_type: HPXML::HVACDistributionTypeDSE,
@@ -387,6 +357,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.building_construction.average_ceiling_height = nil
       hpxml_bldg.building_construction.conditioned_building_volume = nil
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        duct.duct_surface_area = nil # removes surface area from both supply and return
+      end
     elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
       hpxml_bldg.building_construction.number_of_conditioned_floors = 2
       hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 1
@@ -1687,6 +1660,20 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-hvac-ducts-area-fractions.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
       hpxml_bldg.hvac_distributions[0].ducts[2].duct_insulation_r_value = 4.0
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        duct.duct_surface_area = nil # removes surface area from both supply and return
+      end
+    elsif ['base-hvac-ducts-defaults.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        duct.duct_surface_area = nil
+      end
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2025.0
+    elsif ['base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml',
+           'base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        duct.duct_surface_area = nil
+      end
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700.0
     elsif ['base-enclosure-2stories.xml',
            'base-enclosure-2stories-garage.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
@@ -1974,11 +1961,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
-    end
-    if hpxml_file.include? 'base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'
-      hpxml_bldg.geothermal_loops[0].shank_spacing = 2.5
-      hpxml_bldg.site.soil_type = 'sand'
-      hpxml_bldg.site.moisture_type = 'dry'
     end
     hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler &&
@@ -2318,6 +2300,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
     if ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.pv_systems[0].year_modules_manufactured = 2015
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700.0
     elsif ['base-misc-generators.xml',
            'base-misc-generators-battery.xml',
            'base-misc-generators-battery-scheduled.xml',

@@ -1,4 +1,4 @@
-Option Name	type	heating_efficiency	pilot_light	airflow_defect_ratio
+Option Name	Type	Heating Efficiency [Frac]	Pilot Light [Btu/hr]	Airflow Defect Ratio [Frac]
 None	none			
 Electric Resistance	ElectricResistance	1		
 "Central Furnace, 60% AFUE"	Furnace	0.6		
