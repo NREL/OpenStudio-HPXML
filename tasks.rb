@@ -153,6 +153,11 @@ def create_hpxmls
 
   puts "\n"
 
+  # Delete stochastic schedule backup file
+  dirs.each do |dir|
+    Dir.glob("#{workflow_dir}/#{dir}/*_bak.xml").each { |file| File.delete(file) }
+  end
+
   # Print warnings about extra files
   dirs.each do |dir|
     Dir["#{workflow_dir}/#{dir}/*.xml"].each do |hpxml|
@@ -197,6 +202,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     end
     roof.emittance = 0.9
     roof.roof_color = nil
+    roof.roof_type = nil
   end
   (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
     if wall.color == HPXML::ColorReflective
@@ -206,6 +212,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     end
     wall.emittance = 0.9
     wall.color = nil
+    wall.siding = nil
     if wall.is_a?(HPXML::Wall)
       if wall.attic_wall_type == HPXML::AtticWallTypeGable
         wall.insulation_assembly_r_value = 2.15
@@ -303,8 +310,10 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
     surface.emittance = 0.9
     if surface.is_a? HPXML::Roof
       surface.roof_color = nil
+      surface.roof_type = nil
     else
       surface.color = nil
+      surface.siding = nil
     end
   end
 

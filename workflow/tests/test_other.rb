@@ -19,7 +19,7 @@ class WorkflowOtherTest < Minitest::Test
       output_format = 'csv' if output_format == 'csv_dview'
 
       # Check for output files
-      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
+      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack')) # Produced because --debug flag if used
       assert(File.exist? File.join(File.dirname(xml), 'run', "results_annual.#{output_format}"))
       assert(File.exist? File.join(File.dirname(xml), 'run', "results_timeseries.#{output_format}"))
       assert(File.exist?(File.join(File.dirname(xml), 'run', "results_bills.#{output_format}")))
@@ -52,8 +52,10 @@ class WorkflowOtherTest < Minitest::Test
     assert(File.exist? File.join(File.dirname(xml), 'run', 'in.epJSON'))
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+
+    # Check for no E+ msgpack files
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
   end
 
   def test_run_simulation_idf_input
@@ -67,8 +69,10 @@ class WorkflowOtherTest < Minitest::Test
     assert(File.exist? File.join(File.dirname(xml), 'run', 'in.idf'))
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+
+    # Check for no E+ msgpack files
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
   end
 
   def test_run_simulation_faster_performance
@@ -79,8 +83,10 @@ class WorkflowOtherTest < Minitest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+
+    # Check for no E+ msgpack files
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
 
     # Check component loads don't exist
     component_loads = {}
@@ -107,10 +113,16 @@ class WorkflowOtherTest < Minitest::Test
       system(command, err: File::NULL)
 
       # Check for output files
-      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'in.schedules.csv'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'stochastic.csv'))
+
+      # Check for E+ msgpack files
+      if debug
+        assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
+      else
+        refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
+      end
 
       # Check stochastic.csv headers
       schedules = CSV.read(File.join(File.dirname(xml), 'run', 'stochastic.csv'), headers: true)
@@ -142,8 +154,10 @@ class WorkflowOtherTest < Minitest::Test
       system(command, err: File::NULL)
 
       # Check for output files
-      assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
       assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+
+      # Check for no E+ msgpack files
+      refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
 
       timeseries_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
       if not invalid_variable_only
@@ -184,12 +198,14 @@ class WorkflowOtherTest < Minitest::Test
     system(command, err: File::NULL)
 
     # Check for output files
-    assert(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries_timestep.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries_hourly.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries_daily.csv'))
     assert(File.exist? File.join(File.dirname(xml), 'run', 'results_timeseries_monthly.csv'))
+
+    # Check for no E+ msgpack files
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
 
     # Check timeseries columns exist
     { 'timestep' => ['Weather:'],
