@@ -680,7 +680,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_area_left'] = 0
       args['window_area_right'] = 0
       args['ducts_supply'] = '0 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.'
-      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft'
+      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['ducts_number_of_return_registers'] = 1
@@ -722,14 +722,15 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('geometry_unit_num_occupants')
       args.delete('ducts_supply_location')
       args.delete('ducts_return_location')
-      args.delete('ducts_supply_surface_area')
-      args.delete('ducts_return_surface_area')
       args.delete('water_heater_location')
       args.delete('water_heater_tank_volume')
       args.delete('hot_water_distribution_standard_piping_length')
       args.delete('clothes_washer_location')
       args.delete('clothes_dryer_location')
       args.delete('refrigerator_location')
+      # options are the same as base-sfd.xml but without duct surface areas
+      args['ducts_supply'] = '75 CFM25 Leakage to Outside, R-4'
+      args['ducts_return'] = '25 CFM25 Leakage to Outside, Uninsulated'
     when 'extra-auto-duct-locations.xml'
       args['ducts_supply_location'] = HPXML::LocationAtticUnvented
       args['ducts_return_location'] = HPXML::LocationAtticUnvented

@@ -100,11 +100,8 @@
     "hvac_control_heating_weekend_setpoint": 68,
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
-    "ducts_leakage_units": "CFM25",
-    "ducts_supply_leakage_to_outside_value": 0,
-    "ducts_return_leakage_to_outside_value": 0,
-    "ducts_supply_insulation_r": 0,
-    "ducts_return_insulation_r": 0,
+    "ducts_supply": "0 CFM25 Leakage to Outside, Uninsulated",
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated",
     "mech_vent_fan_type": "none",
     "mech_vent_recovery_efficiency_type": "Unadjusted",
     "mech_vent_total_recovery_efficiency": 0,
@@ -404,12 +401,10 @@
     "cooling_system_cooling_capacity": 38400,
     "cooling_system_fraction_cool_load_served": 1,
     "hvac_blower_fan_watts_per_cfm": 0.5,
-    "ducts_supply_insulation_r": 0,
+    "ducts_supply": "0 CFM25 Leakage to Outside, Uninsulated, 308 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated, 77 sq. ft.",
     "ducts_supply_location": "conditioned space",
-    "ducts_supply_surface_area": 308,
-    "ducts_return_insulation_r": 0,
-    "ducts_return_location": "conditioned space",
-    "ducts_return_surface_area": 77
+    "ducts_return_location": "conditioned space"
   },
   "tests/HERS_DSE/HVAC3b.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3a.xml",
@@ -420,14 +415,14 @@
   "tests/HERS_DSE/HVAC3c.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3b.xml",
     "heating_system_heating_capacity": 49000,
-    "ducts_supply_insulation_r": 6,
-    "ducts_return_insulation_r": 6
+    "ducts_supply": "0 CFM25 Leakage to Outside, R-6, 308 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, R-6, 77 sq. ft."
   },
   "tests/HERS_DSE/HVAC3d.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3c.xml",
     "heating_system_heating_capacity": 61000,
-    "ducts_supply_leakage_to_outside_value": 125.0,
-    "ducts_return_leakage_to_outside_value": 125.0
+    "ducts_supply": "125 CFM25 Leakage to Outside, R-6, 308 sq. ft.",
+    "ducts_return": "125 CFM25 Leakage to Outside, R-6, 77 sq. ft."
   },
   "tests/HERS_DSE/HVAC3e.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -439,12 +434,10 @@
     "cooling_system_cooling_capacity": 38400,
     "cooling_system_fraction_cool_load_served": 1,
     "hvac_blower_fan_watts_per_cfm": 0.5,
-    "ducts_supply_insulation_r": 0,
+    "ducts_supply": "0 CFM25 Leakage to Outside, Uninsulated, 308 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated, 77 sq. ft.",
     "ducts_supply_location": "conditioned space",
-    "ducts_supply_surface_area": 308,
-    "ducts_return_insulation_r": 0,
-    "ducts_return_location": "conditioned space",
-    "ducts_return_surface_area": 77
+    "ducts_return_location": "conditioned space"
   },
   "tests/HERS_DSE/HVAC3f.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3e.xml",
@@ -455,14 +448,14 @@
   "tests/HERS_DSE/HVAC3g.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3f.xml",
     "cooling_system_cooling_capacity": 42200,
-    "ducts_supply_insulation_r": 6,
-    "ducts_return_insulation_r": 6
+    "ducts_supply": "0 CFM25 Leakage to Outside, R-6, 308 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, R-6, 77 sq. ft."
   },
   "tests/HERS_DSE/HVAC3h.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3g.xml",
     "cooling_system_cooling_capacity": 55000,
-    "ducts_supply_leakage_to_outside_value": 125.0,
-    "ducts_return_leakage_to_outside_value": 125.0
+    "ducts_supply": "125 CFM25 Leakage to Outside, R-6, 308 sq. ft.",
+    "ducts_return": "125 CFM25 Leakage to Outside, R-6, 77 sq. ft."
   },
   "tests/HERS_Hot_Water/L100AD-HW-01.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -676,15 +669,10 @@
     "hvac_control_heating_weekend_setpoint": 68,
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
-    "ducts_leakage_units": "CFM25",
-    "ducts_supply_leakage_to_outside_value": 75,
-    "ducts_return_leakage_to_outside_value": 25,
+    "ducts_supply": "75 CFM25 Leakage to Outside, R-4, 150 sq. ft.",
+    "ducts_return": "25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.",
     "ducts_supply_location": "attic - unvented",
-    "ducts_supply_insulation_r": 4,
-    "ducts_supply_surface_area": 150,
     "ducts_return_location": "attic - unvented",
-    "ducts_return_insulation_r": 0,
-    "ducts_return_surface_area": 50,
     "mech_vent_fan_type": "none",
     "mech_vent_recovery_efficiency_type": "Unadjusted",
     "mech_vent_total_recovery_efficiency": 0,
@@ -888,8 +876,8 @@
     "window_area_left": 120,
     "window_area_right": 120,
     "window_aspect_ratio": 2,
-    "ducts_supply_leakage_to_outside_value": 0,
-    "ducts_return_leakage_to_outside_value": 0,
+    "ducts_supply": "0 CFM25 Leakage to Outside, R-4, 150 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space"
   },
@@ -898,8 +886,8 @@
     "geometry_unit_num_floors_above_grade": 2,
     "geometry_unit_cfa": 3600,
     "geometry_attic_type": "ConditionedAttic",
-    "ducts_supply_leakage_to_outside_value": 5,
-    "ducts_return_leakage_to_outside_value": 10,
+    "ducts_supply": "5 CFM25 Leakage to Outside, R-4, 150 sq. ft.",
+    "ducts_return": "10 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space",
     "water_heater_location": "basement - conditioned",
@@ -914,8 +902,8 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_attic_type": "FlatRoof",
     "roof_assembly_r": 25.8,
-    "ducts_supply_leakage_to_outside_value": 0,
-    "ducts_return_leakage_to_outside_value": 0,
+    "ducts_supply": "0 CFM25 Leakage to Outside, R-4, 150 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.",
     "ducts_supply_location": "basement - conditioned",
     "ducts_return_location": "basement - conditioned"
   },
@@ -1044,15 +1032,15 @@
     "geometry_unit_cfa": 2700,
     "heating_system_heating_capacity": 48000,
     "cooling_system_cooling_capacity": 36000,
-    "ducts_supply_surface_area": 112.5,
-    "ducts_return_surface_area": 37.5,
+    "ducts_supply": "75 CFM25 Leakage to Outside, R-4, 112.5 sq. ft.",
+    "ducts_return": "25 CFM25 Leakage to Outside, Uninsulated, 37.5 sq. ft.",
     "misc_plug_loads_other_annual_kwh": 2457
   },
   "sample_files/base-bldgtype-sfa-unit-atticroof-cathedral.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-sfa-unit-2stories.xml",
     "geometry_attic_type": "ConditionedAttic",
-    "ducts_supply_leakage_to_outside_value": 0,
-    "ducts_return_leakage_to_outside_value": 0,
+    "ducts_supply": "0 CFM25 Leakage to Outside, R-4, 112.5 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated, 37.5 sq. ft.",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space"
   },
@@ -1083,10 +1071,9 @@
     "air_leakage_type": "unit exterior only",
     "heating_system_heating_capacity": 12000,
     "cooling_system_cooling_capacity": 12000,
-    "ducts_supply_leakage_to_outside_value": 0,
-    "ducts_return_leakage_to_outside_value": 0,
+    "ducts_supply": "0 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.",
     "ducts_supply_location": "conditioned space",
-    "ducts_supply_insulation_r": 0,
     "ducts_return_location": "conditioned space",
     "misc_plug_loads_other_annual_kwh": 819
   },
@@ -1625,8 +1612,8 @@
     "window_area_right": 144,
     "heating_system_heating_capacity": 48000,
     "cooling_system_cooling_capacity": 36000,
-    "ducts_supply_surface_area": 112.5,
-    "ducts_return_surface_area": 37.5,
+    "ducts_supply": "75 CFM25 Leakage to Outside, R-4, 112.5 sq. ft.",
+    "ducts_return": "25 CFM25 Leakage to Outside, Uninsulated, 37.5 sq. ft.",
     "misc_plug_loads_other_annual_kwh": 3685.5
   },
   "sample_files/base-enclosure-2stories-garage.xml": {
@@ -1852,7 +1839,7 @@
     "window_area_left": 20,
     "window_area_right": 20,
     "ducts_supply_location": "manufactured home belly",
-    "ducts_supply_insulation_r": 0,
+    "ducts_supply": "75 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.",
     "ducts_return_location": "manufactured home belly"
   },
   "sample_files/base-foundation-belly-wing-no-skirt.xml": {
@@ -1885,8 +1872,8 @@
     "geometry_foundation_height": 4,
     "floor_over_foundation_assembly_r": 18.7,
     "foundation_wall_insulation_distance_to_bottom": 4,
-    "ducts_supply_leakage_to_outside_value": 0,
-    "ducts_return_leakage_to_outside_value": 0,
+    "ducts_supply": "0 CFM25 Leakage to Outside, R-4, 150 sq. ft.",
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.",
     "ducts_supply_location": "crawlspace - conditioned",
     "ducts_return_location": "crawlspace - conditioned",
     "water_heater_location": "crawlspace - conditioned",
@@ -2276,21 +2263,17 @@
   },
   "sample_files/base-hvac-ducts-leakage-cfm50.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts_leakage_units": "CFM50",
-    "ducts_supply_leakage_to_outside_value": 100,
-    "ducts_return_leakage_to_outside_value": 125
+    "ducts_supply": "100 CFM50 Leakage to Outside, R-4, 150 sq. ft.",
+    "ducts_return": "125 CFM50 Leakage to Outside, Uninsulated, 50 sq. ft."
   },
   "sample_files/base-hvac-ducts-leakage-percent.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts_leakage_units": "Percent",
-    "ducts_supply_leakage_to_outside_value": 0.1,
-    "ducts_return_leakage_to_outside_value": 0.05
+    "ducts_supply": "10% Leakage to Outside, R-4, 150 sq. ft.",
+    "ducts_return": "5% Leakage to Outside, Uninsulated, 50 sq. ft."
   },
   "sample_files/base-hvac-ducts-area-fractions.xml": {
     "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
-    "ducts_supply_surface_area": null,
     "ducts_supply_surface_area_fraction": 0.75,
-    "ducts_return_surface_area": null,
     "ducts_return_surface_area_fraction": 0.75
   },
   "sample_files/base-hvac-ducts-area-multipliers.xml": {
@@ -2298,9 +2281,8 @@
   },
   "sample_files/base-hvac-ducts-buried.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts_supply_buried_insulation_level": "deeply buried",
-    "ducts_return_buried_insulation_level": "deeply buried",
-    "ducts_return_insulation_r": 4
+    "ducts_supply": "75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Deeply Buried",
+    "ducts_return": "25 CFM25 Leakage to Outside, R-4, 50 sq. ft., Deeply Buried"
   },
   "sample_files/base-hvac-ducts-defaults.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-room-ac.xml",
@@ -2308,27 +2290,25 @@
     "heating_system_2": "Fireplace, 100% Efficiency",
     "heating_system_2_fraction_heat_load_served": 0.25,
     "ducts_supply_location": null,
-    "ducts_supply_surface_area": null,
-    "ducts_return_location": null,
-    "ducts_return_surface_area": null
+    "ducts_return_location": null
   },
   "sample_files/base-hvac-ducts-effective-rvalue.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-hvac-ducts-shape-round.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts_supply_fraction_rectangular": 0.0,
-    "ducts_return_fraction_rectangular": 0.0
+    "ducts_supply": "75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Round",
+    "ducts_return": "25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., Round"
   },
   "sample_files/base-hvac-ducts-shape-rectangular.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts_supply_fraction_rectangular": 1.0,
-    "ducts_return_fraction_rectangular": 1.0
+    "ducts_supply": "75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Rectangular",
+    "ducts_return": "25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., Rectangular"
   },
   "sample_files/base-hvac-ducts-shape-mixed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts_supply_fraction_rectangular": 0.25,
-    "ducts_return_fraction_rectangular": 0.75
+    "ducts_supply": "75 CFM25 Leakage to Outside, R-4, 150 sq. ft., 25% Rectangular",
+    "ducts_return": "25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., 75% Rectangular"
   },
   "sample_files/base-hvac-elec-resistance-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2349,7 +2329,7 @@
   "sample_files/base-hvac-evap-cooler-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-evap-cooler-only.xml",
     "cooling_system": "Evaporative Cooler, Ducted",
-    "ducts_return_leakage_to_outside_value": 0
+    "ducts_return": "0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft."
   },
   "sample_files/base-hvac-fireplace-wood-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-stove-oil-only.xml",
@@ -2540,11 +2520,8 @@
     "heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
     "cooling_system": "Mini-Split AC, SEER 19, Ducted",
-    "ducts_supply_leakage_to_outside_value": 15,
-    "ducts_return_leakage_to_outside_value": 5,
-    "ducts_supply_insulation_r": 0,
-    "ducts_supply_surface_area": 30,
-    "ducts_return_surface_area": 10
+    "ducts_supply": "15 CFM25 Leakage to Outside, Uninsulated, 30 sq. ft.",
+    "ducts_return": "5 CFM25 Leakage to Outside, Uninsulated, 10 sq. ft."
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ductless.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml",
@@ -2574,11 +2551,8 @@
     "heat_pump_fraction_cool_load_served": 1,
     "heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000,
-    "ducts_supply_leakage_to_outside_value": 15,
-    "ducts_return_leakage_to_outside_value": 5,
-    "ducts_supply_insulation_r": 0,
-    "ducts_supply_surface_area": 30,
-    "ducts_return_surface_area": 10
+    "ducts_supply": "15 CFM25 Leakage to Outside, Uninsulated, 30 sq. ft.",
+    "ducts_return": "5 CFM25 Leakage to Outside, Uninsulated, 10 sq. ft."
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
@@ -2669,9 +2643,7 @@
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml",
     "ducts_supply_location": null,
-    "ducts_supply_surface_area": null,
-    "ducts_return_location": null,
-    "ducts_return_surface_area": null
+    "ducts_return_location": null
   },
   "sample_files/base-hvac-multiple.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -2809,8 +2781,8 @@
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_heating_capacity": 3600,
     "cooling_system_cooling_capacity": 2400,
-    "ducts_supply_leakage_to_outside_value": 7.5,
-    "ducts_return_leakage_to_outside_value": 2.5
+    "ducts_supply": "7.5 CFM25 Leakage to Outside, R-4, 150 sq. ft.",
+    "ducts_return": "2.5 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft."
   },
   "sample_files/base-hvac-wall-furnace-elec-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3144,9 +3116,7 @@
     "hvac_control_cooling_weekday_setpoint": null,
     "hvac_control_cooling_weekend_setpoint": null,
     "ducts_supply_location": null,
-    "ducts_supply_surface_area": null,
     "ducts_return_location": null,
-    "ducts_return_surface_area": null,
     "ducts_number_of_return_registers": 2,
     "mech_vent_fan_type": "exhaust only",
     "mech_vent_total_recovery_efficiency": 0.48,
@@ -3659,9 +3629,7 @@
     "heating_system_fraction_heat_load_served": 0.5,
     "cooling_system_cooling_capacity": 12000,
     "cooling_system_fraction_cool_load_served": 0.5,
-    "ducts_supply_leakage_to_outside_value": 37.5,
-    "ducts_return_leakage_to_outside_value": 12.5,
-    "ducts_supply_surface_area": 75,
-    "ducts_return_surface_area": 25
+    "ducts_supply": "37.5 CFM25 Leakage to Outside, R-4, 75 sq. ft.",
+    "ducts_return": "12.5 CFM25 Leakage to Outside, Uninsulated, 25 sq. ft."
   }
 }
