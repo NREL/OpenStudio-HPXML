@@ -2224,6 +2224,13 @@
   </sch:pattern>
 
   <sch:pattern>
+    <sch:title>[WaterHeatingSystemType=NonElectricTank]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="storage water heater" and h:FuelType!="electricity"]'>
+      <sch:assert role='ERROR' test='count(h:extension/h:TankModelType[text()="stratified"]) = 0'>Expected 0 element(s) for xpath: extension/TankModelType</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
     <sch:title>[WaterHeatingSystemType=Tankless]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType="instantaneous water heater"]'>
       <sch:assert role='ERROR' test='count(h:FuelType) = 1'>Expected 1 element(s) for xpath: FuelType</sch:assert>
