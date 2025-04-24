@@ -345,6 +345,17 @@ Generates timeseries temperatures for each thermal zone.
 
 <br/>
 
+**Generate Timeseries Output: Zone Conditions**
+
+Generates timeseries temperatures and humidities for each thermal zone.
+
+- **Name:** ``include_timeseries_zone_conditions``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Generate Timeseries Output: Airflows**
 
 Generates timeseries airflows.
