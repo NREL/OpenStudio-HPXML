@@ -387,7 +387,7 @@ module Model
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [String] Name for the OpenStudio object
   # @param rated_power [Double] Design power consumption (W)
-  # @param control_type [String] Pump control type: Intermittent or Continuous
+  # @param control_type [String] Pump control type (EPlus::PumpControlTypeXXX)
   # @return [OpenStudio::Model::PumpVariableSpeed] The model object
   def self.add_pump_variable_speed(model, name:, rated_power:, control_type: EPlus::PumpControlTypeIntermittent)
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
