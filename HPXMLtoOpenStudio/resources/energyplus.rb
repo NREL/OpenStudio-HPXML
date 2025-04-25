@@ -50,7 +50,6 @@ module EPlus
   SurfaceWindExposureNo = 'NoWind'
   SurfaceWindExposureYes = 'WindExposed'
   PumpControlTypeIntermittent = 'Intermittent'
-  PumpControlTypeContinuous = 'Continuous'
 
   # Returns the fuel type used in the EnergyPlus simulation that the HPXML fuel type
   # maps to.

@@ -856,7 +856,6 @@ module HVAC
     setpoint_mgr_follow_ground_temp.addToNode(plant_loop.supplyOutletNode)
 
     # Pump
-    control_type = heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed ? EPlus::PumpControlTypeContinuous : EPlus::PumpControlTypeIntermittent
     if heat_pump.cooling_capacity > 1.0
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton')
     else
@@ -866,8 +865,7 @@ module HVAC
     pump = Model.add_pump_variable_speed(
       model,
       name: "#{obj_name} pump",
-      rated_power: pump_w,
-      control_type: control_type
+      rated_power: pump_w
     )
     pump.addToNode(plant_loop.supplyInletNode)
     add_fan_pump_disaggregation_ems_program(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump)
