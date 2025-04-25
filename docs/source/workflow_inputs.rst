@@ -109,7 +109,7 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   ``DefrostModelType``                    string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
   ``OnOffThermostatDeadbandTemperature``  double    F        > 0 [#]_          No                  Temperature difference between cut-in and cut-out temperature for HVAC operation [#]_
   ``HeatPumpBackupCapacityIncrement``     double    Btu/hr   > 0 [#]_          No                  Capacity increment of multi-stage heat pump backup systems [#]_
-  ``GroundToAirHeatPumpModelType``        string             See [#]_          No        simple    Ground-to-air heat pump sytem model type [#]_
+  ``GroundToAirHeatPumpModelType``        string             See [#]_          No        standard  Ground-to-air heat pump system model type [#]_
   ======================================  ========  =======  ================  ========  ========  ========================================================
 
   .. [#] The default value of 7 is an average value found in the literature when calibrating timeseries EnergyPlus indoor temperatures to field data.
@@ -134,7 +134,7 @@ These features may require shorter timesteps, allow more sophisticated simulatio
          If not provided, the heat pump backup is modeled with a single stage.
   .. [#] GroundToAirHeatPumpModelType choices are "standard" and "experimental".
   .. [#] Use "standard" for standard ground-to-air heat pump modeling.
-         Use "experimental" for variable-speed coil models, it also supports single-speed ground-to-air heat pumps. 
+         Use "experimental" for an improved model that better accounts for coil staging.
          The "experimental" ground-to-air heat pump models with desuperheater are not supported yet, see :ref:`water_heater_desuperheater`.
 
 HPXML Emissions Scenarios

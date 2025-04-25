@@ -1046,40 +1046,40 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_ghp_simple(model, heat_pump, 5.84, 3.94, 962, [12.5, -1.3], [20, 31])
+    _check_ghp_standard(model, heat_pump, 5.84, 3.94, 962, [12.5, -1.3], [20, 31])
 
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-2-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_ghp_simple(model, heat_pump, 7.52, 4.44, 962, [12.5, -1.3], [20, 31])
+    _check_ghp_standard(model, heat_pump, 7.52, 4.44, 962, [12.5, -1.3], [20, 31])
 
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-var-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_ghp_simple(model, heat_pump, 12.79, 4.94, 962, [12.5, -1.3], [20, 31])
+    _check_ghp_standard(model, heat_pump, 12.79, 4.94, 962, [12.5, -1.3], [20, 31])
 
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-1-speed-experimental.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_ghp_advanced(model, heat_pump, [10550.56], [10550.56], [5.84], [3.94], 962, [12.5, -1.3], [20, 31])
+    _check_ghp_experimental(model, heat_pump, [10550.56], [10550.56], [5.84], [3.94], 962, [12.5, -1.3], [20, 31])
 
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_ghp_advanced(model, heat_pump, [7757.83, 10550.56], [7779.98, 10550.56], [8.29, 7.52], [5.15, 4.44], 962, [12.5, -1.3], [20, 31])
+    _check_ghp_experimental(model, heat_pump, [7757.83, 10550.56], [7779.98, 10550.56], [8.29, 7.52], [5.15, 4.44], 962, [12.5, -1.3], [20, 31])
 
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_ghp_advanced(model, heat_pump, [5066.38, 10550.56], [4719.26, 10550.56], [13.55, 12.79], [5.69, 4.94], 962, [12.5, -1.3], [20, 31])
+    _check_ghp_experimental(model, heat_pump, [5066.38, 10550.56], [4719.26, 10550.56], [13.55, 12.79], [5.69, 4.94], 962, [12.5, -1.3], [20, 31])
   end
 
   def test_ground_to_air_heat_pump_integrated_backup
@@ -1887,7 +1887,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(program_values['supp_delivered_htg'].sum, supp_delivered_htg, 0.01)
   end
 
-  def _check_ghp_simple(model, heat_pump, clg_cop, htg_cop, soil_density, soil_surface_temp_amps, phase_shift_temp_amps)
+  def _check_ghp_standard(model, heat_pump, clg_cop, htg_cop, soil_density, soil_surface_temp_amps, phase_shift_temp_amps)
     clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
     htg_capacity = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W')
 
@@ -1926,7 +1926,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(phase_shift_temp_amps[1], xing.phaseShiftofTemperatureAmplitude2, 0.01)
   end
 
-  def _check_ghp_advanced(model, heat_pump, clg_capacities, htg_capacities, clg_cops, htg_cops, soil_density, soil_surface_temp_amps, phase_shift_temp_amps)
+  def _check_ghp_experimental(model, heat_pump, clg_capacities, htg_capacities, clg_cops, htg_cops, soil_density, soil_surface_temp_amps, phase_shift_temp_amps)
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingWaterToAirHeatPumpVariableSpeedEquationFits.size)
     clg_coil = model.getCoilCoolingWaterToAirHeatPumpVariableSpeedEquationFits[0]

@@ -1776,7 +1776,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    # Heating capacity adjusted by 25% for single speed simple ghp when heating capacity > 1.5x cooling capacity
+    # Heating capacity adjusted by 25% for single speed standard ghp when heating capacity > 1.5x cooling capacity
     ghp_filenames = ['base-hvac-ground-to-air-heat-pump-1-speed.xml',
                      'base-hvac-ground-to-air-heat-pump-1-speed-experimental.xml']
     ghp_filenames.each do |ghp_filename|

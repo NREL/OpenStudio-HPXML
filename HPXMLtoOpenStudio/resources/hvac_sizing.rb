@@ -2949,7 +2949,7 @@ module HVACSizing
         if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard) && (hvac_heating.compressor_type == HPXML::HVACCompressorTypeSingleStage)
           # For single stage compressor, when heating capacity is much larger than cooling capacity,
           # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
-          # Currently only keep it for simple ghp models
+          # Currently only keep it for standard ghp models
           hvac_sizings.Heat_Capacity *= 0.75 if (hvac_sizings.Heat_Capacity >= 1.5 * hvac_sizings.Cool_Capacity)
         end
         cfm_per_btuh = hvac_sizings.Cool_Airflow / hvac_sizings.Cool_Capacity
