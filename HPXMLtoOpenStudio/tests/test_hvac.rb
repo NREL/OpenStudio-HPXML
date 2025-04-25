@@ -1948,11 +1948,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(2, model.getPumpVariableSpeeds.size) # 1 for dhw, 1 for ghp
     pump = model.getPumpVariableSpeeds.find { |pump| pump.name.get.include? Constants::ObjectTypeGroundSourceHeatPump }
-    if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      assert_equal(EPlus::PumpControlTypeContinuous, pump.pumpControlType)
-    else
-      assert_equal(EPlus::PumpControlTypeIntermittent, pump.pumpControlType)
-    end
+    assert_equal(EPlus::PumpControlTypeIntermittent, pump.pumpControlType)
     # Check EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
     assert(program_values.empty?) # Check no EMS program

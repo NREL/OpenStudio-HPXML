@@ -2826,7 +2826,7 @@ module HVACSizing
       entering_temp = hvac_cooling_ap.design_chw
 
       hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
-      if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple].include? hpxml_header.ground_to_air_heat_pump_model_type
+      if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard].include? hpxml_header.ground_to_air_heat_pump_model_type
         # TODO: replace hardcoded bypass factor and curve?
         gshp_coil_bf = 0.0806
         gshp_coil_bf_ft_spec = [1.21005458, -0.00664200, 0.00000000, 0.00348246, 0.00000000, 0.00000000]
@@ -2946,7 +2946,7 @@ module HVACSizing
       hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load / htg_cap_curve_value
       hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
       if hvac_sizings.Cool_Capacity > 0
-        if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple) && (hvac_heating.compressor_type == HPXML::HVACCompressorTypeSingleStage)
+        if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard) && (hvac_heating.compressor_type == HPXML::HVACCompressorTypeSingleStage)
           # For single stage compressor, when heating capacity is much larger than cooling capacity,
           # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
           # Currently only keep it for simple ghp models
@@ -3926,7 +3926,7 @@ module HVACSizing
   # @param hvac_heating_speed [Integer] Array index of the nominal speed
   # @return [Double] Heating capacity fraction of nominal
   def self.calc_gshp_htg_curve_value(hvac_heating_ap, hpxml_header, db_temp, w_temp, hvac_heating_speed)
-    if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple)
+    if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard)
 
       # Reference conditions in thesis with largest capacity:
       # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf

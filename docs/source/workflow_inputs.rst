@@ -132,9 +132,9 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   .. [#] HeatPumpBackupCapacityIncrement is currently only allowed with a 1 minute timestep.
   .. [#] HeatPumpBackupCapacityIncrement allows modeling multi-stage electric heat pump backup with time-based staging.
          If not provided, the heat pump backup is modeled with a single stage.
-  .. [#] GroundToAirHeatPumpModelType choices are "simple" and "experimental".
-  .. [#] Use "simple" for simplified single-speed coil model.
-         Use "experimental" for variable-speed coil model, it also supports single-speed ground-to-air heat pumps. 
+  .. [#] GroundToAirHeatPumpModelType choices are "standard" and "experimental".
+  .. [#] Use "standard" for standard ground-to-air heat pump modeling.
+         Use "experimental" for variable-speed coil models, it also supports single-speed ground-to-air heat pumps. 
          The "experimental" ground-to-air heat pump models with desuperheater are not supported yet, see :ref:`water_heater_desuperheater`.
 
 HPXML Emissions Scenarios

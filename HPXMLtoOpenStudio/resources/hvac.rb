@@ -582,7 +582,7 @@ module HVAC
     geothermal_loop.num_bore_holes *= unit_multiplier
 
     # Cooling Coil
-    if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple].include? hpxml_header.ground_to_air_heat_pump_model_type
+    if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard].include? hpxml_header.ground_to_air_heat_pump_model_type
       clg_total_cap_curve = Model.add_curve_quad_linear(
         model,
         name: "#{obj_name} clg total cap curve",
@@ -2202,7 +2202,7 @@ module HVAC
     hp_ap = heat_pump.additional_properties
 
     case hpxml_header.ground_to_air_heat_pump_model_type
-    when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple
+    when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
       hp_ap.cool_capacity_ratios = [1.0]
       hp_ap.heat_capacity_ratios = [1.0]
       hp_ap.cool_rated_cfm_per_ton = [400.0]

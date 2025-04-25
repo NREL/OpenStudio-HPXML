@@ -57,7 +57,7 @@ class HPXML < Object
   AddressTypeStreet = 'street'
   AdvancedResearchDefrostModelTypeStandard = 'standard'
   AdvancedResearchDefrostModelTypeAdvanced = 'advanced'
-  AdvancedResearchGroundToAirHeatPumpModelTypeSimple = 'simple'
+  AdvancedResearchGroundToAirHeatPumpModelTypeStandard = 'standard'
   AdvancedResearchGroundToAirHeatPumpModelTypeExperimental = 'experimental'
   AirTypeFanCoil = 'fan coil'
   AirTypeGravity = 'gravity'
