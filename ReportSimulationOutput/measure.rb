@@ -138,15 +138,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     args << arg
 
     timeseries_frequency_chs = OpenStudio::StringVector.new
-    timeseries_frequency_chs << 'none'
-    timeseries_frequency_chs << 'timestep'
-    timeseries_frequency_chs << 'hourly'
-    timeseries_frequency_chs << 'daily'
-    timeseries_frequency_chs << 'monthly'
+    timeseries_frequency_chs << EPlus::TimeseriesFrequencyNone
+    timeseries_frequency_chs << EPlus::TimeseriesFrequencyTimestep
+    timeseries_frequency_chs << EPlus::TimeseriesFrequencyHourly
+    timeseries_frequency_chs << EPlus::TimeseriesFrequencyDaily
+    timeseries_frequency_chs << EPlus::TimeseriesFrequencyMonthly
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('timeseries_frequency', timeseries_frequency_chs, false)
     arg.setDisplayName('Timeseries Reporting Frequency')
-    arg.setDescription("The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.")
-    arg.setDefaultValue('none')
+    arg.setDescription("The frequency at which to report timeseries output data. Using '#{EPlus::TimeseriesFrequencyNone}' will disable timeseries outputs.")
+    arg.setDefaultValue(EPlus::TimeseriesFrequencyNone)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_total_consumptions', false)
@@ -256,7 +256,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('timeseries_num_decimal_places', false)
     arg.setDisplayName('Generate Timeseries Output: Number of Decimal Places')
-    arg.setDescription('Allows overriding the default number of decimal places for timeseries output.')
+    arg.setDescription('Allows overriding the default number of decimal places for timeseries outputs.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('add_timeseries_dst_column', false)
@@ -296,7 +296,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # Define the outputs that the measure will create.
   #
-  # @return [TODO] TODO
+  # @return [OpenStudio::Measure::OSOutputVector] List of outputs
   def outputs
     result = OpenStudio::Measure::OSOutputVector.new
 
@@ -329,7 +329,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @return [TODO] TODO
   def get_arguments(runner, arguments, user_arguments)
     args = runner.getArgumentValues(arguments, user_arguments)
-    if args[:timeseries_frequency] == 'none'
+    if args[:timeseries_frequency] == EPlus::TimeseriesFrequencyNone
       # Override all timeseries arguments
       args.keys.each do |key|
         next unless key.start_with?('include_timeseries')
@@ -409,9 +409,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       # Resilience
       if args[:include_annual_resilience] || args[:include_timeseries_resilience]
-        resilience_frequency = 'timestep'
-        if args[:timeseries_frequency] != 'timestep'
-          resilience_frequency = 'hourly'
+        resilience_frequency = EPlus::TimeseriesFrequencyTimestep
+        if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyTimestep
+          resilience_frequency = EPlus::TimeseriesFrequencyHourly
         end
         result << OpenStudio::IdfObject.load("Output:Meter,Electricity:Facility,#{resilience_frequency};").get
         result << OpenStudio::IdfObject.load("Output:Meter,ElectricityProduced:Facility,#{resilience_frequency};").get
@@ -621,7 +621,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if File.exist? msgpack_timeseries_path
       @msgpackDataTimeseries = MessagePack.unpack(File.read(msgpack_timeseries_path, mode: 'rb'))
     end
-    if args[:timeseries_frequency] != 'hourly'
+    if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyHourly
       msgpack_hourly_path = File.join(output_dir, 'eplusout_hourly.msgpack')
       if File.exist? msgpack_hourly_path
         @msgpackDataHourly = MessagePack.unpack(File.read(msgpack_hourly_path, mode: 'rb'))
@@ -640,8 +640,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       timeseries_output_path = File.join(output_dir, "results_timeseries.#{args[:output_format]}")
     end
 
-    if args[:timeseries_frequency] != 'none'
-      @timestamps, timestamps_dst, timestamps_utc = get_timestamps(@msgpackDataTimeseries, @msgpackData, @hpxml_header, @hpxml_bldgs, args)
+    if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyNone
+      @timestamps, @timestamps_dst, @timestamps_utc = get_timestamps(@msgpackDataTimeseries, @msgpackData, @hpxml_header, @hpxml_bldgs, args)
     end
 
     # Retrieve outputs
@@ -653,24 +653,24 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Write/report results
     report_runperiod_output_results(runner, args, annual_output_path)
-    report_timeseries_output_results(runner, timeseries_output_path, args, timestamps_dst, timestamps_utc)
+    report_timeseries_output_results(runner, timeseries_output_path, args)
 
     return true
   end
 
-  # TODO
+  # Returns timestamp strings to be used in the timeseries output file.
   #
-  # @param msgpackDataTimeseries [TODO] TODO
-  # @param msgpackData [TODO] TODO
+  # @param msgpackDataTimeseries [Hash] Raw E+ MessagePack timeseries output
+  # @param msgpackData [Hash] Raw E+ MessagePack output
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param hpxml_bldgs [TODO] TODO
+  # @param hpxml_bldgs [Array<HPXML::Building>] List of HPXML Building objects representing individual dwelling units
   # @param args [Hash] Map of :argument_name => value
-  # @return [TODO] TODO
+  # @return [Array<String>, Array<String>, Array<String>] List of timestamps, list of timestamps in DST, list of timestamps in UTC
   def get_timestamps(msgpackDataTimeseries, msgpackData, hpxml_header, hpxml_bldgs, args)
     if not msgpackDataTimeseries.nil?
       ep_timestamps = msgpackDataTimeseries['Rows'].map { |r| r.keys[0] }
     elsif not msgpackData.nil?
-      msgpack_timeseries_name = get_msgpack_timeseries_name(args[:timeseries_frequency])
+      msgpack_timeseries_name = EPlus::get_msgpack_timeseries_name(args[:timeseries_frequency])
       timeseries_data = msgpackData['MeterData'][msgpack_timeseries_name]
       if not timeseries_data.nil?
         ep_timestamps = timeseries_data['Rows'].map { |r| r.keys[0] }
@@ -700,13 +700,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Convert from EnergyPlus default (end-of-timestep) to start-of-timestep convention
       if args[:timeseries_timestamp_convention] == 'start'
         case args[:timeseries_frequency]
-        when 'timestep'
+        when EPlus::TimeseriesFrequencyTimestep
           ts_offset = hpxml_header.timestep * 60 # seconds
-        when 'hourly'
+        when EPlus::TimeseriesFrequencyHourly
           ts_offset = 60 * 60 # seconds
-        when 'daily'
+        when EPlus::TimeseriesFrequencyDaily
           ts_offset = 60 * 60 * 24 # seconds
-        when 'monthly'
+        when EPlus::TimeseriesFrequencyMonthly
           ts_offset = Calendar.num_days_in_months(year)[month - 1] * 60 * 60 * 24 # seconds
         else
           fail "Unexpected timeseries_frequency: #{args[:timeseries_frequency]}."
@@ -736,17 +736,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return timestamps, timestamps_dst, timestamps_utc
   end
 
-  # TODO
+  # Returns the number of hours in the run period.
   #
-  # @param timeseries_frequency [TODO] TODO
+  # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
   # @param sim_start_day [TODO] TODO
   # @param sim_end_day [TODO] TODO
   # @param year [Integer] the calendar year
-  # @return [TODO] TODO
+  # @return [Integer] Number of hours in the run period
   def get_n_hours_per_period(timeseries_frequency, sim_start_day, sim_end_day, year)
-    if timeseries_frequency == 'daily'
+    if timeseries_frequency == EPlus::TimeseriesFrequencyDaily
       n_hours_per_period = [24] * (sim_end_day - sim_start_day + 1)
-    elsif timeseries_frequency == 'monthly'
+    elsif timeseries_frequency == EPlus::TimeseriesFrequencyMonthly
       n_days_per_month = Calendar.num_days_in_months(year)
       n_days_per_period = n_days_per_month[@hpxml_header.sim_begin_month - 1..@hpxml_header.sim_end_month - 1]
       n_days_per_period[0] -= @hpxml_header.sim_begin_day - 1
@@ -759,12 +759,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   #
   # @param timeseries_output [TODO] TODO
-  # @param timeseries_frequency [TODO] TODO
+  # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
   # @param average [Boolean] TODO
   # @return [TODO] TODO
   def rollup_timeseries_output_to_daily_or_monthly(timeseries_output, timeseries_frequency, average = false)
     year = @hpxml_header.sim_calendar_year
-    sim_start_day, sim_end_day, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
+    sim_start_day, sim_end_day = get_sim_days_of_year(year)
     n_hours_per_period = get_n_hours_per_period(timeseries_frequency, sim_start_day, sim_end_day, year)
     fail 'Unexpected failure for n_hours_per_period calculations.' if n_hours_per_period.sum != timeseries_output.size
 
@@ -783,7 +783,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param args [Hash] Map of :argument_name => value
-  # @return [TODO] TODO
+  # @return [nil]
   def get_outputs(runner, args)
     args = setup_timeseries_includes(@emissions, args)
 
@@ -874,7 +874,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, args[:timeseries_frequency], is_negative: (end_use.is_negative || end_use.is_storage))
         end
         if args[:include_hourly_electric_end_use_consumptions] && fuel_type == FT::Elec
-          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly', is_negative: (end_use.is_negative || end_use.is_storage))
+          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, EPlus::TimeseriesFrequencyHourly, is_negative: (end_use.is_negative || end_use.is_storage))
         end
       end
       end_use.meters.map { |v| v[0] }.uniq.each do |sys_id|
@@ -893,7 +893,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
         next unless args[:include_hourly_electric_end_use_consumptions] && fuel_type == FT::Elec
 
-        values = get_report_meter_data_timeseries(vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, 'hourly')
+        values = get_report_meter_data_timeseries(vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, EPlus::TimeseriesFrequencyHourly)
         if end_use.hourly_output_by_system[sys_id].nil?
           end_use.hourly_output_by_system[sys_id] = values
         else
@@ -1089,10 +1089,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       elcs = @model.getElectricLoadCenterStorageLiIonNMCBatterys.find { |elcs| elcs.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
 
-      resilience_frequency = 'timestep'
+      resilience_frequency = EPlus::TimeseriesFrequencyTimestep
       ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
-      if args[:timeseries_frequency] != 'timestep'
-        resilience_frequency = 'hourly'
+      if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyTimestep
+        resilience_frequency = EPlus::TimeseriesFrequencyHourly
         ts_per_hr = 1
       end
 
@@ -1129,7 +1129,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       resilience.timeseries_output = resilience_timeseries
 
       # Aggregate up from hourly to the desired timeseries frequency
-      if ['daily', 'monthly'].include? args[:timeseries_frequency]
+      if [EPlus::TimeseriesFrequencyDaily, EPlus::TimeseriesFrequencyMonthly].include? args[:timeseries_frequency]
         resilience.timeseries_output = rollup_timeseries_output_to_daily_or_monthly(resilience.timeseries_output, args[:timeseries_frequency], true)
       end
     end
@@ -1343,13 +1343,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
             do_trim = false
 
             year = 1999 # Try non-leap year for calculations
-            _sim_start_day, _sim_end_day, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
+            sim_start_hour, sim_end_hour = get_sim_hours_of_year(year)
             if hourly_elec.size == hourly_elec_factors[sim_start_hour..sim_end_hour].size + 24
               # Duplicate Feb 28 Cambium values for Feb 29
               hourly_elec_factors = hourly_elec_factors[0..1415] + hourly_elec_factors[1392..1415] + hourly_elec_factors[1416..8759]
               # Use leap-year for calculations
               year = 2000
-              _sim_start_day, _sim_end_day, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
+              sim_start_hour, sim_end_hour = get_sim_hours_of_year(year)
             end
             hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour]
           end
@@ -1368,14 +1368,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
           # Calculate timeseries emissions for end use
 
-          if args[:timeseries_frequency] == 'timestep' && @hpxml_header.timestep != 60
+          if args[:timeseries_frequency] == EPlus::TimeseriesFrequencyTimestep && @hpxml_header.timestep != 60
             timeseries_elec = end_use.timeseries_output_by_system.values.transpose.map(&:sum).map { |x| x * kwh_to_mwh }
           else
             # Need to perform calculations hourly at a minimum
             timeseries_elec = end_use.hourly_output.map { |x| x * kwh_to_mwh }
           end
 
-          if args[:timeseries_frequency] == 'timestep'
+          if args[:timeseries_frequency] == EPlus::TimeseriesFrequencyTimestep
             n_timesteps_per_hour = Integer(60.0 / @hpxml_header.timestep)
             timeseries_elec_factors = hourly_elec_factors.flat_map { |y| [y] * n_timesteps_per_hour }
           else
@@ -1386,7 +1386,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           @emissions[key].timeseries_output_by_end_use[eu_key] = timeseries_elec.zip(timeseries_elec_factors).map { |n, f| n * f * elec_units_mult }
 
           # Aggregate up from hourly to the desired timeseries frequency
-          if ['daily', 'monthly'].include? args[:timeseries_frequency]
+          if [EPlus::TimeseriesFrequencyDaily, EPlus::TimeseriesFrequencyMonthly].include? args[:timeseries_frequency]
             @emissions[key].timeseries_output_by_end_use[eu_key] = rollup_timeseries_output_to_daily_or_monthly(@emissions[key].timeseries_output_by_end_use[eu_key], args[:timeseries_frequency])
           end
         end
@@ -1457,18 +1457,28 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   #
   # @param year [Integer] the calendar year
   # @return [TODO] TODO
-  def get_sim_times_of_year(year)
+  def get_sim_days_of_year(year)
     sim_start_day = Calendar.get_day_num_from_month_day(year, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day)
     sim_end_day = Calendar.get_day_num_from_month_day(year, @hpxml_header.sim_end_month, @hpxml_header.sim_end_day)
-    sim_start_hour = (sim_start_day - 1) * 24
-    sim_end_hour = sim_end_day * 24 - 1
-    return sim_start_day, sim_end_day, sim_start_hour, sim_end_hour
+    return sim_start_day, sim_end_day
   end
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
+  def get_sim_hours_of_year(year)
+    sim_start_day, sim_end_day = get_sim_days_of_year(year)
+    sim_start_hour = (sim_start_day - 1) * 24
+    sim_end_hour = sim_end_day * 24 - 1
+    return sim_start_hour, sim_end_hour
+  end
+
+  # Checks for inconsistencies in outputs -- e.g., timeseries outputs don't sum to annual values,
+  # end use outputs don't sum to totals, etc.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @return [Boolean] True if no errors
   def check_for_errors(runner)
     tol = 0.1
 
@@ -1555,12 +1565,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  # TODO
+  # Writes out results for the entire run period to an output file (CSV, JSON, etc.).
+  # Also reports results to the OpenStudio runner).
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param args [Hash] Map of :argument_name => value
-  # @param annual_output_path [TODO] TODO
-  # @return [TODO] TODO
+  # @param annual_output_path [String] Path for the output file
+  # @return [nil]
   def report_runperiod_output_results(runner, args, annual_output_path)
     # Set rounding precision for run period (e.g., annual) outputs.
     if args[:output_format] == 'msgpack'
@@ -1666,7 +1677,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Unmet hours
     if args[:include_annual_unmet_hours]
       @unmet_hours.each do |_load_type, unmet_hour|
-        results_out << ["#{unmet_hour.name} (#{unmet_hour.annual_units})", unmet_hour.annual_output.to_f.round(n_digits)]
+        results_out << ["#{unmet_hour.name} (#{unmet_hour.annual_units})", unmet_hour.annual_output.to_f.round(3)]
       end
       results_out << [line_break]
     end
@@ -1708,7 +1719,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Resilience
     if args[:include_annual_resilience]
       @resilience.each do |_type, resilience|
-        results_out << ["#{resilience.name} (#{resilience.annual_units})", resilience.annual_output.to_f.round(n_digits)]
+        results_out << ["#{resilience.name} (#{resilience.annual_units})", resilience.annual_output.to_f.round(3)]
       end
       results_out << [line_break]
     end
@@ -1731,18 +1742,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # TODO
+  # Writes out timeseries results to an output file (CSV, JSON, etc.).
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param timeseries_output_path [TODO] TODO
+  # @param timeseries_output_path [String] Path for the output file
   # @param args [Hash] Map of :argument_name => value
-  # @param timestamps_dst [TODO] TODO
-  # @param timestamps_utc [TODO] TODO
-  # @return [TODO] TODO
-  def report_timeseries_output_results(runner, timeseries_output_path, args, timestamps_dst, timestamps_utc)
+  # @return [nil]
+  def report_timeseries_output_results(runner, timeseries_output_path, args)
     return if @timestamps.nil?
 
-    if not ['timestep', 'hourly', 'daily', 'monthly'].include? args[:timeseries_frequency]
+    if not [EPlus::TimeseriesFrequencyTimestep, EPlus::TimeseriesFrequencyHourly, EPlus::TimeseriesFrequencyDaily, EPlus::TimeseriesFrequencyMonthly].include? args[:timeseries_frequency]
       fail "Unexpected timeseries_frequency: #{args[:timeseries_frequency]}."
     end
 
@@ -1755,7 +1764,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Set rounding precision for timeseries (e.g., hourly) outputs.
       # Note: Make sure to round outputs with sufficient resolution for the worst case -- i.e., 1 minute date instead of hourly data.
       n_digits = 3 # Default for hourly (or longer) data
-      if args[:timeseries_frequency] == 'timestep'
+      if args[:timeseries_frequency] == EPlus::TimeseriesFrequencyTimestep
         if @hpxml_header.timestep <= 2 # 2-minute timesteps or shorter; add two decimal places
           n_digits += 2
         elsif @hpxml_header.timestep <= 15 # 15-minute timesteps or shorter; add one decimal place
@@ -1766,17 +1775,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Initial output data w/ Time column(s)
     data = ['Time', nil] + @timestamps
-    if args[:add_timeseries_dst_column]
-      timestamps2 = [['TimeDST', nil] + timestamps_dst]
-    else
-      timestamps2 = []
-    end
-    if args[:add_timeseries_utc_column]
-      timestamps3 = [['TimeUTC', nil] + timestamps_utc]
-    else
-      timestamps3 = []
-    end
+    timestamps2 = args[:add_timeseries_dst_column] ? [['TimeDST', nil] + @timestamps_dst] : []
+    timestamps3 = args[:add_timeseries_utc_column] ? [['TimeUTC', nil] + @timestamps_utc] : []
 
+    # Gather timeseries outputs
+    total_energy_data, fuel_data, end_use_data, system_use_data = [], [], [], []
+    emissions_data, emission_fuel_data, emission_end_use_data = [], [], []
+    hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data = [], [], [], []
+    zone_temps_data, zone_conds_data, airflows_data, weather_data, resilience_data = [], [], [], [], []
+    output_variables_data, output_meters_data = [], []
+
+    # Totals
     if args[:include_timeseries_total_consumptions]
       total_energy_data = []
       [TE::Total, TE::Net].each do |energy_type|
@@ -1784,37 +1793,35 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         total_energy_data << [@totals[energy_type].name, @totals[energy_type].timeseries_units] + @totals[energy_type].timeseries_output.map { |v| v.round(n_digits) }
       end
-    else
-      total_energy_data = []
     end
+
+    # Fuels
     if args[:include_timeseries_fuel_consumptions]
       fuel_data = @fuels.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      fuel_data = []
     end
+
+    # End uses
     if args[:include_timeseries_end_use_consumptions]
       end_use_data = @end_uses.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      end_use_data = []
     end
+
+    # System uses
     if args[:include_timeseries_system_use_consumptions]
       system_use_data = @system_uses.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      system_use_data = []
     end
+
+    # Total Emissions
     if args[:include_timeseries_emissions]
-      emissions_data = []
       @emissions.values.each do |emission|
         next if emission.timeseries_output.sum(0.0) == 0
 
         emissions_data << ["#{emission.name}: Total", emission.timeseries_units] + emission.timeseries_output.map { |v| v.round(n_digits + 2) }
         emissions_data << ["#{emission.name}: Net", emission.timeseries_units] + emission.net_timeseries_output.map { |v| v.round(n_digits + 2) }
       end
-    else
-      emissions_data = []
     end
+
+    # Fuel Emissions
     if args[:include_timeseries_emission_fuels]
-      emission_fuel_data = []
       @emissions.values.each do |emission|
         emission.timeseries_output_by_fuel.each do |fuel_key, timeseries_output|
           fuel, emission_type = fuel_key
@@ -1823,11 +1830,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           emission_fuel_data << ["#{emission.name}: #{fuel}: #{emission_type}", emission.timeseries_units] + timeseries_output.map { |v| v.round(n_digits + 2) }
         end
       end
-    else
-      emission_fuel_data = []
     end
+
+    # End Use Emissions
     if args[:include_timeseries_emission_end_uses]
-      emission_end_use_data = []
       @emissions.values.each do |emission|
         emission.timeseries_output_by_end_use.each do |key, timeseries_output|
           next if timeseries_output.sum(0.0) == 0
@@ -1836,67 +1842,61 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           emission_end_use_data << ["#{emission.name}: #{fuel_type}: #{end_use_type}", emission.timeseries_units] + timeseries_output.map { |v| v.round(n_digits + 2) }
         end
       end
-    else
-      emission_end_use_data = []
     end
+
+    # Hot water uses
     if args[:include_timeseries_hot_water_uses]
       hot_water_use_data = @hot_water_uses.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      hot_water_use_data = []
     end
+
+    # Loads
     if args[:include_timeseries_total_loads]
       total_loads_data = @loads.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      total_loads_data = {}
     end
+
+    # Component loads
     if args[:include_timeseries_component_loads]
       comp_loads_data = @component_loads.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      comp_loads_data = []
     end
+
+    # Unmet hours
     if args[:include_timeseries_unmet_hours]
-      unmet_hours_data = @unmet_hours.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      unmet_hours_data = []
+      unmet_hours_data = @unmet_hours.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(3) } }
     end
+
+    # Zone temperatures
     if args[:include_timeseries_zone_temperatures]
-      zone_temps_data = @zone_temps.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      zone_temps_data = []
+      zone_temps_data = @zone_temps.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(3) } }
     end
+
+    # Zone conditions (detailed)
     if args[:include_timeseries_zone_conditions]
-      zone_conds_data = @zone_conds.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      zone_conds_data = []
+      zone_conds_data = @zone_conds.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(4) } }
     end
+
+    # Airflows
     if args[:include_timeseries_airflows]
-      airflows_data = @airflows.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      airflows_data = []
+      airflows_data = @airflows.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(3) } }
     end
+
+    # Weather
     if args[:include_timeseries_weather]
-      weather_data = @weather.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      weather_data = []
+      weather_data = @weather.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(3) } }
     end
+
+    # Resilience
     if args[:include_timeseries_resilience]
-      resilience_data = @resilience.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
-    else
-      resilience_data = []
+      resilience_data = @resilience.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(3) } }
     end
 
     # EnergyPlus output variables
     if not @output_variables.empty?
       output_variables_data = @output_variables.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output }
-    else
-      output_variables_data = []
     end
 
     # EnergyPlus output meters
     if not @output_meters.empty?
       output_meters_data = @output_meters.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output }
-    else
-      output_meters_data = []
     end
 
     return if (total_energy_data.size + fuel_data.size + end_use_data.size + system_use_data.size + emissions_data.size + emission_fuel_data.size +
@@ -1931,13 +1931,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         start_day = Calendar.get_day_num_from_month_day(year, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day)
         start_hr = (start_day - 1) * 24
         case args[:timeseries_frequency]
-        when 'timestep'
+        when EPlus::TimeseriesFrequencyTimestep
           interval_hrs = @hpxml_header.timestep / 60.0
-        when 'hourly'
+        when EPlus::TimeseriesFrequencyHourly
           interval_hrs = 1.0
-        when 'daily'
+        when EPlus::TimeseriesFrequencyDaily
           interval_hrs = 24.0
-        when 'monthly'
+        when EPlus::TimeseriesFrequencyMonthly
           interval_hrs = Calendar.num_days_in_year(year) * 24.0 / 12
         end
         header_data = [['wxDVFileHeaderVer.1'],
@@ -1949,9 +1949,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         data.delete_at(0) # Remove series name, added to header data above
 
         # Apply daylight savings
-        if args[:timeseries_frequency] == 'timestep' || args[:timeseries_frequency] == 'hourly'
+        if args[:timeseries_frequency] == EPlus::TimeseriesFrequencyTimestep || args[:timeseries_frequency] == EPlus::TimeseriesFrequencyHourly
           if @hpxml_bldgs[0].dst_enabled
-            dst_start_ix, dst_end_ix = get_dst_start_end_indexes(@timestamps, timestamps_dst)
+            dst_start_ix, dst_end_ix = get_dst_start_end_indexes()
             if !dst_start_ix.nil? && !dst_end_ix.nil?
               dst_end_ix.downto(dst_start_ix + 1) do |i|
                 data[i + 1] = data[i]
@@ -1970,8 +1970,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Assemble data
       h = {}
       h['Time'] = data[2..-1]
-      h['TimeDST'] = timestamps2[2..-1] if timestamps_dst
-      h['TimeUTC'] = timestamps3[2..-1] if timestamps_utc
+      h['TimeDST'] = timestamps2[2..-1] if @timestamps_dst
+      h['TimeUTC'] = timestamps3[2..-1] if @timestamps_utc
 
       [total_energy_data, fuel_data, end_use_data, system_use_data, emissions_data, emission_fuel_data,
        emission_end_use_data, hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data,
@@ -1996,18 +1996,16 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   #
-  # @param timestamps [TODO] TODO
-  # @param timestamps_dst [TODO] TODO
   # @return [TODO] TODO
-  def get_dst_start_end_indexes(timestamps, timestamps_dst)
+  def get_dst_start_end_indexes()
     dst_start_ix = nil
     dst_end_ix = nil
-    timestamps.zip(timestamps_dst).each_with_index do |ts, i|
+    @timestamps.zip(@timestamps_dst).each_with_index do |ts, i|
       dst_start_ix = i if ts[0] != ts[1] && dst_start_ix.nil?
       dst_end_ix = i if ts[0] == ts[1] && dst_end_ix.nil? && !dst_start_ix.nil?
     end
 
-    dst_end_ix = timestamps.size - 1 if dst_end_ix.nil? && !dst_start_ix.nil? # run period ends before DST ends
+    dst_end_ix = @timestamps.size - 1 if dst_end_ix.nil? && !dst_start_ix.nil? # run period ends before DST ends
 
     return dst_start_ix, dst_end_ix
   end
@@ -2099,12 +2097,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param meter_names [TODO] TODO
   # @param unit_conv [TODO] TODO
   # @param unit_adder [TODO] TODO
-  # @param timeseries_frequency [TODO] TODO
+  # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
   # @return [TODO] TODO
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_frequency)
     return [0.0] * @timestamps.size if meter_names.empty?
 
-    msgpack_timeseries_name = get_msgpack_timeseries_name(timeseries_frequency)
+    msgpack_timeseries_name = EPlus::get_msgpack_timeseries_name(timeseries_frequency)
     timeseries_data = @msgpackData['MeterData'][msgpack_timeseries_name]
     cols = timeseries_data['Cols']
     rows = timeseries_data['Rows']
@@ -2130,7 +2128,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param variables [TODO] TODO
   # @param unit_conv [TODO] TODO
   # @param unit_adder [TODO] TODO
-  # @param timeseries_frequency [TODO] TODO
+  # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
   # @param is_negative [TODO] TODO
   # @param ems_shift [TODO] TODO
   # @return [TODO] TODO
@@ -2151,7 +2149,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       return sum_values
     end
 
-    if (timeseries_frequency == 'hourly') && (not @msgpackDataHourly.nil?)
+    if (timeseries_frequency == EPlus::TimeseriesFrequencyHourly) && (not @msgpackDataHourly.nil?)
       msgpack_data = @msgpackDataHourly
     else
       msgpack_data = @msgpackDataTimeseries
@@ -2182,13 +2180,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   #
-  # @param timeseries_frequency [TODO] TODO
+  # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
   # @return [TODO] TODO
   def apply_ems_shift(timeseries_frequency)
     # Only shift if we reporting timestep values (i.e., not daily, monthly, or hourly w/ a sub-hourly timestep)
-    if (timeseries_frequency == 'timestep')
+    if (timeseries_frequency == EPlus::TimeseriesFrequencyTimestep)
       return true
-    elsif (timeseries_frequency == 'hourly') && (@model.getTimestep.numberOfTimestepsPerHour == 1)
+    elsif (timeseries_frequency == EPlus::TimeseriesFrequencyHourly) && (@model.getTimestep.numberOfTimestepsPerHour == 1)
       return true
     end
 
@@ -2217,12 +2215,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   #
   # @param meter_name [TODO] TODO
-  # @param timeseries_frequency [TODO] TODO
+  # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
   # @return [TODO] TODO
   def get_report_meter_data_timeseries_units(meter_name, timeseries_frequency)
     return if @msgpackData.nil?
 
-    msgpack_timeseries_name = get_msgpack_timeseries_name(timeseries_frequency)
+    msgpack_timeseries_name = EPlus::get_msgpack_timeseries_name(timeseries_frequency)
     timeseries_data = @msgpackData['MeterData'][msgpack_timeseries_name]
     return if timeseries_data.nil?
 
@@ -2233,17 +2231,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     return
-  end
-
-  # TODO
-  #
-  # @param timeseries_frequency [TODO] TODO
-  # @return [TODO] TODO
-  def get_msgpack_timeseries_name(timeseries_frequency)
-    return { 'timestep' => 'TimeStep',
-             'hourly' => 'Hourly',
-             'daily' => 'Daily',
-             'monthly' => 'Monthly' }[timeseries_frequency]
   end
 
   # TODO
