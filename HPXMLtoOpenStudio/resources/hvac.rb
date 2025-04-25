@@ -631,7 +631,7 @@ module HVAC
       htg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(70, 'F', 'C'))
       # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
       htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
-    elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced].include? hpxml_header.ground_to_air_heat_pump_model_type
+    elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental].include? hpxml_header.ground_to_air_heat_pump_model_type
       num_speeds = hp_ap.cool_capacity_ratios.size
       if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         plf_fplr_curve = Model.add_curve_quadratic(
@@ -898,7 +898,7 @@ module HVAC
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
     add_pump_power_ems_program(model, pump, air_loop_unitary, heat_pump)
-    if (heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed) && (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced)
+    if (heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed) && (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental)
       add_ghp_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil)
     end
 
@@ -2240,7 +2240,7 @@ module HVAC
       cool_cop_ratios = [1.0]
       heat_cop_ratios = [1.0]
 
-    when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced
+    when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental
       hp_ap.cool_capacity_ratios = get_cool_capacity_ratios_gshp(heat_pump)
       hp_ap.heat_capacity_ratios = get_heat_capacity_ratios_gshp(heat_pump)
       hp_ap.cool_rated_cfm_per_ton = [400.0] * hp_ap.cool_capacity_ratios.size

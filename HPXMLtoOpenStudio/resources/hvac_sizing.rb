@@ -2613,7 +2613,7 @@ module HVACSizing
   # @param rated_idb [Double] Indoor air Dry-Bulb temperature at rated conditions (F)
   # @param rated_iwb [Double] Indoor air Wet-Bulb temperature at rated conditions (F)
 
-  # @return [Array<Double, Double, Double, Double>] Final design airflow, cooling total capacity at rated conditions, sensible capacity at rated conditions, SHR at design condition
+  # @return [Array<Double, Double, Double>] Final design airflow, cooling total capacity at rated conditions, sensible capacity at rated conditions
   def self.adjust_cooling_capacities_by_sizing_at_design(mj, hvac_cooling_ap, hvac_sizings, cooling_delta_t, manualj_humidity_setpoint, total_cap_curve_value, hvac_cooling_speed, undersize_limit, oversize_limit, rated_idb, rated_iwb)
     cool_cap_rated = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
     cool_cfm_rated = UnitConversions.convert(cool_cap_rated, 'btu/hr', 'ton') * hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed]
@@ -2720,7 +2720,7 @@ module HVACSizing
 
       delta = (airflow - cool_airflow_prev) / cool_airflow_prev
     end
-    return airflow, cool_cap_rated, cool_sens_cap_rated, design_shr
+    return airflow, cool_cap_rated, cool_sens_cap_rated
   end
 
   # Applies Manual S equipment adjustments based on the system type and design loads.
@@ -2787,7 +2787,7 @@ module HVACSizing
         coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
         total_cap_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, entering_temp, coefficients)
       end
-      hvac_sizings.Cool_Airflow, hvac_sizings.Cool_Capacity, hvac_sizings.Cool_Capacity_Sens, _design_shr = adjust_cooling_capacities_by_sizing_at_design(mj, hvac_cooling_ap, hvac_sizings, cooling_delta_t, hpxml_bldg.header.manualj_humidity_setpoint, total_cap_curve_value, hvac_cooling_speed, undersize_limit, oversize_limit, HVAC::AirSourceCoolRatedIDB, HVAC::AirSourceCoolRatedIWB)
+      hvac_sizings.Cool_Airflow, hvac_sizings.Cool_Capacity, hvac_sizings.Cool_Capacity_Sens = adjust_cooling_capacities_by_sizing_at_design(mj, hvac_cooling_ap, hvac_sizings, cooling_delta_t, hpxml_bldg.header.manualj_humidity_setpoint, total_cap_curve_value, hvac_cooling_speed, undersize_limit, oversize_limit, HVAC::AirSourceCoolRatedIDB, HVAC::AirSourceCoolRatedIWB)
 
     elsif [HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_type) && !is_ducted
@@ -2858,9 +2858,9 @@ module HVACSizing
                                    (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
                                    (80.0 - mj.cool_setpoint) / cooling_delta_t))
         hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
-      elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced].include? hpxml_header.ground_to_air_heat_pump_model_type
+      elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental].include? hpxml_header.ground_to_air_heat_pump_model_type
         total_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(mj.cool_indoor_wetbulb, 'F', 'C'), UnitConversions.convert(entering_temp, 'F', 'C'), hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed])
-        hvac_sizings.Cool_Airflow, hvac_sizings.Cool_Capacity, hvac_sizings.Cool_Capacity_Sens, design_shr = adjust_cooling_capacities_by_sizing_at_design(mj, hvac_cooling_ap, hvac_sizings, cooling_delta_t, hpxml_bldg.header.manualj_humidity_setpoint, total_cap_curve_value, hvac_cooling_speed, undersize_limit, oversize_limit, HVAC::GroundSourceCoolRatedIDB, HVAC::GroundSourceCoolRatedIWB)
+        hvac_sizings.Cool_Airflow, hvac_sizings.Cool_Capacity, hvac_sizings.Cool_Capacity_Sens = adjust_cooling_capacities_by_sizing_at_design(mj, hvac_cooling_ap, hvac_sizings, cooling_delta_t, hpxml_bldg.header.manualj_humidity_setpoint, total_cap_curve_value, hvac_cooling_speed, undersize_limit, oversize_limit, HVAC::GroundSourceCoolRatedIDB, HVAC::GroundSourceCoolRatedIWB)
       end
     elsif HPXML::HVACTypeEvaporativeCooler == cooling_type
 
@@ -2952,19 +2952,10 @@ module HVACSizing
           # Currently only keep it for simple ghp models
           hvac_sizings.Heat_Capacity *= 0.75 if (hvac_sizings.Heat_Capacity >= 1.5 * hvac_sizings.Cool_Capacity)
         end
+        cfm_per_btuh = hvac_sizings.Cool_Airflow / hvac_sizings.Cool_Capacity
         hvac_sizings.Cool_Capacity = [hvac_sizings.Cool_Capacity, hvac_sizings.Heat_Capacity].max
         hvac_sizings.Heat_Capacity = hvac_sizings.Cool_Capacity
-
-        if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeSimple].include? hpxml_header.ground_to_air_heat_pump_model_type
-          hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr_rated
-          cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
-                                     (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
-                                     (80.0 - mj.cool_setpoint) / cooling_delta_t))
-        elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced].include? hpxml_header.ground_to_air_heat_pump_model_type
-          cool_load_sens_cap_design = hvac_sizings.Cool_Capacity * total_cap_curve_value * design_shr
-        end
-
-        hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
+        hvac_sizings.Cool_Airflow = cfm_per_btuh * hvac_sizings.Cool_Capacity
       end
       hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, heating_delta_t, dx_capacity: hvac_sizings.Heat_Capacity, hp_cooling_cfm: hvac_sizings.Cool_Airflow)
 
@@ -3945,7 +3936,7 @@ module HVACSizing
       w_temp = UnitConversions.convert(w_temp, 'F', 'K')
 
       htg_cap_curve_value = MathTools.quadlinear(db_temp / ref_temp, w_temp / ref_temp, 1.0, 1.0, hvac_heating_ap.heat_cap_curve_spec[hvac_heating_speed])
-    elsif (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced)
+    elsif (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental)
       htg_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(db_temp, 'F', 'C'), UnitConversions.convert(w_temp, 'F', 'C'), hvac_heating_ap.heat_cap_ft_spec[hvac_heating_speed])
     end
 

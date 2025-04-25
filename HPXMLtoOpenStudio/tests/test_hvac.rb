@@ -1060,21 +1060,21 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     heat_pump = hpxml_bldg.heat_pumps[0]
     _check_ghp_simple(model, heat_pump, 12.79, 4.94, 962, [12.5, -1.3], [20, 31])
 
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-1-speed-advanced.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-1-speed-experimental.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     _check_ghp_advanced(model, heat_pump, [10550.56], [10550.56], [5.84], [3.94], 962, [12.5, -1.3], [20, 31])
 
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-2-speed-advanced.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     _check_ghp_advanced(model, heat_pump, [7757.83, 10550.56], [7779.98, 10550.56], [8.29, 7.52], [5.15, 4.44], 962, [12.5, -1.3], [20, 31])
 
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-var-speed-advanced.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -1530,8 +1530,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(program_values['FF_AF_clg'].sum, cooling_cfm / rated_airflow_cfm_clg, 0.01)
     assert_in_epsilon(program_values['FF_AF_htg'].sum, heating_cfm / rated_airflow_cfm_htg, 0.01)
 
-    ['base-hvac-install-quality-ground-to-air-heat-pump-2-speed-advanced.xml',
-     'base-hvac-install-quality-ground-to-air-heat-pump-var-speed-advanced.xml'].each do |filename|
+    ['base-hvac-install-quality-ground-to-air-heat-pump-2-speed-experimental.xml',
+     'base-hvac-install-quality-ground-to-air-heat-pump-var-speed-experimental.xml'].each do |filename|
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, filename))
       model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 

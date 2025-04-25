@@ -195,14 +195,14 @@ Research feature to select the type of defrost model. Use standard for default E
 
 **Simulation Control: Ground-to-Air Heat Pump Model Type**
 
-Research feature to select the type of ground-to-air heat pump model. Use simple for simple E+ geothermal coil modeling. Use advanced for an improved model that better accounts for coil staging. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+Research feature to select the type of ground-to-air heat pump model. Use simple for simple E+ geothermal coil modeling. Use experimental for an improved model that better accounts for coil staging. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
 
 - **Name:** ``simulation_control_ground_to_air_heat_pump_model_type``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `simple`, `advanced`
+- **Choices:** `simple`, `experimental`
 
 <br/>
 

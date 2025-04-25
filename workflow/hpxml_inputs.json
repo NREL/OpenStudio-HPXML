@@ -2613,9 +2613,9 @@
     "heat_pump_fraction_cool_load_served": 1,
     "heat_pump_backup_type": "none"
   },
-  "sample_files/base-hvac-ground-to-air-heat-pump-1-speed-advanced.xml": {
+  "sample_files/base-hvac-ground-to-air-heat-pump-1-speed-experimental.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "simulation_control_ground_to_air_heat_pump_model_type": "advanced"
+    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2623,9 +2623,9 @@
     "heat_pump_cooling_efficiency": 20.5,
     "heat_pump_cooling_compressor_type": "two stage"
   },
-  "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-advanced.xml": {
+  "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml",
-    "simulation_control_ground_to_air_heat_pump_model_type": "advanced"
+    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2633,9 +2633,9 @@
     "heat_pump_cooling_efficiency": 30.9,
     "heat_pump_cooling_compressor_type": "variable speed"
   },
-  "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-advanced.xml": {
+  "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml",
-    "simulation_control_ground_to_air_heat_pump_model_type": "advanced"
+    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-integrated.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2734,14 +2734,14 @@
     "heat_pump_charge_defect_ratio": -0.25,
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
-  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-2-speed-advanced.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-advanced.xml",
+  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-2-speed-experimental.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
     "heat_pump_charge_defect_ratio": -0.25,
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
-  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-var-speed-advanced.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-advanced.xml",
+  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-var-speed-experimental.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
     "heat_pump_charge_defect_ratio": -0.25,
     "hvac_blower_fan_watts_per_cfm": 0.365

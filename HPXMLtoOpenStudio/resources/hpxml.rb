@@ -58,7 +58,7 @@ class HPXML < Object
   AdvancedResearchDefrostModelTypeStandard = 'standard'
   AdvancedResearchDefrostModelTypeAdvanced = 'advanced'
   AdvancedResearchGroundToAirHeatPumpModelTypeSimple = 'simple'
-  AdvancedResearchGroundToAirHeatPumpModelTypeAdvanced = 'advanced'
+  AdvancedResearchGroundToAirHeatPumpModelTypeExperimental = 'experimental'
   AirTypeFanCoil = 'fan coil'
   AirTypeGravity = 'gravity'
   AirTypeHighVelocity = 'high velocity'
