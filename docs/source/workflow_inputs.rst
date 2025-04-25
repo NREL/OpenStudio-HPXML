@@ -109,6 +109,7 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   ``DefrostModelType``                    string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
   ``OnOffThermostatDeadbandTemperature``  double    F        > 0 [#]_          No                  Temperature difference between cut-in and cut-out temperature for HVAC operation [#]_
   ``HeatPumpBackupCapacityIncrement``     double    Btu/hr   > 0 [#]_          No                  Capacity increment of multi-stage heat pump backup systems [#]_
+  ``GroundToAirHeatPumpModelType``        string             See [#]_          No        standard  Ground-to-air heat pump system model type [#]_
   ======================================  ========  =======  ================  ========  ========  ========================================================
 
   .. [#] The default value of 7 is an average value found in the literature when calibrating timeseries EnergyPlus indoor temperatures to field data.
@@ -131,6 +132,10 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   .. [#] HeatPumpBackupCapacityIncrement is currently only allowed with a 1 minute timestep.
   .. [#] HeatPumpBackupCapacityIncrement allows modeling multi-stage electric heat pump backup with time-based staging.
          If not provided, the heat pump backup is modeled with a single stage.
+  .. [#] GroundToAirHeatPumpModelType choices are "standard" and "experimental".
+  .. [#] Use "standard" for standard ground-to-air heat pump modeling.
+         Use "experimental" for an improved model that better accounts for coil staging.
+         The "experimental" ground-to-air heat pump models with desuperheater are not supported yet, see :ref:`water_heater_desuperheater`.
 
 HPXML Emissions Scenarios
 *************************
@@ -3030,6 +3035,7 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   ``HeatPumpFuel``                                 string            electricity      Yes                       Fuel type
   ``HeatingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Heating output capacity (excluding any backup heating)
   ``CoolingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Cooling output capacity
+  ``CompressorType``                               string            See [#]_         Yes                       Type of compressor
   ``CoolingSensibleHeatFraction``                  double    frac    > 0.5, <= 1      No        0.73            Sensible heat fraction
   ``BackupType``                                   string            See [#]_         No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                       double    frac    >= 0, <= 1 [#]_  Yes                       Fraction of heating load served
@@ -3062,6 +3068,7 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
+  .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] BackupType choices are "integrated" or "separate".
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
          Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
@@ -4233,7 +4240,9 @@ If the water heater uses a desuperheater, additional information is entered in `
 
   .. warning::
 
-    A desuperheater is currently not allow if detailed water heater setpoint schedules are used.
+    A desuperheater is currently not allowed if detailed water heater setpoint schedules are used.
+
+    A desuperheater is currently not allowed if ``GroundToAirHeatPumpModelType`` is "experimental", see :ref:`hpxml_simulation_control`.
 
 HPXML Hot Water Distribution
 ****************************

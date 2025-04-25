@@ -704,7 +704,7 @@ module Waterheater
     pump.setRatedPowerConsumption(pump_power)
     pump.setMotorEfficiency(0.3)
     pump.setFractionofMotorInefficienciestoFluidStream(0.2)
-    pump.setPumpControlType('Intermittent')
+    pump.setPumpControlType(EPlus::PumpControlTypeIntermittent)
     pump.setRatedFlowRate(UnitConversions.convert(coll_flow, 'cfm', 'm^3/s'))
     pump.addToNode(plant_loop.supplyInletNode)
     pump.additionalProperties.setFeature('HPXML_ID', solar_thermal_system.water_heating_system.id) # Used by reporting measure

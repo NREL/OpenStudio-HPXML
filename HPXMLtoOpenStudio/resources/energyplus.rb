@@ -49,6 +49,7 @@ module EPlus
   SurfaceTypeWall = 'Wall'
   SurfaceWindExposureNo = 'NoWind'
   SurfaceWindExposureYes = 'WindExposed'
+  PumpControlTypeIntermittent = 'Intermittent'
   TimeseriesFrequencyNone = 'none'
   TimeseriesFrequencyTimestep = 'timestep'
   TimeseriesFrequencyHourly = 'hourly'

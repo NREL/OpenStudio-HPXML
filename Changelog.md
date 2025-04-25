@@ -2,7 +2,8 @@
 
 __New Features__
 - HVAC modeling updates:
-  - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps.
+  - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps as well as ground-to-air heat pumps.
+  - Optional input `SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType` to choose "standard" (default) or "experimental"; "experimental" ground-to-air heat pump model better accounts for coil staging.
 - Electric vehicle enhancements:
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
@@ -188,7 +189,7 @@ __New Features__
   - Adds new optional arguments for registering (with the OpenStudio runner) annual or monthly utility bills.
 - Advanced research features:
   - **Breaking change**: Replaces `SimulationControl/TemperatureCapacitanceMultiplier` with `SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier`.
-  - Allows an optional boolean input `SimulationControl/AdvancedResearchFeatures/DefrostModelType` for heat pump advanced defrost model.
+  - Allows an optional input `SimulationControl/AdvancedResearchFeatures/DefrostModelType` for heat pump advanced defrost model.
   - Adds maximum power ratio detailed schedule for variable-speed HVAC systems to model shedding controls per [AHRI 1380](https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small).
 
 __Bugfixes__
