@@ -253,10 +253,13 @@ module XMLHelper
   # Obtains the XML document for the XML file at the specified path.
   #
   # @param hpxml_path [String] Path to the HPXML file
+  # @param hpxml_path [String] Contents of the HPXML file if already available
   # @return [Oga::XML::Document] The XML document
-  def self.parse_file(hpxml_path)
-    file_read = File.read(hpxml_path)
-    hpxml_doc = Oga.parse_xml(file_read)
+  def self.parse_file(hpxml_path, hpxml_contents: nil)
+    if hpxml_contents.nil?
+      hpxml_contents = File.read(hpxml_path)
+    end
+    hpxml_doc = Oga.parse_xml(hpxml_contents)
     return hpxml_doc
   end
 
@@ -306,12 +309,14 @@ module XMLHelper
     doc_s.gsub!(' ?>', '?>')
     doc_s.gsub!('&quot;', '"')
 
-    # Write XML file
-    if not Dir.exist? File.dirname(hpxml_path)
-      FileUtils.mkdir_p(File.dirname(hpxml_path))
-    end
-    File.open(hpxml_path, 'w', newline: :crlf) do |f|
-      f << doc_s
+    if not hpxml_path.nil?
+      # Write XML file
+      if not Dir.exist? File.dirname(hpxml_path)
+        FileUtils.mkdir_p(File.dirname(hpxml_path))
+      end
+      File.open(hpxml_path, 'w', newline: :crlf) do |f|
+        f << doc_s
+      end
     end
 
     return doc_s
