@@ -11784,7 +11784,9 @@ class HPXML < Object
     if (ceiling_locations.include? hpxml_floor.interior_adjacent_to) || (ceiling_locations.include? hpxml_floor.exterior_adjacent_to)
       return true
     elsif (floor_locations.include? hpxml_floor.interior_adjacent_to) || (floor_locations.include? hpxml_floor.exterior_adjacent_to)
-      if ((HPXML::conditioned_locations_this_unit.include? hpxml_floor.interior_adjacent_to) && (not HPXML::conditioned_locations_this_unit.include? hpxml_floor.exterior_adjacent_to))
+      if ((floor_locations.include? hpxml_floor.interior_adjacent_to) &&
+         (HPXML::conditioned_locations_this_unit.include? hpxml_floor.interior_adjacent_to) &&
+         (not HPXML::conditioned_locations_this_unit.include? hpxml_floor.exterior_adjacent_to))
         # E.g., conditioned basement w/ other housing unit above it
         return true
       else
