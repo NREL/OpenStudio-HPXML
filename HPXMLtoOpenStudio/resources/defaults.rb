@@ -6275,16 +6275,20 @@ module Defaults
 
     clg_ap = cooling_system.additional_properties
 
-    # Based on RESNET MINHERS Addendum 82
-    clg_ap.cool_cap_fflow_spec = [0.718664047, 0.41797409, -0.136638137]
-    clg_ap.cool_eir_fflow_spec = [1.143487507, -0.13943972, -0.004047787]
 
     if cooling_system.is_a?(HPXML::HeatPump) && cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      # Need a separate set of coefficients for installation quality
+      # Based on RESNET MINHERS Addendum 82
+      clg_ap.cool_cap_fflow_spec_iq = [0.718664047, 0.41797409, -0.136638137]
+      clg_ap.cool_eir_fflow_spec_iq = [1.143487507, -0.13943972, -0.004047787]
       clg_ap.cool_rated_shr_gross = 0.708
       clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
       return
     end
 
+    # Based on RESNET MINHERS Addendum 82
+    clg_ap.cool_cap_fflow_spec = [0.718664047, 0.41797409, -0.136638137]
+    clg_ap.cool_eir_fflow_spec = [1.143487507, -0.13943972, -0.004047787]
     set_hvac_degradation_coefficient(cooling_system)
 
     if HVAC.is_room_dx_hvac_system(cooling_system)
@@ -6381,14 +6385,18 @@ module Defaults
 
     htg_ap = heating_system.additional_properties
 
-    # Based on RESNET MINHERS Addendum 82
-    htg_ap.heat_cap_fflow_spec = [0.694045465, 0.474207981, -0.168253446]
-    htg_ap.heat_eir_fflow_spec = [2.185418751, -1.942827919, 0.757409168]
-
     if heating_system.is_a?(HPXML::HeatPump) && heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      # Need a separate set of coefficients for installation quality
+      # Based on RESNET MINHERS Addendum 82
+      htg_ap.heat_cap_fflow_spec_iq = [0.694045465, 0.474207981, -0.168253446]
+      htg_ap.heat_eir_fflow_spec_iq = [2.185418751, -1.942827919, 0.757409168]
       htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
       return
     end
+
+    # Based on RESNET MINHERS Addendum 82
+    htg_ap.heat_cap_fflow_spec = [0.694045465, 0.474207981, -0.168253446]
+    htg_ap.heat_eir_fflow_spec = [2.185418751, -1.942827919, 0.757409168]
 
     set_hvac_degradation_coefficient(heating_system)
 

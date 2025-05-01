@@ -1804,14 +1804,14 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       assert_in_epsilon(fan_watts_cfm, fan.electricPowerPerUnitFlowRate * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
 
       # Check installation quality EMS
-      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
 
       # defect ratios in EMS is calculated correctly
       assert_in_epsilon(program_values['F_CH'].sum, charge_defect, 0.01)
-      [0.75, 0.75].each_with_index do |rated_airflow_ratio, i|
+      [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
         assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
       end
-      [0.702, 0.702].each_with_index do |rated_airflow_ratio, i|
+      [0.675, 0.675].each_with_index do |rated_airflow_ratio, i|
         assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
       end
     end

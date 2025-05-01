@@ -2814,7 +2814,7 @@ module HVACSizing
         hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
         hvac_sizings.Cool_Airflow = calc_airflow_rate(:clg, hvac_cooling, hvac_sizings.Cool_Capacity, hpxml_bldg)
       elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental].include? hpxml_header.ground_to_air_heat_pump_model_type
-        total_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(mj.cool_indoor_wetbulb, 'F', 'C'), UnitConversions.convert(entering_temp, 'F', 'C'), hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed])
+        total_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(mj.cool_indoor_wetbulb, 'F', 'C'), UnitConversions.convert(entering_temp, 'F', 'C'), clg_ap.cool_cap_ft_spec[hvac_cooling_speed])
         calculate_cooling_capacities(mj, clg_ap, hvac_sizings, hpxml_bldg.header.manualj_humidity_setpoint, total_cap_curve_value, undersize_limit, oversize_limit, HVAC::GroundSourceCoolRatedIDB, HVAC::GroundSourceCoolRatedIWB, hvac_cooling, hpxml_bldg)
       end
     elsif HPXML::HVACTypeEvaporativeCooler == cooling_type
@@ -3067,9 +3067,10 @@ module HVACSizing
       end
 
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
-      a1_AF_Qgr_c = clg_ap.cool_cap_fflow_spec[0]
-      a2_AF_Qgr_c = clg_ap.cool_cap_fflow_spec[1]
-      a3_AF_Qgr_c = clg_ap.cool_cap_fflow_spec[2]
+      cool_cap_fflow_spec = (clg_ap.respond_to? :cool_cap_fflow_spec_iq) ? clg_ap.cool_cap_fflow_spec_iq : clg_ap.cool_cap_fflow_spec
+      a1_AF_Qgr_c = cool_cap_fflow_spec[0]
+      a2_AF_Qgr_c = cool_cap_fflow_spec[1]
+      a3_AF_Qgr_c = cool_cap_fflow_spec[2]
 
       qgr_values, _p_values, ff_chg_values = HVAC.get_charge_fault_cooling_coeff(f_ch)
 
@@ -3128,9 +3129,10 @@ module HVACSizing
         heat_airflow_rated_defect_ratio = 1 + heat_airflow_defect_ratio
       end
 
-      a1_AF_Qgr_h = htg_ap.heat_cap_fflow_spec[0]
-      a2_AF_Qgr_h = htg_ap.heat_cap_fflow_spec[1]
-      a3_AF_Qgr_h = htg_ap.heat_cap_fflow_spec[2]
+      heat_cap_fflow_spec = (htg_ap.respond_to? :heat_cap_fflow_spec_iq) ? htg_ap.heat_cap_fflow_spec_iq : htg_ap.heat_cap_fflow_spec
+      a1_AF_Qgr_h = heat_cap_fflow_spec[0]
+      a2_AF_Qgr_h = heat_cap_fflow_spec[1]
+      a3_AF_Qgr_h = heat_cap_fflow_spec[2]
 
       qgr_values, _p_values, ff_chg_values = HVAC.get_charge_fault_heating_coeff(f_ch)
 

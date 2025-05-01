@@ -17,7 +17,6 @@ module HVAC
   GroundSourceCoolRatedWET = 85.0 # degF, Rated water entering temperature for ground-source systems, cooling
   GroundSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for ground-source systems, cooling
   GroundSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for ground-source systems, cooling
-  CrankcaseHeaterTemp = 50.0 # degF
 
   # Adds any HVAC Systems to the OpenStudio model.
   #
@@ -568,8 +567,8 @@ module HVAC
 
     htg_cfm = hp_ap.heating_actual_airflow_cfm
     clg_cfm = hp_ap.cooling_actual_airflow_cfm
-    htg_air_flow_rated = calc_rated_airflow(heat_pump.heating_capacity, hp_ap.heat_rated_cfm_per_ton[-1], 'm^3/s')
-    clg_air_flow_rated = calc_rated_airflow(heat_pump.cooling_capacity, hp_ap.cool_rated_cfm_per_ton[-1], 'm^3/s')
+    htg_air_flow_rated = calc_rated_airflow(heat_pump.heating_capacity, hp_ap.heat_rated_cfm_per_ton, 'm^3/s')
+    clg_air_flow_rated = calc_rated_airflow(heat_pump.cooling_capacity, hp_ap.cool_rated_cfm_per_ton, 'm^3/s')
 
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = EPlus::FluidWater
@@ -705,7 +704,7 @@ module HVAC
         speed.setReferenceUnitGrossRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W') * hp_ap.cool_capacity_ratios[i])
         speed.setReferenceUnitGrossRatedSensibleHeatRatio(hp_ap.cool_rated_shr_gross)
         speed.setReferenceUnitGrossRatedCoolingCOP(hp_ap.cool_rated_cops[i])
-        speed.setReferenceUnitRatedAirFlowRate(UnitConversions.convert(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * hp_ap.cool_capacity_ratios[i] * hp_ap.cool_rated_cfm_per_ton[i], 'cfm', 'm^3/s'))
+        speed.setReferenceUnitRatedAirFlowRate(UnitConversions.convert(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * hp_ap.cool_capacity_ratios[i] * hp_ap.cool_rated_cfm_per_ton, 'cfm', 'm^3/s'))
         speed.setReferenceUnitRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.cool_capacity_ratios[i])
         speed.setReferenceUnitWasteHeatFractionofInputPowerAtRatedConditions(0.0)
         clg_coil.addSpeed(speed)
@@ -780,7 +779,7 @@ module HVAC
         # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
         speed.setReferenceUnitGrossRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W') * hp_ap.heat_capacity_ratios[i])
         speed.setReferenceUnitGrossRatedHeatingCOP(hp_ap.heat_rated_cops[i])
-        speed.setReferenceUnitRatedAirFlow(UnitConversions.convert(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * hp_ap.heat_capacity_ratios[i] * hp_ap.heat_rated_cfm_per_ton[i], 'cfm', 'm^3/s'))
+        speed.setReferenceUnitRatedAirFlow(UnitConversions.convert(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * hp_ap.heat_capacity_ratios[i] * hp_ap.heat_rated_cfm_per_ton, 'cfm', 'm^3/s'))
         speed.setReferenceUnitRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.heat_capacity_ratios[i])
         speed.setReferenceUnitWasteHeatFractionofInputPowerAtRatedConditions(0.0)
         htg_coil.addSpeed(speed)
@@ -4807,12 +4806,14 @@ module HVAC
       qgr_values, p_values, ff_chg_values = get_charge_fault_heating_coeff(f_chg)
       suffix = 'htg'
     end
-    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{hvac_ap.cool_cap_fflow_spec[0]}")
-    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{hvac_ap.cool_cap_fflow_spec[1]}")
-    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{hvac_ap.cool_cap_fflow_spec[2]}")
-    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{hvac_ap.cool_eir_fflow_spec[0]}")
-    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{hvac_ap.cool_eir_fflow_spec[1]}")
-    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{hvac_ap.cool_eir_fflow_spec[2]}")
+    cool_cap_fflow_spec = (hvac_ap.respond_to? :cool_cap_fflow_spec_iq) ? hvac_ap.cool_cap_fflow_spec_iq : hvac_ap.cool_cap_fflow_spec
+    cool_eir_fflow_spec = (hvac_ap.respond_to? :cool_eir_fflow_spec_iq) ? hvac_ap.cool_eir_fflow_spec_iq : hvac_ap.cool_eir_fflow_spec
+    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{cool_cap_fflow_spec[0]}")
+    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{cool_cap_fflow_spec[1]}")
+    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{cool_cap_fflow_spec[2]}")
+    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{cool_eir_fflow_spec[0]}")
+    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{cool_eir_fflow_spec[1]}")
+    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{cool_eir_fflow_spec[2]}")
 
     # charge fault coefficients
     fault_program.addLine("Set a1_CH_Qgr_#{suffix} = #{qgr_values[0]}")
@@ -4873,8 +4874,13 @@ module HVAC
       fault_program.addLine("Set EIR_IQ_adj_#{suffix} = EIR_Cutler_Curve_After_#{suffix} / EIR_Cutler_Curve_Pre_#{suffix}")
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
       if (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit) && (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit)
-        cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec : hvac_ap.heat_cap_fflow_spec
-        eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec : hvac_ap.heat_eir_fflow_spec
+        if (clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit) || (clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit)
+          cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec[speed] : hvac_ap.heat_cap_fflow_spec[speed]
+          eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec[speed] : hvac_ap.heat_eir_fflow_spec[speed]
+        else
+          cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec : hvac_ap.heat_cap_fflow_spec
+          eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec : hvac_ap.heat_eir_fflow_spec
+        end
         fault_program.addLine("Set CAP_c1_#{suffix} = #{cap_fff_specs_coeff[0]}")
         fault_program.addLine("Set CAP_c2_#{suffix} = #{cap_fff_specs_coeff[1]}")
         fault_program.addLine("Set CAP_c3_#{suffix} = #{cap_fff_specs_coeff[2]}")
