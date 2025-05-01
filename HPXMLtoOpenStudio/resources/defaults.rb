@@ -6276,6 +6276,16 @@ module Defaults
     clg_ap = cooling_system.additional_properties
 
 
+    # Refrigerant charge fault coefficients per ANSI/RESNET 301-2022 Tables 4.2.2.4(1) and 4.2.2.4(5)
+    if cooling_system.charge_defect_ratio.to_f <= 0
+      clg_ap.cool_qgr_values = [-9.46E-01, 4.93E-02, -1.18E-03, -1.15E+00]
+      clg_ap.cool_p_values = [-3.13E-01, 1.15E-02, 2.66E-03, -1.16E-01]
+    else
+      clg_ap.cool_qgr_values = [-1.63E-01, 1.14E-02, -2.10E-04, -1.40E-01]
+      clg_ap.cool_p_values = [2.19E-01, -5.01E-03, 9.89E-04, 2.84E-01]
+    end
+    clg_ap.cool_ff_chg_values = [26.67, 35.0]
+
     if cooling_system.is_a?(HPXML::HeatPump) && cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
       # Need a separate set of coefficients for installation quality
       # Based on RESNET MINHERS Addendum 82
@@ -6384,6 +6394,18 @@ module Defaults
     end
 
     htg_ap = heating_system.additional_properties
+
+
+    # Refrigerant charge fault coefficients per ANSI/RESNET 301-2022 Tables 4.2.2.4(2) and 4.2.2.4(6)
+    # Note: We added a zero term to make cooling and heating calculations consistent
+    if heating_system.charge_defect_ratio.to_f <= 0
+      htg_ap.heat_qgr_values = [-3.39E-02, 0.0, 2.03E-02, -2.62E+00]
+      htg_ap.heat_p_values = [6.16E-02, 0.0, 4.46E-03, -2.60E-01]
+    else
+      htg_ap.heat_qgr_values = [-2.95E-03, 0.0, 7.38E-04, -6.41E-03]
+      htg_ap.heat_p_values = [-5.94E-01, 0.0, 1.59E-02, 1.89E+00]
+    end
+    htg_ap.heat_ff_chg_values = [0.0, 8.33] # Add a zero term to combine cooling and heating calculation
 
     if heating_system.is_a?(HPXML::HeatPump) && heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
       # Need a separate set of coefficients for installation quality
