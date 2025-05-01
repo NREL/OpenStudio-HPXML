@@ -153,11 +153,6 @@ def create_hpxmls
 
   puts "\n"
 
-  # Delete stochastic schedule backup file
-  dirs.each do |dir|
-    Dir.glob("#{workflow_dir}/#{dir}/*_bak.xml").each { |file| File.delete(file) }
-  end
-
   # Print warnings about extra files
   dirs.each do |dir|
     Dir["#{workflow_dir}/#{dir}/*.xml"].each do |hpxml|
@@ -1846,6 +1841,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 heat_pump_fuel: HPXML::FuelTypeElectricity,
                                 heating_capacity: 4800,
                                 cooling_capacity: 4800,
+                                compressor_type: HPXML::HVACCompressorTypeSingleStage,
                                 backup_type: HPXML::HeatPumpBackupTypeIntegrated,
                                 backup_heating_fuel: HPXML::FuelTypeElectricity,
                                 backup_heating_capacity: 3412,

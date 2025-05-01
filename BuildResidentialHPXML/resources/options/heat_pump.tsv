@@ -60,12 +60,15 @@ None	none
 "Mini-Split HP, SEER 29.3, 14 HSPF, Ducted"	mini-split	SEER	29.3	variable speed	HSPF	14	0.5	-15		TRUE														
 "Mini-Split HP, SEER 33, 13.3 HSPF"	mini-split	SEER	33	variable speed	HSPF	13.3	0.5	-15																
 "Mini-Split HP, SEER 33, 13.3 HSPF, Ducted"	mini-split	SEER	33	variable speed	HSPF	13.3	0.5	-15		TRUE														
-"Geothermal HP, EER 16.6, COP 3.6"	ground-to-air	EER	16.6		COP	3.6																		
-"Geothermal HP, EER 16.6, COP 3.6, Grade 3 Installation"	ground-to-air	EER	16.6		COP	3.6					-0.25	-0.25												
-"Geothermal HP, EER 18.2, COP 3.7"	ground-to-air	EER	18.2		COP	3.7																		
-"Geothermal HP, EER 19.4, COP 3.8"	ground-to-air	EER	19.4		COP	3.8																		
-"Geothermal HP, EER 20.2, COP 4.2"	ground-to-air	EER	20.2		COP	4.2																		
-"Geothermal HP, EER 20.5, COP 4.0"	ground-to-air	EER	20.5		COP	4																		
+"Geothermal HP, EER 16.6, COP 3.6"	ground-to-air	EER	16.6	single stage	COP	3.6																		
+"Geothermal HP, EER 16.6, COP 3.6, Grade 3 Installation"	ground-to-air	EER	16.6	single stage	COP	3.6					-0.25	-0.25												
+"Geothermal HP, EER 18.2, COP 3.7"	ground-to-air	EER	18.2	single stage	COP	3.7																		
+"Geothermal HP, EER 19.4, COP 3.8"	ground-to-air	EER	19.4	single stage	COP	3.8																		
+"Geothermal HP, EER 20.2, COP 4.2"	ground-to-air	EER	20.2	two stage	COP	4.2																		
+"Geothermal HP, EER 20.5, COP 4.0"	ground-to-air	EER	20.5	two stage	COP	4																		
+"Geothermal HP, EER 20.5, COP 4.0, Grade 3 Installation"	ground-to-air	EER	20.5	two stage	COP	4					-0.25	-0.25												
+"Geothermal HP, EER 30.9, COP 4.4"	ground-to-air	EER	30.9	variable speed	COP	4.4																		
+"Geothermal HP, EER 30.9, COP 4.4, Grade 3 Installation"	ground-to-air	EER	30.9	variable speed	COP	4.4					-0.25	-0.25												
 "Packaged Terminal HP, EER 11.4, COP 3.6"	packaged terminal heat pump	EER	11.4		COP	3.6	0.6	17																
 "Room AC w/ Reverse Cycle, EER 11.4, COP 3.6"	room air conditioner with reverse cycle	EER	11.4		COP	3.6	0.6	17																
 																								
