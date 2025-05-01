@@ -512,22 +512,52 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_output_hpxml_path_same_as_input_hpxml_path
-    hpxml_path = File.join(@sample_files_path, 'base.xml')
-    @args_hash['hpxml_path'] = hpxml_path
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     @args_hash['hpxml_output_path'] = @args_hash['hpxml_path']
     @args_hash['output_csv_path'] = @tmp_schedule_file_path
-    _hpxml, result = _test_measure()
 
-    # Check that original HPXML file was backed up
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = nil
+
     hpxml_backup_path = @args_hash['hpxml_path'].gsub('.xml', '_bak.xml')
-    assert(File.exist? hpxml_backup_path)
+    backup_warn_msg = 'HPXML Output File Path is same as HPXML File Path, creating backup.'
 
-    warn_msgs = result.warnings.map { |x| x.logMessage }
-    assert(warn_msgs.any? { |warn_msg| warn_msg.include?('HPXML Output File Path is same as HPXML File Path, creating backup.') })
+    [false, true].each do |test_backup_file|
+      [false, true].each do |test_with_defaults|
+        hpxml = _create_hpxml('base.xml')
+        if test_with_defaults
+          # Check that the presence of dataSource='software' attributes doesn't affect the logic
+          hpxml_bldg = hpxml.buildings[0]
+          if weather.nil?
+            epw_path = File.join(@root_path, 'weather', hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath)
+            weather = WeatherFile.new(epw_path: epw_path, runner: runner)
+          end
+          Defaults.apply(runner, hpxml, hpxml_bldg, weather)
+        end
+        hpxml_doc = hpxml.to_doc()
+        if test_backup_file
+          # Add an element that isn't recognized by the HPXML class and will be dropped when the new HPXML is written
+          # This should cause the original HPXML file to be backed up
+          extension_element = XMLHelper.get_element(hpxml_doc, '/HPXML/SoftwareInfo/extension')
+          XMLHelper.add_element(extension_element, 'foo', 'bar', :string)
+        end
+        XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
+        _hpxml, result = _test_measure()
 
-    # Revert to original
-    File.delete(hpxml_path)
-    File.rename(hpxml_backup_path, hpxml_path)
+        warn_msgs = result.warnings.map { |x| x.logMessage }
+
+        if test_backup_file
+          # Check backup file created
+          assert(File.exist? hpxml_backup_path)
+          File.delete(hpxml_backup_path)
+          assert(warn_msgs.any? { |warn_msg| warn_msg.include?(backup_warn_msg) })
+        else
+          # Check backup file NOT created
+          refute(File.exist? hpxml_backup_path)
+          refute(warn_msgs.any? { |warn_msg| warn_msg.include?(backup_warn_msg) })
+        end
+      end
+    end
   end
 
   private

@@ -1272,6 +1272,7 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0,
     "heat_pump_type": "ground-to-air",
+    "heat_pump_compressor_type": "single stage",
     "heat_pump_heating_efficiency_type": "COP",
     "heat_pump_heating_efficiency": 3.6,
     "heat_pump_cooling_efficiency_type": "EER",
@@ -1382,8 +1383,8 @@
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
     "water_heater_uses_desuperheater": true
   },
-  "sample_files/base-dhw-desuperheater-gshp.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+  "sample_files/base-dhw-desuperheater-ghp.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "water_heater_uses_desuperheater": true
   },
   "sample_files/base-dhw-desuperheater-hpwh.xml": {
@@ -2658,7 +2659,7 @@
   "sample_files/base-hvac-furnace-x3-dse.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
-  "sample_files/base-hvac-ground-to-air-heat-pump.xml": {
+  "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "none",
     "heating_system_heating_efficiency": 0,
@@ -2667,6 +2668,7 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0,
     "heat_pump_type": "ground-to-air",
+    "heat_pump_compressor_type": "single stage",
     "heat_pump_heating_efficiency_type": "COP",
     "heat_pump_heating_efficiency": 3.6,
     "heat_pump_cooling_efficiency_type": "EER",
@@ -2677,14 +2679,38 @@
     "heat_pump_fraction_cool_load_served": 1,
     "heat_pump_backup_type": "none"
   },
+  "sample_files/base-hvac-ground-to-air-heat-pump-1-speed-experimental.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
+    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
+    "heat_pump_heating_efficiency": 4.0,
+    "heat_pump_cooling_efficiency": 20.5,
+    "heat_pump_compressor_type": "two stage"
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml",
+    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
+    "heat_pump_heating_efficiency": 4.4,
+    "heat_pump_cooling_efficiency": 30.9,
+    "heat_pump_compressor_type": "variable speed"
+  },
+  "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml",
+    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
+  },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-integrated.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_backup_type": "integrated",
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-stove.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_backup_type": "separate",
     "heating_system_2_type": "Stove",
     "heating_system_2_fuel": "fuel oil",
@@ -2692,7 +2718,7 @@
     "heating_system_2_heating_capacity": 60000
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "geothermal_loop_configuration": "vertical",
     "geothermal_loop_borefield_configuration": "Lopsided U",
     "geothermal_loop_loop_flow": 10.0,
@@ -2707,14 +2733,14 @@
     "site_soil_and_moisture_type": "sand, dry"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-cooling-only.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_capacity": 0,
     "heat_pump_fraction_heat_load_served": 0,
     "heat_pump_backup_type": "none",
     "heat_pump_backup_heating_efficiency": 0
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-heating-only.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_cooling_capacity": 0,
     "heat_pump_fraction_cool_load_served": 0
   },
@@ -2768,8 +2794,20 @@
     "heating_system_airflow_defect_ratio": -0.25,
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
-  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-1-speed.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
+    "heat_pump_airflow_defect_ratio": -0.25,
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
+  },
+  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-2-speed-experimental.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml",
+    "heat_pump_airflow_defect_ratio": -0.25,
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
+  },
+  "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-var-speed-experimental.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
     "heat_pump_charge_defect_ratio": -0.25,
     "hvac_blower_fan_watts_per_cfm": 0.365
@@ -3053,7 +3091,7 @@
     "cooling_system_integrated_heating_system_fraction_heat_load_served": 1
   },
   "sample_files/base-hvac-pthp.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_type": "packaged terminal heat pump",
     "heat_pump_cooling_efficiency": 11.4,
     "heat_pump_heating_capacity_fraction_17F": 0.6,

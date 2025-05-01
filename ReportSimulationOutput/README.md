@@ -393,7 +393,7 @@ Determines whether timeseries timestamps use the start-of-period or end-of-perio
 
 **Generate Timeseries Output: Number of Decimal Places**
 
-Allows overriding the default number of decimal places for timeseries output.
+Allows overriding the default number of decimal places for timeseries outputs.
 
 - **Name:** ``timeseries_num_decimal_places``
 - **Type:** ``Integer``
