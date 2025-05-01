@@ -248,8 +248,7 @@
       <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:LeakinessDescription]) = 1'>Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/AirLeakage | EffectiveLeakageArea | LeakinessDescription]</sch:assert> <!-- See [AirInfiltrationMeasurement] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Roofs/h:Roof) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Roofs/Roof</sch:assert> <!-- See [Roof] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:RimJoists/h:RimJoist) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/RimJoists/RimJoist</sch:assert> <!-- See [RimJoist] -->
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:Walls/h:Wall) &gt;= 1'>Expected 1 or more element(s) for xpath: Enclosure/Walls/Wall</sch:assert> <!-- See [Wall] -->
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:FoundationWalls/h:FoundationWall) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/FoundationWalls/FoundationWall</sch:assert> <!-- See [FoundationWall] -->
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:Walls/h:Wall) + count(h:Enclosure/h:FoundationWalls/h:FoundationWall) &gt;= 1'>Expected 1 or more element(s) for xpath: Enclosure/Walls/Wall | Enclosure/FoundationWalls/FoundationWall</sch:assert> <!-- See [Wall] or [FoundationWall] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Floors/h:Floor) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Floors/Floor</sch:assert> <!-- See [Floor] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Slabs/h:Slab) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Slabs/Slab</sch:assert> <!-- See [Slab] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Windows/h:Window) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Windows/Window</sch:assert> <!-- See [Window] -->
@@ -834,7 +833,7 @@
       <sch:assert role='ERROR' test='number(h:extension/h:CarpetFraction) &lt;= 1 or not(h:extension/h:CarpetFraction)'>Expected extension/CarpetFraction to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:CarpetRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/CarpetRValue</sch:assert>
       <!-- Warnings -->
-      <sch:report role='WARN' test='number(h:ExposedPerimeter) = 0'>Slab has zero exposed perimeter, this may indicate an input error.</sch:report>
+      <sch:report role='WARN' test='number(h:ExposedPerimeter) = 0'>Slab has zero exposed perimeter which is very uncommon, this may indicate an input error.</sch:report>
       <sch:report role='WARN' test='number(h:ExposedPerimeter) &gt; 2*number(h:Area)'>Slab exposed perimeter is more than twice the slab area, this may indicate an input error.</sch:report>
       <sch:report role='WARN' test='number(h:Thickness) &lt; 1 and number(h:Thickness) &gt; 0'>Thickness is less than 1 inch; this may indicate incorrect units.</sch:report>
       <sch:report role='WARN' test='number(h:Thickness) &gt; 12'>Thickness is greater than 12 inches; this may indicate incorrect units.</sch:report>
@@ -2959,18 +2958,10 @@
 
   <sch:pattern>
     <sch:title>[AdjacentSurfaces=ConditionedSpace]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure[*/*[h:InteriorAdjacentTo="conditioned space"]]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure[*/*[contains(h:InteriorAdjacentTo, "conditioned")]]'>
       <sch:assert role='ERROR' test='count(h:Roofs/h:Roof[contains(h:InteriorAdjacentTo, "conditioned")]) + count(h:Floors/h:Floor[contains(h:InteriorAdjacentTo, "conditioned") and (h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]) &gt;= 1'>There must be at least one ceiling or roof adjacent to conditioned space.</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Walls/h:Wall[contains(h:InteriorAdjacentTo, "conditioned") and h:ExteriorAdjacentTo="outside"]) &gt;= 1'>There must be at least one exterior wall adjacent to conditioned space.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Walls/h:Wall[contains(h:InteriorAdjacentTo, "conditioned") and h:ExteriorAdjacentTo="outside"]) + count(h:FoundationWalls/h:FoundationWall[contains(h:InteriorAdjacentTo, "conditioned") and h:ExteriorAdjacentTo="ground"]) &gt;= 1'>There must be at least one exterior wall or foundation wall adjacent to conditioned space.</sch:assert>
       <sch:assert role='ERROR' test='count(h:Slabs/h:Slab[contains(h:InteriorAdjacentTo, "conditioned")]) + count(h:Floors/h:Floor[contains(h:InteriorAdjacentTo, "conditioned") and not(h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]) &gt;= 1'>There must be at least one floor or slab adjacent to conditioned space.</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[AdjacentSurfaces=ConditionedBasement]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure[*/*[h:InteriorAdjacentTo="basement - conditioned" or h:ExteriorAdjacentTo="basement - conditioned"]]'>
-      <sch:assert role='ERROR' test='count(h:FoundationWalls/h:FoundationWall[h:InteriorAdjacentTo="basement - conditioned" and h:ExteriorAdjacentTo="ground"]) + count(h:Walls/h:Wall[h:InteriorAdjacentTo="basement - conditioned" and h:ExteriorAdjacentTo="outside"]) &gt;= 1'>There must be at least one exterior wall or foundation wall adjacent to "basement - conditioned".</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Slabs/h:Slab[h:InteriorAdjacentTo="basement - conditioned"]) &gt;= 1'>There must be at least one slab adjacent to "basement - conditioned".</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -3002,14 +2993,6 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[AdjacentSurfaces=ConditionedCrawlspace]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure[*/*[h:InteriorAdjacentTo="crawlspace - conditioned" or h:ExteriorAdjacentTo="crawlspace - conditioned"]]'>
-      <sch:assert role='ERROR' test='count(h:FoundationWalls/h:FoundationWall[h:InteriorAdjacentTo="crawlspace - conditioned" and h:ExteriorAdjacentTo="ground"]) + count(h:Walls/h:Wall[h:InteriorAdjacentTo="crawlspace - conditioned" and h:ExteriorAdjacentTo="outside"]) &gt;= 1'>There must be at least one exterior wall or foundation wall adjacent to "crawlspace - conditioned".</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Slabs/h:Slab[h:InteriorAdjacentTo="crawlspace - conditioned"]) &gt;= 1'>There must be at least one slab adjacent to "crawlspace - conditioned".</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
     <sch:title>[AdjacentSurfaces=Garage]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure[*/*[h:InteriorAdjacentTo="garage" or h:ExteriorAdjacentTo="garage"]]'>
       <sch:assert role='ERROR' test='count(h:Roofs/h:Roof[h:InteriorAdjacentTo="garage"]) + count(h:Floors/h:Floor[h:InteriorAdjacentTo="garage" or h:ExteriorAdjacentTo="garage"]) &gt;= 1'>There must be at least one roof or ceiling adjacent to "garage".</sch:assert>
@@ -3037,9 +3020,9 @@
   <!-- Rules below check that the specified appliance, water heater, HVAC, or duct location exists in the building -->
 
   <sch:pattern>
-    <sch:title>[LocationCheck=ConditionedBasement]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Appliances/*[h:Location="basement - conditioned"] | h:Systems/*/*[h:Location="basement - conditioned"] | h:Systems/*/*/*[h:UnitLocation="basement - conditioned"] | h:Systems/*/*/*/*/*[h:DuctLocation="basement - conditioned"]]'>
-      <sch:assert role='ERROR' test='count(h:Enclosure/*/*[h:InteriorAdjacentTo="basement - conditioned" or h:ExteriorAdjacentTo="basement - conditioned"]) &gt;= 1'>A location is specified as "basement - conditioned" but no surfaces were found adjacent to this space type.</sch:assert>
+    <sch:title>[LocationCheck=ConditionedSpace]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Appliances/*[contains(h:Location, "conditioned")] | h:Systems/*/*[contains(h:Location, "conditioned")] | h:Systems/*/*/*[contains(h:UnitLocation, "conditioned")] | h:Systems/*/*/*/*/*[contains(h:DuctLocation, "conditioned")]]'>
+      <sch:assert role='ERROR' test='count(h:Enclosure/*/*[contains(h:InteriorAdjacentTo, "conditioned") or contains(h:ExteriorAdjacentTo, "conditioned")]) &gt;= 1'>A location is specified as conditioned space but no surfaces were found adjacent to this space type.</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -3061,13 +3044,6 @@
     <sch:title>[LocationCheck=UnventedCrawlspace]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Appliances/*[h:Location="crawlspace - unvented"] | h:Systems/*/*[h:Location="crawlspace - unvented"] | h:Systems/*/*/*[h:UnitLocation="crawlspace - unvented"] | h:Systems/*/*/*/*/*[h:DuctLocation="crawlspace - unvented"]]'>
       <sch:assert role='ERROR' test='count(h:Enclosure/*/*[h:InteriorAdjacentTo="crawlspace - unvented" or h:ExteriorAdjacentTo="crawlspace - unvented"]) &gt;= 1'>A location is specified as "crawlspace - unvented" but no surfaces were found adjacent to this space type.</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[LocationCheck=ConditionedCrawlspace]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Appliances/*[h:Location="crawlspace - conditioned"] | h:Systems/*/*[h:Location="crawlspace - conditioned"] | h:Systems/*/*/*[h:UnitLocation="crawlspace - conditioned"] | h:Systems/*/*/*/*/*[h:DuctLocation="crawlspace - conditioned"]]'>
-      <sch:assert role='ERROR' test='count(h:Enclosure/*/*[h:InteriorAdjacentTo="crawlspace - conditioned" or h:ExteriorAdjacentTo="crawlspace - conditioned"]) &gt;= 1'>A location is specified as "crawlspace - conditioned" but no surfaces were found adjacent to this space type.</sch:assert>
     </sch:rule>
   </sch:pattern>
 
