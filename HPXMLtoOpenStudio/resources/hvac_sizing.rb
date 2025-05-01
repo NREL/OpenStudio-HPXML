@@ -3055,12 +3055,13 @@ module HVACSizing
         cool_airflow_rated_defect_ratio = 1 + cool_airflow_defect_ratio
       end
 
-      # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
+      # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults
       a1_AF_Qgr_c = clg_ap.cool_cap_fflow_spec[0]
       a2_AF_Qgr_c = clg_ap.cool_cap_fflow_spec[1]
       a3_AF_Qgr_c = clg_ap.cool_cap_fflow_spec[2]
 
-      qgr_values, _p_values, ff_chg_values = HVAC.get_charge_fault_cooling_coeff(f_ch)
+      qgr_values = clg_ap.cool_qgr_values
+      ff_chg_values = clg_ap.cool_ff_chg_values
 
       a1_CH_Qgr_c = qgr_values[0]
       a2_CH_Qgr_c = qgr_values[1]
@@ -3073,7 +3074,7 @@ module HVACSizing
       q3_CH = a4_CH_Qgr_c * f_ch
       y_CH_Q_c = 1 + ((q0_CH + q1_CH + q2_CH + q3_CH) * f_ch)
 
-      ff_ch_c = (1.0 / (1.0 + (qgr_values[0] + (qgr_values[1] * ff_chg_values[0]) + (qgr_values[2] * ff_chg_values[1]) + (qgr_values[3] * f_ch)) * f_ch)).round(3)
+      ff_ch_c = (1.0 / (1.0 + (a1_CH_Qgr_c + (a2_CH_Qgr_c * ff_chg_values[0]) + (a3_CH_Qgr_c * ff_chg_values[1]) + (a4_CH_Qgr_c * f_ch)) * f_ch)).round(3)
       ff_AF_c = cool_airflow_rated_defect_ratio.round(3)
       ff_AF_comb_c = ff_ch_c * ff_AF_c
 
@@ -3121,7 +3122,8 @@ module HVACSizing
       a2_AF_Qgr_h = htg_ap.heat_cap_fflow_spec[1]
       a3_AF_Qgr_h = htg_ap.heat_cap_fflow_spec[2]
 
-      qgr_values, _p_values, ff_chg_values = HVAC.get_charge_fault_heating_coeff(f_ch)
+      qgr_values = htg_ap.heat_qgr_values
+      ff_chg_values = htg_ap.heat_ff_chg_values
 
       a1_CH_Qgr_h = qgr_values[0]
       a2_CH_Qgr_h = qgr_values[2]
@@ -3132,7 +3134,7 @@ module HVACSizing
       qh3_CH = a3_CH_Qgr_h * f_ch
       y_CH_Q_h = 1 + ((qh1_CH + qh2_CH + qh3_CH) * f_ch)
 
-      ff_ch_h = (1 / (1 + (qgr_values[0] + qgr_values[2] * ff_chg_values[1] + qgr_values[3] * f_ch) * f_ch)).round(3)
+      ff_ch_h = (1 / (1 + (a1_CH_Qgr_h + a2_CH_Qgr_h * ff_chg_values[1] + a3_CH_Qgr_h * f_ch) * f_ch)).round(3)
       ff_AF_h = heat_airflow_rated_defect_ratio.round(3)
       ff_AF_comb_h = ff_ch_h * ff_AF_h
 

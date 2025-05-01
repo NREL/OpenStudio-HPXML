@@ -4157,38 +4157,6 @@ module HVAC
 
   # TODO
   #
-  # @param f_chg [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_charge_fault_cooling_coeff(f_chg)
-    if f_chg <= 0
-      qgr_values = [-9.46E-01, 4.93E-02, -1.18E-03, -1.15E+00]
-      p_values = [-3.13E-01, 1.15E-02, 2.66E-03, -1.16E-01]
-    else
-      qgr_values = [-1.63E-01, 1.14E-02, -2.10E-04, -1.40E-01]
-      p_values = [2.19E-01, -5.01E-03, 9.89E-04, 2.84E-01]
-    end
-    ff_chg_values = [26.67, 35.0]
-    return qgr_values, p_values, ff_chg_values
-  end
-
-  # TODO
-  #
-  # @param f_chg [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_charge_fault_heating_coeff(f_chg)
-    if f_chg <= 0
-      qgr_values = [-0.0338595, 0.0, 0.0202827, -2.6226343] # Add a zero term to combine cooling and heating calculation
-      p_values = [0.0615649, 0.0, 0.0044554, -0.2598507] # Add a zero term to combine cooling and heating calculation
-    else
-      qgr_values = [-0.0029514, 0.0, 0.0007379, -0.0064112] # Add a zero term to combine cooling and heating calculation
-      p_values = [-0.0594134, 0.0, 0.0159205, 1.8872153] # Add a zero term to combine cooling and heating calculation
-    end
-    ff_chg_values = [0.0, 8.33] # Add a zero term to combine cooling and heating calculation
-    return qgr_values, p_values, ff_chg_values
-  end
-
-  # TODO
-  #
   # @param fault_program [TODO] TODO
   # @param tin_sensor [TODO] TODO
   # @param tout_sensor [TODO] TODO
@@ -4292,18 +4260,26 @@ module HVAC
 
     # Apply Cutler curve airflow coefficients to later equations
     if mode == :clg
-      qgr_values, p_values, ff_chg_values = get_charge_fault_cooling_coeff(f_chg)
+      cap_fflow_spec = hvac_ap.cool_cap_fflow_spec
+      eir_fflow_spec = hvac_ap.cool_eir_fflow_spec
+      qgr_values = hvac_ap.cool_qgr_values
+      p_values = hvac_ap.cool_p_values
+      ff_chg_values = hvac_ap.cool_ff_chg_values
       suffix = 'clg'
     elsif mode == :htg
-      qgr_values, p_values, ff_chg_values = get_charge_fault_heating_coeff(f_chg)
+      cap_fflow_spec = hvac_ap.heat_cap_fflow_spec
+      eir_fflow_spec = hvac_ap.heat_eir_fflow_spec
+      qgr_values = hvac_ap.heat_qgr_values
+      p_values = hvac_ap.heat_p_values
+      ff_chg_values = hvac_ap.heat_ff_chg_values
       suffix = 'htg'
     end
-    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{hvac_ap.cool_cap_fflow_spec[0]}")
-    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{hvac_ap.cool_cap_fflow_spec[1]}")
-    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{hvac_ap.cool_cap_fflow_spec[2]}")
-    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{hvac_ap.cool_eir_fflow_spec[0]}")
-    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{hvac_ap.cool_eir_fflow_spec[1]}")
-    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{hvac_ap.cool_eir_fflow_spec[2]}")
+    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{cap_fflow_spec[0]}")
+    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{cap_fflow_spec[1]}")
+    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{cap_fflow_spec[2]}")
+    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{eir_fflow_spec[0]}")
+    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{eir_fflow_spec[1]}")
+    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{eir_fflow_spec[2]}")
 
     # charge fault coefficients
     fault_program.addLine("Set a1_CH_Qgr_#{suffix} = #{qgr_values[0]}")
