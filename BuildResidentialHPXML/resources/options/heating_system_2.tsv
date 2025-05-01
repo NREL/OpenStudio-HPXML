@@ -34,8 +34,8 @@ Electric Resistance	ElectricResistance	1
 "Boiler, 85% AFUE"	Boiler	0.85		
 "Boiler, 90% AFUE"	Boiler	0.9		
 "Boiler, 92% AFUE"	Boiler	0.92		
-"Boiler, 92.5% AFUE"	Boiler	0.925		
 "Boiler, 92% AFUE, Pilot Light"	Boiler	0.92	600	
+"Boiler, 92.5% AFUE"	Boiler	0.925		
 "Boiler, 95% AFUE"	Boiler	0.95		
 "Boiler, 96% AFUE"	Boiler	0.96		
 "Boiler, 98% AFUE"	Boiler	0.98		
@@ -58,3 +58,8 @@ Electric Resistance	ElectricResistance	1
 "Fireplace, 70% Efficiency"	Fireplace	0.7		
 "Fireplace, 80% Efficiency"	Fireplace	0.8		
 "Fireplace, 100% Efficiency"	Fireplace	1		
+				
+Type: The type of system.				
+Heating Efficiency: The rated heating efficiency.				
+"Pilot Light: The fuel usage of the pilot light. Applies to Furnaces, Boilers, Stoves, and Fireplaces with non-electric fuel. If not provided, assumes no pilot light."				
+"Airflow Defect Ratio: The airflow defect ratio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies to Central Furnaces. If not provided, assumes no defect."				

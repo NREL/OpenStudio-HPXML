@@ -1051,7 +1051,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage', air_leakage_choices, false)
     arg.setDisplayName('Air Leakage')
-    arg.setDescription('The Leakiness Description (qualitative), or numeric air leakage value (ACH or CFM at specified pressure, nACH or nCFM, or ELA.')
+    arg.setDescription('The Leakiness Description (qualitative), or numeric air leakage value (ACH or CFM at specified pressure, nACH or nCFM, or ELA). When a leakiness description is used, the Year Built of the home is also required.')
     args << arg
 
     air_leakage_type_choices = OpenStudio::StringVector.new
@@ -4173,8 +4173,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @return [nil]
   def set_site(hpxml_bldg, args)
     hpxml_bldg.site.shielding_of_home = args[:site_shielding_of_home]
-    hpxml_bldg.site.ground_conductivity = args[:site_soil_type_ground_conductivity]
-    hpxml_bldg.site.ground_diffusivity = args[:site_soil_type_ground_diffusivity]
+    hpxml_bldg.site.ground_conductivity = args[:site_soil_type_conductivity]
+    hpxml_bldg.site.ground_diffusivity = args[:site_soil_type_diffusivity]
     hpxml_bldg.site.soil_type = args[:site_soil_type_soil_type]
     hpxml_bldg.site.moisture_type = args[:site_soil_type_moisture_type]
 

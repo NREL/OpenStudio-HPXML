@@ -5,6 +5,7 @@ require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require_relative '../measure.rb'
+require_relative '../resources/options.rb'
 require 'fileutils'
 
 class BuildResidentialHPXMLTest < Minitest::Test
@@ -378,6 +379,45 @@ class BuildResidentialHPXMLTest < Minitest::Test
     assert_equal(1, hvac_control.seasons_cooling_begin_day)
     assert_equal(10, hvac_control.seasons_cooling_end_month)
     assert_equal(31, hvac_control.seasons_cooling_end_day)
+  end
+
+  def test_option_tsv
+    num_tsvs = 0
+    Dir["#{File.dirname(__FILE__)}/../resources/options/*.tsv"].each do |tsv_path|
+      tsv_name = File.basename(tsv_path)
+      puts "Checking #{tsv_name}..."
+
+      # Check we can retrieve option names
+      option_names = get_option_names(tsv_name)
+      puts "  Number of options: #{option_names.size}"
+      assert_operator(option_names.size, :>, 0)
+
+      # Check we can retrieve properties for each option
+      option_names.each_with_index do |option_name, i|
+        args = {}
+        get_option_properties(args, tsv_name, option_name)
+        puts "  Number of properties: #{args.size}" if i == 0
+        assert_operator(args.size, :>, 0)
+      end
+
+      # Check that every property has a description at the end of the file
+      tsv_contents = File.readlines(tsv_path).map(&:strip)
+      property_names = []
+      tsv_contents[0].split("\t")[1..-1].each do |property_name|
+        if property_name.include? '[' # strip units
+          property_name = property_name[0..property_name.index('[') - 1].strip
+        end
+        property_names << property_name
+      end
+      assert_operator(property_names.size, :>, 0)
+      property_names.each do |property_name|
+        puts "  Checking for property description for '#{property_name}'..."
+        assert_equal(1, tsv_contents.select { |tsv_row| tsv_row.gsub('"', '').start_with?("#{property_name}: ") }.size)
+      end
+
+      num_tsvs += 1
+    end
+    assert_operator(num_tsvs, :>, 0)
   end
 
   private

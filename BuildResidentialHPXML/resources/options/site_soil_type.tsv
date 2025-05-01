@@ -1,4 +1,4 @@
-Option Name	Soil Type	Moisture Type	Ground Conductivity [Btu/hr-ft-F]	Ground Diffusivity [ft^2/hr]
+Option Name	Soil Type	Moisture Type	Conductivity [Btu/hr-ft-F]	Diffusivity [ft^2/hr]
 Unknown	unknown	mixed		
 "Clay, Dry"	clay	dry		
 "Clay, Mixed"	clay	mixed		
@@ -24,3 +24,8 @@ Unknown	unknown	mixed
 2.0 Conductivity			2	
 2.3 Conductivity			2.3	
 2.6 Conductivity			2.6	
+				
+Soil Type: The soil type.				
+Moisture Type: The soil moisture type.				
+Conductivity: The soil thermal conductivity.				
+Diffusivity: The soil thermal diffusivity.				

@@ -44,3 +44,8 @@ Cool Roof	cool roof	reflective
 0.4 Solar Absorptance			0.4	0.9
 0.6 Solar Absorptance			0.6	0.9
 0.75 Solar Absorptance			0.75	0.9
+				
+Type: The type of roof material.				
+Color: The color of the roof.				
+Solar Absorptance: The solar absorptance of the outermost roof material.				
+Emittance: The emittance of the outermost roof material.				

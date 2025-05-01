@@ -8,6 +8,8 @@ def get_option_names(tsv_file_name)
   csv_data = get_csv_data_for_tsv_file(tsv_file_name)
   option_names = OpenStudio::StringVector.new
   csv_data.map { |row| row['Option Name'] }.each do |option_name|
+    break if option_name.nil?
+
     option_names << option_name
   end
   return option_names

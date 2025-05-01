@@ -68,3 +68,10 @@ None	Percent	0	0
 "25 CFM25 Leakage to Outside, Uninsulated"	CFM25	25	0			
 "125 CFM25 Leakage to Outside, R-6, 77 sq. ft."	CFM25	125	6		77	
 "125 CFM50 Leakage to Outside, Uninsulated, 50 sq. ft."	CFM50	125	0		50	
+						
+Leakage Units: The units for the duct leakage.						
+Leakage to Outside Value: The leakage to outside value.						
+Insulation R: The nominal insulation r-value of the ducts excluding air films. Use 0 for uninsulated ducts.						
+"Buried Insulation Level: Whether the ducts are buried in, e.g., attic loose-fill insulation. Use 'partially buried' if the insulation does not cover the top of the ducts. Use 'fully buried' if the insulation just covers the top of the ducts. Use 'deeply buried' if the insulation continues above the top of the ducts."						
+"Surface Area: The duct surface area, if known, in the given location."						
+Fraction Rectangular: The fraction of ducts that are rectangular (as opposed to round) if known. This affects the duct effective R-value used for modeling.						

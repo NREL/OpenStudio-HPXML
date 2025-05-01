@@ -68,3 +68,28 @@ None	none
 "Geothermal HP, EER 20.5, COP 4.0"	ground-to-air	EER	20.5		COP	4																		
 "Packaged Terminal HP, EER 11.4, COP 3.6"	packaged terminal heat pump	EER	11.4		COP	3.6	0.6	17																
 "Room AC w/ Reverse Cycle, EER 11.4, COP 3.6"	room air conditioner with reverse cycle	EER	11.4		COP	3.6	0.6	17																
+																								
+Type: The type of system.																								
+"Cooling Efficiency Type: The cooling efficiency type. Central HPs and Mini-Split HPs use SEER2 or SEER; Geothermal HPs, Packaged Terminal HPs, and Room HPs use EER."																								
+Cooling Efficiency: The rated cooling efficiency.																								
+"Cooling Compressor Type: The compressor type of the cooling system. Applies to Central HPs, Mini-Split HPs, and Geothermal HPs."																								
+"Heating Efficiency Type: The heating efficiency type. Central HPs and Mini-Split HPs use HSPF2 or HSPF; Goethermal HPs, Packaged Terminal HPs, and Room HPs use COP."																								
+Heating Efficiency: The rated heating efficiency.																								
+"Heating Capacity Retention Fraction: The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the nominal heating capacity. Applies to all heat pump types except Geothermal HPs."																								
+"Heating Capacity Retention Temp: The corresponding user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction."																								
+"Compressor Lockout Temp: The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than Geothermal HPs."																								
+"Is Ducted: Whether the system is ducted or not. Only used for Mini-Split HPs. It's assumed that Central HPs and Geothermal HPs are ducted, and Packaged Terminal HPs and Room HPs are not ducted."																								
+"Airflow Defect Ratio: The airflow defect ratio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies to Central HPs, ducted Mini-Split HPs, and Geothermal HPs. If not provided, assumes no defect."																								
+"Charge Defect Ratio: The refrigerant charge defect ratio is defined as (InstalledCharge - DesignCharge) / DesignCharge per ANSI/RESNET/ACCA Standard 310. Applies to all heat pump types. If not provided, assumes no defect."																								
+"Crankcase Heater Watts: Crankcase heater power consumption. Applies to Central HPs, Mini-Split HPs, Room HPs, and Packaged Terminal HPs."																								
+Detailed Performance Data Capacity Type: Type of capacity values when providing detailed performance data. Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Heating Outdoor Temperatures: List of outdoor temperatures when providing heating detailed performance data. Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Heating Min Speed Capacities: Minimum speed capacities when providing detailed heating performance data.  Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Heating Max Speed Capacities: Maximum speed capacities when providing detailed heating performance data.  Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Heating Min Speed COPs: Minimum speed COPs when providing detailed heating performance data.  Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Heating Max Speed COPs: Maximum speed COPs when providing detailed heating performance data.  Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Cooling Outdoor Temperatures: List of outdoor temperatures when providing cooling detailed performance data. Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Cooling Min Speed Capacities: Minimum speed capacities when providing detailed cooling performance data.  Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Cooling Max Speed Capacities: Maximum speed capacities when providing detailed cooling performance data.  Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Cooling Min Speed COPs: Minimum speed COPs when providing detailed cooling performance data.  Applies to Central HPs and Mini-Split HPs.																								
+Detailed Performance Data Cooling Max Speed COPs: Maximum speed COPs when providing detailed cooling performance data.  Applies to Central HPs and Mini-Split HPs.																								
