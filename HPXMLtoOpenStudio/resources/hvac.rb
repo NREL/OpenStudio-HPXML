@@ -4514,15 +4514,15 @@ module HVAC
 
     # Apply Cutler curve airflow coefficients to later equations
     if mode == :clg
-      cap_fflow_spec = (hvac_ap.respond_to? :cool_cap_fflow_spec_iq) ? hvac_ap.cool_cap_fflow_spec_iq : hvac_ap.cool_cap_fflow_spec
-      eir_fflow_spec = (hvac_ap.respond_to? :cool_eir_fflow_spec_iq) ? hvac_ap.cool_eir_fflow_spec_iq : hvac_ap.cool_eir_fflow_spec
+      cap_fflow_spec = hvac_ap.cool_cap_fflow_spec_iq
+      eir_fflow_spec = hvac_ap.cool_eir_fflow_spec_iq
       qgr_values = hvac_ap.cool_qgr_values
       p_values = hvac_ap.cool_p_values
       ff_chg_values = hvac_ap.cool_ff_chg_values
       suffix = 'clg'
     elsif mode == :htg
-      cap_fflow_spec = (hvac_ap.respond_to? :heat_cap_fflow_spec_iq) ? hvac_ap.heat_cap_fflow_spec_iq : hvac_ap.heat_cap_fflow_spec
-      eir_fflow_spec = (hvac_ap.respond_to? :heat_eir_fflow_spec_iq) ? hvac_ap.heat_eir_fflow_spec_iq : hvac_ap.heat_eir_fflow_spec
+      cap_fflow_spec = hvac_ap.heat_cap_fflow_spec_iq
+      eir_fflow_spec = hvac_ap.heat_eir_fflow_spec_iq
       qgr_values = hvac_ap.heat_qgr_values
       p_values = hvac_ap.heat_p_values
       ff_chg_values = hvac_ap.heat_ff_chg_values

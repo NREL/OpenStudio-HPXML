@@ -3067,7 +3067,7 @@ module HVACSizing
       end
 
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults
-      cool_cap_fflow_spec = (clg_ap.respond_to? :cool_cap_fflow_spec_iq) ? clg_ap.cool_cap_fflow_spec_iq : clg_ap.cool_cap_fflow_spec
+      cool_cap_fflow_spec = clg_ap.cool_cap_fflow_spec_iq
       a1_AF_Qgr_c = cool_cap_fflow_spec[0]
       a2_AF_Qgr_c = cool_cap_fflow_spec[1]
       a3_AF_Qgr_c = cool_cap_fflow_spec[2]
@@ -3130,7 +3130,7 @@ module HVACSizing
         heat_airflow_rated_defect_ratio = 1 + heat_airflow_defect_ratio
       end
 
-      heat_cap_fflow_spec = (htg_ap.respond_to? :heat_cap_fflow_spec_iq) ? htg_ap.heat_cap_fflow_spec_iq : htg_ap.heat_cap_fflow_spec
+      heat_cap_fflow_spec = htg_ap.heat_cap_fflow_spec_iq
       a1_AF_Qgr_h = heat_cap_fflow_spec[0]
       a2_AF_Qgr_h = heat_cap_fflow_spec[1]
       a3_AF_Qgr_h = heat_cap_fflow_spec[2]
