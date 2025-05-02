@@ -7,7 +7,7 @@ __New Features__
   - Optional input `SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType` to choose "standard" (default) or "experimental"; "experimental" ground-to-air heat pump model better accounts for coil staging.
   - Updated DX heat pump and air conditioner models per RESNET MINHERS Addendum 82.
   - Allows optional pan heater inputs (`PanHeaterPowerWatts` and `PanHeaterControlType`) for central and mini-split heat pumps; defaults to assuming a pan heater is present.
-  - Allows optional EER2 or EER inputs (`AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value`) for central and mini-split air conditioners and heat pumps.
+  - Allows optional EER2/EER inputs (`AnnualCoolingEfficiency[Units="EER2" or Units="EER"]/Value`) for central and mini-split air conditioners and heat pumps.
   - Deprecates SHR inputs (e.g., `CoolingSensibleHeatFraction`); they are no longer used.
   - Allows optional `extension/FanMotorType` input for central equipment; updates `FanPowerWattsPerCFM` defaults to be based on fan motor type.
   - Allows optional `extension/EquipmentType` inputs for central air conditioners and heat pumps; only used for SEER/SEER2, EER/EER2, and HSPF/HSPF2 conversions.
