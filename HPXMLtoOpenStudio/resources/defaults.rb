@@ -6256,7 +6256,8 @@ module Defaults
   # Calculate the GHP gross rated heating/cooling cops based on COP ratios from spec sheets
   #
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @param cop_ratios [Array<Double>] Heating or cooling COP ratios
+  # @param cop_ratios [Array<Double>] Heating or cooling COP ratios for each speed
+  # @param mode [Symbol] Heating or cooling
   # @return [nil]
   def self.set_gross_rated_cops_ghp(heat_pump, cop_ratios, mode)
     hp_ap = heat_pump.additional_properties
@@ -6313,14 +6314,16 @@ module Defaults
       clg_ap.cool_p_values = [2.19E-01, -5.01E-03, 9.89E-04, 2.84E-01]
     end
     clg_ap.cool_ff_chg_values = [26.67, 35.0]
+
+    # Coefficients for HVAC installation quality per RESNET MINHERS Addendum 82
     clg_ap.cool_cap_fflow_spec_iq = [0.718664047, 0.41797409, -0.136638137]
     clg_ap.cool_eir_fflow_spec_iq = [1.143487507, -0.13943972, -0.004047787]
 
     if cooling_system.is_a?(HPXML::HeatPump) && cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      # Need a separate set of coefficients for installation quality
       # Based on RESNET MINHERS Addendum 82
       clg_ap.cool_rated_shr_gross = 0.708
       clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+
       case hpxml_header.ground_to_air_heat_pump_model_type
       when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
         clg_ap.cool_capacity_ratios = [1.0]
@@ -6508,7 +6511,6 @@ module Defaults
 
     htg_ap = heating_system.additional_properties
 
-
     # Refrigerant charge fault coefficients per ANSI/RESNET 301-2022 Tables 4.2.2.4(2) and 4.2.2.4(6)
     # Note: We added a zero term to make cooling and heating calculations consistent
     if heating_system.charge_defect_ratio.to_f <= 0
@@ -6519,8 +6521,8 @@ module Defaults
       htg_ap.heat_p_values = [-5.94E-01, 0.0, 1.59E-02, 1.89E+00]
     end
     htg_ap.heat_ff_chg_values = [0.0, 8.33] # Add a zero term to combine cooling and heating calculation
-    # Based on RESNET MINHERS Addendum 82
-    # Coefficients used for installation quality program
+
+    # Coefficients for HVAC installation quality per RESNET MINHERS Addendum 82
     htg_ap.heat_cap_fflow_spec_iq = [0.694045465, 0.474207981, -0.168253446]
     htg_ap.heat_eir_fflow_spec_iq = [2.185418751, -1.942827919, 0.757409168]
 
