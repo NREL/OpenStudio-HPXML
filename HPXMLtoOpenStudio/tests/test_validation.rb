@@ -94,17 +94,16 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'emissions-electricity-schedule' => ['Expected NumberofHeaderRows to be greater than or equal to 0',
                                                                  'Expected ColumnNumber to be greater than or equal to 1'],
                             'enclosure-attic-missing-roof' => ['There must be at least one roof adjacent to "attic - unvented". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]], id: "MyBuilding"]'],
-                            'enclosure-basement-missing-exterior-foundation-wall' => ['There must be at least one exterior wall or foundation wall adjacent to "basement - unconditioned". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]], id: "MyBuilding"]'],
                             'enclosure-basement-missing-slab' => ['There must be at least one slab adjacent to "basement - unconditioned". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="basement - unconditioned"]], id: "MyBuilding"]'],
                             'enclosure-floor-area-exceeds-cfa' => ['Expected ConditionedFloorArea to be greater than or equal to the sum of conditioned slab/floor areas. [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]'],
                             'enclosure-floor-area-exceeds-cfa2' => ['Expected ConditionedFloorArea to be greater than or equal to the sum of conditioned slab/floor areas. [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]'],
                             'enclosure-garage-missing-exterior-wall' => ['There must be at least one exterior wall or foundation wall adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]], id: "MyBuilding"]'],
                             'enclosure-garage-missing-roof-ceiling' => ['There must be at least one roof or ceiling adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]], id: "MyBuilding"]'],
                             'enclosure-garage-missing-slab' => ['There must be at least one slab adjacent to "garage". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="garage" or ExteriorAdjacentTo="garage"]], id: "MyBuilding"]'],
-                            'enclosure-conditioned-missing-ceiling-roof' => ['There must be at least one ceiling or roof adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="conditioned space"]], id: "MyBuilding"]',
+                            'enclosure-conditioned-missing-ceiling-roof' => ['There must be at least one ceiling or roof adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[contains(InteriorAdjacentTo, "conditioned")]], id: "MyBuilding"]',
                                                                              'There must be at least one floor adjacent to "attic - unvented". [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - unvented"]], id: "MyBuilding"]'],
-                            'enclosure-conditioned-missing-exterior-wall' => ['There must be at least one exterior wall adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="conditioned space"]], id: "MyBuilding"]'],
-                            'enclosure-conditioned-missing-floor-slab' => ['There must be at least one floor or slab adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[InteriorAdjacentTo="conditioned space"]], id: "MyBuilding"]'],
+                            'enclosure-conditioned-missing-exterior-wall' => ['There must be at least one exterior wall or foundation wall adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[contains(InteriorAdjacentTo, "conditioned")]], id: "MyBuilding"]'],
+                            'enclosure-conditioned-missing-floor-slab' => ['There must be at least one floor or slab adjacent to conditioned space. [context: /HPXML/Building/BuildingDetails/Enclosure[*/*[contains(InteriorAdjacentTo, "conditioned")]], id: "MyBuilding"]'],
                             'frac-sensible-latent-fuel-load-values' => ['Expected extension/FracSensible to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"], id: "FuelLoad1"]',
                                                                         'Expected extension/FracLatent to be greater than or equal to 0 [context: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"], id: "FuelLoad1"]'],
                             'frac-sensible-latent-fuel-load-presence' => ['Expected 0 or 2 element(s) for xpath: extension/FracSensible | extension/FracLatent'],
@@ -374,8 +373,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         end
       when 'enclosure-conditioned-missing-exterior-wall'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.walls.reverse_each do |wall|
-          next unless wall.interior_adjacent_to == HPXML::LocationConditionedSpace
+        (hpxml_bldg.walls + hpxml_bldg.foundation_walls).reverse_each do |wall|
+          next unless HPXML::conditioned_locations.include?(wall.interior_adjacent_to)
 
           wall.delete
         end
@@ -910,7 +909,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'portable-spa' => ['Portable spa is not currently handled, the portable spa will not be modeled.'],
                               'slab-ext-horiz-insul-without-perim-insul' => ['There is ExteriorHorizontalInsulation but no PerimeterInsulation, this may indicate an input error.'],
                               'slab-large-exposed-perimeter' => ['Slab exposed perimeter is more than twice the slab area, this may indicate an input error.'],
-                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
+                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter which is very uncommon, this may indicate an input error.'],
                               'unit-multiplier' => ['NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'],
                               'vehicle-phev' => ["Vehicle type 'PlugInHybridElectricVehicle' is not currently handled, the vehicle will not be modeled."],
                               'window-exterior-shading-types' => ["Exterior shading type is 'external overhangs', but overhangs are explicitly defined; exterior shading type will be ignored.",

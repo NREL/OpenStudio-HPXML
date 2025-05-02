@@ -247,7 +247,7 @@ module HVACSizing
     mj.cool_design_temps = {}
     mj.heat_design_temps = {}
 
-    locations = []
+    locations = [HPXML::LocationOutside]
     hpxml_bldg.surfaces.each do |surface|
       locations << surface.interior_adjacent_to
       locations << surface.exterior_adjacent_to
