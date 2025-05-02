@@ -197,6 +197,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     end
     roof.emittance = 0.9
     roof.roof_color = nil
+    roof.roof_type = nil
   end
   (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
     if wall.color == HPXML::ColorReflective
@@ -206,6 +207,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     end
     wall.emittance = 0.9
     wall.color = nil
+    wall.siding = nil
     if wall.is_a?(HPXML::Wall)
       if wall.attic_wall_type == HPXML::AtticWallTypeGable
         wall.insulation_assembly_r_value = 2.15
@@ -303,8 +305,10 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
     surface.emittance = 0.9
     if surface.is_a? HPXML::Roof
       surface.roof_color = nil
+      surface.roof_type = nil
     else
       surface.color = nil
+      surface.siding = nil
     end
   end
 
@@ -1850,6 +1854,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 heat_pump_fuel: HPXML::FuelTypeElectricity,
                                 heating_capacity: 4800,
                                 cooling_capacity: 4800,
+                                compressor_type: HPXML::HVACCompressorTypeSingleStage,
                                 backup_type: HPXML::HeatPumpBackupTypeIntegrated,
                                 backup_heating_fuel: HPXML::FuelTypeElectricity,
                                 backup_heating_capacity: 3412,
