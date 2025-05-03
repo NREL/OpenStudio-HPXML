@@ -61,31 +61,13 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, run_measure
   success = report_ft_errors_warnings(forward_translator, rundir)
 
   # Remove unused objects automatically added by OpenStudio?
-  def is_unused_object(model_obj)
+  [model.alwaysOnContinuousSchedule,
+   model.alwaysOnDiscreteSchedule,
+   model.alwaysOffDiscreteSchedule].each do |sch|
     # Don't know why we need to check for AdditionalProperties too, but it works
-    if model_obj.sources.empty? || model_obj.sources.all? { |s| s.to_AdditionalProperties.is_initialized }
-      return true
+    if sch.directUseCount == 0 || sch.sources.all? { |s| s.to_AdditionalProperties.is_initialized }
+      workspace.getObjectByTypeAndName('Schedule:Constant'.to_IddObjectType, sch.name.to_s).get.remove
     end
-
-    return false
-  end
-  remove_objects = []
-  if is_unused_object(model.alwaysOnContinuousSchedule)
-    remove_objects << ['Schedule:Constant', model.alwaysOnContinuousSchedule.name.to_s]
-  end
-  if is_unused_object(model.alwaysOnDiscreteSchedule)
-    remove_objects << ['Schedule:Constant', model.alwaysOnDiscreteSchedule.name.to_s]
-  end
-  if is_unused_object(model.alwaysOffDiscreteSchedule)
-    remove_objects << ['Schedule:Constant', model.alwaysOffDiscreteSchedule.name.to_s]
-  end
-  model.getSchedules.each do |sch|
-    if is_unused_object(sch)
-      remove_objects << ['Schedule:Constant', sch.name.to_s]
-    end
-  end
-  remove_objects.uniq.each do |remove_object|
-    workspace.getObjectByTypeAndName(remove_object[0].to_IddObjectType, remove_object[1]).get.remove
   end
 
   if not success
