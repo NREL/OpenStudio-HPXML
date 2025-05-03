@@ -162,7 +162,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
-      return result
+      return false
     end
 
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
@@ -174,12 +174,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     if @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
       uses_unit_multipliers = @hpxml_buildings.count { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 } > 0
       if uses_unit_multipliers || (@hpxml_buildings.size > 1 && hpxml.header.whole_sfa_or_mf_building_sim)
-        return result
+        return false
       end
     end
 
     warnings = check_for_return_type_warnings()
-    return result if !warnings.empty?
+    return false if !warnings.empty?
 
     fuels = setup_fuel_outputs()
 

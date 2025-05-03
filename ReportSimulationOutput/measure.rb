@@ -355,7 +355,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # use the built-in error checking
     if !runner.validateUserArguments(arguments(model), user_arguments)
-      return result
+      return false
     end
 
     unmet_hours_program = model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetHoursProgram }
