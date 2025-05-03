@@ -23,6 +23,7 @@ __New Features__
 - Allows arbitrary columns to be present in a detailed schedule csv file with warning.
 
 __Bugfixes__
+- Fixes EPvalidator schematron file extension (.sch, not .xml).
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
 - Fixes using detailed schedules with higher resolution (e.g., 10-min data) than the simulation timestep (e.g., 60-min).
 - Fixes possible heating/cooling spikes when using maximum power ratio detailed schedule for variable-speed HVAC systems.
