@@ -657,16 +657,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The thickness of the slab. Zero can be entered if there is a dirt floor instead of a slab. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-slabs'>HPXML Slabs</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_carpet_fraction', false)
-    arg.setDisplayName('Slab: Carpet Fraction')
-    arg.setUnits('Frac')
-    arg.setDescription("Fraction of the slab floor area that is carpeted. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-slabs'>HPXML Slabs</a>) is used.")
-    args << arg
+    slab_carpet_choices = get_option_names('slab_carpet.tsv')
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_carpet_r', false)
-    arg.setDisplayName('Slab: Carpet R-value')
-    arg.setUnits('h-ft^2-R/Btu')
-    arg.setDescription("R-value of the slab carpet. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-slabs'>HPXML Slabs</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('slab_carpet', slab_carpet_choices, false)
+    arg.setDisplayName('Slab: Carpet')
+    arg.setDescription('The fraction of the slab floor area that is carpeted and the carpet R-value.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_assembly_r', true)
@@ -3224,6 +3219,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     get_option_properties(args, 'air_leakage.tsv', args[:air_leakage])
     get_option_properties(args, 'ducts_supply.tsv', args[:ducts_supply])
     get_option_properties(args, 'ducts_return.tsv', args[:ducts_return])
+    get_option_properties(args, 'slab_carpet.tsv', args[:slab_carpet])
 
     error = (args[:heating_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:heating_system_fraction_heat_load_served] > 0) && (args[:heat_pump_fraction_heat_load_served] > 0)
     errors << 'Multiple central heating systems are not currently supported.' if error

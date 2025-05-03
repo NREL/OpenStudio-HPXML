@@ -1098,29 +1098,16 @@ The thickness of the slab. Zero can be entered if there is a dirt floor instead 
 
 <br/>
 
-**Slab: Carpet Fraction**
+**Slab: Carpet**
 
-Fraction of the slab floor area that is carpeted. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-slabs'>HPXML Slabs</a>) is used.
+The fraction of the slab floor area that is carpeted and the carpet R-value.
 
-- **Name:** ``slab_carpet_fraction``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
+- **Name:** ``slab_carpet``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Slab: Carpet R-value**
-
-R-value of the slab carpet. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-slabs'>HPXML Slabs</a>) is used.
-
-- **Name:** ``slab_carpet_r``
-- **Type:** ``Double``
-
-- **Units:** ``h-ft^2-R/Btu``
-
-- **Required:** ``false``
+- **Choices:** `0% Carpet`, `20% Carpet`, `40% Carpet`, `60% Carpet`, `80% Carpet`, `100% Carpet`, `100% Carpet, R-2.08`, `100% Carpet, R-2.5`
 
 <br/>
 

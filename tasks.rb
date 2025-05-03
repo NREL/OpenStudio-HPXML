@@ -351,6 +351,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.building_construction.average_ceiling_height = nil
       hpxml_bldg.building_construction.conditioned_building_volume = nil
+      hpxml_bldg.slabs.each do |slab|
+        slab.carpet_fraction = nil
+      end
       hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
         duct.duct_surface_area = nil # removes surface area from both supply and return
       end
@@ -1662,8 +1665,15 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         duct.duct_surface_area = nil
       end
       hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2025.0
-    elsif ['base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml',
-           'base-residents-5-5.xml'].include? hpxml_file
+    elsif ['base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        duct.duct_surface_area = nil
+      end
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700.0
+    elsif ['base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.slabs.each do |slab|
+        slab.carpet_fraction = nil
+      end
       hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
         duct.duct_surface_area = nil
       end
