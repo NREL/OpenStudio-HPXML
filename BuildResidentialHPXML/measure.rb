@@ -127,6 +127,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for an improved model that better accounts for load and energy use during defrost; using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
+    ground_to_air_heat_pump_model_type_choices = OpenStudio::StringVector.new
+    ground_to_air_heat_pump_model_type_choices << HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
+    ground_to_air_heat_pump_model_type_choices << HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('simulation_control_ground_to_air_heat_pump_model_type', ground_to_air_heat_pump_model_type_choices, false)
+    arg.setDisplayName('Simulation Control: Ground-to-Air Heat Pump Model Type')
+    arg.setDescription("Research feature to select the type of ground-to-air heat pump model. Use #{HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard} for standard ground-to-air heat pump modeling. Use #{HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental} for an improved model that better accounts for coil staging. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_onoff_thermostat_deadband', false)
     arg.setDisplayName('Simulation Control: HVAC On-Off Thermostat Deadband')
     arg.setDescription('Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.')
@@ -1278,7 +1286,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_compressor_type', compressor_type_choices, false)
     arg.setDisplayName('Cooling System: Cooling Compressor Type')
-    arg.setDescription("The compressor type of the cooling system. Only applies to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.")
+    arg.setDescription("The compressor type of the cooling system. Only applies to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_sensible_heat_fraction', false)
@@ -1423,7 +1431,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_compressor_type', compressor_type_choices, false)
     arg.setDisplayName('Heat Pump: Cooling Compressor Type')
-    arg.setDescription("The compressor type of the heat pump. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.")
+    arg.setDescription("The compressor type of the heat pump. Only applies to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit} and #{HPXML::HVACTypeHeatPumpGroundToAir}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_sensible_heat_fraction', false)
@@ -2755,15 +2763,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
-    ev_charger_location_choices = OpenStudio::StringVector.new
-    ev_charger_location_choices << HPXML::LocationGarage
-    ev_charger_location_choices << HPXML::LocationOutside
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ev_charger_location', ev_charger_location_choices, false)
-    arg.setDisplayName('Electric Vehicle Charger: Location')
-    arg.setDescription("The space type for the EV charger. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
     arg.setDisplayName('Lighting: Present')
     arg.setDescription('Whether there is lighting energy use.')
@@ -3654,21 +3653,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    epw_path = args[:weather_station_epw_filepath]
-    if epw_path.nil?
-      # Get EPW path from zip code
-      epw_path = Defaults.lookup_weather_data_from_zipcode(args[:site_zip_code])[:station_filename]
-    end
-
-    # Create EpwFile object
-    if not File.exist? epw_path
-      epw_path = File.join(File.expand_path(File.join(File.dirname(__FILE__), '..', 'weather')), epw_path) # a filename was entered for weather_station_epw_filepath
-    end
-    if not File.exist? epw_path
-      runner.registerError("Could not find EPW file at '#{epw_path}'.")
-      return false
-    end
-
     # Create HPXML file
     hpxml_path = args[:hpxml_path]
     unless (Pathname.new hpxml_path).absolute?
@@ -3683,7 +3667,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    hpxml_doc = HPXMLFile.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
+    hpxml_doc = HPXMLFile.create(runner, model, args, hpxml_path, existing_hpxml_path)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
@@ -3792,7 +3776,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_num_floors_above_grade] == 1 && args[:geometry_attic_type] == HPXML::AtticTypeConditioned)
     errors << 'Units with a conditioned attic must have at least two above-grade floors.' if error
 
-    error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
+    error = [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include?(args[:water_heater_type]) && !args[:heating_system_type].include?(HPXML::HVACTypeBoiler)
     errors << 'Must specify a boiler when modeling an indirect water heater type.' if error
 
     error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:heating_system_type].include?('Shared')
@@ -3965,14 +3949,11 @@ module HPXMLFile
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_path [String] Path to the EPW weather file
   # @param hpxml_path [String] Path to the created HPXML file
   # @param existing_hpxml_path [String] Path to the existing HPXML file
   # @return [Oga::XML::Element] Root XML element of the updated HPXML document
-  def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
-    if need_weather_based_on_args(args)
-      weather = WeatherFile.new(epw_path: epw_path, runner: nil)
-    end
+  def self.create(runner, model, args, hpxml_path, existing_hpxml_path)
+    weather = get_weather_if_needed(args)
 
     success = create_geometry_envelope(runner, model, args)
     return false if not success
@@ -4072,21 +4053,36 @@ module HPXMLFile
     return hpxml_doc
   end
 
-  # Determines if we need to process the weather; we avoid this if we can because it has a runtime performance impact
+  # Returns the WeatherFile object if we determine we need it for subsequent processing.
   #
   # @param args [Hash] Map of :argument_name => value
-  # @return [Boolean] True if we need to process the weather file
-  def self.need_weather_based_on_args(args)
+  # @return [WeatherFile] Weather object containing EPW information
+  def self.get_weather_if_needed(args)
     if (args[:hvac_control_heating_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:hvac_control_cooling_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:solar_thermal_system_type] != Constants::None && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
        (args[:pv_system_present] && args[:pv_system_array_tilt].start_with?('latitude')) ||
        (args[:pv_system_2_present] && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
        (args[:apply_defaults])
-      return true
+      epw_path = args[:weather_station_epw_filepath]
+      if epw_path.nil?
+        # Get EPW path from zip code
+        epw_path = Defaults.lookup_weather_data_from_zipcode(args[:site_zip_code])[:station_filename]
+      end
+
+      # Error-checking
+      if not File.exist? epw_path
+        epw_path = File.join(File.expand_path(File.join(File.dirname(__FILE__), '..', 'weather')), epw_path) # a filename was entered for weather_station_epw_filepath
+      end
+      if not File.exist? epw_path
+        runner.registerError("Could not find EPW file at '#{epw_path}'.")
+        return false
+      end
+
+      return WeatherFile.new(epw_path: epw_path, runner: nil)
     end
 
-    return false
+    return
   end
 
   # Check for errors in hpxml, and validate hpxml_doc against hpxml_path
@@ -4316,6 +4312,13 @@ module HPXMLFile
         errors << "'Simulation Control: Defrost Model Type' cannot vary across dwelling units."
       end
       hpxml.header.defrost_model_type = args[:simulation_control_defrost_model_type]
+    end
+
+    if not args[:simulation_control_ground_to_air_heat_pump_model_type].nil?
+      if (not hpxml.header.ground_to_air_heat_pump_model_type.nil?) && (hpxml.header.ground_to_air_heat_pump_model_type != args[:simulation_control_ground_to_air_heat_pump_model_type])
+        errors << "'Simulation Control: Ground-to-Air Heat Pump Model Type' cannot vary across dwelling units."
+      end
+      hpxml.header.ground_to_air_heat_pump_model_type = args[:simulation_control_ground_to_air_heat_pump_model_type]
     end
 
     if not args[:simulation_control_onoff_thermostat_deadband].nil?
@@ -5850,7 +5853,7 @@ module HPXMLFile
       end
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
       compressor_type = args[:heat_pump_cooling_compressor_type]
     end
 
@@ -6968,7 +6971,6 @@ module HPXMLFile
   # - hours driven per week
   # - fraction charged at home
   # - EV charger reference
-  # - EV charger location
   # - EV charger charging power
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -6981,7 +6983,6 @@ module HPXMLFile
     if args[:ev_charger_present]
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
-                                 location: args[:ev_charger_location],
                                  charging_level: args[:ev_charger_level],
                                  charging_power: args[:ev_charger_power])
     end

@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>d854de31-5491-4968-b149-954210969b8b</version_id>
-  <version_modified>2025-03-18T15:53:43Z</version_modified>
+  <version_id>40f5276a-2de3-4913-90d6-c913daeb63de</version_id>
+  <version_modified>2025-05-03T15:48:50Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -180,7 +180,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5BB25DE1</checksum>
+      <checksum>B5ABACA8</checksum>
     </file>
     <file>
       <filename>detailed_rates/README.md</filename>
