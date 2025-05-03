@@ -68,6 +68,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-water-heater-attic.xml' => 'base-sfd.xml',
       'extra-battery-crawlspace.xml' => 'base-sfd.xml',
       'extra-battery-attic.xml' => 'base-sfd.xml',
+      'extra-vehicle-ev.xml' => 'extra-enclosure-garage-partially-protruded.xml',
+      'extra-two-batteries.xml' => 'base-sfd.xml',
       'extra-detailed-performance-autosize.xml' => 'base-sfd.xml',
       'extra-power-outage-periods.xml' => 'base-sfd.xml',
 
@@ -384,22 +386,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     assert_equal(1, hvac_control.seasons_cooling_begin_day)
     assert_equal(10, hvac_control.seasons_cooling_end_month)
     assert_equal(31, hvac_control.seasons_cooling_end_day)
-  end
-
-  def test_version
-    found_match = false
-    measure_xml_path = File.join(File.dirname(__FILE__), '..', 'measure.xml')
-    File.readlines(measure_xml_path).each do |xml_line|
-      next unless xml_line.include? '<description>'
-      next unless xml_line.include? 'https://openstudio-hpxml.readthedocs.io'
-
-      found_match = true
-      if not xml_line.include? Version::OS_HPXML_Version
-        puts "ERROR: Found incorrect OS-HPXML version. Manually edit the BuildResidentialHPXML/measure.rb and run 'openstudio tasks.rb update_measures' to force the measure.xml to be regenerated."
-      end
-      assert(xml_line.include? Version::OS_HPXML_Version)
-    end
-    assert(found_match)
   end
 
   private
@@ -832,7 +818,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_type'] = Constants::None
       args['cooling_system_type'] = Constants::None
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-      args.delete('heat_pump_cooling_compressor_type')
+      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
       args['heat_pump_heating_efficiency'] = 10.0
       args['heat_pump_cooling_efficiency'] = 19.0
       args['heat_pump_heating_capacity'] = 48000.0
@@ -953,6 +939,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationCrawlspace
     when 'extra-battery-attic.xml'
+      args['battery_present'] = true
+      args['battery_location'] = HPXML::LocationAttic
+    when 'extra-vehicle-ev.xml'
+      args['vehicle_type'] = HPXML::VehicleTypeBEV
+      args['ev_charger_present'] = true
+    when 'extra-two-batteries.xml'
+      args['vehicle_type'] = HPXML::VehicleTypeBEV
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationAttic
     when 'extra-detailed-performance-autosize.xml'
@@ -1175,7 +1168,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_type'] = Constants::None
       args['cooling_system_type'] = Constants::None
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpMiniSplit
-      args.delete('heat_pump_cooling_compressor_type')
+      args['heat_pump_cooling_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
       args['heat_pump_is_ducted'] = true
       args['heat_pump_backup_type'] = HPXML::HeatPumpBackupTypeSeparate
       args['heating_system_2_type'] = HPXML::HVACTypeFurnace

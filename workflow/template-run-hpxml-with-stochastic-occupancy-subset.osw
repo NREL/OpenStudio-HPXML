@@ -54,13 +54,15 @@
         "include_timeseries_component_loads": false,
         "include_timeseries_unmet_hours": false,
         "include_timeseries_zone_temperatures": false,
+        "include_timeseries_zone_conditions": false,
         "include_timeseries_airflows": false,
         "include_timeseries_weather": false,
         "include_timeseries_resilience": false,
         "timeseries_timestamp_convention": "start",
         "add_timeseries_dst_column": false,
         "add_timeseries_utc_column": false,
-        "user_output_variables": ""
+        "user_output_variables": "",
+        "user_output_meters": ""
       },
       "measure_dir_name": "ReportSimulationOutput"
     },

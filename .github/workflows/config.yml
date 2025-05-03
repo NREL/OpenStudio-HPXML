@@ -7,11 +7,18 @@ on:
     types: [ synchronize, opened ]
   workflow_dispatch:
 
+# Cancel in-progress jobs when a new commit is pushed to the PR
+# This avoids CI jobs "stacking up" for the same PR
+# This won't stop existing job if new commit is pushed with [ci skip].
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   run-unit-tests:
     runs-on: ubuntu-22.04
     container:
-      image: docker://nrel/openstudio:3.9.0
+      image: docker://nrel/openstudio:develop
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,14 +40,25 @@ jobs:
           git config --global --add safe.directory $(realpath .)
           git diff --exit-code --ignore-cr-at-eol *.rb
 
-      - name: Check HPXMLs
+      - name: Check HPXMLs/Schedules
         shell: bash
         run: |
           echo "Regenerating HPXML files..."
           openstudio tasks.rb update_hpxmls
-          echo "Checking for HPXML differences..."
           git config --global --add safe.directory $(realpath .)
+          echo "Checking for HPXML differences..."
+          echo "If differences are found below, then HPXMLs need to be regenerated using: openstudio tasks.rb update_hpxmls"
           git diff --exit-code --ignore-cr-at-eol workflow/*.xml
+          echo "Checking for schedule CSV differences..."
+          echo "If differences are found below, then schedule CSVs need to be regenerated using: openstudio tasks.rb update_hpxmls"
+          git diff --stat --ignore-cr-at-eol HPXMLtoOpenStudio/resources/schedule_files/*.csv
+
+          # Run the detailed diff script if there are changes
+          if ! git diff --quiet --ignore-cr-at-eol HPXMLtoOpenStudio/resources/schedule_files/*.csv; then
+            echo "Detailed schedule file differences:"
+            cd HPXMLtoOpenStudio/resources/schedule_files
+            openstudio print_diff.py
+          fi
 
       - name: Run measure unit tests
         run: |
@@ -77,7 +95,7 @@ jobs:
   run-workflow1-tests:
     runs-on: ubuntu-22.04
     container:
-      image: docker://nrel/openstudio:3.9.0
+      image: docker://nrel/openstudio:develop
     steps:
       - uses: actions/checkout@v4
         with:
@@ -100,7 +118,7 @@ jobs:
   run-workflow2-tests:
     runs-on: ubuntu-22.04
     container:
-      image: docker://nrel/openstudio:3.9.0
+      image: docker://nrel/openstudio:develop
     steps:
       - uses: actions/checkout@v4
         with:
@@ -120,20 +138,20 @@ jobs:
           path: workflow/tests/test_results
           name: results-workflow2-tests
 
-  run-windows-tests:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-      - name: Install software and run test
-        shell: pwsh
-        run: |
-          $env:OS_VERSION="3.9.0"
-          $env:OS_SHA="c77fbb9569"
-          Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
-          tar -xzf Windows.tar.gz
-          & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
+#  run-windows-tests:
+#    runs-on: windows-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          ref: ${{ github.head_ref }}
+#      - name: Install software and run test
+#        shell: pwsh
+#        run: |
+#          $env:OS_VERSION="3.9.0"
+#          $env:OS_SHA="c77fbb9569"
+#          Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
+#          tar -xzf Windows.tar.gz
+#          & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
 
   merge-results:
     runs-on: ubuntu-22.04
@@ -205,12 +223,12 @@ jobs:
           cp -r base_results/results*.csv workflow/tests/base_results
           mkdir workflow/tests/test_results
           cp -r test_results/results* workflow/tests/test_results
-          
+
           pip install numpy
           pip install pandas
           pip install plotly
           pip install kaleido
-          
+
           python workflow/tests/compare.py -a results
           python workflow/tests/compare.py -a visualize
 
@@ -235,7 +253,7 @@ jobs:
           name: test_results
 
       - name: Commit latest results
-        shell: bash        
+        shell: bash
         run: |
           branch_name="${{ github.head_ref }}"
           git pull origin $branch_name

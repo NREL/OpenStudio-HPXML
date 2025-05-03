@@ -109,7 +109,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     Version.check_openstudio_version()
-    Model.reset(model, runner)
+    Model.reset(runner, model)
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
     set_file_paths(args)
@@ -119,7 +119,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false unless hpxml.errors.empty?
 
       # Do these once upfront for the entire HPXML object
-      epw_path, weather = process_weather(runner, hpxml, args)
+      weather = process_weather(runner, hpxml, args)
       process_whole_sfa_mf_inputs(hpxml)
       hpxml_sch_map, design_loads_results_out = process_defaults_schedules_emissions_files(runner, weather, hpxml, args)
 
@@ -133,10 +133,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         # If we're running a whole SFA/MF building, all the unit models will be merged later
         if hpxml.buildings.size > 1
           unit_model = OpenStudio::Model::Model.new
-          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, weather, hpxml_sch_map[hpxml_bldg])
+          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, weather, hpxml_sch_map[hpxml_bldg])
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
-          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, hpxml_sch_map[hpxml_bldg])
+          create_unit_model(hpxml, hpxml_bldg, runner, model, weather, hpxml_sch_map[hpxml_bldg])
           hpxml_osm_map[hpxml_bldg] = model
         end
       end
@@ -150,10 +150,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       Outputs.apply_ems_programs(model, hpxml_osm_map, hpxml.header, args[:add_component_loads])
       Outputs.apply_output_file_controls(model, args[:debug])
       Outputs.apply_additional_properties(model, hpxml, hpxml_osm_map, args[:hpxml_path], args[:building_id], args[:hpxml_defaults_path])
+      Outputs.create_custom_meters(model)
       # Outputs.apply_ems_debug_output(model) # Uncomment to debug EMS
 
       # Write output files
-      Outputs.write_debug_files(runner, model, args[:debug], args[:output_dir], epw_path)
+      Outputs.write_debug_files(runner, model, weather, args[:debug], args[:output_dir])
 
       # Write annual results output file
       # This is helpful if the user wants to get these results right away (e.g.,
@@ -228,15 +229,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return hpxml
   end
 
-  # Returns the EPW file path and the WeatherFile object.
+  # Returns the WeatherFile object.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   # @param args [Hash] Map of :argument_name => value
-  # @return [Array<String, WeatherFile>] Path to the EPW weather file, Weather object containing EPW information
+  # @return [WeatherFile> Weather object containing EPW information
   def process_weather(runner, hpxml, args)
     epw_path = Location.get_epw_path(hpxml.buildings[0], args[:hpxml_path])
-    weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
+    weather = WeatherFile.new(epw_path: epw_path, runner: runner)
     hpxml.buildings.each_with_index do |hpxml_bldg, i|
       next if i == 0
       next if Location.get_epw_path(hpxml_bldg, args[:hpxml_path]) == epw_path
@@ -244,7 +245,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       fail 'Weather station EPW filepath has different values across dwelling units.'
     end
 
-    return epw_path, weather
+    return weather
   end
 
   # Performs error-checking on the inputs for whole SFA/MF building simulations.
@@ -315,21 +316,21 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param epw_path [String] Path to the EPW weather file
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, schedules_file)
+  def create_unit_model(hpxml, hpxml_bldg, runner, model, weather, schedules_file)
     init(model, hpxml_bldg, hpxml.header)
     SimControls.apply(model, hpxml.header)
-    Location.apply(model, weather, hpxml_bldg, hpxml.header, epw_path)
+    Location.apply(model, weather, hpxml_bldg, hpxml.header)
 
     # Conditioned space & setpoints
     spaces = {} # Map of HPXML locations => OpenStudio Space objects
     Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
-    hvac_days = HVAC.apply_setpoints(model, runner, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
+    hvac_days = HVAC.apply_setpoints(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
 
     # Geometry & Enclosure
+    Geometry.apply_foundation_and_walls_top(hpxml_bldg)
     Geometry.apply_roofs(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_walls(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_rim_joists(runner, model, spaces, hpxml_bldg)
@@ -371,6 +372,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     PV.apply(model, hpxml_bldg)
     Generator.apply(model, hpxml_bldg)
     Battery.apply(runner, model, spaces, hpxml_bldg, schedules_file)
+    Vehicle.apply(runner, model, spaces, hpxml_bldg, hpxml.header, schedules_file)
   end
 
   # Miscellaneous logic that needs to occur upfront.
@@ -396,30 +398,20 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
 
     # Hidden feature: Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-    if hpxml_header.eri_calculation_version.nil?
-      hpxml_header.eri_calculation_version = 'latest'
+    if hpxml_header.eri_calculation_versions.size > 1
+      fail 'Only a single ERI version is supported.'
     end
-    if hpxml_header.eri_calculation_version == 'latest'
-      hpxml_header.eri_calculation_version = Constants::ERIVersions[-1]
+
+    if hpxml_header.eri_calculation_versions.empty?
+      hpxml_header.eri_calculation_versions = ['latest']
+    end
+    if hpxml_header.eri_calculation_versions == ['latest']
+      hpxml_header.eri_calculation_versions = [Constants::ERIVersions[-1]]
     end
 
     # Hidden feature: Whether to override certain assumptions to better match the ASHRAE 140 specification
     if hpxml_header.apply_ashrae140_assumptions.nil?
       hpxml_header.apply_ashrae140_assumptions = false
-    end
-
-    if not hpxml_bldg.building_occupancy.number_of_residents.nil?
-      # If zero occupants, ensure end uses of interest are zeroed out
-      if (hpxml_bldg.building_occupancy.number_of_residents == 0) && (not hpxml_header.apply_ashrae140_assumptions)
-        hpxml_header.unavailable_periods.add(column_name: 'Vacancy',
-                                             begin_month: hpxml_header.sim_begin_month,
-                                             begin_day: hpxml_header.sim_begin_day,
-                                             begin_hour: 0,
-                                             end_month: hpxml_header.sim_end_month,
-                                             end_day: hpxml_header.sim_end_day,
-                                             end_hour: 24,
-                                             natvent_availability: HPXML::ScheduleUnavailable)
-      end
     end
   end
 end

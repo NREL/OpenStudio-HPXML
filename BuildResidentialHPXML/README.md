@@ -174,7 +174,7 @@ Enter a date range like 'Mar 15 - Dec 15'. If not provided, the OS-HPXML default
 Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
 
 - **Name:** ``simulation_control_temperature_capacitance_multiplier``
-- **Type:** ``String``
+- **Type:** ``Double``
 
 - **Required:** ``false``
 
@@ -190,6 +190,19 @@ Research feature to select the type of defrost model. Use standard for default E
 - **Required:** ``false``
 
 - **Choices:** `standard`, `advanced`
+
+<br/>
+
+**Simulation Control: Ground-to-Air Heat Pump Model Type**
+
+Research feature to select the type of ground-to-air heat pump model. Use standard for standard ground-to-air heat pump modeling. Use experimental for an improved model that better accounts for coil staging. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+
+- **Name:** ``simulation_control_ground_to_air_heat_pump_model_type``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `standard`, `experimental`
 
 <br/>
 
@@ -2048,7 +2061,7 @@ The rated efficiency value of the cooling system. Ignored for evaporative cooler
 
 **Cooling System: Cooling Compressor Type**
 
-The compressor type of the cooling system. Only applies to central air conditioner and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#central-air-conditioner'>Central Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.
+The compressor type of the cooling system. Only applies to central air conditioner and mini-split.
 
 - **Name:** ``cooling_system_cooling_compressor_type``
 - **Type:** ``Choice``
@@ -2287,7 +2300,7 @@ The rated cooling efficiency value of the heat pump.
 
 **Heat Pump: Cooling Compressor Type**
 
-The compressor type of the heat pump. Only applies to air-to-air and mini-split. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>) is used.
+The compressor type of the heat pump. Only applies to air-to-air, mini-split and ground-to-air.
 
 - **Name:** ``heat_pump_cooling_compressor_type``
 - **Type:** ``Choice``
@@ -4505,6 +4518,141 @@ Number of bedrooms served by the lithium ion battery. Only needed if single-fami
 - **Type:** ``Integer``
 
 - **Units:** ``#``
+
+- **Required:** ``false``
+
+<br/>
+
+**Vehicle: Type**
+
+The type of vehicle present at the home.
+
+- **Name:** ``vehicle_type``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Vehicle: EV Battery Nominal Battery Capacity**
+
+The nominal capacity of the vehicle battery, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+
+- **Name:** ``vehicle_battery_capacity``
+- **Type:** ``Double``
+
+- **Units:** ``kWh``
+
+- **Required:** ``false``
+
+<br/>
+
+**Vehicle: EV Battery Usable Capacity**
+
+The usable capacity of the vehicle battery, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+
+- **Name:** ``vehicle_battery_usable_capacity``
+- **Type:** ``Double``
+
+- **Units:** ``kWh``
+
+- **Required:** ``false``
+
+<br/>
+
+**Vehicle: Combined Fuel Economy Units**
+
+The combined fuel economy units of the vehicle. Only 'kWh/mile', 'mile/kWh', or 'mpge' are allow for electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+
+- **Name:** ``vehicle_fuel_economy_units``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `kWh/mile`, `mile/kWh`, `mpge`, `mpg`
+
+<br/>
+
+**Vehicle: Combined Fuel Economy**
+
+The combined fuel economy of the vehicle. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+
+- **Name:** ``vehicle_fuel_economy_combined``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Vehicle: Miles Driven Per Year**
+
+The annual miles the vehicle is driven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+
+- **Name:** ``vehicle_miles_driven_per_year``
+- **Type:** ``Double``
+
+- **Units:** ``miles``
+
+- **Required:** ``false``
+
+<br/>
+
+**Vehicle: Hours Driven Per Week**
+
+The weekly hours the vehicle is driven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+
+- **Name:** ``vehicle_hours_driven_per_week``
+- **Type:** ``Double``
+
+- **Units:** ``hours``
+
+- **Required:** ``false``
+
+<br/>
+
+**Vehicle: Fraction Charged at Home**
+
+The fraction of charging energy provided by the at-home charger to the vehicle, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+
+- **Name:** ``vehicle_fraction_charged_home``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Vehicle Charger: Present**
+
+Whether there is an electric vehicle charger present.
+
+- **Name:** ``ev_charger_present``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Vehicle Charger: Charging Level**
+
+The charging level of the EV charger. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.
+
+- **Name:** ``ev_charger_level``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `1`, `2`, `3`
+
+<br/>
+
+**Electric Vehicle Charger: Rated Charging Power**
+
+The rated power output of the EV charger. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.
+
+- **Name:** ``ev_charger_power``
+- **Type:** ``Double``
+
+- **Units:** ``W``
 
 - **Required:** ``false``
 
