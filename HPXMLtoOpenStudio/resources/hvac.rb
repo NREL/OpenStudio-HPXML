@@ -12,6 +12,11 @@ module HVAC
   CrankcaseHeaterTemp = 50.0 # degF, RESNET MINHERS Addendum 82
   MinCapacity = 1.0 # Btuh
   MinAirflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
+  GroundSourceHeatRatedWET = 70.0 # degF, Rated water entering temperature for ground-source systems, heating
+  GroundSourceHeatRatedIDB = 70.0 # degF, Rated indoor drybulb for ground-source systems, heating
+  GroundSourceCoolRatedWET = 85.0 # degF, Rated water entering temperature for ground-source systems, cooling
+  GroundSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for ground-source systems, cooling
+  GroundSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for ground-source systems, cooling
 
   # Adds any HVAC Systems to the OpenStudio model.
   #
@@ -223,7 +228,7 @@ module HVAC
       when HPXML::HVACTypeHeatPumpGroundToAir
         airloop_map[sys_id] = apply_ground_to_air_heat_pump(runner, model, weather, heat_pump, hvac_sequential_load_fracs,
                                                             conditioned_zone, hpxml_bldg.site.ground_conductivity, hpxml_bldg.site.ground_diffusivity,
-                                                            hvac_unavailable_periods, hpxml_bldg.building_construction.number_of_units)
+                                                            hvac_unavailable_periods, hpxml_bldg.building_construction.number_of_units, hpxml_header)
       end
 
       next if heat_pump.backup_system.nil?
@@ -543,10 +548,11 @@ module HVAC
   # @param ground_diffusivity [TODO] TODO
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [OpenStudio::Model::AirLoopHVAC] The newly created air loop hvac object
   def self.apply_ground_to_air_heat_pump(runner, model, weather, heat_pump, hvac_sequential_load_fracs,
                                          control_zone, ground_conductivity, ground_diffusivity,
-                                         hvac_unavailable_periods, unit_multiplier)
+                                         hvac_unavailable_periods, unit_multiplier, hpxml_header)
 
     if unit_multiplier > 1
       # FUTURE: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
@@ -561,6 +567,8 @@ module HVAC
 
     htg_cfm = hp_ap.heating_actual_airflow_cfm
     clg_cfm = hp_ap.cooling_actual_airflow_cfm
+    htg_air_flow_rated = calc_rated_airflow(heat_pump.heating_capacity, hp_ap.heat_rated_cfm_per_ton, 'm^3/s')
+    clg_air_flow_rated = calc_rated_airflow(heat_pump.cooling_capacity, hp_ap.cool_rated_cfm_per_ton, 'm^3/s')
 
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = EPlus::FluidWater
@@ -571,56 +579,215 @@ module HVAC
     geothermal_loop.loop_flow *= unit_multiplier
     geothermal_loop.num_bore_holes *= unit_multiplier
 
-    # Cooling Coil
-    clg_total_cap_curve = Model.add_curve_quad_linear(
-      model,
-      name: "#{obj_name} clg total cap curve",
-      coeff: hp_ap.cool_cap_curve_spec[0]
-    )
-    clg_sens_cap_curve = Model.add_curve_quint_linear(
-      model,
-      name: "#{obj_name} clg sens cap curve",
-      coeff: hp_ap.cool_sh_curve_spec[0]
-    )
-    clg_power_curve = Model.add_curve_quad_linear(
-      model,
-      name: "#{obj_name} clg power curve",
-      coeff: hp_ap.cool_power_curve_spec[0]
-    )
-    clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
-    clg_coil.setName(obj_name + ' clg coil')
-    clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
-    clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
-    clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
-    clg_coil.setRatedAirFlowRate(calc_rated_airflow(heat_pump.cooling_capacity, hp_ap.cool_rated_cfm_per_ton, 'm^3/s'))
-    clg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
-    clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(80, 'F', 'C'))
-    clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
-    clg_coil.setRatedEnteringAirWetBulbTemperature(UnitConversions.convert(67, 'F', 'C'))
-    clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
-    clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity * hp_ap.cool_rated_shr_gross, 'Btu/hr', 'W'))
+    if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard].include? hpxml_header.ground_to_air_heat_pump_model_type
+      # Cooling Coil
+      clg_total_cap_curve = Model.add_curve_quad_linear(
+        model,
+        name: "#{obj_name} clg total cap curve",
+        coeff: hp_ap.cool_cap_curve_spec[0]
+      )
+      clg_sens_cap_curve = Model.add_curve_quint_linear(
+        model,
+        name: "#{obj_name} clg sens cap curve",
+        coeff: hp_ap.cool_sh_curve_spec[0]
+      )
+      clg_power_curve = Model.add_curve_quad_linear(
+        model,
+        name: "#{obj_name} clg power curve",
+        coeff: hp_ap.cool_power_curve_spec[0]
+      )
+      clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
+      clg_coil.setName(obj_name + ' clg coil')
+      clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
+      clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
+      clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
+      clg_coil.setRatedAirFlowRate(clg_air_flow_rated)
+      clg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
+      clg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(80, 'F', 'C'))
+      clg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(80, 'F', 'C'))
+      clg_coil.setRatedEnteringAirWetBulbTemperature(UnitConversions.convert(67, 'F', 'C'))
+      # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
+      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
+      clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity * hp_ap.cool_rated_shr_gross, 'Btu/hr', 'W'))
+      # Heating Coil
+      htg_cap_curve = Model.add_curve_quad_linear(
+        model,
+        name: "#{obj_name} htg cap curve",
+        coeff: hp_ap.heat_cap_curve_spec[0]
+      )
+      htg_power_curve = Model.add_curve_quad_linear(
+        model,
+        name: "#{obj_name} htg power curve",
+        coeff: hp_ap.heat_power_curve_spec[0]
+      )
+      htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model, htg_cap_curve, htg_power_curve)
+      htg_coil.setName(obj_name + ' htg coil')
+      htg_coil.setRatedHeatingCoefficientofPerformance(hp_ap.heat_rated_cops[0])
+      htg_coil.setRatedAirFlowRate(htg_air_flow_rated)
+      htg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
+      htg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(60, 'F', 'C'))
+      htg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(70, 'F', 'C'))
+      # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
+      htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
+    elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental].include? hpxml_header.ground_to_air_heat_pump_model_type
+      num_speeds = hp_ap.cool_capacity_ratios.size
+      if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+        plf_fplr_curve = Model.add_curve_quadratic(
+          model,
+          name: 'Cool-PLF-fPLR',
+          coeff: [1.0, 0.0, 0.0],
+          min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+        )
+      else
+        # Derived from: https://www.e3s-conferences.org/articles/e3sconf/pdf/2018/19/e3sconf_eko-dok2018_00139.pdf
+        plf_fplr_curve = Model.add_curve_cubic(
+          model,
+          name: 'Cool-PLF-fPLR',
+          coeff: [0.4603, 1.6416, -1.8588, 0.7605],
+          min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+        )
+      end
+      clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.new(model, plf_fplr_curve)
+      clg_coil.setName(obj_name + ' clg coil')
+      clg_coil.setNominalTimeforCondensatetoBeginLeavingtheCoil(1000)
+      clg_coil.setInitialMoistureEvaporationRateDividedbySteadyStateACLatentCapacity(1.5)
+      clg_coil.setNominalSpeedLevel(num_speeds)
+      clg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(clg_air_flow_rated)
+      clg_coil.setRatedWaterFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
+      # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
+      clg_coil.setGrossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
+      for i in 0..(num_speeds - 1)
+        cap_ft_curve = Model.add_curve_biquadratic(
+          model,
+          name: "Cool-CAP-fT#{i + 1}",
+          coeff: hp_ap.cool_cap_ft_spec[i],
+          min_x: -100, max_x: 100, min_y: -100, max_y: 100
+        )
+        cap_faf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Cool-CAP-fAF#{i + 1}",
+          coeff: hp_ap.cool_cap_fflow_spec[i],
+          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+        )
+        cap_fwf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Cool-CAP-fWF#{i + 1}",
+          coeff: hp_ap.cool_cap_fwf_spec[i],
+          min_x: 0.45, max_x: 2, min_y: 0, max_y: 2
+        )
+        eir_ft_curve = Model.add_curve_biquadratic(
+          model,
+          name: "Cool-EIR-fT#{i + 1}",
+          coeff: hp_ap.cool_eir_ft_spec[i],
+          min_x: -100, max_x: 100, min_y: -100, max_y: 100
+        )
+        eir_faf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Cool-EIR-fAF#{i + 1}",
+          coeff: hp_ap.cool_eir_fflow_spec[i],
+          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+        )
+        eir_fwf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Cool-EIR-fWF#{i + 1}",
+          coeff: hp_ap.cool_eir_fwf_spec[i],
+          min_x: 0.45, max_x: 2, min_y: 0, max_y: 2
+        )
+        # Recoverable heat modifier as a function of indoor wet-bulb and water entering temperatures.
+        waste_heat_ft = Model.add_curve_biquadratic(
+          model,
+          name: "WasteHeat-FT#{i + 1}",
+          coeff: [1, 0, 0, 0, 0, 0]
+        )
+        speed = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFitSpeedData.new(model, cap_ft_curve, cap_faf_curve, cap_fwf_curve, eir_ft_curve, eir_faf_curve, eir_fwf_curve, waste_heat_ft)
+        # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
+        speed.setReferenceUnitGrossRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W') * hp_ap.cool_capacity_ratios[i])
+        speed.setReferenceUnitGrossRatedSensibleHeatRatio(hp_ap.cool_rated_shr_gross)
+        speed.setReferenceUnitGrossRatedCoolingCOP(hp_ap.cool_rated_cops[i])
+        speed.setReferenceUnitRatedAirFlowRate(UnitConversions.convert(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') * hp_ap.cool_capacity_ratios[i] * hp_ap.cool_rated_cfm_per_ton, 'cfm', 'm^3/s'))
+        speed.setReferenceUnitRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.cool_capacity_ratios[i])
+        speed.setReferenceUnitWasteHeatFractionofInputPowerAtRatedConditions(0.0)
+        clg_coil.addSpeed(speed)
+      end
+      if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+        plf_fplr_curve = Model.add_curve_quadratic(
+          model,
+          name: 'Heat-PLF-fPLR',
+          coeff: [1.0, 0.0, 0.0],
+          min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+        )
+      else
+        # Derived from: https://www.e3s-conferences.org/articles/e3sconf/pdf/2018/19/e3sconf_eko-dok2018_00139.pdf
+        plf_fplr_curve = Model.add_curve_cubic(
+          model,
+          name: 'Heat-PLF-fPLR',
+          coeff: [0.4603, 1.6416, -1.8588, 0.7605],
+          min_x: 0, max_x: 1, min_y: 0.7, max_y: 1
+        )
+      end
+      htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.new(model, plf_fplr_curve)
+      htg_coil.setName(obj_name + ' htg coil')
+      htg_coil.setNominalSpeedLevel(num_speeds)
+      htg_coil.setRatedAirFlowRateAtSelectedNominalSpeedLevel(htg_air_flow_rated)
+      htg_coil.setRatedWaterFlowRateAtSelectedNominalSpeedLevel(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
+      # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
+      htg_coil.setRatedHeatingCapacityAtSelectedNominalSpeedLevel(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
+      for i in 0..(num_speeds - 1)
+        cap_ft_curve = Model.add_curve_biquadratic(
+          model,
+          name: "Heat-CAP-fT#{i + 1}",
+          coeff: hp_ap.heat_cap_ft_spec[i],
+          min_x: -100, max_x: 100, min_y: -100, max_y: 100
+        )
+        cap_faf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Heat-CAP-fAF#{i + 1}",
+          coeff: hp_ap.heat_cap_fflow_spec[i],
+          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+        )
+        cap_fwf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Heat-CAP-fWF#{i + 1}",
+          coeff: hp_ap.heat_cap_fwf_spec[i],
+          min_x: 0.45, max_x: 2, min_y: 0, max_y: 2
+        )
+        eir_ft_curve = Model.add_curve_biquadratic(
+          model,
+          name: "Heat-EIR-fT#{i + 1}",
+          coeff: hp_ap.heat_eir_ft_spec[i],
+          min_x: -100, max_x: 100, min_y: -100, max_y: 100
+        )
+        eir_faf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Heat-EIR-fAF#{i + 1}",
+          coeff: hp_ap.heat_eir_fflow_spec[i],
+          min_x: 0, max_x: 2, min_y: 0, max_y: 2
+        )
+        eir_fwf_curve = Model.add_curve_quadratic(
+          model,
+          name: "Heat-EIR-fWF#{i + 1}",
+          coeff: hp_ap.heat_eir_fwf_spec[i],
+          min_x: 0.45, max_x: 2, min_y: 0, max_y: 2
+        )
+        # Recoverable heat modifier as a function of indoor wet-bulb and water entering temperatures.
+        waste_heat_ft = Model.add_curve_biquadratic(
+          model,
+          name: "WasteHeat-FT#{i + 1}",
+          coeff: [1, 0, 0, 0, 0, 0]
+        )
+        speed = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFitSpeedData.new(model, cap_ft_curve, cap_faf_curve, cap_fwf_curve, eir_ft_curve, eir_faf_curve, eir_fwf_curve, waste_heat_ft)
+        # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
+        speed.setReferenceUnitGrossRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W') * hp_ap.heat_capacity_ratios[i])
+        speed.setReferenceUnitGrossRatedHeatingCOP(hp_ap.heat_rated_cops[i])
+        speed.setReferenceUnitRatedAirFlow(UnitConversions.convert(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') * hp_ap.heat_capacity_ratios[i] * hp_ap.heat_rated_cfm_per_ton, 'cfm', 'm^3/s'))
+        speed.setReferenceUnitRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s') * hp_ap.heat_capacity_ratios[i])
+        speed.setReferenceUnitWasteHeatFractionofInputPowerAtRatedConditions(0.0)
+        htg_coil.addSpeed(speed)
+      end
+    end
     clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
-
-    # Heating Coil
-    htg_cap_curve = Model.add_curve_quad_linear(
-      model,
-      name: "#{obj_name} htg cap curve",
-      coeff: hp_ap.heat_cap_curve_spec[0]
-    )
-    htg_power_curve = Model.add_curve_quad_linear(
-      model,
-      name: "#{obj_name} htg power curve",
-      coeff: hp_ap.heat_power_curve_spec[0]
-    )
-    htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model, htg_cap_curve, htg_power_curve)
-    htg_coil.setName(obj_name + ' htg coil')
-    htg_coil.setRatedHeatingCoefficientofPerformance(hp_ap.heat_rated_cops[0])
-    htg_coil.setRatedAirFlowRate(calc_rated_airflow(heat_pump.heating_capacity, hp_ap.heat_rated_cfm_per_ton, 'm^3/s'))
-    htg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
-    htg_coil.setRatedEnteringWaterTemperature(UnitConversions.convert(60, 'F', 'C'))
-    htg_coil.setRatedEnteringAirDryBulbTemperature(UnitConversions.convert(70, 'F', 'C'))
-    htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+
 
     # Supplemental Heating Coil
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
@@ -714,12 +881,22 @@ module HVAC
     demand_outlet_pipe.addToNode(plant_loop.demandOutletNode)
 
     # Fan
-    fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, [htg_cfm, clg_cfm], heat_pump)
+    fan_cfms = []
+    hp_ap.cool_capacity_ratios.each do |capacity_ratio|
+      fan_cfms << clg_cfm * capacity_ratio
+    end
+    hp_ap.heat_capacity_ratios.each do |capacity_ratio|
+      fan_cfms << htg_cfm * capacity_ratio
+    end
+    fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, fan_cfms, heat_pump)
     add_fan_pump_disaggregation_ems_program(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
-    add_pump_power_ems_program(model, pump_w, pump, air_loop_unitary)
+    add_pump_power_ems_program(model, pump, air_loop_unitary, heat_pump)
+    if (heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed) && (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental)
+      add_ghp_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil)
+    end
 
     if heat_pump.is_shared_system
       # Shared pump power per ANSI/RESNET/ICC 301-2022 Section 4.4.5.1 (pump runs 8760)
@@ -899,7 +1076,7 @@ module HVAC
     plant_loop.addSupplyBranchForComponent(boiler)
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     boiler.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
-    add_pump_power_ems_program(model, pump_w, pump, boiler)
+    add_pump_power_ems_program(model, pump, boiler, heating_system)
 
     if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
@@ -1571,48 +1748,6 @@ module HVAC
     return clg_wd_setpoints, clg_we_setpoints
   end
 
-  # TODO
-  #
-  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @return [nil]
-  def self.set_curves_gshp(heat_pump)
-    hp_ap = heat_pump.additional_properties
-
-    # E+ equation fit coil coefficients generated following approach in Tang's thesis:
-    # See Appendix B of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
-    # Coefficients generated by catalog data: https://files.climatemaster.com/Genesis-GS-Series-Product-Catalog.pdf, p180
-    # Data point taken as rated condition:
-    # EWT: 80F EAT:80/67F, AFR: 1200cfm, WFR: 4.5gpm
-
-    # Cooling Curves
-    hp_ap.cool_cap_curve_spec = [[-5.45013866666657, 7.42301402824225, -1.43760846638838, 0.249103937703341, 0.0378875477019811]]
-    hp_ap.cool_power_curve_spec = [[-4.21572180554818, 0.322682268675807, 4.56870615863483, 0.154605773589744, -0.167531037948482]]
-    hp_ap.cool_sh_curve_spec = [[0.56143829895505, 18.7079597251858, -19.1482655264078, -0.138154731772664, 0.4823357726442, -0.00164644360129174]]
-
-    # E+ equation fit coil coefficients following approach from Tang's thesis:
-    # See Appendix B Figure B.3 of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
-    # Coefficients generated by catalog data: https://www.climatemaster.com/download/18.274be999165850ccd5b5b73/1535543867815/lc377-climatemaster-commercial-tranquility-20-single-stage-ts-series-water-source-heat-pump-submittal-set.pdf
-    # Data point taken as rated condition:
-    # EWT: 60F EAT: 70F AFR: 1200 cfm, WFR: 4.5 gpm
-
-    # Heating Curves
-    hp_ap.heat_cap_curve_spec = [[-3.75031847962047, -2.18062040443483, 6.8363364819032, 0.188376814356582, 0.0869274802923634]]
-    hp_ap.heat_power_curve_spec = [[-8.4754723813072, 8.10952801956388, 1.38771494628738, -0.33766445915032, 0.0223085217874051]]
-
-    # Fan/pump adjustments calculations
-    # Fan power to overcome the static pressure adjustment
-    rated_fan_watts_per_cfm = 0.5 * heat_pump.fan_watts_per_cfm # Calculate rated fan power by assuming the power to overcome the ductwork is approximately 50% of the total fan power (ANSI/RESNET/ICC 301 says 0.2 W/cfm is the fan power associated with ductwork, but we don't know if that was a PSC or BPM fan)
-    power_f = rated_fan_watts_per_cfm * RatedCFMPerTon / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # W per Btu/hr of capacity
-    rated_pump_watts_per_ton = 30.0 # ANSI/RESNET/ICC 301, estimated pump power required to overcome the internal resistance of the ground-water heat exchanger under AHRI test conditions for a closed loop system
-    power_p = rated_pump_watts_per_ton / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
-
-    cool_eir = UnitConversions.convert(((1 - UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.cooling_efficiency_eer - power_f - power_p), 'Wh', 'Btu')
-    heat_eir = (1 + UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.heating_efficiency_cop - UnitConversions.convert(power_f + power_p, 'Wh', 'Btu')
-
-    hp_ap.cool_rated_cops = [1.0 / cool_eir]
-    hp_ap.heat_rated_cops = [1.0 / heat_eir]
-  end
-
   # Calculates heating/cooling seasons per the Building America House Simulation Protocols (BAHSP) definition.
   #
   # @param weather [WeatherFile] Weather object containing EPW information
@@ -1731,16 +1866,16 @@ module HVAC
     )
   end
 
-  # Creates an EMS program to set the pump power.
+  # Create EMS program to correctly account for pump power consumption based on heating object part load ratio
   # Without EMS, the pump power will vary according to the plant loop part load ratio
-  # (based on flow rate) rather than the boiler part load ratio (based on load).
+  # (based on flow rate) rather than the component part load ratio (based on load).
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param pump_w [TODO] TODO
-  # @param pump [TODO] TODO
-  # @param heating_object [TODO] TODO
+  # @param pump [OpenStudio::Model::PumpVariableSpeed] OpenStudio variable-speed pump object
+  # @param heating_object [OpenStudio::Model::AirLoopHVACUnitarySystem or OpenStudio::Model::BoilerHotWater] OpenStudio unitary system object or boiler object
+  # @param hvac_system [HPXML::HeatPump or HPXML::HeatingSystem] HPXML heat pump or heating system object
   # @return [nil]
-  def self.add_pump_power_ems_program(model, pump_w, pump, heating_object)
+  def self.add_pump_power_ems_program(model, pump, heating_object, hvac_system)
     # Sensors
     if heating_object.is_a? OpenStudio::Model::BoilerHotWater
       heating_plr_sensor = Model.add_ems_sensor(
@@ -1750,12 +1885,57 @@ module HVAC
         key_name: heating_object.name
       )
     elsif heating_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-      heating_plr_sensor = Model.add_ems_sensor(
-        model,
-        name: "#{heating_object.name} plr s",
-        output_var_or_meter_name: 'Unitary System Part Load Ratio',
-        key_name: heating_object.name
-      )
+      htg_coil = heating_object.heatingCoil.get
+      clg_coil = heating_object.coolingCoil.get
+      # GHP model, variable speed coils
+      if htg_coil.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
+        htg_coil = htg_coil.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.get
+        clg_coil = clg_coil.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.get
+        heating_plr_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{htg_coil.name} plr s",
+          output_var_or_meter_name: 'Heating Coil Part Load Ratio',
+          key_name: htg_coil.name
+        )
+        heating_nsl_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{htg_coil.name} nsl s",
+          output_var_or_meter_name: 'Heating Coil Neighboring Speed Levels Ratio',
+          key_name: htg_coil.name
+        )
+        heating_usl_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{htg_coil.name} usl s",
+          output_var_or_meter_name: 'Heating Coil Upper Speed Level',
+          key_name: htg_coil.name
+        )
+        cooling_plr_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{clg_coil.name} plr s",
+          output_var_or_meter_name: 'Cooling Coil Part Load Ratio',
+          key_name: clg_coil.name
+        )
+        cooling_nsl_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{clg_coil.name} nsl s",
+          output_var_or_meter_name: 'Cooling Coil Neighboring Speed Levels Ratio',
+          key_name: clg_coil.name
+        )
+        cooling_usl_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{clg_coil.name} usl s",
+          output_var_or_meter_name: 'Cooling Coil Upper Speed Level',
+          key_name: clg_coil.name
+        )
+      # GHP model, single speed coils
+      else
+        heating_plr_sensor = Model.add_ems_sensor(
+          model,
+          name: "#{heating_object.name} plr s",
+          output_var_or_meter_name: 'Unitary System Part Load Ratio',
+          key_name: heating_object.name
+        )
+      end
     end
 
     pump_mfr_sensor = Model.add_ems_sensor(
@@ -1786,11 +1966,58 @@ module HVAC
       model,
       name: "#{pump.name} power program"
     )
-    pump_program.addLine("Set heating_plr = #{heating_plr_sensor.name}")
+    if cooling_plr_sensor.nil?
+      pump_program.addLine("Set hvac_plr = #{heating_plr_sensor.name}")
+    else
+      hvac_ap = hvac_system.additional_properties
+      pump_program.addLine("Set heating_pump_vfr_max = #{htg_coil.speeds[-1].referenceUnitRatedWaterFlowRate}")
+      pump_program.addLine("Set cooling_pump_vfr_max = #{clg_coil.speeds[-1].referenceUnitRatedWaterFlowRate}")
+      pump_program.addLine('Set htg_flow_rate = 0.0')
+      pump_program.addLine('Set clg_flow_rate = 0.0')
+      (1..htg_coil.speeds.size).each do |i|
+        # Initialization
+        pump_program.addLine("Set heating_pump_vfr_#{i} = heating_pump_vfr_max * #{hvac_ap.heat_capacity_ratios[i - 1]}")
+        pump_program.addLine("Set heating_fraction_time_#{i} = 0.0")
+      end
+      pump_program.addLine("If #{heating_usl_sensor.name} == 1")
+      pump_program.addLine("  Set heating_fraction_time_1 = #{heating_plr_sensor.name}")
+      (1..(htg_coil.speeds.size - 1)).each do |i|
+        pump_program.addLine("ElseIf #{heating_usl_sensor.name} == #{i + 1}")
+        pump_program.addLine("  Set heating_fraction_time_#{i} = 1.0 - #{heating_nsl_sensor.name}")
+        pump_program.addLine("  Set heating_fraction_time_#{i + 1} = #{heating_nsl_sensor.name}")
+      end
+      pump_program.addLine('EndIf')
+      # sum up to get the actual flow rate
+      (1..htg_coil.speeds.size).each do |i|
+        pump_program.addLine("Set htg_flow_rate = htg_flow_rate + heating_fraction_time_#{i} * heating_pump_vfr_#{i}")
+      end
+      pump_program.addLine('Set heating_plr = htg_flow_rate / heating_pump_vfr_max')
+
+      # Cooling
+      (1..clg_coil.speeds.size).each do |i|
+        # Initialization
+        pump_program.addLine("Set cooling_pump_vfr_#{i} = cooling_pump_vfr_max * #{hvac_ap.cool_capacity_ratios[i - 1]}")
+        pump_program.addLine("Set cooling_fraction_time_#{i} = 0.0")
+      end
+      pump_program.addLine("If #{cooling_usl_sensor.name} == 1")
+      pump_program.addLine("  Set cooling_fraction_time_1 = #{cooling_plr_sensor.name}")
+      (1..(clg_coil.speeds.size - 1)).each do |i|
+        pump_program.addLine("ElseIf (#{cooling_usl_sensor.name}) == #{i + 1}")
+        pump_program.addLine("  Set cooling_fraction_time_#{i} = 1.0 - #{cooling_nsl_sensor.name}")
+        pump_program.addLine("  Set cooling_fraction_time_#{i + 1} = #{cooling_nsl_sensor.name}")
+      end
+      pump_program.addLine('EndIf')
+      # sum up to get the actual flow rate
+      (1..clg_coil.speeds.size).each do |i|
+        pump_program.addLine("Set clg_flow_rate = clg_flow_rate + cooling_fraction_time_#{i} * heating_pump_vfr_#{i}")
+      end
+      pump_program.addLine('Set cooling_plr = clg_flow_rate / cooling_pump_vfr_max')
+      pump_program.addLine('Set hvac_plr = @Max cooling_plr heating_plr')
+    end
     pump_program.addLine("Set pump_total_eff = #{pump_rated_mfr_var.name} / 1000 * #{pump.ratedPumpHead} / #{pump.ratedPowerConsumption.get}")
     pump_program.addLine("Set pump_vfr = #{pump_mfr_sensor.name} / 1000")
     pump_program.addLine('If pump_vfr > 0')
-    pump_program.addLine("  Set #{pump_pressure_rise_act.name} = #{pump_w} * heating_plr * pump_total_eff / pump_vfr")
+    pump_program.addLine("  Set #{pump_pressure_rise_act.name} = #{pump.ratedPowerConsumption.get} * hvac_plr * pump_total_eff / pump_vfr")
     pump_program.addLine('Else')
     pump_program.addLine("  Set #{pump_pressure_rise_act.name} = 0")
     pump_program.addLine('EndIf')
@@ -1800,6 +2027,74 @@ module HVAC
       model,
       name: "#{pump_program.name} calling manager",
       calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
+      ems_programs: [pump_program]
+    )
+  end
+
+  # Add EMS program to actuate pump mass flow rate, to work around an E+ bug: https://github.com/NREL/EnergyPlus/issues/10936
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param pump [OpenStudio::Model::PumpVariableSpeed] OpenStudio variable speed pump object
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
+  # @param htg_coil [OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit or OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit]  OpenStudio Heating Coil object
+  # @param clg_coil [OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit or OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit]  OpenStudio Cooling Coil object
+  # @return [nil]
+  def self.add_ghp_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil)
+    # Sensors
+    htg_load_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{control_zone.name} predicted heating loads",
+      output_var_or_meter_name: 'Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate',
+      key_name: control_zone.name
+    )
+
+    clg_load_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{control_zone.name} predicted cooling loads",
+      output_var_or_meter_name: 'Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate',
+      key_name: control_zone.name
+    )
+
+    # Actuator
+    pump_mfr_act = Model.add_ems_actuator(
+      name: "#{pump.name} mfr act",
+      model_object: pump,
+      comp_type_and_control: EPlus::EMSActuatorPumpMassFlowRate
+    )
+
+    # Program
+    # See https://bigladdersoftware.com/epx/docs/9-3/ems-application-guide/hvac-systems-001.html#pump
+    pump_program = Model.add_ems_program(
+      model,
+      name: "#{pump.name} mfr program"
+    )
+    pump_program.addLine("If #{htg_load_sensor.name} > 0.0 && #{clg_load_sensor.name} > 0.0") # Heating loads
+    pump_program.addLine("  Set estimated_plr = (@ABS #{htg_load_sensor.name}) / #{htg_coil.ratedHeatingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
+    pump_program.addLine("  Set max_vfr_htg = #{htg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
+    pump_program.addLine('  Set estimated_vfr = estimated_plr * max_vfr_htg')
+    pump_program.addLine("  If estimated_vfr < #{htg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
+    pump_program.addLine("    Set #{pump_mfr_act.name} = estimated_vfr * 1000.0")
+    pump_program.addLine('  Else')
+    pump_program.addLine("    Set #{pump_mfr_act.name} = NULL")
+    pump_program.addLine('  EndIf')
+    pump_program.addLine("ElseIf #{htg_load_sensor.name} < 0.0 && #{clg_load_sensor.name} < 0.0") # Cooling loads
+    pump_program.addLine("  Set estimated_plr = (@ABS #{clg_load_sensor.name}) / #{clg_coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
+    pump_program.addLine("  Set max_vfr_clg = #{clg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
+    pump_program.addLine('  Set estimated_vfr = estimated_plr * max_vfr_clg')
+    pump_program.addLine("  If estimated_vfr < #{clg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
+    pump_program.addLine("    Set #{pump_mfr_act.name} = estimated_vfr * 1000.0")
+    pump_program.addLine('  Else')
+    pump_program.addLine("    Set #{pump_mfr_act.name} = NULL")
+    pump_program.addLine('  EndIf')
+    pump_program.addLine('Else')
+    pump_program.addLine("  Set #{pump_mfr_act.name} = NULL")
+    pump_program.addLine('EndIf')
+
+    # Calling Point
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{pump_program.name} calling manager",
+      calling_point: 'AfterPredictorBeforeHVACManagers',
       ems_programs: [pump_program]
     )
   end
@@ -3996,55 +4291,6 @@ module HVAC
     return
   end
 
-  # TODO
-  #
-  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
-  # @param weather [WeatherFile] Weather object containing EPW information
-  # @return [nil]
-  def self.set_gshp_assumptions(heat_pump, weather)
-    hp_ap = heat_pump.additional_properties
-    geothermal_loop = heat_pump.geothermal_loop
-
-    hp_ap.design_chw = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.DeepGroundAnnualTemp + 10.0].max # Temperature of water entering indoor coil, use 85F as lower bound
-    hp_ap.design_delta_t = 10.0
-    hp_ap.fluid_type = EPlus::FluidPropyleneGlycol
-    hp_ap.frac_glycol = 0.2 # This was changed from 0.3 to 0.2 -- more typical based on experts/spec sheets
-    if hp_ap.fluid_type == EPlus::FluidWater
-      hp_ap.design_hw = [45.0, weather.design.HeatingDrybulb + 35.0, weather.data.DeepGroundAnnualTemp - 10.0].max # Temperature of fluid entering indoor coil, use 45F as lower bound for water
-    else
-      hp_ap.design_hw = [35.0, weather.design.HeatingDrybulb + 35.0, weather.data.DeepGroundAnnualTemp - 10.0].min # Temperature of fluid entering indoor coil, use 35F as upper bound
-    end
-    pipe_diameter = geothermal_loop.pipe_diameter
-    # Pipe nominal size conversion to pipe outside diameter and inside diameter,
-    # only pipe sizes <= 2" are used here with DR11 (dimension ratio)
-    case pipe_diameter
-    when 0.75 # 3/4" pipe
-      hp_ap.pipe_od = 1.050 # in
-      hp_ap.pipe_id = 0.859 # in
-    when 1.0 # 1" pipe
-      hp_ap.pipe_od = 1.315 # in
-      hp_ap.pipe_id = 1.076 # in
-    when 1.25 # 1-1/4" pipe
-      hp_ap.pipe_od = 1.660 # in
-      hp_ap.pipe_id = 1.358 # in
-    else
-      fail "Unexpected pipe size: #{pipe_diameter}"
-    end
-    hp_ap.u_tube_spacing_type = 'b'
-    # Calculate distance between pipes
-    case hp_ap.u_tube_spacing_type
-    when 'as'
-      # Two tubes, spaced 1/8” apart at the center of the borehole
-      hp_ap.u_tube_spacing = 0.125
-    when 'b'
-      # Two tubes equally spaced between the borehole edges
-      hp_ap.u_tube_spacing = 0.9661
-    when 'c'
-      # Both tubes placed against outer edge of borehole
-      hp_ap.u_tube_spacing = geothermal_loop.bore_diameter - 2 * hp_ap.pipe_od
-    end
-  end
-
   # Returns the EnergyPlus sequential load fractions for every day of the year.
   #
   # @param load_frac [Double] Fraction of heating or cooling load served by this HVAC system
@@ -4184,6 +4430,10 @@ module HVAC
           cap_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_TableLookup.get }
           eir_pow_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_TableLookup.get }
         end
+      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit
+        num_speeds = clg_or_htg_coil.speeds.size
+        cap_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.totalCoolingCapacityFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
+        eir_pow_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.energyInputRatioFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
       elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
         num_speeds = 1
         cap_fff_curves = [clg_or_htg_coil.totalCoolingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
@@ -4227,6 +4477,10 @@ module HVAC
           cap_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_TableLookup.get }
           eir_pow_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_TableLookup.get }
         end
+      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit
+        num_speeds = clg_or_htg_coil.speeds.size
+        cap_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.totalHeatingCapacityFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
+        eir_pow_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.energyInputRatioFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
       elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit
         num_speeds = 1
         cap_fff_curves = [clg_or_htg_coil.heatingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
@@ -4260,15 +4514,15 @@ module HVAC
 
     # Apply Cutler curve airflow coefficients to later equations
     if mode == :clg
-      cap_fflow_spec = hvac_ap.cool_cap_fflow_spec
-      eir_fflow_spec = hvac_ap.cool_eir_fflow_spec
+      cap_fflow_spec = hvac_ap.cool_cap_fflow_spec_iq
+      eir_fflow_spec = hvac_ap.cool_eir_fflow_spec_iq
       qgr_values = hvac_ap.cool_qgr_values
       p_values = hvac_ap.cool_p_values
       ff_chg_values = hvac_ap.cool_ff_chg_values
       suffix = 'clg'
     elsif mode == :htg
-      cap_fflow_spec = hvac_ap.heat_cap_fflow_spec
-      eir_fflow_spec = hvac_ap.heat_eir_fflow_spec
+      cap_fflow_spec = hvac_ap.heat_cap_fflow_spec_iq
+      eir_fflow_spec = hvac_ap.heat_eir_fflow_spec_iq
       qgr_values = hvac_ap.heat_qgr_values
       p_values = hvac_ap.heat_p_values
       ff_chg_values = hvac_ap.heat_ff_chg_values
@@ -4340,8 +4594,13 @@ module HVAC
       fault_program.addLine("Set EIR_IQ_adj_#{suffix} = EIR_Cutler_Curve_After_#{suffix} / EIR_Cutler_Curve_Pre_#{suffix}")
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
       if (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit) && (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit)
-        cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec : hvac_ap.heat_cap_fflow_spec
-        eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec : hvac_ap.heat_eir_fflow_spec
+        if (clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit) || (clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit)
+          cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec[speed] : hvac_ap.heat_cap_fflow_spec[speed]
+          eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec[speed] : hvac_ap.heat_eir_fflow_spec[speed]
+        else
+          cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec : hvac_ap.heat_cap_fflow_spec
+          eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec : hvac_ap.heat_eir_fflow_spec
+        end
         fault_program.addLine("Set CAP_c1_#{suffix} = #{cap_fff_specs_coeff[0]}")
         fault_program.addLine("Set CAP_c2_#{suffix} = #{cap_fff_specs_coeff[1]}")
         fault_program.addLine("Set CAP_c3_#{suffix} = #{cap_fff_specs_coeff[2]}")
@@ -4404,6 +4663,8 @@ module HVAC
       clg_cfm = clg_ap.cooling_actual_airflow_cfm
       if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized || clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
         cool_airflow_rated_defect_ratio = [UnitConversions.convert(clg_cfm, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0]
+      elsif clg_coil.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
+        cool_airflow_rated_defect_ratio = clg_coil.speeds.zip(clg_ap.cool_capacity_ratios).map { |speed, speed_ratio| UnitConversions.convert(clg_cfm * speed_ratio, 'cfm', 'm^3/s') / speed.referenceUnitRatedAirFlowRate - 1.0 }
       elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
         cool_airflow_rated_defect_ratio = clg_coil.stages.zip(clg_ap.cool_capacity_ratios).map { |stage, speed_ratio| UnitConversions.convert(clg_cfm * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
       end
@@ -4414,6 +4675,8 @@ module HVAC
       htg_cfm = htg_ap.heating_actual_airflow_cfm
       if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
         heat_airflow_rated_defect_ratio = [UnitConversions.convert(htg_cfm, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0]
+      elsif htg_coil.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
+        heat_airflow_rated_defect_ratio = htg_coil.speeds.zip(htg_ap.heat_capacity_ratios).map { |speed, speed_ratio| UnitConversions.convert(htg_cfm * speed_ratio, 'cfm', 'm^3/s') / speed.referenceUnitRatedAirFlow - 1.0 }
       elsif htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
         heat_airflow_rated_defect_ratio = htg_coil.stages.zip(htg_ap.heat_capacity_ratios).map { |stage, speed_ratio| UnitConversions.convert(htg_cfm * speed_ratio, 'cfm', 'm^3/s') / stage.ratedAirFlowRate.get - 1.0 }
       end

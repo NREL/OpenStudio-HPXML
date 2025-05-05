@@ -193,6 +193,19 @@ Research feature to select the type of defrost model. Use standard for default E
 
 <br/>
 
+**Simulation Control: Ground-to-Air Heat Pump Model Type**
+
+Research feature to select the type of ground-to-air heat pump model. Use standard for standard ground-to-air heat pump modeling. Use experimental for an improved model that better accounts for coil staging. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+
+- **Name:** ``simulation_control_ground_to_air_heat_pump_model_type``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `standard`, `experimental`
+
+<br/>
+
 **Simulation Control: HVAC On-Off Thermostat Deadband**
 
 Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.
@@ -2226,7 +2239,7 @@ The type of heat pump. Use 'none' if there is no heat pump.
 
 **Heat Pump: Cooling Compressor Type**
 
-The compressor type of the heat pump. Required for air-to-air and mini-split.
+The compressor type of the heat pump. Required for air-to-air, mini-split and ground-to-air.
 
 - **Name:** ``heat_pump_compressor_type``
 - **Type:** ``Choice``
