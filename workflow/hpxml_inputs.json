@@ -2427,7 +2427,9 @@
     "heat_pump_compressor_lockout_temp": 30,
     "heat_pump_backup_fuel": "natural gas",
     "heat_pump_backup_heating_efficiency": 0.95,
-    "heat_pump_backup_heating_lockout_temp": 30
+    "heat_pump_backup_heating_lockout_temp": 30,
+    "ducts_supply_surface_area_fraction": null,
+    "ducts_return_surface_area_fraction": null
   },
   "sample_files/base-hvac-ducts-leakage-cfm50.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2973,7 +2975,17 @@
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml",
     "heating_system_2_type": "Furnace",
     "heating_system_2_fuel": "natural gas",
-    "heating_system_2_heating_efficiency": 0.8
+    "heating_system_2_heating_efficiency": 0.8,
+    "ducts_supply_leakage_to_outside_value": 81,
+    "ducts_return_leakage_to_outside_value": 27,
+    "ducts_supply_location": "attic - unvented",
+    "ducts_supply_insulation_r": 4,
+    "ducts_supply_surface_area": null,
+    "ducts_supply_surface_area_fraction": 1.0,
+    "ducts_return_location": "attic - unvented",
+    "ducts_return_insulation_r": 4,
+    "ducts_return_surface_area": null,
+    "ducts_return_surface_area_fraction": 1.0
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml",
