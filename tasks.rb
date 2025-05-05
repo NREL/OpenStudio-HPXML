@@ -450,10 +450,16 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].dup
         hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
         hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
-        hpxml_bldg.hvac_distributions[-1].ducts[0].id = 'Ducts3'
-        hpxml_bldg.hvac_distributions[-1].ducts[1].id = 'Ducts4'
+        hpxml_bldg.hvac_distributions[-1].ducts[0].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}"
+        hpxml_bldg.hvac_distributions[-1].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 2}"
         hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+      end
+      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+        hvac_distribution.ducts[0].duct_fraction_area = nil
+        hvac_distribution.ducts[1].duct_fraction_area = nil
+        hvac_distribution.ducts[0].duct_surface_area = 150.0
+        hvac_distribution.ducts[1].duct_surface_area = 150.0
       end
 
       # Add spaces
@@ -1926,17 +1932,19 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.cooling_systems[1].distribution_system_idref = hpxml_bldg.hvac_distributions[1].id
       hpxml_bldg.cooling_systems[1].primary_system = true
     elsif ['base-bldgtype-mf-unit-adjacent-to-multiple.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_area = 0.5
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_area = 0.5
       hpxml_bldg.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}",
                                                  duct_type: HPXML::DuctTypeSupply,
                                                  duct_insulation_r_value: 4,
                                                  duct_location: HPXML::LocationRoofDeck,
-                                                 duct_surface_area: 150)
+                                                 duct_fraction_area: 0.5)
       hpxml_bldg.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}",
                                                  duct_type: HPXML::DuctTypeReturn,
                                                  duct_insulation_r_value: 0,
                                                  duct_location: HPXML::LocationRoofDeck,
-                                                 duct_surface_area: 50)
+                                                 duct_fraction_area: 0.5)
     elsif ['base-appliances-dehumidifier-multiple.xml'].include? hpxml_file
       hpxml_bldg.dehumidifiers[0].fraction_served = 0.5
       hpxml_bldg.dehumidifiers.add(id: 'Dehumidifier2',
