@@ -3997,7 +3997,7 @@
     "heating_system_fraction_heat_load_served": 0.5,
     "cooling_system_cooling_capacity": 12000,
     "cooling_system_fraction_cool_load_served": 0.5,
-    "ducts_supply_leakage_to_outside_value": 20.25,
-    "ducts_return_leakage_to_outside_value": 6.75
+    "ducts_supply_leakage_to_outside_value": 40.5,
+    "ducts_return_leakage_to_outside_value": 13.5
   }
 }

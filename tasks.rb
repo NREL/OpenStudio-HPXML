@@ -458,8 +458,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hvac_distributions.each do |hvac_distribution|
         hvac_distribution.ducts[0].duct_fraction_area = nil
         hvac_distribution.ducts[1].duct_fraction_area = nil
-        hvac_distribution.ducts[0].duct_surface_area = 150.0
-        hvac_distribution.ducts[1].duct_surface_area = 150.0
+        hvac_distribution.ducts[0].duct_surface_area = 150.0 / hpxml_bldg.hvac_distributions.size
+        hvac_distribution.ducts[1].duct_surface_area = 50.0 / hpxml_bldg.hvac_distributions.size
       end
 
       # Add spaces
