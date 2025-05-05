@@ -3197,7 +3197,7 @@ module Defaults
   # @return [nil]
   def self.apply_electric_panels(runner, hpxml_header, hpxml_bldg, unit_num)
     # Currently, we leave the electric panel object unchanged if no load calculation types are specified
-    return if hpxml_header.service_feeders_load_calculation_types.empty?
+    return if hpxml_header.service_feeders_load_calculation_types.nil? || hpxml_header.service_feeders_load_calculation_types.empty?
 
     default_panels_csv_data = get_panels_csv_data()
 
