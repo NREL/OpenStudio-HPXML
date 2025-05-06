@@ -1070,7 +1070,9 @@
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
   },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
+    "heating_system_heating_capacity": 18000,
+    "cooling_system_cooling_capacity": 18000
   },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
@@ -2062,7 +2064,9 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
     "heat_pump": "Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup": "Separate, 30F Lockout"
+    "heat_pump_backup": "Separate, 30F Lockout",
+    "heat_pump_heating_capacity": 24000,
+    "heat_pump_cooling_capacity": 24000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml"
