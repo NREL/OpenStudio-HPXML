@@ -1879,22 +1879,25 @@ module HVACSizing
 
         # Initialize for the iteration
         delta = 1
+        de = nil
         heat_load_next = init_heat_load
 
-        for _iter in 0..19
-          break if delta.abs <= 0.001
+        while delta.abs > 0.001 # 0.1%
 
-          heat_load_prev = heat_load_next
-
-          # Calculate the new heating air flow rate
+          # Calculate the new heating airflow rate
           heating_delta_t = hvac_heating_ap.supply_air_temp - mj.heat_setpoint
           heat_cfm = calc_airflow_rate_manual_s(mj, heat_load_next, heating_delta_t)
 
+          # Calculate the new duct leakage (can be a percentage, in which case it's dependent on airflow rate)
           q_s, q_r = calc_duct_leakages_cfm25(distribution_system, heat_cfm)
 
+          # Calculate the delivery effectiveness
+          de_prev = de
           de = calc_delivery_effectiveness_heating(mj, q_s, q_r, heat_cfm, heat_load_next, t_amb_s, t_amb_r, a_s, a_r, mj.heat_setpoint, f_regain_s, f_regain_r, rvalue_s, rvalue_r)
+          de = (de + de_prev) / 2.0 unless de_prev.nil? # Use average of last 2 values to prevent oscillations
 
-          # Calculate the increase in heating load due to ducts (Approach: DE = Qload/Qequip -> Qducts = Qequip-Qload)
+          # Calculate the increase in heating load due to ducts
+          heat_load_prev = heat_load_next
           heat_load_next = init_heat_load / de
 
           # Calculate the change since the last iteration
@@ -1919,35 +1922,41 @@ module HVACSizing
 
         # Initialize for the iteration
         delta = 1
+        de = nil
         cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
         cooling_delta_t = mj.cool_setpoint - hvac_cooling_ap.leaving_air_temp
         cool_cfm = calc_airflow_rate_manual_s(mj, init_cool_load_sens, cooling_delta_t)
         _q_s, q_r = calc_duct_leakages_cfm25(distribution_system, cool_cfm)
 
-        for _iter in 1..50
-          break if delta.abs <= 0.001
-
-          cool_load_tot_prev = cool_load_tot_next
+        while delta.abs > 0.001 # 0.1%
 
           cool_load_lat, cool_load_sens = calculate_sensible_latent_split(mj, q_r, cool_load_tot_next, init_cool_load_lat)
           cool_load_tot = cool_load_lat + cool_load_sens
 
-          # Calculate the new cooling air flow rate
+          # Calculate the new cooling airflow rate
           cool_cfm = calc_airflow_rate_manual_s(mj, cool_load_sens, cooling_delta_t)
 
+          # Calculate the new duct leakage (can be a percentage, in which case it's dependent on airflow rate)
           q_s, q_r = calc_duct_leakages_cfm25(distribution_system, cool_cfm)
 
+          # Calculate the delivery effectiveness
+          de_prev = de
           de = calc_delivery_effectiveness_cooling(mj, q_s, q_r, hvac_cooling_ap.leaving_air_temp, cool_cfm, cool_load_sens, cool_load_tot, t_amb_s, t_amb_r, a_s, a_r, mj.cool_setpoint, f_regain_s, f_regain_r, h_r, rvalue_s, rvalue_r)
+          de = (de + de_prev) / 2.0 unless de_prev.nil? # Use average of last 2 values to prevent oscillations
 
-          cool_load_tot_next = (init_cool_load_sens + init_cool_load_lat) / de
+          # Calculate the increase in cooling load due to ducts
+          cool_load_tot_prev = cool_load_tot_next
+          cool_load_sens_next = init_cool_load_sens / de
+          cool_load_lat_next = init_cool_load_lat / de
+          cool_load_tot_next = cool_load_sens_next + cool_load_lat_next
 
           # Calculate the change since the last iteration
           delta = (cool_load_tot_next - cool_load_tot_prev) / cool_load_tot_prev
         end
 
-        ducts_cool_load_sens = cool_load_sens - init_cool_load_sens
-        ducts_cool_load_lat = cool_load_lat - init_cool_load_lat
+        ducts_cool_load_sens = cool_load_sens_next - init_cool_load_sens
+        ducts_cool_load_lat = cool_load_lat_next - init_cool_load_lat
       end
     end
 
