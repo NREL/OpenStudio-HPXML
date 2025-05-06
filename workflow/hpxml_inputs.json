@@ -2787,8 +2787,8 @@
     "ducts_return_insulation_r": 0,
     "ducts_supply_surface_area": 30,
     "ducts_return_surface_area": 10,
-    "ducts_supply_surface_area_fraction": 1.0,
-    "ducts_return_surface_area_fraction": 1.0
+    "ducts_supply_surface_area_fraction": null,
+    "ducts_return_surface_area_fraction": null
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ductless.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml",
@@ -2842,8 +2842,8 @@
     "ducts_return_insulation_r": 0,
     "ducts_supply_surface_area": 30,
     "ducts_return_surface_area": 10,
-    "ducts_supply_surface_area_fraction": 1.0,
-    "ducts_return_surface_area_fraction": 1.0
+    "ducts_supply_surface_area_fraction": null,
+    "ducts_return_surface_area_fraction": null
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
