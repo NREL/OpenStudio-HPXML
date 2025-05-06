@@ -1151,7 +1151,9 @@
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
   },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
+    "heating_system_heating_capacity": 18000,
+    "cooling_system_cooling_capacity": 18000
   },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
