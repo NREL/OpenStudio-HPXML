@@ -476,8 +476,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['slab_exterior_horizontal_insulation_width'] = 0
       args['slab_exterior_horizontal_insulation_depth_below_grade'] = 0
       args['slab_thickness'] = 4.0
-      args['slab_carpet_fraction'] = 0.0
-      args['slab_carpet_r'] = 0.0
+      args['slab_carpet'] = '0% Carpet'
       args['ceiling_assembly_r'] = 39.3
       args['enclosure_roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
       args['roof_assembly_r'] = 2.3

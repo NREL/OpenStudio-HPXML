@@ -39,8 +39,7 @@
     "slab_under_insulation_r": 0,
     "slab_under_insulation_width": 0,
     "slab_thickness": 4,
-    "slab_carpet_fraction": 0,
-    "slab_carpet_r": 0,
+    "slab_carpet": "0% Carpet",
     "ceiling_assembly_r": 18.45,
     "enclosure_roof_material": "0.6 Solar Absorptance",
     "roof_assembly_r": 1.99,
@@ -256,8 +255,7 @@
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_foundation_type": "SlabOnGrade",
-    "slab_carpet_fraction": 1,
-    "slab_carpet_r": 2.08
+    "slab_carpet": "100% Carpet, R-2.08"
   },
   "tests/ASHRAE_Standard_140/L304XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L302XC.xml",
@@ -599,8 +597,7 @@
     "slab_under_insulation_r": 0,
     "slab_under_insulation_width": 0,
     "slab_thickness": 4,
-    "slab_carpet_fraction": 0,
-    "slab_carpet_r": 0,
+    "slab_carpet":"0% Carpet",
     "ceiling_assembly_r": 39.3,
     "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
     "roof_assembly_r": 2.3,
@@ -1867,8 +1864,7 @@
     "geometry_foundation_height_above_grade": 0,
     "slab_under_insulation_r": 5,
     "slab_under_insulation_width": 999,
-    "slab_carpet_fraction": 1,
-    "slab_carpet_r": 2.5,
+    "slab_carpet": "100% Carpet, R-2.5",
     "ducts_supply_location": "under slab",
     "ducts_return_location": "under slab",
     "misc_plug_loads_other_annual_kwh": 1228.5
@@ -3101,7 +3097,6 @@
     "foundation_wall_insulation_distance_to_top": null,
     "foundation_wall_insulation_distance_to_bottom": null,
     "slab_thickness": null,
-    "slab_carpet_fraction": null,
     "enclosure_roof_material": null,
     "enclosure_wall_siding": null,
     "window_fraction_operable": null,

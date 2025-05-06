@@ -1,0 +1,12 @@
+Option Name	Fraction [Frac]	R [h-ft^2-R/Btu]
+0% Carpet	0	0
+20% Carpet	0.2	
+40% Carpet	0.4	
+60% Carpet	0.6	
+80% Carpet	0.8	
+100% Carpet	1	
+"100% Carpet, R-2.08"	1	2.08
+"100% Carpet, R-2.5"	1	2.5
+		
+Fraction: Fraction of the slab floor area that is carpeted.		
+R: R-value of the slab carpet.		
