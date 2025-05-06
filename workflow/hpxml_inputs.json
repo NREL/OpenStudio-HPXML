@@ -2207,7 +2207,9 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
     "heat_pump_compressor_lockout_temp": 30,
-    "heat_pump_backup_heating_lockout_temp": 30
+    "heat_pump_backup_heating_lockout_temp": 30,
+    "heat_pump_heating_capacity": 24000,
+    "heat_pump_cooling_capacity": 24000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml"
