@@ -2340,16 +2340,16 @@ The blower fan efficiency at maximum fan speed. Applies only to split (not packa
 
 <br/>
 
-**Ducts: Supply**
+**Ducts**
 
 The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.
 
-- **Name:** ``ducts_supply``
+- **Name:** ``ducts``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `None`, `0% Leakage to Outside, Uninsulated`, `4% Leakage to Outside, Uninsulated`, `4% Leakage to Outside, R-4`, `4% Leakage to Outside, R-6`, `4% Leakage to Outside, R-8`, `5% Leakage to Outside, Uninsulated`, `5% Leakage to Outside, R-4`, `5% Leakage to Outside, R-6`, `5% Leakage to Outside, R-8`, `6.7% Leakage to Outside, Uninsulated`, `6.7% Leakage to Outside, R-4`, `6.7% Leakage to Outside, R-6`, `6.7% Leakage to Outside, R-8`, `9.3% Leakage to Outside, Uninsulated`, `9.3% Leakage to Outside, R-4`, `9.3% Leakage to Outside, R-6`, `9.3% Leakage to Outside, R-8`, `10% Leakage to Outside, Uninsulated`, `10% Leakage to Outside, R-4`, `10% Leakage to Outside, R-4, 150 sq. ft.`, `10% Leakage to Outside, R-6`, `10% Leakage to Outside, R-8`, `13.3% Leakage to Outside, Uninsulated`, `13.3% Leakage to Outside, R-4`, `13.3% Leakage to Outside, R-6`, `13.3% Leakage to Outside, R-8`, `15% Leakage to Outside, Uninsulated`, `15% Leakage to Outside, R-4`, `15% Leakage to Outside, R-6`, `15% Leakage to Outside, R-8`, `16% Leakage to Outside, Uninsulated`, `16% Leakage to Outside, R-4`, `16% Leakage to Outside, R-6`, `16% Leakage to Outside, R-8`, `20% Leakage to Outside, Uninsulated`, `20% Leakage to Outside, R-4`, `20% Leakage to Outside, R-6`, `20% Leakage to Outside, R-8`, `22.7% Leakage to Outside, Uninsulated`, `22.7% Leakage to Outside, R-4`, `22.7% Leakage to Outside, R-6`, `22.7% Leakage to Outside, R-8`, `35.3% Leakage to Outside, Uninsulated`, `35.3% Leakage to Outside, R-4`, `35.3% Leakage to Outside, R-6`, `35.3% Leakage to Outside, R-8`, `56.7% Leakage to Outside, Uninsulated`, `56.7% Leakage to Outside, R-4`, `56.7% Leakage to Outside, R-6`, `56.7% Leakage to Outside, R-8`, `0 CFM25 Leakage to Outside, Uninsulated`, `0 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.`, `0 CFM25 Leakage to Outside, R-4, 150 sq. ft.`, `0 CFM25 Leakage to Outside, R-4, 112.5 sq. ft.`, `0 CFM25 Leakage to Outside, Uninsulated, 308 sq. ft.`, `0 CFM25 Leakage to Outside, R-6, 308 sq. ft.`, `5 CFM25 Leakage to Outside, R-4, 150 sq. ft.`, `7.5 CFM25 Leakage to Outside, R-4, 150 sq. ft.`, `15 CFM25 Leakage to Outside, Uninsulated, 30 sq. ft.`, `37.5 CFM25 Leakage to Outside, R-4, 75 sq. ft.`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft.`, `75 CFM25 Leakage to Outside, R-4`, `75 CFM25 Leakage to Outside, R-4, 112.5 sq. ft.`, `75 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Deeply Buried`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Round`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft., Rectangular`, `75 CFM25 Leakage to Outside, R-4, 150 sq. ft., 25% Rectangular`, `125 CFM25 Leakage to Outside, R-6, 308 sq. ft.`, `100 CFM50 Leakage to Outside, R-4, 150 sq. ft.`
+- **Choices:** `None`, `0% Leakage, Uninsulated`, `0% Leakage, R-4`, `0% Leakage, R-6`, `0% Leakage, R-8`, `5% Leakage, Uninsulated`, `5% Leakage, R-4`, `5% Leakage, R-6`, `5% Leakage, R-8`, `10% Leakage, Uninsulated`, `10% Leakage, R-4`, `10% Leakage, R-6`, `10% Leakage, R-8`, `15% Leakage, Uninsulated`, `15% Leakage, R-4`, `15% Leakage, R-6`, `15% Leakage, R-8`, `20% Leakage, Uninsulated`, `20% Leakage, R-4`, `20% Leakage, R-6`, `20% Leakage, R-8`, `25% Leakage, Uninsulated`, `25% Leakage, R-4`, `25% Leakage, R-6`, `25% Leakage, R-8`, `30% Leakage, Uninsulated`, `30% Leakage, R-4`, `30% Leakage, R-6`, `30% Leakage, R-8`, `35% Leakage, Uninsulated`, `35% Leakage, R-4`, `35% Leakage, R-6`, `35% Leakage, R-8`, `0 CFM25 per 100ft2, Uninsulated`, `0 CFM25 per 100ft2, R-4`, `0 CFM25 per 100ft2, R-6`, `0 CFM25 per 100ft2, R-8`, `1 CFM25 per 100ft2, Uninsulated`, `1 CFM25 per 100ft2, R-4`, `1 CFM25 per 100ft2, R-6`, `1 CFM25 per 100ft2, R-8`, `2 CFM25 per 100ft2, Uninsulated`, `2 CFM25 per 100ft2, R-4`, `2 CFM25 per 100ft2, R-6`, `2 CFM25 per 100ft2, R-8`, `4 CFM25 per 100ft2, Uninsulated`, `4 CFM25 per 100ft2, R-4`, `4 CFM25 per 100ft2, R-4, Deeply Buried`, `4 CFM25 per 100ft2, R-4, 100% Round`, `4 CFM25 per 100ft2, R-4, 100% Rectangular`, `4 CFM25 per 100ft2, R-6`, `4 CFM25 per 100ft2, R-8`, `6 CFM25 per 100ft2, Uninsulated`, `6 CFM25 per 100ft2, R-4`, `6 CFM25 per 100ft2, R-6`, `6 CFM25 per 100ft2, R-8`, `8 CFM25 per 100ft2, Uninsulated`, `8 CFM25 per 100ft2, R-4`, `8 CFM25 per 100ft2, R-6`, `8 CFM25 per 100ft2, R-8`, `12 CFM25 per 100ft2, Uninsulated`, `12 CFM25 per 100ft2, R-4`, `12 CFM25 per 100ft2, R-6`, `12 CFM25 per 100ft2, R-8`, `250 CFM25, R-6`, `5 CFM50 per 100ft2, R-4`, `400 CFM50, R-6`
 
 <br/>
 
@@ -2379,16 +2379,16 @@ The fraction of supply ducts surface area in the given location. Only used if Su
 
 <br/>
 
-**Ducts: Return**
+**Ducts: Supply Leakage Fraction**
 
-The return duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.
+The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts
 
-- **Name:** ``ducts_return``
-- **Type:** ``Choice``
+- **Name:** ``ducts_supply_leakage_fraction``
+- **Type:** ``Double``
 
-- **Required:** ``true``
+- **Units:** ``frac``
 
-- **Choices:** `None`, `0% Leakage to Outside, Uninsulated`, `2% Leakage to Outside, Uninsulated`, `2% Leakage to Outside, R-4`, `2% Leakage to Outside, R-6`, `2% Leakage to Outside, R-8`, `2.5% Leakage to Outside, Uninsulated`, `2.5% Leakage to Outside, R-4`, `2.5% Leakage to Outside, R-6`, `2.5% Leakage to Outside, R-8`, `3.3% Leakage to Outside, Uninsulated`, `3.3% Leakage to Outside, R-4`, `3.3% Leakage to Outside, R-6`, `3.3% Leakage to Outside, R-8`, `4.7% Leakage to Outside, Uninsulated`, `4.7% Leakage to Outside, R-4`, `4.7% Leakage to Outside, R-6`, `4.7% Leakage to Outside, R-8`, `5% Leakage to Outside, Uninsulated`, `5% Leakage to Outside, Uninsulated, 50 sq. ft.`, `5% Leakage to Outside, R-4`, `5% Leakage to Outside, R-6`, `5% Leakage to Outside, R-8`, `6.7% Leakage to Outside, Uninsulated`, `6.7% Leakage to Outside, R-4`, `6.7% Leakage to Outside, R-6`, `6.7% Leakage to Outside, R-8`, `7.5% Leakage to Outside, Uninsulated`, `7.5% Leakage to Outside, R-4`, `7.5% Leakage to Outside, R-6`, `7.5% Leakage to Outside, R-8`, `8% Leakage to Outside, Uninsulated`, `8% Leakage to Outside, R-4`, `8% Leakage to Outside, R-6`, `8% Leakage to Outside, R-8`, `10% Leakage to Outside, Uninsulated`, `10% Leakage to Outside, R-4`, `10% Leakage to Outside, R-6`, `10% Leakage to Outside, R-10`, `11.3% Leakage to Outside, Uninsulated`, `11.3% Leakage to Outside, R-4`, `11.3% Leakage to Outside, R-6`, `11.3% Leakage to Outside, R-8`, `17.7% Leakage to Outside, Uninsulated`, `17.7% Leakage to Outside, R-4`, `17.7% Leakage to Outside, R-6`, `17.7% Leakage to Outside, R-8`, `28.3% Leakage to Outside, Uninsulated`, `28.3% Leakage to Outside, R-4`, `28.3% Leakage to Outside, R-6`, `28.3% Leakage to Outside, R-8`, `0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.`, `0 CFM25 Leakage to Outside, Uninsulated`, `0 CFM25 Leakage to Outside, Uninsulated, 77 sq. ft.`, `0 CFM25 Leakage to Outside, Uninsulated, 37.5 sq. ft.`, `0 CFM25 Leakage to Outside, R-6, 77 sq. ft.`, `2.5 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.`, `5 CFM25 Leakage to Outside, Uninsulated, 10 sq. ft.`, `10 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.`, `12.5 CFM25 Leakage to Outside, Uninsulated, 25 sq. ft.`, `25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.`, `25 CFM25 Leakage to Outside, Uninsulated, 37.5 sq. ft.`, `25 CFM25 Leakage to Outside, R-4, 50 sq. ft., Deeply Buried`, `25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., Round`, `25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., Rectangular`, `25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft., 75% Rectangular`, `25 CFM25 Leakage to Outside, Uninsulated`, `125 CFM25 Leakage to Outside, R-6, 77 sq. ft.`, `125 CFM50 Leakage to Outside, Uninsulated, 50 sq. ft.`
+- **Required:** ``false``
 
 <br/>
 

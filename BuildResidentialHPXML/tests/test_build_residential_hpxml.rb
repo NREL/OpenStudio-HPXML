@@ -389,15 +389,17 @@ class BuildResidentialHPXMLTest < Minitest::Test
 
       # Check we can retrieve option names
       option_names = get_option_names(tsv_name)
-      puts "  Number of options: #{option_names.size}"
+      puts "  Number of options: #{option_names.size} (unique: #{option_names.uniq.size})"
       assert_operator(option_names.size, :>, 0)
+      assert_equal(option_names.size, option_names.uniq.size) # Make sure there are no duplicates
 
       # Check we can retrieve properties for each option
       option_names.each_with_index do |option_name, i|
         args = {}
         get_option_properties(args, tsv_name, option_name)
-        puts "  Number of properties: #{args.size}" if i == 0
+        puts "  Number of properties: #{args.size} (unique: #{args.uniq.size})" if i == 0
         assert_operator(args.size, :>, 0)
+        assert_equal(args.size, args.uniq.size) # Make sure there are no duplicates
       end
 
       # Check that every property has a description at the end of the file
