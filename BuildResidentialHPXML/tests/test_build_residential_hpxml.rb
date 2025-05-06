@@ -543,8 +543,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_control_heating_weekend_setpoint'] = 68
       args['hvac_control_cooling_weekday_setpoint'] = 78
       args['hvac_control_cooling_weekend_setpoint'] = 78
-      args['ducts_supply'] = '75 CFM25 Leakage to Outside, R-4, 150 sq. ft.'
-      args['ducts_return'] = '25 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
+      args['ducts'] = '4 CFM25 per 100ft2, R-4'
       args['ducts_supply_location'] = HPXML::LocationAtticUnvented
       args['ducts_return_location'] = HPXML::LocationAtticUnvented
       args['ducts_number_of_return_registers'] = 2
@@ -720,8 +719,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_area_back'] = 0
       args['window_area_left'] = 0
       args['window_area_right'] = 0
-      args['ducts_supply'] = '0 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.'
-      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
+      args['ducts'] = '0 CFM25 per 100ft2, Uninsulated'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['ducts_number_of_return_registers'] = 1
@@ -769,9 +767,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('clothes_washer_location')
       args.delete('clothes_dryer_location')
       args.delete('refrigerator_location')
-      # options are the same as base-sfd.xml but without duct surface areas
-      args['ducts_supply'] = '75 CFM25 Leakage to Outside, R-4'
-      args['ducts_return'] = '25 CFM25 Leakage to Outside, Uninsulated'
+      args['ducts'] = '4 CFM25 per 100ft2, R-4'
     when 'extra-auto-duct-locations.xml'
       args['ducts_supply_location'] = HPXML::LocationAtticUnvented
       args['ducts_return_location'] = HPXML::LocationAtticUnvented
@@ -789,8 +785,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_fuel'] = HPXML::FuelTypeElectricity
       args['heating_system_heating_capacity'] = 48000.0
       args['heating_system_fraction_heat_load_served'] = 0.75
-      args['ducts_supply'] = '0 CFM25 Leakage to Outside, Uninsulated, 150 sq. ft.'
-      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
+      args['ducts'] = '0 CFM25 per 100ft2, Uninsulated'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['heating_system_2'] = 'Space Heater, 100% Efficiency'
@@ -814,8 +809,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump_backup'] = 'Integrated, Electricity, 100% Efficiency'
       args['heat_pump_heating_capacity'] = 48000.0
       args['heat_pump_fraction_heat_load_served'] = 0.75
-      args['ducts_supply'] = '0 CFM25 Leakage to Outside, R-4, 150 sq. ft.'
-      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
+      args['ducts'] = '0 CFM25 per 100ft2, R-4'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['heating_system_2'] = 'Space Heater, 100% Efficiency'
@@ -956,8 +950,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'
     when 'extra-sfa-atticroof-flat.xml'
       args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
-      args['ducts_supply'] = '0 CFM25 Leakage to Outside, R-4, 150 sq. ft.'
-      args['ducts_return'] = '0 CFM25 Leakage to Outside, Uninsulated, 50 sq. ft.'
+      args['ducts'] = '0 CFM25 per 100ft2, R-4'
       args['ducts_supply_location'] = HPXML::LocationBasementConditioned
       args['ducts_return_location'] = HPXML::LocationBasementConditioned
     when 'extra-sfa-atticroof-conditioned-eaves-gable.xml'
