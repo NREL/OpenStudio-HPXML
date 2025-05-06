@@ -1670,29 +1670,16 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
           hpxml_bldg.heating_systems[i].fraction_heat_load_served = 0.35
         end
       end
-    elsif ['base-hvac-ducts-defaults.xml'].include? hpxml_file
-      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
-        duct.duct_surface_area = nil
-      end
-      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2025.0
-    elsif ['base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml'].include? hpxml_file
-      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
-        duct.duct_surface_area = nil
-      end
-      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700.0
     elsif ['base-residents-5-5.xml'].include? hpxml_file
       hpxml_bldg.slabs.each do |slab|
         slab.carpet_fraction = nil
       end
-      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
-        duct.duct_surface_area = nil
-      end
-      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700.0
     elsif ['base-enclosure-2stories.xml',
            'base-enclosure-2stories-garage.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
       hpxml_bldg.hvac_distributions[0].ducts[2].duct_insulation_r_value = 4.0
       hpxml_bldg.hvac_distributions[0].ducts[3].duct_location = HPXML::LocationConditionedSpace
+      hpxml_bldg.hvac_distributions[0].ducts[3].duct_insulation_r_value = 0
     elsif ['base-hvac-ducts-effective-rvalue.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_insulation_r_value = nil
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_insulation_r_value = nil
