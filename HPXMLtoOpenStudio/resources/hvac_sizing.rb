@@ -1882,7 +1882,8 @@ module HVACSizing
         de = nil
         heat_load_next = init_heat_load
 
-        while delta.abs > 0.001 # 0.1%
+        for _iter in 1..50
+          break if delta.abs <= 0.001 # 0.1%
 
           # Calculate the new heating airflow rate
           heating_delta_t = hvac_heating_ap.supply_air_temp - mj.heat_setpoint
@@ -1894,7 +1895,7 @@ module HVACSizing
           # Calculate the delivery effectiveness
           de_prev = de
           de = calc_delivery_effectiveness_heating(mj, q_s, q_r, heat_cfm, heat_load_next, t_amb_s, t_amb_r, a_s, a_r, mj.heat_setpoint, f_regain_s, f_regain_r, rvalue_s, rvalue_r)
-          de = (de + de_prev) / 2.0 unless de_prev.nil? # Use average of last 2 values to prevent oscillations
+          de = 0.9 * de + 0.1 * de_prev unless de_prev.nil? # Force towards convergence, see https://github.com/NREL/OpenStudio-HPXML/pull/2004
 
           # Calculate the increase in heating load due to ducts
           heat_load_prev = heat_load_next
@@ -1929,7 +1930,8 @@ module HVACSizing
         cool_cfm = calc_airflow_rate_manual_s(mj, init_cool_load_sens, cooling_delta_t)
         _q_s, q_r = calc_duct_leakages_cfm25(distribution_system, cool_cfm)
 
-        while delta.abs > 0.001 # 0.1%
+        for _iter in 1..50
+          break if delta.abs <= 0.001 # 0.1%
 
           cool_load_lat, cool_load_sens = calculate_sensible_latent_split(mj, q_r, cool_load_tot_next, init_cool_load_lat)
           cool_load_tot = cool_load_lat + cool_load_sens
@@ -1943,7 +1945,7 @@ module HVACSizing
           # Calculate the delivery effectiveness
           de_prev = de
           de = calc_delivery_effectiveness_cooling(mj, q_s, q_r, hvac_cooling_ap.leaving_air_temp, cool_cfm, cool_load_sens, cool_load_tot, t_amb_s, t_amb_r, a_s, a_r, mj.cool_setpoint, f_regain_s, f_regain_r, h_r, rvalue_s, rvalue_r)
-          de = (de + de_prev) / 2.0 unless de_prev.nil? # Use average of last 2 values to prevent oscillations
+          de = 0.9 * de + 0.1 * de_prev unless de_prev.nil? # Force towards convergence, see https://github.com/NREL/OpenStudio-HPXML/pull/2004
 
           # Calculate the increase in cooling load due to ducts
           cool_load_tot_prev = cool_load_tot_next
