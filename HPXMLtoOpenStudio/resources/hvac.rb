@@ -475,7 +475,7 @@ module HVAC
     if is_heatpump && hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
       apply_advanced_defrost(model, htg_coil, control_zone.spaces[0], htg_supp_coil, cooling_system, q_dot_defrost)
     elsif is_heatpump && hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeStandard
-      apply_frost_multiplier_EMS(model, htg_coil, control_zone.spaces[0], htg_supp_coil, cooling_system)
+      apply_frost_multiplier_EMS(model, htg_coil, control_zone.spaces[0], htg_supp_coil, cooling_system, hpxml_bldg.building_construction.number_of_units)
     end
 
     return air_loop
@@ -5747,8 +5747,9 @@ module HVAC
   # @param conditioned_space [OpenStudio::Model::Space]  OpenStudio Space object for conditioned zone
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [nil]
-  def self.apply_frost_multiplier_EMS(model, htg_coil, conditioned_space, htg_supp_coil, heat_pump)
+  def self.apply_frost_multiplier_EMS(model, htg_coil, conditioned_space, htg_supp_coil, heat_pump, unit_multiplier)
     if htg_supp_coil.nil?
       backup_system = heat_pump.backup_system
       if backup_system.nil?
@@ -5756,7 +5757,7 @@ module HVAC
         supp_sys_fuel = HPXML::FuelTypeElectricity
       else
         supp_sys_fuel = backup_system.heating_system_fuel
-        supp_sys_capacity = UnitConversions.convert(backup_system.heating_capacity, 'Btu/hr', 'W')
+        supp_sys_capacity = UnitConversions.convert(backup_system.heating_capacity, 'Btu/hr', 'W') / unit_multiplier
         supp_sys_efficiency = backup_system.heating_efficiency_percent
         supp_sys_efficiency = backup_system.heating_efficiency_afue if supp_sys_efficiency.nil?
       end
@@ -5764,7 +5765,7 @@ module HVAC
       supp_sys_fuel = heat_pump.backup_heating_fuel
       is_ducted = !heat_pump.distribution_system_idref.nil?
       if is_ducted
-        supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
+        supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W') / unit_multiplier
         supp_sys_efficiency = heat_pump.backup_heating_efficiency_percent
         supp_sys_efficiency = heat_pump.backup_heating_efficiency_afue if supp_sys_efficiency.nil?
       else
@@ -5845,7 +5846,7 @@ module HVAC
     program.addLine('  Set hp_defrost_time_fraction = F_defrost')
     program.addLine("  Set fraction_defrost = hp_defrost_time_fraction * #{htg_coil_rtf_sensor.name}")
     program.addLine("  If #{htg_coil_rtf_sensor.name} > 0")
-    program.addLine("    Set q_dot_defrost = (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name} - #{htg_coil_htg_rate_sensor.name}) / fraction_defrost")
+    program.addLine("    Set q_dot_defrost = (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name} - #{htg_coil_htg_rate_sensor.name}) / #{unit_multiplier} / fraction_defrost")
     program.addLine('  Else')
     program.addLine('    Set q_dot_defrost = 0.0')
     program.addLine('  EndIf')
