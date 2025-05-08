@@ -5671,10 +5671,11 @@ module HVAC
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
+    cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeBackupSuppHeat } # Ensure unique meter for each other equipment
     defrost_supp_heat_energy_oe = Model.add_other_equipment(
       model,
       name: "#{htg_coil.name} defrost supp heat energy",
-      end_use: Constants::ObjectTypeBackupSuppHeat,
+      end_use: "#{Constants::ObjectTypeBackupSuppHeat}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
       frac_radiant: 0,
@@ -5684,7 +5685,6 @@ module HVAC
       fuel_type: supp_sys_fuel
     )
     defrost_supp_heat_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
-    defrost_supp_heat_energy_oe.additionalProperties.setFeature('IsHeatPumpBackup', true) # Used by reporting measure
 
     defrost_supp_heat_energy_oe_act = Model.add_ems_actuator(
       name: "#{defrost_supp_heat_energy_oe.name} act",
@@ -5789,7 +5789,6 @@ module HVAC
       fuel_type: supp_sys_fuel
     )
     defrost_supp_heat_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
-    defrost_supp_heat_energy_oe.additionalProperties.setFeature('IsHeatPumpBackup', true) # Used by reporting measure
 
     defrost_supp_heat_energy_oe_act = Model.add_ems_actuator(
       name: "#{defrost_supp_heat_energy_oe.name} act",
