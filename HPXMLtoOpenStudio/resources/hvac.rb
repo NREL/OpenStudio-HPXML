@@ -5775,10 +5775,11 @@ module HVAC
       end
     end
     # other equipment actuator
+    cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeBackupSuppHeat } # Ensure unique meter for each other equipment
     defrost_supp_heat_energy_oe = Model.add_other_equipment(
       model,
       name: "#{htg_coil.name} defrost supp heat energy",
-      end_use: Constants::ObjectTypeBackupSuppHeat,
+      end_use: "#{Constants::ObjectTypeBackupSuppHeat}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
       frac_radiant: 0,
@@ -5843,10 +5844,9 @@ module HVAC
     program.addLine("Set #{frost_cap_multiplier_act.name} = 1.0 - 1.8 * F_defrost")
     program.addLine("Set #{frost_pow_multiplier_act.name} = 1.0 - 0.3 * F_defrost")
     program.addLine("If #{tout_db_sensor.name} <= #{max_oat_defrost}")
-    program.addLine('  Set hp_defrost_time_fraction = F_defrost')
-    program.addLine("  Set fraction_defrost = hp_defrost_time_fraction * #{htg_coil_rtf_sensor.name}")
+    program.addLine("  Set fraction_defrost = F_defrost * #{htg_coil_rtf_sensor.name}")
     program.addLine("  If #{htg_coil_rtf_sensor.name} > 0")
-    program.addLine("    Set q_dot_defrost = (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name} - #{htg_coil_htg_rate_sensor.name}) / #{unit_multiplier} / fraction_defrost")
+    program.addLine("    Set q_dot_defrost = (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name} * (1.0 - F_defrost) - #{htg_coil_htg_rate_sensor.name}) / #{unit_multiplier} / fraction_defrost")
     program.addLine('  Else')
     program.addLine('    Set q_dot_defrost = 0.0')
     program.addLine('  EndIf')
