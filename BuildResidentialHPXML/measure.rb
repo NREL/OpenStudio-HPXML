@@ -5817,12 +5817,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
+    ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
+    ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+
     if (not ducts_supply_location.nil?) && args[:ducts_supply_surface_area].nil? && args[:ducts_supply_surface_area_fraction].nil?
       # Supply duct location without any area inputs provided; set area fraction
       if ducts_supply_location == HPXML::LocationConditionedSpace
         args[:ducts_supply_surface_area_fraction] = 1.0
       else
-        args[:ducts_supply_surface_area_fraction] = Defaults.get_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
+        args[:ducts_supply_surface_area_fraction] = Defaults.get_duct_primary_fraction(ducts_supply_location, ncfl, ncfl_ag)
       end
     end
 
@@ -5831,7 +5834,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       if ducts_return_location == HPXML::LocationConditionedSpace
         args[:ducts_return_surface_area_fraction] = 1.0
       else
-        args[:ducts_return_surface_area_fraction] = Defaults.get_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
+        args[:ducts_return_surface_area_fraction] = Defaults.get_duct_primary_fraction(ducts_return_location, ncfl, ncfl_ag)
       end
     end
 

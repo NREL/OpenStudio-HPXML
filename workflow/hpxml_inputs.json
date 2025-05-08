@@ -1020,8 +1020,6 @@
     "heating_system_heating_capacity": 48000,
     "cooling_system_cooling_capacity": 36000,
     "ducts": "4 CFM25 per 100ft2, R-4",
-    "ducts_supply_surface_area_fraction": 1.0,
-    "ducts_return_surface_area_fraction": 1.0,
     "misc_plug_loads_other_annual_kwh": 2457
   },
   "sample_files/base-bldgtype-sfa-unit-atticroof-cathedral.xml": {
@@ -2069,7 +2067,8 @@
     "heat_pump_cooling_capacity": 24000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml"
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
+    "ducts": "2 CFM25 per 100ft2, R-4"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
@@ -2091,7 +2090,8 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv"
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv",
+    "ducts": "2 CFM25 per 100ft2, R-4"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -3026,7 +3026,8 @@
     "mech_vent_sensible_recovery_efficiency": 0.79
   },
   "sample_files/base-mechvent-multiple.xml": {
-    "parent_hpxml": "sample_files/base-mechvent-bath-kitchen-fans.xml"
+    "parent_hpxml": "sample_files/base-mechvent-bath-kitchen-fans.xml",
+    "ducts": "2 CFM25 per 100ft2, R-4"
   },
   "sample_files/base-mechvent-supply.xml": {
     "parent_hpxml": "sample_files/base.xml",
