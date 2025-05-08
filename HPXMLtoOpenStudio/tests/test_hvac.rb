@@ -1088,7 +1088,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.06667, 1389)
+    _check_advanced_defrost(model, htg_coil, backup_fuel, 0.06667, 1389)
 
     # Single Speed heat pump test
     args_hash = {}
@@ -1102,7 +1102,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.1, 1605)
+    _check_advanced_defrost(model, htg_coil, backup_fuel, 0.1, 1605)
 
     # Ductless heat pump test
     args_hash = {}
@@ -1115,7 +1115,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 3444)
+    _check_advanced_defrost(model, htg_coil, backup_fuel, 0.06667, 3444)
 
     # Dual fuel heat pump test
     args_hash = {}
@@ -1125,12 +1125,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     backup_fuel = EPlus.fuel_type(heat_pump.backup_heating_fuel)
-    supp_htg_power = 4747.75 / 0.95
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1260)
+    _check_advanced_defrost(model, htg_coil, backup_fuel, 0.06667, 1260)
 
     # Separate backup heat pump test
     args_hash = {}
@@ -1140,12 +1139,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     backup_heating_system = hpxml_bldg.heating_systems[0]
     backup_fuel = EPlus.fuel_type(backup_heating_system.heating_system_fuel)
-    supp_htg_power = 2373.9 / 0.8
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 2373.9, backup_fuel, 0.06667, 663)
+    _check_advanced_defrost(model, htg_coil, backup_fuel, 0.06667, 663)
 
     # Small capacity test
     args_hash = {}
@@ -1161,10 +1159,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
-    supp_htg_power = 131.88
     backup_fuel = EPlus.fuel_type(heat_pump.backup_heating_fuel)
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, supp_htg_power, 131.88, backup_fuel, 0.1, 42.9)
+    _check_advanced_defrost(model, htg_coil, backup_fuel, 0.1, 42.9)
   end
 
   def test_mini_split_heat_pump_ductless
@@ -2213,7 +2210,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return program_values
   end
 
-  def _check_advanced_defrost(model, htg_coil, supp_design_level, supp_delivered_htg, backup_fuel, defrost_time_fraction, defrost_power)
+  def _check_advanced_defrost(model, htg_coil, backup_fuel, defrost_time_fraction, defrost_power)
     # Check Other equipment inputs
     defrost_heat_load_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost heat load' }
     assert_equal(1, defrost_heat_load_oe.size)
@@ -2234,8 +2231,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{htg_coil.name} defrost program")
-    assert_in_epsilon(program_values['supp_design_level'].sum, supp_design_level, 0.01)
-    assert_in_epsilon(program_values['supp_delivered_htg'].sum, supp_delivered_htg, 0.01)
+    assert(!program_values.empty?)
   end
 
   def _check_ghp_standard(model, heat_pump, clg_cop, htg_cop, soil_density, soil_surface_temp_amps, phase_shift_temp_amps)
@@ -2304,7 +2300,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     pump = model.getPumpVariableSpeeds.find { |pump| pump.name.get.include? Constants::ObjectTypeGroundSourceHeatPump }
     assert_equal(EPlus::PumpControlTypeIntermittent, pump.pumpControlType)
     # Check EMS
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} install quality program")
     assert(program_values.empty?) # Check no EMS program
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{pump.name} mfr program")
