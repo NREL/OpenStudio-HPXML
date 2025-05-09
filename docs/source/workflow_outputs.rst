@@ -742,28 +742,16 @@ Panel breaker spaces and loads can also be found in the ``in.xml`` file.
 Breaker Spaces
 ~~~~~~~~~~~~~~
 
-Individual panel load occupied breaker spaces, as well as summarized totals, are available as listed below.
+Electric panel breaker space counts are available as listed below.
+End use categories (e.g., Heating, Cooling, Hot Water) report occupied spaces for dedicated circuits except for Other which reports otherwise uncategorized or shared circuits.
 
   ================================================================================  ====================
   Type                                                                              Notes
   ================================================================================  ====================
-  Electric Panel Breaker Spaces: Heating Count                                      Sum of heating system and heat pump heating occupied spaces
-  Electric Panel Breaker Spaces: Cooling Count                                      Sum of cooling system and heat pump cooling occupied spaces
-  Electric Panel Breaker Spaces: Hot Water Count                                    Sum of water heating system occupied spaces
-  Electric Panel Breaker Spaces: Clothes Dryer Count                                Sum of clothes dryer occupied spaces
-  Electric Panel Breaker Spaces: Dishwasher Count                                   Sum of dishwasher occupied spaces
-  Electric Panel Breaker Spaces: Range/Oven Count                                   Sum of range/oven occupied spaces
-  Electric Panel Breaker Spaces: Mech Vent Count                                    Sum of mechanical ventilation occupied spaces
-  Electric Panel Breaker Spaces: Permanent Spa Heater Count                         Sum of permanent spa heater occupied spaces
-  Electric Panel Breaker Spaces: Permanent Spa Pump Count                           Sum of permanent spa pump occupied spaces
-  Electric Panel Breaker Spaces: Pool Heater Count                                  Sum of pool heater occupied spaces
-  Electric Panel Breaker Spaces: Pool Pump Count                                    Sum of pool pump occupied spaces
-  Electric Panel Breaker Spaces: Well Pump Count                                    Sum of well pump occupied spaces
-  Electric Panel Breaker Spaces: Electric Vehicle Charging Count                    Sum of electric vehicle charging occupied spaces
-  Electric Panel Breaker Spaces: Other Count                                        Sum of other occupied spaces
+  Electric Panel Breaker Spaces: <BranchCircuitID> Count                            Occupied spaces for the branch circuit
   Electric Panel Breaker Spaces: Total Count                                        Total rated number of spaces on the panel
   Electric Panel Breaker Spaces: Occupied Count                                     Total number of occupied spaces on the panel
-  Electric Panel Breaker Spaces: Headroom Count                                     Total rated spaces minus occupied spaces
+  Electric Panel Breaker Spaces: Headroom Count                                     Total Count minus Occupied Count
   ================================================================================  ====================
 
 .. note::
@@ -774,26 +762,26 @@ Individual panel load occupied breaker spaces, as well as summarized totals, are
 Loads
 ~~~~~
 
-Individual panel loads, as well as calculated loads for each calculation type (see :ref:`hpxml_electric_panel_calculations`), are available as listed below.
+Electric panel loads, as well as calculated total loads and capacities for each calculation type (see :ref:`hpxml_electric_panel_calculations`), are available as listed below.
 
   ================================================================================  ====================
   Type                                                                              Notes
   ================================================================================  ====================
-  Electric Panel Load: Heating (W)                                                  Sum of heating system and heat pump heating demand loads
-  Electric Panel Load: Cooling (W)                                                  Sum of cooling system and heat pump cooling demand loads
-  Electric Panel Load: Hot Water (W)                                                Sum of water heating system demand loads
-  Electric Panel Load: Clothes Dryer (W)                                            Sum of clothes dryer demand loads
-  Electric Panel Load: Dishwasher (W)                                               Sum of dishwasher demand loads
-  Electric Panel Load: Range/Oven (W)                                               Sum of range/oven demand loads
-  Electric Panel Load: Mech Vent (W)                                                Sum of mechanical ventilation demand loads
-  Electric Panel Load: Permanent Spa Heater (W)                                     Sum of permanent spa heater demand loads
-  Electric Panel Load: Permanent Spa Pump (W)                                       Sum of permanent spa pump demand loads
-  Electric Panel Load: Pool Heater (W)                                              Sum of pool heater demand loads
-  Electric Panel Load: Pool Pump (W)                                                Sum of pool pump demand loads
-  Electric Panel Load: Well Pump (W)                                                Sum of well pump demand loads
-  Electric Panel Load: Electric Vehicle Charging (W)                                Sum of electric vehicle charging demand loads
-  Electric Panel Load: Other (W)                                                    Sum of other demand loads
-  Electric Panel Load: <Type>: Total Load (W)                                       Calculated NEC demand load capacity
+  Electric Panel Load: Heating (W)                                                  Sum of heating system and heat pump heating loads
+  Electric Panel Load: Cooling (W)                                                  Sum of cooling system and heat pump cooling loads
+  Electric Panel Load: Hot Water (W)                                                Sum of water heating system loads
+  Electric Panel Load: Clothes Dryer (W)                                            Sum of clothes dryer loads
+  Electric Panel Load: Dishwasher (W)                                               Sum of dishwasher loads
+  Electric Panel Load: Range/Oven (W)                                               Sum of range/oven loads
+  Electric Panel Load: Mech Vent (W)                                                Sum of mechanical ventilation loads
+  Electric Panel Load: Permanent Spa Heater (W)                                     Sum of permanent spa heater loads
+  Electric Panel Load: Permanent Spa Pump (W)                                       Sum of permanent spa pump loads
+  Electric Panel Load: Pool Heater (W)                                              Sum of pool heater loads
+  Electric Panel Load: Pool Pump (W)                                                Sum of pool pump loads
+  Electric Panel Load: Well Pump (W)                                                Sum of well pump loads
+  Electric Panel Load: Electric Vehicle Charging (W)                                Sum of electric vehicle charging loads
+  Electric Panel Load: Other (W)                                                    Sum of other loads
+  Electric Panel Load: <Type>: Total Load (W)                                       Calculated NEC total load capacity
   Electric Panel Load: <Type>: Total Capacity (A)                                   Total Load (W) divided by panel voltage
   Electric Panel Load: <Type>: Headroom Capacity (A)                                Panel max current rating (A) minus Total Capacity (A)
   ================================================================================  ====================

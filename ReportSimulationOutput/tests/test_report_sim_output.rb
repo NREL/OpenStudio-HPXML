@@ -1453,9 +1453,9 @@ class ReportSimulationOutputTest < Minitest::Test
     _annual_csv, _timeseries_csv, _run_log, panel_csv = _test_measure(args_hash)
     assert(File.exist?(panel_csv))
     actual_panel_rows = _get_annual_values(panel_csv)
-    assert_equal(16, actual_panel_rows['Electric Panel Breaker Spaces: Total Count'])
-    assert_equal(11, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
-    assert_equal(16 - 11, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
+    assert_equal(14, actual_panel_rows['Electric Panel Breaker Spaces: Total Count'])
+    assert_equal(9, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
+    assert_equal(14 - 9, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
     assert_equal(9444.2, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Load (W)'])
     assert_equal(39.4, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Capacity (A)'])
     assert_in_epsilon(100.0 - 39.4, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Headroom Capacity (A)'], 0.01)
@@ -1466,46 +1466,27 @@ class ReportSimulationOutputTest < Minitest::Test
     # Upgrade
     hpxml_bldg = hpxml.buildings[0]
     electric_panel = hpxml_bldg.electric_panels[0]
-    electric_panel.rated_total_spaces = 16
-    branch_circuits = electric_panel.branch_circuits
+    electric_panel.rated_total_spaces = 12
     service_feeders = electric_panel.service_feeders
-    sf = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }
-    sf.power = 16942
-    sf.is_new_load = true
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                        voltage: HPXML::ElectricPanelVoltage240,
-                        occupied_spaces: 5,
+    service_feeders.add(type: HPXML::ElectricPanelLoadTypeHeating,
+                        power: 17942,
+                        is_new_load: true,
                         component_idrefs: [hpxml_bldg.heating_systems[0].id])
-    sf = service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }
-    sf.power = 16942
-    sf.is_new_load = true
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                        voltage: HPXML::ElectricPanelVoltage240,
-                        occupied_spaces: 0,
+    service_feeders.add(type: HPXML::ElectricPanelLoadTypeCooling,
+                        power: 17942,
+                        is_new_load: true,
                         component_idrefs: [hpxml_bldg.cooling_systems[0].id])
     service_feeders.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
                         power: 4500,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                        voltage: HPXML::ElectricPanelVoltage240,
-                        occupied_spaces: 2,
-                        component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
     service_feeders.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
                         power: 5760,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                        voltage: HPXML::ElectricPanelVoltage240,
-                        occupied_spaces: 2,
-                        component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     service_feeders.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
                         power: 12000,
                         is_new_load: true,
-                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                        voltage: HPXML::ElectricPanelVoltage240,
-                        occupied_spaces: 2,
                         component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging)
@@ -1520,15 +1501,15 @@ class ReportSimulationOutputTest < Minitest::Test
     _annual_csv, _timeseries_csv, _run_log, panel_csv = _test_measure(args_hash)
     assert(File.exist?(panel_csv))
     actual_panel_rows = _get_annual_values(panel_csv)
-    assert_equal(16, actual_panel_rows['Electric Panel Breaker Spaces: Total Count'])
-    assert_equal(20, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
-    assert_equal(16 - 20, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
-    assert_equal(34827.2, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Load (W)'])
-    assert_equal(145.1, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Capacity (A)'])
-    assert_in_epsilon(100.0 - 145.1, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Headroom Capacity (A)'], 0.01)
-    assert_equal(46477.0, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Total Load (W)'])
-    assert_equal(193.7, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Total Capacity (A)'])
-    assert_in_epsilon(100.0 - 193.7, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Headroom Capacity (A)'], 0.01)
+    assert_equal(12, actual_panel_rows['Electric Panel Breaker Spaces: Total Count'])
+    assert_equal(19, actual_panel_rows['Electric Panel Breaker Spaces: Occupied Count'])
+    assert_equal(12 - 19, actual_panel_rows['Electric Panel Breaker Spaces: Headroom Count'])
+    assert_equal(36011.7, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Load (W)'])
+    assert_equal(150.0, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Total Capacity (A)'])
+    assert_in_epsilon(100.0 - 150.0, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Load-Based: Headroom Capacity (A)'], 0.01)
+    assert_equal(47477.0, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Total Load (W)'])
+    assert_equal(197.8, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Total Capacity (A)'])
+    assert_in_epsilon(100.0 - 197.8, actual_panel_rows['Electric Panel Load: 2023 Existing Dwelling Meter-Based: Headroom Capacity (A)'], 0.01)
   end
 
   private

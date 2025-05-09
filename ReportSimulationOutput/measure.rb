@@ -1586,9 +1586,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param args [Hash] Map of :argument_name => value
-  # @param annual_output_path [String] Path for the output file
-  # @param electric_panel_output_path [String] TODO
-  # @return [nil]
+  # @param annual_output_path [TODO] TODO
+  # @param electric_panel_output_path [TODO] TODO
+  # @return [TODO] TODO
   def report_runperiod_output_results(runner, args, annual_output_path, electric_panel_output_path)
     # Set rounding precision for run period (e.g., annual) outputs.
     if args[:output_format] == 'msgpack'
