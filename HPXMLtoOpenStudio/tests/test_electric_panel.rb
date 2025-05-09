@@ -60,7 +60,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                         component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage240,
-                        occupied_spaces: 2)
+                        occupied_spaces: 2,
+                        component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeClothesDryer,
                         power: 5760,
@@ -68,17 +69,19 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                         component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage120,
-                        occupied_spaces: 2)
+                        occupied_spaces: 2,
+                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeRangeOven,
                         power: 12000,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
-    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                        voltage: HPXML::ElectricPanelVoltage240,
-                        occupied_spaces: 2)
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging)
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        occupied_spaces: 2,
+                        component_idrefs: [hpxml_bldg.plug_loads[-1].id])
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                         type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
                         power: 1650,
@@ -129,12 +132,14 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
   def test_low_load
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path) }
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased,
+                                                           HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased]
 
-    hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased]
     branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
     branch_circuits.add(id: 'Kitchen', occupied_spaces: 2)
     branch_circuits.add(id: 'Laundry', occupied_spaces: 1)
     branch_circuits.add(id: 'Other', occupied_spaces: 1)
+
     service_feeders = hpxml_bldg.electric_panels[0].service_feeders
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeHeating, power: 0, component_idrefs: [hpxml_bldg.heating_systems[0].id])
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeCooling, power: 0, component_idrefs: [hpxml_bldg.cooling_systems[0].id])
@@ -142,21 +147,24 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeClothesDryer, power: 0, component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeDishwasher, power: 0, component_idrefs: [hpxml_bldg.dishwashers[0].id])
     service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeRangeOven, power: 0, component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
-    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeLighting, power: 500)
-    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeKitchen, power: 1000)
-    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeLaundry, power: 1500)
-    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeOther, power: 2000)
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeLighting, power: 500) # 0
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeKitchen, power: 1000) # 2
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeLaundry, power: 1500) # 1
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}", type: HPXML::ElectricPanelLoadTypeOther, power: 2000) # 1
 
     XMLHelper.write_file(hpxml.to_doc(), @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     electric_panel = hpxml_bldg.electric_panels[0]
 
-    assert_in_epsilon(5000, electric_panel.capacity_total_watts[0], 0.01)
-    assert_in_epsilon(5000 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
-    assert_in_epsilon(electric_panel.max_current_rating - 5000 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
     assert_equal(4 + 3, electric_panel.breaker_spaces_total)
     assert_equal(4, electric_panel.breaker_spaces_occupied)
     assert_equal(3, electric_panel.breaker_spaces_headroom)
+    assert_in_epsilon(5000.0, electric_panel.capacity_total_watts[0], 0.001)
+    assert_in_epsilon(5000.0 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
+    assert_in_epsilon(electric_panel.max_current_rating - 5000.0 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[0], 0.01)
+    assert_in_epsilon(1.25 * 4500.0, electric_panel.capacity_total_watts[1], 0.001)
+    assert_in_epsilon(1.25 * 4500.0 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[1], 0.01)
+    assert_in_epsilon(electric_panel.max_current_rating - (1.25 * 4500.0) / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[1], 0.01)
   end
 
   def test_hvac_configurations
@@ -631,6 +639,23 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 2)
 
+    test_name = '120v vented clothes dryer'
+    hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    service_feeders = hpxml_bldg.electric_panels[0].service_feeders
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage120,
+                        component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                        component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
+
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 3)
+
     test_name = 'HP clothes dryer'
     hpxml, hpxml_bldg = _create_hpxml('base-appliances-modified.xml', test_name)
     branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
@@ -654,6 +679,63 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 996)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 1)
+  end
+
+  def test_cooking_range_configurations
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
+
+    test_name = 'Resistance cooking range'
+    hpxml, _hpxml_bldg = _create_hpxml('base.xml', test_name)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 12000)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 2)
+
+    test_name = '120v resistance cooking range'
+    hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    service_feeders = hpxml_bldg.electric_panels[0].service_feeders
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage120,
+                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeRangeOven,
+                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 1800)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 1)
+
+    test_name = 'Induction cooking range'
+    hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
+    hpxml_bldg.cooking_ranges[0].is_induction = true
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 10000)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 2)
+
+    test_name = '120v induction cooking range'
+    hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
+    hpxml_bldg.cooking_ranges[0].is_induction = true
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    service_feeders = hpxml_bldg.electric_panels[0].service_feeders
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage120,
+                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeRangeOven,
+                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 10000)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 5)
   end
 
   def test_ventilation_fans_configurations

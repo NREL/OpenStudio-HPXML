@@ -901,6 +901,7 @@ module Outputs
     ocf.setOutputCSV(debug)
     ocf.setOutputSQLite(debug)
     ocf.setOutputPerfLog(debug)
+    ocf.setOutputTabular(debug)
   end
 
   # Store some data for use in reporting measure.
@@ -1208,7 +1209,6 @@ module Outputs
   #
   # @param hpxml_bldgs [Array<HPXML::Building>] List of HPXML Building objects representing an individual dwelling unit
   # @param results_out [Array] Rows of output data
-  # @param peak_fuels [Hash] Map of peak building electricity outputs
   # @return [Array] Rows of output data, with electric panel results appended
   def self.append_panel_results(hpxml_header, hpxml_bldgs, _peak_fuels, results_out)
     line_break = nil

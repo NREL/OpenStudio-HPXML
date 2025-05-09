@@ -132,7 +132,7 @@ module ElectricPanel
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
-  # @param service_feeders [Array<HPXML::ServiceFeeder>] List of service feeder objects
+  # @param service_feeders [LoadValues] Object with calculated load
   # @param service_feeders_load_calculation_type [String] the load calculation type
   # @return [nil]
   def self.calculate_load_based(hpxml_bldg, electric_panel, service_feeders, service_feeders_load_calculation_type)
@@ -180,7 +180,7 @@ module ElectricPanel
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
-  # @param peak_fuels [Hash] Map of peak building electricity outputs
+  # @param service_feeders [LoadValues] Object with calculated load
   # @param service_feeders_load_calculation_type [String] the load calculation type
   # @return [Array<Double, Double, Double>] The capacity (W), the capacity (A), and headroom (A)
   def self.calculate_meter_based(hpxml_bldg, electric_panel, service_feeders, service_feeders_load_calculation_type)
