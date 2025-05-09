@@ -45,7 +45,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     # Upgrade
     # Not adding new HVAC
-    electric_panel.headroom = nil
+    electric_panel.headroom_spaces = nil
     electric_panel.rated_total_spaces = 13
     branch_circuits = electric_panel.branch_circuits
     service_feeders = electric_panel.service_feeders
@@ -463,8 +463,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                         component_idrefs: [hpxml_bldg.heat_pumps[0].id])
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 210 + 3114 + 96)
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 225 + 3114)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 281 + 4022 + 96)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 5)
 
     test_name = 'ASHP heating only w/integrated electric backup'
@@ -642,12 +642,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     test_name = '120v vented clothes dryer'
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
     branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
-    service_feeders = hpxml_bldg.electric_panels[0].service_feeders
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage120,
-                        component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
-    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
-                        type: HPXML::ElectricPanelLoadTypeClothesDryer,
                         component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
 
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
@@ -686,7 +682,12 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                   'skip_validation' => true }
 
     test_name = 'Resistance cooking range'
-    hpxml, _hpxml_bldg = _create_hpxml('base.xml', test_name)
+    hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
@@ -696,12 +697,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     test_name = '120v resistance cooking range'
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
     branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
-    service_feeders = hpxml_bldg.electric_panels[0].service_feeders
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage120,
-                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
-    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
-                        type: HPXML::ElectricPanelLoadTypeRangeOven,
                         component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
 
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
@@ -713,6 +710,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     test_name = 'Induction cooking range'
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
     hpxml_bldg.cooking_ranges[0].is_induction = true
+    branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+    branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                        voltage: HPXML::ElectricPanelVoltage240,
+                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
+
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
@@ -723,12 +725,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
     hpxml_bldg.cooking_ranges[0].is_induction = true
     branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
-    service_feeders = hpxml_bldg.electric_panels[0].service_feeders
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                         voltage: HPXML::ElectricPanelVoltage120,
-                        component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
-    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
-                        type: HPXML::ElectricPanelLoadTypeRangeOven,
                         component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
 
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)

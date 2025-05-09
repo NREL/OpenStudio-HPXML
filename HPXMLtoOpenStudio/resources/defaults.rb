@@ -6177,7 +6177,6 @@ module Defaults
 
               end
             end
-            puts "watts1 #{watts}"
           end
         end
       end
@@ -6224,7 +6223,6 @@ module Defaults
           heat_pump.branch_circuits.each do |branch_circuit|
             watts += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit.voltage)
           end
-          puts "watts2 #{watts}"
         end
       end
 
@@ -6314,13 +6312,25 @@ module Defaults
         next if !component_ids.include?(cooking_range.id)
         next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
 
-        if cooking_range.branch_circuits.empty?
-          voltage = get_branch_circuit_voltage_default_values(cooking_range)
-          runner.registerWarning("Missing branch circuit for #{cooking_range.id}; assuming #{voltage}V.")
-          watts += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven', 'PowerRating', voltage)
-        else
-          cooking_range.branch_circuits.each do |branch_circuit|
-            watts += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven', 'PowerRating', branch_circuit.voltage)
+        if cooking_range.is_induction
+          if cooking_range.branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(cooking_range)
+            runner.registerWarning("Missing branch circuit for #{cooking_range.id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven_induction', 'PowerRating', voltage)
+          else
+            cooking_range.branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven_induction', 'PowerRating', branch_circuit.voltage)
+            end
+          end
+        else # resistance
+          if cooking_range.branch_circuits.empty?
+            voltage = get_branch_circuit_voltage_default_values(cooking_range)
+            runner.registerWarning("Missing branch circuit for #{cooking_range.id}; assuming #{voltage}V.")
+            watts += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven', 'PowerRating', voltage)
+          else
+            cooking_range.branch_circuits.each do |branch_circuit|
+              watts += get_default_panels_value(runner, default_panels_csv_data, 'rangeoven', 'PowerRating', branch_circuit.voltage)
+            end
           end
         end
       end

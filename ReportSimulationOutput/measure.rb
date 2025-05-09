@@ -669,7 +669,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Write/report results
     report_runperiod_output_results(runner, args, annual_output_path, electric_panel_output_path)
-    report_timeseries_output_results(runner, timeseries_output_path, args, timestamps_dst, timestamps_utc)
+    report_timeseries_output_results(runner, timeseries_output_path, args)
 
     return true
   end
