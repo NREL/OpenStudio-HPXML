@@ -1975,6 +1975,10 @@
     "electric_panel_breaker_spaces": 5,
     "electric_panel_load_other_power": 559
   },
+  "sample_files/base-detailed-electric-panel-no-calculation-types.xml": {
+    "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
+    "electric_panel_service_feeders_load_calculation_types": null
+  },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_floors_above_grade": 2,
