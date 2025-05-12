@@ -10,6 +10,9 @@ __New Features__
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
   - Updates the default schedule for the EV charging `PlugLoad` to better reflect real-world hourly/monthly variation.
+- Electric panel calculations (experimental research feature):
+  - Allows optional `ElectricPanel` inputs for describing branch circuits and service feeders
+  - Optionally reports breaker spaces and calculated loads for specified NEC calculation types
 - Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 - BuildResidentialScheduleFile measure:
   - Adds stochastic schedule generation for electric vehicle charging (using `Vehicles`).
@@ -21,9 +24,6 @@ __New Features__
   - Avoids writing the E+ eplustbl.htm by default; use the debug flag to get it.
   - Deletes eplusout\*.msgpack files by default (run_simulation.rb only); use the debug flag to preserve them.
 - Allows arbitrary columns to be present in a detailed schedule csv file with warning.
-- Electric panel calculations:
-  - Allows optional `ElectricPanel` inputs for describing branch circuits and service feeders
-  - Optionally reports breaker spaces and calculated loads for specified NEC calculation types
 
 __Bugfixes__
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.

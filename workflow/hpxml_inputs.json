@@ -713,6 +713,7 @@
     "heat_pump_heating_efficiency": 7.7,
     "heat_pump_cooling_efficiency_type": "SEER",
     "heat_pump_cooling_efficiency": 13,
+    "heat_pump_cooling_compressor_type": "single stage",
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
     "heat_pump_heating_capacity": 84000,
@@ -985,6 +986,7 @@
     "heat_pump_heating_efficiency": 7.7,
     "heat_pump_cooling_efficiency_type": "SEER",
     "heat_pump_cooling_efficiency": 13,
+    "heat_pump_cooling_compressor_type": "single stage",
     "heat_pump_fraction_heat_load_served": 0.75,
     "heat_pump_fraction_cool_load_served": 1,
     "heat_pump_heating_capacity": 30000,
@@ -2244,6 +2246,10 @@
     "electric_panel_breaker_spaces_type": "headroom",
     "electric_panel_breaker_spaces": 5,
     "electric_panel_load_other_power": 559
+  },
+  "sample_files/base-detailed-electric-panel-no-calculation-types.xml": {
+    "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
+    "electric_panel_service_feeders_load_calculation_types": null
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",
