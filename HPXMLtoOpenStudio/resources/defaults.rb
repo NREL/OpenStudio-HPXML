@@ -3199,7 +3199,7 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param unit_num [Integer] Dwelling unit number
   # @return [nil]
-  def self.apply_electric_panels(runner, hpxml_header, hpxml_bldg, _unit_num)
+  def self.apply_electric_panels(runner, hpxml_header, hpxml_bldg, unit_num)
     # Currently, we leave the electric panel object unchanged if no load calculation types are specified
     return if hpxml_header.service_feeders_load_calculation_types.nil? || hpxml_header.service_feeders_load_calculation_types.empty?
 
@@ -3292,7 +3292,12 @@ module Defaults
             next unless !component_idref.nil?
 
             types.each do |type|
-              service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+              if not unit_num.nil?
+                feeder_id = "ServiceFeeder#{service_feeders.size + 1}_#{unit_num}"
+              else
+                feeder_id = "ServiceFeeder#{service_feeders.size + 1}"
+              end
+              service_feeders.add(id: feeder_id,
                                   type: type,
                                   type_isdefaulted: true,
                                   component_idrefs: [component_idref],
@@ -3305,7 +3310,12 @@ module Defaults
         [HPXML::ElectricPanelLoadTypeLighting, HPXML::ElectricPanelLoadTypeKitchen, HPXML::ElectricPanelLoadTypeLaundry, HPXML::ElectricPanelLoadTypeOther].each do |type|
           next unless service_feeders.count { |pl| pl.type == type } == 0
 
-          service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+          if not unit_num.nil?
+            feeder_id = "ServiceFeeder#{service_feeders.size + 1}_#{unit_num}"
+          else
+            feeder_id = "ServiceFeeder#{service_feeders.size + 1}"
+          end
+          service_feeders.add(id: feeder_id,
                               type: type,
                               type_isdefaulted: true,
                               component_idrefs: [])
