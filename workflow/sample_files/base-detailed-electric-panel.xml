@@ -477,32 +477,44 @@
             <BranchCircuits>
               <BranchCircuit>
                 <SystemIdentifier id='BranchCircuit1'/>
+                <AttachedToComponent idref='HeatingSystem1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit2'/>
+                <AttachedToComponent idref='CoolingSystem1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit3'/>
+                <AttachedToComponent idref='HVACDistribution1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit4'/>
+                <AttachedToComponent idref='VentilationFan1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit5'/>
+                <AttachedToComponent idref='VentilationFan2'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit6'/>
+                <OccupiedSpaces>0.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit7'/>
+                <OccupiedSpaces>2.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit8'/>
+                <OccupiedSpaces>1.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit9'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
               </BranchCircuit>
             </BranchCircuits>
             <ServiceFeeders>
               <ServiceFeeder>
                 <SystemIdentifier id='ServiceFeeder1'/>
-                <LoadType>heating</LoadType>
-                <AttachedToComponent idref='HeatingSystem1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder2'/>
-                <LoadType>cooling</LoadType>
-                <AttachedToComponent idref='CoolingSystem1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder3'/>
-                <LoadType>mech vent</LoadType>
-                <AttachedToComponent idref='VentilationFan1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder4'/>
-                <LoadType>mech vent</LoadType>
-                <AttachedToComponent idref='VentilationFan2'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder5'/>
                 <LoadType>other</LoadType>
                 <PowerRating>559.0</PowerRating>
               </ServiceFeeder>

@@ -466,42 +466,45 @@
             <BranchCircuits>
               <BranchCircuit>
                 <SystemIdentifier id='BranchCircuit1'/>
+                <AttachedToComponent idref='HeatPump1'/>
+                <AttachedToComponent idref='HVACDistribution1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit2'/>
+                <AttachedToComponent idref='WaterHeatingSystem1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit3'/>
+                <AttachedToComponent idref='ClothesDryer1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit4'/>
+                <AttachedToComponent idref='Dishwasher1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit5'/>
+                <AttachedToComponent idref='CookingRange1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit6'/>
+                <OccupiedSpaces>0.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit7'/>
+                <OccupiedSpaces>2.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit8'/>
+                <OccupiedSpaces>1.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit9'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
               </BranchCircuit>
             </BranchCircuits>
             <ServiceFeeders>
               <ServiceFeeder>
                 <SystemIdentifier id='ServiceFeeder1'/>
-                <LoadType>heating</LoadType>
-                <AttachedToComponent idref='HeatPump1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder2'/>
-                <LoadType>cooling</LoadType>
-                <AttachedToComponent idref='HeatPump1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder3'/>
-                <LoadType>hot water</LoadType>
-                <AttachedToComponent idref='WaterHeatingSystem1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder4'/>
-                <LoadType>clothes dryer</LoadType>
-                <AttachedToComponent idref='ClothesDryer1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder5'/>
-                <LoadType>dishwasher</LoadType>
-                <AttachedToComponent idref='Dishwasher1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder6'/>
-                <LoadType>range/oven</LoadType>
-                <AttachedToComponent idref='CookingRange1'/>
-              </ServiceFeeder>
-              <ServiceFeeder>
-                <SystemIdentifier id='ServiceFeeder7'/>
                 <LoadType>other</LoadType>
                 <PowerRating>559.0</PowerRating>
               </ServiceFeeder>

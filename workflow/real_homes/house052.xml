@@ -832,6 +832,20 @@
                 <OccupiedSpaces>1.0</OccupiedSpaces>
               </BranchCircuit>
             </BranchCircuits>
+            <ServiceFeeders>
+              <ServiceFeeder>
+                <SystemIdentifier id='ServiceFeeder1'/>
+                <LoadType>dishwasher</LoadType>
+                <PowerRating>1100.0</PowerRating>
+                <AttachedToComponent idref='Dishwasher1'/>
+              </ServiceFeeder>
+              <ServiceFeeder>
+                <SystemIdentifier id='ServiceFeeder2'/>
+                <LoadType>pool pump</LoadType>
+                <PowerRating>1300.0</PowerRating>
+                <AttachedToComponent idref='Pool1Pump'/>
+              </ServiceFeeder>
+            </ServiceFeeders>
           </ElectricPanel>
         </ElectricPanels>
         <Batteries>

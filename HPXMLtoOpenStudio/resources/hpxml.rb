@@ -7906,6 +7906,40 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
+    # Returns any branch circuits that the component may be attached to.
+    #
+    # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
+    def branch_circuits
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.branch_circuits.each do |branch_circuit|
+          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
+          next unless branch_circuit.component_idrefs.include?(@id)
+
+          list << branch_circuit
+        end
+      end
+
+      return list
+    end
+
+    # Returns any service feeders that the component may be attached to.
+    #
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
+    def service_feeders
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
+
+          list << service_feeder
+        end
+      end
+
+      return list
+    end
+
     # Returns all the HVAC systems attached to this HVAC distribution system.
     #
     # @return [Array<HPXML::XXX>] The list of HVAC systems
@@ -9558,284 +9592,6 @@ class HPXML < Object
     end
   end
 
-  # Array of HPXML::ElectricVehicleCharger objects
-  class ElectricVehicleChargers < BaseArrayElement
-    # Adds a new object, with the specified keyword arguments, to the array.
-    #
-    # @return [nil]
-    def add(**kwargs)
-      self << ElectricVehicleCharger.new(@parent_object, **kwargs)
-    end
-
-    # Populates the HPXML object(s) from the XML document.
-    #
-    # @param building [Oga::XML::Element] The current Building XML element
-    # @return [nil]
-    def from_doc(building)
-      return if building.nil?
-
-      XMLHelper.get_elements(building, 'BuildingDetails/Systems/ElectricVehicleChargers/ElectricVehicleCharger').each do |charger|
-        self << ElectricVehicleCharger.new(@parent_object, charger)
-      end
-    end
-  end
-
-  # Object for /HPXML/Building/BuildingDetails/Systems/ElectricVehicleChargers/ElectricVehicleCharger.
-  class ElectricVehicleCharger < BaseElement
-    ATTRS = [:id,             # [String] SystemIdentifier/@id
-             :charging_level, # [Integer] ChargingLevel (1-3)
-             :charging_power] # [Double] ChargingPower (W)
-    attr_accessor(*ATTRS)
-
-    # Returns any branch circuits that the component may be attached to.
-    #
-    # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
-    def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
-    end
-
-    # Returns any service feeders that the component may be attached to.
-    #
-    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
-    def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
-    end
-
-    # Deletes the current object from the array.
-    #
-    # @return [nil]
-    def delete
-      @parent_object.ev_chargers.delete(self)
-    end
-
-    # Additional error-checking beyond what's checked in Schema/Schematron validators.
-    #
-    # @return [Array<String>] List of error messages
-    def check_for_errors
-      errors = []
-      return errors
-    end
-
-    # Adds this object to the provided Oga XML element.
-    #
-    # @param building [Oga::XML::Element] The current Building XML element
-    # @return [nil]
-    def to_doc(building)
-      return if nil?
-
-      chargers = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'ElectricVehicleChargers'])
-      charger = XMLHelper.add_element(chargers, 'ElectricVehicleCharger')
-      sys_id = XMLHelper.add_element(charger, 'SystemIdentifier')
-      XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(charger, 'ChargingLevel', @charging_level, :integer, @charging_level_isdefaulted) unless @charging_level.nil?
-      XMLHelper.add_element(charger, 'ChargingPower', @charging_power, :float, @charging_power_isdefaulted) unless @charging_power.nil?
-    end
-
-    # Populates the HPXML object(s) from the XML document.
-    #
-    # @param battery [Oga::XML::Element] The current Battery XML element
-    # @return [nil]
-    def from_doc(charger)
-      return if charger.nil?
-
-      @id = HPXML::get_id(charger)
-      @charging_level = XMLHelper.get_value(charger, 'ChargingLevel', :integer)
-      @charging_power = XMLHelper.get_value(charger, 'ChargingPower', :float)
-    end
-  end
-
-  # Array of HPXML::Vehicle objects.
-  class Vehicles < BaseArrayElement
-    # Adds a new object, with the specified keyword arguments, to the array.
-    #
-    # @return [nil]
-    def add(**kwargs)
-      self << Vehicle.new(@parent_object, **kwargs)
-    end
-
-    # Populates the HPXML object(s) from the XML document.
-    #
-    # @param building [Oga::XML::Element] The current Building XML element
-    # @return [nil]
-    def from_doc(building)
-      return if building.nil?
-
-      XMLHelper.get_elements(building, 'BuildingDetails/Systems/Vehicles/Vehicle').each do |vehicle|
-        self << Vehicle.new(@parent_object, vehicle)
-      end
-    end
-  end
-
-  # Object for /HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle.
-  class Vehicle < BaseElement
-    ATTRS = [:id,                     # [String] SystemIdentifier/@id
-             :vehicle_type,           # [String] VehicleType (HPXML::VehicleTypeXXX)
-             :miles_per_year,         # [Double] MilesDrivenPerYear (miles)
-             :hours_per_week,         # [Double] HoursDrivenPerWeek (hours)
-             :fuel_economy_combined,  # [Double] FuelEconomyCombined/Value
-             :fuel_economy_units,     # [String] FuelEconomyCombined/Units
-             :fraction_charged_home,  # [Double] VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage (frac)
-             :ev_charger_idref,       # [String] VehicleType/BatteryElectricVehicle/ConnectedCharger/@idref
-             :battery_type,           # [String] VehicleType/BatteryElectricVehicle/Battery/BatteryType (HPXML::BatteryTypeXXX)
-             :nominal_capacity_kwh,   # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh"]/Value (kWh)
-             :nominal_capacity_ah,    # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="Ah"]/Value (Ah)
-             :usable_capacity_kwh,    # [Double] VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh"]/Value (kWh)
-             :usable_capacity_ah,     # [Double] VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="Ah"]/Value (Ah)
-             :nominal_voltage,        # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalVoltage (V)
-             :lifetime_model,         # [String] VehicleType/BatteryElectricVehicle/Battery/extension/LifetimeModel (HPXML::BatteryLifetimeModelXXX)
-             :ev_weekday_fractions,   # [String] VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions
-             :ev_weekend_fractions,   # [String] VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions
-             :ev_monthly_multipliers] # [String] VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers
-    attr_accessor(*ATTRS)
-
-    # Deletes the current object from the array.
-    #
-    # @return [nil]
-    def delete
-      @parent_object.vehicles.delete(self)
-    end
-
-    # Additional error-checking beyond what's checked in Schema/Schematron validators.
-    #
-    # @return [Array<String>] List of error messages
-    def check_for_errors
-      errors = []
-      return errors
-    end
-
-    # Adds this object to the provided Oga XML element.
-    #
-    # @param building [Oga::XML::Element] The current Building XML element
-    # @return [nil]
-    def to_doc(building)
-      return if nil?
-
-      vehicles = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Vehicles'])
-      vehicle = XMLHelper.add_element(vehicles, 'Vehicle')
-      sys_id = XMLHelper.add_element(vehicle, 'SystemIdentifier')
-      XMLHelper.add_attribute(sys_id, 'id', @id)
-      vehicle_type_element = XMLHelper.add_element(vehicle, 'VehicleType')
-      vehicle_type = XMLHelper.add_element(vehicle_type_element, @vehicle_type)
-
-      if [HPXML::VehicleTypeBEV, HPXML::VehicleTypePHEV, HPXML::VehicleTypeHybrid].include? @vehicle_type
-        if (not @battery_type.nil?) || (not @nominal_capacity_kwh.nil?) || (not @nominal_capacity_ah.nil?) || (not @usable_capacity_kwh.nil?) || (not @usable_capacity_ah.nil?) || (not @nominal_voltage.nil?) || (not @lifetime_model.nil?)
-          battery = XMLHelper.add_element(vehicle_type, 'Battery')
-          XMLHelper.add_element(battery, 'BatteryType', @battery_type, :string, @battery_type_isdefaulted) unless @battery_type.nil?
-          if not @nominal_capacity_kwh.nil?
-            nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
-            XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
-            XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
-          end
-          if not @nominal_capacity_ah.nil?
-            nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
-            XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
-            XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
-          end
-          if not @usable_capacity_kwh.nil?
-            usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
-            XMLHelper.add_element(usable_capacity, 'Units', UnitsKwh, :string)
-            XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
-          end
-          if not @usable_capacity_ah.nil?
-            usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
-            XMLHelper.add_element(usable_capacity, 'Units', UnitsAh, :string)
-            XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
-          end
-          XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
-          XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
-        end
-      end
-
-      case @vehicle_type
-      when HPXML::VehicleTypeBEV
-        if not @fraction_charged_home.nil?
-          fraction_charged_location = XMLHelper.add_element(vehicle_type, 'FractionChargedLocation')
-          XMLHelper.add_element(fraction_charged_location, 'Location', HPXML::ElectricVehicleChargingLocationHome, :string)
-          XMLHelper.add_element(fraction_charged_location, 'Percentage', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted)
-        end
-        if not @ev_charger_idref.nil?
-          charger = XMLHelper.add_element(vehicle_type, 'ConnectedCharger')
-          XMLHelper.add_attribute(charger, 'idref', @ev_charger_idref)
-        end
-        XMLHelper.add_extension(vehicle_type, 'WeekdayScheduleFractions', @ev_weekday_fractions, :string, @ev_weekday_fractions_isdefaulted) unless @ev_weekday_fractions.nil?
-        XMLHelper.add_extension(vehicle_type, 'WeekendScheduleFractions', @ev_weekend_fractions, :string, @ev_weekend_fractions_isdefaulted) unless @ev_weekend_fractions.nil?
-        XMLHelper.add_extension(vehicle_type, 'MonthlyScheduleMultipliers', @ev_monthly_multipliers, :string, @ev_monthly_multipliers_isdefaulted) unless @ev_monthly_multipliers.nil?
-      end
-
-      XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_per_year, :float, @miles_per_year_isdefaulted) unless @miles_per_year.nil?
-      XMLHelper.add_element(vehicle, 'HoursDrivenPerWeek', @hours_per_week, :float, @hours_per_week_isdefaulted) unless @hours_per_week.nil?
-      if (not @fuel_economy_units.nil?) && (not @fuel_economy_combined.nil?)
-        fuel_economy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined')
-        XMLHelper.add_element(fuel_economy, 'Units', @fuel_economy_units, :string, @fuel_economy_units_isdefaulted)
-        XMLHelper.add_element(fuel_economy, 'Value', @fuel_economy_combined, :float, @fuel_economy_combined_isdefaulted)
-      end
-    end
-
-    # Populates the HPXML object(s) from the XML document.
-    #
-    # @param battery [Oga::XML::Element] The current Battery XML element
-    # @return [nil]
-    def from_doc(vehicle)
-      return if vehicle.nil?
-
-      @id = HPXML::get_id(vehicle)
-      @miles_per_year = XMLHelper.get_value(vehicle, 'MilesDrivenPeryear', :float)
-      @hours_per_week = XMLHelper.get_value(vehicle, 'HoursDrivenPerWeek', :float)
-      @fuel_economy_combined = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Value', :float)
-      @fuel_economy_units = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Units', :string)
-      @vehicle_type = XMLHelper.get_child_name(vehicle, 'VehicleType')
-      if @vehicle_type == HPXML::VehicleTypeBEV
-        battery_prefix = "VehicleType/#{@vehicle_type}/Battery"
-        @battery_type = XMLHelper.get_value(vehicle, "#{battery_prefix}/BatteryType", :string)
-        @nominal_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
-        @nominal_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsAh}']/Value", :float)
-        @usable_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
-        @usable_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsAh}']/Value", :float)
-        @nominal_voltage = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalVoltage", :float)
-        @fraction_charged_home = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/FractionChargedLocation[Location='#{HPXML::ElectricVehicleChargingLocationHome}']/Percentage", :float)
-        @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(vehicle, "VehicleType/#{@vehicle_type}/ConnectedCharger"))
-        @lifetime_model = XMLHelper.get_value(vehicle, "#{battery_prefix}/extension/LifetimeModel", :string)
-        @ev_weekday_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekdayScheduleFractions", :string)
-        @ev_weekend_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekendScheduleFractions", :string)
-        @ev_monthly_multipliers = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/MonthlyScheduleMultipliers", :string)
-      end
-    end
-
-    # Returns the EV charger for the vehicle.
-    #
-    # @return [HPXML::ElectricVehicleCharger] The connected EV charger
-    def ev_charger
-      return if @ev_charger_idref.nil?
-
-      @parent_object.ev_chargers.each do |ev_charger|
-        next unless ev_charger.id == @ev_charger_idref
-
-        return ev_charger
-      end
-      fail "Connected charger '#{@ev_charger_idref}' not found for vehicle '#{@id}'."
-    end
-  end
-
   # Array of HPXML::ElectricPanel objects.
   class ElectricPanels < BaseArrayElement
     # Adds a new object, with the specified keyword arguments, to the array.
@@ -10016,25 +9772,34 @@ class HPXML < Object
     def components
       return [] if @component_idrefs.nil?
 
+      # FIXME: should this be constrained?
       heating_systems = @parent_object.heating_systems.select { |heating_system| @component_idrefs.include? heating_system.id }
       cooling_systems = @parent_object.cooling_systems.select { |cooling_system| @component_idrefs.include? cooling_system.id }
       heat_pumps = @parent_object.heat_pumps.select { |heat_pump| @component_idrefs.include? heat_pump.id }
+      hvac_distributions = @parent_object.hvac_distributions.select { |hvac_distribution| @component_idrefs.include? hvac_distribution.id }
       water_heating_systems = @parent_object.water_heating_systems.select { |water_heating_system| @component_idrefs.include? water_heating_system.id }
+      clothes_washers = @parent_object.clothes_washers.select { |clothes_washer| @component_idrefs.include? clothes_washer.id }
       clothes_dryers = @parent_object.clothes_dryers.select { |clothes_dryer| @component_idrefs.include? clothes_dryer.id }
       dishwashers = @parent_object.dishwashers.select { |dishwasher| @component_idrefs.include? dishwasher.id }
       cooking_ranges = @parent_object.cooking_ranges.select { |cooking_range| @component_idrefs.include? cooking_range.id }
+      ovens = @parent_object.ovens.select { |oven| @component_idrefs.include? oven.id }
+      refrigerators = @parent_object.refrigerators.select { |refrigerator| @component_idrefs.include? refrigerator.id }
+      freezers = @parent_object.freezers.select { |freezer| @component_idrefs.include? freezer.id }
+      dehumidifiers = @parent_object.dehumidifiers.select { |dehumidifier| @component_idrefs.include? dehumidifier.id }
       ventilation_fans = @parent_object.ventilation_fans.select { |ventilation_fan| @component_idrefs.include? ventilation_fan.id }
       permanent_spa_pumps = @parent_object.permanent_spas.select { |permanent_spa| @component_idrefs.include? permanent_spa.pump_id }
       permanent_spa_heaters = @parent_object.permanent_spas.select { |permanent_spa| @component_idrefs.include? permanent_spa.heater_id }
       pool_pumps = @parent_object.pools.select { |pool| @component_idrefs.include? pool.pump_id }
       pool_heaters = @parent_object.pools.select { |pool| @component_idrefs.include? pool.heater_id }
-      plug_load_well_pumps = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) && plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump }
-      plug_load_vehicles = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) && plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
-      ev_chargers = @parent_object.ev_chargers.select { |ev_charger| @component_idrefs.include?(ev_charger.id) }
+      plug_loads = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) }
+      fuel_loads = @parent_object.fuel_loads.select { |fuel_load| @component_idrefs.include?(fuel_load.id) }
+      ev_chargers = @parent_object.ev_chargers.select { |ev_charger| @component_idrefs.include? ev_charger.id }
+      pv_systems = @parent_object.pv_systems.select { |pv_system| @component_idrefs.include? pv_system.id }
+      lighting_groups = @parent_object.lighting_groups.select { |lighting_group| @component_idrefs.include? lighting_group.id }
 
-      list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
+      list = heating_systems + cooling_systems + heat_pumps + hvac_distributions + water_heating_systems + clothes_washers + clothes_dryers + dishwashers + cooking_ranges + ovens + refrigerators + freezers + dehumidifiers + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_loads + fuel_loads + ev_chargers + pv_systems + lighting_groups
       if @component_idrefs.size > list.size
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for branch circuit '#{@id}'."
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not supported for branch circuit '#{@id}'."
       end
 
       return list
@@ -10068,6 +9833,7 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
+      begin; components; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -10154,6 +9920,7 @@ class HPXML < Object
       heating_systems = @parent_object.heating_systems.select { |heating_system| @component_idrefs.include? heating_system.id }
       cooling_systems = @parent_object.cooling_systems.select { |cooling_system| @component_idrefs.include? cooling_system.id }
       heat_pumps = @parent_object.heat_pumps.select { |heat_pump| @component_idrefs.include? heat_pump.id }
+      hvac_distributions = @parent_object.hvac_distributions.select { |hvac_distribution| @component_idrefs.include? hvac_distribution.id }
       water_heating_systems = @parent_object.water_heating_systems.select { |water_heating_system| @component_idrefs.include? water_heating_system.id }
       clothes_dryers = @parent_object.clothes_dryers.select { |clothes_dryer| @component_idrefs.include? clothes_dryer.id }
       dishwashers = @parent_object.dishwashers.select { |dishwasher| @component_idrefs.include? dishwasher.id }
@@ -10165,7 +9932,7 @@ class HPXML < Object
       pool_heaters = @parent_object.pools.select { |pool| @component_idrefs.include? pool.heater_id }
       plug_load_well_pumps = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) && plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump }
       plug_load_vehicles = @parent_object.plug_loads.select { |plug_load| @component_idrefs.include?(plug_load.id) && plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
-      ev_chargers = @parent_object.ev_chargers.select { |ev_charger| @component_idrefs.include?(ev_charger.id) }
+      ev_chargers = @parent_object.ev_chargers.select { |ev_charger| @component_idrefs.include? ev_charger.id }
 
       if !heating_systems.empty?
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating].include?(@type)
@@ -10174,6 +9941,9 @@ class HPXML < Object
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeCooling].include?(@type)
       end
       if !heat_pumps.empty?
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
+      end
+      if !hvac_distributions.empty?
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
       end
       if !water_heating_systems.empty?
@@ -10213,9 +9983,9 @@ class HPXML < Object
         fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
       end
 
-      list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
+      list = heating_systems + cooling_systems + heat_pumps + hvac_distributions + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
       if @component_idrefs.size > list.size
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for service feeder '#{@id}'."
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not supported for service feeder '#{@id}'."
       end
 
       return list
@@ -10274,6 +10044,287 @@ class HPXML < Object
       @power = XMLHelper.get_value(service_feeder, 'PowerRating', :float)
       @is_new_load = XMLHelper.get_value(service_feeder, 'IsNewLoad', :boolean)
       @component_idrefs = HPXML::get_idrefs(service_feeder, 'AttachedToComponent')
+    end
+  end
+
+  # Array of HPXML::ElectricVehicleCharger objects
+  class ElectricVehicleChargers < BaseArrayElement
+    # Adds a new object, with the specified keyword arguments, to the array.
+    #
+    # @return [nil]
+    def add(**kwargs)
+      self << ElectricVehicleCharger.new(@parent_object, **kwargs)
+    end
+
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
+    def from_doc(building)
+      return if building.nil?
+
+      XMLHelper.get_elements(building, 'BuildingDetails/Systems/ElectricVehicleChargers/ElectricVehicleCharger').each do |charger|
+        self << ElectricVehicleCharger.new(@parent_object, charger)
+      end
+    end
+  end
+
+  # Object for /HPXML/Building/BuildingDetails/Systems/ElectricVehicleChargers/ElectricVehicleCharger.
+  class ElectricVehicleCharger < BaseElement
+    ATTRS = [:id,             # [String] SystemIdentifier/@id
+             :location,       # [String] Location (HPXML::LocationXXX)
+             :charging_level, # [Integer] ChargingLevel (1-3)
+             :charging_power] # [Double] ChargingPower (W)
+    attr_accessor(*ATTRS)
+
+    # Returns any branch circuits that the component may be attached to.
+    #
+    # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
+    def branch_circuits
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.branch_circuits.each do |branch_circuit|
+          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
+          next unless branch_circuit.component_idrefs.include?(@id)
+
+          list << branch_circuit
+        end
+      end
+
+      return list
+    end
+
+    # Returns any service feeders that the component may be attached to.
+    #
+    # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
+    def service_feeders
+      list = []
+      @parent_object.electric_panels.each do |electric_panel|
+        electric_panel.service_feeders.each do |service_feeder|
+          next if service_feeder.component_idrefs.empty?
+          next unless service_feeder.component_idrefs.include?(@id)
+
+          list << service_feeder
+        end
+      end
+
+      return list
+    end
+
+    # Deletes the current object from the array.
+    #
+    # @return [nil]
+    def delete
+      @parent_object.ev_chargers.delete(self)
+    end
+
+    # Additional error-checking beyond what's checked in Schema/Schematron validators.
+    #
+    # @return [Array<String>] List of error messages
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    # Adds this object to the provided Oga XML element.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
+    def to_doc(building)
+      return if nil?
+
+      chargers = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'ElectricVehicleChargers'])
+      charger = XMLHelper.add_element(chargers, 'ElectricVehicleCharger')
+      sys_id = XMLHelper.add_element(charger, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(charger, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
+      XMLHelper.add_element(charger, 'ChargingLevel', @charging_level, :integer, @charging_level_isdefaulted) unless @charging_level.nil?
+      XMLHelper.add_element(charger, 'ChargingPower', @charging_power, :float, @charging_power_isdefaulted) unless @charging_power.nil?
+    end
+
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param battery [Oga::XML::Element] The current Battery XML element
+    # @return [nil]
+    def from_doc(charger)
+      return if charger.nil?
+
+      @id = HPXML::get_id(charger)
+      @location = XMLHelper.get_value(charger, 'Location', :string)
+      @charging_level = XMLHelper.get_value(charger, 'ChargingLevel', :integer)
+      @charging_power = XMLHelper.get_value(charger, 'ChargingPower', :float)
+    end
+  end
+
+  # Array of HPXML::Vehicle objects.
+  class Vehicles < BaseArrayElement
+    # Adds a new object, with the specified keyword arguments, to the array.
+    #
+    # @return [nil]
+    def add(**kwargs)
+      self << Vehicle.new(@parent_object, **kwargs)
+    end
+
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
+    def from_doc(building)
+      return if building.nil?
+
+      XMLHelper.get_elements(building, 'BuildingDetails/Systems/Vehicles/Vehicle').each do |vehicle|
+        self << Vehicle.new(@parent_object, vehicle)
+      end
+    end
+  end
+
+  # Object for /HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle.
+  class Vehicle < BaseElement
+    ATTRS = [:id,                     # [String] SystemIdentifier/@id
+             :vehicle_type,           # [String] VehicleType (HPXML::VehicleTypeXXX)
+             :miles_per_year,         # [Double] MilesDrivenPerYear (miles)
+             :hours_per_week,         # [Double] HoursDrivenPerWeek (hours)
+             :fuel_economy_combined,  # [Double] FuelEconomyCombined/Value
+             :fuel_economy_units,     # [String] FuelEconomyCombined/Units
+             :fraction_charged_home,  # [Double] VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage (frac)
+             :ev_charger_idref,       # [String] VehicleType/BatteryElectricVehicle/ConnectedCharger/@idref
+             :battery_type,           # [String] VehicleType/BatteryElectricVehicle/Battery/BatteryType (HPXML::BatteryTypeXXX)
+             :nominal_capacity_kwh,   # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="kWh"]/Value (kWh)
+             :nominal_capacity_ah,    # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalCapacity[Units="Ah"]/Value (Ah)
+             :usable_capacity_kwh,    # [Double] VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="kWh"]/Value (kWh)
+             :usable_capacity_ah,     # [Double] VehicleType/BatteryElectricVehicle/Battery/UsableCapacity[Units="Ah"]/Value (Ah)
+             :nominal_voltage,        # [Double] VehicleType/BatteryElectricVehicle/Battery/NominalVoltage (V)
+             :lifetime_model,         # [String] VehicleType/BatteryElectricVehicle/Battery/extension/LifetimeModel (HPXML::BatteryLifetimeModelXXX)
+             :ev_weekday_fractions,   # [String] VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions
+             :ev_weekend_fractions,   # [String] VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions
+             :ev_monthly_multipliers] # [String] VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers
+    attr_accessor(*ATTRS)
+
+    # Deletes the current object from the array.
+    #
+    # @return [nil]
+    def delete
+      @parent_object.vehicles.delete(self)
+    end
+
+    # Additional error-checking beyond what's checked in Schema/Schematron validators.
+    #
+    # @return [Array<String>] List of error messages
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    # Adds this object to the provided Oga XML element.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
+    def to_doc(building)
+      return if nil?
+
+      vehicles = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Vehicles'])
+      vehicle = XMLHelper.add_element(vehicles, 'Vehicle')
+      sys_id = XMLHelper.add_element(vehicle, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      vehicle_type_element = XMLHelper.add_element(vehicle, 'VehicleType')
+      vehicle_type = XMLHelper.add_element(vehicle_type_element, @vehicle_type)
+
+      if [HPXML::VehicleTypeBEV, HPXML::VehicleTypePHEV, HPXML::VehicleTypeHybrid].include? @vehicle_type
+        if (not @battery_type.nil?) || (not @nominal_capacity_kwh.nil?) || (not @nominal_capacity_ah.nil?) || (not @usable_capacity_kwh.nil?) || (not @usable_capacity_ah.nil?) || (not @nominal_voltage.nil?) || (not @lifetime_model.nil?)
+          battery = XMLHelper.add_element(vehicle_type, 'Battery')
+          XMLHelper.add_element(battery, 'BatteryType', @battery_type, :string, @battery_type_isdefaulted) unless @battery_type.nil?
+          if not @nominal_capacity_kwh.nil?
+            nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
+            XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
+            XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
+          end
+          if not @nominal_capacity_ah.nil?
+            nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
+            XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
+            XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
+          end
+          if not @usable_capacity_kwh.nil?
+            usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+            XMLHelper.add_element(usable_capacity, 'Units', UnitsKwh, :string)
+            XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
+          end
+          if not @usable_capacity_ah.nil?
+            usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+            XMLHelper.add_element(usable_capacity, 'Units', UnitsAh, :string)
+            XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
+          end
+          XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
+          XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
+        end
+      end
+
+      case @vehicle_type
+      when HPXML::VehicleTypeBEV
+        if not @fraction_charged_home.nil?
+          fraction_charged_location = XMLHelper.add_element(vehicle_type, 'FractionChargedLocation')
+          XMLHelper.add_element(fraction_charged_location, 'Location', HPXML::ElectricVehicleChargingLocationHome, :string)
+          XMLHelper.add_element(fraction_charged_location, 'Percentage', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted)
+        end
+        if not @ev_charger_idref.nil?
+          charger = XMLHelper.add_element(vehicle_type, 'ConnectedCharger')
+          XMLHelper.add_attribute(charger, 'idref', @ev_charger_idref)
+        end
+        XMLHelper.add_extension(vehicle_type, 'WeekdayScheduleFractions', @ev_weekday_fractions, :string, @ev_weekday_fractions_isdefaulted) unless @ev_weekday_fractions.nil?
+        XMLHelper.add_extension(vehicle_type, 'WeekendScheduleFractions', @ev_weekend_fractions, :string, @ev_weekend_fractions_isdefaulted) unless @ev_weekend_fractions.nil?
+        XMLHelper.add_extension(vehicle_type, 'MonthlyScheduleMultipliers', @ev_monthly_multipliers, :string, @ev_monthly_multipliers_isdefaulted) unless @ev_monthly_multipliers.nil?
+      end
+
+      XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_per_year, :float, @miles_per_year_isdefaulted) unless @miles_per_year.nil?
+      XMLHelper.add_element(vehicle, 'HoursDrivenPerWeek', @hours_per_week, :float, @hours_per_week_isdefaulted) unless @hours_per_week.nil?
+      if (not @fuel_economy_units.nil?) && (not @fuel_economy_combined.nil?)
+        fuel_economy = XMLHelper.add_element(vehicle, 'FuelEconomyCombined')
+        XMLHelper.add_element(fuel_economy, 'Units', @fuel_economy_units, :string, @fuel_economy_units_isdefaulted)
+        XMLHelper.add_element(fuel_economy, 'Value', @fuel_economy_combined, :float, @fuel_economy_combined_isdefaulted)
+      end
+    end
+
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param battery [Oga::XML::Element] The current Battery XML element
+    # @return [nil]
+    def from_doc(vehicle)
+      return if vehicle.nil?
+
+      @id = HPXML::get_id(vehicle)
+      @miles_per_year = XMLHelper.get_value(vehicle, 'MilesDrivenPeryear', :float)
+      @hours_per_week = XMLHelper.get_value(vehicle, 'HoursDrivenPerWeek', :float)
+      @fuel_economy_combined = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Value', :float)
+      @fuel_economy_units = XMLHelper.get_value(vehicle, 'FuelEconomyCombined/Units', :string)
+      @vehicle_type = XMLHelper.get_child_name(vehicle, 'VehicleType')
+      if @vehicle_type == HPXML::VehicleTypeBEV
+        battery_prefix = "VehicleType/#{@vehicle_type}/Battery"
+        @battery_type = XMLHelper.get_value(vehicle, "#{battery_prefix}/BatteryType", :string)
+        @nominal_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
+        @nominal_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsAh}']/Value", :float)
+        @usable_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
+        @usable_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsAh}']/Value", :float)
+        @nominal_voltage = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalVoltage", :float)
+        @fraction_charged_home = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/FractionChargedLocation[Location='#{HPXML::ElectricVehicleChargingLocationHome}']/Percentage", :float)
+        @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(vehicle, "VehicleType/#{@vehicle_type}/ConnectedCharger"))
+        @lifetime_model = XMLHelper.get_value(vehicle, "#{battery_prefix}/extension/LifetimeModel", :string)
+        @ev_weekday_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekdayScheduleFractions", :string)
+        @ev_weekend_fractions = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/WeekendScheduleFractions", :string)
+        @ev_monthly_multipliers = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/extension/MonthlyScheduleMultipliers", :string)
+      end
+    end
+
+    # Returns the EV charger for the vehicle.
+    #
+    # @return [HPXML::ElectricVehicleCharger] The connected EV charger
+    def ev_charger
+      return if @ev_charger_idref.nil?
+
+      @parent_object.ev_chargers.each do |ev_charger|
+        next unless ev_charger.id == @ev_charger_idref
+
+        return ev_charger
+      end
+      fail "Connected charger '#{@ev_charger_idref}' not found for vehicle '#{@id}'."
     end
   end
 

@@ -391,7 +391,7 @@ These calculations are currently considered experimental research features.
 
          \- **2023 Existing Dwelling Load-Based**: Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
 
-         \- **2023 Existing Dwelling Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
+         \- **2023 Existing Dwelling Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code. FIXME: need something about needing extension/AdditionalProperties/PeakElectricity populated.
 
          If running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling Load-Based" calculation types, load calculations will be performed on each individual dwelling unit and then summed across units of the building.
          Running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling Meter-Based" calculation types is not supported.
@@ -4676,8 +4676,8 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``Voltage``                                     string    V               See [#]_     No        See [#]_
   ``MaxCurrentRating``                            double    A                            No        See [#]_
-  ``OccupiedSpaces``                              integer                   See [#]_     No        See [#]_   Number of occupied breaker spaces
-  ``AttachedToComponent``                         idref                                  No                   ID of attached component; multiple are allowed [#]_
+  ``OccupiedSpaces``                              integer                                No        See [#]_   Number of occupied breaker spaces
+  ``AttachedToComponent``                         idref                     See [#]_     No                   ID of attached component; multiple are allowed [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] Voltage choices are "120" or "240".
@@ -4693,7 +4693,6 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          
          \- **240**: 50
 
-  .. [#] OccupiedSpaces choices are 0.0, 0.5, 1.0, or 2.0.
   .. [#] If OccupiedSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of components referenced by AttachedToComponent.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
          Occupied breaker spaces will be recalculated based on the new Voltage classification.
@@ -4705,7 +4704,9 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          
          NumBreakers = NumBranches * (Voltage / 120)
 
+  .. [#] AttachedToComponent must reference a ``HeatingSystem``, ``CoolingSystem``, ``HeatPump``,  ``HVACDistribution``, ``WaterHeatingSystem``, ``ClothesWasher``, ``ClothesDryer``, ``Dishwasher``, ``CookingRange``, ``Oven``, ``Refrigerator``, ``Freezer``, ``Dehumidifier``, ``VentilationFan``, ``PermanentSpa/Pumps/Pump``, ``PermanentSpa/Heater``, ``Pool/Pumps/Pump``, ``Pool/Heater``, ``PlugLoad``, ``FuelLoad``, ``ElectricVehicleCharger``, ``PVSystem``, or ``LightingGroup``.
   .. [#] Provide a AttachedToComponent element for each referenced component.
+         A branch circuit is assumed to be dedicated when exactly one AttachedToComponent element is provided.
 
 .. _service_feeders:
 
@@ -4728,9 +4729,9 @@ Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
   .. [#] Depending on the LoadType, AttachedToComponent must reference:
 
-         \- **heating**: ``HeatingSystem`` or ``HeatPump``
+         \- **heating**: ``HeatingSystem``, ``HeatPump``, or ``HVACDistribution``
 
-         \- **cooling**: ``CoolingSystem`` or ``HeatPump``
+         \- **cooling**: ``CoolingSystem``, ``HeatPump``, or ``HVACDistribution``
 
          \- **hot water**: ``WaterHeatingSystem``
 

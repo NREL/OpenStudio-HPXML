@@ -462,6 +462,59 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
+        <ElectricPanels>
+          <ElectricPanel>
+            <SystemIdentifier id='ElectricPanel1'/>
+            <Voltage>240</Voltage>
+            <MaxCurrentRating>100.0</MaxCurrentRating>
+            <HeadroomSpaces>5</HeadroomSpaces>
+            <BranchCircuits>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit1'/>
+                <AttachedToComponent idref='HeatingSystem1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit2'/>
+                <AttachedToComponent idref='CoolingSystem1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit3'/>
+                <AttachedToComponent idref='HVACDistribution1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit4'/>
+                <AttachedToComponent idref='VentilationFan1'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit5'/>
+                <AttachedToComponent idref='VentilationFan2'/>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit6'/>
+                <OccupiedSpaces>0.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit7'/>
+                <OccupiedSpaces>2.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit8'/>
+                <OccupiedSpaces>1.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit9'/>
+                <OccupiedSpaces>1.0</OccupiedSpaces>
+              </BranchCircuit>
+            </BranchCircuits>
+            <ServiceFeeders>
+              <ServiceFeeder>
+                <SystemIdentifier id='ServiceFeeder1'/>
+                <LoadType>other</LoadType>
+                <PowerRating>559.0</PowerRating>
+              </ServiceFeeder>
+            </ServiceFeeders>
+          </ElectricPanel>
+        </ElectricPanels>
       </Systems>
       <Appliances>
         <ClothesWasher>
