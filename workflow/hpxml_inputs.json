@@ -603,7 +603,7 @@
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-07.xml",
     "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
-  "real_homes/house054.xml": {
+  "real_homes/house051.xml": {
     "simulation_control_timestep": 60,
     "site_type": "suburban",
     "site_iecc_zone": "5B",
