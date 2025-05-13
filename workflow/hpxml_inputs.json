@@ -2087,7 +2087,7 @@
     "heat_pump_cooling_efficiency": 13,
     "heat_pump_compressor_type": "single stage",
     "heat_pump_heating_capacity": 36000,
-    "heat_pump_heating_capacity_fraction_17F": 0.6,
+    "heat_pump_heating_capacity_fraction_17_f": 0.6,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
@@ -2208,7 +2208,7 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "heat_pump_heating_capacity": 18000,
-    "heat_pump_heating_capacity_fraction_17F": 0.6,
+    "heat_pump_heating_capacity_fraction_17_f": 0.6,
     "heat_pump_cooling_capacity": 18000,
     "heat_pump_backup_type": "separate",
     "heating_system_2_type": "Boiler",
@@ -2285,7 +2285,7 @@
     "heat_pump_compressor_type": "variable speed",
     "heat_pump_heating_capacity": null,
     "heat_pump_cooling_capacity": null,
-    "heat_pump_heating_capacity_fraction_17F": null,
+    "heat_pump_heating_capacity_fraction_17_f": null,
     "heat_pump_cooling_efficiency": 17.5,
     "heat_pump_heating_efficiency": 9.5,
     "hvac_perf_data_capacity_type": "Absolute capacities",
@@ -2453,7 +2453,7 @@
     "heat_pump_cooling_efficiency": 13,
     "heat_pump_compressor_type": "single stage",
     "heat_pump_heating_capacity": 36000,
-    "heat_pump_heating_capacity_fraction_17F": 0.6,
+    "heat_pump_heating_capacity_fraction_17_f": 0.6,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_backup_type": "integrated",
@@ -2646,7 +2646,7 @@
     "heat_pump_cooling_efficiency": 13,
     "heat_pump_compressor_type": "single stage",
     "heat_pump_heating_capacity": 36000,
-    "heat_pump_heating_capacity_fraction_17F": 0.6,
+    "heat_pump_heating_capacity_fraction_17_f": 0.6,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_cool_load_served": 1
   },
@@ -2892,7 +2892,7 @@
     "heat_pump_cooling_efficiency": 19,
     "heat_pump_compressor_type": "variable speed",
     "heat_pump_heating_capacity": 36000,
-    "heat_pump_heating_capacity_fraction_17F": 0.6,
+    "heat_pump_heating_capacity_fraction_17_f": 0.6,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
@@ -2912,7 +2912,7 @@
     "heat_pump_compressor_type": "variable speed",
     "heat_pump_cooling_capacity": 36000.0,
     "heat_pump_heating_capacity": 36000.0,
-    "heat_pump_heating_capacity_fraction_17F": null,
+    "heat_pump_heating_capacity_fraction_17_f": null,
     "heat_pump_cooling_efficiency": 16.7,
     "heat_pump_heating_efficiency": 11.3,
     "hvac_perf_data_capacity_type": "Absolute capacities",
@@ -2988,7 +2988,7 @@
     "heat_pump_compressor_type": "variable speed",
     "heat_pump_cooling_capacity": null,
     "heat_pump_heating_capacity": null,
-    "heat_pump_heating_capacity_fraction_17F": null,
+    "heat_pump_heating_capacity_fraction_17_f": null,
     "heat_pump_cooling_efficiency": 17.0,
     "heat_pump_heating_efficiency": 10.0,
     "hvac_perf_data_capacity_type": "Absolute capacities",
@@ -3026,7 +3026,7 @@
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "heat_pump_heating_capacity": 18000,
-    "heat_pump_heating_capacity_fraction_17F": 0.6,
+    "heat_pump_heating_capacity_fraction_17_f": 0.6,
     "heat_pump_cooling_capacity": 18000,
     "heat_pump_backup_type": "separate",
     "heating_system_2_type": "Stove",
@@ -3114,7 +3114,7 @@
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_type": "packaged terminal heat pump",
     "heat_pump_cooling_efficiency": 11.4,
-    "heat_pump_heating_capacity_fraction_17F": 0.6,
+    "heat_pump_heating_capacity_fraction_17_f": 0.6,
     "heat_pump_backup_type": "integrated",
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
@@ -3161,7 +3161,7 @@
   "sample_files/base-hvac-room-ac-with-reverse-cycle.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml",
     "heat_pump_type": "room air conditioner with reverse cycle",
-    "heat_pump_heating_capacity_fraction_17F": 0.6
+    "heat_pump_heating_capacity_fraction_17_f": 0.6
   },
   "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
