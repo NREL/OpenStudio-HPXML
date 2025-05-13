@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- Updates to OpenStudio 3.10/EnergyPlus 25.1.
 - HVAC modeling updates:
   - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps as well as ground-to-air heat pumps.
   - Optional input `SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType` to choose "standard" (default) or "experimental"; "experimental" ground-to-air heat pump model better accounts for coil staging.
@@ -25,6 +26,7 @@ __New Features__
 - Allows arbitrary columns to be present in a detailed schedule csv file with warning.
 
 __Bugfixes__
+- Fixes EPvalidator schematron file extension (.sch, not .xml).
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
 - Fixes using detailed schedules with higher resolution (e.g., 10-min data) than the simulation timestep (e.g., 60-min).
 - Fixes possible heating/cooling spikes when using maximum power ratio detailed schedule for variable-speed HVAC systems.
