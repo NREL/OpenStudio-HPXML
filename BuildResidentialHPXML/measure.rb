@@ -1445,7 +1445,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_fraction_17F', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_fraction_17_f', false)
     arg.setDisplayName('Heat Pump: Heating Capacity Fraction at 17F')
     arg.setDescription("The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity at 47F. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('Frac')
@@ -5935,7 +5935,7 @@ module HPXMLFile
                               heating_autosizing_limit: args[:heat_pump_heating_autosizing_limit],
                               backup_heating_autosizing_factor: args[:heat_pump_backup_heating_autosizing_factor],
                               backup_heating_autosizing_limit: args[:heat_pump_backup_heating_autosizing_limit],
-                              heating_capacity_fraction_17F: args[:heat_pump_heating_capacity_fraction_17F],
+                              heating_capacity_fraction_17F: args[:heat_pump_heating_capacity_fraction_17_f],
                               compressor_type: compressor_type,
                               compressor_lockout_temp: args[:heat_pump_compressor_lockout_temp],
                               cooling_capacity: args[:heat_pump_cooling_capacity],
