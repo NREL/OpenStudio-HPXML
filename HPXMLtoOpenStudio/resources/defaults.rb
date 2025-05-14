@@ -2253,6 +2253,18 @@ module Defaults
       end
     end
 
+    # Defrost
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      next unless heat_pump.backup_heating_active_during_defrost.nil?
+      next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                   HPXML::HVACTypeHeatPumpMiniSplit,
+                   HPXML::HVACTypeHeatPumpRoom,
+                   HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
+
+      heat_pump.backup_heating_active_during_defrost = (not heat_pump.backup_type.nil?)
+      heat_pump.backup_heating_active_during_defrost_isdefaulted = true
+    end
+
     # EER2
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       if hvac_system.is_a?(HPXML::CoolingSystem)
