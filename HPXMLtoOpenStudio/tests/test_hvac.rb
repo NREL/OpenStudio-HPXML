@@ -1087,7 +1087,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_defrost(model, htg_coil, 4747.7, 10550.56, 1.0, backup_fuel, 0.06667, 1389)
+    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 1389, 4747.7)
 
     # Single Speed heat pump test
     args_hash = {}
@@ -1100,7 +1100,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_defrost(model, htg_coil, 4747.7, 10000.0, 1.0, backup_fuel, 0.1, 1605)
+    _check_defrost(model, htg_coil, 10000.0, 1.0, backup_fuel, 0.1, 1605, 4747.7)
 
     # Ductless heat pump test
     args_hash = {}
@@ -1112,7 +1112,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    _check_defrost(model, htg_coil, 1055.1, 0.0, 0.0, backup_fuel, 0.06667, 3444)
+    _check_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 3444, 1055.1)
 
     # Dual fuel heat pump test
     args_hash = {}
@@ -1125,7 +1125,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_defrost(model, htg_coil, 4747.7, 10550.56, 0.95, backup_fuel, 0.06667, 1260)
+    _check_defrost(model, htg_coil, 10550.56, 0.95, backup_fuel, 0.06667, 1260, 4747.7)
 
     # Separate backup heat pump test
     args_hash = {}
@@ -1137,7 +1137,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    _check_defrost(model, htg_coil, 2373.9, 0.0, 0.0, backup_fuel, 0.06667, 663)
+    _check_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 663, 2373.9)
 
     # Small capacity test
     args_hash = {}
@@ -1152,7 +1152,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
     backup_fuel = EPlus.fuel_type(hpxml_bldg.heat_pumps[0].backup_heating_fuel)
     # q_dot smaller than backup capacity
-    _check_defrost(model, htg_coil, 131.88, 10000.0, 1.0, backup_fuel, 0.1, 42.9)
+    _check_defrost(model, htg_coil, 10000.0, 1.0, backup_fuel, 0.1, 42.9, 131.88)
   end
 
   def test_heat_pump_resnet_defrost
