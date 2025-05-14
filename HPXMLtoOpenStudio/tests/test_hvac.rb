@@ -1106,7 +1106,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Ductless heat pump test
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values

@@ -4775,8 +4775,7 @@ module HVAC
     if htg_supp_coil.nil?
       backup_system = heat_pump.backup_system
       if backup_system.nil?
-        supp_sys_capacity = 0.0
-        supp_sys_fuel = HPXML::FuelTypeElectricity
+        defrost_backup_heat_active = false
       else
         supp_sys_fuel = backup_system.heating_system_fuel
         supp_sys_capacity = UnitConversions.convert(backup_system.heating_capacity, 'Btu/hr', 'W')
@@ -4995,8 +4994,7 @@ module HVAC
     if htg_supp_coil.nil?
       backup_system = heat_pump.backup_system
       if backup_system.nil?
-        supp_sys_capacity = 0.0
-        supp_sys_fuel = HPXML::FuelTypeElectricity
+        defrost_backup_heat_active = false
       else
         supp_sys_fuel = backup_system.heating_system_fuel
         supp_sys_capacity = UnitConversions.convert(backup_system.heating_capacity, 'Btu/hr', 'W') / unit_multiplier
