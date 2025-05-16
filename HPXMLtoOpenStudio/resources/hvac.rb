@@ -466,10 +466,16 @@ module HVAC
 
     add_variable_speed_power_ems_program(runner, model, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
-    if is_heatpump && hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
-      apply_advanced_defrost(model, htg_coil, control_zone.spaces[0], cooling_system, q_dot_defrost, hpxml_bldg.building_construction.number_of_units)
-    elsif is_heatpump && hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeStandard
-      apply_frost_multiplier_EMS(model, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg.building_construction.number_of_units)
+    if is_heatpump
+      unit_multiplier = hpxml_bldg.building_construction.number_of_units
+      defrost_backup_heat_active = cooling_system.backup_heating_active_during_defrost
+      if hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
+        apply_advanced_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, q_dot_defrost, unit_multiplier, defrost_backup_heat_active)
+      elsif hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeStandard
+        apply_standard_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, unit_multiplier, defrost_backup_heat_active)
+      else
+        fail "Unexpected defrost model type: #{hpxml_header.defrost_model_type}"
+      end
     end
 
     if is_heatpump && cooling_system.pan_heater_watts.to_f > 0
@@ -789,7 +795,6 @@ module HVAC
     end
     clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
-
 
     # Supplemental Heating Coil
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
@@ -4764,20 +4769,18 @@ module HVAC
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @param q_dot_defrost [Double] Calculated delivered cooling q_dot [W]
   # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @param defrost_backup_heat_active [Boolean] Whether backup heat is active during defrost
   # @return [nil]
-  def self.apply_advanced_defrost(model, htg_coil, conditioned_space, heat_pump, q_dot_defrost, unit_multiplier)
-    supp_sys_capacity = 0.0
-    supp_sys_efficiency = 0.0
-    supp_sys_fuel = HPXML::FuelTypeElectricity
-    if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-      if not heat_pump.distribution_system_idref.nil?
-        # Practically no integrated supplemental system for ductless
-        # Sometimes integrated backup systems are added to ductless to avoid unmet loads, so it shouldn't count here to avoid overestimating backup system energy use
-        supp_sys_fuel = heat_pump.backup_heating_fuel
-        supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W') / unit_multiplier
-        supp_sys_efficiency = heat_pump.backup_heating_efficiency_percent
-        supp_sys_efficiency = heat_pump.backup_heating_efficiency_afue if supp_sys_efficiency.nil?
-      end
+  def self.apply_advanced_defrost_ems_program(model, htg_coil, conditioned_space, heat_pump, q_dot_defrost, unit_multiplier, defrost_backup_heat_active)
+    if defrost_backup_heat_active && heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+      supp_sys_fuel = heat_pump.backup_heating_fuel
+      supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W') / unit_multiplier
+      supp_sys_efficiency = heat_pump.backup_heating_efficiency_percent
+      supp_sys_efficiency = heat_pump.backup_heating_efficiency_afue if supp_sys_efficiency.nil?
+    else
+      supp_sys_capacity = 0.0
+      supp_sys_efficiency = 0.0
+      supp_sys_fuel = HPXML::FuelTypeElectricity
     end
 
     # Other equipment/actuator
@@ -4974,20 +4977,18 @@ module HVAC
   # @param conditioned_space [OpenStudio::Model::Space]  OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @param defrost_backup_heat_active [Boolean] Whether backup heat is active during defrost
   # @return [nil]
-  def self.apply_frost_multiplier_EMS(model, htg_coil, conditioned_space, heat_pump, unit_multiplier)
-    supp_sys_capacity = 0.0
-    supp_sys_efficiency = 0.0
-    supp_sys_fuel = HPXML::FuelTypeElectricity
-    if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-      if not heat_pump.distribution_system_idref.nil?
-        # Practically no integrated supplemental system for ductless
-        # Sometimes integrated backup systems are added to ductless to avoid unmet loads, so it shouldn't count here to avoid overestimating backup system energy use
-        supp_sys_fuel = heat_pump.backup_heating_fuel
-        supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W') / unit_multiplier
-        supp_sys_efficiency = heat_pump.backup_heating_efficiency_percent
-        supp_sys_efficiency = heat_pump.backup_heating_efficiency_afue if supp_sys_efficiency.nil?
-      end
+  def self.apply_standard_defrost_ems_program(model, htg_coil, conditioned_space, heat_pump, unit_multiplier, defrost_backup_heat_active)
+    if defrost_backup_heat_active && heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+      supp_sys_fuel = heat_pump.backup_heating_fuel
+      supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W') / unit_multiplier
+      supp_sys_efficiency = heat_pump.backup_heating_efficiency_percent
+      supp_sys_efficiency = heat_pump.backup_heating_efficiency_afue if supp_sys_efficiency.nil?
+    else
+      supp_sys_capacity = 0.0
+      supp_sys_efficiency = 0.0
+      supp_sys_fuel = HPXML::FuelTypeElectricity
     end
 
     # Other equipment/actuator
