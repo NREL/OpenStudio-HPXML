@@ -2261,7 +2261,7 @@ module Defaults
                    HPXML::HVACTypeHeatPumpRoom,
                    HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
 
-      heat_pump.backup_heating_active_during_defrost = (not heat_pump.backup_type.nil?)
+      heat_pump.backup_heating_active_during_defrost = (heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated)
       heat_pump.backup_heating_active_during_defrost_isdefaulted = true
     end
 

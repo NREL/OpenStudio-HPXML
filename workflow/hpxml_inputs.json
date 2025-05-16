@@ -3046,12 +3046,15 @@
     "heat_pump_backup_heating_efficiency": 1,
     "simulation_control_defrost_model_type": "advanced"
   },
-  "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost-without-supplemental.xml": {
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost-without-backup-heat-active.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost.xml"
   },
-  "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-standard-defrost-without-supplemental.xml": {
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-standard-defrost.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost.xml",
     "simulation_control_defrost_model_type": "standard"
+  },
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-standard-defrost-without-backup-heat-active.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-standard-defrost.xml"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml",
