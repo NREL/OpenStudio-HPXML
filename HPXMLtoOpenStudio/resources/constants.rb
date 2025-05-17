@@ -38,7 +38,6 @@ module Constants
   ObjectTypeGeneralWaterUseSensible = 'general water use sensible'
   ObjectTypeGenerator = 'generator'
   ObjectTypeGroundSourceHeatPump = 'ground source heat pump'
-  ObjectTypeGSHPSharedPump = 'gshp shared loop pump'
   ObjectTypeHotWaterRecircPump = 'dhw recirc pump'
   ObjectTypeHVACAvailabilitySensor = 'hvac availability sensor'
   ObjectTypeIdealAirSystem = 'ideal air system'
