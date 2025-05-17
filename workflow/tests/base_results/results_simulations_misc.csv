@@ -51,7 +51,7 @@ base-bldgtype-mf-unit-shared-chiller-only-fan-coil.xml,0.0,0.0,0.0,1323.0,910.7,
 base-bldgtype-mf-unit-shared-chiller-only-water-loop-heat-pump.xml,0.0,2.0,0.0,1323.0,910.7,11805.3,3162.8,1847.6,3699.0,3699.0,1847.6,3699.0,3699.0,0.0,8.668,0.0
 base-bldgtype-mf-unit-shared-cooling-tower-only-water-loop-heat-pump.xml,0.0,2.0,0.0,1323.0,910.7,11805.3,3162.8,1623.2,2457.5,2457.5,1623.2,2457.5,2457.5,0.0,8.668,0.0
 base-bldgtype-mf-unit-shared-generator.xml,0.0,0.0,0.0,1323.0,910.7,11805.3,3162.8,1344.9,2045.8,2045.8,1344.9,2045.8,2045.8,3.85,7.744,0.0
-base-bldgtype-mf-unit-shared-ground-loop-ground-to-air-heat-pump.xml,0.0,0.0,0.0,1323.0,910.7,11805.3,3162.8,1682.2,2056.4,2056.4,1682.2,2056.4,2056.4,3.85,7.745,0.0
+base-bldgtype-mf-unit-shared-ground-loop-ground-to-air-heat-pump.xml,0.0,0.0,0.0,1323.0,910.7,11805.3,3162.8,1590.4,1985.6,1985.6,1590.4,1985.6,1985.6,3.853,7.746,0.0
 base-bldgtype-mf-unit-shared-laundry-room-multiple-water-heaters.xml,0.0,0.0,0.0,1323.0,910.6,11805.6,3162.9,923.2,1615.2,1615.2,923.2,1615.2,1615.2,3.894,7.781,0.0
 base-bldgtype-mf-unit-shared-laundry-room.xml,0.0,0.0,0.0,1323.0,910.6,11805.1,3162.8,910.3,1604.1,1604.1,910.3,1604.1,1604.1,4.043,7.66,0.0
 base-bldgtype-mf-unit-shared-mechvent-multiple.xml,0.0,0.0,0.0,1323.0,910.7,11805.3,3162.8,1792.1,2461.6,2461.6,1792.1,2461.6,2461.6,7.92,9.025,0.0
