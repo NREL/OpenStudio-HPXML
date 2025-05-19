@@ -2966,7 +2966,7 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
   .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
          If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode and the outdoor temperature is below 32F.
-  .. [#] If BackupHeatingActiveDuringDefrost not provided, defaults to true if BackupType="integrated", otherwise false.
+  .. [#] If BackupHeatingActiveDuringDefrost not provided, defaults to true if BackupType="integrated" and there is an attached distribution system, otherwise false.
 
 .. _hvac_hp_pthp:
 
@@ -2994,7 +2994,7 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                          Yes                       Rated heating efficiency
   ``extension/HeatingCapacityFraction17F``                         double    frac      >= 0, < 1                    No        See [#]_        Heating output capacity at 17F divided by heating output capacity at 47F [#]_
   ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                         No        0.0             Crankcase heater power
-  ``extension/BackupHeatingActiveDuringDefrost``                   boolean                                          No        See [#]_        Whether integrated backup heat is used during defrost
+  ``extension/BackupHeatingActiveDuringDefrost``                   boolean                                          No        false           Whether integrated backup heat is used during defrost
   ``extension/CoolingAutosizingFactor``                            double    frac      > 0                          No        1.0             Cooling autosizing capacity multiplier
   ``extension/HeatingAutosizingFactor``                            double    frac      > 0                          No        1.0             Heating autosizing capacity multiplier
   ``extension/CoolingAutosizingLimit``                             double    Btu/hr    > 0                          No                        Cooling autosizing capacity limit
@@ -3018,7 +3018,6 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
   .. [#] If neither extension/HeatingCapacityFraction17F nor HeatingCapacity17F provided, heating capacity fraction at 17F defaults to 0.59.
   .. [#] The extension/HeatingCapacityFraction17F input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems.
          Either input approach can be used, but not both.
-  .. [#] If BackupHeatingActiveDuringDefrost not provided, defaults to true if BackupType="integrated", otherwise false.
 
 .. _hvac_hp_room_ac_reverse_cycle:
 
@@ -3046,7 +3045,7 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                                      Yes                       Rated heating efficiency
   ``extension/HeatingCapacityFraction17F``                         double    frac      >= 0, < 1                                No        See [#]_        Heating output capacity at 17F divided by heating output capacity 1t 47F [#]_
   ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                                     No        0.0             Crankcase heater power
-  ``extension/BackupHeatingActiveDuringDefrost``                   boolean                                                      No        See [#]_        Whether integrated backup heat is used during defrost
+  ``extension/BackupHeatingActiveDuringDefrost``                   boolean                                                      No        false           Whether integrated backup heat is used during defrost
   ``extension/CoolingAutosizingFactor``                            double    frac      > 0                                      No        1.0             Cooling autosizing capacity multiplier
   ``extension/HeatingAutosizingFactor``                            double    frac      > 0                                      No        1.0             Heating autosizing capacity multiplier
   ``extension/CoolingAutosizingLimit``                             double    Btu/hr    > 0                                      No                        Cooling autosizing capacity limit
@@ -3070,7 +3069,6 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   .. [#] If neither extension/HeatingCapacityFraction17F nor HeatingCapacity17F provided, heating capacity fraction at 17F defaults to 0.59.
   .. [#] The extension/HeatingCapacityFraction17F input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems.
          Either input approach can be used, but not both.
-  .. [#] If BackupHeatingActiveDuringDefrost not provided, defaults to true if BackupType="integrated", otherwise false.
 
 .. _hvac_hp_ground_to_air:
 

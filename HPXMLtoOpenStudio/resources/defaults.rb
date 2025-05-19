@@ -2253,7 +2253,7 @@ module Defaults
       end
     end
 
-    # Defrost
+    # Defrost Backup Heat
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless heat_pump.backup_heating_active_during_defrost.nil?
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
@@ -2261,7 +2261,10 @@ module Defaults
                    HPXML::HVACTypeHeatPumpRoom,
                    HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
 
-      heat_pump.backup_heating_active_during_defrost = (heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated)
+      # The input is only used when there's integrated backup heat
+      next unless heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+
+      heat_pump.backup_heating_active_during_defrost = !heat_pump.distribution_system.nil?
       heat_pump.backup_heating_active_during_defrost_isdefaulted = true
     end
 
