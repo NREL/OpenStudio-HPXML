@@ -1651,8 +1651,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # End Use Emissions
     if args[:include_annual_emission_end_uses]
       if not @emissions.empty?
+        fuels = @fuels.keys.map { |fuel_key| fuel_key[0] }.uniq
         @emissions.each do |_scenario_key, emission|
-          @fuels.keys.each do |fuel, _total_or_net|
+          fuels.each do |fuel|
             @end_uses.keys.each do |key|
               fuel_type, end_use_type = key
               next unless fuel_type == fuel
@@ -1729,9 +1730,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Check for duplicate results
-    results_data = results_out.select{ |e| e != [line_break] }
+    results_data = results_out.select { |e| e != [line_break] }
     if results_data.size != results_data.uniq.size
-      fail "Duplicate results found: #{results_data.select{ |e| results_data.count(e) > 1 }.uniq}"
+      fail "Duplicate results found: #{results_data.select { |e| results_data.count(e) > 1 }.uniq}"
     end
 
     Outputs.write_results_out_to_file(results_out, args[:output_format], annual_output_path)
