@@ -3366,6 +3366,16 @@ module Defaults
                             component_idrefs_isdefaulted: true)
       end
 
+      hpxml_bldg.ev_chargers.each do |ev_charger|
+        next unless ev_charger.service_feeders.empty?
+
+        service_feeders.add(id: get_id('ServiceFeeder', service_feeders, unit_num),
+                            type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                            type_isdefaulted: true,
+                            component_idrefs: [ev_charger.id],
+                            component_idrefs_isdefaulted: true)
+      end
+
       service_feeders.each do |service_feeder|
         next if service_feeder.power == 0
 

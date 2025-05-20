@@ -7456,6 +7456,7 @@ module HPXMLFile
     end
 
     hpxml_bldg.ev_chargers.each do |ev_charger|
+      # The electric panel EV voltage argument takes precedence over the EV charging level.
       if not args[:electric_panel_load_misc_plug_loads_vehicle_voltage].nil?
         voltage = args[:electric_panel_load_misc_plug_loads_vehicle_voltage]
       elsif not ev_charger.charging_level.nil?
@@ -7464,22 +7465,18 @@ module HPXMLFile
                     3 => HPXML::ElectricPanelVoltage240 }[ev_charger.charging_level]
       end
 
+      # The electric panel EV power rating argument takes precedence over the EV charging power.
       if not args[:electric_panel_load_misc_plug_loads_vehicle_power_rating].nil?
         power = args[:electric_panel_load_misc_plug_loads_vehicle_power_rating]
       elsif not ev_charger.charging_power.nil?
         power = ev_charger.charging_power
       end
 
-      if voltage.nil? && !power.nil?
-        voltage = HPXML::ElectricPanelVoltage120
-        if power > 2400 # 120v, 20A breaker?
-          voltage = HPXML::ElectricPanelVoltage240
-        end
+      if not voltage.nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: voltage,
+                            component_idrefs: [ev_charger.id])
       end
-
-      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                          voltage: voltage,
-                          component_idrefs: [ev_charger.id])
 
       service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                           type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
