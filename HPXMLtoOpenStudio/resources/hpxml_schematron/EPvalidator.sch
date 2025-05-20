@@ -2520,6 +2520,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:ElectricPanels/h:ElectricPanel/h:BranchCircuits/h:BranchCircuit'>
       <sch:assert role='ERROR' test='count(h:Voltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Voltage</sch:assert>
       <sch:assert role='ERROR' test='h:Voltage[text()="120" or text()="240"] or not(h:Voltage)'>Expected Voltage to be '120' or '240'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Voltage[text()="240"]) + count(../../../h:ElectricPanel[h:Voltage[text()="120"]]) &lt; 2'>Expected ../../../ElectricPanel/Voltage to be '240'</sch:assert>
       <sch:assert role='ERROR' test='count(h:MaxCurrentRating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MaxCurrentRating</sch:assert>
       <sch:assert role='ERROR' test='count(h:OccupiedSpaces) &lt;= 1'>Expected 0 or 1 element(s) for xpath: OccupiedSpaces</sch:assert>
       <sch:assert role='ERROR' test='h:OccupiedSpaces[text()="0.0" or text()="0.5" or text()="1.0" or text()="2.0"] or not(h:OccupiedSpaces)'>Expected OccupiedSpaces to be '0.0' or '0.5' or '1.0' or '2.0'</sch:assert>
