@@ -958,7 +958,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         next if clg_system.distribution_system.annual_cooling_dse.nil?
 
         dse = clg_system.distribution_system.annual_cooling_dse
-        fuel_types.each do |fuel_type|
+        @unique_fuel_types.each do |fuel_type|
           [EUT::Cooling, EUT::CoolingFanPump].each do |end_use_type|
             end_use = @end_uses[[fuel_type, end_use_type]]
             next if end_use.nil?
