@@ -1971,8 +1971,7 @@
     "electric_panel_baseline_peak_power": 4500,
     "electric_panel_service_voltage": "240",
     "electric_panel_service_max_current_rating": 100,
-    "electric_panel_breaker_spaces_type": "headroom",
-    "electric_panel_breaker_spaces": 5,
+    "electric_panel_breaker_spaces_headroom": 5,
     "electric_panel_load_other_power_rating": 559
   },
   "sample_files/base-detailed-electric-panel-no-calculation-types.xml": {
@@ -2398,8 +2397,7 @@
     "electric_panel_baseline_peak_power": 4500,
     "electric_panel_service_voltage": "240",
     "electric_panel_service_max_current_rating": 100,
-    "electric_panel_breaker_spaces_type": "headroom",
-    "electric_panel_breaker_spaces": 5,
+    "electric_panel_breaker_spaces_headroom": 5,
     "electric_panel_load_cooling_system_power_rating": 3542,
     "electric_panel_load_other_power_rating": 559
   },

@@ -4484,24 +4484,24 @@ The service max current rating of the electric panel. If not provided, the OS-HP
 
 <br/>
 
-**Electric Panel: Breaker Spaces Type**
+**Electric Panel: Breaker Spaces Headroom**
 
-The breaker spaces specification type of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+The unoccupied number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
-- **Name:** ``electric_panel_breaker_spaces_type``
-- **Type:** ``Choice``
+- **Name:** ``electric_panel_breaker_spaces_headroom``
+- **Type:** ``Integer``
+
+- **Units:** ``#``
 
 - **Required:** ``false``
 
-- **Choices:** `total`, `headroom`
-
 <br/>
 
-**Electric Panel: Breaker Spaces**
+**Electric Panel: Breaker Spaces Rated Total**
 
-The total (if 'total' used above) or unoccupied (if 'headroom' used above) number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+The rated total number of breaker spaces on the electric panel.
 
-- **Name:** ``electric_panel_breaker_spaces``
+- **Name:** ``electric_panel_breaker_spaces_rated_total``
 - **Type:** ``Integer``
 
 - **Units:** ``#``

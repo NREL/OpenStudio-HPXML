@@ -2506,7 +2506,8 @@
       <sch:assert role='ERROR' test='count(h:Voltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Voltage</sch:assert>
       <sch:assert role='ERROR' test='h:Voltage[text()="120" or text()="240"] or not(h:Voltage)'>Expected Voltage to be '120' or '240'</sch:assert>
       <sch:assert role='ERROR' test='count(h:MaxCurrentRating) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MaxCurrentRating</sch:assert>
-      <sch:assert role='ERROR' test='count(h:HeadroomSpaces) + count(h:RatedTotalSpaces) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeadroomSpaces | RatedTotalSpaces</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeadroomSpaces) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeadroomSpaces</sch:assert>
+      <sch:assert role='ERROR' test='count(h:RatedTotalSpaces) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RatedTotalSpaces</sch:assert>
       <sch:assert role='ERROR' test='count(h:BranchCircuits) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BranchCircuits</sch:assert> <!-- See [BranchCircuit]-->
       <sch:assert role='ERROR' test='count(h:ServiceFeeders) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ServiceFeeders</sch:assert> <!-- See [ServiceFeeder]-->
       <!-- Warnings -->

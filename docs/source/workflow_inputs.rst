@@ -4660,7 +4660,8 @@ See :ref:`hpxml_electric_panel_calculations` for more information about specifyi
   ``SystemIdentifier``                                                     id                                           Yes                      Unique identifier
   ``Voltage``                                                              string   V          See [#]_                 No        240            Service voltage
   ``MaxCurrentRating``                                                     double   A          See [#]_                 No        200            Service max current rating
-  ``HeadroomSpaces`` or ``RatedTotalSpaces``                               integer             >= 0 or > 0              No        See [#]_       Unoccupied or total number of breaker spaces
+  ``HeadroomSpaces``                                                       integer             >= 0                     No        See [#]_       Number of unoccupied breaker spaces
+  ``RatedTotalSpaces``                                                     integer             > 0                      No                       Total number of breaker spaces
   ``BranchCircuits``                                                       element                                      No        See [#]_       Individual branch circuits
   ``ServiceFeeders``                                                       element                                      No        See [#]_       Individual service feeders
   =======================================================================  =======  =========  =======================  ========  =============  ============================================

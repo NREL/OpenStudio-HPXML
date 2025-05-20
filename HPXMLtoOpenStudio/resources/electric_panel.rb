@@ -210,7 +210,7 @@ module ElectricPanel
   # @return [nil]
   def self.calculate_breaker_spaces(electric_panel, service_feeders)
     occupied = electric_panel.branch_circuits.map { |branch_circuit| branch_circuit.occupied_spaces }.sum(0.0)
-    if !electric_panel.rated_total_spaces.nil?
+    if not electric_panel.rated_total_spaces.nil?
       total = electric_panel.rated_total_spaces
     else
       total = occupied + electric_panel.headroom_spaces

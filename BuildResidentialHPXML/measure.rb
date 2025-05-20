@@ -2664,18 +2664,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('A')
     args << arg
 
-    electric_panel_breaker_spaces_type_choices = OpenStudio::StringVector.new
-    electric_panel_breaker_spaces_type_choices << 'total'
-    electric_panel_breaker_spaces_type_choices << 'headroom'
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_breaker_spaces_type', electric_panel_breaker_spaces_type_choices, false)
-    arg.setDisplayName('Electric Panel: Breaker Spaces Type')
-    arg.setDescription("The breaker spaces specification type of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_headroom', false)
+    arg.setDisplayName('Electric Panel: Breaker Spaces Headroom')
+    arg.setDescription("The unoccupied number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces', false)
-    arg.setDisplayName('Electric Panel: Breaker Spaces')
-    arg.setDescription("The total (if 'total' used above) or unoccupied (if 'headroom' used above) number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_rated_total', false)
+    arg.setDisplayName('Electric Panel: Breaker Spaces Rated Total')
+    arg.setDescription('The rated total number of breaker spaces on the electric panel.')
     arg.setUnits('#')
     args << arg
 
@@ -7256,17 +7253,11 @@ module HPXMLFile
   def self.set_electric_panel(hpxml_bldg, args)
     return if args[:electric_panel_service_feeders_load_calculation_types].nil?
 
-    if args[:electric_panel_breaker_spaces_type] == 'total'
-      total_breaker_spaces = args[:electric_panel_breaker_spaces]
-    elsif args[:electric_panel_breaker_spaces_type] == 'headroom'
-      headroom_breaker_spaces = args[:electric_panel_breaker_spaces]
-    end
-
     hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
                                    voltage: args[:electric_panel_service_voltage],
                                    max_current_rating: args[:electric_panel_service_max_current_rating],
-                                   headroom_spaces: headroom_breaker_spaces,
-                                   rated_total_spaces: total_breaker_spaces)
+                                   headroom_spaces: args[:electric_panel_breaker_spaces_headroom],
+                                   rated_total_spaces: args[:electric_panel_breaker_spaces_rated_total])
 
     electric_panel = hpxml_bldg.electric_panels[0]
     branch_circuits = electric_panel.branch_circuits
