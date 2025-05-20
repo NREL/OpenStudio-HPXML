@@ -707,7 +707,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     if hpxml_bldg.electric_panels.size == 0
       hpxml_bldg.electric_panels.add(id: 'ElectricPanel')
     end
-    hpxml_bldg.header.extension_properties['PeakElectricity'] = 4500
+    hpxml_bldg.header.electric_panel_baseline_peak_power = 4500
     return hpxml, hpxml_bldg
   end
 

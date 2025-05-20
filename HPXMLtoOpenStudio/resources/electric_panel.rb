@@ -195,8 +195,7 @@ module ElectricPanel
         new_loads += service_feeder.power if service_feeder.is_new_load
       end
 
-      extension_properties = hpxml_bldg.header.extension_properties
-      peak_elec = extension_properties['PeakElectricity'].to_f
+      peak_elec = hpxml_bldg.header.electric_panel_baseline_peak_power.to_f
 
       service_feeders.Load_CapacityW = new_loads + 1.25 * peak_elec
       service_feeders.Load_CapacityA = service_feeders.Load_CapacityW / Float(electric_panel.voltage)

@@ -4445,11 +4445,11 @@ Types of electric panel service/feeder load calculations. These calculations are
 
 <br/>
 
-**Electric Panel: Baseline Peak Electricity Power**
+**Electric Panel: Baseline Peak Power**
 
-Specifies the baseline peak electricity. Used for 2023 Existing Dwelling Meter-Based. If not provided, assumed to be zero.
+Specifies the baseline peak power. Used for 2023 Existing Dwelling Meter-Based. If not provided, assumed to be zero.
 
-- **Name:** ``electric_panel_baseline_peak_electricity_power``
+- **Name:** ``electric_panel_baseline_peak_power``
 - **Type:** ``Double``
 
 - **Units:** ``W``

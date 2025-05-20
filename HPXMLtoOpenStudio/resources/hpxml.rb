@@ -2669,6 +2669,7 @@ class HPXML < Object
              :shading_summer_begin_day,             # [Integer] ShadingControl/SummerBeginDayOfMonth
              :shading_summer_end_month,             # [Integer] ShadingControl/SummerEndMonth
              :shading_summer_end_day,               # [Integer] ShadingControl/SummerEndDayOfMonth
+             :electric_panel_baseline_peak_power,   # [Double] ElectricPanelBaselinePeakPower
              :extension_properties]                 # [Hash] AdditionalProperties
     attr_accessor(*ATTRS)
 
@@ -2723,6 +2724,9 @@ class HPXML < Object
         XMLHelper.add_element(window_shading_season, 'SummerEndMonth', @shading_summer_end_month, :integer, @shading_summer_end_month_isdefaulted) unless @shading_summer_end_month.nil?
         XMLHelper.add_element(window_shading_season, 'SummerEndDayOfMonth', @shading_summer_end_day, :integer, @shading_summer_end_day_isdefaulted) unless @shading_summer_end_day.nil?
       end
+      if not @electric_panel_baseline_peak_power.nil?
+        XMLHelper.add_extension(building_summary, 'ElectricPanelBaselinePeakPower', @electric_panel_baseline_peak_power, :float)
+      end
       if (not @extension_properties.nil?) && (not @extension_properties.empty?)
         properties = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'AdditionalProperties'])
         @extension_properties.each do |key, value|
@@ -2762,6 +2766,7 @@ class HPXML < Object
       @manualj_num_occupants = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/NumberofOccupants', :float)
       @manualj_infiltration_shielding_class = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InfiltrationShieldingClass', :integer)
       @manualj_infiltration_method = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InfiltrationMethod', :string)
+      @electric_panel_baseline_peak_power = XMLHelper.get_value(building_summary, 'extension/ElectricPanelBaselinePeakPower', :float)
       @extension_properties = {}
       XMLHelper.get_elements(building_summary, 'extension/AdditionalProperties').each do |property|
         property.children.each do |child|

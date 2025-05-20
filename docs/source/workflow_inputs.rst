@@ -398,6 +398,14 @@ These calculations are currently considered experimental research features.
 
 See :ref:`panel_outputs` for descriptions of how calculated loads appear in the output files.
 
+If meter-based load calculation type(s) are entered, the electric panel baseline peak power is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension``.
+
+  ====================================  ========  =======  ================  ========  ================  ===========
+  Element                               Type      Units    Constraints       Required  Default           Notes
+  ====================================  ========  =======  ================  ========  ================  ===========
+  ``ElectricPanelBaselinePeakPower``    double    W        >= 0              No        0                 Used for meter-based load calculations
+  ====================================  ========  =======  ================  ========  ================  ===========
+
 .. _hpxml_building:
 
 HPXML Building
