@@ -1728,6 +1728,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       results_out = Outputs.append_sizing_results(@hpxml_bldgs, results_out)
     end
 
+    # Check for duplicate results
+    results_data = results_out.select{ |e| e != [line_break] }
+    if results_data.size != results_data.uniq.size
+      fail "Duplicate results found: #{results_data.select{ |e| results_data.count(e) > 1 }.uniq}"
+    end
+
     Outputs.write_results_out_to_file(results_out, args[:output_format], annual_output_path)
     runner.registerInfo("Wrote annual output results to #{annual_output_path}.")
 
