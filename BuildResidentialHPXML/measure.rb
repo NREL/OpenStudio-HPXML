@@ -7368,32 +7368,44 @@ module HPXMLFile
                           component_idrefs: [cooking_range.id])
     end
 
-    hpxml_bldg.ventilation_fans.each do |ventilation_fan|
-      if ventilation_fan.fan_location == HPXML::LocationKitchen
-        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
-                            type: HPXML::ElectricPanelLoadTypeMechVent,
-                            power: args[:electric_panel_load_kitchen_fans_power_rating],
-                            is_new_load: args[:electric_panel_load_kitchen_fans_new_load],
-                            component_idrefs: [ventilation_fan.id])
-      elsif ventilation_fan.fan_location == HPXML::LocationBath
-        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
-                            type: HPXML::ElectricPanelLoadTypeMechVent,
-                            power: args[:electric_panel_load_bathroom_fans_power_rating],
-                            is_new_load: args[:electric_panel_load_bathroom_fans_new_load],
-                            component_idrefs: [ventilation_fan.id])
-      elsif ventilation_fan.fan_type == args[:mech_vent_fan_type]
-        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
-                            type: HPXML::ElectricPanelLoadTypeMechVent,
-                            power: args[:electric_panel_load_mech_vent_power_rating],
-                            is_new_load: args[:electric_panel_load_mech_vent_fan_new_load],
-                            component_idrefs: [ventilation_fan.id])
-      elsif ventilation_fan.fan_type == args[:mech_vent_2_fan_type]
+    ventilation_fans = hpxml_bldg.ventilation_fans
+    if args[:mech_vent_fan_type] != Constants::None # Mechanical Ventilation
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeMechVent,
+                          power: args[:electric_panel_load_mech_vent_power_rating],
+                          is_new_load: args[:electric_panel_load_mech_vent_fan_new_load],
+                          component_idrefs: [ventilation_fans[0].id])
+      if args[:mech_vent_2_fan_type] != Constants::None # Mechanical Ventilation 2
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                             type: HPXML::ElectricPanelLoadTypeMechVent,
                             power: args[:electric_panel_load_mech_vent_2_power_rating],
                             is_new_load: args[:electric_panel_load_mech_vent_2_new_load],
-                            component_idrefs: [ventilation_fan.id])
-      elsif ventilation_fan.used_for_seasonal_cooling_load_reduction
+                            component_idrefs: [ventilation_fans[1].id])
+      end
+    elsif args[:mech_vent_2_fan_type] != Constants::None # Mechanical Ventilation 2
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeMechVent,
+                          power: args[:electric_panel_load_mech_vent_2_power_rating],
+                          is_new_load: args[:electric_panel_load_mech_vent_2_new_load],
+                          component_idrefs: [ventilation_fans[0].id])
+    end
+
+    ventilation_fans.each do |ventilation_fan|
+      if ventilation_fan.used_for_local_ventilation # Kitchen / Bathroom Fans
+        if ventilation_fan.fan_location == HPXML::LocationKitchen
+          service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                              type: HPXML::ElectricPanelLoadTypeMechVent,
+                              power: args[:electric_panel_load_kitchen_fans_power_rating],
+                              is_new_load: args[:electric_panel_load_kitchen_fans_new_load],
+                              component_idrefs: [ventilation_fan.id])
+        elsif ventilation_fan.fan_location == HPXML::LocationBath
+          service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                              type: HPXML::ElectricPanelLoadTypeMechVent,
+                              power: args[:electric_panel_load_bathroom_fans_power_rating],
+                              is_new_load: args[:electric_panel_load_bathroom_fans_new_load],
+                              component_idrefs: [ventilation_fan.id])
+        end
+      elsif ventilation_fan.used_for_seasonal_cooling_load_reduction # Whole House Fan
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                             type: HPXML::ElectricPanelLoadTypeMechVent,
                             power: args[:electric_panel_load_whole_house_fan_power_rating],

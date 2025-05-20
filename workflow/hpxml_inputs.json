@@ -872,6 +872,7 @@
     "electric_panel_load_dishwasher_power_rating": 1150,
     "electric_panel_load_cooking_range_power_rating": 12500,
     "electric_panel_load_misc_plug_loads_vehicle_power_rating": 3300,
+    "electric_panel_load_misc_plug_loads_vehicle_voltage": "240",
     "electric_panel_load_other_power_rating": 2500,
     "utility_bill_scenario_names": "Bills",
     "combine_like_surfaces": true
