@@ -4436,7 +4436,7 @@ Maximum power output of the second PV system. For a shared system, this is the t
 
 **Electric Panel: Service/Feeders Load Calculation Types**
 
-Types of electric panel service/feeder load calculations. Possible types are: 2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.
+Types of electric panel service/feeder load calculations. These calculations are experimental research features. Possible types are: 2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.
 
 - **Name:** ``electric_panel_service_feeders_load_calculation_types``
 - **Type:** ``String``
@@ -4445,9 +4445,9 @@ Types of electric panel service/feeder load calculations. Possible types are: 20
 
 <br/>
 
-**Electric Panel: Peak Electricity Power**
+**Electric Panel: Baseline Peak Electricity Power**
 
-Specifies the baseline peak electricity. Used for 2023 Existing Dwelling Meter-Based.
+Specifies the baseline peak electricity. Used for 2023 Existing Dwelling Meter-Based. If not provided, assumed to be zero.
 
 - **Name:** ``electric_panel_baseline_peak_electricity_power``
 - **Type:** ``Double``
@@ -4471,11 +4471,11 @@ The service voltage of the electric panel. If not provided, the OS-HPXML default
 
 <br/>
 
-**Electric Panel: Service Rating**
+**Electric Panel: Service Max Current Rating**
 
-The service rating of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+The service max current rating of the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
-- **Name:** ``electric_panel_service_rating``
+- **Name:** ``electric_panel_service_max_current_rating``
 - **Type:** ``Double``
 
 - **Units:** ``A``
@@ -4499,7 +4499,7 @@ The breaker spaces specification type of the electric panel. If not provided, th
 
 **Electric Panel: Breaker Spaces**
 
-The total, or unoccupied, number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
+The total (if 'total' used above) or unoccupied (if 'headroom' used above) number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
 - **Name:** ``electric_panel_breaker_spaces``
 - **Type:** ``Integer``
@@ -4510,11 +4510,11 @@ The total, or unoccupied, number of breaker spaces on the electric panel. If not
 
 <br/>
 
-**Electric Panel: Heating System Power**
+**Electric Panel: Heating System Power Rating**
 
-Specifies the panel load heating system power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load heating system power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Panel Loads</a>) is used.
 
-- **Name:** ``electric_panel_load_heating_system_power``
+- **Name:** ``electric_panel_load_heating_system_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4525,20 +4525,20 @@ Specifies the panel load heating system power. If not provided, the OS-HPXML def
 
 **Electric Panel: Heating System Addition**
 
-Whether the heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_heating_system_addition``
+- **Name:** ``electric_panel_load_heating_system_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Cooling System Power**
+**Electric Panel: Cooling System Power Rating**
 
-Specifies the panel load cooling system power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load cooling system power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_cooling_system_power``
+- **Name:** ``electric_panel_load_cooling_system_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4549,20 +4549,20 @@ Specifies the panel load cooling system power. If not provided, the OS-HPXML def
 
 **Electric Panel: Cooling System Addition**
 
-Whether the cooling system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the cooling system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_cooling_system_addition``
+- **Name:** ``electric_panel_load_cooling_system_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Heat Pump Heating Power**
+**Electric Panel: Heat Pump Heating Power Rating**
 
-Specifies the panel load heating power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load heating power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_heat_pump_heating_power``
+- **Name:** ``electric_panel_load_heat_pump_heating_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4571,11 +4571,11 @@ Specifies the panel load heating power. If not provided, the OS-HPXML default (s
 
 <br/>
 
-**Electric Panel: Heat Pump Cooling Power**
+**Electric Panel: Heat Pump Cooling Power Rating**
 
-Specifies the panel load heat pump cooling power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load heat pump cooling power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_heat_pump_cooling_power``
+- **Name:** ``electric_panel_load_heat_pump_cooling_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4586,7 +4586,7 @@ Specifies the panel load heat pump cooling power. If not provided, the OS-HPXML 
 
 **Electric Panel: Heat Pump Voltage**
 
-Specifies the panel load heat pump voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load heat pump voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
 - **Name:** ``electric_panel_load_heat_pump_voltage``
 - **Type:** ``Choice``
@@ -4599,20 +4599,20 @@ Specifies the panel load heat pump voltage. If not provided, the OS-HPXML defaul
 
 **Electric Panel: Heat Pump Addition**
 
-Whether the heat pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the heat pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_heat_pump_addition``
+- **Name:** ``electric_panel_load_heat_pump_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Heating System 2 Power**
+**Electric Panel: Heating System 2 Power Rating**
 
-Specifies the panel load second heating system power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load second heating system power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_heating_system_2_power``
+- **Name:** ``electric_panel_load_heating_system_2_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4623,20 +4623,20 @@ Specifies the panel load second heating system power. If not provided, the OS-HP
 
 **Electric Panel: Heating System 2 Addition**
 
-Whether the second heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the second heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_heating_system_2_addition``
+- **Name:** ``electric_panel_load_heating_system_2_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Mechanical Ventilation Power**
+**Electric Panel: Mechanical Ventilation Power Rating**
 
-Specifies the panel load mechanical ventilation power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load mechanical ventilation power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_mech_vent_power``
+- **Name:** ``electric_panel_load_mech_vent_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4647,20 +4647,20 @@ Specifies the panel load mechanical ventilation power. If not provided, the OS-H
 
 **Electric Panel: Mechanical Ventilation Addition**
 
-Whether the mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_mech_vent_fan_addition``
+- **Name:** ``electric_panel_load_mech_vent_fan_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Mechanical Ventilation 2 Power**
+**Electric Panel: Mechanical Ventilation 2 Power Rating**
 
-Specifies the panel load second mechanical ventilation power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load second mechanical ventilation power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_mech_vent_2_power``
+- **Name:** ``electric_panel_load_mech_vent_2_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4671,20 +4671,20 @@ Specifies the panel load second mechanical ventilation power. If not provided, t
 
 **Electric Panel: Mechanical Ventilation 2 Addition**
 
-Whether the second mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the second mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_mech_vent_2_addition``
+- **Name:** ``electric_panel_load_mech_vent_2_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Whole House Fan Power**
+**Electric Panel: Whole House Fan Power Rating**
 
-Specifies the panel load whole house fan power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load whole house fan power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_whole_house_fan_power``
+- **Name:** ``electric_panel_load_whole_house_fan_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4695,20 +4695,20 @@ Specifies the panel load whole house fan power. If not provided, the OS-HPXML de
 
 **Electric Panel: Whole House Fan Addition**
 
-Whether the whole house fan is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the whole house fan is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_whole_house_fan_addition``
+- **Name:** ``electric_panel_load_whole_house_fan_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Kitchen Fans Power**
+**Electric Panel: Kitchen Fans Power Rating**
 
-Specifies the panel load kitchen fans power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load kitchen fans power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_kitchen_fans_power``
+- **Name:** ``electric_panel_load_kitchen_fans_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4719,20 +4719,20 @@ Specifies the panel load kitchen fans power. If not provided, the OS-HPXML defau
 
 **Electric Panel: Kitchen Fans Addition**
 
-Whether the kitchen fans is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the kitchen fans is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_kitchen_fans_addition``
+- **Name:** ``electric_panel_load_kitchen_fans_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Bathroom Fans Power**
+**Electric Panel: Bathroom Fans Power Rating**
 
-Specifies the panel load bathroom fans power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load bathroom fans power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_bathroom_fans_power``
+- **Name:** ``electric_panel_load_bathroom_fans_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4743,20 +4743,20 @@ Specifies the panel load bathroom fans power. If not provided, the OS-HPXML defa
 
 **Electric Panel: Bathroom Fans Addition**
 
-Whether the bathroom fans is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the bathroom fans is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_bathroom_fans_addition``
+- **Name:** ``electric_panel_load_bathroom_fans_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Water Heater Power**
+**Electric Panel: Water Heater Power Rating**
 
-Specifies the panel load water heater power. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load water heater power rating. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_water_heater_power``
+- **Name:** ``electric_panel_load_water_heater_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4767,7 +4767,7 @@ Specifies the panel load water heater power. Only applies to electric water heat
 
 **Electric Panel: Water Heater Voltage**
 
-Specifies the panel load water heater voltage. Only applies to heat pump water heater (compressor). If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load water heater voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
 - **Name:** ``electric_panel_load_water_heater_voltage``
 - **Type:** ``Choice``
@@ -4780,20 +4780,20 @@ Specifies the panel load water heater voltage. Only applies to heat pump water h
 
 **Electric Panel: Water Heater Addition**
 
-Whether the water heater is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the water heater is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_water_heater_addition``
+- **Name:** ``electric_panel_load_water_heater_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Clothes Dryer Power**
+**Electric Panel: Clothes Dryer Power Rating**
 
-Specifies the panel load power. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load power rating. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_clothes_dryer_power``
+- **Name:** ``electric_panel_load_clothes_dryer_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4804,7 +4804,7 @@ Specifies the panel load power. Only applies to electric clothes dryer. If not p
 
 **Electric Panel: Clothes Dryer Voltage**
 
-Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
 - **Name:** ``electric_panel_load_clothes_dryer_voltage``
 - **Type:** ``Choice``
@@ -4817,20 +4817,20 @@ Specifies the panel load voltage. If not provided, the OS-HPXML default (see <a 
 
 **Electric Panel: Clothes Dryer Addition**
 
-Whether the clothes dryer is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the clothes dryer is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_clothes_dryer_addition``
+- **Name:** ``electric_panel_load_clothes_dryer_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Dishwasher Power**
+**Electric Panel: Dishwasher Power Rating**
 
-Specifies the panel load dishwasher power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load dishwasher power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_dishwasher_power``
+- **Name:** ``electric_panel_load_dishwasher_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4841,20 +4841,20 @@ Specifies the panel load dishwasher power. If not provided, the OS-HPXML default
 
 **Electric Panel: Dishwasher Addition**
 
-Whether the dishwasher is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the dishwasher is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_dishwasher_addition``
+- **Name:** ``electric_panel_load_dishwasher_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Cooking Range/Oven Power**
+**Electric Panel: Cooking Range/Oven Power Rating**
 
-Specifies the panel load cooking range/oven power. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load cooking range/oven power rating. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_cooking_range_power``
+- **Name:** ``electric_panel_load_cooking_range_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4865,7 +4865,7 @@ Specifies the panel load cooking range/oven power. Only applies to electric cook
 
 **Electric Panel: Cooking Range/Oven Voltage**
 
-Specifies the panel load cooking range/oven voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load cooking range/oven voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
 - **Name:** ``electric_panel_load_cooking_range_voltage``
 - **Type:** ``Choice``
@@ -4878,20 +4878,20 @@ Specifies the panel load cooking range/oven voltage. If not provided, the OS-HPX
 
 **Electric Panel: Cooking Range/Oven Addition**
 
-Whether the cooking range is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the cooking range is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_cooking_range_addition``
+- **Name:** ``electric_panel_load_cooking_range_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Misc Plug Loads Well Pump Power**
+**Electric Panel: Misc Plug Loads Well Pump Power Rating**
 
-Specifies the panel load well pump power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load well pump power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_misc_plug_loads_well_pump_power``
+- **Name:** ``electric_panel_load_misc_plug_loads_well_pump_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4902,20 +4902,20 @@ Specifies the panel load well pump power. If not provided, the OS-HPXML default 
 
 **Electric Panel: Misc Plug Loads Well Pump Addition**
 
-Whether the well pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the well pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_misc_plug_loads_well_pump_addition``
+- **Name:** ``electric_panel_load_misc_plug_loads_well_pump_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Misc Plug Loads Vehicle Power**
+**Electric Panel: Misc Plug Loads Vehicle Power Rating**
 
-Specifies the panel load electric vehicle power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load electric vehicle power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_misc_plug_loads_vehicle_power``
+- **Name:** ``electric_panel_load_misc_plug_loads_vehicle_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4926,7 +4926,7 @@ Specifies the panel load electric vehicle power. If not provided, the OS-HPXML d
 
 **Electric Panel: Misc Plug Loads Vehicle Voltage**
 
-Specifies the panel load electric vehicle voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load electric vehicle voltage. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
 - **Name:** ``electric_panel_load_misc_plug_loads_vehicle_voltage``
 - **Type:** ``Choice``
@@ -4939,20 +4939,20 @@ Specifies the panel load electric vehicle voltage. If not provided, the OS-HPXML
 
 **Electric Panel: Misc Plug Loads Vehicle Addition**
 
-Whether the electric vehicle is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the electric vehicle is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_misc_plug_loads_vehicle_addition``
+- **Name:** ``electric_panel_load_misc_plug_loads_vehicle_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Pool Pump Power**
+**Electric Panel: Pool Pump Power Rating**
 
-Specifies the panel load pool pump power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load pool pump power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_pool_pump_power``
+- **Name:** ``electric_panel_load_pool_pump_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4963,20 +4963,20 @@ Specifies the panel load pool pump power. If not provided, the OS-HPXML default 
 
 **Electric Panel: Pool Pump Addition**
 
-Whether the pool pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the pool pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_pool_pump_addition``
+- **Name:** ``electric_panel_load_pool_pump_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Pool Heater Power**
+**Electric Panel: Pool Heater Power Rating**
 
-Specifies the panel load pool heater power. Only applies to electric pool heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load pool heater power rating. Only applies to electric pool heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_pool_heater_power``
+- **Name:** ``electric_panel_load_pool_heater_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4987,20 +4987,20 @@ Specifies the panel load pool heater power. Only applies to electric pool heater
 
 **Electric Panel: Pool Heater Addition**
 
-Whether the pool heater is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the pool heater is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_pool_heater_addition``
+- **Name:** ``electric_panel_load_pool_heater_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Permanent Spa Pump Power**
+**Electric Panel: Permanent Spa Pump Power Rating**
 
-Specifies the panel load permanent spa pump power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load permanent spa pump power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_permanent_spa_pump_power``
+- **Name:** ``electric_panel_load_permanent_spa_pump_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -5011,20 +5011,20 @@ Specifies the panel load permanent spa pump power. If not provided, the OS-HPXML
 
 **Electric Panel: Permanent Spa Pump Addition**
 
-Whether the spa pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the spa pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_permanent_spa_pump_addition``
+- **Name:** ``electric_panel_load_permanent_spa_pump_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Permanent Spa Heater Power**
+**Electric Panel: Permanent Spa Heater Power Rating**
 
-Specifies the panel load permanent spa heater power. Only applies to electric permanent spa heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load permanent spa heater power rating. Only applies to electric permanent spa heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_permanent_spa_heater_power``
+- **Name:** ``electric_panel_load_permanent_spa_heater_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -5035,20 +5035,20 @@ Specifies the panel load permanent spa heater power. Only applies to electric pe
 
 **Electric Panel: Permanent Spa Heater Addition**
 
-Whether the spa heater is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the spa heater is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_permanent_spa_heater_addition``
+- **Name:** ``electric_panel_load_permanent_spa_heater_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Panel: Other Power**
+**Electric Panel: Other Power Rating**
 
-Specifies the panel load other power. This represents the total of all other electric loads that are fastened in place, permanently connected, or located on a specific circuit. For example, garbage disposal, built-in microwave. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Specifies the panel load other power rating. This represents the total of all other electric loads that are fastened in place, permanently connected, or located on a specific circuit. For example, garbage disposal, built-in microwave. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_other_power``
+- **Name:** ``electric_panel_load_other_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -5059,9 +5059,9 @@ Specifies the panel load other power. This represents the total of all other ele
 
 **Electric Panel: Other Addition**
 
-Whether the other load is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#panel-loads'>Panel Loads</a>) is used.
+Whether the other load is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_other_addition``
+- **Name:** ``electric_panel_load_other_new_load``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
