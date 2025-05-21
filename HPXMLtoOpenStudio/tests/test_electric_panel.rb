@@ -535,7 +535,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760)
-    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 3)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 4)
 
     test_name = 'HP clothes dryer'
     hpxml, _hpxml_bldg = _create_hpxml('base-appliances-modified.xml', test_name)
@@ -617,7 +617,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 10000)
-    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 5)
+    _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 6)
   end
 
   def test_ventilation_fans_configurations

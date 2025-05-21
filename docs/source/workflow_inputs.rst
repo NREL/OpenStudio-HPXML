@@ -4700,7 +4700,7 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
 
   .. [#] If MaxCurrentRating not provided, defaults based on Voltage as follows:
   
-         \- **120**: 20
+         \- **120**: 15
          
          \- **240**: 50
 
@@ -4801,7 +4801,7 @@ Loads with power ratings of "auto" are calculated based on estimates for:
 - hydronic pumps (using electric auxiliary energy kWh/yr divided by 2.08)
 
 Loads with occupied breaker spaces of "auto" vary based on calculated power ratings.
-Room air conditioners connected to a 120v branch circuit are assumed to occupy 0 breaker spaces.
+Room air conditioners connected to a 120V branch circuit are assumed to occupy 0 breaker spaces.
 
 .. _hpxml_batteries:
 
