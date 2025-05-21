@@ -1752,6 +1752,7 @@
       <sch:assert role='ERROR' test='count(h:BackupHeatingCapacity) = 0'>Expected 0 element(s) for xpath: BackupHeatingCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:BackupHeatingAutosizingFactor) = 0'>Expected 0 element(s) for xpath: extension/BackupHeatingAutosizingFactor</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:BackupHeatingAutosizingLimit) = 0'>Expected 0 element(s) for xpath: extension/BackupHeatingAutosizingLimit</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:BackupHeatingActiveDuringDefrost[text()="true"]) = 0'>BackupHeatingActiveDuringDefrost not allowed when system has separate backup heating.</sch:assert>
     </sch:rule>
   </sch:pattern>
 
