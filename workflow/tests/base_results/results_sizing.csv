@@ -323,9 +323,6 @@ denver-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-HERS-backup-
 denver-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-HERS-backup-supplemental.xml,26131.0,26131.0,11747.0,784.0,784.0
 denver-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-MaxLoad-backup-emergency.xml,41066.0,41066.0,26131.0,1232.0,1232.0
 denver-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-MaxLoad-backup-supplemental.xml,41066.0,41066.0,0.0,1232.0,1232.0
-denver-hvac-autosize-mini-split-heat-pump-ductless-advanced-defrost-sizing-methodology-ACCA.xml,19461.0,19461.0,0.0,584.0,584.0
-denver-hvac-autosize-mini-split-heat-pump-ductless-advanced-defrost-sizing-methodology-HERS.xml,23530.0,23530.0,0.0,706.0,706.0
-denver-hvac-autosize-mini-split-heat-pump-ductless-advanced-defrost-sizing-methodology-MaxLoad.xml,36979.0,36979.0,0.0,1109.0,1109.0
 denver-hvac-autosize-mini-split-heat-pump-ductless-backup-advanced-defrost-sizing-methodology-ACCA-backup-emergency.xml,19461.0,19461.0,23530.0,584.0,584.0
 denver-hvac-autosize-mini-split-heat-pump-ductless-backup-advanced-defrost-sizing-methodology-ACCA-backup-supplemental.xml,19461.0,19461.0,11147.0,584.0,584.0
 denver-hvac-autosize-mini-split-heat-pump-ductless-backup-advanced-defrost-sizing-methodology-HERS-backup-emergency.xml,23530.0,23530.0,23530.0,706.0,706.0
@@ -754,9 +751,6 @@ houston-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-HERS-backup
 houston-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-HERS-backup-supplemental.xml,21229.0,21229.0,0.0,637.0,637.0
 houston-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-MaxLoad-backup-emergency.xml,22941.0,22941.0,15834.0,688.0,688.0
 houston-hvac-autosize-mini-split-heat-pump-ducted-sizing-methodology-MaxLoad-backup-supplemental.xml,22941.0,22941.0,0.0,688.0,688.0
-houston-hvac-autosize-mini-split-heat-pump-ductless-advanced-defrost-sizing-methodology-ACCA.xml,18277.0,18277.0,0.0,548.0,548.0
-houston-hvac-autosize-mini-split-heat-pump-ductless-advanced-defrost-sizing-methodology-HERS.xml,18277.0,18277.0,0.0,548.0,548.0
-houston-hvac-autosize-mini-split-heat-pump-ductless-advanced-defrost-sizing-methodology-MaxLoad.xml,19751.0,19751.0,0.0,593.0,592.0
 houston-hvac-autosize-mini-split-heat-pump-ductless-backup-advanced-defrost-sizing-methodology-ACCA-backup-emergency.xml,18277.0,18277.0,13974.0,548.0,548.0
 houston-hvac-autosize-mini-split-heat-pump-ductless-backup-advanced-defrost-sizing-methodology-ACCA-backup-supplemental.xml,18277.0,18277.0,0.0,548.0,548.0
 houston-hvac-autosize-mini-split-heat-pump-ductless-backup-advanced-defrost-sizing-methodology-HERS-backup-emergency.xml,18277.0,18277.0,13974.0,548.0,548.0
