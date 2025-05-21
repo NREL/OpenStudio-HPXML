@@ -2710,12 +2710,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_heat_pump_voltage', electric_panel_voltage_choices, false)
-    arg.setDisplayName('Electric Panel: Heat Pump Voltage')
-    arg.setDescription("Specifies the panel load heat pump voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
-    arg.setUnits('V')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heat_pump_new_load', false)
     arg.setDisplayName('Electric Panel: Heat Pump New Load')
     arg.setDescription("Whether the heat pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
@@ -7294,11 +7288,8 @@ module HPXMLFile
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      if not args[:electric_panel_load_heat_pump_voltage].nil?
-        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
-                            voltage: args[:electric_panel_load_heat_pump_voltage],
-                            component_idrefs: [heat_pump.id])
-      end
+      next if heat_pump.is_shared_system
+
       if heat_pump.fraction_heat_load_served != 0
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                             type: HPXML::ElectricPanelLoadTypeHeating,
