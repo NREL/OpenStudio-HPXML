@@ -1303,9 +1303,9 @@
       <sch:assert role='ERROR' test='h:extension/h:EquipmentType[text()="split system" or text()="packaged system" or text()="small duct high velocity system" or text()="space constrained system"] or not(h:extension/h:EquipmentType)'>Expected extension/EquipmentType to be 'split system', 'packaged system', 'small duct high velocity system', or 'space constrained system'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER"]/h:Value) &lt; 8'>SEER should typically be greater than or equal to 8.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 8'>SEER2 should typically be greater than or equal to 8.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 7.6'>SEER2 should typically be greater than or equal to 7.6.</sch:report>
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER"]/h:Value) &lt; 6'>EER should typically be greater than or equal to 6.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER2"]/h:Value) &lt; 6'>EER2 should typically be greater than or equal to 6.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER2"]/h:Value) &lt; 5.7'>EER2 should typically be greater than or equal to 5.7.</sch:report>
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
     </sch:rule>
   </sch:pattern>
@@ -1325,7 +1325,7 @@
       <sch:assert role='ERROR' test='number(h:extension/h:CrankcaseHeaterPowerWatts) &gt;= 0.0 or not(h:extension/h:CrankcaseHeaterPowerWatts)'>Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.0.</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER"]/h:Value) &lt; 6'>EER should typically be greater than or equal to 6.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="CEER"]/h:Value) &lt; 8'>CEER should typically be greater than or equal to 8.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="CEER"]/h:Value) &lt; 5.9'>CEER should typically be greater than or equal to 5.9.</sch:report>
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
     </sch:rule>
   </sch:pattern>
@@ -1380,9 +1380,9 @@
       <sch:assert role='ERROR' test='number(h:extension/h:CrankcaseHeaterPowerWatts) &gt;= 0.0 or not(h:extension/h:CrankcaseHeaterPowerWatts)'>Expected extension/CrankcaseHeaterPowerWatts to be greater than or equal to 0.0.</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER"]/h:Value) &lt; 8'>SEER should typically be greater than or equal to 8.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 8'>SEER2 should typically be greater than or equal to 8.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 7.6'>SEER2 should typically be greater than or equal to 7.6.</sch:report>
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER"]/h:Value) &lt; 6'>EER should typically be greater than or equal to 6.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER2"]/h:Value) &lt; 6'>EER2 should typically be greater than or equal to 6.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER2"]/h:Value) &lt; 5.7'>EER2 should typically be greater than or equal to 5.7.</sch:report>
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
     </sch:rule>
   </sch:pattern>
@@ -1533,11 +1533,11 @@
       <sch:assert role='ERROR' test='h:extension/h:EquipmentType[text()="split system" or text()="packaged system" or text()="small duct high velocity system" or text()="space constrained system"] or not(h:extension/h:EquipmentType)'>Expected extension/EquipmentType to be 'split system', 'packaged system', 'small duct high velocity system', or 'space constrained system'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER"]/h:Value) &lt; 8'>SEER should typically be greater than or equal to 8.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 8'>SEER2 should typically be greater than or equal to 8.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 7.6'>SEER2 should typically be greater than or equal to 7.6.</sch:report>
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER"]/h:Value) &lt; 6'>EER should typically be greater than or equal to 6.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER2"]/h:Value) &lt; 6'>EER2 should typically be greater than or equal to 6.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER2"]/h:Value) &lt; 5.7'>EER2 should typically be greater than or equal to 5.7.</sch:report>
       <sch:report role='WARN' test='number(h:AnnualHeatingEfficiency[h:Units="HSPF"]/h:Value) &lt; 6'>HSPF should typically be greater than or equal to 6.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualHeatingEfficiency[h:Units="HSPF2"]/h:Value) &lt; 6'>HSPF2 should typically be greater than or equal to 6.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualHeatingEfficiency[h:Units="HSPF2"]/h:Value) &lt; 5.1'>HSPF2 should typically be greater than or equal to 5.1.</sch:report>
       <sch:report role='WARN' test='number(h:HeatingCapacity) &lt;= 1000 and number(h:HeatingCapacity) &gt; 0 and h:HeatingCapacity'>Heating capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
     </sch:rule>
@@ -1598,9 +1598,9 @@
       <sch:assert role='ERROR' test='h:extension/h:BackupHeatingActiveDuringDefrost[text()="true" or text()="false"] or not(h:extension/h:BackupHeatingActiveDuringDefrost)'>Expected extension/BackupHeatingActiveDuringDefrost to be 'true' or 'false'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER"]/h:Value) &lt; 8'>SEER should typically be greater than or equal to 8.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 8'>SEER2 should typically be greater than or equal to 8.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="SEER2"]/h:Value) &lt; 7.6'>SEER2 should typically be greater than or equal to 7.6.</sch:report>
       <sch:report role='WARN' test='number(h:AnnualHeatingEfficiency[h:Units="HSPF"]/h:Value) &lt; 6'>HSPF should typically be greater than or equal to 6.</sch:report>
-      <sch:report role='WARN' test='number(h:AnnualHeatingEfficiency[h:Units="HSPF2"]/h:Value) &lt; 6'>HSPF2 should typically be greater than or equal to 6.</sch:report>
+      <sch:report role='WARN' test='number(h:AnnualHeatingEfficiency[h:Units="HSPF2"]/h:Value) &lt; 5.1'>HSPF2 should typically be greater than or equal to 5.1.</sch:report>
       <sch:report role='WARN' test='number(h:HeatingCapacity) &lt;= 1000 and number(h:HeatingCapacity) &gt; 0 and h:HeatingCapacity'>Heating capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
     </sch:rule>
