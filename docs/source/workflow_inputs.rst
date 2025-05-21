@@ -4660,7 +4660,7 @@ See :ref:`hpxml_electric_panel_calculations` for more information about specifyi
   =======================================================================  =======  =========  =======================  ========  =============  ============================================
   ``SystemIdentifier``                                                     id                                           Yes                      Unique identifier
   ``Voltage``                                                              string   V          See [#]_                 No        240            Service voltage
-  ``MaxCurrentRating``                                                     double   A          See [#]_                 No        200            Service max current rating
+  ``MaxCurrentRating``                                                     double   A          >= 0                     No        200            Service max current rating
   ``HeadroomSpaces``                                                       integer             >= 0                     No        See [#]_       Number of unoccupied breaker spaces
   ``RatedTotalSpaces``                                                     integer             > 0                      No                       Total number of breaker spaces
   ``BranchCircuits``                                                       element                                      No        See [#]_       Individual branch circuits
@@ -4668,7 +4668,6 @@ See :ref:`hpxml_electric_panel_calculations` for more information about specifyi
   =======================================================================  =======  =========  =======================  ========  =============  ============================================
 
   .. [#] Voltage choices are "120" or "240".
-  .. [#] MaxCurrentRating choices are "0.0", "0.5", "1.0", or "2.0".
   .. [#] If neither HeadroomSpaces nor RatedTotalSpaces provided, the following default value representing an electric panel with 3 open breaker spaces will be used: HeadroomSpaces = 3.
   .. [#] See :ref:`branch_circuits`.
   .. [#] See :ref:`service_feeders`.
@@ -4685,8 +4684,9 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``SystemIdentifier``                            id                                     Yes                  Unique identifier
   ``Voltage``                                     string    V               See [#]_     No        See [#]_   Voltage of the branch circuit
-  ``MaxCurrentRating``                            double    A                            No        See [#]_   Max current rating of the branch circuit
+  ``MaxCurrentRating``                            double    A               >= 0         No        See [#]_   Max current rating of the branch circuit
   ``OccupiedSpaces``                              double                    See [#]_     No        See [#]_   Number of occupied breaker spaces
   ``AttachedToComponent``                         idref                                  No                   ID of attached component; multiple are allowed [#]_
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
@@ -4728,6 +4728,7 @@ Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``SystemIdentifier``                            id                                     Yes                  Unique identifier
   ``LoadType``                                    string                    See [#]_     Yes                  The type of the service feeder load
   ``PowerRating``                                 double    W               >= 0         No        See [#]_   The power rating of the service feeder
   ``IsNewLoad``                                   boolean                                No        false      Whether, in the context of NEC calculations, the load is new
