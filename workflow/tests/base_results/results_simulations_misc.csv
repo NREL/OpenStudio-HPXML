@@ -320,12 +320,14 @@ base-hvac-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule.xml,
 base-hvac-mini-split-heat-pump-ducted-heating-only.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4909.1,1799.0,4909.1,4909.1,1799.0,4909.1,19.312,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml,104.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,6041.6,2604.3,6041.6,6041.6,2604.3,6041.6,21.535,14.142,0.0
 base-hvac-mini-split-heat-pump-ducted.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4909.1,2667.3,4909.1,4909.1,2667.3,4909.1,19.312,14.143,0.0
-base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4086.5,2477.2,4086.5,4086.5,2477.2,4086.5,16.97,12.04,0.0
 base-hvac-mini-split-heat-pump-ductless-autosize-factor.xml,1.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4288.5,2446.6,4288.5,4288.5,2446.6,4288.5,17.278,12.04,0.0
+base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost-with-backup-heat-active.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4108.0,2477.2,4108.0,4108.0,2477.2,4108.0,16.749,12.04,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4086.5,2477.2,4086.5,4086.5,2477.2,4086.5,16.97,12.04,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4939.1,2617.3,4939.1,4939.1,2617.3,4939.1,17.411,12.04,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml,1.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,3013.0,2557.6,3013.0,3013.0,2557.6,3013.0,19.339,12.202,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml,1.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,3141.4,2617.2,3141.4,3141.4,2617.2,3141.4,25.283,12.04,0.0
+base-hvac-mini-split-heat-pump-ductless-backup-standard-defrost-with-backup-heat-active.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4359.0,2477.2,4359.0,4359.0,2477.2,4359.0,16.749,12.04,0.0
+base-hvac-mini-split-heat-pump-ductless-backup-standard-defrost.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4256.2,2477.2,4256.2,4256.2,2477.2,4256.2,18.072,12.04,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-stove.xml,1.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,2927.5,2557.6,2927.5,2927.5,2557.6,2927.5,17.305,12.202,0.0
 base-hvac-mini-split-heat-pump-ductless-detailed-performance-autosize.xml,110.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4061.7,3043.3,4061.7,4061.7,3043.3,4061.7,17.36,12.039,0.0
 base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4616.9,2866.8,4616.9,4616.9,2866.8,4616.9,17.49,12.04,0.0

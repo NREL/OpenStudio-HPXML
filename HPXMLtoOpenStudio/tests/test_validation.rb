@@ -193,6 +193,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-ground-diffusivity' => ['Expected extension/Diffusivity to be greater than 0'],
                             'invalid-heat-pump-capacity-fraction-17F' => ['Expected extension/HeatingCapacityFraction17F to be less than 1'],
                             'invalid-heat-pump-capacity-fraction-17F-2' => ['Expected extension/HeatingCapacityFraction17F to be greater than or equal to 0'],
+                            'invalid-heat-pump-defrost-backup' => ['BackupHeatingActiveDuringDefrost not allowed when system has separate backup heating'],
                             'invalid-hvac-installation-quality' => ['Expected extension/AirflowDefectRatio to be greater than or equal to -0.9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]',
                                                                     'Expected extension/ChargeDefectRatio to be greater than or equal to -0.9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]'],
                             'invalid-hvac-installation-quality2' => ['Expected extension/AirflowDefectRatio to be less than or equal to 9 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]',
@@ -667,6 +668,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.heat_pumps[0].heating_capacity_17F = nil
         hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = -1
+      when 'invalid-heat-pump-defrost-backup'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml')
+        hpxml_bldg.heat_pumps[0].backup_heating_active_during_defrost = true
       when 'invalid-hvac-installation-quality'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.heat_pumps[0].airflow_defect_ratio = -99
