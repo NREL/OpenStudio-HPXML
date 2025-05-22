@@ -4662,13 +4662,14 @@ See :ref:`hpxml_electric_panel_calculations` for more information about specifyi
   ``Voltage``                                                              string   V          See [#]_                 No        240            Service voltage
   ``MaxCurrentRating``                                                     double   A          >= 0                     No        200            Service max current rating
   ``HeadroomSpaces``                                                       integer             >= 0                     No        See [#]_       Number of unoccupied breaker spaces
-  ``RatedTotalSpaces``                                                     integer             > 0                      No                       Total number of breaker spaces
+  ``RatedTotalSpaces``                                                     integer             > 0                      No        See [#]_       Total number of breaker spaces
   ``BranchCircuits``                                                       element                                      No        See [#]_       Individual branch circuits
   ``ServiceFeeders``                                                       element                                      No        See [#]_       Individual service feeders
   =======================================================================  =======  =========  =======================  ========  =============  ============================================
 
   .. [#] Voltage choices are "120" or "240".
-  .. [#] If neither HeadroomSpaces nor RatedTotalSpaces provided, the following default value representing an electric panel with 3 open breaker spaces will be used: HeadroomSpaces = 3.
+  .. [#] If HeadroomSpaces not provided, defaults to RatedTotalSpaces minus the sum of OccupiedSpaces for all BranchCircuits, or defaults to 3 if RatedTotalSpaces also not provided.
+  .. [#] If RatedTotalSpaces not provided, defaults to HeadroomSpaces plus the sum of OccupiedSpaces for all BranchCircuits.
   .. [#] See :ref:`branch_circuits`.
   .. [#] See :ref:`service_feeders`.
 
