@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>7f47ba55-012f-402d-9073-f81a38957421</version_id>
-  <version_modified>2025-05-22T19:19:07Z</version_modified>
+  <version_id>3a0a7679-55b2-4721-a366-dfd257db30de</version_id>
+  <version_modified>2025-05-22T21:40:55Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5533,18 +5533,9 @@
       </choices>
     </argument>
     <argument>
-      <name>electric_panel_load_heat_pump_heating_power_rating</name>
-      <display_name>Electric Panel: Heat Pump Heating Power Rating</display_name>
-      <description>Specifies the panel load heat pump heating power rating. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'&gt;Service Feeders&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>W</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>electric_panel_load_heat_pump_cooling_power_rating</name>
-      <display_name>Electric Panel: Heat Pump Cooling Power Rating</display_name>
-      <description>Specifies the panel load heat pump cooling power rating. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'&gt;Service Feeders&lt;/a&gt;) is used.</description>
+      <name>electric_panel_load_heat_pump_power_rating</name>
+      <display_name>Electric Panel: Heat Pump Power Rating</display_name>
+      <description>Specifies the panel load heat pump power rating. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'&gt;Service Feeders&lt;/a&gt;) is used.</description>
       <type>Double</type>
       <units>W</units>
       <required>false</required>
@@ -8370,7 +8361,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>4E5F452C</checksum>
+      <checksum>15A2DDF6</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -8387,7 +8378,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0847F3CC</checksum>
+      <checksum>33BCF88E</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>

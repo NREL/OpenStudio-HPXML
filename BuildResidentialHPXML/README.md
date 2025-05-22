@@ -4558,24 +4558,11 @@ Whether the cooling system is a new panel load addition to an existing service p
 
 <br/>
 
-**Electric Panel: Heat Pump Heating Power Rating**
+**Electric Panel: Heat Pump Power Rating**
 
-Specifies the panel load heat pump heating power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
+Specifies the panel load heat pump power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
-- **Name:** ``electric_panel_load_heat_pump_heating_power_rating``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Electric Panel: Heat Pump Cooling Power Rating**
-
-Specifies the panel load heat pump cooling power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
-
-- **Name:** ``electric_panel_load_heat_pump_cooling_power_rating``
+- **Name:** ``electric_panel_load_heat_pump_power_rating``
 - **Type:** ``Double``
 
 - **Units:** ``W``

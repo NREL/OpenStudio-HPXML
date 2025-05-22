@@ -2698,15 +2698,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Whether the cooling system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_heating_power_rating', false)
-    arg.setDisplayName('Electric Panel: Heat Pump Heating Power Rating')
-    arg.setDescription("Specifies the panel load heat pump heating power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_cooling_power_rating', false)
-    arg.setDisplayName('Electric Panel: Heat Pump Cooling Power Rating')
-    arg.setDescription("Specifies the panel load heat pump cooling power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_power_rating', false)
+    arg.setDisplayName('Electric Panel: Heat Pump Power Rating')
+    arg.setDescription("Specifies the panel load heat pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -7293,7 +7287,7 @@ module HPXMLFile
       if heat_pump.fraction_heat_load_served != 0
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                             type: HPXML::ElectricPanelLoadTypeHeating,
-                            power: args[:electric_panel_load_heat_pump_heating_power_rating],
+                            power: args[:electric_panel_load_heat_pump_power_rating],
                             is_new_load: args[:electric_panel_load_heat_pump_new_load],
                             component_idrefs: [heat_pump.id])
       end
@@ -7301,7 +7295,7 @@ module HPXMLFile
 
       service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                           type: HPXML::ElectricPanelLoadTypeCooling,
-                          power: args[:electric_panel_load_heat_pump_cooling_power_rating],
+                          power: args[:electric_panel_load_heat_pump_power_rating],
                           is_new_load: args[:electric_panel_load_heat_pump_new_load],
                           component_idrefs: [heat_pump.id])
     end
