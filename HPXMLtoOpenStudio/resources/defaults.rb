@@ -6342,20 +6342,22 @@ module Defaults
         branch_circuit_ahu = get_or_add_branch_circuit(electric_panel, heat_pump, unit_num, true)
 
         watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
-        watts_odu = 0.0
+        watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage)
 
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-          if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-            watts_odu += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage),
-                          UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
-          else
-            watts_odu += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage)
+
+          if heat_pump.overlapping_compressor_and_backup_operation # sum; backup > compressor
+
+            if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+              watts_ahu += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
+            end
+
+          else # max; switchover (only be used for a heat pump with fossil fuel backup)
 
             branch_circuit_ahu.voltage = HPXML::ElectricPanelVoltage120
             branch_circuit_ahu.max_current_rating = get_branch_circuit_amps_default_values(branch_circuit_ahu)
+
           end
-        else
-          watts_odu += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage)
         end
 
         if branch_circuit_ahu.occupied_spaces.nil?

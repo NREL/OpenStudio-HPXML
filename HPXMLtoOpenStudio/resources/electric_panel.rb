@@ -56,7 +56,9 @@ module ElectricPanel
   end
 
   # Gets the electric panel's heating load.
-  # The returned heating load depends on whether we are tabulating all heating loads, only existing heating loads, or only new heating loads.
+  # The returned heating load depends on the following factors:
+  # - whether the backup heating system can operate simultaneous with the primary heating system (if it can, we sum; if it can't, we take the max)
+  # - whether we are tabulating all heating loads, only existing heating loads, or only new heating loads
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
@@ -79,6 +81,7 @@ module ElectricPanel
            (addition && service_feeder.is_new_load) ||
            (!addition && !service_feeder.is_new_load)
           if (primary_heat_pump_watts == 0) ||
+             (!heating_system.primary_heat_pump.nil? && heating_system.primary_heat_pump.overlapping_compressor_and_backup_operation) ||
              (!heating_system.primary_heat_pump.nil? && heating_system_watts >= primary_heat_pump_watts)
             htg += heating_system_watts
           end
@@ -99,6 +102,7 @@ module ElectricPanel
                   (!addition && !service_feeder.is_new_load)
 
       next unless (backup_system_watts == 0) ||
+                  (!heat_pump.backup_system.nil? && heat_pump.overlapping_compressor_and_backup_operation) ||
                   (!heat_pump.backup_system.nil? && heat_pump_watts >= backup_system_watts)
 
       htg += heat_pump_watts

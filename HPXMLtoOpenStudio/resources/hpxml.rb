@@ -7186,6 +7186,20 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
+    # Based on compressor and backup heating lockout temperatures, returns whether the heat pump and backup system can both operate at the same time.
+    # Note that this indicates there MAY be simultaneous operation, whereas more typically they cycle (e.g., a dual-fuel heat pump).
+    #
+    # @return [Boolean] True if backup system can operate at the same time as the compressor
+    def overlapping_compressor_and_backup_operation
+      if !@compressor_lockout_temp.nil? &&
+         !@backup_heating_lockout_temp.nil? &&
+         (@backup_heating_lockout_temp > @compressor_lockout_temp)
+        return true
+      end
+
+      return false
+    end
+
     # Returns any branch circuits that the component may be attached to.
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
