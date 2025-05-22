@@ -2672,13 +2672,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_rated_total', false)
     arg.setDisplayName('Electric Panel: Breaker Spaces Rated Total')
-    arg.setDescription('The rated total number of breaker spaces on the electric panel.')
+    arg.setDescription("The rated total number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('#')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heating_system_power_rating', false)
     arg.setDisplayName('Electric Panel: Heating System Power Rating')
-    arg.setDescription("Specifies the panel load heating system power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Panel Loads</a>) is used.")
+    arg.setDescription("Specifies the panel load heating system power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -2700,13 +2700,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_heating_power_rating', false)
     arg.setDisplayName('Electric Panel: Heat Pump Heating Power Rating')
-    arg.setDescription("Specifies the panel load heating power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setDescription("Specifies the panel load heat pump heating power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_cooling_power_rating', false)
     arg.setDisplayName('Electric Panel: Heat Pump Cooling Power Rating')
-    arg.setDescription("Specifies the panel load heat pump cooling power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setDescription("Specifies the panel load heat pump cooling power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 

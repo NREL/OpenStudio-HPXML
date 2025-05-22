@@ -4499,7 +4499,7 @@ The unoccupied number of breaker spaces on the electric panel. If not provided, 
 
 **Electric Panel: Breaker Spaces Rated Total**
 
-The rated total number of breaker spaces on the electric panel.
+The rated total number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.
 
 - **Name:** ``electric_panel_breaker_spaces_rated_total``
 - **Type:** ``Integer``
@@ -4512,7 +4512,7 @@ The rated total number of breaker spaces on the electric panel.
 
 **Electric Panel: Heating System Power Rating**
 
-Specifies the panel load heating system power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Panel Loads</a>) is used.
+Specifies the panel load heating system power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
 - **Name:** ``electric_panel_load_heating_system_power_rating``
 - **Type:** ``Double``
@@ -4560,7 +4560,7 @@ Whether the cooling system is a new panel load addition to an existing service p
 
 **Electric Panel: Heat Pump Heating Power Rating**
 
-Specifies the panel load heating power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
+Specifies the panel load heat pump heating power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
 - **Name:** ``electric_panel_load_heat_pump_heating_power_rating``
 - **Type:** ``Double``
@@ -4573,7 +4573,7 @@ Specifies the panel load heating power rating. If not provided, the OS-HPXML def
 
 **Electric Panel: Heat Pump Cooling Power Rating**
 
-Specifies the panel load heat pump cooling power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
+Specifies the panel load heat pump cooling power rating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#service-feeders'>Service Feeders</a>) is used.
 
 - **Name:** ``electric_panel_load_heat_pump_cooling_power_rating``
 - **Type:** ``Double``
