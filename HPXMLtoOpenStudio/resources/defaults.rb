@@ -2299,12 +2299,7 @@ module Defaults
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         if heat_pump.geothermal_loop.nil?
-          if not unit_num.nil?
-            loop_id = "GeothermalLoop#{hpxml_bldg.geothermal_loops.size + 1}_#{unit_num}"
-          else
-            loop_id = "GeothermalLoop#{hpxml_bldg.geothermal_loops.size + 1}"
-          end
-          hpxml_bldg.geothermal_loops.add(id: loop_id,
+          hpxml_bldg.geothermal_loops.add(id: get_id('GeothermalLoop', hpxml_bldg.geothermal_loops, unit_num),
                                           loop_configuration: HPXML::GeothermalLoopLoopConfigurationVertical)
           heat_pump.geothermal_loop_idref = hpxml_bldg.geothermal_loops[-1].id
         end
@@ -3179,7 +3174,14 @@ module Defaults
     end
   end
 
-  # TODO
+  # Get the id based on provided prefix, number of like HPXML objects, and dwelling unit number.
+  # This is useful for HPXML objects that get added by defaults.rb.
+  # Pass the dwelling unit number when adding HPXML objects across multiple HPXML buildings.
+  #
+  # @param prefix [String] Identifier prefix
+  # @param objects [Array<HPXML::XXX>] List of HPXML objects
+  # @param unit_num [Integer] Dwelling unit number
+  # @return [String]
   def self.get_id(prefix, objects, unit_num)
     if not unit_num.nil?
       id = "#{prefix}#{objects.size + 1}_#{unit_num}"
@@ -6340,27 +6342,20 @@ module Defaults
         branch_circuit_ahu = get_or_add_branch_circuit(electric_panel, heat_pump, unit_num, true)
 
         watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.heating_airflow_cfm)
-        watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage)
+        watts_odu = 0.0
 
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+          if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
+            watts_odu += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage),
+                          UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
+          else
+            watts_odu += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage)
 
-          if heat_pump.simultaneous_backup # sum; backup > compressor
-
-            if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-              watts_ahu += UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')
-            end
-
-          else # max; switchover
-
-            if heat_pump.backup_heating_fuel == HPXML::FuelTypeElectricity
-              watts_ahu += [HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_ahu.voltage),
-                            UnitConversions.convert(HVAC.get_heating_input_capacity(heat_pump.backup_heating_capacity, heat_pump.backup_heating_efficiency_afue, heat_pump.backup_heating_efficiency_percent), 'btu/hr', 'w')].max
-            else
-              branch_circuit_ahu.voltage = HPXML::ElectricPanelVoltage120
-              branch_circuit_ahu.max_current_rating = get_branch_circuit_amps_default_values(branch_circuit_ahu)
-            end
-
+            branch_circuit_ahu.voltage = HPXML::ElectricPanelVoltage120
+            branch_circuit_ahu.max_current_rating = get_branch_circuit_amps_default_values(branch_circuit_ahu)
           end
+        else
+          watts_odu += HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage)
         end
 
         if branch_circuit_ahu.occupied_spaces.nil?
