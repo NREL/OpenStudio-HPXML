@@ -6501,34 +6501,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Returns the zone that the heating system serves.
@@ -6841,34 +6821,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Returns the zone that the cooling system serves.
@@ -7204,34 +7164,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Returns the zone that the heat pump serves.
@@ -8398,34 +8338,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Returns the HVAC distribution system for the ventilation fan.
@@ -8800,34 +8720,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Returns the HVAC system related to this water heating system (e.g., for
@@ -9597,34 +9497,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Deletes the current object from the array.
@@ -10682,34 +10562,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Deletes the current object from the array.
@@ -10825,34 +10685,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Returns the water heating system connected to the dishwasher.
@@ -11267,34 +11107,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Deletes the current object from the array.
@@ -12223,34 +12043,14 @@ class HPXML < Object
     #
     # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
     def branch_circuits
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.branch_circuits.each do |branch_circuit|
-          next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
-          next unless branch_circuit.component_idrefs.include?(@id)
-
-          list << branch_circuit
-        end
-      end
-
-      return list
+      return HPXML::branch_circuits(self, @parent_object.electric_panels)
     end
 
     # Returns any service feeders that the component may be attached to.
     #
     # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
     def service_feeders
-      list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        electric_panel.service_feeders.each do |service_feeder|
-          next if service_feeder.component_idrefs.empty?
-          next unless service_feeder.component_idrefs.include?(@id)
-
-          list << service_feeder
-        end
-      end
-
-      return list
+      return HPXML::service_feeders(self, @parent_object.electric_panels)
     end
 
     # Deletes the current object from the array.
@@ -12885,5 +12685,43 @@ class HPXML < Object
         end
       end
     end
+  end
+
+  # Returns attached branch circuits for provided component ID.
+  #
+  # @param component [HPXML::XXX] HPXML component
+  # @param electric_panels [Array<HPXML::ElectricPanel>] List of electric panel objects
+  # @return [Array<HPXML::BranchCircuit>] List of branch circuit objects
+  def self.branch_circuits(component, electric_panels)
+    list = []
+    electric_panels.each do |electric_panel|
+      electric_panel.branch_circuits.each do |branch_circuit|
+        next if branch_circuit.component_idrefs.nil? || branch_circuit.component_idrefs.empty?
+        next unless branch_circuit.component_idrefs.include?(component.id)
+
+        list << branch_circuit
+      end
+    end
+
+    return list
+  end
+
+  # Returns attached service feeders for provided component ID.
+  #
+  # @param component [HPXML::XXX] HPXML component
+  # @param electric_panels [Array<HPXML::ElectricPanel>] List of electric panel objects
+  # @return [Array<HPXML::ServiceFeeder>] List of service feeder objects
+  def self.service_feeders(component, electric_panels)
+    list = []
+    electric_panels.each do |electric_panel|
+      electric_panel.service_feeders.each do |service_feeder|
+        next if service_feeder.component_idrefs.empty?
+        next unless service_feeder.component_idrefs.include?(component.id)
+
+        list << service_feeder
+      end
+    end
+
+    return list
   end
 end
