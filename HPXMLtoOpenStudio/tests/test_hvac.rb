@@ -2277,16 +2277,16 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def _check_defrost(model, htg_coil, supp_capacity, supp_efficiency, backup_fuel, defrost_time_fraction, defrost_power, q_dot = nil)
     # Check Other equipment inputs
-    defrost_heat_load_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost heat load' }
+    defrost_heat_load_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost load' }
     assert_equal(1, defrost_heat_load_oe.size)
     assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionRadiant)
     assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionLatent)
     assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionLost)
-    defrost_supp_heat_energy_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost supp heat energy' }
+    defrost_supp_heat_energy_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost supp heat' }
     assert_equal(1, defrost_supp_heat_energy_oe.size)
     assert_equal(0, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionRadiant)
     assert_equal(0, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionLatent)
-    assert_equal(1, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionLost)
+    assert_in_epsilon(1.0 - supp_efficiency, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionLost, 0.01)
     assert(backup_fuel == defrost_supp_heat_energy_oe[0].fuelType.to_s)
 
     # Check heating coil defrost inputs

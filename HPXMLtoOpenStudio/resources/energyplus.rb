@@ -41,6 +41,7 @@ module EPlus
   FuelTypePropane = 'Propane'
   FuelTypeWoodCord = 'OtherFuel1'
   FuelTypeWoodPellets = 'OtherFuel2'
+  FuelTypeGeneric = 'Generic'
   ScheduleTypeLimitsFraction = 'Fractional'
   ScheduleTypeLimitsOnOff = 'OnOff'
   ScheduleTypeLimitsTemperature = 'Temperature'

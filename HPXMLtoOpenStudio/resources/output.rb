@@ -5,6 +5,7 @@ module Outputs
   MeterCustomElectricityTotal = 'Electricity:Total'
   MeterCustomElectricityNet = 'Electricity:Net'
   MeterCustomElectricityPV = 'Electricity:PV'
+  MeterCustomHeatingDelivered = 'Heating:EnergyTransfer:Custom'
 
   # Add EMS programs for output reporting. In the case where a whole SFA/MF building is
   # being simulated, these programs are added to the whole building (merged) model, not
@@ -203,10 +204,20 @@ module Outputs
       end
 
       # Energy transferred in conditioned zone, used for determining heating (winter) vs cooling (summer)
+      # Add supp heat delivered energy to the meter, using Meter:Custom
+      htg_load_key_vars = [['', "Heating:EnergyTransfer:Zone:#{conditioned_zone_name.upcase}"]]
+      model.getOtherEquipments.sort.each do |o|
+        next unless o.endUseSubcategory.start_with? Constants::ObjectTypeHPDefrostSupplHeat
+        next unless o.space.get.thermalZone.get.name.to_s.upcase == conditioned_zone_name.upcase
+
+        htg_load_key_vars << [o.name.to_s.upcase, 'Other Equipment Total Heating Energy']
+      end
+      meter_name = MeterCustomHeatingDelivered + ":#{conditioned_zone_name.upcase}"
+      htg_load_meter = create_custom_meter(model, meter_name, EPlus::FuelTypeGeneric, htg_load_key_vars)
       htg_cond_load_sensors[unit] = Model.add_ems_sensor(
         model,
         name: 'htg_load_cond',
-        output_var_or_meter_name: "Heating:EnergyTransfer:Zone:#{conditioned_zone_name.upcase}",
+        output_var_or_meter_name: htg_load_meter.name.to_s,
         key_name: nil
       )
 
@@ -1247,26 +1258,41 @@ module Outputs
       MeterCustomElectricityNet => net_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
-        meter = OpenStudio::Model::MeterCustom.new(model)
         key_vars << ['', 'Electricity:Facility']
+        create_custom_meter(model, meter_name, EPlus::FuelTypeElectricity, key_vars)
       else
-        meter = OpenStudio::Model::MeterCustomDecrement.new(model, 'Electricity:Facility')
-      end
-      meter.setName(meter_name)
-      meter.setFuelType(EPlus::FuelTypeElectricity)
-      key_vars.uniq.each do |key_var|
-        meter.addKeyVarGroup(key_var[0], key_var[1])
+        create_custom_meter(model, meter_name, EPlus::FuelTypeElectricity, key_vars, true, 'Electricity:Facility')
       end
     end
 
     # Create PV meter
     if not pv_key_vars.empty?
-      meter = OpenStudio::Model::MeterCustom.new(model)
-      meter.setName(MeterCustomElectricityPV)
-      meter.setFuelType(EPlus::FuelTypeElectricity)
-      pv_key_vars.uniq.each do |key_var|
-        meter.addKeyVarGroup(key_var[0], key_var[1])
-      end
+      create_custom_meter(model, MeterCustomElectricityPV, EPlus::FuelTypeElectricity, pv_key_vars)
     end
+  end
+
+  # Creates EnergyPlus custom output meter, grouping specified variables or meters onto a virtual meter
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param meter_name [String] name of OpenStudio::Model::Meter:Custom or OpenStudio::Model::Meter:CustomDecrement
+  # @param meter_fuel_type [String] fuel type of OpenStudio::Model::Meter:Custom or OpenStudio::Model::Meter:CustomDecrement
+  # @param key_var_pairs [Array<Array<String>>] List of (key value, variable name) pairs to be inluded in the meter
+  # @param is_decrement [Boolean] true to create OpenStudio::Model::Meter:CustomDecrement, false to create OpenStudio::Model::Meter:Custom
+  # @param source_meter_name [String] name of source meter for OpenStudio::Model::Meter:CustomDecrement, required when is_decrement == true
+  # @return [OpenStudio::Model::Meter:Custom or OpenStudio::Model::Meter:CustomDecrement]
+  def self.create_custom_meter(model, meter_name, meter_fuel_type, key_var_pairs, is_decrement = false, source_meter_name = nil)
+    if is_decrement
+      fail 'No source meter specified for Meter:Custom:Decrement' if source_meter_name.nil?
+
+      meter = OpenStudio::Model::MeterCustomDecrement.new(model, source_meter_name)
+    else
+      meter = OpenStudio::Model::MeterCustom.new(model)
+    end
+    meter.setName(meter_name)
+    meter.setFuelType(meter_fuel_type)
+    key_var_pairs.uniq.each do |key_var|
+      meter.addKeyVarGroup(key_var[0], key_var[1])
+    end
+    return meter
   end
 end
