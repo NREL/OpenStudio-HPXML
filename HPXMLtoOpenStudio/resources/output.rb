@@ -5,7 +5,6 @@ module Outputs
   MeterCustomElectricityTotal = 'Electricity:Total'
   MeterCustomElectricityNet = 'Electricity:Net'
   MeterCustomElectricityPV = 'Electricity:PV'
-  MeterCustomHeatingDelivered = 'Heating:EnergyTransfer:Custom'
 
   # Add EMS programs for output reporting. In the case where a whole SFA/MF building is
   # being simulated, these programs are added to the whole building (merged) model, not
@@ -204,20 +203,10 @@ module Outputs
       end
 
       # Energy transferred in conditioned zone, used for determining heating (winter) vs cooling (summer)
-      # Add supp heat delivered energy to the meter, using Meter:Custom
-      htg_load_key_vars = [['', "Heating:EnergyTransfer:Zone:#{conditioned_zone_name.upcase}"]]
-      model.getOtherEquipments.sort.each do |o|
-        next unless o.endUseSubcategory.start_with? Constants::ObjectTypeHPDefrostSupplHeat
-        next unless o.space.get.thermalZone.get.name.to_s.upcase == conditioned_zone_name.upcase
-
-        htg_load_key_vars << [o.name.to_s.upcase, 'Other Equipment Total Heating Energy']
-      end
-      meter_name = MeterCustomHeatingDelivered + ":#{conditioned_zone_name.upcase}"
-      htg_load_meter = create_custom_meter(model, meter_name, EPlus::FuelTypeGeneric, htg_load_key_vars)
       htg_cond_load_sensors[unit] = Model.add_ems_sensor(
         model,
         name: 'htg_load_cond',
-        output_var_or_meter_name: htg_load_meter.name.to_s,
+        output_var_or_meter_name: "Heating:EnergyTransfer:Zone:#{conditioned_zone_name.upcase}",
         key_name: nil
       )
 

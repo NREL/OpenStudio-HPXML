@@ -205,9 +205,9 @@ base-hvac-air-to-air-heat-pump-1-speed-research-features.xml,254.567,0.0,0.0,128
 base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,9279.5,4014.6,9279.5,9279.5,4014.6,9279.5,31.084,22.072,0.0
 base-hvac-air-to-air-heat-pump-1-speed-space-constrained.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,9249.7,3934.9,9249.7,9249.7,3934.9,9249.7,31.084,22.072,0.0
 base-hvac-air-to-air-heat-pump-1-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,9249.7,4020.9,9249.7,9249.7,4020.9,9249.7,31.084,22.072,0.0
-base-hvac-air-to-air-heat-pump-2-speed-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,8959.2,3789.9,8959.2,8959.2,3789.9,8959.2,31.071,24.638,0.0
+base-hvac-air-to-air-heat-pump-2-speed-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,8959.7,3789.9,8959.7,8959.7,3789.9,8959.7,31.071,24.638,0.0
 base-hvac-air-to-air-heat-pump-2-speed-research-features.xml,80.717,0.0,0.0,1286.4,890.5,11996.9,2685.2,19759.4,8236.0,19759.4,19759.4,8236.0,19759.4,56.5,23.888,0.0
-base-hvac-air-to-air-heat-pump-2-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,8965.3,3529.0,8965.3,8965.3,3529.0,8965.3,31.076,24.832,0.0
+base-hvac-air-to-air-heat-pump-2-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,8966.8,3529.0,8966.8,8966.8,3529.0,8966.8,31.076,24.832,0.0
 base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,6337.0,3644.8,6337.0,6337.0,3644.8,6337.0,30.497,20.224,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-advanced-defrost.xml,1.0,323.0,0.0,1286.4,890.5,11239.2,2515.6,3741.6,3183.6,3741.6,3741.6,3183.6,3741.6,26.415,18.747,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-hvac-seasons.xml,1.0,323.0,0.0,1286.4,890.5,11239.2,2515.6,3846.6,3205.2,3846.6,3846.6,3205.2,3846.6,26.415,18.746,0.0
@@ -218,8 +218,8 @@ base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml,1.0,183.0,0.0,1286.4
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,7515.5,4512.4,7515.5,7515.5,4512.4,7515.5,30.733,24.007,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,7515.5,4512.4,7515.5,7515.5,4512.4,7515.5,30.733,24.007,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,7843.1,4616.3,7843.1,7843.1,4616.3,7843.1,31.07,24.21,0.0
-base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,367.0,4.0,0.0,1286.4,890.5,11239.3,2515.7,17202.1,6489.2,17202.1,17202.1,6489.2,17202.1,61.901,33.789,0.0
-base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,49.0,2.0,0.0,1286.4,890.5,11239.2,2515.6,7103.0,5080.7,7103.0,7103.0,5080.7,7103.0,28.316,22.963,0.0
+base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,366.833,4.0,0.0,1286.4,890.5,11239.3,2515.7,17202.1,6489.2,17202.1,17202.1,6489.2,17202.1,61.901,33.789,0.0
+base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,48.0,2.0,0.0,1286.4,890.5,11239.2,2515.6,7104.7,5080.7,7104.7,7104.7,5080.7,7104.7,28.317,22.963,0.0
 base-hvac-air-to-air-heat-pump-var-speed-pan-heater-continuous-mode.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,8174.6,3661.6,8174.6,8174.6,3661.6,8174.6,30.667,24.06,0.0
 base-hvac-air-to-air-heat-pump-var-speed-pan-heater-defrost-mode.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,8082.6,3661.6,8082.6,8082.6,3661.6,8082.6,30.667,24.06,0.0
 base-hvac-air-to-air-heat-pump-var-speed-pan-heater-none.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,8074.6,3661.6,8074.6,8074.6,3661.6,8074.6,30.667,24.06,0.0
@@ -251,7 +251,7 @@ base-hvac-dse.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,2044.7,2978.9,2978.9,2
 base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-lockout-temperatures.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4859.9,4020.9,4859.9,4859.9,4020.9,4859.9,31.081,22.072,0.0
 base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4627.3,4020.9,4627.3,4627.3,4020.9,4627.3,31.079,22.072,0.0
 base-hvac-dual-fuel-air-to-air-heat-pump-2-speed-advanced-defrost.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4020.8,3529.0,4020.8,4020.8,3529.0,4020.8,31.075,24.832,0.0
-base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4065.1,3529.0,4065.1,4065.1,3529.0,4065.1,31.075,24.832,0.0
+base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4065.1,3529.0,4065.1,4065.1,3529.0,4065.1,31.076,24.832,0.0
 base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,3965.3,3661.6,3965.3,3965.3,3661.6,3965.3,30.668,24.06,0.0
 base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,2799.9,2667.3,2799.9,2799.9,2667.3,2799.9,19.309,14.143,0.0
 base-hvac-ducts-area-multipliers.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,2108.2,3852.3,3852.3,2108.2,3852.3,3852.3,27.935,21.629,0.0
@@ -297,7 +297,7 @@ base-hvac-ground-to-air-heat-pump-heating-only.xml,0.0,0.0,0.0,1286.4,890.5,1123
 base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml,8.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4223.8,2609.5,4223.8,4223.8,2609.5,4223.8,28.566,24.408,0.0
 base-hvac-ground-to-air-heat-pump-var-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,3737.1,2718.4,3737.1,3737.1,2718.4,3737.1,30.213,22.403,0.0
 base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,10163.2,4563.0,10163.2,10163.2,4563.0,10163.2,32.646,25.068,0.0
-base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,9810.1,4082.1,9810.1,9810.1,4082.1,9810.1,32.642,25.571,0.0
+base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,9810.2,4082.1,9810.2,9810.2,4082.1,9810.2,32.642,25.571,0.0
 base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,8956.0,5464.1,8956.0,8956.0,5464.1,8956.0,32.645,25.117,0.0
 base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,9347.6,4081.0,9347.6,9347.6,4081.0,9347.6,32.041,24.936,0.0
 base-hvac-install-quality-furnace-gas-central-ac-1-speed.xml,0.0,302.0,0.0,1286.4,890.5,11239.2,2515.6,2058.6,3747.4,3747.4,2058.6,3747.4,3747.4,36.557,19.437,0.0
@@ -314,11 +314,11 @@ base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance-autosize
 base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,1947.8,2870.7,2870.7,1947.8,2870.7,2870.7,0.0,11.821,0.0
 base-hvac-mini-split-air-conditioner-only-ductless.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,1937.8,2574.2,2574.2,1937.8,2574.2,2574.2,0.0,11.821,0.0
 base-hvac-mini-split-heat-pump-ducted-cooling-only.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,1947.8,2637.5,2637.5,1947.8,2637.5,2637.5,0.0,13.929,0.0
-base-hvac-mini-split-heat-pump-ducted-detailed-performance-autosize.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,5065.3,3050.2,5065.3,5065.3,3050.2,5065.3,19.381,14.191,0.0
-base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4984.0,2969.2,4984.0,4984.0,2969.2,4984.0,19.393,14.128,0.0
-base-hvac-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule.xml,104.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,6041.6,1799.0,6041.6,6041.6,1799.0,6041.6,21.535,0.0,0.0
+base-hvac-mini-split-heat-pump-ducted-detailed-performance-autosize.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,5083.0,3050.2,5083.0,5083.0,3050.2,5083.0,19.382,14.191,0.0
+base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4984.0,2969.2,4984.0,4984.0,2969.2,4984.0,19.172,14.128,0.0
+base-hvac-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule.xml,104.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,6021.7,1799.0,6021.7,6021.7,1799.0,6021.7,21.486,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-heating-only.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4909.1,1799.0,4909.1,4909.1,1799.0,4909.1,19.312,0.0,0.0
-base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml,104.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,6041.6,2604.3,6041.6,6041.6,2604.3,6041.6,21.535,14.142,0.0
+base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml,104.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,6021.7,2604.3,6021.7,6021.7,2604.3,6021.7,21.486,14.142,0.0
 base-hvac-mini-split-heat-pump-ducted.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4909.1,2667.3,4909.1,4909.1,2667.3,4909.1,19.312,14.143,0.0
 base-hvac-mini-split-heat-pump-ductless-autosize-factor.xml,1.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4288.5,2446.6,4288.5,4288.5,2446.6,4288.5,17.278,12.04,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost-with-backup-heat-active.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,4108.0,2477.2,4108.0,4108.0,2477.2,4108.0,16.749,12.04,0.0
