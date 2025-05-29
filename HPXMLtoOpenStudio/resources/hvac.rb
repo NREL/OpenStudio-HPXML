@@ -1357,7 +1357,7 @@ module HVAC
     pl_coeff = [0.90, 0.10, 0.0]
 
     dehumidifiers.each do |dehumidifier|
-      next unless d.energy_factor.nil?
+      next unless dehumidifier.energy_factor.nil?
 
       convert_dehumidifier_ief_to_ef(dehumidifier, w_coeff, ef_coeff)
     end
