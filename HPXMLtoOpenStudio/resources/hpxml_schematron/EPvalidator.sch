@@ -53,7 +53,7 @@
     <sch:title>[AdvancedResearchFeatures]</sch:title>
     <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures'>
       <sch:assert role='ERROR' test='count(h:TemperatureCapacitanceMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: TemperatureCapacitanceMultiplier</sch:assert>
-      <!-- Deprecated DefrostModelType input; see https://github.com/NREL/OpenStudio-HPXML/pull/XXX -->
+      <!-- Deprecated DefrostModelType input; see https://github.com/NREL/OpenStudio-HPXML/pull/2015 -->
       <sch:assert role='ERROR' test='count(h:DefrostModelType) = 0'>DefrostModelType has been deprecated</sch:assert>
       <sch:assert role='ERROR' test='count(h:OnOffThermostatDeadbandTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: OnOffThermostatDeadbandTemperature</sch:assert> <!-- See [OnOffThermostatDeadbandTemperature] -->
       <sch:assert role='ERROR' test='number(h:OnOffThermostatDeadbandTemperature) &gt; 0 or not(h:OnOffThermostatDeadbandTemperature)'>Expected OnOffThermostatDeadbandTemperature to be greater than 0</sch:assert>
