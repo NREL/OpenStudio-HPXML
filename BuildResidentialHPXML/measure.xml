@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>bd8270cb-476a-45f1-b067-6905ee302105</version_id>
-  <version_modified>2025-05-14T16:46:12Z</version_modified>
+  <version_id>558ace94-10fa-4d11-9910-594c1e670214</version_id>
+  <version_modified>2025-05-29T16:39:21Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -152,24 +152,6 @@
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>simulation_control_defrost_model_type</name>
-      <display_name>Simulation Control: Defrost Model Type</display_name>
-      <description>Research feature to select the type of defrost model. Use standard for default E+ defrost setting. Use advanced for an improved model that better accounts for load and energy use during defrost; using advanced may impact simulation runtime. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-simulation-control'&gt;HPXML Simulation Control&lt;/a&gt;) is used.</description>
-      <type>Choice</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
-        <choice>
-          <value>standard</value>
-          <display_name>standard</display_name>
-        </choice>
-        <choice>
-          <value>advanced</value>
-          <display_name>advanced</display_name>
-        </choice>
-      </choices>
     </argument>
     <argument>
       <name>simulation_control_ground_to_air_heat_pump_model_type</name>
@@ -7718,7 +7700,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>61BF199F</checksum>
+      <checksum>1B7B346C</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -7735,7 +7717,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2E88D0DE</checksum>
+      <checksum>16956B57</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>

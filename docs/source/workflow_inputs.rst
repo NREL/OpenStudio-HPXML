@@ -106,7 +106,6 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   Element                                 Type      Units    Constraints       Required  Default   Notes
   ======================================  ========  =======  ================  ========  ========  ========================================================
   ``TemperatureCapacitanceMultiplier``    double             > 0               No        7.0 [#]_  Multiplier on air heat capacitance [#]_
-  ``DefrostModelType``                    string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
   ``OnOffThermostatDeadbandTemperature``  double    F        > 0 [#]_          No                  Temperature difference between cut-in and cut-out temperature for HVAC operation [#]_
   ``HeatPumpBackupCapacityIncrement``     double    Btu/hr   > 0 [#]_          No                  Capacity increment of multi-stage heat pump backup systems [#]_
   ``GroundToAirHeatPumpModelType``        string             See [#]_          No        standard  Ground-to-air heat pump system model type [#]_
@@ -116,9 +115,6 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   .. [#] TemperatureCapacitanceMultiplier affects the transient calculation of indoor air temperatures.
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
-  .. [#] DefrostModelType choices are "standard" and "advanced".
-  .. [#] Use "standard" for default E+ defrost setting.
-         Use "advanced" for an improved model that better accounts for load and energy use during defrost; using "advanced" may impact simulation runtime.
   .. [#] OnOffThermostatDeadbandTemperature is currently only allowed with a 1 minute timestep.
          Currently only supports homes with at most one cooling system (including heat pumps) serving 100% of the cooling load and at most one heating system (including heat pumps) serving 100% of the heating load (i.e., FractionHeatLoadServed and FractionCoolLoadServed are 1.0).
          Applies to single speed and two speed AC/ASHP only.

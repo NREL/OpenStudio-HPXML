@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d440cf44-04d4-4d3f-9792-a214991d1ee4</version_id>
-  <version_modified>2025-05-23T21:46:47Z</version_modified>
+  <version_id>f78a261e-a465-4317-b287-f913b08146b1</version_id>
+  <version_modified>2025-05-29T16:39:23Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -333,7 +333,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B58E3D76</checksum>
+      <checksum>B52FC6D2</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -363,7 +363,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A4D40A8D</checksum>
+      <checksum>9945FEE8</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -381,7 +381,7 @@
       <filename>hpxml_schematron/EPvalidator.sch</filename>
       <filetype>sch</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C816CC8E</checksum>
+      <checksum>7D2697DE</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -393,7 +393,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DFE2FCA6</checksum>
+      <checksum>4EBE522B</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -675,7 +675,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D3763678</checksum>
+      <checksum>9D0C2CB4</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -735,7 +735,7 @@
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3C22AA4B</checksum>
+      <checksum>FFC01DC0</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>

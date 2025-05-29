@@ -221,11 +221,6 @@ module Defaults
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
     end
 
-    if hpxml_header.defrost_model_type.nil? && (hpxml_bldg.heat_pumps.any? { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? hp.heat_pump_type })
-      hpxml_header.defrost_model_type = HPXML::AdvancedResearchDefrostModelTypeStandard
-      hpxml_header.defrost_model_type_isdefaulted = true
-    end
-
     if hpxml_header.ground_to_air_heat_pump_model_type.nil? && (hpxml_bldg.heat_pumps.any? { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir })
       hpxml_header.ground_to_air_heat_pump_model_type = HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
       hpxml_header.ground_to_air_heat_pump_model_type_isdefaulted = true
