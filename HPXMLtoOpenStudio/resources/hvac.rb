@@ -1963,8 +1963,8 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param pump [OpenStudio::Model::PumpVariableSpeed] OpenStudio variable speed pump object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
-  # @param htg_coil [OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit or OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit]  OpenStudio Heating Coil object
-  # @param clg_coil [OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit or OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit]  OpenStudio Cooling Coil object
+  # @param htg_coil [OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit or OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit] OpenStudio Heating Coil object
+  # @param clg_coil [OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit or OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit] OpenStudio Cooling Coil object
   # @return [nil]
   def self.add_ghp_pump_mass_flow_rate_ems_program(model, pump, control_zone, htg_coil, clg_coil)
     # Sensors
@@ -2487,27 +2487,6 @@ module HVAC
     # E+ inputs under EF test conditions
     dehumidifier.integrated_energy_factor = dehumidifier.integrated_energy_factor / ef_curve_value_ief * curve_value_ef
     dehumidifier.capacity = dehumidifier.capacity / water_removal_curve_value_ief * curve_value_ef
-  end
-
-  # TODO
-  #
-  # @param heating_capacity_fraction_17F [Double] Heating capacity fraction at 17F (Btuh)
-  # @return [TODO] TODO
-  def self.calc_heat_cap_ft_spec(heating_capacity_fraction_17F)
-    iat_slope = -0.002303414
-    iat_intercept = 0.18417308
-
-    # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
-    # Derive coefficients from user input for capacity fraction at 17F.
-    x_A = 17.0
-    y_A = heating_capacity_fraction_17F
-    x_B = HVAC::AirSourceHeatRatedODB
-    y_B = 1.0
-
-    oat_slope = (y_B - y_A) / (x_B - x_A)
-    oat_intercept = y_A - (x_A * oat_slope)
-
-    return [oat_intercept + iat_intercept, iat_slope, 0, oat_slope, 0, 0]
   end
 
   # Returns biquadratic curve coefficients converted from IP units to SI units.
@@ -4229,11 +4208,15 @@ module HVAC
     return s
   end
 
-  # TODO
+  # Assigns heating/cooling sequential load fraction schedules to the HVAC objects. This specifies
+  # how much of the heating/cooling load is served by the given HVAC system.
+  #
+  # For heat pump backup heating systems, we also use an EMS program to actuate the sequential load
+  # fraction schedule to prevent operation above the given switchover/lockout temperature.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
-  # @param hvac_object [TODO] TODO
+  # @param hvac_object [OpenStudio::Model::Foo] HVAC model object that the sequential fraction schedule is assigned to
   # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
@@ -4296,7 +4279,8 @@ module HVAC
     end
   end
 
-  # TODO
+  # Adds the ANSI/RESNET/ICC 301 equations for HVAC blower airflow defects and refrigerant charge defects
+  # to the HVAC installation quality EMS program.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
@@ -4304,35 +4288,35 @@ module HVAC
   # @param fault_program [OpenStudio::Model::EnergyManagementSystemProgram] The EMS program of interest
   # @param tin_sensor [OpenStudio::Model::EnergyManagementSystemSensor] The indoor temperature sensor
   # @param tout_sensor [OpenStudio::Model::EnergyManagementSystemSensor] The outdoor temperature sensor
-  # @param airflow_rated_defect_ratio [TODO] TODO
-  # @param clg_or_htg_coil [TODO] TODO
-  # @param f_chg [TODO] TODO
-  # @param defect_ratio [TODO] TODO
+  # @param hvac_coil [OpenStudio::Model::CoilCoolingXXX or OpenStudio::Model::CoilHeatingXXX] Cooling or heating coil model object
+  # @param f_chg [Double] Refrigerant charge defect ratio (i.e., (InstalledCharge - DesignCharge) / DesignCharge)
+  # @param airflow_defect_ratio [Double] Airflow defect ratio (i.e., (InstalledAirflow - DesignAirflow) / DesignAirflow)
+  # @param airflow_rated_defect_ratio [Array<Double>] Rated airflow defect ratio (i.e., (InstalledAirflow - RatedAirflow) / RatedAirflow)) at each speed
   # @param hvac_ap [HPXML::AdditionalProperties] AdditionalProperties object for the HVAC system
   # @return [nil]
-  def self.add_installation_quality_ems_program(model, obj_name, mode, fault_program, tin_sensor, tout_sensor, airflow_rated_defect_ratio, clg_or_htg_coil, f_chg, defect_ratio, hvac_ap)
+  def self.add_installation_quality_ems_program_equations(model, obj_name, mode, fault_program, tin_sensor, tout_sensor, hvac_coil, f_chg, airflow_defect_ratio, airflow_rated_defect_ratio, hvac_ap)
     if mode == :clg
-      if clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
+      if hvac_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
         num_speeds = 1
-        cap_fff_curves = [clg_or_htg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
-        eir_pow_fff_curves = [clg_or_htg_coil.energyInputRatioFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
-      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
-        num_speeds = clg_or_htg_coil.stages.size
-        if clg_or_htg_coil.stages[0].totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.is_initialized
-          cap_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
-          eir_pow_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+        cap_fff_curves = [hvac_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
+        eir_pow_fff_curves = [hvac_coil.energyInputRatioFunctionOfFlowFractionCurve.to_CurveQuadratic.get]
+      elsif hvac_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
+        num_speeds = hvac_coil.stages.size
+        if hvac_coil.stages[0].totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.is_initialized
+          cap_fff_curves = hvac_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+          eir_pow_fff_curves = hvac_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
         else
-          cap_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_TableLookup.get }
-          eir_pow_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_TableLookup.get }
+          cap_fff_curves = hvac_coil.stages.map { |stage| stage.totalCoolingCapacityFunctionofFlowFractionCurve.to_TableLookup.get }
+          eir_pow_fff_curves = hvac_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_TableLookup.get }
         end
-      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit
-        num_speeds = clg_or_htg_coil.speeds.size
-        cap_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.totalCoolingCapacityFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
-        eir_pow_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.energyInputRatioFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
-      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
+      elsif hvac_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit
+        num_speeds = hvac_coil.speeds.size
+        cap_fff_curves = hvac_coil.speeds.map { |speed| speed.totalCoolingCapacityFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
+        eir_pow_fff_curves = hvac_coil.speeds.map { |speed| speed.energyInputRatioFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
+      elsif hvac_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
         num_speeds = 1
-        cap_fff_curves = [clg_or_htg_coil.totalCoolingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
-        eir_pow_fff_curves = [clg_or_htg_coil.coolingPowerConsumptionCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
+        cap_fff_curves = [hvac_coil.totalCoolingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
+        eir_pow_fff_curves = [hvac_coil.coolingPowerConsumptionCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
 
         # variables are the same for eir and cap curve
         var1_sensor = Model.add_ems_sensor(
@@ -4359,27 +4343,27 @@ module HVAC
         fail 'cooling coil not supported'
       end
     elsif mode == :htg
-      if clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
+      if hvac_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
         num_speeds = 1
-        cap_fff_curves = [clg_or_htg_coil.totalHeatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get]
-        eir_pow_fff_curves = [clg_or_htg_coil.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get]
-      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
-        num_speeds = clg_or_htg_coil.stages.size
-        if clg_or_htg_coil.stages[0].heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.is_initialized
-          cap_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
-          eir_pow_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+        cap_fff_curves = [hvac_coil.totalHeatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get]
+        eir_pow_fff_curves = [hvac_coil.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get]
+      elsif hvac_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+        num_speeds = hvac_coil.stages.size
+        if hvac_coil.stages[0].heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.is_initialized
+          cap_fff_curves = hvac_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get }
+          eir_pow_fff_curves = hvac_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_CurveQuadratic.get }
         else
-          cap_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_TableLookup.get }
-          eir_pow_fff_curves = clg_or_htg_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_TableLookup.get }
+          cap_fff_curves = hvac_coil.stages.map { |stage| stage.heatingCapacityFunctionofFlowFractionCurve.to_TableLookup.get }
+          eir_pow_fff_curves = hvac_coil.stages.map { |stage| stage.energyInputRatioFunctionofFlowFractionCurve.to_TableLookup.get }
         end
-      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit
-        num_speeds = clg_or_htg_coil.speeds.size
-        cap_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.totalHeatingCapacityFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
-        eir_pow_fff_curves = clg_or_htg_coil.speeds.map { |speed| speed.energyInputRatioFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
-      elsif clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit
+      elsif hvac_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit
+        num_speeds = hvac_coil.speeds.size
+        cap_fff_curves = hvac_coil.speeds.map { |speed| speed.totalHeatingCapacityFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
+        eir_pow_fff_curves = hvac_coil.speeds.map { |speed| speed.energyInputRatioFunctionofAirFlowFractionCurve.to_CurveQuadratic.get }
+      elsif hvac_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit
         num_speeds = 1
-        cap_fff_curves = [clg_or_htg_coil.heatingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
-        eir_pow_fff_curves = [clg_or_htg_coil.heatingPowerConsumptionCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
+        cap_fff_curves = [hvac_coil.heatingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
+        eir_pow_fff_curves = [hvac_coil.heatingPowerConsumptionCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
 
         # variables are the same for eir and cap curve
         var1_sensor = Model.add_ems_sensor(
@@ -4480,7 +4464,7 @@ module HVAC
       fault_program.addLine("Set FF_AF_comb_#{suffix} = FF_CH * FF_AF_#{suffix}")
       fault_program.addLine("Set p_AF_Q_#{suffix} = (a1_AF_Qgr_#{suffix}) + ((a2_AF_Qgr_#{suffix})*FF_AF_comb_#{suffix}) + ((a3_AF_Qgr_#{suffix})*FF_AF_comb_#{suffix}*FF_AF_comb_#{suffix})")
       fault_program.addLine("Set p_AF_COP_#{suffix} = 1.0 / ((a1_AF_EIR_#{suffix}) + ((a2_AF_EIR_#{suffix})*FF_AF_comb_#{suffix}) + ((a3_AF_EIR_#{suffix})*FF_AF_comb_#{suffix}*FF_AF_comb_#{suffix}))")
-      fault_program.addLine("Set FF_AF_nodef_#{suffix} = FF_AF_#{suffix} / (1 + (#{defect_ratio.round(3)}))")
+      fault_program.addLine("Set FF_AF_nodef_#{suffix} = FF_AF_#{suffix} / (1 + (#{airflow_defect_ratio.round(3)}))")
       fault_program.addLine("Set CAP_Cutler_Curve_Pre_#{suffix} = (a1_AF_Qgr_#{suffix}) + ((a2_AF_Qgr_#{suffix})*FF_AF_nodef_#{suffix}) + ((a3_AF_Qgr_#{suffix})*FF_AF_nodef_#{suffix}*FF_AF_nodef_#{suffix})")
       fault_program.addLine("Set EIR_Cutler_Curve_Pre_#{suffix} = (a1_AF_EIR_#{suffix}) + ((a2_AF_EIR_#{suffix})*FF_AF_nodef_#{suffix}) + ((a3_AF_EIR_#{suffix})*FF_AF_nodef_#{suffix}*FF_AF_nodef_#{suffix})")
       fault_program.addLine("Set CAP_Cutler_Curve_After_#{suffix} = p_CH_Q_#{suffix} * p_AF_Q_#{suffix}")
@@ -4488,8 +4472,8 @@ module HVAC
       fault_program.addLine("Set CAP_IQ_adj_#{suffix} = CAP_Cutler_Curve_After_#{suffix} / CAP_Cutler_Curve_Pre_#{suffix}")
       fault_program.addLine("Set EIR_IQ_adj_#{suffix} = EIR_Cutler_Curve_After_#{suffix} / EIR_Cutler_Curve_Pre_#{suffix}")
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
-      if (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit) && (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit)
-        if (clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit) || (clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit)
+      if (not hvac_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit) && (not hvac_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit)
+        if (hvac_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit) || (hvac_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit)
           cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec[speed] : hvac_ap.heat_cap_fflow_spec[speed]
           eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec[speed] : hvac_ap.heat_eir_fflow_spec[speed]
         else
@@ -4531,17 +4515,18 @@ module HVAC
     end
   end
 
-  # TODO
+  # Adds an EMS program to the OpenStudio model that adjusts the performance of the HVAC system based
+  # on the ANSI/RESNET/ICC 301 equations for HVAC blower airflow defects and refrigerant charge defects.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
-  # @param unitary_system [TODO] TODO
-  # @param htg_coil [TODO] TODO
-  # @param clg_coil [TODO] TODO
+  # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
+  # @param htg_coil [OpenStudio::Model::CoilHeatingXXX] Heating coil model object
+  # @param clg_coil [OpenStudio::Model::CoilCoolingXXX] Cooling coil model object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @return [nil]
-  def self.apply_installation_quality_ems_program(model, heating_system, cooling_system, unitary_system, htg_coil, clg_coil, control_zone)
+  def self.apply_installation_quality_ems_program(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
     if not cooling_system.nil?
       charge_defect_ratio = cooling_system.charge_defect_ratio
       cool_airflow_defect_ratio = cooling_system.airflow_defect_ratio
@@ -4579,7 +4564,7 @@ module HVAC
 
     return if cool_airflow_rated_defect_ratio.empty? && heat_airflow_rated_defect_ratio.empty?
 
-    obj_name = "#{unitary_system.name} install quality program"
+    obj_name = "#{air_loop_unitary.name} install quality program"
 
     tin_sensor = Model.add_ems_sensor(
       model,
@@ -4604,11 +4589,11 @@ module HVAC
     fault_program.addLine("Set F_CH = #{f_chg.round(3)}")
 
     if not cool_airflow_rated_defect_ratio.empty?
-      add_installation_quality_ems_program(model, obj_name, :clg, fault_program, tin_sensor, tout_sensor, cool_airflow_rated_defect_ratio, clg_coil, f_chg, cool_airflow_defect_ratio, clg_ap)
+      add_installation_quality_ems_program_equations(model, obj_name, :clg, fault_program, tin_sensor, tout_sensor, clg_coil, f_chg, cool_airflow_defect_ratio, cool_airflow_rated_defect_ratio, clg_ap)
     end
 
     if not heat_airflow_rated_defect_ratio.empty?
-      add_installation_quality_ems_program(model, obj_name, :htg, fault_program, tin_sensor, tout_sensor, heat_airflow_rated_defect_ratio, htg_coil, f_chg, heat_airflow_defect_ratio, htg_ap)
+      add_installation_quality_ems_program_equations(model, obj_name, :htg, fault_program, tin_sensor, tout_sensor, htg_coil, f_chg, heat_airflow_defect_ratio, heat_airflow_rated_defect_ratio, htg_ap)
     end
 
     Model.add_ems_program_calling_manager(
@@ -4719,8 +4704,8 @@ module HVAC
   # when using the advanced defrost model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed]  OpenStudio Heating Coil object
-  # @param conditioned_space [OpenStudio::Model::Space]  OpenStudio Space object for conditioned zone
+  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
+  # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [nil]
@@ -4853,202 +4838,6 @@ module HVAC
       calling_point: 'BeginZoneTimestepBeforeInitHeatBalance',
       ems_programs: [program]
     )
-  end
-
-  # TODO
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [nil]
-  def self.apply_shared_systems(hpxml_bldg)
-    applied_clg = apply_shared_cooling_systems(hpxml_bldg)
-    applied_htg = apply_shared_heating_systems(hpxml_bldg)
-    return unless (applied_clg || applied_htg)
-
-    # Remove WLHP if not serving heating nor cooling
-    hpxml_bldg.heat_pumps.each do |hp|
-      next unless hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
-      next if hp.fraction_heat_load_served > 0
-      next if hp.fraction_cool_load_served > 0
-
-      hp.delete
-    end
-
-    # Remove any orphaned HVAC distributions
-    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      hvac_systems = []
-      hpxml_bldg.hvac_systems.each do |hvac_system|
-        next if hvac_system.distribution_system_idref.nil?
-        next unless hvac_system.distribution_system_idref == hvac_distribution.id
-
-        hvac_systems << hvac_system
-      end
-      next unless hvac_systems.empty?
-
-      hvac_distribution.delete
-    end
-  end
-
-  # TODO
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
-  def self.apply_shared_cooling_systems(hpxml_bldg)
-    applied = false
-    hpxml_bldg.cooling_systems.each do |cooling_system|
-      next unless cooling_system.is_shared_system
-
-      applied = true
-      wlhp = nil
-      distribution_system = cooling_system.distribution_system
-      distribution_type = distribution_system.distribution_system_type
-
-      # Calculate air conditioner SEER equivalent
-      n_dweq = cooling_system.number_of_units_served.to_f
-      aux = cooling_system.shared_loop_watts
-
-      if cooling_system.cooling_system_type == HPXML::HVACTypeChiller
-
-        # Chiller w/ baseboard or fan coil or water loop heat pump
-        cap = cooling_system.cooling_capacity
-        chiller_input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton * UnitConversions.convert(cap, 'Btu/hr', 'ton'), 'kW', 'W')
-        if distribution_type == HPXML::HVACDistributionTypeHydronic
-          if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop
-            wlhp = hpxml_bldg.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
-            aux_dweq = wlhp.cooling_capacity / wlhp.cooling_efficiency_eer
-          else
-            aux_dweq = 0.0
-          end
-        elsif distribution_type == HPXML::HVACDistributionTypeAir
-          if distribution_system.air_type == HPXML::AirTypeFanCoil
-            aux_dweq = cooling_system.fan_coil_watts
-          end
-        end
-        # ANSI/RESNET/ICC 301-2022 Equation 4.4-2
-        seer_eq = (cap - 3.41 * aux - 3.41 * aux_dweq * n_dweq) / (chiller_input + aux + aux_dweq * n_dweq)
-
-      elsif cooling_system.cooling_system_type == HPXML::HVACTypeCoolingTower
-
-        # Cooling tower w/ water loop heat pump
-        if distribution_type == HPXML::HVACDistributionTypeHydronic
-          if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop
-            wlhp = hpxml_bldg.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
-            wlhp_cap = wlhp.cooling_capacity
-            wlhp_input = wlhp_cap / wlhp.cooling_efficiency_eer
-          end
-        end
-        # ANSI/RESNET/ICC 301-2022 Equation 4.4-3
-        seer_eq = (wlhp_cap - 3.41 * aux / n_dweq) / (wlhp_input + aux / n_dweq)
-
-      else
-        fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
-      end
-
-      if seer_eq <= 0
-        fail "Negative SEER equivalent calculated for cooling system '#{cooling_system.id}', double-check inputs."
-      end
-
-      cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
-      cooling_system.cooling_efficiency_seer = seer_eq.round(2)
-      cooling_system.cooling_efficiency_kw_per_ton = nil
-      cooling_system.cooling_capacity = nil # Autosize the equipment
-      cooling_system.compressor_type = HPXML::HVACCompressorTypeSingleStage
-      cooling_system.is_shared_system = false
-      cooling_system.number_of_units_served = nil
-      cooling_system.shared_loop_watts = nil
-      cooling_system.shared_loop_motor_efficiency = nil
-      cooling_system.fan_coil_watts = nil
-
-      # Assign new distribution system to air conditioner
-      if distribution_type == HPXML::HVACDistributionTypeHydronic
-        if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop
-          # Assign WLHP air distribution
-          cooling_system.distribution_system_idref = wlhp.distribution_system_idref
-          wlhp.fraction_cool_load_served = 0.0
-          wlhp.fraction_heat_load_served = 0.0
-        else
-          # Assign DSE=1
-          hpxml_bldg.hvac_distributions.add(id: "#{cooling_system.id}AirDistributionSystem",
-                                            distribution_system_type: HPXML::HVACDistributionTypeDSE,
-                                            annual_cooling_dse: 1.0,
-                                            annual_heating_dse: 1.0)
-          cooling_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-        end
-      elsif (distribution_type == HPXML::HVACDistributionTypeAir) && (distribution_system.air_type == HPXML::AirTypeFanCoil)
-        # Convert "fan coil" air distribution system to "regular velocity"
-        if distribution_system.hvac_systems.size > 1
-          # Has attached heating system, so create a copy specifically for the cooling system
-          hpxml_bldg.hvac_distributions.add(id: "#{distribution_system.id}_#{cooling_system.id}",
-                                            distribution_system_type: distribution_system.distribution_system_type,
-                                            air_type: distribution_system.air_type,
-                                            number_of_return_registers: distribution_system.number_of_return_registers,
-                                            conditioned_floor_area_served: distribution_system.conditioned_floor_area_served)
-          distribution_system.duct_leakage_measurements.each do |lm|
-            hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << lm.dup
-          end
-          distribution_system.ducts.each do |d|
-            hpxml_bldg.hvac_distributions[-1].ducts << d.dup
-          end
-          cooling_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-        end
-        hpxml_bldg.hvac_distributions[-1].air_type = HPXML::AirTypeRegularVelocity
-        if hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.count { |lm| (lm.duct_type == HPXML::DuctTypeSupply) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) } == 0
-          # Assign zero supply leakage
-          hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                          duct_leakage_units: HPXML::UnitsCFM25,
-                                                                          duct_leakage_value: 0,
-                                                                          duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-        end
-        if hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.count { |lm| (lm.duct_type == HPXML::DuctTypeReturn) && (lm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside) } == 0
-          # Assign zero return leakage
-          hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                          duct_leakage_units: HPXML::UnitsCFM25,
-                                                                          duct_leakage_value: 0,
-                                                                          duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-        end
-        hpxml_bldg.hvac_distributions[-1].ducts.each do |d|
-          d.id = "#{d.id}_#{cooling_system.id}"
-        end
-      end
-    end
-
-    return applied
-  end
-
-  # TODO
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
-  def self.apply_shared_heating_systems(hpxml_bldg)
-    applied = false
-    hpxml_bldg.heating_systems.each do |heating_system|
-      next unless heating_system.is_shared_system
-
-      applied = true
-      distribution_system = heating_system.distribution_system
-      hydronic_type = distribution_system.hydronic_type
-
-      if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_type.to_s == HPXML::HydronicTypeWaterLoop
-
-        # Shared boiler w/ water loop heat pump
-        # Per ANSI/RESNET/ICC 301-2022 Section 4.4.7.2, model as:
-        # A) heat pump with constant efficiency and duct losses, fraction heat load served = 1/COP
-        # B) boiler, fraction heat load served = 1-1/COP
-        fraction_heat_load_served = heating_system.fraction_heat_load_served
-
-        # Heat pump
-        # If this approach is ever removed, also remove code in HVACSizing.apply_hvac_loads()
-        wlhp = hpxml_bldg.heat_pumps.find { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir }
-        wlhp.fraction_heat_load_served = fraction_heat_load_served * (1.0 / wlhp.heating_efficiency_cop)
-        wlhp.fraction_cool_load_served = 0.0
-
-        # Boiler
-        heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / wlhp.heating_efficiency_cop)
-      end
-
-      heating_system.heating_capacity = nil # Autosize the equipment
-    end
-
-    return applied
   end
 
   # Calculates the rated airflow rate for a given speed.
@@ -5232,7 +5021,7 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # Note that this is a regression based on products on the market, not a conversion.
   #
-  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [Double] SEER value (Btu/Wh)
   def self.calc_seer_from_seer2(hvac_system)
     is_ducted = !hvac_system.distribution_system_idref.nil?
@@ -5260,7 +5049,7 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # Note that this is a regression based on products on the market, not a conversion.
   #
-  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [Double] SEER2 value (Btu/Wh)
   def self.calc_seer2_from_seer(hvac_system)
     is_ducted = !hvac_system.distribution_system_idref.nil?
@@ -5288,7 +5077,7 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # Note that this is a regression based on products on the market, not a conversion.
   #
-  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [Double] EER value (Btu/Wh)
   def self.calc_eer_from_eer2(hvac_system)
     is_ducted = !hvac_system.distribution_system_idref.nil?
@@ -5316,7 +5105,7 @@ module HVAC
   # Source: ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
   # Note that this is a regression based on products on the market, not a conversion.
   #
-  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump]  The HPXML HVAC system of interest
+  # @param hvac_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @return [Double] EER2 value (Btu/Wh)
   def self.calc_eer2_from_eer(hvac_system)
     is_ducted = !hvac_system.distribution_system_idref.nil?
