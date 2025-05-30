@@ -184,7 +184,8 @@ module Outputs
     htg_cond_load_sensors, clg_cond_load_sensors = {}, {}
     htg_duct_load_sensors, clg_duct_load_sensors = {}, {}
     total_heat_load_serveds, total_cool_load_serveds = {}, {}
-    dehumidifier_global_vars, dehumidifier_sensors = {}, {}
+    dehumidifier_global_vars, dehumidifier_sensors, defrost_load_oe_sensors = {}, {}, {}
+    unit_multipliers = {}
 
     hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit|
       # Retrieve objects
@@ -192,6 +193,7 @@ module Outputs
       duct_zone_names = unit_model.getThermalZones.select { |z| z.isPlenum }.map { |z| z.name.to_s }
       dehumidifier = unit_model.getZoneHVACDehumidifierDXs
       dehumidifier_name = dehumidifier[0].name.to_s unless dehumidifier.empty?
+      defrost_load_oes = unit_model.getOtherEquipments.select { |o| o.name.to_s.include? 'defrost heat load' }
 
       # Fraction heat/cool load served
       if hpxml_header.apply_ashrae140_assumptions
@@ -236,6 +238,16 @@ module Outputs
         )
       end
 
+      defrost_load_oe_sensors[unit] = []
+      defrost_load_oes.sort.each_with_index do |o, i|
+        defrost_load_oe_sensors[unit] << Model.add_ems_sensor(
+          model,
+          name: "ig_defrost_#{i}",
+          output_var_or_meter_name: 'Other Equipment Total Heating Energy',
+          key_name: o.name.to_s
+        )
+      end
+      unit_multipliers[unit] = hpxml_bldg.building_construction.number_of_units
       next if dehumidifier_name.nil?
 
       # Need to adjust E+ EnergyTransfer meters for dehumidifier internal gains.
@@ -293,6 +305,9 @@ module Outputs
       end
       if not dehumidifier_global_vars[unit].nil?
         program.addLine("  Set loads_htg_tot = loads_htg_tot - #{dehumidifier_global_vars[unit].name}")
+      end
+      defrost_load_oe_sensors[unit].each do |defrost_ss|
+        program.addLine("  Set loads_htg_tot = loads_htg_tot + #{defrost_ss.name} * #{unit_multipliers[unit]}")
       end
       program.addLine('EndIf')
     end

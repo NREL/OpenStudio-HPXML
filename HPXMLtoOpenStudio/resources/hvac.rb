@@ -4784,9 +4784,9 @@ module HVAC
     end
 
     # Other equipment/actuator
-    defrost_load_oe = Model.add_other_equipment(
+    defrost_heat_load_oe = Model.add_other_equipment(
       model,
-      name: "#{htg_coil.name} defrost load",
+      name: "#{htg_coil.name} defrost heat load",
       end_use: nil,
       space: conditioned_space,
       design_level: 0,
@@ -4796,30 +4796,30 @@ module HVAC
       schedule: model.alwaysOnDiscreteSchedule,
       fuel_type: nil
     )
-    defrost_load_oe_act = Model.add_ems_actuator(
-      name: "#{defrost_load_oe.name} act",
-      model_object: defrost_load_oe,
+    defrost_heat_load_oe_act = Model.add_ems_actuator(
+      name: "#{defrost_heat_load_oe.name} act",
+      model_object: defrost_heat_load_oe,
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeHPDefrostSupplHeat } # Ensure unique meter for each heat pump
-    defrost_supp_heat_oe = Model.add_other_equipment(
+    defrost_supp_heat_energy_oe = Model.add_other_equipment(
       model,
-      name: "#{htg_coil.name} defrost supp heat",
+      name: "#{htg_coil.name} defrost supp heat energy",
       end_use: "#{Constants::ObjectTypeHPDefrostSupplHeat}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
       frac_radiant: 0,
       frac_latent: 0,
-      frac_lost: 1.0 - supp_sys_efficiency,
+      frac_lost: 1.0,
       schedule: model.alwaysOnDiscreteSchedule,
       fuel_type: supp_sys_fuel
     )
-    defrost_supp_heat_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+    defrost_supp_heat_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
-    defrost_supp_heat_oe_act = Model.add_ems_actuator(
-      name: "#{defrost_supp_heat_oe.name} act",
-      model_object: defrost_supp_heat_oe,
+    defrost_supp_heat_energy_oe_act = Model.add_ems_actuator(
+      name: "#{defrost_supp_heat_energy_oe.name} act",
+      model_object: defrost_supp_heat_energy_oe,
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
@@ -4856,11 +4856,11 @@ module HVAC
     program.addLine('    Set supp_design_level = 0.0')
     program.addLine('  EndIf')
     program.addLine("  Set fraction_defrost = hp_defrost_time_fraction * #{htg_coil_rtf_sensor.name}")
-    program.addLine("  Set #{defrost_load_oe_act.name} = (-q_dot_defrost) * fraction_defrost")
-    program.addLine("  Set #{defrost_supp_heat_oe_act.name} = fraction_defrost * supp_design_level")
+    program.addLine("  Set #{defrost_heat_load_oe_act.name} = (supp_delivered_htg - q_dot_defrost) * fraction_defrost")
+    program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = fraction_defrost * supp_design_level")
     program.addLine('Else')
-    program.addLine("  Set #{defrost_load_oe_act.name} = 0")
-    program.addLine("  Set #{defrost_supp_heat_oe_act.name} = 0")
+    program.addLine("  Set #{defrost_heat_load_oe_act.name} = 0")
+    program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = 0")
     program.addLine('EndIf')
 
     # EMS calling manager
@@ -4991,9 +4991,9 @@ module HVAC
     end
 
     # Other equipment/actuator
-    defrost_load_oe = Model.add_other_equipment(
+    defrost_heat_load_oe = Model.add_other_equipment(
       model,
-      name: "#{htg_coil.name} defrost load",
+      name: "#{htg_coil.name} defrost heat load",
       end_use: nil,
       space: conditioned_space,
       design_level: 0,
@@ -5003,30 +5003,30 @@ module HVAC
       schedule: model.alwaysOnDiscreteSchedule,
       fuel_type: nil
     )
-    defrost_load_oe_act = Model.add_ems_actuator(
-      name: "#{defrost_load_oe.name} act",
-      model_object: defrost_load_oe,
+    defrost_heat_load_oe_act = Model.add_ems_actuator(
+      name: "#{defrost_heat_load_oe.name} act",
+      model_object: defrost_heat_load_oe,
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
 
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeHPDefrostSupplHeat } # Ensure unique meter for each other equipment
-    defrost_supp_heat_oe = Model.add_other_equipment(
+    defrost_supp_heat_energy_oe = Model.add_other_equipment(
       model,
-      name: "#{htg_coil.name} defrost supp heat",
+      name: "#{htg_coil.name} defrost supp heat energy",
       end_use: "#{Constants::ObjectTypeHPDefrostSupplHeat}#{cnt + 1}",
       space: conditioned_space,
       design_level: 0,
       frac_radiant: 0,
       frac_latent: 0,
-      frac_lost: 1.0 - supp_sys_efficiency,
+      frac_lost: 1.0,
       schedule: model.alwaysOnDiscreteSchedule,
       fuel_type: supp_sys_fuel
     )
-    defrost_supp_heat_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+    defrost_supp_heat_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
-    defrost_supp_heat_oe_act = Model.add_ems_actuator(
-      name: "#{defrost_supp_heat_oe.name} act",
-      model_object: defrost_supp_heat_oe,
+    defrost_supp_heat_energy_oe_act = Model.add_ems_actuator(
+      name: "#{defrost_supp_heat_energy_oe.name} act",
+      model_object: defrost_supp_heat_energy_oe,
       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
     )
     # frost multiplier actuators
@@ -5094,11 +5094,11 @@ module HVAC
     program.addLine('  Else')
     program.addLine('    Set supp_design_level = 0.0')
     program.addLine('  EndIf')
-    program.addLine("  Set #{defrost_load_oe_act.name} = (-q_dot_defrost) * fraction_defrost")
-    program.addLine("  Set #{defrost_supp_heat_oe_act.name} = fraction_defrost * supp_design_level")
+    program.addLine("  Set #{defrost_heat_load_oe_act.name} = (supp_delivered_htg - q_dot_defrost) * fraction_defrost")
+    program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = fraction_defrost * supp_design_level")
     program.addLine('Else')
-    program.addLine("  Set #{defrost_load_oe_act.name} = 0")
-    program.addLine("  Set #{defrost_supp_heat_oe_act.name} = 0")
+    program.addLine("  Set #{defrost_heat_load_oe_act.name} = 0")
+    program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = 0")
     program.addLine('EndIf')
 
     Model.add_ems_program_calling_manager(
