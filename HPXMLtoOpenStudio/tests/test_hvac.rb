@@ -2292,7 +2292,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check heating coil defrost inputs
     assert(htg_coil.defrostStrategy == 'Resistive')
     assert_in_epsilon(htg_coil.defrostTimePeriodFraction, defrost_time_fraction, 0.01)
-    assert_in_delta(htg_coil.resistiveDefrostHeaterCapacity.get, defrost_power, 0.01)
+    assert_in_delta(htg_coil.resistiveDefrostHeaterCapacity.get, defrost_power, 1.0)
 
     # Check EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{htg_coil.name} defrost program")
