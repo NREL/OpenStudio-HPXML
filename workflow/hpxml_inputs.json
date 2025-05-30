@@ -859,7 +859,7 @@
     "permanent_spa_heater_type": "none",
     "vehicle_type": "BatteryElectricVehicle",
     "ev_charger_present": true,
-    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
+    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based",
     "electric_panel_service_voltage": "240",
     "electric_panel_service_max_current_rating": 200,
     "electric_panel_load_heat_pump_power_rating": 2500,

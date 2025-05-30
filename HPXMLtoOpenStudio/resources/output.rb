@@ -1311,10 +1311,11 @@ module Outputs
   # @param hpxml_bldgs [Array<HPXML::Building>] List of HPXML Building objects representing an individual dwelling unit
   # @param results_out [Array] Rows of output data
   # @return [Array] Rows of output data, with electric panel results appended
-  def self.append_panel_results(hpxml_header, hpxml_bldgs, results_out)
+  def self.append_panel_results(hpxml_header, hpxml_bldgs)
     line_break = nil
 
     # Summary breaker spaces
+    results_out = []
     results_out << ['Electric Panel Breaker Spaces: Heating Count', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_breaker_spaces(hpxml_bldg)[0] }.sum(0)]
     results_out << ['Electric Panel Breaker Spaces: Cooling Count', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_breaker_spaces(hpxml_bldg)[1] }.sum(0)]
     results_out << ['Electric Panel Breaker Spaces: Hot Water Count', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_breaker_spaces(hpxml_bldg)[2] }.sum(0)]

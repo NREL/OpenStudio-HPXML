@@ -14,7 +14,6 @@
       <ElectricPanelLoadCalculations>
         <ServiceFeeders>
           <Type>2023 Existing Dwelling Load-Based</Type>
-          <Type>2023 Existing Dwelling Meter-Based</Type>
         </ServiceFeeders>
       </ElectricPanelLoadCalculations>
       <UtilityBillScenarios>
@@ -520,6 +519,11 @@
               <BranchCircuit>
                 <SystemIdentifier id='BranchCircuit2'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
+              </BranchCircuit>
+              <BranchCircuit>
+                <SystemIdentifier id='BranchCircuit3'/>
+                <OccupiedSpaces>2.0</OccupiedSpaces>
+                <AttachedToComponent idref='Refrigerator1'/>
               </BranchCircuit>
             </BranchCircuits>
             <ServiceFeeders>

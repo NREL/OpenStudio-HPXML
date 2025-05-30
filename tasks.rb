@@ -2347,6 +2347,17 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 number_of_bedrooms_served: 18)
     end
 
+    # -------------------- #
+    # HPXML Electric Panel #
+    # -------------------- #
+    if ['house051.xml'].include? hpxml_file
+      electric_panel = hpxml_bldg.electric_panels[0]
+      branch_circuits = electric_panel.branch_circuits
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                          occupied_spaces: 2,
+                          component_idrefs: [hpxml_bldg.refrigerators[0].id])
+    end
+
     # ------------- #
     # HPXML Battery #
     # ------------- #
