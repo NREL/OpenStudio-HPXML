@@ -2485,7 +2485,7 @@ module HVAC
     water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.sum(0.0)
 
     # E+ inputs under EF test conditions
-    dehumidifier.integrated_energy_factor = dehumidifier.integrated_energy_factor / ef_curve_value_ief * curve_value_ef
+    dehumidifier.energy_factor = dehumidifier.integrated_energy_factor / ef_curve_value_ief * curve_value_ef
     dehumidifier.capacity = dehumidifier.capacity / water_removal_curve_value_ief * curve_value_ef
   end
 
