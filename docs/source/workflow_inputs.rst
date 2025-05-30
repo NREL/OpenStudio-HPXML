@@ -404,7 +404,7 @@ This value is used for meter-based load calculations.
   ====================================  ========  =======  ================  ========  ================  ===========
   Element                               Type      Units    Constraints       Required  Default           Notes
   ====================================  ========  =======  ================  ========  ================  ===========
-  ``ElectricPanelBaselinePeakPower``    double    W        >= 0              No        0                 Used for meter-based load calculations
+  ``ElectricPanelBaselinePeakPower``    double    W        > 0               No                          Used for meter-based load calculations
   ====================================  ========  =======  ================  ========  ================  ===========
 
 .. _hpxml_building:
@@ -4700,23 +4700,13 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          \- ``CoolingSystem[CoolingSystemType!="room air conditioner"]``: 240
          
          \- ``HeatPump[HeatPumpFuel="electricity"]``: 240
-         
-         \- ``HVACDistribution``: 240
-         
+                  
          \- ``WaterHeatingSystem[FuelType="electricity"]``: 240
-         
-         \- ``ClothesWasher``: 240
          
          \- ``ClothesDryer[FuelType="electricity"]``: 240
          
          \- ``CookingRange[FuelType="electricity"]``: 240
-         
-         \- ``Oven``: 240
-         
-         \- ``Refrigerator``: 240
-         
-         \- ``Freezer``: 240
-         
+                  
          \- ``PermanentSpa/Heater[Type="electric resistance" or "heat pump"]``: 240
          
          \- ``Pool/Heater[Type="electric resistance" or "heat pump"]``: 240
@@ -4724,6 +4714,8 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          \- ``PlugLoad[PlugLoadType="well pump"]``: 240
          
          \- ``PVSystem``: 240
+         
+         \- ``Battery``: 240
          
          \- Otherwise: 120
 

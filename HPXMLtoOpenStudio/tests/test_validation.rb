@@ -266,6 +266,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'panel-with-unrequired-system' => ['Expected 0 element(s) for xpath: AttachedToComponent [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
                             'panel-without-load-type' => ['Expected 1 element(s) for xpath: LoadType [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
                             'panel-insufficient-voltage' => ["Expected ../../../ElectricPanel/Voltage to be '240' [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/BranchCircuits/BranchCircuit, id: \"BranchCircuit1\"]"],
+                            'panel-zero-meter-based' => ['Expected extension/ElectricPanelBaselinePeakPower to be greater than 0 [context: /HPXML/Building/BuildingDetails/BuildingSummary, id: "MyBuilding"]'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerator-schedule' => ['Expected either schedule fractions/multipliers or schedule coefficients but not both.'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than or equal to 0.99 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction], id: "SolarThermalSystem1"]'],
@@ -806,6 +807,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                        voltage: HPXML::ElectricPanelVoltage120)
         hpxml_bldg.electric_panels[0].branch_circuits.add(id: 'BranchCircuit1',
                                                           voltage: HPXML::ElectricPanelVoltage240)
+      when 'panel-zero-meter-based'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
+        hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased]
+        hpxml_bldg.header.electric_panel_baseline_peak_power = 0
       when 'refrigerator-location'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.refrigerators[0].location = HPXML::LocationGarage

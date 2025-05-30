@@ -14,6 +14,7 @@
       <ElectricPanelLoadCalculations>
         <ServiceFeeders>
           <Type>2023 Existing Dwelling Load-Based</Type>
+          <Type>2023 Existing Dwelling Meter-Based</Type>
         </ServiceFeeders>
       </ElectricPanelLoadCalculations>
       <UtilityBillScenarios>
@@ -68,6 +69,9 @@
           <ConditionedFloorArea>989.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>7912.0</ConditionedBuildingVolume>
         </BuildingConstruction>
+        <extension>
+          <ElectricPanelBaselinePeakPower>7200.0</ElectricPanelBaselinePeakPower>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -522,7 +526,7 @@
               </BranchCircuit>
               <BranchCircuit>
                 <SystemIdentifier id='BranchCircuit3'/>
-                <OccupiedSpaces>2.0</OccupiedSpaces>
+                <OccupiedSpaces>1.0</OccupiedSpaces>
                 <AttachedToComponent idref='Refrigerator1'/>
               </BranchCircuit>
             </BranchCircuits>

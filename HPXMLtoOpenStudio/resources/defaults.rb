@@ -6158,45 +6158,43 @@ module Defaults
   # @param branch_circuit [HPXML::BranchCircuit] Object that defines a single electric panel branch circuit
   # @return [String] '120' or '240'
   def self.get_branch_circuit_voltage_default_values(branch_circuit)
+    voltages = []
     branch_circuit.components.each do |component|
       if component.is_a?(HPXML::HeatingSystem)
         if component.heating_system_fuel == HPXML::FuelTypeElectricity
-          return HPXML::ElectricPanelVoltage240
+          voltages << HPXML::ElectricPanelVoltage240
         end
       elsif component.is_a?(HPXML::CoolingSystem)
         if component.cooling_system_type != HPXML::HVACTypeRoomAirConditioner
-          return HPXML::ElectricPanelVoltage240
+          voltages << HPXML::ElectricPanelVoltage240
         end
       elsif component.is_a?(HPXML::HeatPump)
         if component.heat_pump_fuel == HPXML::FuelTypeElectricity
-          return HPXML::ElectricPanelVoltage240
+          voltages << HPXML::ElectricPanelVoltage240
         end
-      elsif component.is_a?(HPXML::HVACDistribution) ||
-            component.is_a?(HPXML::ClothesWasher)
-        component.is_a?(HPXML::Oven) ||
-          component.is_a?(HPXML::Refrigerator) ||
-          component.is_a?(HPXML::Freezer) ||
-          component.is_a?(HPXML::PVSystem)
-        return HPXML::ElectricPanelVoltage240
+      elsif component.is_a?(HPXML::PVSystem)
+        voltages << HPXML::ElectricPanelVoltage240
       elsif component.is_a?(HPXML::WaterHeatingSystem) ||
             component.is_a?(HPXML::ClothesDryer) ||
             component.is_a?(HPXML::CookingRange)
         if component.fuel_type == HPXML::FuelTypeElectricity
-          return HPXML::ElectricPanelVoltage240
+          voltages << HPXML::ElectricPanelVoltage240
         end
       elsif component.is_a?(HPXML::PermanentSpa) ||
             component.is_a?(HPXML::Pool)
         if [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(component.heater_type)
-          return HPXML::ElectricPanelVoltage240
+          voltages << HPXML::ElectricPanelVoltage240
         end
       elsif component.is_a?(HPXML::PlugLoad)
         if component.plug_load_type == HPXML::PlugLoadTypeWellPump
-          return HPXML::ElectricPanelVoltage240
+          voltages << HPXML::ElectricPanelVoltage240
         end
-      else
-        return HPXML::ElectricPanelVoltage120
       end
     end
+    if voltages.include?(HPXML::ElectricPanelVoltage240)
+      return HPXML::ElectricPanelVoltage240
+    end
+
     return HPXML::ElectricPanelVoltage120
   end
 
