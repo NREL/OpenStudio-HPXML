@@ -1248,40 +1248,31 @@ module Outputs
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
         key_vars << ['', 'Electricity:Facility']
-        create_custom_meter(model, meter_name, EPlus::FuelTypeElectricity, key_vars)
+        Model.add_meter_custom(
+          model,
+          name: meter_name,
+          fuel_type: EPlus::FuelTypeElectricity,
+          key_var_pairs: key_vars
+        )
       else
-        create_custom_meter(model, meter_name, EPlus::FuelTypeElectricity, key_vars, true, 'Electricity:Facility')
+        Model.add_meter_custom_decrement(
+          model,
+          name: meter_name,
+          fuel_type: EPlus::FuelTypeElectricity,
+          key_var_pairs: key_vars,
+          source_meter_name: 'Electricity:Facility'
+        )
       end
     end
 
     # Create PV meter
     if not pv_key_vars.empty?
-      create_custom_meter(model, MeterCustomElectricityPV, EPlus::FuelTypeElectricity, pv_key_vars)
+      Model.add_meter_custom(
+        model,
+        name: MeterCustomElectricityPV,
+        fuel_type: EPlus::FuelTypeElectricity,
+        key_var_pairs: pv_key_vars
+      )
     end
-  end
-
-  # Creates EnergyPlus custom output meter, grouping specified variables or meters onto a virtual meter
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param meter_name [String] name of OpenStudio::Model::Meter:Custom or OpenStudio::Model::Meter:CustomDecrement
-  # @param meter_fuel_type [String] fuel type of OpenStudio::Model::Meter:Custom or OpenStudio::Model::Meter:CustomDecrement
-  # @param key_var_pairs [Array<Array<String>>] List of (key value, variable name) pairs to be inluded in the meter
-  # @param is_decrement [Boolean] true to create OpenStudio::Model::Meter:CustomDecrement, false to create OpenStudio::Model::Meter:Custom
-  # @param source_meter_name [String] name of source meter for OpenStudio::Model::Meter:CustomDecrement, required when is_decrement == true
-  # @return [OpenStudio::Model::Meter:Custom or OpenStudio::Model::Meter:CustomDecrement]
-  def self.create_custom_meter(model, meter_name, meter_fuel_type, key_var_pairs, is_decrement = false, source_meter_name = nil)
-    if is_decrement
-      fail 'No source meter specified for Meter:Custom:Decrement' if source_meter_name.nil?
-
-      meter = OpenStudio::Model::MeterCustomDecrement.new(model, source_meter_name)
-    else
-      meter = OpenStudio::Model::MeterCustom.new(model)
-    end
-    meter.setName(meter_name)
-    meter.setFuelType(meter_fuel_type)
-    key_var_pairs.uniq.each do |key_var|
-      meter.addKeyVarGroup(key_var[0], key_var[1])
-    end
-    return meter
   end
 end

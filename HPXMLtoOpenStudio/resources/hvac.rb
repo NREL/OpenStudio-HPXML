@@ -3296,7 +3296,7 @@ module HVAC
     if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
       htg_coil.setResistiveDefrostHeaterCapacity(p_dot_defrost)
     elsif defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeStandard
-      htg_coil.setResistiveDefrostHeaterCapacity(0)
+      htg_coil.setResistiveDefrostHeaterCapacity(0.000001) # Use non-zero value to prevent E+ warning
     else
       fail 'unknown defrost model type.'
     end
