@@ -45,7 +45,7 @@
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
           <Soil>
-            <Conductivity>0.8</Conductivity>
+            <Conductivity>0.765</Conductivity>
           </Soil>
         </Site>
         <BuildingConstruction>
@@ -294,16 +294,16 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CompressorType>variable speed</CompressorType>
+              <CompressorType>single stage</CompressorType>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
-                <Value>30.9</Value>
+                <Value>16.6</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>COP</Units>
-                <Value>4.4</Value>
+                <Value>3.6</Value>
               </AnnualHeatingEfficiency>
               <AttachedToGeothermalLoop idref='GeothermalLoop1'/>
               <extension>
