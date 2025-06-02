@@ -175,7 +175,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # (2) an electric panel is specified
       if (not hpxml.header.service_feeders_load_calculation_types.empty?) &&
          (hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.electric_panels.size }.sum > 0)
-        electric_panel_results_out = Outputs.append_panel_results(hpxml.header, hpxml.buildings)
+        electric_panel_results_out = Outputs.get_panel_results(hpxml.header, hpxml.buildings)
 
         Outputs.write_results_out_to_file(electric_panel_results_out, args[:output_format], args[:electric_panel_output_file_path])
       end

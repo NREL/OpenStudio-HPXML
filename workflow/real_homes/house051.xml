@@ -528,6 +528,7 @@
                 <SystemIdentifier id='BranchCircuit3'/>
                 <OccupiedSpaces>1.0</OccupiedSpaces>
                 <AttachedToComponent idref='Refrigerator1'/>
+                <AttachedToComponent idref='PlugLoad2'/>
               </BranchCircuit>
             </BranchCircuits>
             <ServiceFeeders>

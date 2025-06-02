@@ -1306,12 +1306,11 @@ module Outputs
     return results_out
   end
 
-  # Appends electric panel results to the provided array for use in writing output files.
+  # Returns electric panel results for use in writing output files.
   #
   # @param hpxml_bldgs [Array<HPXML::Building>] List of HPXML Building objects representing an individual dwelling unit
-  # @param results_out [Array] Rows of output data
   # @return [Array] Rows of output data, with electric panel results appended
-  def self.append_panel_results(hpxml_header, hpxml_bldgs)
+  def self.get_panel_results(hpxml_header, hpxml_bldgs)
     line_break = nil
 
     # Summary breaker spaces
