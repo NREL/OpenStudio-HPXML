@@ -3937,7 +3937,8 @@
   },
   "sample_files/base-misc-unit-multiplier-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base-misc-unit-multiplier.xml",
-    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based"
+    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
+    "electric_panel_baseline_peak_power": 4500
   },
   "sample_files/base-misc-usage-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
