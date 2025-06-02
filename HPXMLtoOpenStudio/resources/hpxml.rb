@@ -10054,49 +10054,49 @@ class HPXML < Object
       ev_chargers = @parent_object.ev_chargers.select { |ev_charger| @component_idrefs.include?(ev_charger.id) }
 
       if !heating_systems.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeHeating].include?(@type)
       end
       if !cooling_systems.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeCooling].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeCooling].include?(@type)
       end
       if !heat_pumps.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling].include?(@type)
       end
       if !water_heating_systems.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeWaterHeater].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeWaterHeater].include?(@type)
       end
       if !clothes_dryers.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeClothesDryer].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeClothesDryer].include?(@type)
       end
       if !dishwashers.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeDishwasher].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeDishwasher].include?(@type)
       end
       if !cooking_ranges.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeRangeOven].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeRangeOven].include?(@type)
       end
       if !ventilation_fans.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeMechVent].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeMechVent].include?(@type)
       end
       if !permanent_spa_pumps.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypePermanentSpaPump].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypePermanentSpaPump].include?(@type)
       end
       if !permanent_spa_heaters.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypePermanentSpaHeater].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypePermanentSpaHeater].include?(@type)
       end
       if !pool_pumps.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypePoolPump].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypePoolPump].include?(@type)
       end
       if !pool_heaters.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypePoolHeater].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypePoolHeater].include?(@type)
       end
       if !plug_load_well_pumps.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeWellPump].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeWellPump].include?(@type)
       end
       if !plug_load_vehicles.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
       end
       if !ev_chargers.empty?
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}'" if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
+        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not valid for service feeder '#{@id}' with LoadType '#{@type}'." if ![HPXML::ElectricPanelLoadTypeElectricVehicleCharging].include?(@type)
       end
 
       list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
