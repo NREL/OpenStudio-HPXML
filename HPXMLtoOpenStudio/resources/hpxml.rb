@@ -10100,9 +10100,6 @@ class HPXML < Object
       end
 
       list = heating_systems + cooling_systems + heat_pumps + water_heating_systems + clothes_dryers + dishwashers + cooking_ranges + ventilation_fans + permanent_spa_pumps + permanent_spa_heaters + pool_pumps + pool_heaters + plug_load_well_pumps + plug_load_vehicles + ev_chargers
-      if @component_idrefs.size > list.size
-        fail "One or more referenced components '#{@component_idrefs.join("', '")}' not found for service feeder '#{@id}'."
-      end
 
       return list
     end

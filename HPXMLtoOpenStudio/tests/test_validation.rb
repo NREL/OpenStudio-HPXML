@@ -1223,7 +1223,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'orphaned-geothermal-loop' => ["Geothermal loop 'GeothermalLoop1' found but no heat pump attached to it."],
                             'orphaned-hvac-distribution' => ["Distribution system 'HVACDistribution1' found but no HVAC system attached to it."],
                             'panel-wrong-system-type' => ["One or more referenced components 'WaterHeatingSystem1' not valid for service feeder 'ServiceFeeder1'"],
-                            'panel-missing-system' => ["One or more referenced components 'foobar' not found for service feeder 'ServiceFeeder1'"],
                             'refrigerators-multiple-primary' => ['More than one refrigerator designated as the primary.'],
                             'refrigerators-no-primary' => ['Could not find a primary refrigerator.'],
                             'repeated-relatedhvac-dhw-indirect' => ["RelatedHVACSystem 'HeatingSystem1' is attached to multiple water heating systems."],
@@ -1600,12 +1599,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
                                                           type: HPXML::ElectricPanelLoadTypeHeating,
                                                           component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-      when 'panel-missing-system'
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
-        hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
-                                                          type: HPXML::ElectricPanelLoadTypeCooling,
-                                                          component_idrefs: ['foobar'])
       when 'refrigerators-multiple-primary'
         hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
         hpxml_bldg.refrigerators[1].primary_indicator = true
