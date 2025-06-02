@@ -95,7 +95,7 @@ jobs:
   run-workflow1-tests:
     runs-on: ubuntu-22.04
     container:
-      image: docker://nrel/openstudio:develop
+      image: docker://nrel/openstudio:3.10-rc1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -118,7 +118,7 @@ jobs:
   run-workflow2-tests:
     runs-on: ubuntu-22.04
     container:
-      image: docker://nrel/openstudio:develop
+      image: docker://nrel/openstudio:3.10-rc1
     steps:
       - uses: actions/checkout@v4
         with:
