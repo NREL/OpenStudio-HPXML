@@ -1847,7 +1847,7 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="HasMixingValve" type="HPXMLBoolean"/>
-									<xs:element minOccurs="0" name="MixingValueSetpoint" type="TemperatureGreaterThanZero"/>
+									<xs:element minOccurs="0" name="MixingValveSetpoint" type="TemperatureGreaterThanZero"/>
 									<xs:element minOccurs="0" name="UsesDesuperheater" type="HPXMLBoolean">
 										<xs:annotation>
 											<xs:documentation>Indicates whether this water heater uses a desuperheater. The attached heat pump or air conditioner can be referenced in the
@@ -2064,7 +2064,7 @@
 									</xs:element>
 									<xs:element minOccurs="0" name="CollectorRatedOpticalEfficiency" type="CollectorRatedOpticalEfficiency">
 										<xs:annotation>
-											<xs:documentation>[Btu/h-ft^2-F] Often referred to as Fr-tau-alpha (FRta), this describes the optical efficiency portion of the overall collector efficiency. 
+											<xs:documentation>[Btu/h-ft^2-F] Often referred to as Fr-tau-alpha (FRta), this describes the optical efficiency portion of the overall collector efficiency.
 												In the OG-100 SRCC Certified Solar Thermal Collector Directory, this is the y-intercept of the efficiency curve.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
