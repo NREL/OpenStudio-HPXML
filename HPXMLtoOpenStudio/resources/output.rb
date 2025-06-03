@@ -1311,10 +1311,20 @@ module Outputs
   # @param hpxml_bldgs [Array<HPXML::Building>] List of HPXML Building objects representing an individual dwelling unit
   # @return [Array] Rows of output data, with electric panel results appended
   def self.get_panel_results(hpxml_header, hpxml_bldgs)
+    results_out = []
+
+    # Currently, we only write this file if:
+    # (1) at least one load calculation type is specified
+    # (2) an electric panel is specified
+    if hpxml_header.service_feeders_load_calculation_types.empty?
+      return results_out
+    elsif hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.electric_panels.size }.sum == 0
+      return results_out
+    end
+
     line_break = nil
 
     # Summary breaker spaces
-    results_out = []
     results_out << ['Electric Panel Breaker Spaces: Heating Count', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_breaker_spaces(hpxml_bldg)[0] }.sum(0)]
     results_out << ['Electric Panel Breaker Spaces: Cooling Count', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_breaker_spaces(hpxml_bldg)[1] }.sum(0)]
     results_out << ['Electric Panel Breaker Spaces: Hot Water Count', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_breaker_spaces(hpxml_bldg)[2] }.sum(0)]
@@ -1392,6 +1402,8 @@ module Outputs
   # @param mode [String] File opening mode (e.g., write or append)
   # @return [nil]
   def self.write_results_out_to_file(results_out, output_format, output_file_path, mode = 'w')
+    return if results_out.nil? || results_out.empty?
+
     line_break = nil
     if ['csv'].include? output_format
       CSV.open(output_file_path, mode) { |csv| results_out.to_a.each { |elem| csv << elem } }
