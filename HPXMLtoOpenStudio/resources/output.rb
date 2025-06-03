@@ -1402,8 +1402,6 @@ module Outputs
   # @param mode [String] File opening mode (e.g., write or append)
   # @return [nil]
   def self.write_results_out_to_file(results_out, output_format, output_file_path, mode = 'w')
-    return if results_out.nil? || results_out.empty?
-
     line_break = nil
     if ['csv'].include? output_format
       CSV.open(output_file_path, mode) { |csv| results_out.to_a.each { |elem| csv << elem } }
