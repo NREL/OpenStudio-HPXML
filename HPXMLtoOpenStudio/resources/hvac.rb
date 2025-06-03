@@ -4796,6 +4796,7 @@ module HVAC
       schedule: model.alwaysOnDiscreteSchedule,
       fuel_type: nil
     )
+    defrost_heat_load_oe.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHPDefrostHeatLoad) # Used by reporting measure
     defrost_heat_load_oe_act = Model.add_ems_actuator(
       name: "#{defrost_heat_load_oe.name} act",
       model_object: defrost_heat_load_oe,
@@ -5003,6 +5004,7 @@ module HVAC
       schedule: model.alwaysOnDiscreteSchedule,
       fuel_type: nil
     )
+    defrost_heat_load_oe.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHPDefrostHeatLoad) # Used by reporting measure
     defrost_heat_load_oe_act = Model.add_ems_actuator(
       name: "#{defrost_heat_load_oe.name} act",
       model_object: defrost_heat_load_oe,
