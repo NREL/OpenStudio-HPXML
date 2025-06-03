@@ -193,7 +193,8 @@ module Outputs
       duct_zone_names = unit_model.getThermalZones.select { |z| z.isPlenum }.map { |z| z.name.to_s }
       dehumidifier = unit_model.getZoneHVACDehumidifierDXs
       dehumidifier_name = dehumidifier[0].name.to_s unless dehumidifier.empty?
-      defrost_load_oes = unit_model.getOtherEquipments.select { |o| o.name.to_s.include? 'defrost heat load' }
+      # Spaces in other equipment names are replaced with '_' after merging models, include both names
+      defrost_load_oes = unit_model.getOtherEquipments.select { |o| (o.name.to_s.include? 'defrost heat load') || (o.name.to_s.include? 'defrost_heat_load') }
 
       # Fraction heat/cool load served
       if hpxml_header.apply_ashrae140_assumptions
