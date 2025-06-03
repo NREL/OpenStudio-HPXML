@@ -2,6 +2,12 @@ HPXML,HVAC Capacity: Heating (Btu/h),HVAC Capacity: Cooling (Btu/h),HVAC Capacit
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-ACCA.xml,0.0,33554.0,0.0,0.0,1118.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-HERS.xml,0.0,33554.0,0.0,0.0,1118.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-MaxLoad.xml,0.0,33554.0,0.0,0.0,1118.0
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-ACCA-backup-emergency.xml,33554.0,33554.0,38834.0,1046.0,1118.0
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-ACCA-backup-supplemental.xml,33554.0,33554.0,22977.0,1046.0,1118.0
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-HERS-backup-emergency.xml,38834.0,38834.0,38834.0,1211.0,1294.0
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-HERS-backup-supplemental.xml,38834.0,38834.0,22977.0,1211.0,1294.0
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-MaxLoad-backup-emergency.xml,82175.0,82175.0,38834.0,2562.0,2739.0
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-MaxLoad-backup-supplemental.xml,82175.0,82175.0,0.0,2562.0,2739.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-heating-capacity-17f-sizing-methodology-ACCA-backup-emergency.xml,33554.0,33554.0,38834.0,1046.0,1118.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-heating-capacity-17f-sizing-methodology-ACCA-backup-supplemental.xml,33554.0,33554.0,22977.0,1046.0,1118.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-heating-capacity-17f-sizing-methodology-HERS-backup-emergency.xml,38834.0,38834.0,38834.0,1211.0,1294.0
@@ -390,6 +396,12 @@ denver-hvac-autosize-wall-furnace-elec-only.xml,23530.0,0.0,0.0,686.0,0.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-ACCA.xml,0.0,37123.0,0.0,0.0,1237.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-HERS.xml,0.0,37123.0,0.0,0.0,1237.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-MaxLoad.xml,0.0,37123.0,0.0,0.0,1237.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-ACCA-backup-emergency.xml,37123.0,37123.0,25084.0,967.0,1237.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-ACCA-backup-supplemental.xml,37123.0,37123.0,0.0,967.0,1237.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-HERS-backup-emergency.xml,37123.0,37123.0,25084.0,967.0,1237.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-HERS-backup-supplemental.xml,37123.0,37123.0,0.0,967.0,1237.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-MaxLoad-backup-emergency.xml,40447.0,40447.0,25084.0,1054.0,1348.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-detailed-electric-panel-sizing-methodology-MaxLoad-backup-supplemental.xml,40447.0,40447.0,0.0,1054.0,1348.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-heating-capacity-17f-sizing-methodology-ACCA-backup-emergency.xml,37123.0,37123.0,25084.0,967.0,1237.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-heating-capacity-17f-sizing-methodology-ACCA-backup-supplemental.xml,37123.0,37123.0,0.0,967.0,1237.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-heating-capacity-17f-sizing-methodology-HERS-backup-emergency.xml,37123.0,37123.0,25084.0,967.0,1237.0

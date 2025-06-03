@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- Updates to OpenStudio 3.10/EnergyPlus 25.1/HPXML v4.2-rc2.
 - HVAC modeling updates:
   - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps as well as ground-to-air heat pumps.
   - Optional input `SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType` to choose "standard" (default) or "experimental"; "experimental" ground-to-air heat pump model better accounts for coil staging.
@@ -9,6 +10,9 @@ __New Features__
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
   - Updates the default schedule for the EV charging `PlugLoad` to better reflect real-world hourly/monthly variation.
+- Electric panel NEC load calculations (experimental research feature):
+  - Allows optional `ElectricPanel` inputs for describing branch circuits and service feeders
+  - Optionally reports breaker spaces and calculated loads for specified NEC calculation types (`SoftwareInfo/extension/ElectricPanelCalculations/ServiceFeeders/Type`)
 - Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 - BuildResidentialScheduleFile measure:
   - Adds stochastic schedule generation for electric vehicle charging (using `Vehicles`).
@@ -22,6 +26,7 @@ __New Features__
 - Allows arbitrary columns to be present in a detailed schedule csv file with warning.
 
 __Bugfixes__
+- Fixes EPvalidator schematron file extension (.sch, not .xml).
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
 - Fixes using detailed schedules with higher resolution (e.g., 10-min data) than the simulation timestep (e.g., 60-min).
 - Fixes possible heating/cooling spikes when using maximum power ratio detailed schedule for variable-speed HVAC systems.
@@ -35,6 +40,7 @@ __Bugfixes__
 - Fixes error if there's a vented attic with zero roof pitch.
 - Fixes tank loss coefficient when TankModelType=stratified for a conventional storage water heater.
 - Fixes possibility of incorrect design duct load for really bad ducts (e.g., ducts with high surface area in a cold attic).
+- Fixes duplicate emission end use rows for electricity in results_annual.csv.
 - Adds error-checking to ensure TankModelType=stratified is not used with a non-electric water heater.
 - BuildResidentialHPXML measure: Improves default duct areas/locations for 1-story buildings with a conditioned basement and ducts located in the attic.
 - BuildResidentialHPXML measure: Fixes error when specifying a combi boiler as the water heater type and a *shared* boiler as the heating system type.

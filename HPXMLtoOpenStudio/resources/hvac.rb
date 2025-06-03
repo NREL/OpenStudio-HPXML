@@ -816,6 +816,7 @@ module HVAC
     ground_heat_exch_vert.setDesignFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
     ground_heat_exch_vert.setNumberofBoreHoles(geothermal_loop.num_bore_holes)
     ground_heat_exch_vert.setBoreHoleLength(UnitConversions.convert(geothermal_loop.bore_length, 'ft', 'm'))
+    ground_heat_exch_vert.setBoreHoleTopDepth(2) # Consistent with G-function library
     ground_heat_exch_vert.setGFunctionReferenceRatio(ground_heat_exch_vert.boreHoleRadius.get / ground_heat_exch_vert.boreHoleLength.get) # ensure this ratio is consistent with rb/H so that g values will be taken as-is
     ground_heat_exch_vert.removeAllGFunctions
     for i in 0..(hp_ap.GSHP_G_Functions[0].size - 1)
@@ -985,6 +986,55 @@ module HVAC
     return air_loop
   end
 
+  # Get the outdoor unit (compressor) power (W) using regression based on (output) capacity.
+  # The equation is a derived regression for the minimum circuit amp (MCA) of direct expansion compressor from 201 product datapoints (including central ACs, room ACs, and ASHPs) collected between 2023-2024.
+  #
+  # @param capacity [Double] Direct expansion coil rated (output) capacity [kBtu/hr].
+  # @param voltage [String] '120' or '240'
+  # @return [Double] Direct expansion coil rated (input) capacity (W)
+  def self.get_dx_coil_power_watts_from_capacity(capacity, voltage)
+    required_amperage = 0.631 * capacity + 1.615
+    power = required_amperage * Float(voltage)
+    return power
+  end
+
+  # Get the indoor unit (air handler) power (W).
+  #
+  # @param fan_watts_per_cfm [Double] Blower fan watts per cfm [W/cfm]
+  # @param airflow_cfm [Double] HVAC system airflow rate [cfm]
+  # @return [Double] Blower fan power [W]
+  def self.get_blower_fan_power_watts(fan_watts_per_cfm, airflow_cfm)
+    return 0.0 if fan_watts_per_cfm.nil? || airflow_cfm.nil?
+
+    return fan_watts_per_cfm * airflow_cfm
+  end
+
+  # Get the boiler pump power (W).
+  #
+  # @param electric_auxiliary_energy [Double] Boiler electric auxiliary energy [kWh/yr]
+  # @return [Double] Boiler pump power [W]
+  def self.get_pump_power_watts(electric_auxiliary_energy)
+    return 0.0 if electric_auxiliary_energy.nil?
+
+    return electric_auxiliary_energy / 2.08
+  end
+
+  # Returns the heating input capacity, calculated as the heating rated (output) capacity divided by the rated efficiency.
+  #
+  # @param heating_capacity [Double] Heating output capacity [Btu/hr]
+  # @param heating_efficiency_afue [Double] Rated efficiency [AFUE]
+  # @param heating_efficiency_percent [Double] Rated efficiency [Percent]
+  # @return [Double] The heating input capacity [Btu/hr]
+  def self.get_heating_input_capacity(heating_capacity, heating_efficiency_afue, heating_efficiency_percent)
+    if not heating_efficiency_afue.nil?
+      return heating_capacity / heating_efficiency_afue
+    elsif not heating_efficiency_percent.nil?
+      return heating_capacity / heating_efficiency_percent
+    else
+      return
+    end
+  end
+
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -1023,7 +1073,7 @@ module HVAC
     loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
 
     # Pump
-    pump_w = heating_system.electric_auxiliary_energy / 2.08
+    pump_w = get_pump_power_watts(heating_system.electric_auxiliary_energy)
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump = Model.add_pump_variable_speed(
       model,
@@ -1489,10 +1539,7 @@ module HVAC
     if ceiling_fan_sch.nil?
       ceiling_fan_unavailable_periods = Schedule.get_unavailable_periods(runner, ceiling_fan_col_name, hpxml_header.unavailable_periods)
       annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
-      weekday_sch = ceiling_fan.weekday_fractions
-      weekend_sch = ceiling_fan.weekend_fractions
-      monthly_sch = ceiling_fan.monthly_multipliers
-      ceiling_fan_sch_obj = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', weekday_sch, weekend_sch, monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: ceiling_fan_unavailable_periods)
+      ceiling_fan_sch_obj = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', ceiling_fan.weekday_fractions, ceiling_fan.weekend_fractions, ceiling_fan.monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: ceiling_fan_unavailable_periods)
       ceiling_fan_design_level = ceiling_fan_sch_obj.calc_design_level_from_daily_kwh(annual_kwh / 365.0)
       ceiling_fan_sch = ceiling_fan_sch_obj.schedule
     else

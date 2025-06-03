@@ -68,14 +68,14 @@ def create_hpxmls
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     num_apply_measures = 1
-    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
       num_apply_measures = 6
     end
 
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
@@ -2353,6 +2353,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 number_of_bedrooms_served: 18)
     end
 
+    # -------------------- #
+    # HPXML Electric Panel #
+    # -------------------- #
+    if ['house051.xml'].include? hpxml_file
+      electric_panel = hpxml_bldg.electric_panels[0]
+      branch_circuits = electric_panel.branch_circuits
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                          occupied_spaces: 1,
+                          component_idrefs: [hpxml_bldg.refrigerators[0].id,
+                                             hpxml_bldg.plug_loads[1].id])
+    end
+
     # ------------- #
     # HPXML Battery #
     # ------------- #
@@ -2379,6 +2391,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                               fuel_economy_combined: 44.0,
                               miles_per_year: 15000.0,
                               hours_per_week: 10.0)
+    end
+    if ['base-schedules-simple.xml'].include? hpxml_file
+      hpxml_bldg.vehicles[0].ev_weekday_fractions = '0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, -0.3535, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.3221, -0.3244, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714'
+      hpxml_bldg.vehicles[0].ev_weekend_fractions = '0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, -0.3334, 0, 0, 0, 0, -0.3293, -0.3372, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588'
+      hpxml_bldg.vehicles[0].ev_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
     end
 
     # ---------------- #
