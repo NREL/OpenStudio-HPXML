@@ -1216,6 +1216,22 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     _check_defrost(model, htg_coil, 10550.56, 0.95, backup_fuel, 0.06667, 0.0)
 
+    # Two heat pump test
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    # Same backup fuel for these two systems
+    backup_fuel = EPlus.fuel_type(hpxml_bldg.heat_pumps[0].backup_heating_fuel)
+
+    assert_equal(2, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 0.0, nil, 2)
+
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[1]
+    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 0.0, nil, 2)
+
     # Separate backup heat pump test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml'))
@@ -2275,18 +2291,18 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return program_values
   end
 
-  def _check_defrost(model, htg_coil, supp_capacity, supp_efficiency, backup_fuel, defrost_time_fraction, defrost_power, q_dot = nil)
+  def _check_defrost(model, htg_coil, supp_capacity, supp_efficiency, backup_fuel, defrost_time_fraction, defrost_power, q_dot = nil, num_of_ems = 1)
     # Check Other equipment inputs
-    defrost_heat_load_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost heat load' }
-    assert_equal(1, defrost_heat_load_oe.size)
+    defrost_heat_load_oe = model.getOtherEquipments.select { |oe| oe.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHPDefrostHeatLoad }
+    assert_equal(num_of_ems, defrost_heat_load_oe.size)
     assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionRadiant)
     assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionLatent)
     assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionLost)
-    defrost_supp_heat_energy_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost supp heat energy' }
-    assert_equal(1, defrost_supp_heat_energy_oe.size)
+    defrost_supp_heat_energy_oe = model.getOtherEquipments.select { |oe| oe.endUseSubcategory.start_with? Constants::ObjectTypeHPDefrostSupplHeat }
+    assert_equal(num_of_ems, defrost_supp_heat_energy_oe.size)
     assert_equal(0, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionRadiant)
     assert_equal(0, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionLatent)
-    assert_in_epsilon(1.0 - supp_efficiency, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionLost, 0.01)
+    assert_in_epsilon(1.0, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionLost, 0.01)
     assert(backup_fuel == defrost_supp_heat_energy_oe[0].fuelType.to_s)
 
     # Check heating coil defrost inputs
