@@ -83,7 +83,7 @@ HPXML Simulation Control
 EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
 
   ====================================  ========  =======  ================  ========  ===========================  =====================================
-  Element                               Type      Units    Constraints       Required  Default                      Description
+  Element                               Type      Units    Constraints       Required  Default                      Notes
   ====================================  ========  =======  ================  ========  ===========================  =====================================
   ``Timestep``                          integer   minutes  Divisor of 60     No        60 (1 hour)                  Timestep
   ``BeginMonth``                        integer            >= 1, <= 12 [#]_  No        1 (January)                  Run period start date
@@ -136,6 +136,8 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   .. [#] Use "standard" for standard ground-to-air heat pump modeling.
          Use "experimental" for an improved model that better accounts for coil staging.
          The "experimental" ground-to-air heat pump models with desuperheater are not supported yet, see :ref:`water_heater_desuperheater`.
+
+.. _hpxml_emissions_scenarios:
 
 HPXML Emissions Scenarios
 *************************
@@ -345,7 +347,7 @@ One or more unavailable periods (e.g., vacancies, power outages) can be entered 
 If not entered, the simulation will not include unavailable periods.
 
   ====================================  ========  =======  =============  ========  ================  ===========
-  Element                               Type      Units    Constraints    Required  Default           Description
+  Element                               Type      Units    Constraints    Required  Default           Notes
   ====================================  ========  =======  =============  ========  ================  ===========
   ``ColumnName``                        string                            Yes                         Column name associated with unavailable_periods.csv below
   ``BeginMonth``                        integer            >= 1, <= 12    Yes                         Begin month
@@ -369,6 +371,42 @@ You can create an additional column in the CSV file to define another unavailabl
 .. warning::
 
   It is not possible to eliminate all HVAC/DHW energy use (e.g. crankcase/defrost energy, water heater parasitics) in EnergyPlus during an unavailable period.
+
+.. _hpxml_electric_panel_calculations:
+
+HPXML Electric Panel Calculations
+*********************************
+
+To enable electric panel load calculations, one or more calculation types (e.g., 2023 NEC 220.83) can be entered in ``/HPXML/SoftwareInfo/extension/ElectricPanelCalculations/ServiceFeeders``.
+If not entered, electric panel loads will not be calculated.
+These calculations are currently considered experimental research features.
+
+  ====================================  ========  =======  ================  ========  ================  ===========
+  Element                               Type      Units    Constraints       Required  Default           Notes
+  ====================================  ========  =======  ================  ========  ================  ===========
+  ``Type``                              string             See [#]_          Yes                         Electric panel calculation vintage/method; multiple are allowed
+  ====================================  ========  =======  ================  ========  ================  ===========
+
+  .. [#] Type choices are "2023 Existing Dwelling Load-Based" and "2023 Existing Dwelling Meter-Based", and are described as follows:
+
+         \- **2023 Existing Dwelling Load-Based**: Using a load summing method based on Section 220.83 of the 2023 National Electrical Code.
+
+         \- **2023 Existing Dwelling Meter-Based**: Using a maximum demand method based on Section 220.87 of the 2023 National Electrical Code.
+
+         If running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling Load-Based" calculation types, load calculations will be performed on each individual dwelling unit and then summed across units of the building.
+         Running :ref:`bldg_type_whole_mf_buildings` with any "Dwelling Meter-Based" calculation types is not supported.
+
+See :ref:`panel_outputs` for descriptions of how calculated loads appear in the output files.
+
+The electric panel baseline peak power is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension``.
+
+  ====================================  ========  =======  ================  ========  ================  ===========
+  Element                               Type      Units    Constraints       Required  Default           Notes
+  ====================================  ========  =======  ================  ========  ================  ===========
+  ``ElectricPanelBaselinePeakPower``    double    W        > 0               See [#]_                    Used for meter-based load calculations
+  ====================================  ========  =======  ================  ========  ================  ===========
+
+  .. [#] ElectricPanelBaselinePeakPower only required if meter-based load calculations are desired.
 
 .. _hpxml_building:
 
@@ -442,7 +480,7 @@ HPXML Building Site
 Building site information can be entered in ``/HPXML/Building/Site``.
 
   =======================================  ========  =====  ===============  ========  ========  ===============
-  Element                                  Type      Units  Constraints      Required  Default   Description
+  Element                                  Type      Units  Constraints      Required  Default   Notes
   =======================================  ========  =====  ===============  ========  ========  ===============
   ``SiteID``                               id                                Yes                 Unique identifier
   ``Address/CityMunicipality``             string                            No        See [#]_  Address city/municipality
@@ -467,7 +505,7 @@ Building site information can be entered in ``/HPXML/Building/Site``.
 If daylight saving time is observed, additional information can be specified in ``/HPXML/Building/Site/TimeZone/extension``.
 
   ============================================  ========  =====  ===========================  ========  =============================  ===========
-  Element                                       Type      Units  Constraints                  Required  Default                        Description
+  Element                                       Type      Units  Constraints                  Required  Default                        Notes
   ============================================  ========  =====  ===========================  ========  =============================  ===========
   ``DSTBeginMonth`` and ``DSTBeginDayOfMonth``  integer          >= 1, <= 12 and >= 1, <= 31  No        EPW else 3/12 (March 12) [#]_  Start date
   ``DSTEndMonth`` and ``DSTEndDayOfMonth``      integer          >= 1, <= 12 and >= 1, <= 31  No        EPW else 11/5 (November 5)     End date
@@ -685,7 +723,7 @@ Detailed schedule inputs are provided via one or more CSV file that should be re
 The column names available in the schedule CSV files are:
 
   ================================  =======  =============================================================================================  ===============================
-  Column Name                       Units    Description                                                                                    Can Be Stochastically Generated [#]_
+  Column Name                       Units    Notes                                                                                          Can Be Stochastically Generated [#]_
   ================================  =======  =============================================================================================  ===============================
   ``occupants``                     frac     Occupant heat gain schedule.                                                                   Yes
   ``lighting_interior``             frac     Interior lighting energy use schedule.                                                         Yes
@@ -789,7 +827,7 @@ HVAC equipment sizing controls are entered in ``/HPXML/Building/BuildingDetails/
 Additional autosizing factor inputs are available at the system level, see :ref:`hvac_heating`, :ref:`hvac_cooling` and :ref:`hvac_heatpump`.
 
   ===================================  ========  =====  ===========  ========  =========  ============================================
-  Element                              Type      Units  Constraints  Required  Default    Description
+  Element                              Type      Units  Constraints  Required  Default    Notes
   ===================================  ========  =====  ===========  ========  =========  ============================================
   ``HeatPumpSizingMethodology``        string           See [#]_     No        HERS       Logic for autosized heat pumps
   ``HeatPumpBackupSizingMethodology``  string           See [#]_     No        emergency  Logic for autosized heat pump backup
@@ -821,7 +859,7 @@ Manual J Inputs
 Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment, can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
 
   =================================  ========  ======  ===========  ========  ============  ============================================
-  Element                            Type      Units   Constraints  Required  Default       Description
+  Element                            Type      Units   Constraints  Required  Default       Notes
   =================================  ========  ======  ===========  ========  ============  ============================================
   ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating outdoor design temperature
   ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling outdoor design temperature
@@ -872,7 +910,7 @@ If not provided, summer will be default based on the cooling season defined in t
 The remainder of the year is winter.
 
   ====================================  ========  =======  =============  ========  =======  =====================================
-  Element                               Type      Units    Constraints    Required  Default  Description
+  Element                               Type      Units    Constraints    Required  Default  Notes
   ====================================  ========  =======  =============  ========  =======  =====================================
   ``SummerBeginMonth``                  integer            >= 1, <= 12    Yes                Summer shading start date
   ``SummerBeginDayOfMonth``             integer            >= 1, <= 31    Yes                Summer shading start date
@@ -937,7 +975,7 @@ HPXML Climate Zone IECC
 Climate zone information can be optionally entered as an ``/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC``.
 
   =================================  ========  =====  ===========  ========  ========  ===============
-  Element                            Type      Units  Constraints  Required  Default   Description
+  Element                            Type      Units  Constraints  Required  Default   Notes
   =================================  ========  =====  ===========  ========  ========  ===============
   ``Year``                           integer          See [#]_     Yes                 IECC year
   ``ClimateZone``                    string           See [#]_     Yes                 IECC zone
@@ -3449,7 +3487,7 @@ HPXML HVAC Seasons
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
 
   ===================  ========  =====  ===========  ========  =======  ===========
-  Element              Type      Units  Constraints  Required  Default  Description
+  Element              Type      Units  Constraints  Required  Default  Notes
   ===================  ========  =====  ===========  ========  =======  ===========
   ``BeginMonth``       integer          >= 1, <= 12  Yes                Begin month
   ``BeginDayOfMonth``  integer          >= 1, <= 31  Yes                Begin day
@@ -4699,6 +4737,190 @@ In addition, the PVSystem must be connected to an inverter that is entered as a 
   =======================================================  =================  ================  ===================  ========  ========  ============================================
 
   .. [#] For homes with multiple inverters, all InverterEfficiency elements must have the same value.
+
+.. _hpxml_electric_panels:
+
+HPXML Electric Panels
+*********************
+
+A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel``.
+
+**Note**: An electric panel is only used and subject to having default values applied when load calculation types are specified.
+See :ref:`hpxml_electric_panel_calculations` for more information about specifying electric panel load calculation types.
+
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  Element                                                                  Type     Units      Constraints              Required  Default        Notes
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+  ``SystemIdentifier``                                                     id                                           Yes                      Unique identifier
+  ``Voltage``                                                              string   V          See [#]_                 No        240            Service voltage
+  ``MaxCurrentRating``                                                     double   A          >= 0                     No        200            Service max current rating
+  ``HeadroomSpaces``                                                       integer             >= 0                     No        See [#]_       Number of unoccupied breaker spaces
+  ``RatedTotalSpaces``                                                     integer             > 0                      No        See [#]_       Total number of breaker spaces
+  ``BranchCircuits``                                                       element                                      No        See [#]_       Individual branch circuits
+  ``ServiceFeeders``                                                       element                                      No        See [#]_       Individual service feeders
+  =======================================================================  =======  =========  =======================  ========  =============  ============================================
+
+  .. [#] Voltage choices are "120" or "240".
+  .. [#] If HeadroomSpaces not provided, defaults to RatedTotalSpaces minus the sum of OccupiedSpaces for all BranchCircuits, or defaults to 3 if RatedTotalSpaces also not provided.
+  .. [#] If RatedTotalSpaces not provided, defaults to HeadroomSpaces plus the sum of OccupiedSpaces for all BranchCircuits.
+  .. [#] See :ref:`branch_circuits`.
+  .. [#] See :ref:`service_feeders`.
+
+See :ref:`panel_outputs` for descriptions of how breaker spaces and calculated loads appear in the output files.
+
+.. _branch_circuits:
+
+Branch Circuits
+~~~~~~~~~~~~~~~
+
+Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
+
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``SystemIdentifier``                            id                                     Yes                  Unique identifier
+  ``Voltage``                                     string    V               See [#]_     No        See [#]_   Voltage of the branch circuit
+  ``MaxCurrentRating``                            double    A               >= 0         No        See [#]_   Max current rating of the branch circuit
+  ``OccupiedSpaces``                              double                    See [#]_     No        See [#]_   Number of occupied breaker spaces
+  ``AttachedToComponent``                         idref                                  No                   ID of attached component; multiple are allowed [#]_
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+
+  .. [#] Voltage choices are "120" or "240".
+  .. [#] If Voltage not provided, defaults based on optional referenced components as follows:
+
+         \- ``HeatingSystem[HeatingSystemFuel="electricity"]``: 240
+         
+         \- ``CoolingSystem[CoolingSystemType!="room air conditioner"]``: 240
+         
+         \- ``HeatPump[HeatPumpFuel="electricity"]``: 240
+                  
+         \- ``WaterHeatingSystem[FuelType="electricity"]``: 240
+         
+         \- ``ClothesDryer[FuelType="electricity"]``: 240
+         
+         \- ``CookingRange[FuelType="electricity"]``: 240
+                  
+         \- ``PermanentSpa/Pumps/Pump``: 240
+         
+         \- ``PermanentSpa/Heater[Type="electric resistance" or "heat pump"]``: 240
+         
+         \- ``Pool/Pumps/Pump``: 240
+         
+         \- ``Pool/Heater[Type="electric resistance" or "heat pump"]``: 240
+         
+         \- ``PlugLoad[PlugLoadType="well pump"]``: 240
+         
+         \- ``PVSystem``: 240
+         
+         \- ``Battery``: 240
+         
+         \- Otherwise: 120
+
+  .. [#] If MaxCurrentRating not provided, defaults based on Voltage as follows:
+  
+         \- **120**: 15
+         
+         \- **240**: 50
+
+  .. [#] OccupiedSpaces choices are 0.0, 0.5, 1.0, or 2.0.
+  .. [#] If OccupiedSpaces not provided, then :ref:`panels_default` are used based on Voltage and properties of components referenced by AttachedToComponent.
+         Components that are not attached to :ref:`service_feeders` are assumed to occupy zero breaker spaces.
+         If no corresponding Voltage is specified, the other Voltage classification will be used.
+         Occupied breaker spaces will be recalculated based on the new Voltage classification.
+         Occupied breaker spaces are calculated based on PowerRating, Voltage, and MaxCurrentRating as follows:
+         
+         RequiredAmperage = PowerRating / Voltage
+         
+         NumBranches = ceiling(RequiredAmperage / MaxCurrentRating)
+         
+         NumBreakers = NumBranches * (Voltage / 120)
+
+  .. [#] Provide a AttachedToComponent element for each referenced component.
+
+.. _service_feeders:
+
+Service Feeders
+~~~~~~~~~~~~~~~
+
+Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
+
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``SystemIdentifier``                            id                                     Yes                  Unique identifier
+  ``LoadType``                                    string                    See [#]_     Yes                  The type of the service feeder load
+  ``PowerRating``                                 double    W               >= 0         No        See [#]_   The power rating of the service feeder
+  ``IsNewLoad``                                   boolean                                No        false      Whether, in the context of NEC calculations, the load is new
+  ``AttachedToComponent``                         idref                     See [#]_     See [#]_  See [#]_   ID of attached component; multiple are allowed [#]_
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+
+  .. [#] LoadType choices are "heating", "cooling", "hot water", "clothes dryer", "dishwasher", "range/oven", "mech vent", "permanent spa heater", "permanent spa pump", "pool heater", "pool pump", "well pump", "electric vehicle charging", "lighting", "kitchen", "laundry", and "other".
+  .. [#] If PowerRating not provided, then :ref:`panels_default` are used based on Voltage and properties of components referenced by AttachedToComponent.
+         If no corresponding Voltage is specified, the other Voltage classification will be used.
+  .. [#] Depending on the LoadType, AttachedToComponent must reference:
+
+         \- **heating**: ``HeatingSystem`` or ``HeatPump``
+
+         \- **cooling**: ``CoolingSystem`` or ``HeatPump``
+
+         \- **hot water**: ``WaterHeatingSystem``
+
+         \- **clothes dryer**: ``ClothesDryer``
+
+         \- **dishwasher**: ``Dishwasher``
+
+         \- **range/oven**: ``CookingRange``
+
+         \- **mech vent**: ``VentilationFan``
+
+         \- **permanent spa heater**: ``PermanentSpa/Heater``
+
+         \- **permanent spa pump**: ``PermanentSpa/Pumps/Pump``
+
+         \- **pool heater**: ``Pool/Heater``
+
+         \- **pool pump**: ``Pool/Pumps/Pump``
+
+         \- **well pump**: ``PlugLoad[PlugLoadType="well pump"]``
+
+         \- **electric vehicle charging**: ``PlugLoad[PlugLoadType="electric vehicle charging"]`` or ``ElectricVehicleCharger``
+
+  .. [#] Not allowed if LoadType is "lighting", "kitchen", "laundry", or "other"; otherwise, required.
+  .. [#] A service feeder is created for any electric component not already referenced by a service feeder.
+         Service feeders for the following load types are always created if they don't already exist:
+
+         \- **lighting**
+
+         \- **kitchen**
+
+         \- **laundry**
+
+         \- **other**
+  
+  .. [#] Provide a AttachedToComponent element for each referenced component.
+
+.. _panels_default:
+
+Default Panels
+~~~~~~~~~~~~~~
+
+If power rating or occupied breaker spaces are not provided, then they are defaulted.
+Default values may be based on power rating, voltage, amperage, component type, and other component properties such as number of bedrooms or bathrooms.
+They can also be found at ``HPXMLtoOpenStudio/resources/data/default_panels.csv``.
+
+.. csv-table::
+   :file: ../../HPXMLtoOpenStudio/resources/data/default_panels.csv
+   :header-rows: 1
+
+Mechanical ventilation loads may be assigned power ratings based on fan count and W (if available) otherwise 3000 W.
+Loads with power ratings of "auto" are calculated based on estimates for:
+
+- input capacities (using regressions involving rated output capacities and efficiencies if direct expansion)
+- blower fans (using fan W/cfm multiplied by airflow cfm)
+- hydronic pumps (using electric auxiliary energy kWh/yr divided by 2.08)
+
+Loads with occupied breaker spaces of "auto" vary based on calculated power ratings.
+Room air conditioners connected to a 120V branch circuit are assumed to occupy 0 breaker spaces.
 
 .. _hpxml_batteries:
 
