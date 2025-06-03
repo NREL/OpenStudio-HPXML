@@ -8,6 +8,12 @@
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
     <extension>
+      <ElectricPanelLoadCalculations>
+        <ServiceFeeders>
+          <Type>2023 Existing Dwelling Load-Based</Type>
+          <Type>2023 Existing Dwelling Meter-Based</Type>
+        </ServiceFeeders>
+      </ElectricPanelLoadCalculations>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
