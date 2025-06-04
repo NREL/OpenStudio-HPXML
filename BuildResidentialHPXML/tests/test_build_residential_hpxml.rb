@@ -592,16 +592,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
       args['solar_thermal_solar_fraction'] = 0
       args['battery_present'] = false
-      args['lighting_present'] = true
-      args['lighting_interior_fraction_cfl'] = 0.4
-      args['lighting_interior_fraction_lfl'] = 0.1
-      args['lighting_interior_fraction_led'] = 0.25
-      args['lighting_exterior_fraction_cfl'] = 0.4
-      args['lighting_exterior_fraction_lfl'] = 0.1
-      args['lighting_exterior_fraction_led'] = 0.25
-      args['lighting_garage_fraction_cfl'] = 0.4
-      args['lighting_garage_fraction_lfl'] = 0.1
-      args['lighting_garage_fraction_led'] = 0.25
+      args['lighting'] = '40% CFL, 10% LFL, 25% LED'
       args['holiday_lighting_present'] = false
       args['dehumidifier_type'] = Constants::None
       args['dehumidifier_efficiency_type'] = 'EnergyFactor'

@@ -127,16 +127,7 @@
     "solar_thermal_collector_rated_thermal_losses": 0,
     "solar_thermal_solar_fraction": 0,
     "battery_present": false,
-    "lighting_present": false,
-    "lighting_interior_fraction_cfl": 0,
-    "lighting_interior_fraction_lfl": 0,
-    "lighting_interior_fraction_led": 0,
-    "lighting_exterior_fraction_cfl": 0,
-    "lighting_exterior_fraction_lfl": 0,
-    "lighting_exterior_fraction_led": 0,
-    "lighting_garage_fraction_cfl": 0,
-    "lighting_garage_fraction_lfl": 0,
-    "lighting_garage_fraction_led": 0,
+    "lighting": "None",
     "holiday_lighting_present": false,
     "dehumidifier_type": "none",
     "dehumidifier_efficiency_type": "EnergyFactor",
@@ -461,12 +452,11 @@
     "dishwasher_present": true,
     "refrigerator_present": true,
     "cooking_range_oven_present": true,
-    "lighting_present": true,
+    "lighting": "10% CFL",
     "misc_plug_loads_other_annual_kwh": null,
     "misc_plug_loads_other_frac_sensible": null,
     "misc_plug_loads_other_frac_latent": null,
-    "misc_plug_loads_television_present": true,
-    "lighting_interior_fraction_cfl": 0.1
+    "misc_plug_loads_television_present": true
   },
   "tests/HERS_Hot_Water/L100AD-HW-02.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
@@ -676,16 +666,7 @@
     "solar_thermal_collector_rated_thermal_losses": 0,
     "solar_thermal_solar_fraction": 0,
     "battery_present": false,
-    "lighting_present": true,
-    "lighting_interior_fraction_cfl": 0.4,
-    "lighting_interior_fraction_lfl": 0.1,
-    "lighting_interior_fraction_led": 0.25,
-    "lighting_exterior_fraction_cfl": 0.4,
-    "lighting_exterior_fraction_lfl": 0.1,
-    "lighting_exterior_fraction_led": 0.25,
-    "lighting_garage_fraction_cfl": 0.4,
-    "lighting_garage_fraction_lfl": 0.1,
-    "lighting_garage_fraction_led": 0.25,
+    "lighting": "40% CFL, 10% LFL, 25% LED",
     "holiday_lighting_present": false,
     "dehumidifier_type": "none",
     "dehumidifier_efficiency_type": "EnergyFactor",
@@ -2792,11 +2773,11 @@
   },
   "sample_files/base-lighting-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "lighting_present": false
+    "lighting": "None"
   },
   "sample_files/base-lighting-none-ceiling-fans.xml": {
     "parent_hpxml": "sample_files/base-lighting-ceiling-fans.xml",
-    "lighting_present": false
+    "lighting": "None"
   },
   "sample_files/base-location-AMY-2012.xml": {
     "parent_hpxml": "sample_files/base.xml",

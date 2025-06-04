@@ -57,6 +57,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     neighbor_building_choices = get_option_names('neighbor_buildings.tsv')
     pv_system_choices = get_option_names('pv_system.tsv')
     pv_system_2_choices = get_option_names('pv_system_2.tsv')
+    lighting_choices = get_option_names('lighting.tsv')
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
     arg.setDisplayName('HPXML File Path')
@@ -2339,28 +2340,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
-    arg.setDisplayName('Lighting: Present')
-    arg.setDescription('Whether there is lighting energy use.')
-    arg.setDefaultValue(true)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_interior_fraction_cfl', true)
-    arg.setDisplayName('Lighting: Interior Fraction CFL')
-    arg.setDescription('Fraction of all lamps (interior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.1)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_interior_fraction_lfl', true)
-    arg.setDisplayName('Lighting: Interior Fraction LFL')
-    arg.setDescription('Fraction of all lamps (interior) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_interior_fraction_led', true)
-    arg.setDisplayName('Lighting: Interior Fraction LED')
-    arg.setDescription('Fraction of all lamps (interior) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.0)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('lighting', lighting_choices, true)
+    arg.setDisplayName('Lighting')
+    arg.setDescription('The type of lighting.')
+    arg.setDefaultValue('10% CFL')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_interior_usage_multiplier', false)
@@ -2368,45 +2351,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_exterior_fraction_cfl', true)
-    arg.setDisplayName('Lighting: Exterior Fraction CFL')
-    arg.setDescription('Fraction of all lamps (exterior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_exterior_fraction_lfl', true)
-    arg.setDisplayName('Lighting: Exterior Fraction LFL')
-    arg.setDescription('Fraction of all lamps (exterior) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_exterior_fraction_led', true)
-    arg.setDisplayName('Lighting: Exterior Fraction LED')
-    arg.setDescription('Fraction of all lamps (exterior) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_exterior_usage_multiplier', false)
     arg.setDisplayName('Lighting: Exterior Usage Multiplier')
     arg.setDescription("Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_garage_fraction_cfl', true)
-    arg.setDisplayName('Lighting: Garage Fraction CFL')
-    arg.setDescription('Fraction of all lamps (garage) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_garage_fraction_lfl', true)
-    arg.setDisplayName('Lighting: Garage Fraction LFL')
-    arg.setDescription('Fraction of all lamps (garage) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_garage_fraction_led', true)
-    arg.setDisplayName('Lighting: Garage Fraction LED')
-    arg.setDescription('Fraction of all lamps (garage) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.')
-    arg.setDefaultValue(0.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_garage_usage_multiplier', false)
@@ -3226,6 +3173,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     get_option_properties(args, 'neighbor_buildings.tsv', args[:geometry_neighbor_buildings])
     get_option_properties(args, 'pv_system.tsv', args[:pv_system])
     get_option_properties(args, 'pv_system_2.tsv', args[:pv_system_2])
+    get_option_properties(args, 'lighting.tsv', args[:lighting])
 
     # Argument error checks
     warnings, errors = validate_arguments(args)

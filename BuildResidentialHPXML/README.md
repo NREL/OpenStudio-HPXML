@@ -4138,47 +4138,16 @@ The rated power output of the EV charger. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Lighting: Present**
+**Lighting**
 
-Whether there is lighting energy use.
+The type of lighting.
 
-- **Name:** ``lighting_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Lighting: Interior Fraction CFL**
-
-Fraction of all lamps (interior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_interior_fraction_cfl``
-- **Type:** ``Double``
+- **Name:** ``lighting``
+- **Type:** ``Choice``
 
 - **Required:** ``true``
 
-<br/>
-
-**Lighting: Interior Fraction LFL**
-
-Fraction of all lamps (interior) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_interior_fraction_lfl``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Lighting: Interior Fraction LED**
-
-Fraction of all lamps (interior) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_interior_fraction_led``
-- **Type:** ``Double``
-
-- **Required:** ``true``
+- **Choices:** `None`, `100% Incandescent`, `10% CFL`, `20% CFL`, `30% CFL`, `40% CFL`, `40% CFL, 10% LFL, 25% LED`, `50% CFL`, `60% CFL`, `70% CFL`, `80% CFL`, `90% CFL`, `100% CFL`, `10% LED`, `20% LED`, `30% LED`, `40% LED`, `50% LED`, `60% LED`, `70% LED`, `80% LED`, `90% LED`, `100% LED`
 
 <br/>
 
@@ -4193,39 +4162,6 @@ Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/
 
 <br/>
 
-**Lighting: Exterior Fraction CFL**
-
-Fraction of all lamps (exterior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_exterior_fraction_cfl``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Lighting: Exterior Fraction LFL**
-
-Fraction of all lamps (exterior) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_exterior_fraction_lfl``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Lighting: Exterior Fraction LED**
-
-Fraction of all lamps (exterior) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_exterior_fraction_led``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
 **Lighting: Exterior Usage Multiplier**
 
 Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
@@ -4234,39 +4170,6 @@ Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/
 - **Type:** ``Double``
 
 - **Required:** ``false``
-
-<br/>
-
-**Lighting: Garage Fraction CFL**
-
-Fraction of all lamps (garage) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_garage_fraction_cfl``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Lighting: Garage Fraction LFL**
-
-Fraction of all lamps (garage) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_garage_fraction_lfl``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Lighting: Garage Fraction LED**
-
-Fraction of all lamps (garage) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.
-
-- **Name:** ``lighting_garage_fraction_led``
-- **Type:** ``Double``
-
-- **Required:** ``true``
 
 <br/>
 
