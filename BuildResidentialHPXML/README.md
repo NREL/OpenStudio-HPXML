@@ -1228,19 +1228,6 @@ The amount of window area on the unit's right facade (when viewed from the front
 
 <br/>
 
-**Windows: Aspect Ratio**
-
-Ratio of window height to width.
-
-- **Name:** ``window_aspect_ratio``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
 **Windows: Fraction Operable**
 
 Fraction of windows that are operable. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-windows'>HPXML Windows</a>) is used.
