@@ -747,107 +747,16 @@ The eaves depth of the roof.
 
 <br/>
 
-**Neighbor: Front Distance**
+**Geometry: Neighbor Buildings**
 
-The distance between the unit and the neighboring building to the front (not including eaves). A value of zero indicates no neighbors. Used for shading.
+The presence and geometry of neighboring buildings, for shading purposes.
 
-- **Name:** ``neighbor_front_distance``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Neighbor: Back Distance**
-
-The distance between the unit and the neighboring building to the back (not including eaves). A value of zero indicates no neighbors. Used for shading.
-
-- **Name:** ``neighbor_back_distance``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Neighbor: Left Distance**
-
-The distance between the unit and the neighboring building to the left (not including eaves). A value of zero indicates no neighbors. Used for shading.
-
-- **Name:** ``neighbor_left_distance``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Neighbor: Right Distance**
-
-The distance between the unit and the neighboring building to the right (not including eaves). A value of zero indicates no neighbors. Used for shading.
-
-- **Name:** ``neighbor_right_distance``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Neighbor: Front Height**
-
-The height of the neighboring building to the front. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
-
-- **Name:** ``neighbor_front_height``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
+- **Name:** ``geometry_neighbor_buildings``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Neighbor: Back Height**
-
-The height of the neighboring building to the back. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
-
-- **Name:** ``neighbor_back_height``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Neighbor: Left Height**
-
-The height of the neighboring building to the left. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
-
-- **Name:** ``neighbor_left_height``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Neighbor: Right Height**
-
-The height of the neighboring building to the right. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
-
-- **Name:** ``neighbor_right_height``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Left/Right at 5ft`, `Left/Right at 10ft`, `Left/Right at 15ft`, `Left/Right at 20ft`, `Left/Right at 25ft`, `Left/Right at 25ft, Front/Back at 80ft, 12ft Height`, `Left at 5ft`, `Left at 10ft`, `Left at 15ft`, `Left at 20ft`, `Left at 25ft`, `Right at 5ft`, `Right at 10ft`, `Right at 15ft`, `Right at 20ft`, `Right at 25ft`
 
 <br/>
 

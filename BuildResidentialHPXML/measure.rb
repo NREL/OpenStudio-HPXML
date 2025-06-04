@@ -42,6 +42,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     args = OpenStudio::Measure::OSArgumentVector.new
 
+    site_soil_type_choices = get_option_names('site_soil_type.tsv')
+    slab_carpet_choices = get_option_names('slab_carpet.tsv')
+    enclosure_roof_material_choices = get_option_names('roof_material.tsv')
+    enclosure_wall_siding_choices = get_option_names('wall_siding.tsv')
+    air_leakage_choices = get_option_names('air_leakage.tsv')
+    heating_system_choices = get_option_names('heating_system.tsv')
+    cooling_system_choices = get_option_names('cooling_system.tsv')
+    heat_pump_choices = get_option_names('heat_pump.tsv')
+    heat_pump_backup_choices = get_option_names('heat_pump_backup.tsv')
+    geothermal_loop_choices = get_option_names('geothermal_loop.tsv')
+    heating_system_2_choices = get_option_names('heating_system_2.tsv')
+    ducts_choices = get_option_names('ducts.tsv')
+    neighbor_building_choices = get_option_names('neighbor_buildings.tsv')
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
     arg.setDisplayName('HPXML File Path')
     arg.setDescription('Absolute/relative path of the HPXML file.')
@@ -168,8 +182,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Site: Shielding of Home')
     arg.setDescription("Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
     args << arg
-
-    site_soil_type_choices = get_option_names('site_soil_type.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_type', site_soil_type_choices, false)
     arg.setDisplayName('Site: Soil Type')
@@ -466,56 +478,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_front_distance', true)
-    arg.setDisplayName('Neighbor: Front Distance')
-    arg.setUnits('ft')
-    arg.setDescription('The distance between the unit and the neighboring building to the front (not including eaves). A value of zero indicates no neighbors. Used for shading.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_back_distance', true)
-    arg.setDisplayName('Neighbor: Back Distance')
-    arg.setUnits('ft')
-    arg.setDescription('The distance between the unit and the neighboring building to the back (not including eaves). A value of zero indicates no neighbors. Used for shading.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_left_distance', true)
-    arg.setDisplayName('Neighbor: Left Distance')
-    arg.setUnits('ft')
-    arg.setDescription('The distance between the unit and the neighboring building to the left (not including eaves). A value of zero indicates no neighbors. Used for shading.')
-    arg.setDefaultValue(10.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_right_distance', true)
-    arg.setDisplayName('Neighbor: Right Distance')
-    arg.setUnits('ft')
-    arg.setDescription('The distance between the unit and the neighboring building to the right (not including eaves). A value of zero indicates no neighbors. Used for shading.')
-    arg.setDefaultValue(10.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_front_height', false)
-    arg.setDisplayName('Neighbor: Front Height')
-    arg.setUnits('ft')
-    arg.setDescription("The height of the neighboring building to the front. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_back_height', false)
-    arg.setDisplayName('Neighbor: Back Height')
-    arg.setUnits('ft')
-    arg.setDescription("The height of the neighboring building to the back. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_left_height', false)
-    arg.setDisplayName('Neighbor: Left Height')
-    arg.setUnits('ft')
-    arg.setDescription("The height of the neighboring building to the left. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_right_height', false)
-    arg.setDisplayName('Neighbor: Right Height')
-    arg.setUnits('ft')
-    arg.setDescription("The height of the neighboring building to the right. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_neighbor_buildings', neighbor_building_choices, false)
+    arg.setDisplayName('Geometry: Neighbor Buildings')
+    arg.setDescription('The presence and geometry of neighboring buildings, for shading purposes.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('floor_over_foundation_assembly_r', true)
@@ -659,8 +624,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The thickness of the slab. Zero can be entered if there is a dirt floor instead of a slab. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-slabs'>HPXML Slabs</a>) is used.")
     args << arg
 
-    slab_carpet_choices = get_option_names('slab_carpet.tsv')
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('slab_carpet', slab_carpet_choices, false)
     arg.setDisplayName('Slab: Carpet')
     arg.setDescription('The fraction of the slab floor area that is carpeted and the carpet R-value.')
@@ -672,8 +635,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Assembly R-value for the ceiling (attic floor).')
     arg.setDefaultValue(31.6)
     args << arg
-
-    enclosure_roof_material_choices = get_option_names('roof_material.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_roof_material', enclosure_roof_material_choices, false)
     arg.setDisplayName('Enclosure: Roof Material')
@@ -726,8 +687,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The type of walls.')
     arg.setDefaultValue(HPXML::WallTypeWoodStud)
     args << arg
-
-    enclosure_wall_siding_choices = get_option_names('wall_siding.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall_siding', enclosure_wall_siding_choices, false)
     arg.setDisplayName('Enclosure: Wall Siding')
@@ -1052,8 +1011,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(4.4)
     args << arg
 
-    air_leakage_choices = get_option_names('air_leakage.tsv')
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage', air_leakage_choices, false)
     arg.setDisplayName('Air Leakage')
     arg.setDescription('The Leakiness Description (qualitative), or numeric air leakage value (ACH or CFM at specified pressure, nACH or nCFM, or ELA). When a leakiness description is used, the Year Built of the home is also required.')
@@ -1081,8 +1038,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_fuel_choices << HPXML::FuelTypeWoodCord
     heating_system_fuel_choices << HPXML::FuelTypeWoodPellets
     heating_system_fuel_choices << HPXML::FuelTypeCoal
-
-    heating_system_choices = get_option_names('heating_system.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system', heating_system_choices, true)
     arg.setDisplayName('Heating System')
@@ -1119,8 +1074,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     arg.setDefaultValue(1)
     args << arg
-
-    cooling_system_choices = get_option_names('cooling_system.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system', cooling_system_choices, true)
     arg.setDisplayName('Cooling System')
@@ -1172,8 +1125,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_backup_sizing_choices = OpenStudio::StringVector.new
     heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingEmergency
     heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingSupplemental
-
-    heat_pump_choices = get_option_names('heat_pump.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump', heat_pump_choices, true)
     arg.setDisplayName('Heat Pump')
@@ -1229,8 +1180,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
-    heat_pump_backup_choices = get_option_names('heat_pump_backup.tsv')
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup', heat_pump_backup_choices, true)
     arg.setDisplayName('Heat Pump: Backup Type')
     arg.setDescription("The type, fuel type, and efficiency of the heat pump backup. Use '#{Constants::None}' if there is no backup heating. If Backup Type is '#{HPXML::HeatPumpBackupTypeSeparate}', Heating System 2 is used to specify the backup.")
@@ -1264,14 +1213,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
     args << arg
 
-    geothermal_loop_choices = get_option_names('geothermal_loop.tsv')
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop', geothermal_loop_choices, false)
     arg.setDisplayName('Geothermal Loop')
     arg.setDescription("The geothermal loop configuration (only #{HPXML::GeothermalLoopLoopConfigurationVertical} is currently supported), borefield configuration, grout/pipe type, and other numerical inputs that specify a detailed geothermal loop.")
     args << arg
-
-    heating_system_2_choices = get_option_names('heating_system_2.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_2', heating_system_2_choices, true)
     arg.setDisplayName('Heating System 2')
@@ -1370,8 +1315,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
     duct_location_choices << HPXML::LocationOtherNonFreezingSpace
     duct_location_choices << HPXML::LocationManufacturedHomeBelly
-
-    ducts_choices = get_option_names('ducts.tsv')
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts', ducts_choices, true)
     arg.setDisplayName('Ducts')
@@ -2182,7 +2125,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Electric Panel: Heating System 2 New Load')
     arg.setDescription("Whether the second heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
-
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_mech_vent_power_rating', false)
     arg.setDisplayName('Electric Panel: Mechanical Ventilation Power Rating')
@@ -3384,6 +3326,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
 
+    # Get all option properties
+    get_option_properties(args, 'site_soil_type.tsv', args[:site_soil_type])
+    get_option_properties(args, 'slab_carpet.tsv', args[:slab_carpet])
+    get_option_properties(args, 'roof_material.tsv', args[:enclosure_roof_material])
+    get_option_properties(args, 'wall_siding.tsv', args[:enclosure_wall_siding])
+    get_option_properties(args, 'air_leakage.tsv', args[:air_leakage])
+    get_option_properties(args, 'heating_system.tsv', args[:heating_system])
+    get_option_properties(args, 'cooling_system.tsv', args[:cooling_system])
+    get_option_properties(args, 'heat_pump.tsv', args[:heat_pump])
+    get_option_properties(args, 'heat_pump_backup.tsv', args[:heat_pump_backup])
+    get_option_properties(args, 'geothermal_loop.tsv', args[:geothermal_loop])
+    get_option_properties(args, 'heating_system_2.tsv', args[:heating_system_2])
+    get_option_properties(args, 'ducts.tsv', args[:ducts])
+    get_option_properties(args, 'neighbor_buildings.tsv', args[:geometry_neighbor_buildings])
+
     # Argument error checks
     warnings, errors = validate_arguments(args)
     unless warnings.empty?
@@ -3450,11 +3407,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def argument_warnings(args)
     warnings = []
 
-    # need to update the args hash w/ detailed geothermal loop info here
-    # b.c. argument_warnings is called BEFORE argument_errors in validate_arguments
-    # and argument_warnings requires the detailed geothermal loop info
-    get_option_properties(args, 'geothermal_loop.tsv', args[:geothermal_loop])
-
     max_uninsulated_floor_rvalue = 6.0
     max_uninsulated_ceiling_rvalue = 3.0
     max_uninsulated_roof_rvalue = 3.0
@@ -3493,18 +3445,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @return [Array<String>] array of errors
   def argument_errors(args)
     errors = []
-
-    get_option_properties(args, 'roof_material.tsv', args[:enclosure_roof_material])
-    get_option_properties(args, 'wall_siding.tsv', args[:enclosure_wall_siding])
-    get_option_properties(args, 'heating_system.tsv', args[:heating_system])
-    get_option_properties(args, 'cooling_system.tsv', args[:cooling_system])
-    get_option_properties(args, 'heat_pump.tsv', args[:heat_pump])
-    get_option_properties(args, 'heat_pump_backup.tsv', args[:heat_pump_backup])
-    get_option_properties(args, 'heating_system_2.tsv', args[:heating_system_2])
-    get_option_properties(args, 'site_soil_type.tsv', args[:site_soil_type])
-    get_option_properties(args, 'air_leakage.tsv', args[:air_leakage])
-    get_option_properties(args, 'ducts.tsv', args[:ducts])
-    get_option_properties(args, 'slab_carpet.tsv', args[:slab_carpet])
 
     error = (args[:heating_system_type] != Constants::None) && (args[:heat_pump_type] != Constants::None) && (args[:heating_system_fraction_heat_load_served] > 0) && (args[:heat_pump_fraction_heat_load_served] > 0)
     errors << 'Multiple central heating systems are not currently supported.' if error
@@ -4525,10 +4465,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_neighbor_buildings(hpxml_bldg, args)
-    nbr_map = { Constants::FacadeFront => [args[:neighbor_front_distance], args[:neighbor_front_height]],
-                Constants::FacadeBack => [args[:neighbor_back_distance], args[:neighbor_back_height]],
-                Constants::FacadeLeft => [args[:neighbor_left_distance], args[:neighbor_left_height]],
-                Constants::FacadeRight => [args[:neighbor_right_distance], args[:neighbor_right_height]] }
+    nbr_map = { Constants::FacadeFront => [args[:neighbor_buildings_front_distance].to_f, args[:neighbor_buildings_front_height]],
+                Constants::FacadeBack => [args[:neighbor_buildings_back_distance].to_f, args[:neighbor_buildings_back_height]],
+                Constants::FacadeLeft => [args[:neighbor_buildings_left_distance].to_f, args[:neighbor_buildings_left_height]],
+                Constants::FacadeRight => [args[:neighbor_buildings_right_distance].to_f, args[:neighbor_buildings_right_height]] }
 
     nbr_map.each do |facade, data|
       distance, neighbor_height = data

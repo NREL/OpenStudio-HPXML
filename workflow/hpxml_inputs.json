@@ -21,10 +21,7 @@
     "geometry_roof_type": "gable",
     "geometry_roof_pitch": "4:12",
     "geometry_eaves_depth": 0,
-    "neighbor_front_distance": 0,
-    "neighbor_back_distance": 0,
-    "neighbor_left_distance": 0,
-    "neighbor_right_distance": 0,
+    "geometry_neighbor_buildings": "None",
     "floor_over_foundation_assembly_r": 14.15,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
@@ -579,10 +576,7 @@
     "geometry_roof_type": "gable",
     "geometry_roof_pitch": "6:12",
     "geometry_eaves_depth": 0,
-    "neighbor_front_distance": 0,
-    "neighbor_back_distance": 0,
-    "neighbor_left_distance": 0,
-    "neighbor_right_distance": 0,
+    "geometry_neighbor_buildings": "None",
     "floor_over_foundation_assembly_r": 0,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
@@ -1101,7 +1095,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-neighbor-shading.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "neighbor_right_distance": 15,
+    "geometry_neighbor_buildings": "Right at 15ft",
     "combine_like_surfaces": false
   },
   "sample_files/base-bldgtype-mf-unit-residents-1.xml": {
@@ -3279,9 +3273,7 @@
   },
   "sample_files/base-misc-neighbor-shading.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "neighbor_front_distance": 15,
-    "neighbor_back_distance": 10,
-    "neighbor_front_height": 12
+    "geometry_neighbor_buildings": "Left/Right at 25ft, Front/Back at 80ft, 12ft Height"
   },
   "sample_files/base-misc-shielding-of-home.xml": {
     "parent_hpxml": "sample_files/base.xml",

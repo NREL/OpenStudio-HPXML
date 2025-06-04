@@ -44,12 +44,19 @@
             <Neighbors>
               <NeighborBuilding>
                 <Azimuth>180</Azimuth>
-                <Distance>15.0</Distance>
-                <Height>12.0</Height>
+                <Distance>80.0</Distance>
               </NeighborBuilding>
               <NeighborBuilding>
                 <Azimuth>0</Azimuth>
-                <Distance>10.0</Distance>
+                <Distance>80.0</Distance>
+              </NeighborBuilding>
+              <NeighborBuilding>
+                <Azimuth>270</Azimuth>
+                <Distance>25.0</Distance>
+              </NeighborBuilding>
+              <NeighborBuilding>
+                <Azimuth>90</Azimuth>
+                <Distance>25.0</Distance>
               </NeighborBuilding>
             </Neighbors>
           </extension>

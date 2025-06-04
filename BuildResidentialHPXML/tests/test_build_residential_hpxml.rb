@@ -482,10 +482,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['roof_assembly_r'] = 2.3
       args['radiant_barrier_attic_location'] = Constants::None
       args['radiant_barrier_grade'] = 1
-      args['neighbor_front_distance'] = 0
-      args['neighbor_back_distance'] = 0
-      args['neighbor_left_distance'] = 0
-      args['neighbor_right_distance'] = 0
+      args['geometry_neighbor_buildings'] = 'None'
       args['wall_type'] = HPXML::WallTypeWoodStud
       args['enclosure_wall_siding'] = 'Wood, Medium'
       args['wall_assembly_r'] = 23
