@@ -700,60 +700,28 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(11.9)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_front_wwr', true)
-    arg.setDisplayName('Windows: Front Window-to-Wall Ratio')
-    arg.setUnits('Frac')
-    arg.setDescription("The ratio of window area to wall area for the unit's front facade. Enter 0 if specifying Front Window Area instead. If the front wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0.18)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_front', true)
+    arg.setDisplayName('Windows: Front Window Area or Window-to-Wall Ratio')
+    arg.setUnits('ft^2 or frac')
+    arg.setDescription("The amount of window area on the unit's front facade. Enter a fraction if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_back_wwr', true)
-    arg.setDisplayName('Windows: Back Window-to-Wall Ratio')
-    arg.setUnits('Frac')
-    arg.setDescription("The ratio of window area to wall area for the unit's back facade. Enter 0 if specifying Back Window Area instead. If the back wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0.18)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_back', true)
+    arg.setDisplayName('Windows: Back Window Area or Window-to-Wall Ratio')
+    arg.setUnits('ft^2 or frac')
+    arg.setDescription("The amount of window area on the unit's back facade. Enter a fraction if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_left_wwr', true)
-    arg.setDisplayName('Windows: Left Window-to-Wall Ratio')
-    arg.setUnits('Frac')
-    arg.setDescription("The ratio of window area to wall area for the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window Area instead. If the left wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0.18)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_left', true)
+    arg.setDisplayName('Windows: Left Window Area or Window-to-Wall Ratio')
+    arg.setUnits('ft^2 or frac')
+    arg.setDescription("The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_right_wwr', true)
-    arg.setDisplayName('Windows: Right Window-to-Wall Ratio')
-    arg.setUnits('Frac')
-    arg.setDescription("The ratio of window area to wall area for the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window Area instead. If the right wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0.18)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_front', true)
-    arg.setDisplayName('Windows: Front Window Area')
-    arg.setUnits('ft^2')
-    arg.setDescription("The amount of window area on the unit's front facade. Enter 0 if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_back', true)
-    arg.setDisplayName('Windows: Back Window Area')
-    arg.setUnits('ft^2')
-    arg.setDescription("The amount of window area on the unit's back facade. Enter 0 if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_left', true)
-    arg.setDisplayName('Windows: Left Window Area')
-    arg.setUnits('ft^2')
-    arg.setDescription("The amount of window area on the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_right', true)
-    arg.setDisplayName('Windows: Right Window Area')
-    arg.setUnits('ft^2')
-    arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_right', true)
+    arg.setDisplayName('Windows: Right Window Area or Window-to-Wall Ratio')
+    arg.setUnits('ft^2 or frac')
+    arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_fraction_operable', false)

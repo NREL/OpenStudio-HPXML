@@ -1124,105 +1124,53 @@ Assembly R-value of the walls.
 
 <br/>
 
-**Windows: Front Window-to-Wall Ratio**
+**Windows: Front Window Area or Window-to-Wall Ratio**
 
-The ratio of window area to wall area for the unit's front facade. Enter 0 if specifying Front Window Area instead. If the front wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's front facade. Enter a fraction if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.
 
-- **Name:** ``window_front_wwr``
+- **Name:** ``window_area_or_wwr_front``
 - **Type:** ``Double``
 
-- **Units:** ``Frac``
+- **Units:** ``ft^2 or frac``
 
 - **Required:** ``true``
 
 <br/>
 
-**Windows: Back Window-to-Wall Ratio**
+**Windows: Back Window Area or Window-to-Wall Ratio**
 
-The ratio of window area to wall area for the unit's back facade. Enter 0 if specifying Back Window Area instead. If the back wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's back facade. Enter a fraction if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.
 
-- **Name:** ``window_back_wwr``
+- **Name:** ``window_area_or_wwr_back``
 - **Type:** ``Double``
 
-- **Units:** ``Frac``
+- **Units:** ``ft^2 or frac``
 
 - **Required:** ``true``
 
 <br/>
 
-**Windows: Left Window-to-Wall Ratio**
+**Windows: Left Window Area or Window-to-Wall Ratio**
 
-The ratio of window area to wall area for the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window Area instead. If the left wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.
 
-- **Name:** ``window_left_wwr``
+- **Name:** ``window_area_or_wwr_left``
 - **Type:** ``Double``
 
-- **Units:** ``Frac``
+- **Units:** ``ft^2 or frac``
 
 - **Required:** ``true``
 
 <br/>
 
-**Windows: Right Window-to-Wall Ratio**
+**Windows: Right Window Area or Window-to-Wall Ratio**
 
-The ratio of window area to wall area for the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window Area instead. If the right wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.
 
-- **Name:** ``window_right_wwr``
+- **Name:** ``window_area_or_wwr_right``
 - **Type:** ``Double``
 
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Windows: Front Window Area**
-
-The amount of window area on the unit's front facade. Enter 0 if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.
-
-- **Name:** ``window_area_front``
-- **Type:** ``Double``
-
-- **Units:** ``ft^2``
-
-- **Required:** ``true``
-
-<br/>
-
-**Windows: Back Window Area**
-
-The amount of window area on the unit's back facade. Enter 0 if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.
-
-- **Name:** ``window_area_back``
-- **Type:** ``Double``
-
-- **Units:** ``ft^2``
-
-- **Required:** ``true``
-
-<br/>
-
-**Windows: Left Window Area**
-
-The amount of window area on the unit's left facade (when viewed from the front). Enter 0 if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.
-
-- **Name:** ``window_area_left``
-- **Type:** ``Double``
-
-- **Units:** ``ft^2``
-
-- **Required:** ``true``
-
-<br/>
-
-**Windows: Right Window Area**
-
-The amount of window area on the unit's right facade (when viewed from the front). Enter 0 if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.
-
-- **Name:** ``window_area_right``
-- **Type:** ``Double``
-
-- **Units:** ``ft^2``
+- **Units:** ``ft^2 or frac``
 
 - **Required:** ``true``
 

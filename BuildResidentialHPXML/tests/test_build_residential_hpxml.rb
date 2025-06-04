@@ -484,14 +484,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['wall_type'] = HPXML::WallTypeWoodStud
       args['enclosure_wall_siding'] = 'Wood, Medium'
       args['wall_assembly_r'] = 23
-      args['window_front_wwr'] = 0
-      args['window_back_wwr'] = 0
-      args['window_left_wwr'] = 0
-      args['window_right_wwr'] = 0
-      args['window_area_front'] = 108.0
-      args['window_area_back'] = 108.0
-      args['window_area_left'] = 72.0
-      args['window_area_right'] = 72.0
+      args['window_area_or_wwr_front'] = 108.0
+      args['window_area_or_wwr_back'] = 108.0
+      args['window_area_or_wwr_left'] = 72.0
+      args['window_area_or_wwr_right'] = 72.0
       args['window_fraction_operable'] = 0.67
       args['window_ufactor'] = 0.33
       args['window_shgc'] = 0.45
@@ -682,14 +678,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_cfa'] = 1800.0
       args['geometry_building_num_units'] = 3
       args['geometry_unit_right_wall_is_adiabatic'] = true
-      args['window_front_wwr'] = 0.18
-      args['window_back_wwr'] = 0.18
-      args['window_left_wwr'] = 0.18
-      args['window_right_wwr'] = 0.18
-      args['window_area_front'] = 0
-      args['window_area_back'] = 0
-      args['window_area_left'] = 0
-      args['window_area_right'] = 0
+      args['window_area_or_wwr_front'] = 0.18
+      args['window_area_or_wwr_back'] = 0.18
+      args['window_area_or_wwr_left'] = 0.18
+      args['window_area_or_wwr_right'] = 0.18
       args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     when 'base-sfa2.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
@@ -705,14 +697,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeAboveApartment
       args['geometry_unit_right_wall_is_adiabatic'] = true
       args['geometry_building_num_units'] = 6
-      args['window_front_wwr'] = 0.18
-      args['window_back_wwr'] = 0.18
-      args['window_left_wwr'] = 0.18
-      args['window_right_wwr'] = 0.18
-      args['window_area_front'] = 0
-      args['window_area_back'] = 0
-      args['window_area_left'] = 0
-      args['window_area_right'] = 0
+      args['window_area_or_wwr_front'] = 0.18
+      args['window_area_or_wwr_back'] = 0.18
+      args['window_area_or_wwr_left'] = 0.18
+      args['window_area_or_wwr_right'] = 0.18
       args['ducts'] = '0 CFM25 per 100ft2, Uninsulated'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
@@ -834,7 +822,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-enclosure-garage-atticroof-conditioned.xml'
       args['geometry_garage_width'] = 30.0
       args['geometry_garage_protrusion'] = 1.0
-      args['window_area_front'] = 12.0
+      args['window_area_or_wwr_front'] = 12.0
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = HPXML::AtticTypeConditioned
