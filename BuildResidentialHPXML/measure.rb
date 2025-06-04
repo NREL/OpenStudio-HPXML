@@ -55,6 +55,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_2_choices = get_option_names('heating_system_2.tsv')
     ducts_choices = get_option_names('ducts.tsv')
     neighbor_building_choices = get_option_names('neighbor_buildings.tsv')
+    pv_system_choices = get_option_names('pv_system.tsv')
+    pv_system_2_choices = get_option_names('pv_system_2.tsv')
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
     arg.setDisplayName('HPXML File Path')
@@ -1887,121 +1889,42 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0)
     args << arg
 
-    pv_system_module_type_choices = OpenStudio::StringVector.new
-    pv_system_module_type_choices << HPXML::PVModuleTypeStandard
-    pv_system_module_type_choices << HPXML::PVModuleTypePremium
-    pv_system_module_type_choices << HPXML::PVModuleTypeThinFilm
-
-    pv_system_location_choices = OpenStudio::StringVector.new
-    pv_system_location_choices << HPXML::LocationRoof
-    pv_system_location_choices << HPXML::LocationGround
-
-    pv_system_tracking_choices = OpenStudio::StringVector.new
-    pv_system_tracking_choices << HPXML::PVTrackingTypeFixed
-    pv_system_tracking_choices << HPXML::PVTrackingType1Axis
-    pv_system_tracking_choices << HPXML::PVTrackingType1AxisBacktracked
-    pv_system_tracking_choices << HPXML::PVTrackingType2Axis
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pv_system_present', true)
-    arg.setDisplayName('PV System: Present')
-    arg.setDescription('Whether there is a PV system present.')
-    arg.setDefaultValue(false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system', pv_system_choices, false)
+    arg.setDisplayName('PV System')
+    arg.setDescription('The size and type of PV system.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_module_type', pv_system_module_type_choices, false)
-    arg.setDisplayName('PV System: Module Type')
-    arg.setDescription("Module type of the PV system. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_location', pv_system_location_choices, false)
-    arg.setDisplayName('PV System: Location')
-    arg.setDescription("Location of the PV system. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_tracking', pv_system_tracking_choices, false)
-    arg.setDisplayName('PV System: Tracking')
-    arg.setDescription("Type of tracking for the PV system. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_array_azimuth', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_array_azimuth', false)
     arg.setDisplayName('PV System: Array Azimuth')
     arg.setUnits('degrees')
     arg.setDescription('Array azimuth of the PV system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).')
     arg.setDefaultValue(180)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('pv_system_array_tilt', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('pv_system_array_tilt', false)
     arg.setDisplayName('PV System: Array Tilt')
     arg.setUnits('degrees')
     arg.setDescription('Array tilt of the PV system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
     arg.setDefaultValue('RoofPitch')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_max_power_output', true)
-    arg.setDisplayName('PV System: Maximum Power Output')
-    arg.setUnits('W')
-    arg.setDescription('Maximum power output of the PV system. For a shared system, this is the total building maximum power output.')
-    arg.setDefaultValue(4000)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2', pv_system_2_choices, false)
+    arg.setDisplayName('PV System 2')
+    arg.setDescription('The size and type of the second PV system.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_inverter_efficiency', false)
-    arg.setDisplayName('PV System: Inverter Efficiency')
-    arg.setUnits('Frac')
-    arg.setDescription("Inverter efficiency of the PV system. If there are two PV systems, this will apply to both. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_system_losses_fraction', false)
-    arg.setDisplayName('PV System: System Losses Fraction')
-    arg.setUnits('Frac')
-    arg.setDescription("System losses fraction of the PV system. If there are two PV systems, this will apply to both. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_bedrooms_served', false)
-    arg.setDisplayName('PV System: Number of Bedrooms Served')
-    arg.setDescription("Number of bedrooms served by PV system. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared PV system serving multiple dwelling units. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.")
-    arg.setUnits('#')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pv_system_2_present', true)
-    arg.setDisplayName('PV System 2: Present')
-    arg.setDescription('Whether there is a second PV system present.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2_module_type', pv_system_module_type_choices, false)
-    arg.setDisplayName('PV System 2: Module Type')
-    arg.setDescription("Module type of the second PV system. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2_location', pv_system_location_choices, false)
-    arg.setDisplayName('PV System 2: Location')
-    arg.setDescription("Location of the second PV system. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2_tracking', pv_system_tracking_choices, false)
-    arg.setDisplayName('PV System 2: Tracking')
-    arg.setDescription("Type of tracking for the second PV system. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_array_azimuth', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_array_azimuth', false)
     arg.setDisplayName('PV System 2: Array Azimuth')
     arg.setUnits('degrees')
     arg.setDescription('Array azimuth of the second PV system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).')
     arg.setDefaultValue(180)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('pv_system_2_array_tilt', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('pv_system_2_array_tilt', false)
     arg.setDisplayName('PV System 2: Array Tilt')
     arg.setUnits('degrees')
     arg.setDescription('Array tilt of the second PV system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
     arg.setDefaultValue('RoofPitch')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_max_power_output', true)
-    arg.setDisplayName('PV System 2: Maximum Power Output')
-    arg.setUnits('W')
-    arg.setDescription('Maximum power output of the second PV system. For a shared system, this is the total building maximum power output.')
-    arg.setDefaultValue(4000)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_service_feeders_load_calculation_types', false)
@@ -3301,6 +3224,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     get_option_properties(args, 'heating_system_2.tsv', args[:heating_system_2])
     get_option_properties(args, 'ducts.tsv', args[:ducts])
     get_option_properties(args, 'neighbor_buildings.tsv', args[:geometry_neighbor_buildings])
+    get_option_properties(args, 'pv_system.tsv', args[:pv_system])
+    get_option_properties(args, 'pv_system_2.tsv', args[:pv_system_2])
 
     # Argument error checks
     warnings, errors = validate_arguments(args)
@@ -3743,8 +3668,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     if (args[:hvac_control_heating_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:hvac_control_cooling_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:solar_thermal_system_type] != Constants::None && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
-       (args[:pv_system_present] && args[:pv_system_array_tilt].start_with?('latitude')) ||
-       (args[:pv_system_2_present] && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
+       (args[:pv_system_maximum_power_output].to_f > 0 && args[:pv_system_array_tilt].start_with?('latitude')) ||
+       (args[:pv_system_2_maximum_power_output].to_f > 0 && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
        (args[:apply_defaults])
       epw_path = args[:weather_station_epw_filepath]
       if epw_path.nil?
@@ -4361,11 +4286,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     return hpxml.buildings[-1]
   end
 
-  # Set site properties, including:
-  # - shielding
-  # - ground/soil
-  # - surroundings
-  # - orientation
+  # Sets the HPXML site properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4414,10 +4335,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.site.azimuth_of_front_of_home = args[:geometry_unit_orientation]
   end
 
-  # Set neighboring buildings, including:
-  # - facade
-  # - distance
-  # - height
+  # Sets the HPXML neighboring buildings.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4444,9 +4362,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set building occupancy properties, including:
-  # - number of occupants
-  # - general water use usage multiplier
+  # Sets the HPXML building occupancy properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4456,15 +4372,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.building_occupancy.general_water_use_usage_multiplier = args[:general_water_use_usage_multiplier]
   end
 
-  # Set building construction properties, including:
-  # - number of conditioned floors
-  # - number of beds/baths
-  # - conditioned floor area / building volume
-  # - ceiling height
-  # - unit type
-  # - number of dwelling units in the building
-  # - year built
-  # - dwelling unit multipliers
+  # Sets the HPXML building construction properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4493,12 +4401,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.building_construction.unit_height_above_grade = args[:geometry_unit_height_above_grade]
   end
 
-  # Set building header properties, including:
-  # - detailed schedule file paths
-  # - heat pump sizing methodologies
-  # - natural ventilation availability
-  # - summer shading season
-  # - user-specified additional properties
+  # Sets the HPXML building header properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4533,9 +4436,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set climate and risk zones properties, including:
-  # - 2006 IECC zone
-  # - weather station name / EPW file path
+  # Sets the HPXML climate and risk zones properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4553,11 +4454,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set air infiltration measurements properties, including:
-  # - infiltration type
-  # - unit of measure
-  # - leakage value
-  # - presence of flue or chimney in conditioned space
+  # Sets the HPXML air infiltration measurements properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4595,14 +4492,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space = args[:air_leakage_has_flue_or_chimney_in_conditioned_space]
   end
 
-  # Set roofs properties, including:
-  # - adjacent space
-  # - orientation
-  # - gross area
-  # - material type and color
-  # - pitch
-  # - assembly R-value
-  # - presence and grade of radiant barrier
+  # Sets the HPXML roofs properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4647,12 +4537,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set rim joists properties, including:
-  # - adjacent spaces
-  # - orientation
-  # - gross area
-  # - siding type and color
-  # - assembly R-value
+  # Sets the HPXML rim joists properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -4713,11 +4598,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set walls properties, including:
-  # - adjacent spaces
-  # - orientation
-  # - assembly type and R-value
-  # - presence and grade of attic wall radiant barrier
+  # Sets the HPXML walls properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -4806,14 +4687,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set foundation walls properties, including:
-  # - adjacent spaces
-  # - orientation
-  # - gross area
-  # - height above and below grade
-  # - thickness
-  # - assembly type and R-value
-  # - other insulation
+  # Sets the HPXML foundation walls properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -4897,11 +4771,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the floors properties, including:
-  # - adjacent spaces
-  # - gross area
-  # - assembly type and R-value
-  # - presence and grade of attic floor radiant barrier
+  # Sets the HPXML floors properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -4978,13 +4848,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the slabs properties, including:
-  # - adjacent space
-  # - gross area
-  # - thickness
-  # - exposed perimeter
-  # - perimeter or under-slab insulation dimensions and R-value
-  # - carpet fraction and R-value
+  # Sets the HPXML slabs properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -5046,15 +4910,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the windows properties, including:
-  # - gross area
-  # - orientation
-  # - U-Factor and SHGC
-  # - storm type
-  # - winter and summer interior and exterior shading fractions
-  # - operable fraction
-  # - overhangs location and depth
-  # - attached walls
+  # Sets the HPXML windows properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -5136,12 +4992,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the skylights properties, including:
-  # - gross area
-  # - orientation
-  # - U-Factor and SHGC
-  # - storm type
-  # - attached roofs
+  # Sets the HPXML skylights properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5177,11 +5028,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the doors properties, including:
-  # - gross area
-  # - orientation
-  # - R-value
-  # - attached walls
+  # Sets the HPXML doors properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -5212,9 +5059,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the attics properties, including:
-  # - type
-  # - attached roofs, walls, and floors
+  # Sets the HPXML attics properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5250,9 +5095,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                           attached_to_floor_idrefs: surf_ids['floors']['ids'])
   end
 
-  # Set the foundations properties, including:
-  # - type
-  # - attached slabs, floors, foundation walls, walls, and rim joists
+  # Sets the HPXML foundations properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5304,14 +5147,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                belly_wing_skirt_present: belly_wing_skirt_present)
   end
 
-  # Set the primary heating systems properties, including:
-  # - type
-  # - fuel
-  # - capacity
-  # - efficiency
-  # - heat load served
-  # - presence and burn rate of pilot light
-  # - number of dwelling units served
+  # Sets the HPXML primary heating systems properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5376,16 +5212,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    primary_system: true)
   end
 
-  # Set the primary cooling systems properties, including:
-  # - type
-  # - fuel
-  # - capacity
-  # - efficiency
-  # - cool load served
-  # - compressor speeds
-  # - crankcase heater power
-  # - integrated heating system type, fuel, efficiency, and heat load served
-  # - detailed performance data
+  # Sets the HPXML primary cooling systems properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5490,17 +5317,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the primary heat pumps properties, including:
-  # - type
-  # - fuel
-  # - heating and cooling capacities
-  # - heating capacity retention fraction and temperature
-  # - heating and cooling efficiencies
-  # - heat and cool loads served
-  # - compressor speeds and lockout temperature
-  # - backup heating fuel, capacity, efficiency, and switchover/lockout temperatures
-  # - crankcase heater power
-  # - detailed performance data
+  # Sets the HPXML primary heat pumps properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5685,15 +5502,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the geothermal loop properties, including:
-  # - loop configuration
-  # - water flow rate
-  # - borefield configuration
-  # - number of boreholes
-  # - average borehole length
-  # - borehole spacing and diameter
-  # - grout type
-  # - pipe type and diameter
+  # Sets the HPXML geothermal loop properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5728,12 +5537,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.heat_pumps[-1].geothermal_loop_idref = hpxml_bldg.geothermal_loops[-1].id
   end
 
-  # Set the secondary heating system properties, including:
-  # - type
-  # - fuel
-  # - capacity
-  # - efficiency
-  # - heat load served
+  # Sets the HPXML secondary heating system properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5773,10 +5577,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    heating_efficiency_percent: heating_efficiency_percent)
   end
 
-  # Set the HVAC distribution properties, including:
-  # - system type
-  # - number of return registers
-  # - presence of ducts
+  # Sets the HPXML HVAC distribution properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -5859,8 +5660,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the HVAC blower properties, including:
-  # - fan W/cfm
+  # Sets the HPXML HVAC blower properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6091,11 +5891,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the HVAC control properties, including:
-  # - simple heating and cooling setpoint temperatures
-  # - hourly heating and cooling setpoint temperatures
-  # - heating and cooling seasons
-  # - cooling setpoint temperature offset
+  # Sets the HPXML HVAC control properties.
   #
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -6183,22 +5979,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                  seasons_cooling_end_day: seasons_cooling_end_day)
   end
 
-  # Set the ventilation fans properties, including:
-  # - mechanical ventilation
-  #   - fan type
-  #   - flow rate
-  #   - hours in operation
-  #   - efficiency type and value
-  #   - fan power
-  #   - number of dwelling units served
-  #   - shared system recirculation, preheating/precooling efficiencies
-  #   - presence of a second system
-  # - local ventilation
-  #   - kitchen fans quantity, hours in operation, power, start hour
-  #   - bathroom fans quantity, hours in operation, power, start hour
-  # - whole house fan
-  #   - flow rate
-  #   - fan power
+  # Sets the HPXML ventilation fans properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6350,18 +6131,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the water heating systems properties, including:
-  # - type
-  # - fuel
-  # - capacity
-  # - location
-  # - tank volume
-  # - efficiencies
-  # - jacket R-value
-  # - setpoint temperature
-  # - standby loss units and value
-  # - presence of desuperheater
-  # - number of bedrooms served
+  # Sets the HPXML water heating systems properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6479,11 +6249,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                          operating_mode: operating_mode)
   end
 
-  # Set the hot water distribution properties, including:
-  # - system type
-  # - pipe lengths and insulation R-value
-  # - recirculation control type and pump power
-  # - drain water heat recovery facilities connected, flow configuration, efficiency
+  # Sets the HPXML hot water distribution properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6519,9 +6285,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                            dwhr_efficiency: dwhr_efficiency)
   end
 
-  # Set the water fixtures properties, including:
-  # - showerhead low flow
-  # - faucet/sink low flow
+  # Sets the HPXML water fixtures properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6540,11 +6304,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.water_heating.water_fixtures_usage_multiplier = args[:water_fixtures_usage_multiplier]
   end
 
-  # Set the solar thermal properties, including:
-  # - system type
-  # - collector area, loop type, orientation, tilt, optical efficiency, and thermal losses
-  # - storage volume
-  # - solar fraction
+  # Sets the HPXML solar thermal properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6585,30 +6345,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                          solar_fraction: solar_fraction)
   end
 
-  # Set the PV systems properties, including:
-  # - module type
-  # - roof or ground location
-  # - tracking type
-  # - array orientation and tilt
-  # - power output
-  # - inverter efficiency
-  # - losses fraction
-  # - number of bedrooms served
-  # - presence of a second system
+  # Sets the HPXML PV systems properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [nil]
   def set_pv_systems(hpxml_bldg, args, weather)
-    return unless args[:pv_system_present]
-
-    if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
-      if args[:pv_system_num_bedrooms_served].to_f > args[:geometry_unit_num_bedrooms]
-        is_shared_system = true
-        number_of_bedrooms_served = args[:pv_system_num_bedrooms_served]
-      end
-    end
+    return if args[:pv_system_maximum_power_output].to_f == 0
 
     latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
 
@@ -6618,22 +6362,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               tracking: args[:pv_system_tracking],
                               array_azimuth: args[:pv_system_array_azimuth],
                               array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_array_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
-                              max_power_output: args[:pv_system_max_power_output],
-                              system_losses_fraction: args[:pv_system_system_losses_fraction],
-                              is_shared_system: is_shared_system,
-                              number_of_bedrooms_served: number_of_bedrooms_served)
+                              max_power_output: args[:pv_system_maximum_power_output],
+                              system_losses_fraction: args[:pv_system_system_losses_fraction])
 
-    if args[:pv_system_2_present]
+    if args[:pv_system_2_maximum_power_output].to_f > 0
       hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                                 location: args[:pv_system_2_location],
                                 module_type: args[:pv_system_2_module_type],
                                 tracking: args[:pv_system_2_tracking],
                                 array_azimuth: args[:pv_system_2_array_azimuth],
                                 array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_2_array_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
-                                max_power_output: args[:pv_system_2_max_power_output],
-                                system_losses_fraction: args[:pv_system_system_losses_fraction],
-                                is_shared_system: is_shared_system,
-                                number_of_bedrooms_served: number_of_bedrooms_served)
+                                max_power_output: args[:pv_system_2_maximum_power_output],
+                                system_losses_fraction: args[:pv_system_2_system_losses_fraction])
     end
 
     # Add inverter efficiency; assume a single inverter even if multiple PV arrays
@@ -6644,11 +6384,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the electric panel properties, including:
-  # - service voltage
-  # - max current service rating
-  # - individual branch circuits
-  # - individual service feeders
+  # Sets the HPXML electric panel properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6909,12 +6645,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the battery properties, including:
-  # - location
-  # - power output
-  # - nominal and usable capacity
-  # - round-trip efficiency
-  # - number of bedrooms served
+  # Sets the HPXML battery properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6942,15 +6673,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                              number_of_bedrooms_served: number_of_bedrooms_served)
   end
 
-  # Set the vehicle and electric vehicle charger properties, including:
-  # - vehicle battery nominal and usable capacity
-  # - fuel economy
-  # - fuel economy units
-  # - miles driven per year
-  # - hours driven per week
-  # - fraction charged at home
-  # - EV charger reference
-  # - EV charger charging power
+  # Sets the HPXML vehicle and electric vehicle charger properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -6980,10 +6703,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the lighting properties, including:
-  # - interior/exterior/garage fraction of lamps that are LFL/CFL/LED
-  # - interior/exterior/garage usage multipliers
-  # - holiday lighting daily energy and period
+  # Sets the HPXML lighting properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7063,12 +6783,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Set the dehumidifier properties, including:
-  # - type
-  # - efficiency
-  # - capacity
-  # - relative humidity setpoint
-  # - dehumidification load served
+  # Sets the HPXML dehumidifier properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7093,14 +6808,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                  location: HPXML::LocationConditionedSpace)
   end
 
-  # Set the clothes washer properties, including:
-  # - location
-  # - efficiency
-  # - capacity
-  # - annual consumption
-  # - label electric rate
-  # - label gas rate and annual cost
-  # - usage multiplier
+  # Sets the HPXML clothes washer properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7129,12 +6837,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    usage_multiplier: args[:clothes_washer_usage_multiplier])
   end
 
-  # Set the clothes dryer properties, including:
-  # - location
-  # - fuel
-  # - efficiency
-  # - exhaust flow rate
-  # - usage multiplier
+  # Sets the HPXML clothes dryer properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7169,14 +6872,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                   usage_multiplier: args[:clothes_dryer_usage_multiplier])
   end
 
-  # Set the dishwasher properties, including:
-  # - location
-  # - efficiency type and value
-  # - label electric rate
-  # - label gas rate and annual cost
-  # - loads per week
-  # - number of place settings
-  # - usage multiplier
+  # Sets the HPXML dishwasher properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7204,10 +6900,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                usage_multiplier: args[:dishwasher_usage_multiplier])
   end
 
-  # Set the primary refrigerator properties, including:
-  # - location
-  # - annual consumption
-  # - usage multiplier
+  # Sets the HPXML primary refrigerator properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7221,10 +6914,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                  usage_multiplier: args[:refrigerator_usage_multiplier])
   end
 
-  # Set the extra refrigerator properties, including:
-  # - location
-  # - annual consumption
-  # - usage multiplier
+  # Sets the HPXML extra refrigerator properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7240,10 +6930,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.refrigerators[0].primary_indicator = true
   end
 
-  # Set the freezer properties, including:
-  # - location
-  # - annual consumption
-  # - usage multiplier
+  # Sets the HPXML freezer properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7257,10 +6944,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                             usage_multiplier: args[:freezer_usage_multiplier])
   end
 
-  # Set the cooking range/oven properties, including:
-  # - location
-  # - whether induction or convection
-  # - usage multiplier
+  # Sets the HPXML cooking range/oven properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7278,10 +6962,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                          is_convection: args[:cooking_range_oven_is_convection])
   end
 
-  # Set the ceiling fans properties, including:
-  # - label energy use
-  # - efficiency
-  # - quantity
+  # Sets the HPXML ceiling fans properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7295,9 +6976,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                 count: args[:ceiling_fan_quantity])
   end
 
-  # Set the miscellaneous television plug loads properties, including:
-  # - annual consumption
-  # - usage multiplier
+  # Sets the HPXML miscellaneous television plug loads properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7311,10 +6990,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usage_multiplier: args[:misc_plug_loads_television_usage_multiplier])
   end
 
-  # Set the miscellaneous other plug loads properties, including:
-  # - annual consumption
-  # - sensible and latent fractions
-  # - usage multiplier
+  # Sets the HPXML miscellaneous other plug loads properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7328,9 +7004,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usage_multiplier: args[:misc_plug_loads_other_usage_multiplier])
   end
 
-  # Set the miscellaneous well pump plug loads properties, including:
-  # - annual consumption
-  # - usage multiplier
+  # Sets the HPXML miscellaneous well pump plug loads properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7344,9 +7018,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usage_multiplier: args[:misc_plug_loads_well_pump_usage_multiplier])
   end
 
-  # Set the miscellaneous vehicle plug loads properties, including:
-  # - annual consumption
-  # - usage multiplier
+  # Sets the HPXML miscellaneous vehicle plug loads properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7360,10 +7032,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usage_multiplier: args[:misc_plug_loads_vehicle_usage_multiplier])
   end
 
-  # Set the miscellaneous grill fuel loads properties, including:
-  # - fuel
-  # - annual consumption
-  # - usage multiplier
+  # Sets the HPXML miscellaneous grill fuel loads properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7378,10 +7047,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usage_multiplier: args[:misc_fuel_loads_grill_usage_multiplier])
   end
 
-  # Set the miscellaneous lighting fuel loads properties, including:
-  # - fuel
-  # - annual consumption
-  # - usage multiplier
+  # Sets the HPXML miscellaneous lighting fuel loads properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7396,11 +7062,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usage_multiplier: args[:misc_fuel_loads_lighting_usage_multiplier])
   end
 
-  # Set the miscellaneous fireplace fuel loads properties, including:
-  # - fuel
-  # - annual consumption
-  # - sensible and latent fractions
-  # - usage multiplier
+  # Sets the HPXML miscellaneous fireplace fuel loads properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7417,12 +7079,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usage_multiplier: args[:misc_fuel_loads_fireplace_usage_multiplier])
   end
 
-  # Set the pool properties, including:
-  # - pump annual consumption
-  # - pump usage multiplier
-  # - heater type
-  # - heater annual consumption
-  # - heater usage multiplier
+  # Sets the HPXML pool properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7456,12 +7113,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                          heater_usage_multiplier: args[:pool_heater_usage_multiplier])
   end
 
-  # Set the permanent spa properties, including:
-  # - pump annual consumption
-  # - pump usage multiplier
-  # - heater type
-  # - heater annual consumption
-  # - heater usage multiplier
+  # Sets the HPXML permanent spa properties.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value

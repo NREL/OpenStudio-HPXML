@@ -451,29 +451,21 @@
         <Photovoltaics>
           <PVSystem>
             <SystemIdentifier id='PVSystem1'/>
-            <Location>roof</Location>
-            <ModuleType>standard</ModuleType>
-            <Tracking>fixed</Tracking>
             <ArrayAzimuth>180</ArrayAzimuth>
             <ArrayTilt>20.0</ArrayTilt>
             <MaxPowerOutput>4000.0</MaxPowerOutput>
-            <SystemLossesFraction>0.14</SystemLossesFraction>
             <AttachedToInverter idref='Inverter1'/>
           </PVSystem>
           <PVSystem>
             <SystemIdentifier id='PVSystem2'/>
-            <Location>roof</Location>
             <ModuleType>premium</ModuleType>
-            <Tracking>fixed</Tracking>
             <ArrayAzimuth>90</ArrayAzimuth>
             <ArrayTilt>20.0</ArrayTilt>
             <MaxPowerOutput>1500.0</MaxPowerOutput>
-            <SystemLossesFraction>0.14</SystemLossesFraction>
             <AttachedToInverter idref='Inverter1'/>
           </PVSystem>
           <Inverter>
             <SystemIdentifier id='Inverter1'/>
-            <InverterEfficiency>0.96</InverterEfficiency>
           </Inverter>
         </Photovoltaics>
       </Systems>

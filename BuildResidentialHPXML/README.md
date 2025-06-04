@@ -3232,53 +3232,16 @@ The solar fraction of the solar thermal system. If provided, overrides all other
 
 <br/>
 
-**PV System: Present**
+**PV System**
 
-Whether there is a PV system present.
+The size and type of PV system.
 
-- **Name:** ``pv_system_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**PV System: Module Type**
-
-Module type of the PV system. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.
-
-- **Name:** ``pv_system_module_type``
+- **Name:** ``pv_system``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `standard`, `premium`, `thin film`
-
-<br/>
-
-**PV System: Location**
-
-Location of the PV system. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.
-
-- **Name:** ``pv_system_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `roof`, `ground`
-
-<br/>
-
-**PV System: Tracking**
-
-Type of tracking for the PV system. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.
-
-- **Name:** ``pv_system_tracking``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `fixed`, `1-axis`, `1-axis backtracked`, `2-axis`
+- **Choices:** `None`, `0.5 kW`, `1.0 kW`, `1.5 kW`, `1.5 kW, Premium Module`, `1.5 kW, Thin Film Module`, `2.0 kW`, `2.5 kW`, `3.0 kW`, `3.5 kW`, `4.0 kW`, `4.5 kW`, `5.0 kW`, `5.5 kW`, `6.0 kW`, `6.5 kW`, `7.0 kW`, `7.5 kW`, `8.0 kW`, `8.5 kW`, `9.0 kW`, `9.5 kW`, `10.0 kW`, `10.5 kW`, `11.0 kW`, `11.5 kW`, `12.0 kW`
 
 <br/>
 
@@ -3291,7 +3254,7 @@ Array azimuth of the PV system. Azimuth is measured clockwise from north (e.g., 
 
 - **Units:** ``degrees``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3302,109 +3265,20 @@ Array tilt of the PV system. Can also enter, e.g., RoofPitch, RoofPitch+20, Lati
 - **Name:** ``pv_system_array_tilt``
 - **Type:** ``String``
 
-- **Required:** ``true``
-
-<br/>
-
-**PV System: Maximum Power Output**
-
-Maximum power output of the PV system. For a shared system, this is the total building maximum power output.
-
-- **Name:** ``pv_system_max_power_output``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``true``
-
-<br/>
-
-**PV System: Inverter Efficiency**
-
-Inverter efficiency of the PV system. If there are two PV systems, this will apply to both. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.
-
-- **Name:** ``pv_system_inverter_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
 - **Required:** ``false``
 
 <br/>
 
-**PV System: System Losses Fraction**
+**PV System 2**
 
-System losses fraction of the PV system. If there are two PV systems, this will apply to both. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.
+The size and type of the second PV system.
 
-- **Name:** ``pv_system_system_losses_fraction``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**PV System: Number of Bedrooms Served**
-
-Number of bedrooms served by PV system. Only needed if single-family attached or apartment unit and it is a shared PV system serving multiple dwelling units. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.
-
-- **Name:** ``pv_system_num_bedrooms_served``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
-
-<br/>
-
-**PV System 2: Present**
-
-Whether there is a second PV system present.
-
-- **Name:** ``pv_system_2_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**PV System 2: Module Type**
-
-Module type of the second PV system. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.
-
-- **Name:** ``pv_system_2_module_type``
+- **Name:** ``pv_system_2``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `standard`, `premium`, `thin film`
-
-<br/>
-
-**PV System 2: Location**
-
-Location of the second PV system. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.
-
-- **Name:** ``pv_system_2_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `roof`, `ground`
-
-<br/>
-
-**PV System 2: Tracking**
-
-Type of tracking for the second PV system. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-photovoltaics'>HPXML Photovoltaics</a>) is used.
-
-- **Name:** ``pv_system_2_tracking``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `fixed`, `1-axis`, `1-axis backtracked`, `2-axis`
+- **Choices:** `None`, `0.5 kW`, `1.0 kW`, `1.5 kW`, `1.5 kW, Premium Module`, `1.5 kW, Thin Film Module`, `2.0 kW`, `2.5 kW`, `3.0 kW`, `3.5 kW`, `4.0 kW`, `4.5 kW`, `5.0 kW`, `5.5 kW`, `6.0 kW`, `6.5 kW`, `7.0 kW`, `7.5 kW`, `8.0 kW`, `8.5 kW`, `9.0 kW`, `9.5 kW`, `10.0 kW`, `10.5 kW`, `11.0 kW`, `11.5 kW`, `12.0 kW`
 
 <br/>
 
@@ -3417,7 +3291,7 @@ Array azimuth of the second PV system. Azimuth is measured clockwise from north 
 
 - **Units:** ``degrees``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -3428,20 +3302,7 @@ Array tilt of the second PV system. Can also enter, e.g., RoofPitch, RoofPitch+2
 - **Name:** ``pv_system_2_array_tilt``
 - **Type:** ``String``
 
-- **Required:** ``true``
-
-<br/>
-
-**PV System 2: Maximum Power Output**
-
-Maximum power output of the second PV system. For a shared system, this is the total building maximum power output.
-
-- **Name:** ``pv_system_2_max_power_output``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 

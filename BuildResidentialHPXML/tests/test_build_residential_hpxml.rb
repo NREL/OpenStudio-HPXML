@@ -591,14 +591,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['solar_thermal_collector_rated_optical_efficiency'] = 0.5
       args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
       args['solar_thermal_solar_fraction'] = 0
-      args['pv_system_present'] = false
-      args['pv_system_array_azimuth'] = 180
-      args['pv_system_array_tilt'] = 20
-      args['pv_system_max_power_output'] = 4000
-      args['pv_system_2_present'] = false
-      args['pv_system_2_array_azimuth'] = 180
-      args['pv_system_2_array_tilt'] = 20
-      args['pv_system_2_max_power_output'] = 4000
       args['battery_present'] = false
       args['lighting_present'] = true
       args['lighting_interior_fraction_cfl'] = 0.4
@@ -754,8 +746,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['ducts_supply_location'] = HPXML::LocationAtticUnvented
       args['ducts_return_location'] = HPXML::LocationAtticUnvented
     when 'extra-pv-roofpitch.xml'
-      args['pv_system_module_type'] = HPXML::PVModuleTypeStandard
-      args['pv_system_2_module_type'] = HPXML::PVModuleTypeStandard
+      args['pv_system'] = '4.0 kW'
+      args['pv_system_2'] = '4.0 kW'
       args['pv_system_array_tilt'] = 'roofpitch'
       args['pv_system_2_array_tilt'] = 'roofpitch+15'
     when 'extra-dhw-solar-latitude.xml'
