@@ -1078,16 +1078,20 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def test_heat_pump_advanced_defrost
     # Var Speed heat pump test
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-research-features.xml'))
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-research-features.xml')
+    hpxml_bldg.heat_pumps[0].pan_heater_watts = 60.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     backup_fuel = EPlus.fuel_type(hpxml_bldg.heat_pumps[0].backup_heating_fuel)
+    pan_heater_watts = hpxml_bldg.heat_pumps[0].pan_heater_watts
 
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 1389, 4747.7)
+    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 1389, 4747.7, pan_heater_watts)
 
     # Single Speed heat pump test
     args_hash = {}
@@ -1168,17 +1172,21 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   end
 
   def test_heat_pump_standard_defrost
-    # Var Speed heat pump test
+    # Single Speed heat pump test
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed.xml'))
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.heat_pumps[0].pan_heater_watts = 60.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     backup_fuel = EPlus.fuel_type(hpxml_bldg.heat_pumps[0].backup_heating_fuel)
+    pan_heater_watts = hpxml_bldg.heat_pumps[0].pan_heater_watts
 
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
-    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.1, 0.0)
+    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.1, 0.0, nil, pan_heater_watts)
 
     # Ductless heat pump test
     args_hash = {}
@@ -1227,10 +1235,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     assert_equal(2, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 0.0, nil, 2)
+    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 0.0, nil, 150.0, 2)
 
     htg_coil = model.getCoilHeatingDXMultiSpeeds[1]
-    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 0.0, nil, 2)
+    _check_defrost(model, htg_coil, 10550.56, 1.0, backup_fuel, 0.06667, 0.0, nil, 150.0, 2)
 
     # Separate backup heat pump test
     args_hash = {}
@@ -2075,25 +2083,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(crankcase_heater_watts, clg_coil.crankcaseHeaterCapacity, 0.01)
   end
 
-  def test_heat_pump_pan_heater_watts
-    args_hash = {}
-    args_hash['hpxml_path'] = @tmp_hpxml_path
-    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-    hpxml_bldg.heat_pumps[0].pan_heater_watts = 60.0
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-
-    # Get HPXML values
-    heat_pump = hpxml_bldg.heat_pumps[0]
-    pan_heater_watts = heat_pump.pan_heater_watts
-
-    # Check EMS
-    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    unitary_system = model.getAirLoopHVACUnitarySystems[0]
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} pan heater program")
-    assert_equal(pan_heater_watts, program_values['air_source_heat_pump_unitary_system_pan_heater_energy_act'][0])
-  end
-
   def test_ceiling_fan
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-lighting-ceiling-fans.xml'))
@@ -2291,7 +2280,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return program_values
   end
 
-  def _check_defrost(model, htg_coil, supp_capacity, supp_efficiency, backup_fuel, defrost_time_fraction, defrost_power, q_dot = nil, num_of_ems = 1)
+  def _check_defrost(model, htg_coil, supp_capacity, supp_efficiency, backup_fuel, defrost_time_fraction, defrost_power, q_dot = nil, pan_heater_watts = 150.0, num_of_ems = 1)
     # Check Other equipment inputs
     defrost_heat_load_oe = model.getOtherEquipments.select { |oe| oe.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHPDefrostHeatLoad }
     assert_equal(num_of_ems, defrost_heat_load_oe.size)
@@ -2315,6 +2304,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(program_values['q_dot_defrost'].sum, q_dot, 0.01) unless q_dot.nil?
     assert_in_epsilon(program_values['supp_capacity'].sum, supp_capacity, 0.01)
     assert_in_epsilon(program_values['supp_efficiency'].sum, supp_efficiency, 0.01)
+    pan_heater_act_name = program_values.keys.find { |k| k.include? 'pan_heater_energy_act' }
+    assert_equal(pan_heater_watts, program_values[pan_heater_act_name][0])
     assert(!program_values.empty?)
   end
 
