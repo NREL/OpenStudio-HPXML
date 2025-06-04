@@ -4819,7 +4819,7 @@ module HVAC
   # @param q_dot_defrost [Double] Calculated delivered cooling q_dot [W]
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param defrost_backup_heat_active [Boolean] Whether backup heat is active during defrost
-  # @return [nil]
+  # @return [OpenStudio::Model::EnergyManagementSystemProgram] OpenStudio EMS program for defrost model
   def self.apply_advanced_defrost_ems_program(model, htg_coil, conditioned_space, heat_pump, q_dot_defrost, unit_multiplier, defrost_backup_heat_active)
     if defrost_backup_heat_active && heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
       supp_sys_fuel = heat_pump.backup_heating_fuel
@@ -4995,7 +4995,7 @@ module HVAC
   # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param defrost_backup_heat_active [Boolean] Whether backup heat is active during defrost
-  # @return [nil]
+  # @return [OpenStudio::Model::EnergyManagementSystemProgram] OpenStudio EMS program for defrost model
   def self.apply_standard_defrost_ems_program(model, htg_coil, conditioned_space, heat_pump, unit_multiplier, defrost_backup_heat_active)
     if defrost_backup_heat_active && heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
       supp_sys_fuel = heat_pump.backup_heating_fuel
