@@ -756,13 +756,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_aspect_ratio', true)
-    arg.setDisplayName('Windows: Aspect Ratio')
-    arg.setUnits('Frac')
-    arg.setDescription('Ratio of window height to width.')
-    arg.setDefaultValue(1.333)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_fraction_operable', false)
     arg.setDisplayName('Windows: Fraction Operable')
     arg.setUnits('Frac')
@@ -3660,9 +3653,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     error = (args[:door_area] < 0)
     errors << 'Door area cannot be negative.' if error
-
-    error = (args[:window_aspect_ratio] <= 0)
-    errors << 'Window aspect ratio must be greater than zero.' if error
 
     return errors
   end

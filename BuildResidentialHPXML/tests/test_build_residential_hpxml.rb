@@ -205,7 +205,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
       'error-invalid-door-area.xml' => 'base-sfd.xml',
-      'error-invalid-window-aspect-ratio.xml' => 'base-sfd.xml',
       'error-garage-too-wide.xml' => 'base-sfd.xml',
       'error-garage-too-deep.xml' => 'base-sfd.xml',
       'error-vented-attic-with-zero-floor-insulation.xml' => 'base-sfd.xml',
@@ -267,7 +266,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-protruding-garage-under-gable-roof.xml' => ['Cannot handle protruding garage and attic ridge running from front to back.'],
       'error-ambient-with-garage.xml' => ['Cannot handle garages with an ambient foundation type.'],
       'error-invalid-door-area.xml' => ['Door area cannot be negative.'],
-      'error-invalid-window-aspect-ratio.xml' => ['Window aspect ratio must be greater than zero.'],
       'error-garage-too-wide.xml' => ['Garage is as wide as the single-family detached unit.'],
       'error-garage-too-deep.xml' => ['Garage is as deep as the single-family detached unit.'],
       'error-vented-attic-with-zero-floor-insulation.xml' => ["Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
@@ -494,7 +492,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_area_back'] = 108.0
       args['window_area_left'] = 72.0
       args['window_area_right'] = 72.0
-      args['window_aspect_ratio'] = 1.333
       args['window_fraction_operable'] = 0.67
       args['window_ufactor'] = 0.33
       args['window_shgc'] = 0.45
@@ -838,7 +835,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_width'] = 30.0
       args['geometry_garage_protrusion'] = 1.0
       args['window_area_front'] = 12.0
-      args['window_aspect_ratio'] = 5.0 / 1.5
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = HPXML::AtticTypeConditioned
@@ -1223,8 +1219,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
     when 'error-invalid-door-area.xml'
       args['door_area'] = -10
-    when 'error-invalid-window-aspect-ratio.xml'
-      args['window_aspect_ratio'] = 0
     when 'error-garage-too-wide.xml'
       args['geometry_garage_width'] = 72
     when 'error-garage-too-deep.xml'

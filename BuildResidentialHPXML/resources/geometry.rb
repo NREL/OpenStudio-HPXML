@@ -1389,7 +1389,6 @@ module Geometry
   # @param window_area_back [Double] amount of window area on unit's back facade (ft2)
   # @param window_area_left [Double] amount of window area on unit's left facade (ft2)
   # @param window_area_right [Double] amount of window area on unit's right facade (ft2)
-  # @param window_aspect_ratio [Double] ratio of window height to width (frac)
   # @param skylight_area_front [Double] amount of skylight area on the unit's front conditioned roof facade (ft2)
   # @param skylight_area_back [Double] amount of skylight area on the unit's back conditioned roof facade (ft2)
   # @param skylight_area_left [Double] amount of skylight area on the unit's left conditioned roof facade (ft2)
@@ -1397,7 +1396,7 @@ module Geometry
   # @return [Boolean] true if successful
   def self.create_windows_and_skylights(runner, model,
                                         window_front_wwr:, window_back_wwr:, window_left_wwr:, window_right_wwr:,
-                                        window_area_front:, window_area_back:, window_area_left:, window_area_right:, window_aspect_ratio:,
+                                        window_area_front:, window_area_back:, window_area_left:, window_area_right:,
                                         skylight_area_front:, skylight_area_back:, skylight_area_left:, skylight_area_right:,
                                         **)
     facades = [Constants::FacadeBack, Constants::FacadeRight, Constants::FacadeFront, Constants::FacadeLeft]
@@ -1492,6 +1491,7 @@ module Geometry
     max_single_window_area = 12.0 # sqft
     window_gap_y = 1.0 # ft; distance from top of wall
     window_gap_x = 0.2 # ft; distance between windows in a two-window group
+    window_aspect_ratio = 1.333
     min_wall_height = Math.sqrt(max_single_window_area * window_aspect_ratio) + window_gap_y * 1.05 # allow some wall area above/below
     min_wall_width = Math.sqrt(min_single_window_area / window_aspect_ratio) * 1.05 # allow some wall area to the left/right
 

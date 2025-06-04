@@ -53,7 +53,6 @@
     "window_area_back": 90,
     "window_area_left": 45,
     "window_area_right": 45,
-    "window_aspect_ratio": 1.667,
     "window_fraction_operable": 0,
     "window_ufactor": 1.039,
     "window_shgc": 0.67,
@@ -214,8 +213,7 @@
     "window_area_front": 270,
     "window_area_back": 0,
     "window_area_left": 0,
-    "window_area_right": 0,
-    "window_aspect_ratio": 3.333
+    "window_area_right": 0
   },
   "tests/ASHRAE_Standard_140/L155AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L150AC.xml",
@@ -228,8 +226,7 @@
     "window_area_front": 0,
     "window_area_back": 0,
     "window_area_left": 135,
-    "window_area_right": 135,
-    "window_aspect_ratio": 3.333
+    "window_area_right": 135
   },
   "tests/ASHRAE_Standard_140/L170AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -302,8 +299,7 @@
     "window_area_front": 270,
     "window_area_back": 0,
     "window_area_left": 0,
-    "window_area_right": 0,
-    "window_aspect_ratio": 3.333
+    "window_area_right": 0
   },
   "tests/ASHRAE_Standard_140/L155AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L150AL.xml",
@@ -316,8 +312,7 @@
     "window_area_front": 0,
     "window_area_back": 0,
     "window_area_left": 135,
-    "window_area_right": 135,
-    "window_aspect_ratio": 3.333
+    "window_area_right": 135
   },
   "tests/ASHRAE_Standard_140/L170AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -608,7 +603,6 @@
     "window_area_back": 108,
     "window_area_left": 72,
     "window_area_right": 72,
-    "window_aspect_ratio": 1.333,
     "window_fraction_operable": 0.67,
     "window_ufactor": 0.33,
     "window_shgc": 0.45,
@@ -859,7 +853,6 @@
     "roof_assembly_r": 25.8,
     "window_area_left": 120,
     "window_area_right": 120,
-    "window_aspect_ratio": 2,
     "ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space"
@@ -1657,7 +1650,6 @@
     "geometry_garage_width": 30,
     "geometry_garage_protrusion": 1,
     "window_area_front": 12,
-    "window_aspect_ratio": 3.333,
     "ducts_supply_location": "garage",
     "ducts_return_location": "garage",
     "water_heater_location": "garage",
