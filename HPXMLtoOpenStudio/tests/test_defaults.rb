@@ -435,6 +435,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   def test_neighbor_buildings
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-misc-neighbor-shading.xml')
+    hpxml_bldg.neighbor_buildings[-1].delete
+    hpxml_bldg.neighbor_buildings[-1].delete
     hpxml_bldg.neighbor_buildings[0].azimuth = 123
     hpxml_bldg.neighbor_buildings[1].azimuth = 321
     hpxml_bldg.walls[0].azimuth = 123
