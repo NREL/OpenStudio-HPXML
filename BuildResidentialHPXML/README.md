@@ -3914,92 +3914,16 @@ Whether the other load is a new panel load addition to an existing service panel
 
 <br/>
 
-**Battery: Present**
+**Battery**
 
-Whether there is a lithium ion battery present.
+The size and type of battery storage.
 
-- **Name:** ``battery_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Battery: Location**
-
-The space type for the lithium ion battery location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-batteries'>HPXML Batteries</a>) is used.
-
-- **Name:** ``battery_location``
+- **Name:** ``battery``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `crawlspace`, `crawlspace - vented`, `crawlspace - unvented`, `crawlspace - conditioned`, `attic`, `attic - vented`, `attic - unvented`, `garage`, `outside`
-
-<br/>
-
-**Battery: Rated Power Output**
-
-The rated power output of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-batteries'>HPXML Batteries</a>) is used.
-
-- **Name:** ``battery_power``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Battery: Nominal Capacity**
-
-The nominal capacity of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-batteries'>HPXML Batteries</a>) is used.
-
-- **Name:** ``battery_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Battery: Usable Capacity**
-
-The usable capacity of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-batteries'>HPXML Batteries</a>) is used.
-
-- **Name:** ``battery_usable_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Battery: Round Trip Efficiency**
-
-The round trip efficiency of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-batteries'>HPXML Batteries</a>) is used.
-
-- **Name:** ``battery_round_trip_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Battery: Number of Bedrooms Served**
-
-Number of bedrooms served by the lithium ion battery. Only needed if single-family attached or apartment unit and it is a shared battery serving multiple dwelling units. Used to apportion battery charging/discharging to the unit of a SFA/MF building.
-
-- **Name:** ``battery_num_bedrooms_served``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
+- **Choices:** `None`, `5.0 kWh`, `7.5 kWh`, `10.0 kWh`, `12.5 kWh`, `15.0 kWh`, `17.5 kWh`, `20.0 kWh`, `20.0 kWh, 6 kW, Garage`, `20.0 kWh, 6 kW, Outside`, `20.0 kWh, 6 kW, Outside, 80% Efficiency`
 
 <br/>
 

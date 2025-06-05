@@ -67,8 +67,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-ducts-attic.xml' => 'base-sfd.xml',
       'extra-water-heater-crawlspace.xml' => 'base-sfd.xml',
       'extra-water-heater-attic.xml' => 'base-sfd.xml',
-      'extra-battery-crawlspace.xml' => 'base-sfd.xml',
-      'extra-battery-attic.xml' => 'base-sfd.xml',
       'extra-vehicle-ev.xml' => 'extra-enclosure-garage-partially-protruded.xml',
       'extra-two-batteries.xml' => 'base-sfd.xml',
       'extra-detailed-performance-autosize.xml' => 'base-sfd.xml',
@@ -591,7 +589,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['solar_thermal_collector_rated_optical_efficiency'] = 0.5
       args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
       args['solar_thermal_solar_fraction'] = 0
-      args['battery_present'] = false
+      args['battery'] = 'None'
       args['lighting'] = '40% CFL, 10% LFL, 25% LED'
       args['holiday_lighting_present'] = false
       args['dehumidifier_type'] = Constants::None
@@ -886,23 +884,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['water_heater_location'] = HPXML::LocationCrawlspace
     when 'extra-water-heater-attic.xml'
       args['water_heater_location'] = HPXML::LocationAttic
-    when 'extra-battery-crawlspace.xml'
-      args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
-      args['geometry_foundation_height'] = 4
-      args['floor_over_foundation_assembly_r'] = 18.7
-      args['foundation_wall_insulation_distance_to_bottom'] = 4
-      args['battery_present'] = true
-      args['battery_location'] = HPXML::LocationCrawlspace
-    when 'extra-battery-attic.xml'
-      args['battery_present'] = true
-      args['battery_location'] = HPXML::LocationAttic
     when 'extra-vehicle-ev.xml'
       args['vehicle_type'] = HPXML::VehicleTypeBEV
       args['ev_charger_present'] = true
     when 'extra-two-batteries.xml'
       args['vehicle_type'] = HPXML::VehicleTypeBEV
-      args['battery_present'] = true
-      args['battery_location'] = HPXML::LocationAttic
+      args['battery'] = '20.0 kWh'
     when 'extra-detailed-performance-autosize.xml'
       args['heating_system'] = 'None'
       args['cooling_system'] = 'None'

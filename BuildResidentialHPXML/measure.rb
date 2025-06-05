@@ -57,6 +57,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     neighbor_building_choices = get_option_names('neighbor_buildings.tsv')
     pv_system_choices = get_option_names('pv_system.tsv')
     pv_system_2_choices = get_option_names('pv_system_2.tsv')
+    battery_choices = get_option_names('battery.tsv')
     lighting_choices = get_option_names('lighting.tsv')
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
@@ -2212,59 +2213,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Whether the other load is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    battery_location_choices = OpenStudio::StringVector.new
-    battery_location_choices << HPXML::LocationConditionedSpace
-    battery_location_choices << HPXML::LocationBasementConditioned
-    battery_location_choices << HPXML::LocationBasementUnconditioned
-    battery_location_choices << HPXML::LocationCrawlspace
-    battery_location_choices << HPXML::LocationCrawlspaceVented
-    battery_location_choices << HPXML::LocationCrawlspaceUnvented
-    battery_location_choices << HPXML::LocationCrawlspaceConditioned
-    battery_location_choices << HPXML::LocationAttic
-    battery_location_choices << HPXML::LocationAtticVented
-    battery_location_choices << HPXML::LocationAtticUnvented
-    battery_location_choices << HPXML::LocationGarage
-    battery_location_choices << HPXML::LocationOutside
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('battery_present', true)
-    arg.setDisplayName('Battery: Present')
-    arg.setDescription('Whether there is a lithium ion battery present.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery_location', battery_location_choices, false)
-    arg.setDisplayName('Battery: Location')
-    arg.setDescription("The space type for the lithium ion battery location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('battery_power', false)
-    arg.setDisplayName('Battery: Rated Power Output')
-    arg.setDescription("The rated power output of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('battery_capacity', false)
-    arg.setDisplayName('Battery: Nominal Capacity')
-    arg.setDescription("The nominal capacity of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>) is used.")
-    arg.setUnits('kWh')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('battery_usable_capacity', false)
-    arg.setDisplayName('Battery: Usable Capacity')
-    arg.setDescription("The usable capacity of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>) is used.")
-    arg.setUnits('kWh')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('battery_round_trip_efficiency', false)
-    arg.setDisplayName('Battery: Round Trip Efficiency')
-    arg.setDescription("The round trip efficiency of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>) is used.")
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('battery_num_bedrooms_served', false)
-    arg.setDisplayName('Battery: Number of Bedrooms Served')
-    arg.setDescription("Number of bedrooms served by the lithium ion battery. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared battery serving multiple dwelling units. Used to apportion battery charging/discharging to the unit of a SFA/MF building.")
-    arg.setUnits('#')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery', battery_choices, false)
+    arg.setDisplayName('Battery')
+    arg.setDescription('The size and type of battery storage.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('vehicle_type', false)
@@ -3173,6 +3124,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     get_option_properties(args, 'neighbor_buildings.tsv', args[:geometry_neighbor_buildings])
     get_option_properties(args, 'pv_system.tsv', args[:pv_system])
     get_option_properties(args, 'pv_system_2.tsv', args[:pv_system_2])
+    get_option_properties(args, 'battery.tsv', args[:battery])
     get_option_properties(args, 'lighting.tsv', args[:lighting])
 
     # Argument error checks
@@ -6599,26 +6551,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_battery(hpxml_bldg, args)
-    return unless args[:battery_present]
+    return if args[:battery_nominal_capacity].nil? && args[:battery_usable_capacity].nil?
 
     location = get_location(args[:battery_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
-
-    if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
-      if args[:battery_num_bedrooms_served].to_f > args[:geometry_unit_num_bedrooms]
-        is_shared_system = true
-        number_of_bedrooms_served = args[:battery_num_bedrooms_served]
-      end
-    end
 
     hpxml_bldg.batteries.add(id: "Battery#{hpxml_bldg.batteries.size + 1}",
                              type: HPXML::BatteryTypeLithiumIon,
                              location: location,
-                             rated_power_output: args[:battery_power],
-                             nominal_capacity_kwh: args[:battery_capacity],
+                             rated_power_output: args[:battery_rated_power_output],
+                             nominal_capacity_kwh: args[:battery_nominal_capacity],
                              usable_capacity_kwh: args[:battery_usable_capacity],
-                             round_trip_efficiency: args[:battery_round_trip_efficiency],
-                             is_shared_system: is_shared_system,
-                             number_of_bedrooms_served: number_of_bedrooms_served)
+                             round_trip_efficiency: args[:battery_round_trip_efficiency])
   end
 
   # Sets the HPXML vehicle and electric vehicle charger properties.
@@ -6657,7 +6600,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_lighting(hpxml_bldg, args)
-    if args[:lighting_present]
+    if not args[:lighting_interior_fraction_cfl].nil? # Has lighting
       has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
 
       # Interior

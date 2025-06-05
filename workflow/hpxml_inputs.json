@@ -126,7 +126,7 @@
     "solar_thermal_collector_rated_optical_efficiency": 0,
     "solar_thermal_collector_rated_thermal_losses": 0,
     "solar_thermal_solar_fraction": 0,
-    "battery_present": false,
+    "battery": "None",
     "lighting": "None",
     "holiday_lighting_present": false,
     "dehumidifier_type": "none",
@@ -665,7 +665,7 @@
     "solar_thermal_collector_rated_optical_efficiency": 0,
     "solar_thermal_collector_rated_thermal_losses": 0,
     "solar_thermal_solar_fraction": 0,
-    "battery_present": false,
+    "battery": "None",
     "lighting": "40% CFL, 10% LFL, 25% LED",
     "holiday_lighting_present": false,
     "dehumidifier_type": "none",
@@ -862,11 +862,7 @@
   },
   "sample_files/base-battery.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "battery_present": true,
-    "battery_location": "outside",
-    "battery_power": 6000,
-    "battery_capacity": 20,
-    "battery_usable_capacity": 18
+    "battery": "20.0 kWh, 6 kW, Outside"
   },
   "sample_files/base-battery-scheduled.xml": {
     "parent_hpxml": "sample_files/base-battery.xml",
@@ -1172,11 +1168,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-pv-battery.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-pv.xml",
-    "battery_present": true,
-    "battery_power": 36000,
-    "battery_capacity": 120,
-    "battery_usable_capacity": 108,
-    "battery_num_bedrooms_served": 18
+    "battery": "20.0 kWh"
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
@@ -3096,7 +3088,7 @@
     "pv_system": "4.0 kW",
     "pv_system_array_azimuth": 180,
     "pv_system_array_tilt": 20,
-    "battery_present": true,
+    "battery": "20.0 kWh",
     "vehicle_type": "BatteryElectricVehicle",
     "ev_charger_present": true,
     "clothes_washer_location": null,
@@ -3142,11 +3134,7 @@
   },
   "sample_files/base-misc-generators-battery.xml": {
     "parent_hpxml": "sample_files/base-misc-generators.xml",
-    "battery_present": true,
-    "battery_location": "outside",
-    "battery_power": 6000,
-    "battery_capacity": 20,
-    "battery_usable_capacity": 18
+    "battery": "20.0 kWh, 6 kW, Outside"
   },
   "sample_files/base-misc-generators-battery-scheduled.xml": {
     "parent_hpxml": "sample_files/base-misc-generators-battery.xml",
@@ -3322,15 +3310,11 @@
     "pv_system_2": "1.5 kW, Premium Module",
     "pv_system_2_array_azimuth": 90,
     "pv_system_2_array_tilt": 20,
-    "battery_present": true,
-    "battery_location": "garage",
-    "battery_power": 6000,
-    "battery_capacity": 20,
-    "battery_usable_capacity": 18
+    "battery": "20.0 kWh, 6 kW, Garage"
   },
   "sample_files/base-pv-battery-round-trip-efficiency.xml": {
     "parent_hpxml": "sample_files/base-pv-battery.xml",
-    "battery_round_trip_efficiency": 0.8
+    "battery": "20.0 kWh, 6 kW, Outside, 80% Efficiency"
   },
   "sample_files/base-pv-battery-scheduled.xml": {
     "parent_hpxml": "sample_files/base-pv-battery.xml",
@@ -3341,11 +3325,7 @@
   },
   "sample_files/base-pv-generators-battery.xml": {
     "parent_hpxml": "sample_files/base-pv-generators.xml",
-    "battery_present": true,
-    "battery_location": "outside",
-    "battery_power": 6000,
-    "battery_capacity": 20,
-    "battery_usable_capacity": 18
+    "battery": "20.0 kWh, 6 kW, Outside"
   },
   "sample_files/base-pv-generators-battery-scheduled.xml": {
     "parent_hpxml": "sample_files/base-pv-generators-battery.xml",

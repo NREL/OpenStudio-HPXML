@@ -1,35 +1,34 @@
-Option Name	Present	Interior Fraction CFL [frac]	Interior Fraction LFL [frac]	Interior Fraction LED [frac]	Exterior Fraction CFL [frac]	Exterior Fraction LFL [frac]	Exterior Fraction LED [frac]	Garage Fraction CFL [frac]	Garage Fraction LFL [frac]	Garage Fraction LED [frac]
-None	FALSE									
-100% Incandescent	TRUE	0	0	0	0	0	0	0	0	0
-10% CFL	TRUE	0.1	0	0	0.1	0	0	0.1	0	0
-20% CFL	TRUE	0.2	0	0	0.2	0	0	0.2	0	0
-30% CFL	TRUE	0.3	0	0	0.3	0	0	0.3	0	0
-40% CFL	TRUE	0.4	0	0	0.4	0	0	0.4	0	0
-"40% CFL, 10% LFL, 25% LED"	TRUE	0.4	0.1	0.25	0.4	0.1	0.25	0.4	0.1	0.25
-50% CFL	TRUE	0.5	0	0	0.5	0	0	0.5	0	0
-60% CFL	TRUE	0.6	0	0	0.6	0	0	0.6	0	0
-70% CFL	TRUE	0.7	0	0	0.7	0	0	0.7	0	0
-80% CFL	TRUE	0.8	0	0	0.8	0	0	0.8	0	0
-90% CFL	TRUE	0.9	0	0	0.9	0	0	0.9	0	0
-100% CFL	TRUE	1	0	0	1	0	0	1	0	0
-10% LED	TRUE	0	0	0.1	0	0	0.1	0	0	0.1
-20% LED	TRUE	0	0	0.2	0	0	0.2	0	0	0.2
-30% LED	TRUE	0	0	0.3	0	0	0.3	0	0	0.3
-40% LED	TRUE	0	0	0.4	0	0	0.4	0	0	0.4
-50% LED	TRUE	0	0	0.5	0	0	0.5	0	0	0.5
-60% LED	TRUE	0	0	0.6	0	0	0.6	0	0	0.6
-70% LED	TRUE	0	0	0.7	0	0	0.7	0	0	0.7
-80% LED	TRUE	0	0	0.8	0	0	0.8	0	0	0.8
-90% LED	TRUE	0	0	0.9	0	0	0.9	0	0	0.9
-100% LED	TRUE	0	0	1	0	0	1	0	0	1
-										
-Present: Whether there is lighting energy use.										
-"Interior Fraction CFL: Fraction of all interior lamps that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
-"Interior Fraction LFL: Fraction of all interior lamps that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
-"Interior Fraction LED: Fraction of all interior lamps that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
-"Exterior Fraction CFL: Fraction of all exterior lamps that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
-"Exterior Fraction LFL: Fraction of all exterior lamps that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
-"Exterior Fraction LED: Fraction of all exterior lamps that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
-"Garage Fraction CFL: Fraction of all garage lamps that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
-"Garage Fraction LFL: Fraction of all garage lamps that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
-"Garage Fraction LED: Fraction of all garage lamps that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."										
+Option Name	Interior Fraction CFL [frac]	Interior Fraction LFL [frac]	Interior Fraction LED [frac]	Exterior Fraction CFL [frac]	Exterior Fraction LFL [frac]	Exterior Fraction LED [frac]	Garage Fraction CFL [frac]	Garage Fraction LFL [frac]	Garage Fraction LED [frac]
+None									
+100% Incandescent	0	0	0	0	0	0	0	0	0
+10% CFL	0.1	0	0	0.1	0	0	0.1	0	0
+20% CFL	0.2	0	0	0.2	0	0	0.2	0	0
+30% CFL	0.3	0	0	0.3	0	0	0.3	0	0
+40% CFL	0.4	0	0	0.4	0	0	0.4	0	0
+"40% CFL, 10% LFL, 25% LED"	0.4	0.1	0.25	0.4	0.1	0.25	0.4	0.1	0.25
+50% CFL	0.5	0	0	0.5	0	0	0.5	0	0
+60% CFL	0.6	0	0	0.6	0	0	0.6	0	0
+70% CFL	0.7	0	0	0.7	0	0	0.7	0	0
+80% CFL	0.8	0	0	0.8	0	0	0.8	0	0
+90% CFL	0.9	0	0	0.9	0	0	0.9	0	0
+100% CFL	1	0	0	1	0	0	1	0	0
+10% LED	0	0	0.1	0	0	0.1	0	0	0.1
+20% LED	0	0	0.2	0	0	0.2	0	0	0.2
+30% LED	0	0	0.3	0	0	0.3	0	0	0.3
+40% LED	0	0	0.4	0	0	0.4	0	0	0.4
+50% LED	0	0	0.5	0	0	0.5	0	0	0.5
+60% LED	0	0	0.6	0	0	0.6	0	0	0.6
+70% LED	0	0	0.7	0	0	0.7	0	0	0.7
+80% LED	0	0	0.8	0	0	0.8	0	0	0.8
+90% LED	0	0	0.9	0	0	0.9	0	0	0.9
+100% LED	0	0	1	0	0	1	0	0	1
+									
+"Interior Fraction CFL: Fraction of all interior lamps that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									
+"Interior Fraction LFL: Fraction of all interior lamps that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									
+"Interior Fraction LED: Fraction of all interior lamps that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									
+"Exterior Fraction CFL: Fraction of all exterior lamps that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									
+"Exterior Fraction LFL: Fraction of all exterior lamps that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									
+"Exterior Fraction LED: Fraction of all exterior lamps that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									
+"Garage Fraction CFL: Fraction of all garage lamps that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									
+"Garage Fraction LFL: Fraction of all garage lamps that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									
+"Garage Fraction LED: Fraction of all garage lamps that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent."									

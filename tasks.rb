@@ -2388,6 +2388,15 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.batteries[0].usable_capacity_ah = hpxml_bldg.batteries[0].nominal_capacity_ah * default_values[:usable_fraction]
       hpxml_bldg.batteries[0].nominal_capacity_kwh = nil
       hpxml_bldg.batteries[0].usable_capacity_kwh = nil
+    elsif ['base-bldgtype-mf-unit-shared-pv-battery.xml'].include? hpxml_file
+      hpxml_bldg.batteries[0].is_shared_system = true
+      hpxml_bldg.batteries[0].nominal_capacity_kwh = 120.0
+      hpxml_bldg.batteries[0].usable_capacity_kwh = 108.0
+      hpxml_bldg.batteries[0].rated_power_output = 36000
+      hpxml_bldg.batteries[0].number_of_bedrooms_served = 18
+    elsif ['base-misc-defaults.xml',
+           'base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.batteries[0].nominal_capacity_kwh = nil
     end
 
     # ------------- #
