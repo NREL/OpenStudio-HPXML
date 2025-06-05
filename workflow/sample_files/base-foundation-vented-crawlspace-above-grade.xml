@@ -182,9 +182,9 @@
             <SystemIdentifier id='FoundationWall1'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>crawlspace - vented</InteriorAdjacentTo>
+            <Type>solid concrete</Type>
             <Height>4.0</Height>
             <Area>600.0</Area>
-            <Thickness>8.0</Thickness>
             <DepthBelowGrade>0.0</DepthBelowGrade>
             <InteriorFinish>
               <Type>none</Type>
@@ -194,8 +194,6 @@
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
-                <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                <DistanceToBottomOfInsulation>4.0</DistanceToBottomOfInsulation>
               </Layer>
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>

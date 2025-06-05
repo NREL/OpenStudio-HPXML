@@ -117,6 +117,7 @@
             <SystemIdentifier id='FoundationWall1'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Type>solid concrete</Type>
             <Length>150.0</Length>
             <Height>8.0</Height>
             <DepthBelowGrade>7.0</DepthBelowGrade>
