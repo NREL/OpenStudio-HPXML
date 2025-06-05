@@ -25,10 +25,7 @@
     "floor_over_foundation_assembly_r": 14.15,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
-    "foundation_wall_thickness": 6,
-    "foundation_wall_insulation_r": 0,
-    "foundation_wall_insulation_distance_to_top": 0,
-    "foundation_wall_insulation_distance_to_bottom": 0,
+    "foundation_wall": "None",
     "rim_joist_assembly_r": 5.01,
     "slab_perimeter_insulation_r": 0,
     "slab_perimeter_insulation_depth": 0,
@@ -38,12 +35,12 @@
     "slab_thickness": 4,
     "slab_carpet": "0% Carpet",
     "ceiling_assembly_r": 18.45,
-    "enclosure_roof_material": "0.6 Solar Absorptance",
+    "roof_material": "0.6 Solar Absorptance",
     "roof_assembly_r": 1.99,
     "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
-    "enclosure_wall_siding": "0.6 Solar Absorptance",
+    "wall_siding": "0.6 Solar Absorptance",
     "wall_assembly_r": 11.76,
     "window_area_or_wwr_front": 90,
     "window_area_or_wwr_back": 90,
@@ -222,8 +219,8 @@
   },
   "tests/ASHRAE_Standard_140/L202AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AC.xml",
-    "enclosure_roof_material": "0.2 Solar Absorptance",
-    "enclosure_wall_siding": "0.2 Solar Absorptance"
+    "roof_material": "0.2 Solar Absorptance",
+    "wall_siding": "0.2 Solar Absorptance"
   },
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -239,13 +236,12 @@
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_unit_cfa": 3078,
     "geometry_foundation_type": "ConditionedBasement",
+    "foundation_wall": "Solid Concrete, Uninsulated",
     "air_leakage": "0.335 nACH"
   },
   "tests/ASHRAE_Standard_140/L324XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L322XC.xml",
-    "foundation_wall_insulation_r": 10.2,
-    "foundation_wall_insulation_location": "interior",
-    "foundation_wall_insulation_distance_to_bottom": 7.25,
+    "foundation_wall": "Solid Concrete, Whole Wall, R-10.2, Interior",
     "rim_joist_assembly_r": 13.14
   },
   "tests/ASHRAE_Standard_140/L100AL.xml": {
@@ -308,8 +304,8 @@
   },
   "tests/ASHRAE_Standard_140/L202AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AL.xml",
-    "enclosure_roof_material": "0.2 Solar Absorptance",
-    "enclosure_wall_siding": "0.2 Solar Absorptance"
+    "roof_material": "0.2 Solar Absorptance",
+    "wall_siding": "0.2 Solar Absorptance"
   },
   "tests/HERS_HVAC/HVAC1a.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -425,8 +421,8 @@
     "air_leakage": "79.8 sq. in. ELA",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "geometry_unit_num_bedrooms": 2,
-    "enclosure_roof_material": "0.75 Solar Absorptance",
-    "enclosure_wall_siding": "0.75 Solar Absorptance",
+    "roof_material": "0.75 Solar Absorptance",
+    "wall_siding": "0.75 Solar Absorptance",
     "wall_assembly_r": 17.54,
     "floor_over_foundation_assembly_r": 30.3,
     "ceiling_assembly_r": 38.46,
@@ -553,10 +549,7 @@
     "floor_over_foundation_assembly_r": 0,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
-    "foundation_wall_thickness": 8,
-    "foundation_wall_insulation_r": 8.9,
-    "foundation_wall_insulation_distance_to_top": 0,
-    "foundation_wall_insulation_distance_to_bottom": 8,
+    "foundation_wall": "Solid Concrete, Whole Wall, R-8.9",
     "rim_joist_assembly_r": 23,
     "slab_perimeter_insulation_r": 0,
     "slab_perimeter_insulation_depth": 0,
@@ -566,12 +559,12 @@
     "slab_thickness": 4,
     "slab_carpet":"0% Carpet",
     "ceiling_assembly_r": 39.3,
-    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
+    "roof_material": "Asphalt/Fiberglass Shingles, Medium",
     "roof_assembly_r": 2.3,
     "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
-    "enclosure_wall_siding": "Wood, Medium",
+    "wall_siding": "Wood, Medium",
     "wall_assembly_r": 23,
     "window_area_or_wwr_front": 108,
     "window_area_or_wwr_back": 108,
@@ -1781,9 +1774,7 @@
   },
   "sample_files/base-foundation-conditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "foundation_wall_type": "concrete block foam core",
-    "foundation_wall_insulation_r": 18.9,
-    "foundation_wall_insulation_distance_to_top": 1
+    "foundation_wall": "Concrete Block Foam Core, Whole Wall, R-18.9"
   },
   "sample_files/base-foundation-conditioned-crawlspace.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1791,7 +1782,6 @@
     "geometry_foundation_type": "ConditionedCrawlspace",
     "geometry_foundation_height": 4,
     "floor_over_foundation_assembly_r": 18.7,
-    "foundation_wall_insulation_distance_to_bottom": 4,
     "ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "crawlspace - conditioned",
     "ducts_return_location": "crawlspace - conditioned",
@@ -1826,8 +1816,7 @@
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "UnconditionedBasement",
     "floor_over_foundation_assembly_r": 18.7,
-    "foundation_wall_insulation_r": 0,
-    "foundation_wall_insulation_distance_to_bottom": 0,
+    "foundation_wall": "Solid Concrete, Uninsulated",
     "rim_joist_assembly_r": 4,
     "ducts_supply_location": "basement - unconditioned",
     "ducts_return_location": "basement - unconditioned",
@@ -1845,13 +1834,12 @@
   },
   "sample_files/base-foundation-unconditioned-basement-assembly-r.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
-    "foundation_wall_assembly_r": 10.69
+    "foundation_wall": "Solid Concrete, Assembly R-10.69"
   },
   "sample_files/base-foundation-unconditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
     "floor_over_foundation_assembly_r": 2.1,
-    "foundation_wall_insulation_r": 8.9,
-    "foundation_wall_insulation_distance_to_bottom": 4,
+    "foundation_wall": "Solid Concrete, Whole Wall, R-8.9",
     "rim_joist_assembly_r": 23
   },
   "sample_files/base-foundation-unvented-crawlspace.xml": {
@@ -1860,7 +1848,6 @@
     "geometry_foundation_type": "UnventedCrawlspace",
     "geometry_foundation_height": 4,
     "floor_over_foundation_assembly_r": 18.7,
-    "foundation_wall_insulation_distance_to_bottom": 4,
     "slab_thickness": 0,
     "ducts_supply_location": "crawlspace - unvented",
     "ducts_return_location": "crawlspace - unvented",
@@ -1873,7 +1860,6 @@
     "geometry_foundation_type": "VentedCrawlspace",
     "geometry_foundation_height": 4,
     "floor_over_foundation_assembly_r": 18.7,
-    "foundation_wall_insulation_distance_to_bottom": 4,
     "slab_thickness": 0,
     "ducts_supply_location": "crawlspace - vented",
     "ducts_return_location": "crawlspace - vented",
@@ -1890,8 +1876,7 @@
   },
   "sample_files/base-foundation-walkout-basement.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "geometry_foundation_height_above_grade": 5,
-    "foundation_wall_insulation_distance_to_bottom": 4
+    "geometry_foundation_height_above_grade": 5
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3050,12 +3035,9 @@
     "site_iecc_zone": null,
     "site_state_code": null,
     "geometry_unit_num_bathrooms": null,
-    "foundation_wall_thickness": null,
-    "foundation_wall_insulation_distance_to_top": null,
-    "foundation_wall_insulation_distance_to_bottom": null,
     "slab_thickness": null,
-    "enclosure_roof_material": null,
-    "enclosure_wall_siding": null,
+    "roof_material": null,
+    "wall_siding": null,
     "window_fraction_operable": null,
     "window_interior_shading_winter": null,
     "window_interior_shading_summer": null,

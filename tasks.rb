@@ -206,6 +206,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     floor.interior_finish_thickness = 0.5
   end
   hpxml_bldg.foundation_walls.each do |fwall|
+    fwall.thickness = 6.0
     if fwall.insulation_interior_r_value == 0
       fwall.interior_finish_type = HPXML::InteriorFinishNone
     else

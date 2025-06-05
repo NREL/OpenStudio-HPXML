@@ -44,8 +44,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     site_soil_type_choices = get_option_names('site_soil_type.tsv')
     slab_carpet_choices = get_option_names('slab_carpet.tsv')
-    enclosure_roof_material_choices = get_option_names('roof_material.tsv')
-    enclosure_wall_siding_choices = get_option_names('wall_siding.tsv')
+    foundation_wall_choices = get_option_names('foundation_wall.tsv')
+    roof_material_choices = get_option_names('roof_material.tsv')
+    wall_siding_choices = get_option_names('wall_siding.tsv')
     air_leakage_choices = get_option_names('air_leakage.tsv')
     heating_system_choices = get_option_names('heating_system.tsv')
     cooling_system_choices = get_option_names('cooling_system.tsv')
@@ -189,7 +190,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_type', site_soil_type_choices, false)
     arg.setDisplayName('Site: Soil Type')
-    arg.setDescription('The soil and moisture type, used to inform ground conductivity and diffusivity. Specific numerical inputs ([Btu/hr-ft-F] or [ft^2/hr]) override the soil and moisture type input.')
+    arg.setDescription('The soil and moisture type.')
     args << arg
 
     site_iecc_zone_choices = OpenStudio::StringVector.new
@@ -306,7 +307,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_cfa', true)
     arg.setDisplayName('Geometry: Unit Conditioned Floor Area')
-    arg.setUnits('ft^2')
+    arg.setUnits('ft2')
     arg.setDescription("The total floor area of the unit's conditioned space (including any conditioned basement floor area).")
     arg.setDefaultValue(2000.0)
     args << arg
@@ -489,14 +490,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('floor_over_foundation_assembly_r', true)
     arg.setDisplayName('Floor: Over Foundation Assembly R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Assembly R-value for the floor over the foundation. Ignored if the building has a slab-on-grade foundation.')
     arg.setDefaultValue(28.1)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('floor_over_garage_assembly_r', true)
     arg.setDisplayName('Floor: Over Garage Assembly R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Assembly R-value for the floor over the garage. Ignored unless the building has a garage under conditioned space.')
     arg.setDefaultValue(28.1)
     args << arg
@@ -513,72 +514,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::FloorTypeWoodFrame)
     args << arg
 
-    foundation_wall_type_choices = OpenStudio::StringVector.new
-    foundation_wall_type_choices << HPXML::FoundationWallTypeSolidConcrete
-    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlock
-    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlockFoamCore
-    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlockPerliteCore
-    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlockVermiculiteCore
-    foundation_wall_type_choices << HPXML::FoundationWallTypeConcreteBlockSolidCore
-    foundation_wall_type_choices << HPXML::FoundationWallTypeDoubleBrick
-    foundation_wall_type_choices << HPXML::FoundationWallTypeWood
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('foundation_wall_type', foundation_wall_type_choices, false)
-    arg.setDisplayName('Foundation Wall: Type')
-    arg.setDescription("The material type of the foundation wall. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-foundation-walls'>HPXML Foundation Walls</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('foundation_wall_thickness', false)
-    arg.setDisplayName('Foundation Wall: Thickness')
-    arg.setUnits('in')
-    arg.setDescription("The thickness of the foundation wall. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-foundation-walls'>HPXML Foundation Walls</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('foundation_wall_insulation_r', true)
-    arg.setDisplayName('Foundation Wall: Insulation Nominal R-value')
-    arg.setUnits('h-ft^2-R/Btu')
-    arg.setDescription('Nominal R-value for the foundation wall insulation. Only applies to basements/crawlspaces.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    wall_ins_location_choices = OpenStudio::StringVector.new
-    wall_ins_location_choices << Constants::LocationInterior
-    wall_ins_location_choices << Constants::LocationExterior
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('foundation_wall_insulation_location', wall_ins_location_choices, false)
-    arg.setDisplayName('Foundation Wall: Insulation Location')
-    arg.setUnits('ft')
-    arg.setDescription('Whether the insulation is on the interior or exterior of the foundation wall. Only applies to basements/crawlspaces.')
-    arg.setDefaultValue(Constants::LocationExterior)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('foundation_wall_insulation_distance_to_top', false)
-    arg.setDisplayName('Foundation Wall: Insulation Distance To Top')
-    arg.setUnits('ft')
-    arg.setDescription("The distance from the top of the foundation wall to the top of the foundation wall insulation. Only applies to basements/crawlspaces. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-foundation-walls'>HPXML Foundation Walls</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('foundation_wall_insulation_distance_to_bottom', false)
-    arg.setDisplayName('Foundation Wall: Insulation Distance To Bottom')
-    arg.setUnits('ft')
-    arg.setDescription("The distance from the top of the foundation wall to the bottom of the foundation wall insulation. Only applies to basements/crawlspaces. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-foundation-walls'>HPXML Foundation Walls</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('foundation_wall_assembly_r', false)
-    arg.setDisplayName('Foundation Wall: Assembly R-value')
-    arg.setUnits('h-ft^2-R/Btu')
-    arg.setDescription('Assembly R-value for the foundation walls. Only applies to basements/crawlspaces. If provided, overrides the previous foundation wall insulation inputs. If not provided, it is ignored.')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('foundation_wall', foundation_wall_choices, true)
+    arg.setDisplayName('Enclosure: Foundation Wall')
+    arg.setDescription('The type of foundation wall.')
+    arg.setDefaultValue('Solid Concrete, Uninsulated')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('rim_joist_assembly_r', false)
     arg.setDisplayName('Rim Joist: Assembly R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Required if a rim joist height is provided.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_perimeter_insulation_r', true)
     arg.setDisplayName('Slab: Perimeter Insulation Nominal R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
     arg.setDefaultValue(0)
     args << arg
@@ -592,7 +542,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_exterior_horizontal_insulation_r', false)
     arg.setDisplayName('Slab: Exterior Horizontal Insulation Nominal R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Nominal R-value of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
     args << arg
 
@@ -610,7 +560,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_under_insulation_r', true)
     arg.setDisplayName('Slab: Under Slab Insulation Nominal R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
     arg.setDefaultValue(0)
     args << arg
@@ -635,19 +585,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_assembly_r', true)
     arg.setDisplayName('Ceiling: Assembly R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Assembly R-value for the ceiling (attic floor).')
     arg.setDefaultValue(31.6)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_roof_material', enclosure_roof_material_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_material', roof_material_choices, false)
     arg.setDisplayName('Enclosure: Roof Material')
     arg.setDescription("The material type/color of the roof. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('roof_assembly_r', true)
     arg.setDisplayName('Roof: Assembly R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Assembly R-value of the roof.')
     arg.setDefaultValue(2.3)
     args << arg
@@ -692,39 +642,39 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::WallTypeWoodStud)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall_siding', enclosure_wall_siding_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('wall_siding', wall_siding_choices, false)
     arg.setDisplayName('Enclosure: Wall Siding')
     arg.setDescription("The siding type/color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-walls'>HPXML Walls</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('wall_assembly_r', true)
     arg.setDisplayName('Wall: Assembly R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('Assembly R-value of the walls.')
     arg.setDefaultValue(11.9)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_front', true)
     arg.setDisplayName('Windows: Front Window Area or Window-to-Wall Ratio')
-    arg.setUnits('ft^2 or frac')
+    arg.setUnits('ft2 or frac')
     arg.setDescription("The amount of window area on the unit's front facade. Enter a fraction if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_back', true)
     arg.setDisplayName('Windows: Back Window Area or Window-to-Wall Ratio')
-    arg.setUnits('ft^2 or frac')
+    arg.setUnits('ft2 or frac')
     arg.setDescription("The amount of window area on the unit's back facade. Enter a fraction if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_left', true)
     arg.setDisplayName('Windows: Left Window Area or Window-to-Wall Ratio')
-    arg.setUnits('ft^2 or frac')
+    arg.setUnits('ft2 or frac')
     arg.setDescription("The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_right', true)
     arg.setDisplayName('Windows: Right Window Area or Window-to-Wall Ratio')
-    arg.setUnits('ft^2 or frac')
+    arg.setUnits('ft2 or frac')
     arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.")
     args << arg
 
@@ -742,7 +692,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_ufactor', true)
     arg.setDisplayName('Windows: U-Factor')
-    arg.setUnits('Btu/hr-ft^2-R')
+    arg.setUnits('Btu/hr-ft2-R')
     arg.setDescription('Full-assembly NFRC U-factor.')
     arg.setDefaultValue(0.37)
     args << arg
@@ -918,35 +868,35 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_front', true)
     arg.setDisplayName('Skylights: Front Roof Area')
-    arg.setUnits('ft^2')
+    arg.setUnits('ft2')
     arg.setDescription("The amount of skylight area on the unit's front conditioned roof facade.")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_back', true)
     arg.setDisplayName('Skylights: Back Roof Area')
-    arg.setUnits('ft^2')
+    arg.setUnits('ft2')
     arg.setDescription("The amount of skylight area on the unit's back conditioned roof facade.")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_left', true)
     arg.setDisplayName('Skylights: Left Roof Area')
-    arg.setUnits('ft^2')
+    arg.setUnits('ft2')
     arg.setDescription("The amount of skylight area on the unit's left conditioned roof facade (when viewed from the front).")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_right', true)
     arg.setDisplayName('Skylights: Right Roof Area')
-    arg.setUnits('ft^2')
+    arg.setUnits('ft2')
     arg.setDescription("The amount of skylight area on the unit's right conditioned roof facade (when viewed from the front).")
     arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_ufactor', true)
     arg.setDisplayName('Skylights: U-Factor')
-    arg.setUnits('Btu/hr-ft^2-R')
+    arg.setUnits('Btu/hr-ft2-R')
     arg.setDescription('Full-assembly NFRC U-factor.')
     arg.setDefaultValue(0.33)
     args << arg
@@ -964,14 +914,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('door_area', true)
     arg.setDisplayName('Doors: Area')
-    arg.setUnits('ft^2')
+    arg.setUnits('ft2')
     arg.setDescription('The area of the opaque door(s).')
     arg.setDefaultValue(20.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('door_rvalue', true)
     arg.setDisplayName('Doors: R-value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription('R-value of the opaque door(s).')
     arg.setDefaultValue(4.4)
     args << arg
@@ -1673,7 +1623,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_jacket_rvalue', false)
     arg.setDisplayName('Water Heater: Jacket R-value')
     arg.setDescription("The jacket R-value of water heater. Doesn't apply to #{HPXML::WaterHeaterTypeTankless} or #{HPXML::WaterHeaterTypeCombiTankless}. If not provided, defaults to no jacket insulation.")
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_setpoint_temperature', false)
@@ -1760,7 +1710,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_pipe_r', false)
     arg.setDisplayName('Hot Water Distribution: Pipe Insulation Nominal R-Value')
-    arg.setUnits('h-ft^2-R/Btu')
+    arg.setUnits('F-ft2-hr/Btu')
     arg.setDescription("Nominal R-value of the pipe insulation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hot-water-distribution'>HPXML Hot Water Distribution</a>) is used.")
     args << arg
 
@@ -1833,7 +1783,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('solar_thermal_collector_area', true)
     arg.setDisplayName('Solar Thermal: Collector Area')
-    arg.setUnits('ft^2')
+    arg.setUnits('ft2')
     arg.setDescription('The collector area of the solar thermal system.')
     arg.setDefaultValue(40.0)
     args << arg
@@ -1873,7 +1823,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('solar_thermal_collector_rated_thermal_losses', true)
     arg.setDisplayName('Solar Thermal: Collector Rated Thermal Losses')
-    arg.setUnits('Btu/hr-ft^2-R')
+    arg.setUnits('Btu/hr-ft2-R')
     arg.setDescription('The collector rated thermal losses of the solar thermal system.')
     arg.setDefaultValue(0.2799)
     args << arg
@@ -2411,7 +2361,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_washer_efficiency', false)
     arg.setDisplayName('Clothes Washer: Efficiency')
-    arg.setUnits('ft^3/kWh-cyc')
+    arg.setUnits('ft3/kWh-cyc')
     arg.setDescription("The efficiency of the clothes washer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.")
     args << arg
 
@@ -2447,7 +2397,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_washer_capacity', false)
     arg.setDisplayName('Clothes Washer: Drum Volume')
-    arg.setUnits('ft^3')
+    arg.setUnits('ft3')
     arg.setDescription("Volume of the washer drum. Obtained from the EnergyStar website or the manufacturer's literature. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.")
     args << arg
 
@@ -3111,8 +3061,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # Get all option properties
     get_option_properties(args, 'site_soil_type.tsv', args[:site_soil_type])
     get_option_properties(args, 'slab_carpet.tsv', args[:slab_carpet])
-    get_option_properties(args, 'roof_material.tsv', args[:enclosure_roof_material])
-    get_option_properties(args, 'wall_siding.tsv', args[:enclosure_wall_siding])
+    get_option_properties(args, 'foundation_wall.tsv', args[:foundation_wall])
+    get_option_properties(args, 'roof_material.tsv', args[:roof_material])
+    get_option_properties(args, 'wall_siding.tsv', args[:wall_siding])
     get_option_properties(args, 'air_leakage.tsv', args[:air_leakage])
     get_option_properties(args, 'heating_system.tsv', args[:heating_system])
     get_option_properties(args, 'cooling_system.tsv', args[:cooling_system])
@@ -3206,7 +3157,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height_above_grade] > 0)
     warnings << 'Specified a slab foundation type with a non-zero height above grade.' if warning
 
-    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || !args[:foundation_wall_assembly_r].nil?) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
+    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_nominal_r_value].to_f > 0) || !args[:foundation_wall_assembly_r_value].nil?) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
     warnings << 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.' if warning
 
     warning = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue) && (args[:roof_assembly_r] > max_uninsulated_roof_rvalue)
@@ -4627,21 +4578,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         foundation_wall_insulation_location = args[:foundation_wall_insulation_location]
       end
 
-      if args[:foundation_wall_assembly_r].to_f > 0
-        insulation_assembly_r_value = args[:foundation_wall_assembly_r]
+      if args[:foundation_wall_assembly_r_value].to_f > 0
+        insulation_assembly_r_value = args[:foundation_wall_assembly_r_value]
       else
         insulation_interior_r_value = 0
         insulation_exterior_r_value = 0
         if interior_adjacent_to == exterior_adjacent_to # E.g., don't insulate wall between basement and neighbor basement
           # nop
         elsif foundation_wall_insulation_location == Constants::LocationInterior
-          insulation_interior_r_value = args[:foundation_wall_insulation_r]
+          insulation_interior_r_value = args[:foundation_wall_insulation_nominal_r_value]
           if insulation_interior_r_value > 0
             insulation_interior_distance_to_top = args[:foundation_wall_insulation_distance_to_top]
             insulation_interior_distance_to_bottom = args[:foundation_wall_insulation_distance_to_bottom]
           end
         elsif foundation_wall_insulation_location == Constants::LocationExterior
-          insulation_exterior_r_value = args[:foundation_wall_insulation_r]
+          insulation_exterior_r_value = args[:foundation_wall_insulation_nominal_r_value]
           if insulation_exterior_r_value > 0
             insulation_exterior_distance_to_top = args[:foundation_wall_insulation_distance_to_top]
             insulation_exterior_distance_to_bottom = args[:foundation_wall_insulation_distance_to_bottom]
@@ -5745,7 +5696,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                 duct_type: HPXML::DuctTypeSupply,
-                                duct_insulation_r_value: args[:ducts_supply_insulation_r],
+                                duct_insulation_r_value: args[:ducts_supply_insulation_r_value],
                                 duct_buried_insulation_level: args[:ducts_supply_buried_insulation_level],
                                 duct_location: ducts_supply_location,
                                 duct_surface_area: args[:ducts_supply_surface_area],
@@ -5756,7 +5707,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
       hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                   duct_type: HPXML::DuctTypeReturn,
-                                  duct_insulation_r_value: args[:ducts_return_insulation_r],
+                                  duct_insulation_r_value: args[:ducts_return_insulation_r_value],
                                   duct_buried_insulation_level: args[:ducts_return_buried_insulation_level],
                                   duct_location: ducts_return_location,
                                   duct_surface_area: args[:ducts_return_surface_area],

@@ -459,10 +459,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['floor_over_foundation_assembly_r'] = 0
       args['floor_over_garage_assembly_r'] = 0
       args['floor_type'] = HPXML::FloorTypeWoodFrame
-      args['foundation_wall_thickness'] = 8.0
-      args['foundation_wall_insulation_r'] = 8.9
-      args['foundation_wall_insulation_distance_to_top'] = 0.0
-      args['foundation_wall_insulation_distance_to_bottom'] = 8.0
+      args['foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
       args['rim_joist_assembly_r'] = 23.0
       args['slab_perimeter_insulation_r'] = 0
       args['slab_perimeter_insulation_depth'] = 0
@@ -474,13 +471,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['slab_thickness'] = 4.0
       args['slab_carpet'] = '0% Carpet'
       args['ceiling_assembly_r'] = 39.3
-      args['enclosure_roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
+      args['roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
       args['roof_assembly_r'] = 2.3
       args['radiant_barrier_attic_location'] = Constants::None
       args['radiant_barrier_grade'] = 1
       args['geometry_neighbor_buildings'] = 'None'
       args['wall_type'] = HPXML::WallTypeWoodStud
-      args['enclosure_wall_siding'] = 'Wood, Medium'
+      args['wall_siding'] = 'Wood, Medium'
       args['wall_assembly_r'] = 23
       args['window_area_or_wwr_front'] = 108.0
       args['window_area_or_wwr_back'] = 108.0
@@ -814,7 +811,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeSlab
       args['geometry_foundation_height'] = 0.0
       args['geometry_foundation_height_above_grade'] = 0.0
-      args.delete('foundation_wall_insulation_distance_to_bottom')
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = HPXML::AtticTypeConditioned
@@ -870,7 +866,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
       args['geometry_foundation_height'] = 4
       args['floor_over_foundation_assembly_r'] = 18.7
-      args['foundation_wall_insulation_distance_to_bottom'] = 4
       args['ducts_supply_location'] = HPXML::LocationCrawlspace
       args['ducts_return_location'] = HPXML::LocationCrawlspace
     when 'extra-ducts-attic.xml'
@@ -880,7 +875,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
       args['geometry_foundation_height'] = 4
       args['floor_over_foundation_assembly_r'] = 18.7
-      args['foundation_wall_insulation_distance_to_bottom'] = 4
       args['water_heater_location'] = HPXML::LocationCrawlspace
     when 'extra-water-heater-attic.xml'
       args['water_heater_location'] = HPXML::LocationAttic
@@ -918,27 +912,22 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeSlab
       args['geometry_foundation_height'] = 0.0
       args['geometry_foundation_height_above_grade'] = 0.0
-      args.delete('foundation_wall_insulation_distance_to_bottom')
     when 'extra-sfa-vented-crawlspace.xml'
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceVented
       args['geometry_foundation_height'] = 4.0
       args['floor_over_foundation_assembly_r'] = 18.7
-      args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     when 'extra-sfa-unvented-crawlspace.xml'
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
       args['geometry_foundation_height'] = 4.0
       args['floor_over_foundation_assembly_r'] = 18.7
-      args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     when 'extra-sfa-conditioned-crawlspace.xml'
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceConditioned
       args['geometry_foundation_height'] = 4.0
       args['floor_over_foundation_assembly_r'] = 2.1
-      args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     when 'extra-sfa-unconditioned-basement.xml'
       args['geometry_foundation_type'] = HPXML::FoundationTypeBasementUnconditioned
       args['floor_over_foundation_assembly_r'] = 18.7
-      args['foundation_wall_insulation_r'] = 0
-      args['foundation_wall_insulation_distance_to_bottom'] = 0.0
+      args['foundation_wall'] = 'Solid Concrete, Uninsulated'
     when 'extra-sfa-ambient.xml'
       args['geometry_unit_cfa'] = 900.0
       args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
@@ -966,19 +955,16 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeSlab
       args['geometry_foundation_height'] = 0.0
       args['geometry_foundation_height_above_grade'] = 0.0
-      args.delete('foundation_wall_insulation_distance_to_bottom')
     when 'extra-mf-vented-crawlspace.xml'
       args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceVented
       args['geometry_foundation_height'] = 4.0
       args['floor_over_foundation_assembly_r'] = 18.7
-      args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     when 'extra-mf-unvented-crawlspace.xml'
       args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
       args['geometry_foundation_height'] = 4.0
       args['floor_over_foundation_assembly_r'] = 18.7
-      args['foundation_wall_insulation_distance_to_bottom'] = 4.0
     when 'extra-mf-ambient.xml'
       args['geometry_unit_cfa'] = 450.0
       args['geometry_foundation_type'] = HPXML::FoundationTypeAmbient
@@ -1075,7 +1061,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump'] = 'Central HP, SEER 10, 6.2 HSPF'
     when 'error-sfd-conditioned-basement-zero-foundation-height.xml'
       args['geometry_foundation_height'] = 0.0
-      args.delete('foundation_wall_insulation_distance_to_bottom')
     when 'error-sfd-adiabatic-walls.xml'
       args['geometry_unit_left_wall_is_adiabatic'] = true
     when 'error-mf-conditioned-basement'
@@ -1086,7 +1071,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
       args['geometry_foundation_height'] = 0.0
       args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
-      args.delete('foundation_wall_insulation_distance_to_bottom')
     when 'error-second-heating-system-but-no-primary-heating.xml'
       args['heating_system'] = 'None'
       args['heating_system_2'] = 'Fireplace, 100% Efficiency'
@@ -1222,23 +1206,20 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'warning-slab-non-zero-foundation-height-above-grade.xml'
       args['geometry_foundation_type'] = HPXML::FoundationTypeSlab
       args['geometry_foundation_height'] = 0.0
-      args.delete('foundation_wall_insulation_distance_to_bottom')
     when 'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml'
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceVented
       args['geometry_foundation_height'] = 3.0
       args['floor_over_foundation_assembly_r'] = 10
-      args['foundation_wall_insulation_distance_to_bottom'] = 0.0
-      args['foundation_wall_assembly_r'] = 10
+      args['foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
     when 'warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml'
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
       args['geometry_foundation_height'] = 3.0
       args['floor_over_foundation_assembly_r'] = 10
-      args['foundation_wall_insulation_distance_to_bottom'] = 0.0
-      args['foundation_wall_assembly_r'] = 10
+      args['foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
     when 'warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml'
       args['geometry_foundation_type'] = HPXML::FoundationTypeBasementUnconditioned
       args['floor_over_foundation_assembly_r'] = 10
-      args['foundation_wall_assembly_r'] = 10
+      args['foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
     when 'warning-vented-attic-with-floor-and-roof-insulation.xml'
       args['geometry_attic_type'] = HPXML::AtticTypeVented
       args['roof_assembly_r'] = 10

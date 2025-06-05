@@ -260,7 +260,7 @@ Presence of nearby buildings, trees, obstructions for infiltration model. If not
 
 **Site: Soil Type**
 
-The soil and moisture type, used to inform ground conductivity and diffusivity. Specific numerical inputs ([Btu/hr-ft-F] or [ft^2/hr]) override the soil and moisture type input.
+The soil and moisture type.
 
 - **Name:** ``site_soil_type``
 - **Type:** ``Choice``
@@ -481,7 +481,7 @@ The total floor area of the unit's conditioned space (including any conditioned 
 - **Name:** ``geometry_unit_cfa``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2``
+- **Units:** ``ft2``
 
 - **Required:** ``true``
 
@@ -767,7 +767,7 @@ Assembly R-value for the floor over the foundation. Ignored if the building has 
 - **Name:** ``floor_over_foundation_assembly_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
@@ -780,7 +780,7 @@ Assembly R-value for the floor over the garage. Ignored unless the building has 
 - **Name:** ``floor_over_garage_assembly_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
@@ -799,94 +799,16 @@ The type of floors.
 
 <br/>
 
-**Foundation Wall: Type**
+**Enclosure: Foundation Wall**
 
-The material type of the foundation wall. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-foundation-walls'>HPXML Foundation Walls</a>) is used.
+The type of foundation wall.
 
-- **Name:** ``foundation_wall_type``
+- **Name:** ``foundation_wall``
 - **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `solid concrete`, `concrete block`, `concrete block foam core`, `concrete block perlite core`, `concrete block vermiculite core`, `concrete block solid core`, `double brick`, `wood`
-
-<br/>
-
-**Foundation Wall: Thickness**
-
-The thickness of the foundation wall. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-foundation-walls'>HPXML Foundation Walls</a>) is used.
-
-- **Name:** ``foundation_wall_thickness``
-- **Type:** ``Double``
-
-- **Units:** ``in``
-
-- **Required:** ``false``
-
-<br/>
-
-**Foundation Wall: Insulation Nominal R-value**
-
-Nominal R-value for the foundation wall insulation. Only applies to basements/crawlspaces.
-
-- **Name:** ``foundation_wall_insulation_r``
-- **Type:** ``Double``
-
-- **Units:** ``h-ft^2-R/Btu``
 
 - **Required:** ``true``
 
-<br/>
-
-**Foundation Wall: Insulation Location**
-
-Whether the insulation is on the interior or exterior of the foundation wall. Only applies to basements/crawlspaces.
-
-- **Name:** ``foundation_wall_insulation_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `interior`, `exterior`
-
-<br/>
-
-**Foundation Wall: Insulation Distance To Top**
-
-The distance from the top of the foundation wall to the top of the foundation wall insulation. Only applies to basements/crawlspaces. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-foundation-walls'>HPXML Foundation Walls</a>) is used.
-
-- **Name:** ``foundation_wall_insulation_distance_to_top``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Foundation Wall: Insulation Distance To Bottom**
-
-The distance from the top of the foundation wall to the bottom of the foundation wall insulation. Only applies to basements/crawlspaces. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-foundation-walls'>HPXML Foundation Walls</a>) is used.
-
-- **Name:** ``foundation_wall_insulation_distance_to_bottom``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Foundation Wall: Assembly R-value**
-
-Assembly R-value for the foundation walls. Only applies to basements/crawlspaces. If provided, overrides the previous foundation wall insulation inputs. If not provided, it is ignored.
-
-- **Name:** ``foundation_wall_assembly_r``
-- **Type:** ``Double``
-
-- **Units:** ``h-ft^2-R/Btu``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Solid Concrete, Uninsulated`, `Solid Concrete, Half Wall, R-5`, `Solid Concrete, Half Wall, R-10`, `Solid Concrete, Half Wall, R-15`, `Solid Concrete, Half Wall, R-20`, `Solid Concrete, Whole Wall, R-5`, `Solid Concrete, Whole Wall, R-8.9`, `Solid Concrete, Whole Wall, R-10`, `Solid Concrete, Whole Wall, R-10.2, Interior`, `Solid Concrete, Whole Wall, R-15`, `Solid Concrete, Whole Wall, R-20`, `Solid Concrete, Assembly R-10.69`, `Concrete Block Foam Core, Whole Wall, R-18.9`
 
 <br/>
 
@@ -897,7 +819,7 @@ Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Requ
 - **Name:** ``rim_joist_assembly_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``false``
 
@@ -910,7 +832,7 @@ Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-gr
 - **Name:** ``slab_perimeter_insulation_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
@@ -936,7 +858,7 @@ Nominal R-value of the slab exterior horizontal insulation. Applies to slab-on-g
 - **Name:** ``slab_exterior_horizontal_insulation_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``false``
 
@@ -975,7 +897,7 @@ Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grad
 - **Name:** ``slab_under_insulation_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
@@ -1027,7 +949,7 @@ Assembly R-value for the ceiling (attic floor).
 - **Name:** ``ceiling_assembly_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
@@ -1037,7 +959,7 @@ Assembly R-value for the ceiling (attic floor).
 
 The material type/color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
 
-- **Name:** ``enclosure_roof_material``
+- **Name:** ``roof_material``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1053,7 +975,7 @@ Assembly R-value of the roof.
 - **Name:** ``roof_assembly_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
@@ -1102,7 +1024,7 @@ The type of walls.
 
 The siding type/color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-walls'>HPXML Walls</a>) is used.
 
-- **Name:** ``enclosure_wall_siding``
+- **Name:** ``wall_siding``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1118,7 +1040,7 @@ Assembly R-value of the walls.
 - **Name:** ``wall_assembly_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
@@ -1131,7 +1053,7 @@ The amount of window area on the unit's front facade. Enter a fraction if specif
 - **Name:** ``window_area_or_wwr_front``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2 or frac``
+- **Units:** ``ft2 or frac``
 
 - **Required:** ``true``
 
@@ -1144,7 +1066,7 @@ The amount of window area on the unit's back facade. Enter a fraction if specify
 - **Name:** ``window_area_or_wwr_back``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2 or frac``
+- **Units:** ``ft2 or frac``
 
 - **Required:** ``true``
 
@@ -1157,7 +1079,7 @@ The amount of window area on the unit's left facade (when viewed from the front)
 - **Name:** ``window_area_or_wwr_left``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2 or frac``
+- **Units:** ``ft2 or frac``
 
 - **Required:** ``true``
 
@@ -1170,7 +1092,7 @@ The amount of window area on the unit's right facade (when viewed from the front
 - **Name:** ``window_area_or_wwr_right``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2 or frac``
+- **Units:** ``ft2 or frac``
 
 - **Required:** ``true``
 
@@ -1209,7 +1131,7 @@ Full-assembly NFRC U-factor.
 - **Name:** ``window_ufactor``
 - **Type:** ``Double``
 
-- **Units:** ``Btu/hr-ft^2-R``
+- **Units:** ``Btu/hr-ft2-R``
 
 - **Required:** ``true``
 
@@ -1504,7 +1426,7 @@ The amount of skylight area on the unit's front conditioned roof facade.
 - **Name:** ``skylight_area_front``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2``
+- **Units:** ``ft2``
 
 - **Required:** ``true``
 
@@ -1517,7 +1439,7 @@ The amount of skylight area on the unit's back conditioned roof facade.
 - **Name:** ``skylight_area_back``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2``
+- **Units:** ``ft2``
 
 - **Required:** ``true``
 
@@ -1530,7 +1452,7 @@ The amount of skylight area on the unit's left conditioned roof facade (when vie
 - **Name:** ``skylight_area_left``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2``
+- **Units:** ``ft2``
 
 - **Required:** ``true``
 
@@ -1543,7 +1465,7 @@ The amount of skylight area on the unit's right conditioned roof facade (when vi
 - **Name:** ``skylight_area_right``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2``
+- **Units:** ``ft2``
 
 - **Required:** ``true``
 
@@ -1556,7 +1478,7 @@ Full-assembly NFRC U-factor.
 - **Name:** ``skylight_ufactor``
 - **Type:** ``Double``
 
-- **Units:** ``Btu/hr-ft^2-R``
+- **Units:** ``Btu/hr-ft2-R``
 
 - **Required:** ``true``
 
@@ -1593,7 +1515,7 @@ The area of the opaque door(s).
 - **Name:** ``door_area``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2``
+- **Units:** ``ft2``
 
 - **Required:** ``true``
 
@@ -1606,7 +1528,7 @@ R-value of the opaque door(s).
 - **Name:** ``door_rvalue``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
@@ -2863,7 +2785,7 @@ The jacket R-value of water heater. Doesn't apply to instantaneous water heater 
 - **Name:** ``water_heater_jacket_rvalue``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``false``
 
@@ -3017,7 +2939,7 @@ Nominal R-value of the pipe insulation. If not provided, the OS-HPXML default (s
 - **Name:** ``hot_water_distribution_pipe_r``
 - **Type:** ``Double``
 
-- **Units:** ``h-ft^2-R/Btu``
+- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``false``
 
@@ -3124,7 +3046,7 @@ The collector area of the solar thermal system.
 - **Name:** ``solar_thermal_collector_area``
 - **Type:** ``Double``
 
-- **Units:** ``ft^2``
+- **Units:** ``ft2``
 
 - **Required:** ``true``
 
@@ -3200,7 +3122,7 @@ The collector rated thermal losses of the solar thermal system.
 - **Name:** ``solar_thermal_collector_rated_thermal_losses``
 - **Type:** ``Double``
 
-- **Units:** ``Btu/hr-ft^2-R``
+- **Units:** ``Btu/hr-ft2-R``
 
 - **Required:** ``true``
 
@@ -4265,7 +4187,7 @@ The efficiency of the clothes washer. If not provided, the OS-HPXML default (see
 - **Name:** ``clothes_washer_efficiency``
 - **Type:** ``Double``
 
-- **Units:** ``ft^3/kWh-cyc``
+- **Units:** ``ft3/kWh-cyc``
 
 - **Required:** ``false``
 
@@ -4343,7 +4265,7 @@ Volume of the washer drum. Obtained from the EnergyStar website or the manufactu
 - **Name:** ``clothes_washer_capacity``
 - **Type:** ``Double``
 
-- **Units:** ``ft^3``
+- **Units:** ``ft3``
 
 - **Required:** ``false``
 
