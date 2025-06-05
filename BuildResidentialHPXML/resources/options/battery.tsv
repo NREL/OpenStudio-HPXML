@@ -16,26 +16,3 @@ Usable Capacity: The battery's usable capacity.
 "Location: The space type for the battery location (e.g., ""outside"", ""garage"", ""basement - unconditioned"", etc.)."					
 Rated Power Output: The battery's power output under non-peak conditions.					
 Round Trip Efficiency: The round trip efficiency.					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-Maximum Power Output: Peak power for the PV system.					
-"Module Type: The type of PV module (""standard"", ""premium"", or ""thin film""). If not provided, defaults to ""standard""."					
-"Location: The location of the PV system (""ground"" or ""roof"" mounted). If not provided, defaults to ""roof""."					
-"Tracking: The type of tracking (""fixed"", ""1-axis"", ""1-axis backtracked"", or ""2-axis""). If not provided, defaults to ""fixed""."					
-"System Losses Fraction: The total PV system losses including soiling, shading, snow, degradation, etc. If not provided, the OS-HPXML default is used."					
-"Inverter Efficiency: Efficiency of the PV system inverter. If not provided, the OS-HPXML default is used."					
