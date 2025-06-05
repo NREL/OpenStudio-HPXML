@@ -125,7 +125,7 @@
               <SystemIdentifier id='FoundationWall1Insulation'/>
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
-                <NominalRValue>8.9</NominalRValue>
+                <NominalRValue>10.0</NominalRValue>
               </Layer>
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>

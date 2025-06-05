@@ -808,7 +808,7 @@ The type of foundation wall.
 
 - **Required:** ``true``
 
-- **Choices:** `None`, `Solid Concrete, Uninsulated`, `Solid Concrete, Half Wall, R-5`, `Solid Concrete, Half Wall, R-10`, `Solid Concrete, Half Wall, R-15`, `Solid Concrete, Half Wall, R-20`, `Solid Concrete, Whole Wall, R-5`, `Solid Concrete, Whole Wall, R-8.9`, `Solid Concrete, Whole Wall, R-10`, `Solid Concrete, Whole Wall, R-10.2, Interior`, `Solid Concrete, Whole Wall, R-15`, `Solid Concrete, Whole Wall, R-20`, `Solid Concrete, Assembly R-10.69`, `Concrete Block Foam Core, Whole Wall, R-18.9`
+- **Choices:** `None`, `Solid Concrete, Uninsulated`, `Solid Concrete, Half Wall, R-5`, `Solid Concrete, Half Wall, R-10`, `Solid Concrete, Half Wall, R-15`, `Solid Concrete, Half Wall, R-20`, `Solid Concrete, Whole Wall, R-5`, `Solid Concrete, Whole Wall, R-10`, `Solid Concrete, Whole Wall, R-10.2, Interior`, `Solid Concrete, Whole Wall, R-15`, `Solid Concrete, Whole Wall, R-20`, `Solid Concrete, Assembly R-10.69`, `Concrete Block Foam Core, Whole Wall, R-18.9`
 
 <br/>
 

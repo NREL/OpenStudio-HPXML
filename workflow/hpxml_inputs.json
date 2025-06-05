@@ -549,7 +549,7 @@
     "floor_over_foundation_assembly_r": 0,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
-    "foundation_wall": "Solid Concrete, Whole Wall, R-8.9",
+    "foundation_wall": "Solid Concrete, Whole Wall, R-10",
     "rim_joist_assembly_r": 23,
     "slab_perimeter_insulation_r": 0,
     "slab_perimeter_insulation_depth": 0,
@@ -1839,7 +1839,7 @@
   "sample_files/base-foundation-unconditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
     "floor_over_foundation_assembly_r": 2.1,
-    "foundation_wall": "Solid Concrete, Whole Wall, R-8.9",
+    "foundation_wall": "Solid Concrete, Half Wall, R-10",
     "rim_joist_assembly_r": 23
   },
   "sample_files/base-foundation-unvented-crawlspace.xml": {
