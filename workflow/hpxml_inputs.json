@@ -28,10 +28,9 @@
     "floor_over_foundation_assembly_r": 14.15,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
+    "foundation_wall_type": "solid concrete",
     "foundation_wall_thickness": 6,
     "foundation_wall_insulation_r": 0,
-    "foundation_wall_insulation_distance_to_top": 0,
-    "foundation_wall_insulation_distance_to_bottom": 0,
     "rim_joist_assembly_r": 5.01,
     "slab_perimeter_insulation_r": 0,
     "slab_perimeter_insulation_depth": 0,
@@ -294,7 +293,6 @@
     "parent_hpxml": "tests/ASHRAE_Standard_140/L322XC.xml",
     "foundation_wall_insulation_r": 10.2,
     "foundation_wall_insulation_location": "interior",
-    "foundation_wall_insulation_distance_to_bottom": 7.25,
     "rim_joist_assembly_r": 13.14
   },
   "tests/ASHRAE_Standard_140/L100AL.xml": {
@@ -532,6 +530,7 @@
     "refrigerator_present": true,
     "cooking_range_oven_present": true,
     "lighting_present": true,
+    "lighting_exterior_fraction_cfl": 0.1,
     "misc_plug_loads_other_annual_kwh": null,
     "misc_plug_loads_other_frac_sensible": null,
     "misc_plug_loads_other_frac_latent": null,
@@ -637,7 +636,7 @@
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
     "foundation_wall_type": "solid concrete",
-    "foundation_wall_insulation_r": 8.9,
+    "foundation_wall_insulation_r": 10.0,
     "rim_joist_assembly_r": 23,
     "slab_perimeter_insulation_r": 0,
     "slab_perimeter_insulation_depth": 0,
@@ -2048,7 +2047,7 @@
   "sample_files/base-foundation-unconditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
     "floor_over_foundation_assembly_r": 2.1,
-    "foundation_wall_insulation_r": 8.9,
+    "foundation_wall_insulation_r": 10.0,
     "foundation_wall_insulation_distance_to_bottom": 4,
     "rim_joist_assembly_r": 23
   },
