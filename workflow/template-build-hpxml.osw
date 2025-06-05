@@ -17,7 +17,7 @@
         "ducts_supply_location": "attic - unvented",
         "floor_over_foundation_assembly_r": 0,
         "floor_over_garage_assembly_r": 0,
-        "enclosure_foundation_wall": "Concrete, Whole Wall, R-8.9",
+        "foundation_wall": "Concrete, Whole Wall, R-8.9",
         "geometry_attic_type": "UnventedAttic",
         "geometry_average_ceiling_height": 8.0,
         "geometry_eaves_depth": 0,
