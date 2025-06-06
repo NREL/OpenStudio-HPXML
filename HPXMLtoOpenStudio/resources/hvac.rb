@@ -306,6 +306,10 @@ module HVAC
             obj_name = Constants::ObjectTypeCentralAirConditioner
           else
             obj_name = Constants::ObjectTypeCentralAirConditionerAndFurnace
+            # error checking for fan motor type
+            if (not cooling_system.fan_motor_type.nil?) && (not heating_system.fan_motor_type.nil?) && (cooling_system.fan_motor_type != heating_system.fan_motor_type)
+              fail "Fan motor types for heating system '#{heating_system.id}' (#{heating_system.fan_motor_type}) and cooling system '#{cooling_system.id}' (#{cooling_system.fan_motor_type}) are attached to a single distribution system and therefore must be the same."
+            end
             # error checking for fan power
             if (not cooling_system.fan_watts_per_cfm.nil?) && (not heating_system.fan_watts_per_cfm.nil?) && (cooling_system.fan_watts_per_cfm != heating_system.fan_watts_per_cfm)
               fail "Fan powers for heating system '#{heating_system.id}' (#{heating_system.fan_watts_per_cfm} W/cfm) and cooling system '#{cooling_system.id}' (#{cooling_system.fan_watts_per_cfm} W/cfm) are attached to a single distribution system and therefore must be the same."

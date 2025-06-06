@@ -2039,6 +2039,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         heat_pump.backup_heating_active_during_defrost = true
       end
     end
+    if ['base-hvac-fan-motor-type.xml'].include? hpxml_file
+      hpxml_bldg.heating_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
+      hpxml_bldg.cooling_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
+    end
 
     # ------------------ #
     # HPXML WaterHeating #

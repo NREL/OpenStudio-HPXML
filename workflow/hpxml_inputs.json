@@ -2603,6 +2603,9 @@
     "cooling_system_is_ducted": true,
     "ducts_return_leakage_to_outside_value": 0
   },
+  "sample_files/base-hvac-fan-motor-type.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
   "sample_files/base-hvac-fireplace-wood-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-stove-oil-only.xml",
     "heating_system_type": "Fireplace",

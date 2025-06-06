@@ -1265,6 +1265,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                    'NumberofUnits greater than 1 is not supported for multi-staging backup coil.'],
                             'hvac-gshp-invalid-num-bore-holes' => ["Number of bore holes (5) with borefield configuration 'Lopsided U' not supported."],
                             'hvac-inconsistent-fan-powers' => ["Fan powers for heating system 'HeatingSystem1' (0.45 W/cfm) and cooling system 'CoolingSystem1' (0.55 W/cfm) are attached to a single distribution system and therefore must be the same."],
+                            'hvac-inconsistent-fan-motor types' => ["Fan motor types for heating system 'HeatingSystem1' (PSC) and cooling system 'CoolingSystem1' (BPM) are attached to a single distribution system and therefore must be the same."],
                             'hvac-invalid-distribution-system-type' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
                             'hvac-shared-boiler-multiple' => ['More than one shared heating system found.'],
                             'hvac-shared-chiller-multiple' => ['More than one shared cooling system found.'],
@@ -1501,6 +1502,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.55
         hpxml_bldg.heating_systems[0].fan_watts_per_cfm = 0.45
+      when 'hvac-inconsistent-fan-motor types'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.heating_systems[0].fan_motor_type = HPXML::HVACFanMotorTypePSC
+        hpxml_bldg.cooling_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
       when 'hvac-shared-boiler-multiple'
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml')
         hpxml_bldg.hvac_distributions << hpxml_bldg.hvac_distributions[0].dup
