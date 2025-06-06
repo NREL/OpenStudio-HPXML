@@ -1291,56 +1291,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('mech_vent_num_units_served', true)
-    arg.setDisplayName('Mechanical Ventilation: Number of Units Served')
-    arg.setDescription("Number of dwelling units served by the mechanical ventilation system. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion flow rate and fan power to the unit.")
-    arg.setUnits('#')
-    arg.setDefaultValue(1)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_shared_frac_recirculation', false)
-    arg.setDisplayName('Shared Mechanical Ventilation: Fraction Recirculation')
-    arg.setDescription('Fraction of the total supply air that is recirculated, with the remainder assumed to be outdoor air. The value must be 0 for exhaust only systems. Required for a shared mechanical ventilation system.')
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_shared_preheating_fuel', heating_system_fuel_choices, false)
-    arg.setDisplayName('Shared Mechanical Ventilation: Preheating Fuel')
-    arg.setDescription('Fuel type of the preconditioning heating equipment. Only used for a shared mechanical ventilation system. If not provided, assumes no preheating.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_shared_preheating_efficiency', false)
-    arg.setDisplayName('Shared Mechanical Ventilation: Preheating Efficiency')
-    arg.setDescription('Efficiency of the preconditioning heating equipment. Only used for a shared mechanical ventilation system. If not provided, assumes no preheating.')
-    arg.setUnits('COP')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_shared_preheating_fraction_heat_load_served', false)
-    arg.setDisplayName('Shared Mechanical Ventilation: Preheating Fraction Ventilation Heat Load Served')
-    arg.setDescription('Fraction of heating load introduced by the shared ventilation system that is met by the preconditioning heating equipment. If not provided, assumes no preheating.')
-    arg.setUnits('Frac')
-    args << arg
-
-    cooling_system_fuel_choices = OpenStudio::StringVector.new
-    cooling_system_fuel_choices << HPXML::FuelTypeElectricity
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_shared_precooling_fuel', cooling_system_fuel_choices, false)
-    arg.setDisplayName('Shared Mechanical Ventilation: Precooling Fuel')
-    arg.setDescription('Fuel type of the preconditioning cooling equipment. Only used for a shared mechanical ventilation system. If not provided, assumes no precooling.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_shared_precooling_efficiency', false)
-    arg.setDisplayName('Shared Mechanical Ventilation: Precooling Efficiency')
-    arg.setDescription('Efficiency of the preconditioning cooling equipment. Only used for a shared mechanical ventilation system. If not provided, assumes no precooling.')
-    arg.setUnits('COP')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_shared_precooling_fraction_cool_load_served', false)
-    arg.setDisplayName('Shared Mechanical Ventilation: Precooling Fraction Ventilation Cool Load Served')
-    arg.setDescription('Fraction of cooling load introduced by the shared ventilation system that is met by the preconditioning cooling equipment. If not provided, assumes no precooling.')
-    arg.setUnits('Frac')
-    args << arg
-
     mech_vent_2_fan_type_choices = OpenStudio::StringVector.new
     mech_vent_2_fan_type_choices << Constants::None
     mech_vent_2_fan_type_choices << HPXML::MechVentTypeExhaust
@@ -5848,18 +5798,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         cfis_addtl_runtime_operating_mode = HPXML::CFISModeAirHandler
       end
 
-      if args[:mech_vent_num_units_served] > 1
-        is_shared_system = true
-        in_unit_flow_rate = args[:mech_vent_flow_rate] / args[:mech_vent_num_units_served].to_f
-        fraction_recirculation = args[:mech_vent_shared_frac_recirculation]
-        preheating_fuel = args[:mech_vent_shared_preheating_fuel]
-        preheating_efficiency_cop = args[:mech_vent_shared_preheating_efficiency]
-        preheating_fraction_load_served = args[:mech_vent_shared_preheating_fraction_heat_load_served]
-        precooling_fuel = args[:mech_vent_shared_precooling_fuel]
-        precooling_efficiency_cop = args[:mech_vent_shared_precooling_efficiency]
-        precooling_fraction_load_served = args[:mech_vent_shared_precooling_fraction_cool_load_served]
-      end
-
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       fan_type: args[:mech_vent_fan_type],
                                       cfis_addtl_runtime_operating_mode: cfis_addtl_runtime_operating_mode,
@@ -5871,16 +5809,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                       sensible_recovery_efficiency: sensible_recovery_efficiency,
                                       sensible_recovery_efficiency_adjusted: sensible_recovery_efficiency_adjusted,
                                       fan_power: args[:mech_vent_fan_power],
-                                      distribution_system_idref: distribution_system_idref,
-                                      is_shared_system: is_shared_system,
-                                      in_unit_flow_rate: in_unit_flow_rate,
-                                      fraction_recirculation: fraction_recirculation,
-                                      preheating_fuel: preheating_fuel,
-                                      preheating_efficiency_cop: preheating_efficiency_cop,
-                                      preheating_fraction_load_served: preheating_fraction_load_served,
-                                      precooling_fuel: precooling_fuel,
-                                      precooling_efficiency_cop: precooling_efficiency_cop,
-                                      precooling_fraction_load_served: precooling_fraction_load_served)
+                                      distribution_system_idref: distribution_system_idref)
     end
 
     if args[:mech_vent_2_fan_type] != Constants::None

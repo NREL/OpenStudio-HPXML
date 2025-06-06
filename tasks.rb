@@ -1510,9 +1510,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.slabs[0].gap_insulation_r_value = 0.0
     end
     if ['base-foundation-slab-exterior-horizontal-insulation.xml'].include? hpxml_file
-      hpxml_bldg.slabs[0].exterior_horizontal_insulation_r_value = 5.4
+      hpxml_bldg.slabs[0].exterior_horizontal_insulation_r_value = 5.0
       hpxml_bldg.slabs[0].exterior_horizontal_insulation_width = 2.5
-      hpxml_bldg.slabs[0].exterior_horizontal_insulation_depth_below_grade = 1.0
+      hpxml_bldg.slabs[0].exterior_horizontal_insulation_depth_below_grade = 2.0
     end
 
     # ---------- #
@@ -2143,7 +2143,20 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML VentilationFan #
     # -------------------- #
 
-    if ['base-bldgtype-mf-unit-shared-mechvent-multiple.xml'].include? hpxml_file
+    if ['base-bldgtype-mf-unit-shared-mechvent.xml',
+        'base-bldgtype-mf-unit-shared-mechvent-preconditioning.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].is_shared_system = true
+      hpxml_bldg.ventilation_fans[0].in_unit_flow_rate = 80
+      hpxml_bldg.ventilation_fans[0].fraction_recirculation = 0.5
+      if hpxml_file == 'base-bldgtype-mf-unit-shared-mechvent-preconditioning.xml'
+        hpxml_bldg.ventilation_fans[0].preheating_fuel = HPXML::FuelTypeNaturalGas
+        hpxml_bldg.ventilation_fans[0].preheating_efficiency_cop = 0.92
+        hpxml_bldg.ventilation_fans[0].preheating_fraction_load_served = 0.7
+        hpxml_bldg.ventilation_fans[0].precooling_fuel = HPXML::FuelTypeElectricity
+        hpxml_bldg.ventilation_fans[0].precooling_efficiency_cop = 4.0
+        hpxml_bldg.ventilation_fans[0].precooling_fraction_load_served = 0.8
+      end
+    elsif ['base-bldgtype-mf-unit-shared-mechvent-multiple.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       fan_type: HPXML::MechVentTypeSupply,
                                       is_shared_system: true,

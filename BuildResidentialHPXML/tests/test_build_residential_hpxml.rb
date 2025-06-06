@@ -535,7 +535,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['mech_vent_total_recovery_efficiency'] = 0.48
       args['mech_vent_sensible_recovery_efficiency'] = 0.72
       args['mech_vent_fan_power'] = 30
-      args['mech_vent_num_units_served'] = 1
       args['mech_vent_2_fan_type'] = Constants::None
       args['mech_vent_2_flow_rate'] = 110
       args['mech_vent_2_hours_in_operation'] = 24
