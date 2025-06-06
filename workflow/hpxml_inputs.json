@@ -84,17 +84,7 @@
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
     "ducts": "0 CFM25 per 100ft2, Uninsulated",
-    "mech_vent_fan_type": "none",
-    "mech_vent_recovery_efficiency_type": "Unadjusted",
-    "mech_vent_total_recovery_efficiency": 0,
-    "mech_vent_sensible_recovery_efficiency": 0,
-    "mech_vent_2_fan_type": "none",
-    "mech_vent_2_flow_rate": 0,
-    "mech_vent_2_hours_in_operation": 0,
-    "mech_vent_2_recovery_efficiency_type": "Unadjusted",
-    "mech_vent_2_total_recovery_efficiency": 0,
-    "mech_vent_2_sensible_recovery_efficiency": 0,
-    "mech_vent_2_fan_power": 0,
+    "mech_vent": "None",
     "kitchen_fans_quantity": 0,
     "bathroom_fans_quantity": 0,
     "whole_house_fan_present": false,
@@ -606,17 +596,7 @@
     "ducts_supply_location": "attic - unvented",
     "ducts_return_location": "attic - unvented",
     "ducts_supply_leakage_fraction": 0.75,
-    "mech_vent_fan_type": "none",
-    "mech_vent_recovery_efficiency_type": "Unadjusted",
-    "mech_vent_total_recovery_efficiency": 0,
-    "mech_vent_sensible_recovery_efficiency": 0,
-    "mech_vent_2_fan_type": "none",
-    "mech_vent_2_flow_rate": 0,
-    "mech_vent_2_hours_in_operation": 0,
-    "mech_vent_2_recovery_efficiency_type": "Unadjusted",
-    "mech_vent_2_total_recovery_efficiency": 0,
-    "mech_vent_2_sensible_recovery_efficiency": 0,
-    "mech_vent_2_fan_power": 0,
+    "mech_vent": "None",
     "kitchen_fans_quantity": 0,
     "bathroom_fans_quantity": 0,
     "whole_house_fan_present": false,
@@ -1113,14 +1093,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-mechvent.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "mech_vent_fan_type": "supply only",
-    "mech_vent_flow_rate": 800,
-    "mech_vent_hours_in_operation": 24,
-    "mech_vent_fan_power": 240,
-    "mech_vent_2_fan_type": "exhaust only",
-    "mech_vent_2_flow_rate": 72,
-    "mech_vent_2_hours_in_operation": 24,
-    "mech_vent_2_fan_power": 26
+    "mech_vent": "Supply Only"
   },
   "sample_files/base-bldgtype-mf-unit-shared-mechvent-multiple.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
@@ -2561,10 +2534,7 @@
   },
   "sample_files/base-hvac-ptac-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
-    "mech_vent_fan_type": "central fan integrated supply",
-    "mech_vent_flow_rate": 100,
-    "mech_vent_hours_in_operation": 8,
-    "mech_vent_fan_power": 100
+    "mech_vent": "CFIS"
   },
   "sample_files/base-hvac-ptac-with-heating-electricity.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
@@ -2586,10 +2556,7 @@
   },
   "sample_files/base-hvac-pthp-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml",
-    "mech_vent_fan_type": "central fan integrated supply",
-    "mech_vent_flow_rate": 100,
-    "mech_vent_hours_in_operation": 8,
-    "mech_vent_fan_power": 100
+    "mech_vent": "CFIS"
   },
   "sample_files/base-hvac-pthp-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml"
@@ -2793,10 +2760,7 @@
   },
   "sample_files/base-mechvent-balanced.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent_fan_type": "balanced",
-    "mech_vent_flow_rate": 110,
-    "mech_vent_hours_in_operation": 24,
-    "mech_vent_fan_power": 60
+    "mech_vent": "Balanced"
   },
   "sample_files/base-mechvent-bath-kitchen-fans.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2813,10 +2777,7 @@
   },
   "sample_files/base-mechvent-cfis.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent_fan_type": "central fan integrated supply",
-    "mech_vent_flow_rate": 330,
-    "mech_vent_hours_in_operation": 8,
-    "mech_vent_fan_power": 300
+    "mech_vent": "CFIS"
   },
   "sample_files/base-mechvent-cfis-15-mins.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
@@ -2830,28 +2791,20 @@
   },
   "sample_files/base-mechvent-cfis-dse.xml": {
     "parent_hpxml": "sample_files/base-hvac-dse.xml",
-    "mech_vent_fan_type": "central fan integrated supply",
-    "mech_vent_flow_rate": 330,
-    "mech_vent_hours_in_operation": 8,
-    "mech_vent_fan_power": 300
+    "mech_vent": "CFIS"
   },
   "sample_files/base-mechvent-cfis-evap-cooler-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-evap-cooler-only-ducted.xml",
-    "mech_vent_fan_type": "central fan integrated supply",
-    "mech_vent_flow_rate": 330,
-    "mech_vent_hours_in_operation": 8,
-    "mech_vent_fan_power": 300
+    "mech_vent": "CFIS"
   },
   "sample_files/base-mechvent-cfis-no-additional-runtime.xml": {
-    "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
-    "mech_vent_fan_power": null
+    "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
   },
   "sample_files/base-mechvent-cfis-no-outdoor-air-control.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
   },
   "sample_files/base-mechvent-cfis-supplemental-fan-exhaust.xml": {
-    "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
-    "mech_vent_fan_power": null
+    "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
   },
   "sample_files/base-mechvent-cfis-supplemental-fan-exhaust-15-mins.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis-supplemental-fan-exhaust.xml",
@@ -2861,46 +2814,25 @@
     "parent_hpxml": "sample_files/base-mechvent-cfis-supplemental-fan-exhaust.xml"
   },
   "sample_files/base-mechvent-cfis-supplemental-fan-supply.xml": {
-    "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
-    "mech_vent_fan_power": null
+    "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
   },
   "sample_files/base-mechvent-erv.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent_fan_type": "energy recovery ventilator",
-    "mech_vent_flow_rate": 110,
-    "mech_vent_hours_in_operation": 24,
-    "mech_vent_total_recovery_efficiency": 0.48,
-    "mech_vent_sensible_recovery_efficiency": 0.72,
-    "mech_vent_fan_power": 60
+    "mech_vent": "ERV, 70%"
   },
   "sample_files/base-mechvent-erv-atre-asre.xml": {
-    "parent_hpxml": "sample_files/base-mechvent-erv.xml",
-    "mech_vent_recovery_efficiency_type": "Adjusted",
-    "mech_vent_total_recovery_efficiency": 0.526,
-    "mech_vent_sensible_recovery_efficiency": 0.79
+    "parent_hpxml": "sample_files/base-mechvent-erv.xml"
   },
   "sample_files/base-mechvent-exhaust.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent_fan_type": "exhaust only",
-    "mech_vent_flow_rate": 110,
-    "mech_vent_hours_in_operation": 24,
-    "mech_vent_fan_power": 30
-  },
-  "sample_files/base-mechvent-exhaust-rated-flow-rate.xml": {
-    "parent_hpxml": "sample_files/base-mechvent-exhaust.xml"
+    "mech_vent": "Exhaust Only"
   },
   "sample_files/base-mechvent-hrv.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent_fan_type": "heat recovery ventilator",
-    "mech_vent_flow_rate": 110,
-    "mech_vent_hours_in_operation": 24,
-    "mech_vent_sensible_recovery_efficiency": 0.72,
-    "mech_vent_fan_power": 60
+    "mech_vent": "HRV, 70%"
   },
   "sample_files/base-mechvent-hrv-asre.xml": {
-    "parent_hpxml": "sample_files/base-mechvent-hrv.xml",
-    "mech_vent_recovery_efficiency_type": "Adjusted",
-    "mech_vent_sensible_recovery_efficiency": 0.79
+    "parent_hpxml": "sample_files/base-mechvent-hrv.xml"
   },
   "sample_files/base-mechvent-multiple.xml": {
     "parent_hpxml": "sample_files/base-mechvent-bath-kitchen-fans.xml",
@@ -2908,10 +2840,7 @@
   },
   "sample_files/base-mechvent-supply.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent_fan_type": "supply only",
-    "mech_vent_flow_rate": 110,
-    "mech_vent_hours_in_operation": 24,
-    "mech_vent_fan_power": 30
+    "mech_vent": "Supply Only"
   },
   "sample_files/base-mechvent-whole-house-fan.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2984,9 +2913,7 @@
     "ducts_supply_location": null,
     "ducts_return_location": null,
     "ducts_number_of_return_registers": 2,
-    "mech_vent_fan_type": "exhaust only",
-    "mech_vent_total_recovery_efficiency": 0,
-    "mech_vent_sensible_recovery_efficiency": 0,
+    "mech_vent": "Exhaust Only",
     "kitchen_fans_quantity": null,
     "bathroom_fans_quantity": null,
     "whole_house_fan_present": true,

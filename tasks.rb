@@ -2143,10 +2143,45 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML VentilationFan #
     # -------------------- #
 
+    if ['base-mechvent-balanced.xml',
+        'base-mechvent-erv.xml',
+        'base-mechvent-erv-atre-asre.xml',
+        'base-mechvent-hrv.xml',
+        'base-mechvent-hrv-asre.xml',
+        'base-mechvent-supply.xml',
+        'base-mechvent-exhaust.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 110.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 24
+      if hpxml_bldg.ventilation_fans[0].is_balanced
+        hpxml_bldg.ventilation_fans[0].fan_power = 60.0
+      else
+        hpxml_bldg.ventilation_fans[0].fan_power = 30.0
+      end
+      if hpxml_file.include? 'atre'
+        hpxml_bldg.ventilation_fans[0].total_recovery_efficiency_adjusted = 1.1 * hpxml_bldg.ventilation_fans[0].total_recovery_efficiency
+        hpxml_bldg.ventilation_fans[0].total_recovery_efficiency = nil
+      end
+      if hpxml_file.include? 'asre'
+        hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency_adjusted = 1.1 * hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency
+        hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency = nil
+      end
+    elsif hpxml_file.include? 'base-mechvent-cfis'
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 330.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 8
+      hpxml_bldg.ventilation_fans[0].fan_power = 300.0
+    elsif ['base-hvac-ptac-cfis.xml',
+           'base-hvac-pthp-cfis.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 100.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 8
+      hpxml_bldg.ventilation_fans[0].fan_power = 100.0
+    end
     if ['base-bldgtype-mf-unit-shared-mechvent.xml',
         'base-bldgtype-mf-unit-shared-mechvent-preconditioning.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].is_shared_system = true
-      hpxml_bldg.ventilation_fans[0].in_unit_flow_rate = 80
+      hpxml_bldg.ventilation_fans[0].in_unit_flow_rate = 80.0
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 800.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 24
+      hpxml_bldg.ventilation_fans[0].fan_power = 240.0
       hpxml_bldg.ventilation_fans[0].fraction_recirculation = 0.5
       if hpxml_file == 'base-bldgtype-mf-unit-shared-mechvent-preconditioning.xml'
         hpxml_bldg.ventilation_fans[0].preheating_fuel = HPXML::FuelTypeNaturalGas
@@ -2156,6 +2191,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.ventilation_fans[0].precooling_efficiency_cop = 4.0
         hpxml_bldg.ventilation_fans[0].precooling_fraction_load_served = 0.8
       end
+      hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
+                                      fan_type: HPXML::MechVentTypeExhaust,
+                                      rated_flow_rate: 72.0,
+                                      hours_in_operation: 24,
+                                      fan_power: 26.0,
+                                      used_for_whole_building_ventilation: true)
     elsif ['base-bldgtype-mf-unit-shared-mechvent-multiple.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       fan_type: HPXML::MechVentTypeSupply,
@@ -2326,12 +2367,14 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.ventilation_fans[0].cfis_control_type = HPXML::CFISControlTypeTimer
     elsif ['base-mechvent-cfis-no-additional-runtime.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeNone
+      hpxml_bldg.ventilation_fans[0].fan_power = nil
     elsif ['base-mechvent-cfis-no-outdoor-air-control.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].cfis_has_outdoor_air_control = false
     elsif ['base-mechvent-cfis-supplemental-fan-exhaust.xml',
            'base-mechvent-cfis-supplemental-fan-exhaust-15-mins.xml',
            'base-mechvent-cfis-supplemental-fan-supply.xml',
            'base-mechvent-cfis-supplemental-fan-exhaust-synchronized.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].fan_power = nil
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       tested_flow_rate: 120,
                                       fan_power: 30,

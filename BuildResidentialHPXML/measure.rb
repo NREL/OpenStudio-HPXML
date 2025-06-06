@@ -57,6 +57,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_2_choices = get_option_names('heating_system_2.tsv')
     hvac_install_defects_choices = get_option_names('hvac_install_defects.tsv')
     ducts_choices = get_option_names('ducts.tsv')
+    mech_vent_choices = get_option_names('mech_vent.tsv')
     neighbor_building_choices = get_option_names('neighbor_buildings.tsv')
     pv_system_choices = get_option_names('pv_system.tsv')
     pv_system_2_choices = get_option_names('pv_system_2.tsv')
@@ -1234,116 +1235,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('#')
     args << arg
 
-    mech_vent_fan_type_choices = OpenStudio::StringVector.new
-    mech_vent_fan_type_choices << Constants::None
-    mech_vent_fan_type_choices << HPXML::MechVentTypeExhaust
-    mech_vent_fan_type_choices << HPXML::MechVentTypeSupply
-    mech_vent_fan_type_choices << HPXML::MechVentTypeERV
-    mech_vent_fan_type_choices << HPXML::MechVentTypeHRV
-    mech_vent_fan_type_choices << HPXML::MechVentTypeBalanced
-    mech_vent_fan_type_choices << HPXML::MechVentTypeCFIS
-
-    mech_vent_recovery_efficiency_type_choices = OpenStudio::StringVector.new
-    mech_vent_recovery_efficiency_type_choices << 'Unadjusted'
-    mech_vent_recovery_efficiency_type_choices << 'Adjusted'
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_fan_type', mech_vent_fan_type_choices, true)
-    arg.setDisplayName('Mechanical Ventilation: Fan Type')
-    arg.setDescription("The type of the mechanical ventilation. Use '#{Constants::None}' if there is no mechanical ventilation system.")
-    arg.setDefaultValue(Constants::None)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_flow_rate', false)
-    arg.setDisplayName('Mechanical Ventilation: Flow Rate')
-    arg.setDescription("The flow rate of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>) is used.")
-    arg.setUnits('CFM')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_hours_in_operation', false)
-    arg.setDisplayName('Mechanical Ventilation: Hours In Operation')
-    arg.setDescription("The hours in operation of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>) is used.")
-    arg.setUnits('hrs/day')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_recovery_efficiency_type', mech_vent_recovery_efficiency_type_choices, true)
-    arg.setDisplayName('Mechanical Ventilation: Total Recovery Efficiency Type')
-    arg.setDescription('The total recovery efficiency type of the mechanical ventilation.')
-    arg.setDefaultValue('Unadjusted')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_total_recovery_efficiency', true)
-    arg.setDisplayName('Mechanical Ventilation: Total Recovery Efficiency')
-    arg.setDescription("The Unadjusted or Adjusted total recovery efficiency of the mechanical ventilation. Applies to #{HPXML::MechVentTypeERV}.")
-    arg.setUnits('Frac')
-    arg.setDefaultValue(0.48)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_sensible_recovery_efficiency', true)
-    arg.setDisplayName('Mechanical Ventilation: Sensible Recovery Efficiency')
-    arg.setDescription("The Unadjusted or Adjusted sensible recovery efficiency of the mechanical ventilation. Applies to #{HPXML::MechVentTypeERV} and #{HPXML::MechVentTypeHRV}.")
-    arg.setUnits('Frac')
-    arg.setDefaultValue(0.72)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_fan_power', false)
-    arg.setDisplayName('Mechanical Ventilation: Fan Power')
-    arg.setDescription("The fan power of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    mech_vent_2_fan_type_choices = OpenStudio::StringVector.new
-    mech_vent_2_fan_type_choices << Constants::None
-    mech_vent_2_fan_type_choices << HPXML::MechVentTypeExhaust
-    mech_vent_2_fan_type_choices << HPXML::MechVentTypeSupply
-    mech_vent_2_fan_type_choices << HPXML::MechVentTypeERV
-    mech_vent_2_fan_type_choices << HPXML::MechVentTypeHRV
-    mech_vent_2_fan_type_choices << HPXML::MechVentTypeBalanced
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_2_fan_type', mech_vent_2_fan_type_choices, true)
-    arg.setDisplayName('Mechanical Ventilation 2: Fan Type')
-    arg.setDescription("The type of the second mechanical ventilation. Use '#{Constants::None}' if there is no second mechanical ventilation system.")
-    arg.setDefaultValue(Constants::None)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_2_flow_rate', true)
-    arg.setDisplayName('Mechanical Ventilation 2: Flow Rate')
-    arg.setDescription('The flow rate of the second mechanical ventilation.')
-    arg.setUnits('CFM')
-    arg.setDefaultValue(110)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_2_hours_in_operation', true)
-    arg.setDisplayName('Mechanical Ventilation 2: Hours In Operation')
-    arg.setDescription('The hours in operation of the second mechanical ventilation.')
-    arg.setUnits('hrs/day')
-    arg.setDefaultValue(24)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent_2_recovery_efficiency_type', mech_vent_recovery_efficiency_type_choices, true)
-    arg.setDisplayName('Mechanical Ventilation 2: Total Recovery Efficiency Type')
-    arg.setDescription('The total recovery efficiency type of the second mechanical ventilation.')
-    arg.setDefaultValue('Unadjusted')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_2_total_recovery_efficiency', true)
-    arg.setDisplayName('Mechanical Ventilation 2: Total Recovery Efficiency')
-    arg.setDescription("The Unadjusted or Adjusted total recovery efficiency of the second mechanical ventilation. Applies to #{HPXML::MechVentTypeERV}.")
-    arg.setUnits('Frac')
-    arg.setDefaultValue(0.48)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_2_sensible_recovery_efficiency', true)
-    arg.setDisplayName('Mechanical Ventilation 2: Sensible Recovery Efficiency')
-    arg.setDescription("The Unadjusted or Adjusted sensible recovery efficiency of the second mechanical ventilation. Applies to #{HPXML::MechVentTypeERV} and #{HPXML::MechVentTypeHRV}.")
-    arg.setUnits('Frac')
-    arg.setDefaultValue(0.72)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_2_fan_power', true)
-    arg.setDisplayName('Mechanical Ventilation 2: Fan Power')
-    arg.setDescription('The fan power of the second mechanical ventilation.')
-    arg.setUnits('W')
-    arg.setDefaultValue(30)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent', mech_vent_choices, false)
+    arg.setDisplayName('Mechanical Ventilation')
+    arg.setDescription('The type of mechanical ventilation system.')
+    arg.setDefaultValue('None')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('kitchen_fans_quantity', false)
@@ -1883,17 +1778,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_mech_vent_fan_new_load', false)
     arg.setDisplayName('Electric Panel: Mechanical Ventilation New Load')
     arg.setDescription("Whether the mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_mech_vent_2_power_rating', false)
-    arg.setDisplayName('Electric Panel: Mechanical Ventilation 2 Power Rating')
-    arg.setDescription("Specifies the panel load second mechanical ventilation power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_mech_vent_2_new_load', false)
-    arg.setDisplayName('Electric Panel: Mechanical Ventilation 2 New Load')
-    arg.setDescription("Whether the second mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_whole_house_fan_power_rating', false)
@@ -2986,6 +2870,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     get_option_properties(args, 'heating_system_2.tsv', args[:heating_system_2])
     get_option_properties(args, 'hvac_install_defects.tsv', args[:hvac_install_defects])
     get_option_properties(args, 'ducts.tsv', args[:ducts])
+    get_option_properties(args, 'mech_vent.tsv', args[:mech_vent])
     get_option_properties(args, 'neighbor_buildings.tsv', args[:geometry_neighbor_buildings])
     get_option_properties(args, 'pv_system.tsv', args[:pv_system])
     get_option_properties(args, 'pv_system_2.tsv', args[:pv_system_2])
@@ -5750,27 +5635,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_ventilation_fans(hpxml_bldg, args)
-    if args[:mech_vent_fan_type] != Constants::None
+    if not args[:mech_vent_fan_type].nil?
 
       distribution_system_idref = nil
 
       case args[:mech_vent_fan_type]
       when HPXML::MechVentTypeERV
-        case args[:mech_vent_recovery_efficiency_type]
-        when 'Unadjusted'
-          total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency]
-          sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
-        when 'Adjusted'
-          total_recovery_efficiency_adjusted = args[:mech_vent_total_recovery_efficiency]
-          sensible_recovery_efficiency_adjusted = args[:mech_vent_sensible_recovery_efficiency]
-        end
+        total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency]
+        sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
       when HPXML::MechVentTypeHRV
-        case args[:mech_vent_recovery_efficiency_type]
-        when 'Unadjusted'
-          sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
-        when 'Adjusted'
-          sensible_recovery_efficiency_adjusted = args[:mech_vent_sensible_recovery_efficiency]
-        end
+        sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
       when HPXML::MechVentTypeCFIS
         hpxml_bldg.hvac_distributions.each do |hvac_distribution|
           next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -5805,44 +5679,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                       hours_in_operation: args[:mech_vent_hours_in_operation],
                                       used_for_whole_building_ventilation: true,
                                       total_recovery_efficiency: total_recovery_efficiency,
-                                      total_recovery_efficiency_adjusted: total_recovery_efficiency_adjusted,
                                       sensible_recovery_efficiency: sensible_recovery_efficiency,
-                                      sensible_recovery_efficiency_adjusted: sensible_recovery_efficiency_adjusted,
                                       fan_power: args[:mech_vent_fan_power],
                                       distribution_system_idref: distribution_system_idref)
-    end
-
-    if args[:mech_vent_2_fan_type] != Constants::None
-
-      case args[:mech_vent_2_fan_type]
-      when HPXML::MechVentTypeERV
-        case args[:mech_vent_2_recovery_efficiency_type]
-        when 'Unadjusted'
-          total_recovery_efficiency = args[:mech_vent_2_total_recovery_efficiency]
-          sensible_recovery_efficiency = args[:mech_vent_2_sensible_recovery_efficiency]
-        when 'Adjusted'
-          total_recovery_efficiency_adjusted = args[:mech_vent_2_total_recovery_efficiency]
-          sensible_recovery_efficiency_adjusted = args[:mech_vent_2_sensible_recovery_efficiency]
-        end
-      when HPXML::MechVentTypeHRV
-        case args[:mech_vent_2_recovery_efficiency_type]
-        when 'Unadjusted'
-          sensible_recovery_efficiency = args[:mech_vent_2_sensible_recovery_efficiency]
-        when 'Adjusted'
-          sensible_recovery_efficiency_adjusted = args[:mech_vent_2_sensible_recovery_efficiency]
-        end
-      end
-
-      hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                      fan_type: args[:mech_vent_2_fan_type],
-                                      rated_flow_rate: args[:mech_vent_2_flow_rate],
-                                      hours_in_operation: args[:mech_vent_2_hours_in_operation],
-                                      used_for_whole_building_ventilation: true,
-                                      total_recovery_efficiency: total_recovery_efficiency,
-                                      total_recovery_efficiency_adjusted: total_recovery_efficiency_adjusted,
-                                      sensible_recovery_efficiency: sensible_recovery_efficiency,
-                                      sensible_recovery_efficiency_adjusted: sensible_recovery_efficiency_adjusted,
-                                      fan_power: args[:mech_vent_2_fan_power])
     end
 
     if args[:kitchen_fans_quantity].nil? || (args[:kitchen_fans_quantity] > 0)
@@ -6248,30 +6087,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                           component_idrefs: [cooking_range.id])
     end
 
-    ventilation_fans = hpxml_bldg.ventilation_fans
-    if args[:mech_vent_fan_type] != Constants::None # Mechanical Ventilation
-      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
-                          type: HPXML::ElectricPanelLoadTypeMechVent,
-                          power: args[:electric_panel_load_mech_vent_power_rating],
-                          is_new_load: args[:electric_panel_load_mech_vent_fan_new_load],
-                          component_idrefs: [ventilation_fans[0].id])
-      if args[:mech_vent_2_fan_type] != Constants::None # Mechanical Ventilation 2
+    hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+      if ventilation_fan.used_for_whole_building_ventilation # Mechanical Ventilation
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                             type: HPXML::ElectricPanelLoadTypeMechVent,
-                            power: args[:electric_panel_load_mech_vent_2_power_rating],
-                            is_new_load: args[:electric_panel_load_mech_vent_2_new_load],
-                            component_idrefs: [ventilation_fans[1].id])
-      end
-    elsif args[:mech_vent_2_fan_type] != Constants::None # Mechanical Ventilation 2
-      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
-                          type: HPXML::ElectricPanelLoadTypeMechVent,
-                          power: args[:electric_panel_load_mech_vent_2_power_rating],
-                          is_new_load: args[:electric_panel_load_mech_vent_2_new_load],
-                          component_idrefs: [ventilation_fans[0].id])
-    end
-
-    ventilation_fans.each do |ventilation_fan|
-      if ventilation_fan.used_for_local_ventilation # Kitchen / Bathroom Fans
+                            power: args[:electric_panel_load_mech_vent_power_rating],
+                            is_new_load: args[:electric_panel_load_mech_vent_fan_new_load],
+                            component_idrefs: [ventilation_fan.id])
+      elsif ventilation_fan.used_for_local_ventilation # Kitchen / Bathroom Fans
         if ventilation_fan.fan_location == HPXML::LocationKitchen
           service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                               type: HPXML::ElectricPanelLoadTypeMechVent,

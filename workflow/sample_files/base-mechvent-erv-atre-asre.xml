@@ -412,8 +412,8 @@
               <RatedFlowRate>110.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <AdjustedTotalRecoveryEfficiency>0.526</AdjustedTotalRecoveryEfficiency>
-              <AdjustedSensibleRecoveryEfficiency>0.79</AdjustedSensibleRecoveryEfficiency>
+              <AdjustedTotalRecoveryEfficiency>0.66</AdjustedTotalRecoveryEfficiency>
+              <AdjustedSensibleRecoveryEfficiency>0.77</AdjustedSensibleRecoveryEfficiency>
               <FanPower>60.0</FanPower>
             </VentilationFan>
           </VentilationFans>
