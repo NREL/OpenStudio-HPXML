@@ -359,7 +359,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     unmet_hours_program = model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetHoursProgram }
-    unmet_showers_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetShowersProgram }
+    unmet_showers_program = model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetShowersProgram }
     total_loads_program = model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeTotalLoadsProgram }
     comp_loads_program = model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeComponentLoadsProgram }
     total_airflows_program = model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeTotalAirflowsProgram }
@@ -462,11 +462,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Unmet Hours
     @unmet_hours.each do |key, unmet_hour|
-      next if key == UHT::HotWaterShower && unmet_showers_program.nil?
+      next if key.include?(UHT::HotWaterShower) && unmet_showers_program.nil?
       next if key == UHT::Driving && unmet_driving_hrs_program.nil?
 
       ems_program = unmet_hours_program
-      if key == UHT::HotWaterShower
+      if key.include?(UHT::HotWaterShower)
         ems_program = unmet_showers_program
       elsif key == UHT::Driving
         ems_program = unmet_driving_hrs_program
