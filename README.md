@@ -25,6 +25,7 @@ OpenStudio-HPXML capabilities include:
 - Modeling individual dwelling units or whole multifamily buildings
 - Modeling a wide range of building technologies
 - HVAC design load calculations and equipment autosizing
+- Electric panel NEC load calculations (experimental research feature)
 - Occupancy schedules (smooth or stochastic)
 - Utility bill calculations (flat, tiered, time-of-use, real-time pricing, etc.)
 - Emissions calculations (CO2e, etc.)
@@ -48,6 +49,7 @@ This repository contains several OpenStudio measures:
 OpenStudio-HPXML is used by a number of software products or organizations, including:
 
 - [BEopt](https://beopt.nrel.gov)
+- [Clarity Heat Pump Toolkit](https://psdconsulting.com/solutions/)
 - [Energy Rating Index (ERI)](https://github.com/NREL/OpenStudio-ERI)
 - [Home Energy Score](https://www.homeenergyscore.gov)
 - [OptiMiser](https://optimiserenergy.com)
@@ -56,6 +58,7 @@ OpenStudio-HPXML is used by a number of software products or organizations, incl
 - [URBANopt](https://www.nrel.gov/buildings/urbanopt.html)
 - [VEIC](https://www.veic.org)
 - [Weatherization Assistant](https://weatherization.ornl.gov/softwaredescription/) (pending)
+- [XeroHome](https://about.xerohome.com/)
 
 Are you using OpenStudio-HPXML and want to be mentioned here? [Email us](mailto:scott.horowitz@nrel.gov) or [open a Pull Request](https://github.com/NREL/OpenStudio-HPXML/edit/master/README.md).
 

@@ -288,7 +288,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
     assert_equal(0, therm_yr)
   end
 
-  def test_operational_5_5_occupants
+  def test_operational_5point5_occupants
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-residents-5-5.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
@@ -366,7 +366,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     # Check vehicle
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscElectricVehicleCharging)
-    assert_in_delta(1667, kwh_yr, 1.0)
+    assert_in_delta(2368, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check well pump
@@ -427,7 +427,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     # Check vehicle
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscElectricVehicleCharging)
-    assert_in_delta(1667, kwh_yr, 1.0)
+    assert_in_delta(2368, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check well pump
