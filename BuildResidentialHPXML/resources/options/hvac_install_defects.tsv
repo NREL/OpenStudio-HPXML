@@ -1,0 +1,67 @@
+Option Name	Airflow Defect Ratio [frac]	Charge Defect Ratio [frac]
+None		
+35% Airflow Defect	-0.35	
+25% Airflow Defect	-0.25	
+15% Airflow Defect	0.15	
+35% Under Charge		-0.35
+25% Under Charge		-0.25
+15% Under Charge		-0.15
+15% Over Charge		0.15
+25% Over Charge		0.25
+35% Over Charge		0.35
+"35% Airflow Defect, 35% Under Charge"	-0.35	-0.35
+"35% Airflow Defect, 25% Under Charge"	-0.35	-0.25
+"35% Airflow Defect, 15% Under Charge"	-0.35	-0.15
+"35% Airflow Defect, 15% Over Charge"	-0.35	0.15
+"35% Airflow Defect, 25% Over Charge"	-0.35	0.25
+"35% Airflow Defect, 35% Over Charge"	-0.35	0.35
+"25% Airflow Defect, 35% Under Charge"	-0.25	-0.35
+"25% Airflow Defect, 25% Under Charge"	-0.25	-0.25
+"25% Airflow Defect, 15% Under Charge"	-0.25	-0.15
+"25% Airflow Defect, 15% Over Charge"	-0.25	0.15
+"25% Airflow Defect, 25% Over Charge"	-0.25	0.25
+"25% Airflow Defect, 35% Over Charge"	-0.25	0.35
+"15% Airflow Defect, 35% Under Charge"	0.15	-0.35
+"15% Airflow Defect, 25% Under Charge"	0.15	-0.25
+"15% Airflow Defect, 15% Under Charge"	0.15	-0.15
+"15% Airflow Defect, 15% Over Charge"	0.15	0.15
+"15% Airflow Defect, 25% Over Charge"	0.15	0.25
+"15% Airflow Defect, 35% Over Charge"	0.15	0.35
+		
+Airflow Defect Ratio: The airflow defect ratio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies to Central Furnaces and Central and ducted Mini-Split ACs/HPs.		
+Charge Defect Ratio: The refrigerant charge defect ratio is defined as (InstalledCharge - DesignCharge) / DesignCharge per ANSI/RESNET/ACCA Standard 310. Applies to Central and Mini-Split ACs/HPs.		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+Type: The type of wall siding.		
+Color: The color of the walls.		
+Solar Absorptance: The solar absorptance of the outermost wall material.		
+Emittance: The emittance of the outermost wall material.		

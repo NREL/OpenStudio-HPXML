@@ -2387,70 +2387,67 @@
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Central HP, SEER 13, 7.7 HSPF, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
-    "heat_pump": "Central HP, SEER 18, 9.3 HSPF, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "heat_pump": "Central HP, SEER 22, 10 HSPF, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml",
-    "heat_pump": "Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "Central Furnace, 92% AFUE, Grade 3 Installation",
-    "cooling_system": "Central AC, SEER 13, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-2-speed.xml",
-    "heating_system": "Central Furnace, 92% AFUE, Grade 3 Installation",
-    "cooling_system": "Central AC, SEER 18, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-var-speed.xml",
-    "heating_system": "Central Furnace, 92% AFUE, Grade 3 Installation",
-    "cooling_system": "Central AC, SEER 24, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-furnace-gas-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
-    "heating_system": "Central Furnace, 92% AFUE, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Geothermal HP, EER 16.6, COP 3.6, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-2-speed-experimental.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml",
-    "heat_pump": "Geothermal HP, EER 20.5, COP 4.0, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-var-speed-experimental.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml",
-    "heat_pump": "Geothermal HP, EER 30.9, COP 4.4, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml",
-    "cooling_system": "Mini-Split AC, SEER 19, Ducted, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-mini-split-heat-pump-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
-    "heat_pump": "Mini-Split HP, SEER 19, 10 HSPF, Grade 3 Installation",
+    "hvac_install_defects": "25% Airflow Defect, 25% Under Charge",
     "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml": {
@@ -2607,7 +2604,7 @@
   },
   "sample_files/base-hvac-ptac-with-heating-electricity.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
-    "cooling_system": "Packaged Terminal AC, EER 10.7, Electric Heating",
+    "cooling_system": "Packaged Terminal AC, EER 10.7, Electric Resistance Heating",
     "cooling_system_integrated_heating_system_capacity": 36000,
     "cooling_system_integrated_heating_system_fraction_heat_load_served": 1
   },
@@ -2653,7 +2650,7 @@
   },
   "sample_files/base-hvac-room-ac-with-heating.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
-    "cooling_system": "Room AC, EER 8.5, Electric Heating",
+    "cooling_system": "Room AC, EER 8.5, Electric Resistance Heating",
     "cooling_system_integrated_heating_system_capacity": 36000,
     "cooling_system_integrated_heating_system_fraction_heat_load_served": 1
   },

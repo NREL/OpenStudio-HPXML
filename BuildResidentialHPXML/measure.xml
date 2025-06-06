@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>4c9fcca3-3302-4e3c-8b01-1204e24a549b</version_id>
-  <version_modified>2025-06-05T21:59:41Z</version_modified>
+  <version_id>11a5b27e-e05d-4631-93d5-3bbbe7e35b49</version_id>
+  <version_modified>2025-06-06T16:50:48Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2785,10 +2785,6 @@
           <display_name>Central Furnace, 92% AFUE, Pilot Light</display_name>
         </choice>
         <choice>
-          <value>Central Furnace, 92% AFUE, Grade 3 Installation</value>
-          <display_name>Central Furnace, 92% AFUE, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Central Furnace, 92.5% AFUE</value>
           <display_name>Central Furnace, 92.5% AFUE</display_name>
         </choice>
@@ -3071,10 +3067,6 @@
           <display_name>Central AC, SEER 13</display_name>
         </choice>
         <choice>
-          <value>Central AC, SEER 13, Grade 3 Installation</value>
-          <display_name>Central AC, SEER 13, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Central AC, SEER 14</value>
           <display_name>Central AC, SEER 14</display_name>
         </choice>
@@ -3103,20 +3095,12 @@
           <display_name>Central AC, SEER 18</display_name>
         </choice>
         <choice>
-          <value>Central AC, SEER 18, Grade 3 Installation</value>
-          <display_name>Central AC, SEER 18, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Central AC, SEER 21</value>
           <display_name>Central AC, SEER 21</display_name>
         </choice>
         <choice>
           <value>Central AC, SEER 24</value>
           <display_name>Central AC, SEER 24</display_name>
-        </choice>
-        <choice>
-          <value>Central AC, SEER 24, Grade 3 Installation</value>
-          <display_name>Central AC, SEER 24, Grade 3 Installation</display_name>
         </choice>
         <choice>
           <value>Central AC, SEER 24.5</value>
@@ -3155,10 +3139,6 @@
           <display_name>Mini-Split AC, SEER 19, Ducted</display_name>
         </choice>
         <choice>
-          <value>Mini-Split AC, SEER 19, Ducted, Grade 3 Installation</value>
-          <display_name>Mini-Split AC, SEER 19, Ducted, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Mini-Split AC, SEER 24</value>
           <display_name>Mini-Split AC, SEER 24</display_name>
         </choice>
@@ -3179,8 +3159,8 @@
           <display_name>Room AC, EER 8.5</display_name>
         </choice>
         <choice>
-          <value>Room AC, EER 8.5, Electric Heating</value>
-          <display_name>Room AC, EER 8.5, Electric Heating</display_name>
+          <value>Room AC, EER 8.5, Electric Resistance Heating</value>
+          <display_name>Room AC, EER 8.5, Electric Resistance Heating</display_name>
         </choice>
         <choice>
           <value>Room AC, EER 9.8</value>
@@ -3203,8 +3183,8 @@
           <display_name>Packaged Terminal AC, EER 10.7</display_name>
         </choice>
         <choice>
-          <value>Packaged Terminal AC, EER 10.7, Electric Heating</value>
-          <display_name>Packaged Terminal AC, EER 10.7, Electric Heating</display_name>
+          <value>Packaged Terminal AC, EER 10.7, Electric Resistance Heating</value>
+          <display_name>Packaged Terminal AC, EER 10.7, Electric Resistance Heating</display_name>
         </choice>
         <choice>
           <value>Packaged Terminal AC, EER 10.7, 80% AFUE Gas Heating</value>
@@ -3328,10 +3308,6 @@
           <display_name>Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F</display_name>
         </choice>
         <choice>
-          <value>Central HP, SEER 13, 7.7 HSPF, Grade 3 Installation</value>
-          <display_name>Central HP, SEER 13, 7.7 HSPF, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Central HP, SEER 13, 8.0 HSPF</value>
           <display_name>Central HP, SEER 13, 8.0 HSPF</display_name>
         </choice>
@@ -3384,20 +3360,12 @@
           <display_name>Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance</display_name>
         </choice>
         <choice>
-          <value>Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance, Grade 3 Installation</value>
-          <display_name>Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Central HP, SEER 18, 9.3 HSPF</value>
           <display_name>Central HP, SEER 18, 9.3 HSPF</display_name>
         </choice>
         <choice>
           <value>Central HP, SEER 18, 9.3 HSPF, 30F Compressor Lockout</value>
           <display_name>Central HP, SEER 18, 9.3 HSPF, 30F Compressor Lockout</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 18, 9.3 HSPF, Grade 3 Installation</value>
-          <display_name>Central HP, SEER 18, 9.3 HSPF, Grade 3 Installation</display_name>
         </choice>
         <choice>
           <value>Central HP, SEER 20, 11 HSPF</value>
@@ -3410,10 +3378,6 @@
         <choice>
           <value>Central HP, SEER 22, 10 HSPF</value>
           <display_name>Central HP, SEER 22, 10 HSPF</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 22, 10 HSPF, Grade 3 Installation</value>
-          <display_name>Central HP, SEER 22, 10 HSPF, Grade 3 Installation</display_name>
         </choice>
         <choice>
           <value>Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout</value>
@@ -3480,10 +3444,6 @@
           <display_name>Mini-Split HP, SEER 19, 10 HSPF, Ducted</display_name>
         </choice>
         <choice>
-          <value>Mini-Split HP, SEER 19, 10 HSPF, Grade 3 Installation</value>
-          <display_name>Mini-Split HP, SEER 19, 10 HSPF, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Mini-Split HP, SEER 19, 10 HSPF, 30F Compressor Lockout</value>
           <display_name>Mini-Split HP, SEER 19, 10 HSPF, 30F Compressor Lockout</display_name>
         </choice>
@@ -3532,10 +3492,6 @@
           <display_name>Geothermal HP, EER 16.6, COP 3.6</display_name>
         </choice>
         <choice>
-          <value>Geothermal HP, EER 16.6, COP 3.6, Grade 3 Installation</value>
-          <display_name>Geothermal HP, EER 16.6, COP 3.6, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Geothermal HP, EER 18.2, COP 3.7</value>
           <display_name>Geothermal HP, EER 18.2, COP 3.7</display_name>
         </choice>
@@ -3552,16 +3508,8 @@
           <display_name>Geothermal HP, EER 20.5, COP 4.0</display_name>
         </choice>
         <choice>
-          <value>Geothermal HP, EER 20.5, COP 4.0, Grade 3 Installation</value>
-          <display_name>Geothermal HP, EER 20.5, COP 4.0, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Geothermal HP, EER 30.9, COP 4.4</value>
           <display_name>Geothermal HP, EER 30.9, COP 4.4</display_name>
-        </choice>
-        <choice>
-          <value>Geothermal HP, EER 30.9, COP 4.4, Grade 3 Installation</value>
-          <display_name>Geothermal HP, EER 30.9, COP 4.4, Grade 3 Installation</display_name>
         </choice>
         <choice>
           <value>Packaged Terminal HP, EER 11.4, COP 3.6</value>
@@ -3926,10 +3874,6 @@
           <display_name>Central Furnace, 92% AFUE, Pilot Light</display_name>
         </choice>
         <choice>
-          <value>Central Furnace, 92% AFUE, Grade 3 Installation</value>
-          <display_name>Central Furnace, 92% AFUE, Grade 3 Installation</display_name>
-        </choice>
-        <choice>
           <value>Central Furnace, 92.5% AFUE</value>
           <display_name>Central Furnace, 92.5% AFUE</display_name>
         </choice>
@@ -4246,6 +4190,129 @@
       <units>W/CFM</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>hvac_install_defects</name>
+      <display_name>HVAC Installation Defects</display_name>
+      <description>Specifies whether the HVAC system has airflow and/or refrigerant charge installation defects. Applies to central furnaces and central/mini-split ACs and HPs.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
+      <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
+        <choice>
+          <value>35% Airflow Defect</value>
+          <display_name>35% Airflow Defect</display_name>
+        </choice>
+        <choice>
+          <value>25% Airflow Defect</value>
+          <display_name>25% Airflow Defect</display_name>
+        </choice>
+        <choice>
+          <value>15% Airflow Defect</value>
+          <display_name>15% Airflow Defect</display_name>
+        </choice>
+        <choice>
+          <value>35% Under Charge</value>
+          <display_name>35% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>25% Under Charge</value>
+          <display_name>25% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>15% Under Charge</value>
+          <display_name>15% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>15% Over Charge</value>
+          <display_name>15% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>25% Over Charge</value>
+          <display_name>25% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>35% Over Charge</value>
+          <display_name>35% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>35% Airflow Defect, 35% Under Charge</value>
+          <display_name>35% Airflow Defect, 35% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>35% Airflow Defect, 25% Under Charge</value>
+          <display_name>35% Airflow Defect, 25% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>35% Airflow Defect, 15% Under Charge</value>
+          <display_name>35% Airflow Defect, 15% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>35% Airflow Defect, 15% Over Charge</value>
+          <display_name>35% Airflow Defect, 15% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>35% Airflow Defect, 25% Over Charge</value>
+          <display_name>35% Airflow Defect, 25% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>35% Airflow Defect, 35% Over Charge</value>
+          <display_name>35% Airflow Defect, 35% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>25% Airflow Defect, 35% Under Charge</value>
+          <display_name>25% Airflow Defect, 35% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>25% Airflow Defect, 25% Under Charge</value>
+          <display_name>25% Airflow Defect, 25% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>25% Airflow Defect, 15% Under Charge</value>
+          <display_name>25% Airflow Defect, 15% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>25% Airflow Defect, 15% Over Charge</value>
+          <display_name>25% Airflow Defect, 15% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>25% Airflow Defect, 25% Over Charge</value>
+          <display_name>25% Airflow Defect, 25% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>25% Airflow Defect, 35% Over Charge</value>
+          <display_name>25% Airflow Defect, 35% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>15% Airflow Defect, 35% Under Charge</value>
+          <display_name>15% Airflow Defect, 35% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>15% Airflow Defect, 25% Under Charge</value>
+          <display_name>15% Airflow Defect, 25% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>15% Airflow Defect, 15% Under Charge</value>
+          <display_name>15% Airflow Defect, 15% Under Charge</display_name>
+        </choice>
+        <choice>
+          <value>15% Airflow Defect, 15% Over Charge</value>
+          <display_name>15% Airflow Defect, 15% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>15% Airflow Defect, 25% Over Charge</value>
+          <display_name>15% Airflow Defect, 25% Over Charge</display_name>
+        </choice>
+        <choice>
+          <value>15% Airflow Defect, 35% Over Charge</value>
+          <display_name>15% Airflow Defect, 35% Over Charge</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>ducts</name>
@@ -9005,7 +9072,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>FBA00F8E</checksum>
+      <checksum>54F65CBB</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9022,7 +9089,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>45F879DA</checksum>
+      <checksum>E837C2EC</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9052,7 +9119,7 @@
       <filename>options/cooling_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A33D59D8</checksum>
+      <checksum>A4B04136</checksum>
     </file>
     <file>
       <filename>options/ducts.tsv</filename>
@@ -9076,7 +9143,7 @@
       <filename>options/heat_pump.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E0BCCBD1</checksum>
+      <checksum>62CAE12B</checksum>
     </file>
     <file>
       <filename>options/heat_pump_backup.tsv</filename>
@@ -9088,13 +9155,19 @@
       <filename>options/heating_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B0129B54</checksum>
+      <checksum>5F77DA59</checksum>
     </file>
     <file>
       <filename>options/heating_system_2.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B0129B54</checksum>
+      <checksum>5F77DA59</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_install_defects.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B085D16C</checksum>
     </file>
     <file>
       <filename>options/lighting.tsv</filename>

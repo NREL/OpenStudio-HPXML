@@ -54,6 +54,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_backup_choices = get_option_names('heat_pump_backup.tsv')
     geothermal_loop_choices = get_option_names('geothermal_loop.tsv')
     heating_system_2_choices = get_option_names('heating_system_2.tsv')
+    hvac_install_defects_choices = get_option_names('hvac_install_defects.tsv')
     ducts_choices = get_option_names('ducts.tsv')
     neighbor_building_choices = get_option_names('neighbor_buildings.tsv')
     pv_system_choices = get_option_names('pv_system.tsv')
@@ -1207,6 +1208,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('HVAC Blower: Fan Efficiency')
     arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless #{HPXML::HVACTypeHeatPumpMiniSplit} systems). If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='#{docs_base_url}#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='#{docs_base_url}#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.")
     arg.setUnits('W/CFM')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_install_defects', hvac_install_defects_choices, false)
+    arg.setDisplayName('HVAC Installation Defects')
+    arg.setDescription('Specifies whether the HVAC system has airflow and/or refrigerant charge installation defects. Applies to central furnaces and central/mini-split ACs and HPs.')
+    arg.setDefaultValue('None')
     args << arg
 
     duct_location_choices = OpenStudio::StringVector.new
@@ -3071,6 +3078,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     get_option_properties(args, 'heat_pump_backup.tsv', args[:heat_pump_backup])
     get_option_properties(args, 'geothermal_loop.tsv', args[:geothermal_loop])
     get_option_properties(args, 'heating_system_2.tsv', args[:heating_system_2])
+    get_option_properties(args, 'hvac_install_defects.tsv', args[:hvac_install_defects])
     get_option_properties(args, 'ducts.tsv', args[:ducts])
     get_option_properties(args, 'neighbor_buildings.tsv', args[:geometry_neighbor_buildings])
     get_option_properties(args, 'pv_system.tsv', args[:pv_system])
@@ -5024,7 +5032,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if [HPXML::HVACTypeFurnace].include? heating_system_type
-      airflow_defect_ratio = args[:heating_system_airflow_defect_ratio]
+      airflow_defect_ratio = args[:hvac_install_defects_airflow_defect_ratio]
     end
 
     if args[:heating_system_fuel] != HPXML::FuelTypeElectricity
@@ -5091,11 +5099,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if [HPXML::HVACTypeCentralAirConditioner].include?(cooling_system_type) || ([HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type) && (args[:cooling_system_is_ducted]))
-      airflow_defect_ratio = args[:cooling_system_airflow_defect_ratio]
+      airflow_defect_ratio = args[:hvac_install_defects_airflow_defect_ratio]
     end
 
     if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type)
-      charge_defect_ratio = args[:cooling_system_charge_defect_ratio]
+      charge_defect_ratio = args[:hvac_install_defects_charge_defect_ratio]
     end
 
     if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include?(cooling_system_type)
@@ -5230,7 +5238,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type) || ([HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump_type) && (args[:heat_pump_is_ducted]))
-      airflow_defect_ratio = args[:heat_pump_airflow_defect_ratio]
+      airflow_defect_ratio = args[:hvac_install_defects_airflow_defect_ratio]
     end
 
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include?(heat_pump_type)
@@ -5269,7 +5277,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               heating_efficiency_cop: heating_efficiency_cop,
                               cooling_efficiency_eer: cooling_efficiency_eer,
                               airflow_defect_ratio: airflow_defect_ratio,
-                              charge_defect_ratio: args[:heat_pump_charge_defect_ratio],
+                              charge_defect_ratio: args[:hvac_install_defects_charge_defect_ratio],
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
                               primary_heating_system: args[:heat_pump_fraction_heat_load_served] > 0,
                               primary_cooling_system: args[:heat_pump_fraction_cool_load_served] > 0)
