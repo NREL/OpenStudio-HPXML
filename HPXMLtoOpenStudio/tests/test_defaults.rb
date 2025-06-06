@@ -1608,7 +1608,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                    heating_system_fuel: HPXML::FuelTypeElectricity,
                                    heating_efficiency_afue: 1,
                                    fraction_heat_load_served: 1.0,
-                                   fan_watts_per_cfm: 0.55)
+                                   fan_watts_per_cfm: 0.55,
+                                   fan_motor_type: HPXML::HVACFanMotorTypeBPM)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.55, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.64, 11.23, 40.0, 1.2, HPXML::HVACEquipmentTypeSpaceConstrained)
