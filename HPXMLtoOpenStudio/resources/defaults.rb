@@ -1986,7 +1986,7 @@ module Defaults
 
       if (not hp_backup_fuel.nil?) && (hp_backup_fuel != HPXML::FuelTypeElectricity)
         # Fuel backup
-        heat_pump.compressor_lockout_temp = 25.0 # F
+        heat_pump.compressor_lockout_temp = 40.0 # F
       else
         # Electric backup or no backup
         if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed

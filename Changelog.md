@@ -15,6 +15,7 @@ __New Features__
   - Allows optional `extension/FanMotorType` input for central equipment; updates `FanPowerWattsPerCFM` defaults to be based on fan motor type.
   - Allows optional `extension/EquipmentType` inputs for central air conditioners and heat pumps; only used for SEER/SEER2, EER/EER2, and HSPF/HSPF2 conversions.
   - Allows optional design airflow rate inputs (`extension/HeatingDesignAirflowCFM` and `extension/CoolingDesignAirflowCFM`).
+  - Updates default compressor lockout temperature for dual-fuel heat pumps from 25F to 40F.
   - Updates default design airflow rates to use cfm/ton assumptions rather than Manual S-based approach.
   - Updates to detailed performance datapoints:
     - **Breaking change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.

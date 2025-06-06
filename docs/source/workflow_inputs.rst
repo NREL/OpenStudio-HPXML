@@ -2878,7 +2878,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
-  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise -20F if CompressorType is "variable speed" otherwise 0F.
+  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 40F if fossil fuel backup otherwise -20F if CompressorType is "variable speed" otherwise 0F.
   .. [#] BackupType choices are "integrated" or "separate".
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
          Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
@@ -2973,7 +2973,7 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
-  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise -20F.
+  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 40F if fossil fuel backup otherwise -20F.
   .. [#] BackupType choices are "integrated" or "separate".
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
          Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
@@ -3047,7 +3047,7 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
          If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_dse` with a DSE of 1.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
-  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
+  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 40F if fossil fuel backup otherwise 0F.
   .. [#] BackupType choices are "integrated" or "separate".
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
          Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
@@ -3099,7 +3099,7 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
          If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_dse` with a DSE of 1.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
-  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
+  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 40F if fossil fuel backup otherwise 0F.
   .. [#] BackupType choices are "integrated" or "separate".
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
          Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
@@ -4793,37 +4793,37 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   .. [#] If Voltage not provided, defaults based on optional referenced components as follows:
 
          \- ``HeatingSystem[HeatingSystemFuel="electricity"]``: 240
-         
+
          \- ``CoolingSystem[CoolingSystemType!="room air conditioner"]``: 240
-         
+
          \- ``HeatPump[HeatPumpFuel="electricity"]``: 240
-                  
+
          \- ``WaterHeatingSystem[FuelType="electricity"]``: 240
-         
+
          \- ``ClothesDryer[FuelType="electricity"]``: 240
-         
+
          \- ``CookingRange[FuelType="electricity"]``: 240
-                  
+
          \- ``PermanentSpa/Pumps/Pump``: 240
-         
+
          \- ``PermanentSpa/Heater[Type="electric resistance" or "heat pump"]``: 240
-         
+
          \- ``Pool/Pumps/Pump``: 240
-         
+
          \- ``Pool/Heater[Type="electric resistance" or "heat pump"]``: 240
-         
+
          \- ``PlugLoad[PlugLoadType="well pump"]``: 240
-         
+
          \- ``PVSystem``: 240
-         
+
          \- ``Battery``: 240
-         
+
          \- Otherwise: 120
 
   .. [#] If MaxCurrentRating not provided, defaults based on Voltage as follows:
-  
+
          \- **120**: 15
-         
+
          \- **240**: 50
 
   .. [#] OccupiedSpaces choices are 0.0, 0.5, 1.0, or 2.0.
@@ -4832,11 +4832,11 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
          Occupied breaker spaces will be recalculated based on the new Voltage classification.
          Occupied breaker spaces are calculated based on PowerRating, Voltage, and MaxCurrentRating as follows:
-         
+
          RequiredAmperage = PowerRating / Voltage
-         
+
          NumBranches = ceiling(RequiredAmperage / MaxCurrentRating)
-         
+
          NumBreakers = NumBranches * (Voltage / 120)
 
   .. [#] Provide a AttachedToComponent element for each referenced component.
@@ -4900,7 +4900,7 @@ Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
          \- **laundry**
 
          \- **other**
-  
+
   .. [#] Provide a AttachedToComponent element for each referenced component.
 
 .. _panels_default:
