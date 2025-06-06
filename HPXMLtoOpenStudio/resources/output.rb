@@ -17,12 +17,13 @@ module Outputs
   # @param add_component_loads [Boolean] Whether to calculate component loads (since it incurs a runtime speed penalty)
   # @return [nil]
   def self.apply_ems_programs(model, hpxml_osm_map, hpxml_header, add_component_loads)
-    season_day_nums = Outputs.apply_unmet_hours_ems_program(model, hpxml_osm_map, hpxml_header)
-    loads_data = Outputs.apply_total_loads_ems_program(model, hpxml_osm_map, hpxml_header)
+    season_day_nums = apply_unmet_hours_ems_program(model, hpxml_osm_map, hpxml_header)
+    add_unmet_showers_ems_program(model, hpxml_osm_map)
+    loads_data = apply_total_loads_ems_program(model, hpxml_osm_map, hpxml_header)
     if add_component_loads
-      Outputs.apply_component_loads_ems_program(model, hpxml_osm_map, loads_data, season_day_nums)
+      apply_component_loads_ems_program(model, hpxml_osm_map, loads_data, season_day_nums)
     end
-    Outputs.apply_total_airflows_ems_program(model, hpxml_osm_map)
+    apply_total_airflows_ems_program(model, hpxml_osm_map)
   end
 
   # Creates an EMS program that calculates heating and cooling unmet hours (number
@@ -170,6 +171,57 @@ module Outputs
     )
 
     return season_day_nums
+  end
+
+  # Creates unmet showers outputs that use max hourly value across all individual dwelling
+  # units for output reporting.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
+  # @return [void]
+  def self.add_unmet_showers_ems_program(model, hpxml_osm_map)
+    return if hpxml_osm_map.select { |hpxml_bldg, _unit_model| !hpxml_bldg.water_heating_systems.empty? }.empty?
+
+    # Retrieve objects
+    shower_unmet_time_vars = []
+    shower_time_vars = []
+    hpxml_osm_map.each do |_hpxml_bldg, unit_model|
+      shower_unmet_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerUnmetTime }
+      shower_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerTime }
+    end
+
+    # EMS program
+    total_shower_unmet_time = 'total_shower_unmet_time'
+    total_shower_time = 'total_shower_time'
+    unit_shower_unmet_time = 'unit_shower_unmet_time'
+    unit_shower_time = 'unit_shower_time'
+    program = Model.add_ems_program(
+      model,
+      name: 'unmet showers program'
+    )
+    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetShowersProgram)
+    program.addLine("Set #{total_shower_unmet_time} = 0")
+    program.addLine("Set #{total_shower_time} = 0")
+    shower_unmet_time_vars.each_with_index do |shower_unmet_time_var, _i|
+      program.addLine("Set #{unit_shower_unmet_time} = #{shower_unmet_time_var.name}")
+      program.addLine("  If #{unit_shower_unmet_time} > #{total_shower_unmet_time}") # Use max hourly value across all units
+      program.addLine("    Set #{total_shower_unmet_time} = #{unit_shower_unmet_time}")
+      program.addLine('  EndIf')
+    end
+    shower_time_vars.each_with_index do |shower_time_var, _i|
+      program.addLine("Set #{unit_shower_time} = #{shower_time_var.name}")
+      program.addLine("  If #{unit_shower_time} > #{total_shower_time}") # Use max hourly value across all units
+      program.addLine("    Set #{total_shower_time} = #{unit_shower_time}")
+      program.addLine('  EndIf')
+    end
+
+    # EMS calling manager
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'EndOfZoneTimestepAfterZoneReporting',
+      ems_programs: [program]
+    )
   end
 
   # Creates an EMS program that calculates total heating and cooling loads delivered
@@ -1176,9 +1228,9 @@ module Outputs
     line_break = nil
 
     # Summary HVAC capacities
-    results_out << ['HVAC Capacity: Heating (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[0] }.sum(0.0).round(1)]
-    results_out << ['HVAC Capacity: Cooling (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[1] }.sum(0.0).round(1)]
-    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[2] }.sum(0.0).round(1)]
+    results_out << ['HVAC Capacity: Heating (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[0] }.sum(0.0).round(1)]
+    results_out << ['HVAC Capacity: Cooling (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[1] }.sum(0.0).round(1)]
+    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[2] }.sum(0.0).round(1)]
 
     # HVAC design temperatures
     results_out << [line_break]

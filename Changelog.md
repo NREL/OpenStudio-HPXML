@@ -23,6 +23,7 @@ __New Features__
   - Adds new outputs for *net* peak electricity (summer/winter/annual); same as *total* peak electricity outputs but subtracts power produced by PV.
   - Avoids writing the E+ eplustbl.htm by default; use the debug flag to get it.
   - Deletes eplusout\*.msgpack files by default (run_simulation.rb only); use the debug flag to preserve them.
+  - Adds "Unmet Hours: Showers (hr)" and "Unmet Hours: Showers (%)" to characterize unmet water heating loads.
 - Allows arbitrary columns to be present in a detailed schedule csv file with warning.
 
 __Bugfixes__

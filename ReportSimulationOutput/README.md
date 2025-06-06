@@ -114,7 +114,7 @@ Generates annual heating, cooling, and hot water loads.
 
 **Generate Annual Output: Unmet Hours**
 
-Generates annual unmet hours for heating, cooling, and EV driving.
+Generates annual unmet hours for heating, cooling, hot water, and EV driving.
 
 - **Name:** ``include_annual_unmet_hours``
 - **Type:** ``Boolean``
@@ -314,7 +314,7 @@ Generates timeseries heating and cooling loads disaggregated by component type.
 
 **Generate Timeseries Output: Unmet Hours**
 
-Generates timeseries unmet hours for heating, cooling, and EV driving.
+Generates timeseries unmet hours for heating, cooling, hot water, and EV driving.
 
 - **Name:** ``include_timeseries_unmet_hours``
 - **Type:** ``Boolean``
@@ -707,6 +707,10 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 - ``unmet_hours_heating_hr``
 
 - ``unmet_hours_cooling_hr``
+
+- ``unmet_hours_showers_hr``
+
+- ``unmet_hours_showers``
 
 - ``unmet_hours_ev_driving_hr``
 

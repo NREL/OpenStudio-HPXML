@@ -14,6 +14,8 @@ module HotWaterAndAppliances
   # @param plantloop_map [Hash] Map of HPXML System ID => OpenStudio PlantLoop objects
   # @return [nil]
   def self.apply(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file, plantloop_map)
+    @default_schedules_csv_data = Defaults.get_schedules_csv_data()
+
     # Get appliances, etc.
     if not hpxml_bldg.clothes_washers.empty?
       clothes_washer = hpxml_bldg.clothes_washers[0]
@@ -375,6 +377,26 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !water_heating.water_fixtures_weekend_fractions.nil?
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !water_heating.water_fixtures_monthly_multipliers.nil?
       end
+
+      # Create a separate shower schedule (from fixtures) used only for unmet showers calculation
+      showers_schedule = nil
+      showers_col_name = SchedulesFile::Columns[:HotWaterShowers].name
+      showers_obj_name = Constants::ObjectTypeShowers
+      if not schedules_file.nil?
+        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
+        showers_schedule_name = showers_col_name
+      end
+      if showers_schedule.nil?
+        showers_unavailable_periods = Schedule.get_unavailable_periods(runner, showers_col_name, hpxml_header.unavailable_periods)
+        showers_weekday_sch = @default_schedules_csv_data[showers_col_name]['ShowersWeekdayScheduleFractions']
+        showers_weekend_sch = @default_schedules_csv_data[showers_col_name]['ShowersWeekendScheduleFractions']
+        showers_monthly_sch = @default_schedules_csv_data[showers_col_name]['ShowersMonthlyScheduleMultipliers']
+        showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, showers_obj_name + ' schedule', showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
+        showers_schedule_name = showers_schedule_obj.schedule.name
+      end
+
+      # Add unmet showers calculation
+      Waterheater.unmet_showers_program(model, hpxml_bldg.water_heating_systems, plantloop_map, mw_temp_schedule, showers_schedule_name)
     end
 
     hpxml_bldg.water_heating_systems.each do |water_heating_system|

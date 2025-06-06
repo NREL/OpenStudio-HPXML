@@ -303,7 +303,7 @@ Annual building loads are listed below.
   ======================================  ==================================================================
   Type                                    Notes
   ======================================  ==================================================================
-  Load: Heating: Delivered (MBtu)         Total heating load delivered, including distribution losses.
+  Load: Heating: Delivered (MBtu)         Total heating load delivered, including distribution losses. [#]_
   Load: Heating: Heat Pump Backup (MBtu)  Heating load delivered by the heat pump backup only, including distribution losses.
   Load: Cooling: Delivered (MBtu)         Total cooling load delivered, including distribution losses.
   Load: Hot Water: Delivered (MBtu)       Total hot water load delivered, including contributions by desuperheaters or solar thermal systems.
@@ -312,8 +312,8 @@ Annual building loads are listed below.
   Load: Hot Water: Solar Thermal (MBtu)   Hot water load delivered by the solar thermal system.
   ======================================  ==================================================================
 
-Note that the "Delivered" loads represent the energy delivered by the HVAC/DHW system; if a system is significantly undersized, there will be unmet load not reflected by these values.
-If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported load will be likewise reduced compared to a home that is fully conditioned.
+  .. [#] Note that the "Delivered" loads represent the energy delivered by the HVAC/DHW system; if a system is significantly undersized, there will be unmet load not reflected by these values.
+         If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported load will be likewise reduced compared to a home that is fully conditioned.
 
 .. _annual_unmet_hours:
 
@@ -327,10 +327,15 @@ Annual unmet hours are listed below.
   ============================  =====
   Unmet Hours: Heating (hr)     Number of hours where the heating setpoint is not maintained. [#]_
   Unmet Hours: Cooling (hr)     Number of hours where the cooling setpoint is not maintained.
+  Unmet Hours: Showers (hr)     Number of hours where the shower water temperature is less than 105 deg-F. [#]_
+  Unmet Hours: Showers (%)      Number of unmet shower hours as a percent of total hours for showers.
   Unmet Hours: EV Driving (hr)  Number of hours where the EV driving demand is not met. [#]_
   ============================  =====
 
   .. [#] The unmet heating and cooling numbers reflect the number of hours during the heating/cooling season when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
+
+  .. [#] Unmet showers hours only account for a storage water heater running out of water and occupant discomfort; they do not account for temperature drop due to a distribution system or a tankless water heater's minimum firing rate.
+         Using simple hourly schedules (rather than detailed/stochastic sub-hourly schedules) may under-represent these values.
 
   .. [#] The unmet EV driving number represents the total time in which the electric vehicle discharge schedule exceeds zero while the EV battery's state of charge is at its minimum level.
          Unmet EV driving hours indicate unrealized driving events and reduced EV charging energy.
@@ -365,12 +370,12 @@ Values are calculated as the maximum load for any individual timestep divided by
   =======================================  ==================================
   Type                                     Notes
   =======================================  ==================================
-  Peak Load: Heating: Delivered (kBtu/hr)  Includes HVAC distribution losses.
+  Peak Load: Heating: Delivered (kBtu/hr)  Includes HVAC distribution losses. [#]_
   Peak Load: Cooling: Delivered (kBtu/hr)  Includes HVAC distribution losses.
   =======================================  ==================================
 
-Note that the "Delivered" peak loads represent the energy delivered by the HVAC system; if a system is significantly undersized, there will be unmet peak load not reflected by these values.
-If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported peak load will be likewise reduced compared to a home that is fully conditioned.
+  .. [#] Note that the "Delivered" peak loads represent the energy delivered by the HVAC system; if a system is significantly undersized, there will be unmet peak load not reflected by these values.
+         If the home is not fully conditioned (e.g., a room air conditioner that only meets 30% of the cooling load), the reported peak load will be likewise reduced compared to a home that is fully conditioned.
 
 Annual Component Building Loads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -654,7 +659,7 @@ Depending on the outputs requested, the file may include:
   Hot Water Uses                      ``hotwater``         Water use for each end use type (in gallons).
   Total Loads                         ``loads``            Heating, cooling, and hot water loads (in kBtu).
   Component Loads                     ``componentloads``   Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
-  Unmet Hours                         ``unmethours``       Heating, cooling, and EV driving unmet hours.
+  Unmet Hours                         ``unmethours``       Heating, cooling, and hot water unmet hours.
   Zone Temperatures                   ``temperatures``     Zone temperatures (in deg-F) for each space (e.g., conditioned space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
   Zone Conditions                     ``conditions``       Zone conditions (humidity ratio and relative humidity and dewpoint, radiant, and operative temperatures)
   Airflows                            ``airflows``         Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.

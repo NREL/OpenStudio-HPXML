@@ -362,6 +362,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
           vehicle.ev_weekend_fractions = nil
           vehicle.ev_monthly_multipliers = nil
         end
+      when SchedulesFile::Columns[:HotWaterShowers].name
+      when SchedulesFile::Columns[:HotWaterShowersMinutes].name
       else
         fail "Unexpected column name: #{column_name}"
       end

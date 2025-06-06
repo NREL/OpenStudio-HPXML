@@ -422,6 +422,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-bldgtype-mf-whole-building'
       next if message.include? 'SHR adjusted to achieve valid outlet air properties and the simulation continues.'
     end
+    if hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
+      next if message.include? 'Target water temperature should be less than or equal to the hot water temperature'
+    end
 
     flunk "Unexpected eplusout.err message found for #{File.basename(hpxml_path)}: #{message}"
   end
@@ -1057,9 +1060,14 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   # Check unmet hours
   unmet_hours_htg = results.select { |k, _v| k.include? 'Unmet Hours: Heating' }.values.sum(0.0)
   unmet_hours_clg = results.select { |k, _v| k.include? 'Unmet Hours: Cooling' }.values.sum(0.0)
+  unmet_hours_shw_hr = results.select { |k, _v| k.include? 'Unmet Hours: Showers (hr)' }.values.sum(0.0)
+  unmet_hours_shw_pc = results.select { |k, _v| k.include? 'Unmet Hours: Showers (%)' }.values.sum(0.0)
   if hpxml_path.include? 'base-hvac-undersized.xml'
     assert_operator(unmet_hours_htg, :>, 1000)
     assert_operator(unmet_hours_clg, :>, 1000)
+  elsif hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
+    assert_operator(unmet_hours_shw_hr, :>, 0)
+    assert_operator(unmet_hours_shw_pc, :>, 0)
   else
     if hpxml_bldg.total_fraction_heat_load_served == 0
       assert_equal(0, unmet_hours_htg)

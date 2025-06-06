@@ -152,6 +152,8 @@ class ReportSimulationOutputTest < Minitest::Test
     "Load: #{LT::HotWaterSolarThermal} (MBtu)",
     "Unmet Hours: #{UHT::Heating} (hr)",
     "Unmet Hours: #{UHT::Cooling} (hr)",
+    "Unmet Hours: #{UHT::HotWaterShower} (hr)",
+    "Unmet Hours: #{UHT::HotWaterShower} (%)",
     "Unmet Hours: #{UHT::Driving} (hr)",
     "Peak Electricity: #{PFT::Winter} #{TE::Total} (W)",
     "Peak Electricity: #{PFT::Summer} #{TE::Total} (W)",
@@ -337,6 +339,7 @@ class ReportSimulationOutputTest < Minitest::Test
   BaseHPXMLTimeseriesColsUnmetHours = [
     "Unmet Hours: #{UHT::Heating}",
     "Unmet Hours: #{UHT::Cooling}",
+    "Unmet Hours: #{UHT::HotWaterShower}",
     "Unmet Hours: #{UHT::Driving}",
   ]
 
@@ -940,6 +943,7 @@ class ReportSimulationOutputTest < Minitest::Test
 
   def test_timeseries_hourly_unmet_hours
     check_timeseries_hourly_unmet_hours('base-hvac-undersized.xml', ["Unmet Hours: #{UHT::Heating}", "Unmet Hours: #{UHT::Cooling}"])
+    check_timeseries_hourly_unmet_hours('base-dhw-undersized.xml', ["Unmet Hours: #{UHT::HotWaterShower}"])
     check_timeseries_hourly_unmet_hours('base-vehicle-ev-charger-undercharged.xml', ["Unmet Hours: #{UHT::Driving}"])
   end
 

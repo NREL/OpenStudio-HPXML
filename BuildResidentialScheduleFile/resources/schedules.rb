@@ -154,7 +154,7 @@ class ScheduleGenerator
 
     # Apply random shift to occupancy schedules
     home_schedule = occupancy_schedules[:away_schedule].map { |i| (1.0 - i) }
-    @schedules[SchedulesFile::Columns[:Occupants].name] = random_shift_and_normalize(home_schedule, @minutes_per_step)
+    @schedules[SchedulesFile::Columns[:Occupants].name], _ = random_shift_and_normalize(home_schedule, @minutes_per_step)
 
     fill_plug_loads_schedule(weather, occupancy_schedules)
     fill_lighting_schedule(args, occupancy_schedules)
@@ -166,37 +166,39 @@ class ScheduleGenerator
     if !@hpxml_bldg.dishwashers.to_a.empty?
       dw_hot_water_sch = generate_dishwasher_schedule(mkc_activity_schedules)
       dw_power_sch = generate_dishwasher_power_schedule(mkc_activity_schedules)
-      @schedules[SchedulesFile::Columns[:HotWaterDishwasher].name] = random_shift_and_normalize(dw_hot_water_sch)
-      @schedules[SchedulesFile::Columns[:Dishwasher].name] = random_shift_and_normalize(dw_power_sch)
+      @schedules[SchedulesFile::Columns[:HotWaterDishwasher].name], _ = random_shift_and_normalize(dw_hot_water_sch)
+      @schedules[SchedulesFile::Columns[:Dishwasher].name], _ = random_shift_and_normalize(dw_power_sch)
     end
     if !@hpxml_bldg.clothes_washers.to_a.empty?
       cw_hot_water_sch = generate_clothes_washer_schedule(mkc_activity_schedules)
       cw_power_sch, cd_power_sch = generate_clothes_washer_dryer_power_schedules(mkc_activity_schedules)
-      @schedules[SchedulesFile::Columns[:HotWaterClothesWasher].name] = random_shift_and_normalize(cw_hot_water_sch)
-      @schedules[SchedulesFile::Columns[:ClothesWasher].name] = random_shift_and_normalize(cw_power_sch)
+      @schedules[SchedulesFile::Columns[:HotWaterClothesWasher].name], _ = random_shift_and_normalize(cw_hot_water_sch)
+      @schedules[SchedulesFile::Columns[:ClothesWasher].name], _ = random_shift_and_normalize(cw_power_sch)
 
       if !@hpxml_bldg.clothes_dryers.to_a.empty?
-        @schedules[SchedulesFile::Columns[:ClothesDryer].name] = random_shift_and_normalize(cd_power_sch)
+        @schedules[SchedulesFile::Columns[:ClothesDryer].name], _ = random_shift_and_normalize(cd_power_sch)
       end
     end
     if !@hpxml_bldg.cooking_ranges.to_a.empty?
       cooking_power_sch = generate_cooking_power_schedule(mkc_activity_schedules)
-      @schedules[SchedulesFile::Columns[:CookingRange].name] = random_shift_and_normalize(cooking_power_sch)
+      @schedules[SchedulesFile::Columns[:CookingRange].name], _ = random_shift_and_normalize(cooking_power_sch)
     end
 
-    showers = random_shift_and_normalize(shower_activity_sch)
-    sinks = random_shift_and_normalize(sink_activity_sch)
-    baths = random_shift_and_normalize(bath_activity_sch)
+    showers, shower_minutes = random_shift_and_normalize(shower_activity_sch)
+    @schedules[SchedulesFile::Columns[:HotWaterShowers].name] = showers
+    @schedules[SchedulesFile::Columns[:HotWaterShowersMinutes].name] = shower_minutes
+    sinks, _ = random_shift_and_normalize(sink_activity_sch)
+    baths, _ = random_shift_and_normalize(bath_activity_sch)
 
     fixtures = [showers, sinks, baths].transpose.map(&:sum)
     @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = normalize(fixtures)
 
     # Apply random shift to EV occupant presence but don't normalize
-    ev_occupant_presence = random_shift_and_normalize(occupancy_schedules[:ev_occupant_presence], @minutes_per_step)
+    ev_occupant_presence, _ = random_shift_and_normalize(occupancy_schedules[:ev_occupant_presence], @minutes_per_step)
     fill_ev_schedules(mkc_activity_schedules, ev_occupant_presence)
 
     if @debug
-      @schedules[SchedulesFile::Columns[:Sleeping].name] = random_shift_and_normalize(occupancy_schedules[:sleep_schedule], @minutes_per_step)
+      @schedules[SchedulesFile::Columns[:Sleeping].name], _ = random_shift_and_normalize(occupancy_schedules[:sleep_schedule], @minutes_per_step)
     end
     return true
   end
@@ -870,8 +872,8 @@ class ScheduleGenerator
     away_index = 5 # Index of away activity in the markov-chain simulator
     away_schedule = markov_chain_simulation_result[@ev_occupant_number].column(away_index)
     charging_schedule, discharging_schedule = get_ev_battery_schedule(away_schedule, hours_per_year)
-    agg_charging_schedule = random_shift_and_normalize(charging_schedule, @minutes_per_step)
-    agg_discharging_schedule = random_shift_and_normalize(discharging_schedule, @minutes_per_step)
+    agg_charging_schedule, _ = random_shift_and_normalize(charging_schedule, @minutes_per_step)
+    agg_discharging_schedule, _ = random_shift_and_normalize(discharging_schedule, @minutes_per_step)
 
     # The combined schedule is not a sum of the charging and discharging schedules because when charging and discharging
     # both occur in a timestep, we don't want them to cancel out and draw no power from the building. So, whenever there
@@ -992,16 +994,16 @@ class ScheduleGenerator
     # Generate schedules for each plug load type if it exists
     if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'other' }
       plug_loads_other = generate_plug_load_schedule(daily_schedules, :plug_loads_other, occupancy_schedules)
-      @schedules[SchedulesFile::Columns[:PlugLoadsOther].name] = random_shift_and_normalize(plug_loads_other)
+      @schedules[SchedulesFile::Columns[:PlugLoadsOther].name], _ = random_shift_and_normalize(plug_loads_other)
     end
 
     if @hpxml_bldg.plug_loads.find { |p| p.plug_load_type == 'TV other' }
       plug_loads_tv = generate_plug_load_schedule(daily_schedules, :plug_loads_tv, occupancy_schedules)
-      @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = random_shift_and_normalize(plug_loads_tv)
+      @schedules[SchedulesFile::Columns[:PlugLoadsTV].name], _ = random_shift_and_normalize(plug_loads_tv)
     end
     if !@hpxml_bldg.ceiling_fans.to_a.empty?
       ceiling_fan = generate_plug_load_schedule(daily_schedules, :ceiling_fan, occupancy_schedules)
-      @schedules[SchedulesFile::Columns[:CeilingFan].name] = random_shift_and_normalize(ceiling_fan)
+      @schedules[SchedulesFile::Columns[:CeilingFan].name], _ = random_shift_and_normalize(ceiling_fan)
     end
   end
 
@@ -1063,7 +1065,7 @@ class ScheduleGenerator
       end
     end
 
-    normalized_lighting = random_shift_and_normalize(lighting_interior)
+    normalized_lighting, _ = random_shift_and_normalize(lighting_interior)
     @schedules[SchedulesFile::Columns[:LightingInterior].name] = normalized_lighting
     if @hpxml_bldg.has_location(HPXML::LocationGarage)
       @schedules[SchedulesFile::Columns[:LightingGarage].name] = normalized_lighting
@@ -1477,7 +1479,7 @@ class ScheduleGenerator
   # Apply random time shift to schedule values without normalizing.
   #
   # @param schedule [Array<Float>] Array of minute-level schedule values
-  # @return [Array<Float>] Schedule with random time shift applied
+  # @return [Array<Float>, Array<Float>] Schedule with random time shift applied, schedule of minutes
   def random_shift_and_aggregate(schedule)
     schedule.rotate!(@random_offset)
 
@@ -1485,18 +1487,33 @@ class ScheduleGenerator
     schedule = apply_monthly_offsets(array: schedule,
                                      weekday_monthly_shift_dict: @weekday_monthly_shift_dict,
                                      weekend_monthly_shift_dict: @weekend_monthly_shift_dict)
+    schedule_minutes = count_nonzero(schedule, @minutes_per_step)
     schedule = aggregate_array(schedule, @minutes_per_step)
 
-    return schedule
+    return schedule, schedule_minutes
   end
 
   # Apply random time shift and normalize schedule values.
   #
   # @param schedule [Array<Float>] Array of minute-level schedule values
   # @param max_val [Float] Maximum value to normalize to. If nil, use the maximum value in the schedule.
-  # @return [Array<Float>] Normalized schedule with random time shift applied
+  # @return [Array<Float>, Array<Float>] Normalized schedule with random time shift applied, schedule of minutes
   def random_shift_and_normalize(schedule, max_val = nil)
-    shifted_schedule = random_shift_and_aggregate(schedule)
-    return normalize(shifted_schedule, max_val)
+    shifted_schedule, schedule_minutes = random_shift_and_aggregate(schedule)
+    return normalize(shifted_schedule, max_val), schedule_minutes
+  end
+
+  # Counts the number of non-zero values in each group of size group_size in the input array
+  #
+  # @param array [Array] The input array to process
+  # @param group_size [Integer] The size of each group to count non-zero values in
+  # @return [Array] Array containing counts of non-zero values for each group
+  def count_nonzero(array, group_size)
+    new_array_size = array.size / group_size
+    new_array = [0] * new_array_size
+    new_array_size.times do |j|
+      new_array[j] = array[(j * group_size)..(j + 1) * group_size - 1].count { |x| x != 0 }
+    end
+    return new_array
   end
 end

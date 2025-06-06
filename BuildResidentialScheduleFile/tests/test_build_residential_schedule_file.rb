@@ -59,6 +59,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       HotWaterDishwasher: 287.3,
       HotWaterClothesWasher: 322.6,
       HotWaterFixtures: 1090.49,
+      HotWaterShowers: 576.9,
+      HotWaterShowersMinutes: 21529.0,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
@@ -138,6 +140,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       HotWaterDishwasher: 287.3,
       HotWaterClothesWasher: 322.6,
       HotWaterFixtures: 1090.49,
+      HotWaterShowers: 576.9,
+      HotWaterShowersMinutes: 21529.0,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
@@ -176,6 +180,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       HotWaterDishwasher: 287.3,
       HotWaterClothesWasher: 322.6,
       HotWaterFixtures: 1090.49,
+      HotWaterShowers: 576.9,
+      HotWaterShowersMinutes: 21529.0,
       Sleeping: 3101.7,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
@@ -213,6 +219,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       HotWaterDishwasher: 304,
       HotWaterClothesWasher: 322,
       HotWaterFixtures: 1146.15,
+      HotWaterShowers: 576.9,
+      HotWaterShowersMinutes: 21529.0,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
 
@@ -236,6 +244,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
                            output_path: @tmp_schedule_file_path)
+
     expected_values = {
       Occupants: 6072,
       LightingInterior: 1767.5,
@@ -248,6 +257,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       HotWaterDishwasher: 243,
       HotWaterClothesWasher: 263,
       HotWaterFixtures: 966.11,
+      HotWaterShowers: 655.2,
+      HotWaterShowersMinutes: 22052,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
   end
@@ -284,6 +295,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       HotWaterDishwasher: 155.9,
       HotWaterClothesWasher: 138.4,
       HotWaterFixtures: 345.7,
+      HotWaterShowers: 147.4,
+      HotWaterShowersMinutes: 3588.2,
     }
     assert_full_load_hrs_match(sf, expected_values, @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
@@ -381,6 +394,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
           HotWaterDishwasher: 287.3,
           HotWaterClothesWasher: 322.6,
           HotWaterFixtures: 1090.49,
+          HotWaterShowers: 576.9,
+          HotWaterShowersMinutes: 21529,
         }
         assert_full_load_hrs_match(sf, expected_values, @tol)
       elsif hpxml_bldg.building_id == 'MyBuilding_2'
@@ -397,6 +412,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
           HotWaterDishwasher: 229.8,
           HotWaterClothesWasher: 246.5,
           HotWaterFixtures: 948.79,
+          HotWaterShowers: 623.0,
+          HotWaterShowersMinutes: 22052,
         }
         assert_full_load_hrs_match(sf, expected_values, @tol)
       elsif hpxml_bldg.building_id == 'MyBuilding_3'
@@ -413,6 +430,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
           HotWaterDishwasher: 232.1,
           HotWaterClothesWasher: 206.8,
           HotWaterFixtures: 955.2,
+          HotWaterShowers: 386.3,
+          HotWaterShowersMinutes: 21048,
         }
         assert_full_load_hrs_match(sf, expected_values, @tol)
       end
@@ -463,6 +482,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
           HotWaterDishwasher: 229.8,
           HotWaterClothesWasher: 246.5,
           HotWaterFixtures: 948.79,
+          HotWaterShowers: 623.0,
+          HotWaterShowersMinutes: 22052,
         }
         assert_full_load_hrs_match(sf, expected_values, @tol)
         assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
