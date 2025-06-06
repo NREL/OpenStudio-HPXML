@@ -225,6 +225,12 @@ def apply_hpxml_modification_ashrae_140(hpxml)
 
     window.overhangs_distance_to_bottom_of_window = 6.0
   end
+  hpxml_bldg.slabs.each do |slab|
+    if slab.perimeter_insulation_r_value == 5
+      slab.perimeter_insulation_r_value = 5.4
+      slab.perimeter_insulation_depth = 2.5
+    end
+  end
 
   # ---------- #
   # HPXML HVAC #
@@ -1502,6 +1508,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     end
     if ['base-foundation-slab.xml'].include? hpxml_file
       hpxml_bldg.slabs[0].gap_insulation_r_value = 0.0
+    end
+    if ['base-foundation-slab-exterior-horizontal-insulation.xml'].include? hpxml_file
+      hpxml_bldg.slabs[0].exterior_horizontal_insulation_r_value = 5.4
+      hpxml_bldg.slabs[0].exterior_horizontal_insulation_width = 2.5
+      hpxml_bldg.slabs[0].exterior_horizontal_insulation_depth_below_grade = 1.0
     end
 
     # ---------- #

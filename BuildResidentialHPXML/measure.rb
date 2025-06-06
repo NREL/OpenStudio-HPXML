@@ -43,6 +43,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args = OpenStudio::Measure::OSArgumentVector.new
 
     site_soil_type_choices = get_option_names('site_soil_type.tsv')
+    slab_choices = get_option_names('slab.tsv')
     slab_carpet_choices = get_option_names('slab_carpet.tsv')
     foundation_wall_choices = get_option_names('foundation_wall.tsv')
     roof_material_choices = get_option_names('roof_material.tsv')
@@ -527,56 +528,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Required if a rim joist height is provided.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_perimeter_insulation_r', true)
-    arg.setDisplayName('Slab: Perimeter Insulation Nominal R-value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription('Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_perimeter_insulation_depth', true)
-    arg.setDisplayName('Slab: Perimeter Insulation Depth')
-    arg.setUnits('ft')
-    arg.setDescription('Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_exterior_horizontal_insulation_r', false)
-    arg.setDisplayName('Slab: Exterior Horizontal Insulation Nominal R-value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription('Nominal R-value of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_exterior_horizontal_insulation_width', false)
-    arg.setDisplayName('Slab: Exterior Horizontal Insulation Width')
-    arg.setUnits('ft')
-    arg.setDescription('Width of the slab exterior horizontal insulation measured from the exterior surface of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_exterior_horizontal_insulation_depth_below_grade', false)
-    arg.setDisplayName('Slab: Exterior Horizontal Insulation Depth Below Grade')
-    arg.setUnits('ft')
-    arg.setDescription('Depth of the slab exterior horizontal insulation measured from the top surface of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_under_insulation_r', true)
-    arg.setDisplayName('Slab: Under Slab Insulation Nominal R-value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription('Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_under_insulation_width', true)
-    arg.setDisplayName('Slab: Under Slab Insulation Width')
-    arg.setUnits('ft')
-    arg.setDescription('Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_thickness', false)
-    arg.setDisplayName('Slab: Thickness')
-    arg.setUnits('in')
-    arg.setDescription("The thickness of the slab. Zero can be entered if there is a dirt floor instead of a slab. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-slabs'>HPXML Slabs</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('slab', slab_choices, false)
+    arg.setDisplayName('Slab')
+    arg.setDescription('The type of slab. Applies to slab-on-grade and basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.')
+    arg.setDefaultValue('Uninsulated')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('slab_carpet', slab_carpet_choices, false)
@@ -3067,6 +3022,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     # Get all option properties
     get_option_properties(args, 'site_soil_type.tsv', args[:site_soil_type])
+    get_option_properties(args, 'slab.tsv', args[:slab])
     get_option_properties(args, 'slab_carpet.tsv', args[:slab_carpet])
     get_option_properties(args, 'foundation_wall.tsv', args[:foundation_wall])
     get_option_properties(args, 'roof_material.tsv', args[:roof_material])
@@ -4737,10 +4693,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         exposed_perimeter -= Geometry.get_unexposed_garage_perimeter(**args)
       end
 
-      if args[:slab_under_insulation_width] >= 999
+      if args[:slab_under_slab_insulation_width].to_f >= 999
         under_slab_insulation_spans_entire_slab = true
       else
-        under_slab_insulation_width = args[:slab_under_insulation_width]
+        under_slab_insulation_width = args[:slab_under_slab_insulation_width]
       end
 
       hpxml_bldg.slabs.add(id: "Slab#{hpxml_bldg.slabs.size + 1}",
@@ -4748,13 +4704,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            thickness: args[:slab_thickness],
                            exposed_perimeter: exposed_perimeter,
-                           perimeter_insulation_r_value: args[:slab_perimeter_insulation_r],
+                           perimeter_insulation_r_value: args[:slab_perimeter_insulation_nominal_r_value],
                            perimeter_insulation_depth: args[:slab_perimeter_insulation_depth],
-                           exterior_horizontal_insulation_r_value: args[:slab_exterior_horizontal_insulation_r],
+                           exterior_horizontal_insulation_r_value: args[:slab_exterior_horizontal_insulation_nominal_r_value],
                            exterior_horizontal_insulation_width: args[:slab_exterior_horizontal_insulation_width],
                            exterior_horizontal_insulation_depth_below_grade: args[:slab_exterior_horizontal_insulation_depth_below_grade],
                            under_slab_insulation_width: under_slab_insulation_width,
-                           under_slab_insulation_r_value: args[:slab_under_insulation_r],
+                           under_slab_insulation_r_value: args[:slab_under_slab_insulation_nominal_r_value],
                            under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab,
                            carpet_fraction: args[:slab_carpet_fraction],
                            carpet_r_value: args[:slab_carpet_r])

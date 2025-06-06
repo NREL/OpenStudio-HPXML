@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>11a5b27e-e05d-4631-93d5-3bbbe7e35b49</version_id>
-  <version_modified>2025-06-06T16:50:48Z</version_modified>
+  <version_id>a5381661-2b3d-45dd-8956-47a77e8668db</version_id>
+  <version_modified>2025-06-06T17:47:20Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1386,80 +1386,107 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>slab_perimeter_insulation_r</name>
-      <display_name>Slab: Perimeter Insulation Nominal R-value</display_name>
-      <description>Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
-      <type>Double</type>
-      <units>F-ft2-hr/Btu</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>slab_perimeter_insulation_depth</name>
-      <display_name>Slab: Perimeter Insulation Depth</display_name>
-      <description>Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
-      <type>Double</type>
-      <units>ft</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>slab_exterior_horizontal_insulation_r</name>
-      <display_name>Slab: Exterior Horizontal Insulation Nominal R-value</display_name>
-      <description>Nominal R-value of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
-      <type>Double</type>
-      <units>F-ft2-hr/Btu</units>
+      <name>slab</name>
+      <display_name>Slab</display_name>
+      <description>The type of slab. Applies to slab-on-grade and basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>slab_exterior_horizontal_insulation_width</name>
-      <display_name>Slab: Exterior Horizontal Insulation Width</display_name>
-      <description>Width of the slab exterior horizontal insulation measured from the exterior surface of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
-      <type>Double</type>
-      <units>ft</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>slab_exterior_horizontal_insulation_depth_below_grade</name>
-      <display_name>Slab: Exterior Horizontal Insulation Depth Below Grade</display_name>
-      <description>Depth of the slab exterior horizontal insulation measured from the top surface of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
-      <type>Double</type>
-      <units>ft</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>slab_under_insulation_r</name>
-      <display_name>Slab: Under Slab Insulation Nominal R-value</display_name>
-      <description>Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
-      <type>Double</type>
-      <units>F-ft2-hr/Btu</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>slab_under_insulation_width</name>
-      <display_name>Slab: Under Slab Insulation Width</display_name>
-      <description>Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
-      <type>Double</type>
-      <units>ft</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>slab_thickness</name>
-      <display_name>Slab: Thickness</display_name>
-      <description>The thickness of the slab. Zero can be entered if there is a dirt floor instead of a slab. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-slabs'&gt;HPXML Slabs&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>in</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
+      <default_value>Uninsulated</default_value>
+      <choices>
+        <choice>
+          <value>Uninsulated</value>
+          <display_name>Uninsulated</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 2ft, R-5</value>
+          <display_name>Under Slab, 2ft, R-5</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 2ft, R-10</value>
+          <display_name>Under Slab, 2ft, R-10</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 2ft, R-15</value>
+          <display_name>Under Slab, 2ft, R-15</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 2ft, R-20</value>
+          <display_name>Under Slab, 2ft, R-20</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 4ft, R-5</value>
+          <display_name>Under Slab, 4ft, R-5</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 4ft, R-10</value>
+          <display_name>Under Slab, 4ft, R-10</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 4ft, R-15</value>
+          <display_name>Under Slab, 4ft, R-15</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 4ft, R-20</value>
+          <display_name>Under Slab, 4ft, R-20</display_name>
+        </choice>
+        <choice>
+          <value>Perimeter, 2ft, R-5</value>
+          <display_name>Perimeter, 2ft, R-5</display_name>
+        </choice>
+        <choice>
+          <value>Perimeter, 2ft, R-10</value>
+          <display_name>Perimeter, 2ft, R-10</display_name>
+        </choice>
+        <choice>
+          <value>Perimeter, 2ft, R-15</value>
+          <display_name>Perimeter, 2ft, R-15</display_name>
+        </choice>
+        <choice>
+          <value>Perimeter, 2ft, R-20</value>
+          <display_name>Perimeter, 2ft, R-20</display_name>
+        </choice>
+        <choice>
+          <value>Perimeter, 4ft, R-5</value>
+          <display_name>Perimeter, 4ft, R-5</display_name>
+        </choice>
+        <choice>
+          <value>Perimeter, 4ft, R-10</value>
+          <display_name>Perimeter, 4ft, R-10</display_name>
+        </choice>
+        <choice>
+          <value>Perimeter, 4ft, R-15</value>
+          <display_name>Perimeter, 4ft, R-15</display_name>
+        </choice>
+        <choice>
+          <value>Perimeter, 4ft, R-20</value>
+          <display_name>Perimeter, 4ft, R-20</display_name>
+        </choice>
+        <choice>
+          <value>Whole Slab, R-5</value>
+          <display_name>Whole Slab, R-5</display_name>
+        </choice>
+        <choice>
+          <value>Whole Slab, R-10</value>
+          <display_name>Whole Slab, R-10</display_name>
+        </choice>
+        <choice>
+          <value>Whole Slab, R-15</value>
+          <display_name>Whole Slab, R-15</display_name>
+        </choice>
+        <choice>
+          <value>Whole Slab, R-20</value>
+          <display_name>Whole Slab, R-20</display_name>
+        </choice>
+        <choice>
+          <value>Whole Slab, R-30</value>
+          <display_name>Whole Slab, R-30</display_name>
+        </choice>
+        <choice>
+          <value>Whole Slab, R-40</value>
+          <display_name>Whole Slab, R-40</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>slab_carpet</name>
@@ -9072,7 +9099,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>54F65CBB</checksum>
+      <checksum>E7C30CFB</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9089,7 +9116,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E837C2EC</checksum>
+      <checksum>A6755181</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9206,6 +9233,12 @@
       <checksum>90838051</checksum>
     </file>
     <file>
+      <filename>options/slab.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9792E3B7</checksum>
+    </file>
+    <file>
       <filename>options/slab_carpet.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -9233,7 +9266,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6A9D6351</checksum>
+      <checksum>03A5286F</checksum>
     </file>
   </files>
 </measure>

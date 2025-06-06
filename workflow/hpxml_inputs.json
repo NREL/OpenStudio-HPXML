@@ -27,12 +27,7 @@
     "floor_type": "WoodFrame",
     "foundation_wall": "None",
     "rim_joist_assembly_r": 5.01,
-    "slab_perimeter_insulation_r": 0,
-    "slab_perimeter_insulation_depth": 0,
-    "slab_perimeter_insulation_depth": 0,
-    "slab_under_insulation_r": 0,
-    "slab_under_insulation_width": 0,
-    "slab_thickness": 4,
+    "slab": "Uninsulated",
     "slab_carpet": "0% Carpet",
     "ceiling_assembly_r": 18.45,
     "roof_material": "0.6 Solar Absorptance",
@@ -229,8 +224,7 @@
   },
   "tests/ASHRAE_Standard_140/L304XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L302XC.xml",
-    "slab_perimeter_insulation_r": 5.4,
-    "slab_perimeter_insulation_depth": 2.5
+    "slab": "Perimeter, 2ft, R-5"
   },
   "tests/ASHRAE_Standard_140/L322XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -551,12 +545,7 @@
     "floor_type": "WoodFrame",
     "foundation_wall": "Solid Concrete, Whole Wall, R-10",
     "rim_joist_assembly_r": 23,
-    "slab_perimeter_insulation_r": 0,
-    "slab_perimeter_insulation_depth": 0,
-    "slab_perimeter_insulation_depth": 0,
-    "slab_under_insulation_r": 0,
-    "slab_under_insulation_width": 0,
-    "slab_thickness": 4,
+    "slab": "Uninsulated",
     "slab_carpet":"0% Carpet",
     "ceiling_assembly_r": 39.3,
     "roof_material": "Asphalt/Fiberglass Shingles, Medium",
@@ -1764,13 +1753,11 @@
   },
   "sample_files/base-foundation-conditioned-basement-slab-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "slab_under_insulation_r": 10,
-    "slab_under_insulation_width": 4
+    "slab": "Under Slab, 4ft, R-10"
   },
   "sample_files/base-foundation-conditioned-basement-slab-insulation-full.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "slab_under_insulation_r": 10,
-    "slab_under_insulation_width": 999
+    "slab": "Whole Slab, R-10"
   },
   "sample_files/base-foundation-conditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1794,19 +1781,14 @@
     "geometry_foundation_type": "SlabOnGrade",
     "geometry_foundation_height": 0,
     "geometry_foundation_height_above_grade": 0,
-    "slab_under_insulation_r": 5,
-    "slab_under_insulation_width": 999,
+    "slab": "Whole Slab, R-5",
     "slab_carpet": "100% Carpet, R-2.5",
     "ducts_supply_location": "under slab",
     "ducts_return_location": "under slab",
     "misc_plug_loads_other_annual_kwh": 1228.5
   },
   "sample_files/base-foundation-slab-exterior-horizontal-insulation.xml": {
-    "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "slab_perimeter_insulation_r": 5.4,
-    "slab_exterior_horizontal_insulation_r": 5.4,
-    "slab_exterior_horizontal_insulation_width": 2.5,
-    "slab_exterior_horizontal_insulation_depth_below_grade": 1
+    "parent_hpxml": "sample_files/base-foundation-slab.xml"
   },
   "sample_files/base-foundation-multiple.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml"
@@ -1848,7 +1830,6 @@
     "geometry_foundation_type": "UnventedCrawlspace",
     "geometry_foundation_height": 4,
     "floor_over_foundation_assembly_r": 18.7,
-    "slab_thickness": 0,
     "ducts_supply_location": "crawlspace - unvented",
     "ducts_return_location": "crawlspace - unvented",
     "water_heater_location": "crawlspace - unvented",
@@ -1860,7 +1841,6 @@
     "geometry_foundation_type": "VentedCrawlspace",
     "geometry_foundation_height": 4,
     "floor_over_foundation_assembly_r": 18.7,
-    "slab_thickness": 0,
     "ducts_supply_location": "crawlspace - vented",
     "ducts_return_location": "crawlspace - vented",
     "water_heater_location": "crawlspace - vented",
@@ -3032,7 +3012,6 @@
     "site_iecc_zone": null,
     "site_state_code": null,
     "geometry_unit_num_bathrooms": null,
-    "slab_thickness": null,
     "roof_material": null,
     "wall_siding": null,
     "window_fraction_operable": null,

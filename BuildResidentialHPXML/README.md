@@ -825,107 +825,16 @@ Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Requ
 
 <br/>
 
-**Slab: Perimeter Insulation Nominal R-value**
+**Slab**
 
-Nominal R-value of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+The type of slab. Applies to slab-on-grade and basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.
 
-- **Name:** ``slab_perimeter_insulation_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
-
-- **Required:** ``true``
-
-<br/>
-
-**Slab: Perimeter Insulation Depth**
-
-Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
-
-- **Name:** ``slab_perimeter_insulation_depth``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Slab: Exterior Horizontal Insulation Nominal R-value**
-
-Nominal R-value of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
-
-- **Name:** ``slab_exterior_horizontal_insulation_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
+- **Name:** ``slab``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Slab: Exterior Horizontal Insulation Width**
-
-Width of the slab exterior horizontal insulation measured from the exterior surface of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
-
-- **Name:** ``slab_exterior_horizontal_insulation_width``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Slab: Exterior Horizontal Insulation Depth Below Grade**
-
-Depth of the slab exterior horizontal insulation measured from the top surface of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
-
-- **Name:** ``slab_exterior_horizontal_insulation_depth_below_grade``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Slab: Under Slab Insulation Nominal R-value**
-
-Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
-
-- **Name:** ``slab_under_insulation_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
-
-- **Required:** ``true``
-
-<br/>
-
-**Slab: Under Slab Insulation Width**
-
-Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors.
-
-- **Name:** ``slab_under_insulation_width``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Slab: Thickness**
-
-The thickness of the slab. Zero can be entered if there is a dirt floor instead of a slab. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-slabs'>HPXML Slabs</a>) is used.
-
-- **Name:** ``slab_thickness``
-- **Type:** ``Double``
-
-- **Units:** ``in``
-
-- **Required:** ``false``
+- **Choices:** `Uninsulated`, `Under Slab, 2ft, R-5`, `Under Slab, 2ft, R-10`, `Under Slab, 2ft, R-15`, `Under Slab, 2ft, R-20`, `Under Slab, 4ft, R-5`, `Under Slab, 4ft, R-10`, `Under Slab, 4ft, R-15`, `Under Slab, 4ft, R-20`, `Perimeter, 2ft, R-5`, `Perimeter, 2ft, R-10`, `Perimeter, 2ft, R-15`, `Perimeter, 2ft, R-20`, `Perimeter, 4ft, R-5`, `Perimeter, 4ft, R-10`, `Perimeter, 4ft, R-15`, `Perimeter, 4ft, R-20`, `Whole Slab, R-5`, `Whole Slab, R-10`, `Whole Slab, R-15`, `Whole Slab, R-20`, `Whole Slab, R-30`, `Whole Slab, R-40`
 
 <br/>
 
