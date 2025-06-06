@@ -270,7 +270,6 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <Area>600.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>70.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -295,7 +294,6 @@
             <SystemIdentifier id='Slab2'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>120.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab2PerimeterInsulation'/>

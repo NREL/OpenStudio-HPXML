@@ -228,7 +228,6 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>crawlspace - vented</InteriorAdjacentTo>
             <Area>1350.0</Area>
-            <Thickness>0.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>

@@ -445,7 +445,6 @@
             <AttachedToSpace idref='GarageSpace'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <Area>600.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>70.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -471,7 +470,6 @@
             <AttachedToSpace idref='Space3'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1000.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>88.9</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab2PerimeterInsulationSpace3'/>
@@ -497,7 +495,6 @@
             <AttachedToSpace idref='Space4'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>350.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>31.1</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab2PerimeterInsulationSpace4'/>
