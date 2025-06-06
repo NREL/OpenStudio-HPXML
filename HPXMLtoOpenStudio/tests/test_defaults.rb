@@ -2618,27 +2618,27 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-backup-integrated.xml')
     hpxml_bldg.heat_pumps[0].pump_watts_per_ton = 9.9
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.66
-    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypePSC
+    hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
     hpxml_bldg.heat_pumps[0].airflow_defect_ratio = -0.22
     hpxml_bldg.heat_pumps[0].cooling_capacity = 12345
     hpxml_bldg.heat_pumps[0].heating_capacity = 23456
     hpxml_bldg.heat_pumps[0].backup_heating_capacity = 34567
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ground_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 9.9, 0.66, HPXML::HVACFanMotorTypePSC, nil, nil, -0.22, 12345, 23456, 34567)
+    _test_default_ground_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 9.9, 0.66, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.22, 12345, 23456, 34567)
 
     # Test watts/cfm based on fan model type
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ground_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 9.9, 0.5, HPXML::HVACFanMotorTypePSC, nil, nil, -0.22, 12345, 23456, 34567)
+    _test_default_ground_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 9.9, 0.375, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.22, 12345, 23456, 34567)
 
     # Test fan model type based on watts/cfm
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.17
     hpxml_bldg.heat_pumps[0].fan_motor_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ground_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 9.9, 0.17, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.22, 12345, 23456, 34567)
+    _test_default_ground_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 9.9, 0.17, HPXML::HVACFanMotorTypePSC, nil, nil, -0.22, 12345, 23456, 34567)
 
     # Test defaults
     hpxml_bldg.heat_pumps[0].pump_watts_per_ton = nil
@@ -2649,7 +2649,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ground_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 80.0, 0.375, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, nil, nil, nil)
+    _test_default_ground_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 80.0, 0.5, HPXML::HVACFanMotorTypePSC, nil, nil, 0, nil, nil, nil)
   end
 
   def test_geothermal_loops
