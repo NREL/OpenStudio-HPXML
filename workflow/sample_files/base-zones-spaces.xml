@@ -336,9 +336,9 @@
             <AttachedToSpace idref='Space3'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Type>solid concrete</Type>
             <Height>8.0</Height>
             <Area>888.9</Area>
-            <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -347,9 +347,7 @@
               <SystemIdentifier id='Space3FoundationWall1Insulation'/>
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
-                <NominalRValue>8.9</NominalRValue>
-                <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
+                <NominalRValue>10.0</NominalRValue>
               </Layer>
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
@@ -362,9 +360,9 @@
             <AttachedToSpace idref='Space4'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Type>solid concrete</Type>
             <Height>8.0</Height>
             <Area>311.1</Area>
-            <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -373,9 +371,7 @@
               <SystemIdentifier id='Space4FoundationWall1Insulation'/>
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
-                <NominalRValue>8.9</NominalRValue>
-                <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
+                <NominalRValue>10.0</NominalRValue>
               </Layer>
               <Layer>
                 <InstallationType>continuous - interior</InstallationType>
