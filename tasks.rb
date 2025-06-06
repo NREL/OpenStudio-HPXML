@@ -68,14 +68,14 @@ def create_hpxmls
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     num_apply_measures = 1
-    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
       num_apply_measures = 6
     end
 
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
@@ -2039,6 +2039,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         heat_pump.backup_heating_active_during_defrost = true
       end
     end
+    if ['base-hvac-fan-motor-type.xml'].include? hpxml_file
+      hpxml_bldg.heating_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
+      hpxml_bldg.cooling_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
+    end
 
     # ------------------ #
     # HPXML WaterHeating #
@@ -2379,6 +2383,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 annual_consumption_kbtu: 85000,
                                 annual_output_kwh: 12000,
                                 number_of_bedrooms_served: 18)
+    end
+
+    # -------------------- #
+    # HPXML Electric Panel #
+    # -------------------- #
+    if ['house051.xml'].include? hpxml_file
+      electric_panel = hpxml_bldg.electric_panels[0]
+      branch_circuits = electric_panel.branch_circuits
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                          occupied_spaces: 1,
+                          component_idrefs: [hpxml_bldg.refrigerators[0].id,
+                                             hpxml_bldg.plug_loads[1].id])
     end
 
     # ------------- #

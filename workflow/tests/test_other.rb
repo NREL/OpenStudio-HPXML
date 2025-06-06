@@ -250,6 +250,35 @@ class WorkflowOtherTest < Minitest::Test
     refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
   end
 
+  def test_run_simulation_electric_panel_outputs
+    # Check that the simulation produces electric panel only when requested
+
+    # Run base.xml (no panel information or calculation types)
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+
+    # Check for output files
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'results_panel.csv'))
+
+    # Run base-detailed-electric-panel-no-calculation-types.xml (panel information but no calculation types)
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-detailed-electric-panel-no-calculation-types.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+
+    # Check for output files
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'results_panel.csv'))
+
+    # Run base-detailed-electric-panel.xml (both panel information and calculation types)
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-detailed-electric-panel.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+
+    # Check for output files
+    assert(File.exist? File.join(File.dirname(xml), 'run', 'results_panel.csv'))
+  end
+
   def test_run_defaulted_in_xml_with_hvac_installation_quality
     # Check that if we simulate the in.xml file (HPXML w/ defaults), we get
     # the same results as the original HPXML for a home with HVAC installation
@@ -285,6 +314,61 @@ class WorkflowOtherTest < Minitest::Test
 
     # Cleanup
     File.delete(tmp_hpxml_path) if File.exist? tmp_hpxml_path
+  end
+
+  def test_defrost_heating_loads
+    # Check that if we simulate the heat pump with or without supplemental during defrost
+    # we get the same heating load results
+
+    # Standard defrost
+    # Run the test file without supplemental heat during defrost
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-hvac-mini-split-heat-pump-ductless-backup-standard-defrost.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+
+    # Check for output files
+    annual_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? annual_output_path)
+    result_rows = CSV.read(annual_output_path, headers: false)
+    heating_loads_no_defrost_backup = Float(result_rows.find { |r| r[0].to_s.start_with? 'Load: Heating: Delivered' }[1]).round(2)
+
+    # Run the test file with supplemental heat during defrost
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-hvac-mini-split-heat-pump-ductless-backup-standard-defrost-with-backup-heat-active.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+
+    # Check for output files
+    annual_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? annual_output_path)
+    result_rows = CSV.read(annual_output_path, headers: false)
+    heating_loads_with_defrost_backup = Float(result_rows.find { |r| r[0].to_s.start_with? 'Load: Heating: Delivered' }[1]).round(2)
+    assert_equal(heating_loads_no_defrost_backup, heating_loads_with_defrost_backup)
+
+    # Advanced defrost
+    # Run the test file without supplemental heat during defrost
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+
+    # Check for output files
+    annual_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? annual_output_path)
+    result_rows = CSV.read(annual_output_path, headers: false)
+    heating_loads_no_defrost_backup = Float(result_rows.find { |r| r[0].to_s.start_with? 'Load: Heating: Delivered' }[1]).round(2)
+
+    # Run the test file with supplemental heat during defrost
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost-with-backup-heat-active.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+
+    # Check for output files
+    annual_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? annual_output_path)
+    result_rows = CSV.read(annual_output_path, headers: false)
+    heating_loads_with_defrost_backup = Float(result_rows.find { |r| r[0].to_s.start_with? 'Load: Heating: Delivered' }[1]).round(2)
+    assert_equal(heating_loads_no_defrost_backup, heating_loads_with_defrost_backup)
   end
 
   def test_template_osws
