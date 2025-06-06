@@ -1612,7 +1612,7 @@
   },
   "sample_files/base-dhw-tank-heat-pump-undersized-80-gal.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-capacities.xml",
-    "water_heater_backup_heating_capacity": 1200
+    "water_heater_heating_capacity": 1200
   },
   "sample_files/base-dhw-tank-heat-pump-undersized-60-gal.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-undersized-80-gal.xml",

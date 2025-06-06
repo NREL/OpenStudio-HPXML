@@ -413,8 +413,8 @@
             <Location>conditioned space</Location>
             <TankVolume>60.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>3000.0</HeatingCapacity>
-            <BackupHeatingCapacity>1200.0</BackupHeatingCapacity>
+            <HeatingCapacity>1200.0</HeatingCapacity>
+            <BackupHeatingCapacity>0.0</BackupHeatingCapacity>
             <EnergyFactor>2.3</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
