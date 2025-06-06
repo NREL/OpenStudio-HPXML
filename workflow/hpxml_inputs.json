@@ -1574,9 +1574,16 @@
     "water_heater_efficiency": 2.3,
     "water_heater_heating_capacity": null
   },
+  "sample_files/base-dhw-tank-heat-pump-undersized-80-gal.xml": {
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-capacities.xml",
+    "water_heater_backup_heating_capacity": 1200
+  },
+  "sample_files/base-dhw-tank-heat-pump-undersized-60-gal.xml": {
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-undersized-80-gal.xml",
+    "water_heater_tank_volume": 60
+  },
   "sample_files/base-dhw-tank-heat-pump-capacities.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
-    "water_heater_type": "heat pump water heater",
     "water_heater_heating_capacity": 3000,
     "water_heater_backup_heating_capacity": 0
   },
