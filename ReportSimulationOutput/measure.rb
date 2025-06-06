@@ -2110,6 +2110,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         elsif meter_names[idx].include? Constants::ObjectTypePanHeater
           # Shift energy use adjustment to align with HVAC operation and weather
           shift_values[idx] = true
+        elsif meter_names[idx].include? Constants::ObjectTypeHPDefrostSupplHeat
+          # Shift energy use adjustment to align with HVAC operation and weather
+          shift_values[idx] = true
         end
       end
     end
