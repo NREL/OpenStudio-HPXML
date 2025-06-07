@@ -10,9 +10,6 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <AdvancedResearchFeatures>
-          <DefrostModelType>advanced</DefrostModelType>
-        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -346,7 +343,6 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <BackupHeatingActiveDuringDefrost>true</BackupHeatingActiveDuringDefrost>
                 <HeatingCapacityFraction17F>0.6</HeatingCapacityFraction17F>
               </extension>
             </HeatPump>

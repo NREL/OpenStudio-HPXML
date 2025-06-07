@@ -10,9 +10,6 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <AdvancedResearchFeatures>
-          <DefrostModelType>advanced</DefrostModelType>
-        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
