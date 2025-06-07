@@ -2089,55 +2089,40 @@ module Defaults
     end
 
     # Fan model type
+    # Based on RESNET DX Modeling Appendix
     hpxml_bldg.heating_systems.each do |heating_system|
-      next unless heating_system.heating_system_type == HPXML::HVACTypeFurnace
       next unless heating_system.fan_motor_type.nil?
+      next unless heating_system.heating_system_type == HPXML::HVACTypeFurnace
       next if (not heating_system.distribution_system.nil?) && (heating_system.distribution_system.air_type == HPXML::AirTypeGravity)
 
       if (not heating_system.attached_cooling_system.nil?) && (not heating_system.attached_cooling_system.compressor_type.nil?)
-        # Based on RESNET DX Modeling Appendix
         heating_system.fan_motor_type = (heating_system.attached_cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
       else
-        # HEScore assumption
+        # Standalone furnace, use HEScore assumption
         heating_system.fan_motor_type = (heating_system.heating_efficiency_afue > 0.9) ? HPXML::HVACFanMotorTypeBPM : HPXML::HVACFanMotorTypePSC
       end
       heating_system.fan_motor_type_isdefaulted = true
     end
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.fan_motor_type.nil?
+      next unless [HPXML::HVACTypeCentralAirConditioner,
+                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
 
       if (not cooling_system.attached_heating_system.nil?) && (not cooling_system.attached_heating_system.fan_motor_type.nil?)
         cooling_system.fan_motor_type = cooling_system.attached_heating_system.fan_motor_type
-        cooling_system.fan_motor_type_isdefaulted = true
-      elsif [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
-        # Based on RESNET DX Modeling Appendix
+      else
         cooling_system.fan_motor_type = (cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
-        cooling_system.fan_motor_type_isdefaulted = true
-      elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
-        cooling_system.fan_motor_type = HPXML::HVACFanMotorTypeBPM
-        cooling_system.fan_motor_type_isdefaulted = true
-      elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
-        # Depends on airflow rate, so defaulted in hvac_sizing.rb
       end
+      cooling_system.fan_motor_type_isdefaulted = true
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless heat_pump.fan_motor_type.nil?
+      next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                   HPXML::HVACTypeHeatPumpGroundToAir,
+                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
 
-      if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
-        # Based on RESNET DX Modeling Appendix
-        heat_pump.fan_motor_type = (heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
-        heat_pump.fan_motor_type_isdefaulted = true
-      elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
-        if heat_pump.heating_efficiency_cop > 8.75 / 3.2 # HEScore assumption
-          heat_pump.fan_motor_type = HPXML::HVACFanMotorTypeBPM
-        else
-          heat_pump.fan_motor_type = HPXML::HVACFanMotorTypePSC
-        end
-        heat_pump.fan_motor_type_isdefaulted = true
-      elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-        heat_pump.fan_motor_type = HPXML::HVACFanMotorTypeBPM
-        heat_pump.fan_motor_type_isdefaulted = true
-      end
+      heat_pump.fan_motor_type = (heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage) ? HPXML::HVACFanMotorTypePSC : HPXML::HVACFanMotorTypeBPM
+      heat_pump.fan_motor_type_isdefaulted = true
     end
 
     # Fan watts/cfm
@@ -7359,7 +7344,6 @@ module Defaults
     end
 
     clg_ap = cooling_system.additional_properties
-
 
     # Refrigerant charge fault coefficients per ANSI/RESNET 301-2022 Tables 4.2.2.4(1) and 4.2.2.4(5)
     if cooling_system.charge_defect_ratio.to_f <= 0

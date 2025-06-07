@@ -1787,7 +1787,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
       assert_equal(3, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-      assert_in_epsilon(192.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
+      assert_in_delta(194.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 1.0)
 
       # Bore depth greater than the max -> increase number of boreholes
       hpxml, hpxml_bldg = _create_hpxml(ghp_filename)
@@ -1795,7 +1795,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
       assert_equal(5, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-      assert_in_epsilon(439.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
+      assert_in_delta(442.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 1.0)
 
       # Bore depth greater than the max -> increase number of boreholes until the max, set depth to the max, and issue warning
       hpxml, hpxml_bldg = _create_hpxml(ghp_filename)
@@ -1803,7 +1803,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
       assert_equal(10, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-      assert_in_epsilon(500.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
+      assert_in_delta(500.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 1.0)
 
       # Boreholes greater than the max -> decrease the number of boreholes until the max
       hpxml, hpxml_bldg = _create_hpxml(ghp_filename)
@@ -1811,7 +1811,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
       assert_equal(10, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-      assert_in_epsilon(228.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
+      assert_in_delta(226.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 1.0)
     end
   end
 
