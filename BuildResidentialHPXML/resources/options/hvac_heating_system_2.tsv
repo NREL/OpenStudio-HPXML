@@ -11,7 +11,6 @@ Electric Resistance	ElectricResistance	1
 "Central Furnace, 85% AFUE"	Furnace	0.85	
 "Central Furnace, 90% AFUE"	Furnace	0.9	
 "Central Furnace, 92% AFUE"	Furnace	0.92	
-"Central Furnace, 92% AFUE, Pilot Light"	Furnace	0.92	600
 "Central Furnace, 92.5% AFUE"	Furnace	0.925	
 "Central Furnace, 96% AFUE"	Furnace	0.96	
 "Central Furnace, 98% AFUE"	Furnace	0.98	
@@ -24,7 +23,6 @@ Electric Resistance	ElectricResistance	1
 "Floor Furnace, 60% AFUE"	FloorFurnace	0.6	
 "Floor Furnace, 70% AFUE"	FloorFurnace	0.7	
 "Floor Furnace, 80% AFUE"	FloorFurnace	0.8	
-"Floor Furnace, 80% AFUE, Pilot Light"	FloorFurnace	0.8	600
 "Boiler, 60% AFUE"	Boiler	0.6	
 "Boiler, 72% AFUE"	Boiler	0.72	
 "Boiler, 76% AFUE"	Boiler	0.76	
@@ -33,7 +31,6 @@ Electric Resistance	ElectricResistance	1
 "Boiler, 85% AFUE"	Boiler	0.85	
 "Boiler, 90% AFUE"	Boiler	0.9	
 "Boiler, 92% AFUE"	Boiler	0.92	
-"Boiler, 92% AFUE, Pilot Light"	Boiler	0.92	600
 "Boiler, 92.5% AFUE"	Boiler	0.925	
 "Boiler, 95% AFUE"	Boiler	0.95	
 "Boiler, 96% AFUE"	Boiler	0.96	
@@ -57,6 +54,9 @@ Electric Resistance	ElectricResistance	1
 "Fireplace, 70% Efficiency"	Fireplace	0.7	
 "Fireplace, 80% Efficiency"	Fireplace	0.8	
 "Fireplace, 100% Efficiency"	Fireplace	1	
+"Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light"	Furnace	0.92	600
+"Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light"	FloorFurnace	0.8	600
+"Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light"	Boiler	0.92	600
 			
 Type: The type of system.			
 Heating Efficiency: The rated heating efficiency.			

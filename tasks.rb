@@ -1986,7 +1986,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
     end
     if hpxml_file.include? 'heating-capacity-17f'
-      hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
+      hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * 0.6
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
     end

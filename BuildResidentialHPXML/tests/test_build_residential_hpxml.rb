@@ -219,7 +219,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'warning-unvented-attic-with-floor-and-roof-insulation.xml' => 'base-sfd.xml',
       'warning-conditioned-basement-with-ceiling-insulation.xml' => 'base-sfd.xml',
       'warning-conditioned-attic-with-floor-insulation.xml' => 'base-sfd.xml',
-      'warning-geothermal-loop-but-no-gshp.xml' => 'base-sfd.xml'
     }
 
     expected_errors = {
@@ -283,7 +282,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'warning-unvented-attic-with-floor-and-roof-insulation.xml' => ['Home with unconditioned attic type has both ceiling insulation and roof insulation.'],
       'warning-conditioned-basement-with-ceiling-insulation.xml' => ['Home with conditioned basement has floor insulation.'],
       'warning-conditioned-attic-with-floor-insulation.xml' => ['Home with conditioned attic has ceiling insulation.'],
-      'warning-geothermal-loop-but-no-gshp.xml' => ['Specified an attached geothermal loop but home has no ground source heat pump.']
     }
 
     schema_path = File.join(File.dirname(__FILE__), '../..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
@@ -507,7 +505,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump_fraction_cool_load_served'] = 1
       args['hvac_heat_pump_backup'] = 'Integrated, Electricity, 100% Efficiency'
       args['heat_pump_backup_heating_capacity'] = 36000.0
-      args['hvac_geothermal_loop'] = 'None'
+      args['hvac_geothermal_loop'] = 'Default'
       args['hvac_control_heating_weekday_setpoint'] = 68
       args['hvac_control_heating_weekend_setpoint'] = 68
       args['hvac_control_cooling_weekday_setpoint'] = 78
@@ -557,7 +555,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
       args['solar_thermal_solar_fraction'] = 0
       args['battery'] = 'None'
-      args['lighting'] = '40% CFL, 10% LFL, 25% LED'
+      args['lighting'] = 'Detailed Example: 40% CFL, 10% LFL, 25% LED'
       args['holiday_lighting_present'] = false
       args['dehumidifier_type'] = Constants::None
       args['dehumidifier_efficiency_type'] = 'EnergyFactor'
@@ -857,7 +855,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-detailed-performance-autosize.xml'
       args['hvac_heating_system'] = 'None'
       args['hvac_cooling_system'] = 'None'
-      args['hvac_heat_pump'] = 'Central HP, SEER 17.25, 10 HPSF, Normalized Detailed Performance'
+      args['hvac_heat_pump'] = 'Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance'
       args.delete('heat_pump_heating_capacity')
       args.delete('heat_pump_cooling_capacity')
     when 'extra-power-outage-periods.xml'
@@ -1044,7 +1042,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_heating_system'] = 'None'
       args['hvac_cooling_system'] = 'None'
       args['hvac_heat_pump'] = 'Mini-Split HP, SEER 14.5, 8.2 HSPF, Ducted'
-      args['hvac_heat_pump_backup'] = 'Separate'
+      args['hvac_heat_pump_backup'] = 'Separate Heating System'
       args['hvac_heating_system_2'] = 'Central Furnace, 100% AFUE'
     when 'error-sfa-no-building-num-units.xml'
       args.delete('geometry_building_num_units')
@@ -1188,8 +1186,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_attic_type'] = HPXML::AtticTypeConditioned
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
-    when 'warning-geothermal-loop-but-no-gshp.xml'
-      args['hvac_geothermal_loop'] = 'Vertical Loop, Default'
     end
   end
 

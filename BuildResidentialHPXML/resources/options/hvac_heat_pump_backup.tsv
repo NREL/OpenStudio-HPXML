@@ -1,27 +1,23 @@
-Option Name	Type	Fuel	Heating Efficiency [Frac]	Heating Lockout Temp [F]
-None	none			
-"Integrated, Electricity, 100% Efficiency"	integrated	electricity	1	
-"Integrated, Electricity, 100% Efficiency, 35F Lockout"	integrated	electricity	1	35
-"Integrated, Natural Gas, 95% AFUE, 30F Lockout"	integrated	natural gas	0.95	30
-"Integrated, Natural Gas, 60% AFUE, 40F Lockout"	integrated	natural gas	0.6	40
-"Integrated, Natural Gas, 76% AFUE, 40F Lockout"	integrated	natural gas	0.76	40
-"Integrated, Natural Gas, 80% AFUE, 40F Lockout"	integrated	natural gas	0.8	40
-"Integrated, Natural Gas, 92.5% AFUE, 40F Lockout"	integrated	natural gas	0.925	40
-"Integrated, Natural Gas, 95% AFUE, 40F Lockout"	integrated	natural gas	0.95	40
-"Integrated, Natural Gas, 95% AFUE, 45F Lockout"	integrated	natural gas	0.95	45
-"Integrated, Fuel Oil, 60% AFUE, 40F Lockout"	integrated	fuel oil	0.6	40
-"Integrated, Fuel Oil, 76% AFUE, 40F Lockout"	integrated	fuel oil	0.76	40
-"Integrated, Fuel Oil, 80% AFUE, 40F Lockout"	integrated	fuel oil	0.8	40
-"Integrated, Fuel Oil, 92.5% AFUE, 40F Lockout"	integrated	fuel oil	0.925	40
-"Integrated, Propane, 60% AFUE, 40F Lockout"	integrated	propane	0.6	40
-"Integrated, Propane, 76% AFUE, 40F Lockout"	integrated	propane	0.76	40
-"Integrated, Propane, 80% AFUE, 40F Lockout"	integrated	propane	0.8	40
-"Integrated, Propane, 92.5% AFUE, 40F Lockout"	integrated	propane	0.925	40
-Separate	separate			
-"Separate, 30F Lockout"	separate			30
-"Separate, -20F Lockout"	separate			-20
-				
-Type: The backup type. Use 'integrated' to represent e.g. built-in electric strip heat or dual-fuel integrated furnace. Use 'separate' to represent e.g. electric baseboard or boiler (based on the Heating System 2).				
-Fuel: The fuel type of the integrated backup.				
-Heating Efficiency: The rated heating efficiency of the integrated backup.				
-"Heating Lockout Temp: The temperature above which the heat pump backup system is disabled. If both this and a HP compressor lockout temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump)."				
+Option Name	Type	Fuel	Heating Efficiency [Frac]
+None	none		
+"Integrated, Electricity, 100% Efficiency"	integrated	electricity	1
+"Integrated, Natural Gas, 60% AFUE"	integrated	natural gas	0.6
+"Integrated, Natural Gas, 76% AFUE"	integrated	natural gas	0.76
+"Integrated, Natural Gas, 80% AFUE"	integrated	natural gas	0.8
+"Integrated, Natural Gas, 92.5% AFUE"	integrated	natural gas	0.925
+"Integrated, Natural Gas, 95% AFUE"	integrated	natural gas	0.95
+"Integrated, Fuel Oil, 60% AFUE"	integrated	fuel oil	0.6
+"Integrated, Fuel Oil, 76% AFUE"	integrated	fuel oil	0.76
+"Integrated, Fuel Oil, 80% AFUE"	integrated	fuel oil	0.8
+"Integrated, Fuel Oil, 92.5% AFUE"	integrated	fuel oil	0.925
+"Integrated, Fuel Oil, 95% AFUE"	integrated	fuel oil	0.95
+"Integrated, Propane, 60% AFUE"	integrated	propane	0.6
+"Integrated, Propane, 76% AFUE"	integrated	propane	0.76
+"Integrated, Propane, 80% AFUE"	integrated	propane	0.8
+"Integrated, Propane, 92.5% AFUE"	integrated	propane	0.925
+"Integrated, Propane, 95% AFUE"	integrated	propane	0.95
+Separate Heating System	separate		
+			
+Type: The backup type. Use 'integrated' to represent e.g. built-in electric strip heat or dual-fuel integrated furnace. Use 'separate' to represent e.g. electric baseboard or boiler (based on Heating System 2).			
+Fuel: The fuel type of the integrated backup.			
+Heating Efficiency: The rated heating efficiency of the integrated backup.			

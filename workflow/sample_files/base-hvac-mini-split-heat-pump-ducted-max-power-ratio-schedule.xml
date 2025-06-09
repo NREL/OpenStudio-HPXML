@@ -345,12 +345,6 @@
                 <Units>HSPF</Units>
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
-              <extension>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
-              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>

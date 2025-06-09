@@ -1,5 +1,4 @@
 Option Name	Type	Thickness [in]	Insulation Nominal R-Value [F-ft2-hr/Btu]	Insulation Location	Insulation Distance To Top [ft]	Insulation Distance To Bottom [ft]	Assembly R-Value [F-ft2-hr/Btu]
-None							
 "Solid Concrete, Uninsulated"	solid concrete		0				
 "Solid Concrete, Half Wall, R-5"	solid concrete		5			4	
 "Solid Concrete, Half Wall, R-10"	solid concrete		10			4	

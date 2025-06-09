@@ -23,8 +23,10 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     File.delete(File.join(File.dirname(__FILE__), 'in.schedules.csv')) if File.exist? File.join(File.dirname(__FILE__), 'in.schedules.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_annual.json')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.json')
-    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
     File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.json')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.json')
+    File.delete(File.join(File.dirname(__FILE__), 'results_panel.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_panel.csv')
+    File.delete(File.join(File.dirname(__FILE__), 'results_panel.json')) if File.exist? File.join(File.dirname(__FILE__), 'results_panel.json')
   end
 
   def test_hvac_configurations

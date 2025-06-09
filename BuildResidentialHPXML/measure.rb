@@ -267,7 +267,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_attached_walls', choices[:geometry_attached_walls], false)
     arg.setDisplayName('Geometry: Unit Attached Walls')
     arg.setDescription("The location of the attached walls if a dwelling unit of type '#{HPXML::ResidentialTypeSFA}' or '#{HPXML::ResidentialTypeApartment}'.")
-    arg.setDefaultValue('None')
+    arg.setDefaultValue(choices[:geometry_attached_walls][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_unit_num_floors_above_grade', true)
@@ -458,6 +458,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_neighbor_buildings', choices[:geometry_neighbor_buildings], false)
     arg.setDisplayName('Geometry: Neighbor Buildings')
     arg.setDescription('The presence and geometry of neighboring buildings, for shading purposes.')
+    arg.setDefaultValue(choices[:geometry_neighbor_buildings][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('floor_over_foundation_assembly_r', true)
@@ -489,7 +490,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_foundation_wall', choices[:enclosure_foundation_wall], true)
     arg.setDisplayName('Enclosure: Foundation Wall')
     arg.setDescription('The type of foundation wall.')
-    arg.setDefaultValue('Solid Concrete, Uninsulated')
+    arg.setDefaultValue(choices[:enclosure_foundation_wall][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('rim_joist_assembly_r', false)
@@ -501,7 +502,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_slab', choices[:enclosure_slab], false)
     arg.setDisplayName('Enclosure: Slab')
     arg.setDescription('The type of slab. Applies to slab-on-grade and basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.')
-    arg.setDefaultValue('Uninsulated')
+    arg.setDefaultValue(choices[:enclosure_slab][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_slab_carpet', choices[:enclosure_slab_carpet], false)
@@ -883,13 +884,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system', choices[:hvac_heating_system], true)
     arg.setDisplayName('HVAC: Heating System')
     arg.setDescription("The heating system type/efficiency. Use 'None' if there is no heating system or if there is a heat pump serving a heating load.")
-    arg.setDefaultValue('Fuel Furnace, 78% AFUE')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_fuel', heating_system_fuel_choices, true)
     arg.setDisplayName('Heating System: Fuel Type')
     arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
-    arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_capacity', false)
@@ -919,7 +918,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_cooling_system', choices[:hvac_cooling_system], true)
     arg.setDisplayName('HVAC: Cooling System')
     arg.setDescription("The cooling system type/efficiency. Use 'None' if there is no cooling system or if there is a heat pump serving a cooling load.")
-    arg.setDefaultValue('Central AC, SEER 13')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_capacity', false)
@@ -970,7 +968,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heat_pump', choices[:hvac_heat_pump], true)
     arg.setDisplayName('HVAC: Heat Pump')
     arg.setDescription('The heat pump type/efficiency.')
-    arg.setDefaultValue('None')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity', false)
@@ -1044,6 +1041,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heat_pump_temps', choices[:hvac_heat_pump_temps], false)
+    arg.setDisplayName('HVAC: Heat Pump Temperatures')
+    arg.setDescription('Specifies the minimum compressor temperature and/or maximum HP backup temperature. If both are the same, a binary switchover temperature is used.')
+    arg.setDefaultValue(choices[:hvac_heat_pump_temps][0])
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_sizing_methodology', heat_pump_sizing_choices, false)
     arg.setDisplayName('Heat Pump: Sizing Methodology')
     arg.setDescription("The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
@@ -1057,18 +1060,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_geothermal_loop', choices[:hvac_geothermal_loop], false)
     arg.setDisplayName('HVAC: Geothermal Loop')
     arg.setDescription("The geothermal loop configuration if there's a #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump.")
+    arg.setDefaultValue(choices[:hvac_geothermal_loop][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system_2', choices[:hvac_heating_system_2], true)
     arg.setDisplayName('HVAC: Heating System 2')
     arg.setDescription("The type/efficiency of the second heating system. If a heat pump is specified and the backup type is '#{HPXML::HeatPumpBackupTypeSeparate}', this heating system represents the '#{HPXML::HeatPumpBackupTypeSeparate}' backup heating.")
-    arg.setDefaultValue('None')
+    arg.setDefaultValue(choices[:hvac_heating_system_2][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_2_fuel', heating_system_fuel_choices, true)
     arg.setDisplayName('Heating System 2: Fuel Type')
     arg.setDescription("The fuel type of the second heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
-    arg.setDefaultValue(HPXML::FuelTypeElectricity)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_heating_capacity', false)
@@ -1138,7 +1141,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_install_defects', choices[:hvac_install_defects], false)
     arg.setDisplayName('HVAC Installation Defects')
     arg.setDescription('Specifies whether the HVAC system has airflow and/or refrigerant charge installation defects. Applies to central furnaces and central/mini-split ACs and HPs.')
-    arg.setDefaultValue('None')
+    arg.setDefaultValue(choices[:hvac_install_defects][0])
     args << arg
 
     duct_location_choices = OpenStudio::StringVector.new
@@ -1207,7 +1210,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent', choices[:mech_vent], false)
     arg.setDisplayName('Mechanical Ventilation')
     arg.setDescription('The type of mechanical ventilation system.')
-    arg.setDefaultValue('None')
+    arg.setDefaultValue(choices[:mech_vent][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('kitchen_fans_quantity', false)
@@ -1620,6 +1623,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system', choices[:pv_system], false)
     arg.setDisplayName('PV System')
     arg.setDescription('The size and type of PV system.')
+    arg.setDefaultValue(choices[:pv_system][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_array_azimuth', false)
@@ -1639,6 +1643,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2', choices[:pv_system_2], false)
     arg.setDisplayName('PV System 2')
     arg.setDescription('The size and type of the second PV system.')
+    arg.setDefaultValue(choices[:pv_system][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_array_azimuth', false)
@@ -1931,6 +1936,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery', choices[:battery], false)
     arg.setDisplayName('Battery')
     arg.setDescription('The size and type of battery storage.')
+    arg.setDefaultValue(choices[:battery][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('vehicle_type', false)
@@ -2922,9 +2928,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue)
     warnings << 'Home with conditioned attic has ceiling insulation.' if warning
-
-    warning = (args[:hvac_heat_pump_type] != HPXML::HVACTypeHeatPumpGroundToAir) && (!args[:hvac_geothermal_loop_configuration].nil? && args[:hvac_geothermal_loop_configuration] != Constants::None)
-    warnings << 'Specified an attached geothermal loop but home has no ground source heat pump.' if warning
 
     return warnings
   end
@@ -4952,11 +4955,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if backup_heating_fuel != HPXML::FuelTypeElectricity
-      if (not args[:hvac_heat_pump_compressor_lockout_temp].nil?) && (not args[:hvac_heat_pump_backup_heating_lockout_temp].nil?) && args[:hvac_heat_pump_compressor_lockout_temp] == args[:hvac_heat_pump_backup_heating_lockout_temp]
+      if (not args[:hvac_heat_pump_temps_compressor_lockout].nil?) && (not args[:hvac_heat_pump_temps_backup_lockout].nil?) && args[:hvac_heat_pump_temps_compressor_lockout] == args[:hvac_heat_pump_temps_backup_lockout]
         # Translate to HPXML as switchover temperature instead
-        backup_heating_switchover_temp = args[:hvac_heat_pump_compressor_lockout_temp]
-        args[:hvac_heat_pump_compressor_lockout_temp] = nil
-        args[:hvac_heat_pump_backup_heating_lockout_temp] = nil
+        backup_heating_switchover_temp = args[:hvac_heat_pump_temps_compressor_lockout]
+        args[:hvac_heat_pump_temps_compressor_lockout] = nil
+        args[:hvac_heat_pump_temps_backup_lockout] = nil
       end
     end
 
@@ -5001,7 +5004,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               heating_capacity_retention_fraction: args[:hvac_heat_pump_heating_capacity_retention_fraction],
                               heating_capacity_retention_temp: args[:hvac_heat_pump_heating_capacity_retention_temp],
                               compressor_type: compressor_type,
-                              compressor_lockout_temp: args[:hvac_heat_pump_compressor_lockout_temp],
+                              compressor_lockout_temp: args[:hvac_heat_pump_temps_compressor_lockout],
                               cooling_capacity: args[:heat_pump_cooling_capacity],
                               cooling_autosizing_factor: args[:heat_pump_cooling_autosizing_factor],
                               cooling_autosizing_limit: args[:heat_pump_cooling_autosizing_limit],
@@ -5014,7 +5017,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               backup_heating_efficiency_afue: backup_heating_efficiency_afue,
                               backup_heating_efficiency_percent: backup_heating_efficiency_percent,
                               backup_heating_switchover_temp: backup_heating_switchover_temp,
-                              backup_heating_lockout_temp: args[:hvac_heat_pump_backup_heating_lockout_temp],
+                              backup_heating_lockout_temp: args[:hvac_heat_pump_temps_backup_lockout],
                               heating_efficiency_hspf: heating_efficiency_hspf,
                               heating_efficiency_hspf2: heating_efficiency_hspf2,
                               cooling_efficiency_seer: cooling_efficiency_seer,

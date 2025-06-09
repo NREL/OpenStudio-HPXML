@@ -352,10 +352,6 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
                 <CoolingAutosizingFactor>1.7</CoolingAutosizingFactor>
                 <HeatingAutosizingFactor>1.4</HeatingAutosizingFactor>
                 <CoolingAutosizingLimit>53000.0</CoolingAutosizingLimit>

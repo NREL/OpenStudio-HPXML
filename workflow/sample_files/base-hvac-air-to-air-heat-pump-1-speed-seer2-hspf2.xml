@@ -342,12 +342,6 @@
                 <Units>HSPF2</Units>
                 <Value>6.5</Value>
               </AnnualHeatingEfficiency>
-              <extension>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
-              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>

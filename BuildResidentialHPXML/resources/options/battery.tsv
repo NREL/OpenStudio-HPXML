@@ -7,9 +7,9 @@ None
 15.0 kWh	15				
 17.5 kWh	17.5				
 20.0 kWh	20				
-"20.0 kWh, 6 kW, Garage"	20	18	garage	6000	
-"20.0 kWh, 6 kW, Outside"	20	18	outside	6000	
-"20.0 kWh, 6 kW, Outside, 80% Efficiency"	20	18	outside	6000	0.8
+"Detailed Example: 20.0 kWh, 6 kW, Garage"	20	18	garage	6000	
+"Detailed Example: 20.0 kWh, 6 kW, Outside"	20	18	outside	6000	
+"Detailed Example: 20.0 kWh, 6 kW, Outside, 80% Efficiency"	20	18	outside	6000	0.8
 					
 Nominal Capacity: The battery's nominal (total) capacity.					
 Usable Capacity: The battery's usable capacity.					

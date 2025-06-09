@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>a83fd5aa-145d-4ed1-86fd-dc2d6d360764</version_id>
-  <version_modified>2025-06-09T19:01:06Z</version_modified>
+  <version_id>ccc7b126-e2bc-4d3c-9738-bf84f27d4358</version_id>
+  <version_modified>2025-06-09T23:44:09Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -304,10 +304,6 @@
           <display_name>Sand, Dry</display_name>
         </choice>
         <choice>
-          <value>Sand, Dry, 0.03 Diffusivity</value>
-          <display_name>Sand, Dry, 0.03 Diffusivity</display_name>
-        </choice>
-        <choice>
           <value>Sand, Mixed</value>
           <display_name>Sand, Mixed</display_name>
         </choice>
@@ -358,6 +354,10 @@
         <choice>
           <value>2.6 Conductivity</value>
           <display_name>2.6 Conductivity</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Sand, Dry, 0.03 Diffusivity</value>
+          <display_name>Detailed Example: Sand, Dry, 0.03 Diffusivity</display_name>
         </choice>
       </choices>
     </argument>
@@ -1190,6 +1190,7 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -1214,10 +1215,6 @@
         <choice>
           <value>Left/Right at 25ft</value>
           <display_name>Left/Right at 25ft</display_name>
-        </choice>
-        <choice>
-          <value>Left/Right at 25ft, Front/Back at 80ft, 12ft Height</value>
-          <display_name>Left/Right at 25ft, Front/Back at 80ft, 12ft Height</display_name>
         </choice>
         <choice>
           <value>Left at 5ft</value>
@@ -1258,6 +1255,10 @@
         <choice>
           <value>Right at 25ft</value>
           <display_name>Right at 25ft</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Left/Right at 25ft, Front/Back at 80ft, 12ft Height</value>
+          <display_name>Detailed Example: Left/Right at 25ft, Front/Back at 80ft, 12ft Height</display_name>
         </choice>
       </choices>
     </argument>
@@ -1317,10 +1318,6 @@
       <model_dependent>false</model_dependent>
       <default_value>Solid Concrete, Uninsulated</default_value>
       <choices>
-        <choice>
-          <value>None</value>
-          <display_name>None</display_name>
-        </choice>
         <choice>
           <value>Solid Concrete, Uninsulated</value>
           <display_name>Solid Concrete, Uninsulated</display_name>
@@ -2585,10 +2582,6 @@
           <display_name>3 ACH50</display_name>
         </choice>
         <choice>
-          <value>3.57 ACH50</value>
-          <display_name>3.57 ACH50</display_name>
-        </choice>
-        <choice>
           <value>3.75 ACH50</value>
           <display_name>3.75 ACH50</display_name>
         </choice>
@@ -2633,10 +2626,6 @@
           <display_name>11.25 ACH50</display_name>
         </choice>
         <choice>
-          <value>12.16 ACH50</value>
-          <display_name>12.16 ACH50</display_name>
-        </choice>
-        <choice>
           <value>15 ACH50</value>
           <display_name>15 ACH50</display_name>
         </choice>
@@ -2677,10 +2666,6 @@
           <display_name>0.335 nACH</display_name>
         </choice>
         <choice>
-          <value>0.375 nACH</value>
-          <display_name>0.375 nACH</display_name>
-        </choice>
-        <choice>
           <value>0.67 nACH</value>
           <display_name>0.67 nACH</display_name>
         </choice>
@@ -2689,24 +2674,36 @@
           <display_name>1.5 nACH</display_name>
         </choice>
         <choice>
-          <value>72 nCFM</value>
-          <display_name>72 nCFM</display_name>
+          <value>Detailed Example: 3.57 ACH50</value>
+          <display_name>Detailed Example: 3.57 ACH50</display_name>
         </choice>
         <choice>
-          <value>79.8 sq. in. ELA</value>
-          <display_name>79.8 sq. in. ELA</display_name>
+          <value>Detailed Example: 12.16 ACH50</value>
+          <display_name>Detailed Example: 12.16 ACH50</display_name>
         </choice>
         <choice>
-          <value>123 sq. in. ELA</value>
-          <display_name>123 sq. in. ELA</display_name>
+          <value>Detailed Example: 0.375 nACH</value>
+          <display_name>Detailed Example: 0.375 nACH</display_name>
         </choice>
         <choice>
-          <value>1080 CFM50</value>
-          <display_name>1080 CFM50</display_name>
+          <value>Detailed Example: 72 nCFM</value>
+          <display_name>Detailed Example: 72 nCFM</display_name>
         </choice>
         <choice>
-          <value>1008.5 CFM45</value>
-          <display_name>1008.5 CFM45</display_name>
+          <value>Detailed Example: 79.8 sq. in. ELA</value>
+          <display_name>Detailed Example: 79.8 sq. in. ELA</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 123 sq. in. ELA</value>
+          <display_name>Detailed Example: 123 sq. in. ELA</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 1080 CFM50</value>
+          <display_name>Detailed Example: 1080 CFM50</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 1010 CFM45</value>
+          <display_name>Detailed Example: 1010 CFM45</display_name>
         </choice>
       </choices>
     </argument>
@@ -2803,10 +2800,6 @@
           <display_name>Central Furnace, 92% AFUE</display_name>
         </choice>
         <choice>
-          <value>Central Furnace, 92% AFUE, Pilot Light</value>
-          <display_name>Central Furnace, 92% AFUE, Pilot Light</display_name>
-        </choice>
-        <choice>
           <value>Central Furnace, 92.5% AFUE</value>
           <display_name>Central Furnace, 92.5% AFUE</display_name>
         </choice>
@@ -2855,10 +2848,6 @@
           <display_name>Floor Furnace, 80% AFUE</display_name>
         </choice>
         <choice>
-          <value>Floor Furnace, 80% AFUE, Pilot Light</value>
-          <display_name>Floor Furnace, 80% AFUE, Pilot Light</display_name>
-        </choice>
-        <choice>
           <value>Boiler, 60% AFUE</value>
           <display_name>Boiler, 60% AFUE</display_name>
         </choice>
@@ -2889,10 +2878,6 @@
         <choice>
           <value>Boiler, 92% AFUE</value>
           <display_name>Boiler, 92% AFUE</display_name>
-        </choice>
-        <choice>
-          <value>Boiler, 92% AFUE, Pilot Light</value>
-          <display_name>Boiler, 92% AFUE, Pilot Light</display_name>
         </choice>
         <choice>
           <value>Boiler, 92.5% AFUE</value>
@@ -2986,6 +2971,18 @@
           <value>Fireplace, 100% Efficiency</value>
           <display_name>Fireplace, 100% Efficiency</display_name>
         </choice>
+        <choice>
+          <value>Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light</value>
+          <display_name>Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light</value>
+          <display_name>Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light</value>
+          <display_name>Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light</display_name>
+        </choice>
       </choices>
     </argument>
     <argument>
@@ -2995,7 +2992,6 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>natural gas</default_value>
       <choices>
         <choice>
           <value>electricity</value>
@@ -3070,7 +3066,6 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>Central AC, SEER 13</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -3105,14 +3100,6 @@
           <display_name>Central AC, SEER 17</display_name>
         </choice>
         <choice>
-          <value>Central AC, SEER 17.5, Normalized Detailed Performance</value>
-          <display_name>Central AC, SEER 17.5, Normalized Detailed Performance</display_name>
-        </choice>
-        <choice>
-          <value>Central AC, SEER 17.5, Absolute Detailed Performance</value>
-          <display_name>Central AC, SEER 17.5, Absolute Detailed Performance</display_name>
-        </choice>
-        <choice>
           <value>Central AC, SEER 18</value>
           <display_name>Central AC, SEER 18</display_name>
         </choice>
@@ -3143,14 +3130,6 @@
         <choice>
           <value>Mini-Split AC, SEER 17</value>
           <display_name>Mini-Split AC, SEER 17</display_name>
-        </choice>
-        <choice>
-          <value>Mini-Split AC, SEER 17, Normalized Detailed Performance</value>
-          <display_name>Mini-Split AC, SEER 17, Normalized Detailed Performance</display_name>
-        </choice>
-        <choice>
-          <value>Mini-Split AC, SEER 17, Absolute Detailed Performance</value>
-          <display_name>Mini-Split AC, SEER 17, Absolute Detailed Performance</display_name>
         </choice>
         <choice>
           <value>Mini-Split AC, SEER 19</value>
@@ -3220,6 +3199,22 @@
           <value>Evaporative Cooler, Ducted</value>
           <display_name>Evaporative Cooler, Ducted</display_name>
         </choice>
+        <choice>
+          <value>Detailed Example: Central AC, SEER 17.5, Normalized Detailed Performance</value>
+          <display_name>Detailed Example: Central AC, SEER 17.5, Normalized Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Central AC, SEER 17.5, Absolute Detailed Performance</value>
+          <display_name>Detailed Example: Central AC, SEER 17.5, Absolute Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Mini-Split AC, SEER 17, Normalized Detailed Performance</value>
+          <display_name>Detailed Example: Mini-Split AC, SEER 17, Normalized Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Mini-Split AC, SEER 17, Absolute Detailed Performance</value>
+          <display_name>Detailed Example: Mini-Split AC, SEER 17, Absolute Detailed Performance</display_name>
+        </choice>
       </choices>
     </argument>
     <argument>
@@ -3283,7 +3278,6 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>None</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -3314,22 +3308,6 @@
           <display_name>Central HP, SEER 13, 7.7 HSPF</display_name>
         </choice>
         <choice>
-          <value>Central HP, SEER 13, 7.7 HSPF, 5F Compressor Lockout</value>
-          <display_name>Central HP, SEER 13, 7.7 HSPF, 5F Compressor Lockout</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 13, 7.7 HSPF, 25F Compressor Lockout</value>
-          <display_name>Central HP, SEER 13, 7.7 HSPF, 25F Compressor Lockout</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 13, 7.7 HSPF, 30F Compressor Lockout</value>
-          <display_name>Central HP, SEER 13, 7.7 HSPF, 30F Compressor Lockout</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F</value>
-          <display_name>Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F</display_name>
-        </choice>
-        <choice>
           <value>Central HP, SEER 13, 8.0 HSPF</value>
           <display_name>Central HP, SEER 13, 8.0 HSPF</display_name>
         </choice>
@@ -3358,64 +3336,24 @@
           <display_name>Central HP, SEER 16, 9.0 HSPF</display_name>
         </choice>
         <choice>
-          <value>Central HP, SEER 16, 9.2 HSPF, -20F Compressor Lockout</value>
-          <display_name>Central HP, SEER 16, 9.2 HSPF, -20F Compressor Lockout</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 16, 9.2 HSPF, Heating Capacity 5F</value>
-          <display_name>Central HP, SEER 16, 9.2 HSPF, Heating Capacity 5F</display_name>
-        </choice>
-        <choice>
           <value>Central HP, SEER 17, 8.7 HSPF</value>
           <display_name>Central HP, SEER 17, 8.7 HSPF</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 17.25, 10 HPSF, Normalized Detailed Performance</value>
-          <display_name>Central HP, SEER 17.25, 10 HPSF, Normalized Detailed Performance</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance</value>
-          <display_name>Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance</value>
-          <display_name>Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance</display_name>
         </choice>
         <choice>
           <value>Central HP, SEER 18, 9.3 HSPF</value>
           <display_name>Central HP, SEER 18, 9.3 HSPF</display_name>
         </choice>
         <choice>
-          <value>Central HP, SEER 18, 9.3 HSPF, 30F Compressor Lockout</value>
-          <display_name>Central HP, SEER 18, 9.3 HSPF, 30F Compressor Lockout</display_name>
-        </choice>
-        <choice>
           <value>Central HP, SEER 20, 11 HSPF</value>
           <display_name>Central HP, SEER 20, 11 HSPF</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 20, 11 HSPF, Heating Capacity 5F</value>
-          <display_name>Central HP, SEER 20, 11 HSPF, Heating Capacity 5F</display_name>
         </choice>
         <choice>
           <value>Central HP, SEER 22, 10 HSPF</value>
           <display_name>Central HP, SEER 22, 10 HSPF</display_name>
         </choice>
         <choice>
-          <value>Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout</value>
-          <display_name>Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout</display_name>
-        </choice>
-        <choice>
           <value>Central HP, SEER 24, 13 HSPF</value>
           <display_name>Central HP, SEER 24, 13 HSPF</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER 24, 13 HSPF, Heating Capacity 5F</value>
-          <display_name>Central HP, SEER 24, 13 HSPF, Heating Capacity 5F</display_name>
-        </choice>
-        <choice>
-          <value>Central HP, SEER2 12.4, HSPF2 6.5, Heating Capacity 17F</value>
-          <display_name>Central HP, SEER2 12.4, HSPF2 6.5, Heating Capacity 17F</display_name>
         </choice>
         <choice>
           <value>Mini-Split HP, SEER 14.5, 8.2 HSPF</value>
@@ -3430,28 +3368,12 @@
           <display_name>Mini-Split HP, SEER 16, 9.2 HSPF</display_name>
         </choice>
         <choice>
-          <value>Mini-Split HP, SEER 16.7, 11.3 HSPF, Absolute Detailed Performance</value>
-          <display_name>Mini-Split HP, SEER 16.7, 11.3 HSPF, Absolute Detailed Performance</display_name>
-        </choice>
-        <choice>
-          <value>Mini-Split HP, SEER 16.7, 11.3 HSPF, Normalized Detailed Performance</value>
-          <display_name>Mini-Split HP, SEER 16.7, 11.3 HSPF, Normalized Detailed Performance</display_name>
-        </choice>
-        <choice>
           <value>Mini-Split HP, SEER 17, 9.5 HSPF</value>
           <display_name>Mini-Split HP, SEER 17, 9.5 HSPF</display_name>
         </choice>
         <choice>
           <value>Mini-Split HP, SEER 17, 9.5 HSPF, Ducted</value>
           <display_name>Mini-Split HP, SEER 17, 9.5 HSPF, Ducted</display_name>
-        </choice>
-        <choice>
-          <value>Mini-Split HP, SEER 17, 10 HSPF, Absolute Detailed Performance</value>
-          <display_name>Mini-Split HP, SEER 17, 10 HSPF, Absolute Detailed Performance</display_name>
-        </choice>
-        <choice>
-          <value>Mini-Split HP, SEER 17, 10 HSPF, Normalized Detailed Performance</value>
-          <display_name>Mini-Split HP, SEER 17, 10 HSPF, Normalized Detailed Performance</display_name>
         </choice>
         <choice>
           <value>Mini-Split HP, SEER 18.0, 9.6 HSPF</value>
@@ -3466,16 +3388,8 @@
           <display_name>Mini-Split HP, SEER 19, 10 HSPF, Ducted</display_name>
         </choice>
         <choice>
-          <value>Mini-Split HP, SEER 19, 10 HSPF, 30F Compressor Lockout</value>
-          <display_name>Mini-Split HP, SEER 19, 10 HSPF, 30F Compressor Lockout</display_name>
-        </choice>
-        <choice>
           <value>Mini-Split HP, SEER 19, 10 HSPF</value>
           <display_name>Mini-Split HP, SEER 19, 10 HSPF</display_name>
-        </choice>
-        <choice>
-          <value>Mini-Split HP, SEER 19, 10 HSPF, Absolute Detailed Performance</value>
-          <display_name>Mini-Split HP, SEER 19, 10 HSPF, Absolute Detailed Performance</display_name>
         </choice>
         <choice>
           <value>Mini-Split HP, SEER 20, 11 HSPF</value>
@@ -3540,6 +3454,38 @@
         <choice>
           <value>Room AC w/ Reverse Cycle, EER 11.4, COP 3.6</value>
           <display_name>Room AC w/ Reverse Cycle, EER 11.4, COP 3.6</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Central HP, SEER2 12.4, HSPF2 6.5</value>
+          <display_name>Detailed Example: Central HP, SEER2 12.4, HSPF2 6.5</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance</value>
+          <display_name>Detailed Example: Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance</value>
+          <display_name>Detailed Example: Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Mini-Split HP, SEER 16.7, 11.3 HSPF, Absolute Detailed Performance</value>
+          <display_name>Detailed Example: Mini-Split HP, SEER 16.7, 11.3 HSPF, Absolute Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Mini-Split HP, SEER 16.7, 11.3 HSPF, Normalized Detailed Performance</value>
+          <display_name>Detailed Example: Mini-Split HP, SEER 16.7, 11.3 HSPF, Normalized Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Mini-Split HP, SEER 17, 10 HSPF, Absolute Detailed Performance</value>
+          <display_name>Detailed Example: Mini-Split HP, SEER 17, 10 HSPF, Absolute Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Mini-Split HP, SEER 17, 10 HSPF, Normalized Detailed Performance</value>
+          <display_name>Detailed Example: Mini-Split HP, SEER 17, 10 HSPF, Normalized Detailed Performance</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Mini-Split HP, SEER 19, 10 HSPF, Absolute Detailed Performance</value>
+          <display_name>Detailed Example: Mini-Split HP, SEER 19, 10 HSPF, Absolute Detailed Performance</display_name>
         </choice>
       </choices>
     </argument>
@@ -3633,80 +3579,68 @@
           <display_name>Integrated, Electricity, 100% Efficiency</display_name>
         </choice>
         <choice>
-          <value>Integrated, Electricity, 100% Efficiency, 35F Lockout</value>
-          <display_name>Integrated, Electricity, 100% Efficiency, 35F Lockout</display_name>
+          <value>Integrated, Natural Gas, 60% AFUE</value>
+          <display_name>Integrated, Natural Gas, 60% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Natural Gas, 95% AFUE, 30F Lockout</value>
-          <display_name>Integrated, Natural Gas, 95% AFUE, 30F Lockout</display_name>
+          <value>Integrated, Natural Gas, 76% AFUE</value>
+          <display_name>Integrated, Natural Gas, 76% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Natural Gas, 60% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Natural Gas, 60% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Natural Gas, 80% AFUE</value>
+          <display_name>Integrated, Natural Gas, 80% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Natural Gas, 76% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Natural Gas, 76% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Natural Gas, 92.5% AFUE</value>
+          <display_name>Integrated, Natural Gas, 92.5% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Natural Gas, 80% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Natural Gas, 80% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Natural Gas, 95% AFUE</value>
+          <display_name>Integrated, Natural Gas, 95% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Natural Gas, 92.5% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Natural Gas, 92.5% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Fuel Oil, 60% AFUE</value>
+          <display_name>Integrated, Fuel Oil, 60% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Natural Gas, 95% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Natural Gas, 95% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Fuel Oil, 76% AFUE</value>
+          <display_name>Integrated, Fuel Oil, 76% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Natural Gas, 95% AFUE, 45F Lockout</value>
-          <display_name>Integrated, Natural Gas, 95% AFUE, 45F Lockout</display_name>
+          <value>Integrated, Fuel Oil, 80% AFUE</value>
+          <display_name>Integrated, Fuel Oil, 80% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Fuel Oil, 60% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Fuel Oil, 60% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Fuel Oil, 92.5% AFUE</value>
+          <display_name>Integrated, Fuel Oil, 92.5% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Fuel Oil, 76% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Fuel Oil, 76% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Fuel Oil, 95% AFUE</value>
+          <display_name>Integrated, Fuel Oil, 95% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Fuel Oil, 80% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Fuel Oil, 80% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Propane, 60% AFUE</value>
+          <display_name>Integrated, Propane, 60% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Fuel Oil, 92.5% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Fuel Oil, 92.5% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Propane, 76% AFUE</value>
+          <display_name>Integrated, Propane, 76% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Propane, 60% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Propane, 60% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Propane, 80% AFUE</value>
+          <display_name>Integrated, Propane, 80% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Propane, 76% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Propane, 76% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Propane, 92.5% AFUE</value>
+          <display_name>Integrated, Propane, 92.5% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Propane, 80% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Propane, 80% AFUE, 40F Lockout</display_name>
+          <value>Integrated, Propane, 95% AFUE</value>
+          <display_name>Integrated, Propane, 95% AFUE</display_name>
         </choice>
         <choice>
-          <value>Integrated, Propane, 92.5% AFUE, 40F Lockout</value>
-          <display_name>Integrated, Propane, 92.5% AFUE, 40F Lockout</display_name>
-        </choice>
-        <choice>
-          <value>Separate</value>
-          <display_name>Separate</display_name>
-        </choice>
-        <choice>
-          <value>Separate, 30F Lockout</value>
-          <display_name>Separate, 30F Lockout</display_name>
-        </choice>
-        <choice>
-          <value>Separate, -20F Lockout</value>
-          <display_name>Separate, -20F Lockout</display_name>
+          <value>Separate Heating System</value>
+          <display_name>Separate Heating System</display_name>
         </choice>
       </choices>
     </argument>
@@ -3735,6 +3669,93 @@
       <units>Btu/hr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>hvac_heat_pump_temps</name>
+      <display_name>HVAC: Heat Pump Temperatures</display_name>
+      <description>Specifies the minimum compressor temperature and/or maximum HP backup temperature. If both are the same, a binary switchover temperature is used.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Default</default_value>
+      <choices>
+        <choice>
+          <value>Default</value>
+          <display_name>Default</display_name>
+        </choice>
+        <choice>
+          <value>-20F Min Compressor Temp</value>
+          <display_name>-20F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>-15F Min Compressor Temp</value>
+          <display_name>-15F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>-10F Min Compressor Temp</value>
+          <display_name>-10F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>-5F Min Compressor Temp</value>
+          <display_name>-5F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>0F Min Compressor Temp</value>
+          <display_name>0F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>5F Min Compressor Temp</value>
+          <display_name>5F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>10F Min Compressor Temp</value>
+          <display_name>10F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>15F Min Compressor Temp</value>
+          <display_name>15F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>20F Min Compressor Temp</value>
+          <display_name>20F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>25F Min Compressor Temp</value>
+          <display_name>25F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>30F Min Compressor Temp</value>
+          <display_name>30F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>35F Min Compressor Temp</value>
+          <display_name>35F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>40F Min Compressor Temp</value>
+          <display_name>40F Min Compressor Temp</display_name>
+        </choice>
+        <choice>
+          <value>30F Min Compressor Temp, 30F Max HP Backup Temp</value>
+          <display_name>30F Min Compressor Temp, 30F Max HP Backup Temp</display_name>
+        </choice>
+        <choice>
+          <value>35F Min Compressor Temp, 35F Max HP Backup Temp</value>
+          <display_name>35F Min Compressor Temp, 35F Max HP Backup Temp</display_name>
+        </choice>
+        <choice>
+          <value>40F Min Compressor Temp, 40F Max HP Backup Temp</value>
+          <display_name>40F Min Compressor Temp, 40F Max HP Backup Temp</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 5F Min Compressor Temp, 35F Max HP Backup Temp</value>
+          <display_name>Detailed Example: 5F Min Compressor Temp, 35F Max HP Backup Temp</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 25F Min Compressor Temp, 45F Max HP Backup Temp</value>
+          <display_name>Detailed Example: 25F Min Compressor Temp, 45F Max HP Backup Temp</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>heat_pump_sizing_methodology</name>
@@ -3783,54 +3804,23 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Default</default_value>
       <choices>
         <choice>
-          <value>None</value>
-          <display_name>None</display_name>
+          <value>Default</value>
+          <display_name>Default</display_name>
         </choice>
         <choice>
-          <value>Vertical Loop, Default</value>
-          <display_name>Vertical Loop, Default</display_name>
+          <value>Vertical Loop, Enhanced Grout</value>
+          <display_name>Vertical Loop, Enhanced Grout</display_name>
         </choice>
         <choice>
-          <value>Vertical Loop, Default, Specified Loop Flow</value>
-          <display_name>Vertical Loop, Default, Specified Loop Flow</display_name>
+          <value>Vertical Loop, Enhanced Pipe</value>
+          <display_name>Vertical Loop, Enhanced Pipe</display_name>
         </choice>
         <choice>
-          <value>Vertical Loop, Default, Specified Borehole Count</value>
-          <display_name>Vertical Loop, Default, Specified Borehole Count</display_name>
-        </choice>
-        <choice>
-          <value>Vertical Loop, Default, Specified Borehole Length</value>
-          <display_name>Vertical Loop, Default, Specified Borehole Length</display_name>
-        </choice>
-        <choice>
-          <value>Vertical Loop, Default, Specified Loop Flow and Borehole Count</value>
-          <display_name>Vertical Loop, Default, Specified Loop Flow and Borehole Count</display_name>
-        </choice>
-        <choice>
-          <value>Vertical Loop, Default, Specified Borehole Count and Length</value>
-          <display_name>Vertical Loop, Default, Specified Borehole Count and Length</display_name>
-        </choice>
-        <choice>
-          <value>Vertical Loop, Default, Specified Loop Flow and Borehole Length</value>
-          <display_name>Vertical Loop, Default, Specified Loop Flow and Borehole Length</display_name>
-        </choice>
-        <choice>
-          <value>Vertical Loop, Default, Thermally Enhanced Grout</value>
-          <display_name>Vertical Loop, Default, Thermally Enhanced Grout</display_name>
-        </choice>
-        <choice>
-          <value>Vertical Loop, Default, Thermally Enhanced Pipe</value>
-          <display_name>Vertical Loop, Default, Thermally Enhanced Pipe</display_name>
-        </choice>
-        <choice>
-          <value>Vertical Loop, Lopsided U Borefield, Detailed</value>
-          <display_name>Vertical Loop, Lopsided U Borefield, Detailed</display_name>
-        </choice>
-        <choice>
-          <value>Vertical Loop, Rectangular Borefield, Detailed</value>
-          <display_name>Vertical Loop, Rectangular Borefield, Detailed</display_name>
+          <value>Detailed Example: Lopsided U Configuration, 10 Boreholes</value>
+          <display_name>Detailed Example: Lopsided U Configuration, 10 Boreholes</display_name>
         </choice>
       </choices>
     </argument>
@@ -3892,10 +3882,6 @@
           <display_name>Central Furnace, 92% AFUE</display_name>
         </choice>
         <choice>
-          <value>Central Furnace, 92% AFUE, Pilot Light</value>
-          <display_name>Central Furnace, 92% AFUE, Pilot Light</display_name>
-        </choice>
-        <choice>
           <value>Central Furnace, 92.5% AFUE</value>
           <display_name>Central Furnace, 92.5% AFUE</display_name>
         </choice>
@@ -3944,10 +3930,6 @@
           <display_name>Floor Furnace, 80% AFUE</display_name>
         </choice>
         <choice>
-          <value>Floor Furnace, 80% AFUE, Pilot Light</value>
-          <display_name>Floor Furnace, 80% AFUE, Pilot Light</display_name>
-        </choice>
-        <choice>
           <value>Boiler, 60% AFUE</value>
           <display_name>Boiler, 60% AFUE</display_name>
         </choice>
@@ -3978,10 +3960,6 @@
         <choice>
           <value>Boiler, 92% AFUE</value>
           <display_name>Boiler, 92% AFUE</display_name>
-        </choice>
-        <choice>
-          <value>Boiler, 92% AFUE, Pilot Light</value>
-          <display_name>Boiler, 92% AFUE, Pilot Light</display_name>
         </choice>
         <choice>
           <value>Boiler, 92.5% AFUE</value>
@@ -4075,6 +4053,18 @@
           <value>Fireplace, 100% Efficiency</value>
           <display_name>Fireplace, 100% Efficiency</display_name>
         </choice>
+        <choice>
+          <value>Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light</value>
+          <display_name>Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light</value>
+          <display_name>Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light</value>
+          <display_name>Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light</display_name>
+        </choice>
       </choices>
     </argument>
     <argument>
@@ -4084,7 +4074,6 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>electricity</default_value>
       <choices>
         <choice>
           <value>electricity</value>
@@ -4533,18 +4522,6 @@
           <display_name>4 CFM25 per 100ft2, R-4</display_name>
         </choice>
         <choice>
-          <value>4 CFM25 per 100ft2, R-4, Deeply Buried</value>
-          <display_name>4 CFM25 per 100ft2, R-4, Deeply Buried</display_name>
-        </choice>
-        <choice>
-          <value>4 CFM25 per 100ft2, R-4, 100% Round</value>
-          <display_name>4 CFM25 per 100ft2, R-4, 100% Round</display_name>
-        </choice>
-        <choice>
-          <value>4 CFM25 per 100ft2, R-4, 100% Rectangular</value>
-          <display_name>4 CFM25 per 100ft2, R-4, 100% Rectangular</display_name>
-        </choice>
-        <choice>
           <value>4 CFM25 per 100ft2, R-6</value>
           <display_name>4 CFM25 per 100ft2, R-6</display_name>
         </choice>
@@ -4601,16 +4578,28 @@
           <display_name>12 CFM25 per 100ft2, R-8</display_name>
         </choice>
         <choice>
-          <value>250 CFM25, R-6</value>
-          <display_name>250 CFM25, R-6</display_name>
+          <value>Detailed Example: 4 CFM25 per 100ft2, R-4, Deeply Buried</value>
+          <display_name>Detailed Example: 4 CFM25 per 100ft2, R-4, Deeply Buried</display_name>
         </choice>
         <choice>
-          <value>5 CFM50 per 100ft2, R-4</value>
-          <display_name>5 CFM50 per 100ft2, R-4</display_name>
+          <value>Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Round</value>
+          <display_name>Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Round</display_name>
         </choice>
         <choice>
-          <value>400 CFM50, R-6</value>
-          <display_name>400 CFM50, R-6</display_name>
+          <value>Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Rectangular</value>
+          <display_name>Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Rectangular</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 5 CFM50 per 100ft2, R-4</value>
+          <display_name>Detailed Example: 5 CFM50 per 100ft2, R-4</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 250 CFM25, R-6</value>
+          <display_name>Detailed Example: 250 CFM25, R-6</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 400 CFM50, R-6</value>
+          <display_name>Detailed Example: 400 CFM50, R-6</display_name>
         </choice>
       </choices>
     </argument>
@@ -5715,6 +5704,7 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -5853,6 +5843,7 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -6643,6 +6634,7 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -6677,16 +6669,16 @@
           <display_name>20.0 kWh</display_name>
         </choice>
         <choice>
-          <value>20.0 kWh, 6 kW, Garage</value>
-          <display_name>20.0 kWh, 6 kW, Garage</display_name>
+          <value>Detailed Example: 20.0 kWh, 6 kW, Garage</value>
+          <display_name>Detailed Example: 20.0 kWh, 6 kW, Garage</display_name>
         </choice>
         <choice>
-          <value>20.0 kWh, 6 kW, Outside</value>
-          <display_name>20.0 kWh, 6 kW, Outside</display_name>
+          <value>Detailed Example: 20.0 kWh, 6 kW, Outside</value>
+          <display_name>Detailed Example: 20.0 kWh, 6 kW, Outside</display_name>
         </choice>
         <choice>
-          <value>20.0 kWh, 6 kW, Outside, 80% Efficiency</value>
-          <display_name>20.0 kWh, 6 kW, Outside, 80% Efficiency</display_name>
+          <value>Detailed Example: 20.0 kWh, 6 kW, Outside, 80% Efficiency</value>
+          <display_name>Detailed Example: 20.0 kWh, 6 kW, Outside, 80% Efficiency</display_name>
         </choice>
       </choices>
     </argument>
@@ -6861,10 +6853,6 @@
           <display_name>40% CFL</display_name>
         </choice>
         <choice>
-          <value>40% CFL, 10% LFL, 25% LED</value>
-          <display_name>40% CFL, 10% LFL, 25% LED</display_name>
-        </choice>
-        <choice>
           <value>50% CFL</value>
           <display_name>50% CFL</display_name>
         </choice>
@@ -6927,6 +6915,10 @@
         <choice>
           <value>100% LED</value>
           <display_name>100% LED</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 40% CFL, 10% LFL, 25% LED</value>
+          <display_name>Detailed Example: 40% CFL, 10% LFL, 25% LED</display_name>
         </choice>
       </choices>
     </argument>
@@ -8838,7 +8830,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>A4A1D140</checksum>
+      <checksum>0BEB939A</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -8855,7 +8847,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F5989522</checksum>
+      <checksum>4D1E3FAC</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -8873,19 +8865,19 @@
       <filename>options/battery.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B4AB147E</checksum>
+      <checksum>ADFC3F87</checksum>
     </file>
     <file>
       <filename>options/enclosure_air_leakage.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8FD1C6A2</checksum>
+      <checksum>559ACB49</checksum>
     </file>
     <file>
       <filename>options/enclosure_foundation_wall.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>40D242F8</checksum>
+      <checksum>58B8E7EA</checksum>
     </file>
     <file>
       <filename>options/enclosure_roof_material.tsv</filename>
@@ -8921,49 +8913,55 @@
       <filename>options/geometry_neighbor_buildings.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>267E466D</checksum>
+      <checksum>AE328677</checksum>
     </file>
     <file>
       <filename>options/hvac_cooling_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A4B04136</checksum>
+      <checksum>8D769209</checksum>
     </file>
     <file>
       <filename>options/hvac_ducts.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A9036BDA</checksum>
+      <checksum>60C4C164</checksum>
     </file>
     <file>
       <filename>options/hvac_geothermal_loop.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>06B6E3F3</checksum>
+      <checksum>34B284DB</checksum>
     </file>
     <file>
       <filename>options/hvac_heat_pump.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>62CAE12B</checksum>
+      <checksum>5FE119E1</checksum>
     </file>
     <file>
       <filename>options/hvac_heat_pump_backup.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E02724BE</checksum>
+      <checksum>0BEEDC44</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_heat_pump_temps.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E14C5DD6</checksum>
     </file>
     <file>
       <filename>options/hvac_heating_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5F77DA59</checksum>
+      <checksum>762CE271</checksum>
     </file>
     <file>
       <filename>options/hvac_heating_system_2.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5F77DA59</checksum>
+      <checksum>762CE271</checksum>
     </file>
     <file>
       <filename>options/hvac_install_defects.tsv</filename>
@@ -8975,7 +8973,7 @@
       <filename>options/lighting.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4D5287D6</checksum>
+      <checksum>ECCA188D</checksum>
     </file>
     <file>
       <filename>options/mech_vent.tsv</filename>
@@ -8999,7 +8997,7 @@
       <filename>options/site_soil_type.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>90838051</checksum>
+      <checksum>05DAC28D</checksum>
     </file>
     <file>
       <filename>options.rb</filename>
@@ -9017,7 +9015,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D4F0DA97</checksum>
+      <checksum>23F65D6D</checksum>
     </file>
   </files>
 </measure>
