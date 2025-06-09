@@ -25,17 +25,17 @@
     "floor_over_foundation_assembly_r": 14.15,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
-    "foundation_wall": "None",
+    "enclosure_foundation_wall": "None",
     "rim_joist_assembly_r": 5.01,
-    "slab": "Uninsulated",
-    "slab_carpet": "0% Carpet",
+    "enclosure_slab": "Uninsulated",
+    "enclosure_slab_carpet": "0% Carpet",
     "ceiling_assembly_r": 18.45,
-    "roof_material": "0.6 Solar Absorptance",
+    "enclosure_roof_material": "0.6 Solar Absorptance",
     "roof_assembly_r": 1.99,
     "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
-    "wall_siding": "0.6 Solar Absorptance",
+    "enclosure_wall_siding": "0.6 Solar Absorptance",
     "wall_assembly_r": 11.76,
     "window_area_or_wwr_front": 90,
     "window_area_or_wwr_back": 90,
@@ -66,24 +66,24 @@
     "skylight_shgc": 0,
     "door_area": 40,
     "door_rvalue": 3.04,
-    "air_leakage": "0.67 nACH",
-    "heating_system": "None",
+    "enclosure_air_leakage": "0.67 nACH",
+    "hvac_heating_system": "None",
     "heating_system_fuel": "natural gas",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "None",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0,
-    "heat_pump": "None",
+    "hvac_heat_pump": "None",
     "heat_pump_fraction_heat_load_served": 0,
     "heat_pump_fraction_cool_load_served": 0,
-    "heat_pump_backup": "None",
-    "heating_system_2": "None",
+    "hvac_heat_pump_backup": "None",
+    "hvac_heating_system_2": "None",
     "heating_system_2_fuel": "electricity",
     "heating_system_2_fraction_heat_load_served": 0,
     "hvac_control_heating_weekday_setpoint": 68,
     "hvac_control_heating_weekend_setpoint": 68,
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
-    "ducts": "0 CFM25 per 100ft2, Uninsulated",
+    "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
     "mech_vent": "None",
     "kitchen_fans_quantity": 0,
     "bathroom_fans_quantity": 0,
@@ -149,7 +149,7 @@
   },
   "tests/ASHRAE_Standard_140/L110AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "air_leakage": "1.5 nACH"
+    "enclosure_air_leakage": "1.5 nACH"
   },
   "tests/ASHRAE_Standard_140/L120AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -199,32 +199,32 @@
     "floor_over_foundation_assembly_r": 4.24,
     "ceiling_assembly_r": 11.75,
     "wall_assembly_r": 4.84,
-    "air_leakage": "1.5 nACH"
+    "enclosure_air_leakage": "1.5 nACH"
   },
   "tests/ASHRAE_Standard_140/L202AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AC.xml",
-    "roof_material": "0.2 Solar Absorptance",
-    "wall_siding": "0.2 Solar Absorptance"
+    "enclosure_roof_material": "0.2 Solar Absorptance",
+    "enclosure_wall_siding": "0.2 Solar Absorptance"
   },
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_foundation_type": "SlabOnGrade",
-    "slab_carpet": "100% Carpet, R-2.08"
+    "enclosure_slab_carpet": "100% Carpet, R-2.08"
   },
   "tests/ASHRAE_Standard_140/L304XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L302XC.xml",
-    "slab": "Perimeter, 2ft, R-5"
+    "enclosure_slab": "Perimeter, 2ft, R-5"
   },
   "tests/ASHRAE_Standard_140/L322XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_unit_cfa": 3078,
     "geometry_foundation_type": "ConditionedBasement",
-    "foundation_wall": "Solid Concrete, Uninsulated",
-    "air_leakage": "0.335 nACH"
+    "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
+    "enclosure_air_leakage": "0.335 nACH"
   },
   "tests/ASHRAE_Standard_140/L324XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L322XC.xml",
-    "foundation_wall": "Solid Concrete, Whole Wall, R-10.2, Interior",
+    "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10.2, Interior",
     "rim_joist_assembly_r": 13.14
   },
   "tests/ASHRAE_Standard_140/L100AL.xml": {
@@ -233,7 +233,7 @@
   },
   "tests/ASHRAE_Standard_140/L110AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "air_leakage": "1.5 nACH"
+    "enclosure_air_leakage": "1.5 nACH"
   },
   "tests/ASHRAE_Standard_140/L120AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -283,27 +283,27 @@
     "floor_over_foundation_assembly_r": 4.24,
     "ceiling_assembly_r": 11.75,
     "wall_assembly_r": 4.84,
-    "air_leakage": "1.5 nACH"
+    "enclosure_air_leakage": "1.5 nACH"
   },
   "tests/ASHRAE_Standard_140/L202AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AL.xml",
-    "roof_material": "0.2 Solar Absorptance",
-    "wall_siding": "0.2 Solar Absorptance"
+    "enclosure_roof_material": "0.2 Solar Absorptance",
+    "enclosure_wall_siding": "0.2 Solar Absorptance"
   },
   "tests/HERS_HVAC/HVAC1a.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "heating_system": "Central Furnace, 78% AFUE",
+    "hvac_heating_system": "Central Furnace, 78% AFUE",
     "heating_system_fuel": "natural gas",
     "heating_system_heating_capacity": 56100,
     "heating_system_fraction_heat_load_served": 1.0,
-    "cooling_system": "Central AC, SEER 10",
+    "hvac_cooling_system": "Central AC, SEER 10",
     "cooling_system_cooling_capacity": 38300,
     "cooling_system_fraction_cool_load_served": 1,
     "hvac_blower_fan_watts_per_cfm": 0.5
   },
   "tests/HERS_HVAC/HVAC1b.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC1a.xml",
-    "cooling_system": "Central AC, SEER 13"
+    "hvac_cooling_system": "Central AC, SEER 13"
   },
   "tests/HERS_HVAC/HVAC2a.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC1a.xml",
@@ -311,44 +311,44 @@
   },
   "tests/HERS_HVAC/HVAC2b.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC2a.xml",
-    "heating_system": "Central Furnace, 90% AFUE"
+    "hvac_heating_system": "Central Furnace, 90% AFUE"
   },
   "tests/HERS_HVAC/HVAC2c.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC2a.xml",
-    "heating_system": "None",
-    "cooling_system": "None",
-    "heat_pump": "Central HP, SEER 10, 6.8 HSPF",
+    "hvac_heating_system": "None",
+    "hvac_cooling_system": "None",
+    "hvac_heat_pump": "Central HP, SEER 10, 6.8 HSPF",
     "heat_pump_cooling_capacity": 56100,
     "heat_pump_heating_capacity": 56100,
-    "heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 34121,
     "heat_pump_fraction_heat_load_served": 1.0,
     "heat_pump_fraction_cool_load_served": 1.0
   },
   "tests/HERS_HVAC/HVAC2d.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC2c.xml",
-    "heat_pump": "Central HP, SEER 13, 9.85 HSPF"
+    "hvac_heat_pump": "Central HP, SEER 13, 9.85 HSPF"
   },
   "tests/HERS_HVAC/HVAC2e.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC2a.xml",
     "heating_system_fuel": "electricity",
-    "heating_system": "Central Furnace, 100% AFUE"
+    "hvac_heating_system": "Central Furnace, 100% AFUE"
   },
   "tests/HERS_DSE/HVAC3a.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L322XC.xml",
     "geometry_foundation_type": "UnconditionedBasement",
     "geometry_unit_cfa": 1539,
-    "air_leakage": "0.67 nACH",
+    "enclosure_air_leakage": "0.67 nACH",
     "floor_over_foundation_assembly_r": 13.85,
     "heating_system_fuel": "natural gas",
     "heating_system_heating_capacity": 46600,
-    "heating_system": "Central Furnace, 78% AFUE",
+    "hvac_heating_system": "Central Furnace, 78% AFUE",
     "heating_system_fraction_heat_load_served": 1.0,
-    "cooling_system": "Central AC, SEER 10",
+    "hvac_cooling_system": "Central AC, SEER 10",
     "cooling_system_cooling_capacity": 38400,
     "cooling_system_fraction_cool_load_served": 1,
     "hvac_blower_fan_watts_per_cfm": 0.5,
-    "ducts": "0 CFM25 per 100ft2, Uninsulated",
+    "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space"
   },
@@ -361,24 +361,24 @@
   "tests/HERS_DSE/HVAC3c.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3b.xml",
     "heating_system_heating_capacity": 49000,
-    "ducts": "0 CFM25 per 100ft2, R-6"
+    "hvac_ducts": "0 CFM25 per 100ft2, R-6"
   },
   "tests/HERS_DSE/HVAC3d.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3c.xml",
     "heating_system_heating_capacity": 61000,
-    "ducts": "250 CFM25, R-6"
+    "hvac_ducts": "250 CFM25, R-6"
   },
   "tests/HERS_DSE/HVAC3e.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
     "heating_system_fuel": "natural gas",
     "heating_system_heating_capacity": 46600,
-    "heating_system": "Central Furnace, 78% AFUE",
+    "hvac_heating_system": "Central Furnace, 78% AFUE",
     "heating_system_fraction_heat_load_served": 1.0,
-    "cooling_system": "Central AC, SEER 10",
+    "hvac_cooling_system": "Central AC, SEER 10",
     "cooling_system_cooling_capacity": 38400,
     "cooling_system_fraction_cool_load_served": 1,
     "hvac_blower_fan_watts_per_cfm": 0.5,
-    "ducts": "0 CFM25 per 100ft2, Uninsulated",
+    "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space"
   },
@@ -391,21 +391,21 @@
   "tests/HERS_DSE/HVAC3g.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3f.xml",
     "cooling_system_cooling_capacity": 42200,
-    "ducts": "0 CFM25 per 100ft2, R-6"
+    "hvac_ducts": "0 CFM25 per 100ft2, R-6"
   },
   "tests/HERS_DSE/HVAC3h.xml": {
     "parent_hpxml": "tests/HERS_DSE/HVAC3g.xml",
     "cooling_system_cooling_capacity": 55000,
-    "ducts": "250 CFM25, R-6"
+    "hvac_ducts": "250 CFM25, R-6"
   },
   "tests/HERS_Hot_Water/L100AD-HW-01.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_unit_num_occupants": null,
-    "air_leakage": "79.8 sq. in. ELA",
+    "enclosure_air_leakage": "79.8 sq. in. ELA",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "geometry_unit_num_bedrooms": 2,
-    "roof_material": "0.75 Solar Absorptance",
-    "wall_siding": "0.75 Solar Absorptance",
+    "enclosure_roof_material": "0.75 Solar Absorptance",
+    "enclosure_wall_siding": "0.75 Solar Absorptance",
     "wall_assembly_r": 17.54,
     "floor_over_foundation_assembly_r": 30.3,
     "ceiling_assembly_r": 38.46,
@@ -415,9 +415,9 @@
     "window_interior_shading_winter": null,
     "window_interior_shading_summer": null,
     "heating_system_fuel": "natural gas",
-    "heating_system":"Central Furnace, 78% AFUE",
+    "hvac_heating_system":"Central Furnace, 78% AFUE",
     "heating_system_fraction_heat_load_served": 1.0,
-    "cooling_system": "Central AC, SEER 13",
+    "hvac_cooling_system": "Central AC, SEER 13",
     "cooling_system_fraction_cool_load_served": 1,
     "water_heater_type": "storage water heater",
     "water_heater_fuel_type": "natural gas",
@@ -532,17 +532,17 @@
     "floor_over_foundation_assembly_r": 0,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
-    "foundation_wall": "Solid Concrete, Whole Wall, R-10",
+    "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
     "rim_joist_assembly_r": 23,
-    "slab": "Uninsulated",
-    "slab_carpet":"0% Carpet",
+    "enclosure_slab": "Uninsulated",
+    "enclosure_slab_carpet":"0% Carpet",
     "ceiling_assembly_r": 39.3,
-    "roof_material": "Asphalt/Fiberglass Shingles, Medium",
+    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
     "roof_assembly_r": 2.3,
     "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
-    "wall_siding": "Wood, Medium",
+    "enclosure_wall_siding": "Wood, Medium",
     "wall_assembly_r": 23,
     "window_area_or_wwr_front": 108,
     "window_area_or_wwr_back": 108,
@@ -573,26 +573,26 @@
     "skylight_shgc": 0.45,
     "door_area": 40,
     "door_rvalue": 4.4,
-    "air_leakage": "3 ACH50",
+    "enclosure_air_leakage": "3 ACH50",
     "heating_system_fuel": "natural gas",
-    "heating_system": "Central Furnace, 92% AFUE",
+    "hvac_heating_system": "Central Furnace, 92% AFUE",
     "heating_system_heating_capacity": 36000,
     "heating_system_fraction_heat_load_served": 1,
-    "cooling_system": "Central AC, SEER 13",
+    "hvac_cooling_system": "Central AC, SEER 13",
     "cooling_system_cooling_capacity": 24000,
     "cooling_system_fraction_cool_load_served": 1,
-    "heat_pump": "None",
+    "hvac_heat_pump": "None",
     "heat_pump_fraction_heat_load_served": 0,
     "heat_pump_fraction_cool_load_served": 0,
-    "heat_pump_backup": "None",
-    "heating_system_2": "None",
+    "hvac_heat_pump_backup": "None",
+    "hvac_heating_system_2": "None",
     "heating_system_2_fuel": "electricity",
     "heating_system_2_fraction_heat_load_served": 0,
     "hvac_control_heating_weekday_setpoint": 68,
     "hvac_control_heating_weekend_setpoint": 68,
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
-    "ducts": "4 CFM25 per 100ft2, R-4",
+    "hvac_ducts": "4 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "attic - unvented",
     "ducts_return_location": "attic - unvented",
     "ducts_supply_leakage_fraction": 0.75,
@@ -770,7 +770,7 @@
     "roof_assembly_r": 25.8,
     "window_area_or_wwr_left": 120,
     "window_area_or_wwr_right": 120,
-    "ducts": "0 CFM25 per 100ft2, R-4",
+    "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space"
   },
@@ -779,7 +779,7 @@
     "geometry_unit_num_floors_above_grade": 2,
     "geometry_unit_cfa": 3600,
     "geometry_attic_type": "ConditionedAttic",
-    "ducts": "1 CFM25 per 100ft2, Uninsulated",
+    "hvac_ducts": "1 CFM25 per 100ft2, Uninsulated",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space",
     "water_heater_location": "basement - conditioned",
@@ -794,7 +794,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_attic_type": "FlatRoof",
     "roof_assembly_r": 25.8,
-    "ducts": "0 CFM25 per 100ft2, R-4",
+    "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "basement - conditioned",
     "ducts_return_location": "basement - conditioned"
   },
@@ -897,7 +897,7 @@
   "sample_files/base-bldgtype-sfa-unit.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_type": "single-family attached",
-    "geometry_unit_right_wall_is_adiabatic": true,
+    "geometry_attached_walls": "1 Side: Right",
     "geometry_unit_cfa": 1800,
     "geometry_unit_aspect_ratio": 0.6667,
     "geometry_building_num_units": 3,
@@ -915,25 +915,25 @@
     "geometry_unit_cfa": 2700,
     "heating_system_heating_capacity": 48000,
     "cooling_system_cooling_capacity": 36000,
-    "ducts": "4 CFM25 per 100ft2, R-4",
+    "hvac_ducts": "4 CFM25 per 100ft2, R-4",
     "misc_plug_loads_other_annual_kwh": 2457
   },
   "sample_files/base-bldgtype-sfa-unit-atticroof-cathedral.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-sfa-unit-2stories.xml",
     "geometry_attic_type": "ConditionedAttic",
-    "ducts": "0 CFM25 per 100ft2, R-4",
+    "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space"
   },
   "sample_files/base-bldgtype-sfa-unit-infil-compartmentalization-test.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-sfa-unit.xml",
-    "air_leakage": "3.57 ACH50",
+    "enclosure_air_leakage": "3.57 ACH50",
     "air_leakage_type": "unit total"
   },
   "sample_files/base-bldgtype-mf-unit.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_type": "apartment unit",
-    "geometry_unit_right_wall_is_adiabatic": true,
+    "geometry_attached_walls": "1 Side: Right",
     "geometry_unit_cfa": 900,
     "geometry_unit_aspect_ratio": 0.6667,
     "geometry_building_num_units": 6,
@@ -948,7 +948,7 @@
     "air_leakage_type": "unit exterior only",
     "heating_system_heating_capacity": 12000,
     "cooling_system_cooling_capacity": 12000,
-    "ducts": "0 CFM25 per 100ft2, Uninsulated",
+    "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
     "ducts_supply_location": "conditioned space",
     "ducts_return_location": "conditioned space",
     "misc_plug_loads_other_annual_kwh": 819
@@ -969,8 +969,8 @@
   },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-multiple-hvac-none.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-adjacent-to-multiple.xml",
-    "heating_system": "None",
-    "cooling_system": "None"
+    "hvac_heating_system": "None",
+    "hvac_cooling_system": "None"
   },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
@@ -982,12 +982,12 @@
   },
   "sample_files/base-bldgtype-mf-unit-infil-compartmentalization-test.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "air_leakage": "12.16 ACH50",
+    "enclosure_air_leakage": "12.16 ACH50",
     "air_leakage_type": "unit total"
   },
   "sample_files/base-bldgtype-mf-unit-infil-leakiness-description.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "air_leakage": "Tight",
+    "enclosure_air_leakage": "Tight",
     "year_built": 1990,
     "air_leakage_type": null
   },
@@ -1004,13 +1004,13 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "heating_system": "Shared Boiler w/ Baseboard, 92% AFUE",
-    "cooling_system": "None",
+    "hvac_heating_system": "Shared Boiler w/ Baseboard, 92% AFUE",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml",
-    "heating_system": "Shared Boiler w/ Fan Coil, 92% AFUE"
+    "hvac_heating_system": "Shared Boiler w/ Fan Coil, 92% AFUE"
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil-ducted.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil.xml"
@@ -1023,8 +1023,8 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "heating_system": "Shared Boiler w/ Baseboard, 92% AFUE",
-    "cooling_system": "None",
+    "hvac_heating_system": "Shared Boiler w/ Baseboard, 92% AFUE",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard-combi-tankless.xml": {
@@ -1033,12 +1033,12 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml",
-    "heating_system": "Shared Boiler w/ Fan Coil, 92% AFUE"
+    "hvac_heating_system": "Shared Boiler w/ Fan Coil, 92% AFUE"
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil-fireplace-elec.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml",
     "heating_system_fraction_heat_load_served": 0.75,
-    "heating_system_2": "Fireplace, 100% Efficiency",
+    "hvac_heating_system_2": "Fireplace, 100% Efficiency",
     "heating_system_2_fraction_heat_load_served": 0.25
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil-ducted.xml": {
@@ -1052,9 +1052,9 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-chiller-only-baseboard.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "None",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-bldgtype-mf-unit-shared-chiller-only-fan-coil.xml": {
@@ -1074,16 +1074,16 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-ground-loop-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "None",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0,
-    "heat_pump": "Geothermal HP, EER 16.6, COP 3.6",
+    "hvac_heat_pump": "Geothermal HP, EER 16.6, COP 3.6",
     "heat_pump_heating_capacity": 12000,
     "heat_pump_cooling_capacity": 12000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
-    "heat_pump_backup": "None"
+    "hvac_heat_pump_backup": "None"
   },
   "sample_files/base-bldgtype-mf-unit-shared-laundry-room.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
@@ -1536,19 +1536,19 @@
   },
   "sample_files/base-enclosure-infil-ach-house-pressure.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "air_leakage": "2.8 ACH45"
+    "enclosure_air_leakage": "2.8 ACH45"
   },
   "sample_files/base-enclosure-infil-cfm-house-pressure.xml": {
     "parent_hpxml": "sample_files/base-enclosure-infil-cfm50.xml",
-    "air_leakage": "1008.5 CFM45"
+    "enclosure_air_leakage": "1008.5 CFM45"
   },
   "sample_files/base-enclosure-infil-cfm50.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "air_leakage": "1080 CFM50"
+    "enclosure_air_leakage": "1080 CFM50"
   },
   "sample_files/base-enclosure-infil-ela.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "air_leakage": "123 sq. in. ELA"
+    "enclosure_air_leakage": "123 sq. in. ELA"
   },
   "sample_files/base-enclosure-infil-flue.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1556,15 +1556,15 @@
   },
   "sample_files/base-enclosure-infil-natural-ach.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "air_leakage": "0.2 nACH"
+    "enclosure_air_leakage": "0.2 nACH"
   },
   "sample_files/base-enclosure-infil-natural-cfm.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "air_leakage": "72 nCFM"
+    "enclosure_air_leakage": "72 nCFM"
   },
   "sample_files/base-enclosure-infil-leakiness-description.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "air_leakage": "Leaky",
+    "enclosure_air_leakage": "Leaky",
     "year_built": 1988,
     "air_leakage_type": null
   },
@@ -1700,7 +1700,7 @@
     "window_area_or_wwr_left": 20,
     "window_area_or_wwr_right": 20,
     "ducts_supply_location": "manufactured home belly",
-    "ducts": "20% Leakage, Uninsulated",
+    "hvac_ducts": "20% Leakage, Uninsulated",
     "ducts_return_location": "manufactured home belly"
   },
   "sample_files/base-foundation-belly-wing-no-skirt.xml": {
@@ -1712,15 +1712,15 @@
   },
   "sample_files/base-foundation-conditioned-basement-slab-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "slab": "Under Slab, 4ft, R-10"
+    "enclosure_slab": "Under Slab, 4ft, R-10"
   },
   "sample_files/base-foundation-conditioned-basement-slab-insulation-full.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "slab": "Whole Slab, R-10"
+    "enclosure_slab": "Whole Slab, R-10"
   },
   "sample_files/base-foundation-conditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "foundation_wall": "Concrete Block Foam Core, Whole Wall, R-18.9"
+    "enclosure_foundation_wall": "Concrete Block Foam Core, Whole Wall, R-18.9"
   },
   "sample_files/base-foundation-conditioned-crawlspace.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1728,7 +1728,7 @@
     "geometry_foundation_type": "ConditionedCrawlspace",
     "geometry_foundation_height": 4,
     "floor_over_foundation_assembly_r": 18.7,
-    "ducts": "0 CFM25 per 100ft2, R-4",
+    "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "crawlspace - conditioned",
     "ducts_return_location": "crawlspace - conditioned",
     "water_heater_location": "crawlspace - conditioned",
@@ -1740,15 +1740,15 @@
     "geometry_foundation_type": "SlabOnGrade",
     "geometry_foundation_height": 0,
     "geometry_foundation_height_above_grade": 0,
-    "slab": "Whole Slab, R-5",
-    "slab_carpet": "100% Carpet, R-2.5",
+    "enclosure_slab": "Whole Slab, R-5",
+    "enclosure_slab_carpet": "100% Carpet, R-2.5",
     "ducts_supply_location": "under slab",
     "ducts_return_location": "under slab",
     "misc_plug_loads_other_annual_kwh": 1228.5
   },
   "sample_files/base-foundation-slab-exterior-horizontal-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "slab": "Perimeter, 2ft, R-5"
+    "enclosure_slab": "Perimeter, 2ft, R-5"
   },
   "sample_files/base-foundation-multiple.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml"
@@ -1758,7 +1758,7 @@
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "UnconditionedBasement",
     "floor_over_foundation_assembly_r": 18.7,
-    "foundation_wall": "Solid Concrete, Uninsulated",
+    "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
     "rim_joist_assembly_r": 4,
     "ducts_supply_location": "basement - unconditioned",
     "ducts_return_location": "basement - unconditioned",
@@ -1776,12 +1776,12 @@
   },
   "sample_files/base-foundation-unconditioned-basement-assembly-r.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
-    "foundation_wall": "Solid Concrete, Assembly R-10.69"
+    "enclosure_foundation_wall": "Solid Concrete, Assembly R-10.69"
   },
   "sample_files/base-foundation-unconditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
     "floor_over_foundation_assembly_r": 2.1,
-    "foundation_wall": "Solid Concrete, Half Wall, R-10",
+    "enclosure_foundation_wall": "Solid Concrete, Half Wall, R-10",
     "rim_joist_assembly_r": 23
   },
   "sample_files/base-foundation-unvented-crawlspace.xml": {
@@ -1820,16 +1820,16 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "None",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0,
-    "heat_pump": "Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F",
+    "hvac_heat_pump": "Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
-    "heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-detailed-electric-panel.xml": {
@@ -1861,7 +1861,7 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_capacity": 0,
     "heat_pump_fraction_heat_load_served": 0,
-    "heat_pump_backup": "None"
+    "hvac_heat_pump_backup": "None"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -1870,8 +1870,8 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Central HP, SEER 13, 7.7 HSPF, 5F Compressor Lockout",
-    "heat_pump_backup": "Integrated, Electricity, 100% Efficiency, 35F Lockout",
+    "hvac_heat_pump": "Central HP, SEER 13, 7.7 HSPF, 5F Compressor Lockout",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency, 35F Lockout",
     "hvac_control_heating_weekday_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64",
     "hvac_control_heating_weekend_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64"
   },
@@ -1888,11 +1888,11 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Central HP, SEER2 12.4, HSPF2 6.5, Heating Capacity 17F"
+    "hvac_heat_pump": "Central HP, SEER2 12.4, HSPF2 6.5, Heating Capacity 17F"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Central HP, SEER 18, 9.3 HSPF"
+    "hvac_heat_pump": "Central HP, SEER 18, 9.3 HSPF"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
@@ -1907,7 +1907,7 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Central HP, SEER 22, 10 HSPF"
+    "hvac_heat_pump": "Central HP, SEER 22, 10 HSPF"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -1919,11 +1919,11 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "heat_pump": "Central HP, SEER 22, 10 HSPF",
+    "hvac_heat_pump": "Central HP, SEER 22, 10 HSPF",
     "heat_pump_heating_capacity": 18000,
     "heat_pump_cooling_capacity": 18000,
-    "heat_pump_backup": "Separate",
-    "heating_system_2": "Boiler, 80% AFUE",
+    "hvac_heat_pump_backup": "Separate",
+    "hvac_heating_system_2": "Boiler, 80% AFUE",
     "heating_system_2_fuel": "natural gas",
     "heating_system_2_heating_capacity": 60000
   },
@@ -1938,14 +1938,14 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
-    "heat_pump": "Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup": "Separate, 30F Lockout",
+    "hvac_heat_pump": "Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout",
+    "hvac_heat_pump_backup": "Separate, 30F Lockout",
     "heat_pump_heating_capacity": 24000,
     "heat_pump_cooling_capacity": 24000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
-    "ducts": "2 CFM25 per 100ft2, R-4"
+    "hvac_ducts": "2 CFM25 per 100ft2, R-4"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
@@ -1968,7 +1968,7 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv",
-    "ducts": "2 CFM25 per 100ft2, R-4"
+    "hvac_ducts": "2 CFM25 per 100ft2, R-4"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -1977,12 +1977,12 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "heat_pump": "Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance",
+    "hvac_heat_pump": "Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance",
     "additional_properties": "HeatPump=YORK HMH7|HeatPumpAHRICert#=206921308"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml",
-    "heat_pump": "Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance"
+    "hvac_heat_pump": "Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml",
@@ -2009,23 +2009,23 @@
   "sample_files/base-hvac-boiler-elec-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_fuel": "electricity",
-    "heating_system": "Boiler, 98% AFUE",
-    "cooling_system": "None",
+    "hvac_heating_system": "Boiler, 98% AFUE",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-boiler-gas-central-ac-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "Boiler, 92% AFUE"
+    "hvac_heating_system": "Boiler, 92% AFUE"
   },
   "sample_files/base-hvac-boiler-gas-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system":"Boiler, 92% AFUE",
-    "cooling_system": "None",
+    "hvac_heating_system":"Boiler, 92% AFUE",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-boiler-gas-only-pilot.xml": {
     "parent_hpxml": "sample_files/base-hvac-boiler-gas-only.xml",
-    "heating_system": "Boiler, 92% AFUE, Pilot Light"
+    "hvac_heating_system": "Boiler, 92% AFUE, Pilot Light"
   },
   "sample_files/base-hvac-boiler-oil-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-boiler-gas-only.xml",
@@ -2041,7 +2041,7 @@
   },
   "sample_files/base-hvac-central-ac-only-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0
   },
   "sample_files/base-hvac-central-ac-only-1-speed-autosize-factor.xml": {
@@ -2052,15 +2052,15 @@
   },
   "sample_files/base-hvac-central-ac-only-1-speed-seer2.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
-    "cooling_system": "Central AC, SEER2 12.4"
+    "hvac_cooling_system": "Central AC, SEER2 12.4"
   },
   "sample_files/base-hvac-central-ac-only-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
-    "cooling_system": "Central AC, SEER 18"
+    "hvac_cooling_system": "Central AC, SEER 18"
   },
   "sample_files/base-hvac-central-ac-only-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
-    "cooling_system": "Central AC, SEER 24"
+    "hvac_cooling_system": "Central AC, SEER 24"
   },
   "sample_files/base-hvac-central-ac-only-var-speed-max-power-ratio-schedule.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-var-speed.xml",
@@ -2068,22 +2068,22 @@
   },
   "sample_files/base-hvac-central-ac-only-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-var-speed.xml",
-    "cooling_system": "Central AC, SEER 17.5, Absolute Detailed Performance",
+    "hvac_cooling_system": "Central AC, SEER 17.5, Absolute Detailed Performance",
     "cooling_system_cooling_capacity": 36000,
     "additional_properties": "HeatPump=YORK HMH7|HeatPumpAHRICert#=206921308"
   },
   "sample_files/base-hvac-central-ac-only-var-speed-detailed-performance-autosize.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-var-speed-detailed-performance.xml",
-    "cooling_system": "Central AC, SEER 17.5, Normalized Detailed Performance",
+    "hvac_cooling_system": "Central AC, SEER 17.5, Normalized Detailed Performance",
     "cooling_system_cooling_capacity": null
   },
   "sample_files/base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
-    "heat_pump": "Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F",
+    "hvac_heat_pump": "Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
-    "heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-dse.xml": {
@@ -2091,18 +2091,18 @@
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Central HP, SEER 13, 7.7 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 30F Lockout"
+    "hvac_heat_pump": "Central HP, SEER 13, 7.7 HSPF, 30F Compressor Lockout",
+    "hvac_heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 30F Lockout"
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-lockout-temperatures.xml": {
     "parent_hpxml": "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Central HP, SEER 13, 7.7 HSPF, 25F Compressor Lockout",
-    "heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 45F Lockout"
+    "hvac_heat_pump": "Central HP, SEER 13, 7.7 HSPF, 25F Compressor Lockout",
+    "hvac_heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 45F Lockout"
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
-    "heat_pump": "Central HP, SEER 18, 9.3 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 30F Lockout"
+    "hvac_heat_pump": "Central HP, SEER 18, 9.3 HSPF, 30F Compressor Lockout",
+    "hvac_heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 30F Lockout"
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed-advanced-defrost.xml": {
     "parent_hpxml": "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml",
@@ -2110,21 +2110,21 @@
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "heat_pump": "Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 30F Lockout"
+    "hvac_heat_pump": "Central HP, SEER 22, 10 HSPF, 30F Compressor Lockout",
+    "hvac_heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 30F Lockout"
   },
   "sample_files/base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
-    "heat_pump": "Mini-Split HP, SEER 19, 10 HSPF, 30F Compressor Lockout",
-    "heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 30F Lockout"
+    "hvac_heat_pump": "Mini-Split HP, SEER 19, 10 HSPF, 30F Compressor Lockout",
+    "hvac_heat_pump_backup": "Integrated, Natural Gas, 95% AFUE, 30F Lockout"
   },
   "sample_files/base-hvac-ducts-leakage-cfm50.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts": "5 CFM50 per 100ft2, R-4"
+    "hvac_ducts": "5 CFM50 per 100ft2, R-4"
   },
   "sample_files/base-hvac-ducts-leakage-percent.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts": "15% Leakage, R-4",
+    "hvac_ducts": "15% Leakage, R-4",
     "ducts_supply_leakage_fraction": 0.75
   },
   "sample_files/base-hvac-ducts-areas.xml": {
@@ -2135,13 +2135,13 @@
   },
   "sample_files/base-hvac-ducts-buried.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts": "4 CFM25 per 100ft2, R-4, Deeply Buried",
+    "hvac_ducts": "4 CFM25 per 100ft2, R-4, Deeply Buried",
     "ducts_supply_leakage_fraction": 0.75
   },
   "sample_files/base-hvac-ducts-defaults.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-room-ac.xml",
     "heating_system_fraction_heat_load_served": 0.75,
-    "heating_system_2": "Fireplace, 100% Efficiency",
+    "hvac_heating_system_2": "Fireplace, 100% Efficiency",
     "heating_system_2_fraction_heat_load_served": 0.25,
     "ducts_supply_location": null,
     "ducts_return_location": null
@@ -2151,43 +2151,43 @@
   },
   "sample_files/base-hvac-ducts-shape-round.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts": "4 CFM25 per 100ft2, R-4, 100% Round",
+    "hvac_ducts": "4 CFM25 per 100ft2, R-4, 100% Round",
     "ducts_supply_leakage_fraction": 0.75
   },
   "sample_files/base-hvac-ducts-shape-rectangular.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts": "4 CFM25 per 100ft2, R-4, 100% Rectangular",
+    "hvac_ducts": "4 CFM25 per 100ft2, R-4, 100% Rectangular",
     "ducts_supply_leakage_fraction": 0.75
   },
   "sample_files/base-hvac-elec-resistance-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_fuel": "electricity",
-    "heating_system": "Electric Resistance",
-    "cooling_system": "None",
+    "hvac_heating_system": "Electric Resistance",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-evap-cooler-furnace-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "cooling_system": "Evaporative Cooler"
+    "hvac_cooling_system": "Evaporative Cooler"
   },
   "sample_files/base-hvac-evap-cooler-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-evap-cooler-furnace-gas.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0
   },
   "sample_files/base-hvac-evap-cooler-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-evap-cooler-only.xml",
-    "cooling_system": "Evaporative Cooler, Ducted"
+    "hvac_cooling_system": "Evaporative Cooler, Ducted"
   },
   "sample_files/base-hvac-fireplace-wood-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-stove-oil-only.xml",
-    "heating_system": "Fireplace, 80% Efficiency",
+    "hvac_heating_system": "Fireplace, 80% Efficiency",
     "heating_system_fuel": "wood"
   },
   "sample_files/base-hvac-floor-furnace-propane-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-stove-oil-only.xml",
     "heating_system_fuel": "propane",
-    "heating_system": "Floor Furnace, 80% AFUE, Pilot Light"
+    "hvac_heating_system": "Floor Furnace, 80% AFUE, Pilot Light"
   },
   "sample_files/base-hvac-furnace-coal-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
@@ -2196,22 +2196,22 @@
   "sample_files/base-hvac-furnace-elec-central-ac-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_fuel": "electricity",
-    "heating_system": "Central Furnace, 100% AFUE"
+    "hvac_heating_system": "Central Furnace, 100% AFUE"
   },
   "sample_files/base-hvac-furnace-elec-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_fuel": "electricity",
-    "heating_system": "Central Furnace, 98% AFUE",
-    "cooling_system": "None",
+    "hvac_heating_system": "Central Furnace, 98% AFUE",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-furnace-gas-central-ac-2-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "cooling_system": "Central AC, SEER 18"
+    "hvac_cooling_system": "Central AC, SEER 18"
   },
   "sample_files/base-hvac-furnace-gas-central-ac-var-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "cooling_system": "Central AC, SEER 24"
+    "hvac_cooling_system": "Central AC, SEER 24"
   },
   "sample_files/base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-var-speed.xml",
@@ -2219,7 +2219,7 @@
   },
   "sample_files/base-hvac-furnace-gas-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "cooling_system": "None",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-furnace-gas-only-autosize-factor.xml": {
@@ -2230,7 +2230,7 @@
   },
   "sample_files/base-hvac-furnace-gas-only-pilot.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
-    "heating_system": "Central Furnace, 92% AFUE, Pilot Light"
+    "hvac_heating_system": "Central Furnace, 92% AFUE, Pilot Light"
   },
   "sample_files/base-hvac-furnace-gas-only-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
@@ -2240,14 +2240,14 @@
   },
   "sample_files/base-hvac-furnace-gas-plus-air-to-air-heat-pump-cooling.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
-    "heat_pump": "Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F",
+    "hvac_heat_pump": "Central HP, SEER 13, 7.7 HSPF, Heating Capacity 17F",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_cool_load_served": 1
   },
   "sample_files/base-hvac-furnace-gas-room-ac.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "cooling_system": "Room AC, EER 8.5"
+    "hvac_cooling_system": "Room AC, EER 8.5"
   },
   "sample_files/base-hvac-furnace-oil-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
@@ -2266,16 +2266,16 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "None",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0,
-    "heat_pump": "Geothermal HP, EER 16.6, COP 3.6",
+    "hvac_heat_pump": "Geothermal HP, EER 16.6, COP 3.6",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
-    "heat_pump_backup": "None"
+    "hvac_heat_pump_backup": "None"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-1-speed-experimental.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2283,7 +2283,7 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Geothermal HP, EER 20.5, COP 4.0"
+    "hvac_heat_pump": "Geothermal HP, EER 20.5, COP 4.0"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml",
@@ -2291,7 +2291,7 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Geothermal HP, EER 30.9, COP 4.4"
+    "hvac_heat_pump": "Geothermal HP, EER 30.9, COP 4.4"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml",
@@ -2299,26 +2299,26 @@
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-integrated.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-stove.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "heat_pump_backup": "Separate",
-    "heating_system_2": "Stove, 60% Efficiency",
+    "hvac_heat_pump_backup": "Separate",
+    "hvac_heating_system_2": "Stove, 60% Efficiency",
     "heating_system_2_fuel": "fuel oil",
     "heating_system_2_heating_capacity": 60000
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "geothermal_loop": "Vertical Loop, Lopsided U Borefield, Detailed",
+    "hvac_geothermal_loop": "Vertical Loop, Lopsided U Borefield, Detailed",
     "site_soil_type": "Sand, Dry, 0.03 Diffusivity"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_capacity": 0,
     "heat_pump_fraction_heat_load_served": 0,
-    "heat_pump_backup": "None"
+    "hvac_heat_pump_backup": "None"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-heating-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2392,55 +2392,55 @@
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "Mini-Split AC, SEER 19, Ducted"
+    "hvac_cooling_system": "Mini-Split AC, SEER 19, Ducted"
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ductless.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml",
-    "cooling_system": "Mini-Split AC, SEER 19"
+    "hvac_cooling_system": "Mini-Split AC, SEER 19"
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ductless.xml",
-    "cooling_system": "Mini-Split AC, SEER 17, Absolute Detailed Performance",
+    "hvac_cooling_system": "Mini-Split AC, SEER 17, Absolute Detailed Performance",
     "cooling_system_cooling_capacity": 36000,
     "additional_properties": "HeatPump=Midea|HeatPumpAHRICert#=207683365"
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance-autosize.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml",
-    "cooling_system": "Mini-Split AC, SEER 17, Normalized Detailed Performance",
+    "hvac_cooling_system": "Mini-Split AC, SEER 17, Normalized Detailed Performance",
     "cooling_system_cooling_capacity": null
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "None",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0,
-    "heat_pump": "Mini-Split HP, SEER 19, 10 HSPF, Ducted",
+    "hvac_heat_pump": "Mini-Split HP, SEER 19, 10 HSPF, Ducted",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
     "heat_pump_fraction_heat_load_served": 1,
     "heat_pump_fraction_cool_load_served": 1,
-    "heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
-    "heat_pump": "Mini-Split HP, SEER 16.7, 11.3 HSPF, Absolute Detailed Performance",
+    "hvac_heat_pump": "Mini-Split HP, SEER 16.7, 11.3 HSPF, Absolute Detailed Performance",
     "additional_properties": "HeatPump=FUJITSU H-Series|HeatPumpAHRICert#=202537549"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance-autosize.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml",
     "heat_pump_heating_capacity": null,
     "heat_pump_cooling_capacity": null,
-    "heat_pump": "Mini-Split HP, SEER 16.7, 11.3 HSPF, Normalized Detailed Performance"
+    "hvac_heat_pump": "Mini-Split HP, SEER 16.7, 11.3 HSPF, Normalized Detailed Performance"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
     "heat_pump_heating_capacity": 0,
     "heat_pump_fraction_heat_load_served": 0,
-    "heat_pump_backup": "None"
+    "hvac_heat_pump_backup": "None"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-heating-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
@@ -2457,8 +2457,8 @@
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
-    "heat_pump": "Mini-Split HP, SEER 19, 10 HSPF",
-    "heat_pump_backup": "None"
+    "hvac_heat_pump": "Mini-Split HP, SEER 19, 10 HSPF",
+    "hvac_heat_pump_backup": "None"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
@@ -2475,12 +2475,12 @@
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
-    "heat_pump": "Mini-Split HP, SEER 17, 10 HSPF, Absolute Detailed Performance",
+    "hvac_heat_pump": "Mini-Split HP, SEER 17, 10 HSPF, Absolute Detailed Performance",
     "additional_properties": "HeatPump=Midea|HeatPumpAHRICert#=207683365"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance-autosize.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml",
-    "heat_pump": "Mini-Split HP, SEER 17, 10 HSPF, Normalized Detailed Performance",
+    "hvac_heat_pump": "Mini-Split HP, SEER 17, 10 HSPF, Normalized Detailed Performance",
     "heat_pump_heating_capacity": null,
     "heat_pump_cooling_capacity": null
   },
@@ -2491,24 +2491,24 @@
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "heat_pump_heating_capacity": 18000,
     "heat_pump_cooling_capacity": 18000,
-    "heat_pump_backup": "Separate",
-    "heating_system_2": "Stove, 60% Efficiency",
+    "hvac_heat_pump_backup": "Separate",
+    "hvac_heating_system_2": "Stove, 60% Efficiency",
     "heating_system_2_fuel": "fuel oil",
     "heating_system_2_heating_capacity": 60000
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml",
-    "heating_system_2": "Electric Resistance",
+    "hvac_heating_system_2": "Electric Resistance",
     "heating_system_2_fuel": "electricity"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml",
-    "heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
     "simulation_control_defrost_model_type": "advanced"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml",
-    "heating_system_2": "Central Furnace, 80% AFUE",
+    "hvac_heating_system_2": "Central Furnace, 80% AFUE",
     "heating_system_2_fuel": "natural gas"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml": {
@@ -2521,16 +2521,16 @@
   },
   "sample_files/base-hvac-none.xml": {
     "parent_hpxml": "sample_files/base-location-honolulu-hi.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "None",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-ptac.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "Packaged Terminal AC, EER 10.7"
+    "hvac_cooling_system": "Packaged Terminal AC, EER 10.7"
   },
   "sample_files/base-hvac-ptac-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
@@ -2538,20 +2538,20 @@
   },
   "sample_files/base-hvac-ptac-with-heating-electricity.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
-    "cooling_system": "Packaged Terminal AC, EER 10.7, Electric Resistance Heating",
+    "hvac_cooling_system": "Packaged Terminal AC, EER 10.7, Electric Resistance Heating",
     "cooling_system_integrated_heating_system_capacity": 36000,
     "cooling_system_integrated_heating_system_fraction_heat_load_served": 1
   },
   "sample_files/base-hvac-ptac-with-heating-natural-gas.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
-    "cooling_system": "Packaged Terminal AC, EER 10.7, 80% AFUE Gas Heating",
+    "hvac_cooling_system": "Packaged Terminal AC, EER 10.7, 80% AFUE Gas Heating",
     "cooling_system_integrated_heating_system_capacity": 36000,
     "cooling_system_integrated_heating_system_fraction_heat_load_served": 1
   },
   "sample_files/base-hvac-pthp.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "heat_pump": "Packaged Terminal HP, EER 11.4, COP 3.6",
-    "heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
+    "hvac_heat_pump": "Packaged Terminal HP, EER 11.4, COP 3.6",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
     "heat_pump_backup_heating_capacity": 36000
   },
   "sample_files/base-hvac-pthp-cfis.xml": {
@@ -2563,9 +2563,9 @@
   },
   "sample_files/base-hvac-room-ac-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "None",
+    "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0,
-    "cooling_system": "Room AC, EER 8.5"
+    "hvac_cooling_system": "Room AC, EER 8.5"
   },
   "sample_files/base-hvac-room-ac-only-33percent.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
@@ -2574,17 +2574,17 @@
   },
   "sample_files/base-hvac-room-ac-only-ceer.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
-    "cooling_system": "Room AC, CEER 8.4"
+    "hvac_cooling_system": "Room AC, CEER 8.4"
   },
   "sample_files/base-hvac-room-ac-with-heating.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
-    "cooling_system": "Room AC, EER 8.5, Electric Resistance Heating",
+    "hvac_cooling_system": "Room AC, EER 8.5, Electric Resistance Heating",
     "cooling_system_integrated_heating_system_capacity": 36000,
     "cooling_system_integrated_heating_system_fraction_heat_load_served": 1
   },
   "sample_files/base-hvac-room-ac-with-reverse-cycle.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml",
-    "heat_pump": "Room AC w/ Reverse Cycle, EER 11.4, COP 3.6"
+    "hvac_heat_pump": "Room AC w/ Reverse Cycle, EER 11.4, COP 3.6"
   },
   "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
@@ -2621,15 +2621,15 @@
   },
   "sample_files/base-hvac-space-heater-gas-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "heating_system": "Space Heater, 100% Efficiency",
-    "cooling_system": "None",
+    "hvac_heating_system": "Space Heater, 100% Efficiency",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-stove-oil-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_fuel": "fuel oil",
-    "heating_system": "Stove, 80% Efficiency",
-    "cooling_system": "None",
+    "hvac_heating_system": "Stove, 80% Efficiency",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-stove-wood-pellets-only.xml": {
@@ -2640,13 +2640,13 @@
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_heating_capacity": 3600,
     "cooling_system_cooling_capacity": 2400,
-    "ducts": "2 CFM25 per 100ft2, R-4"
+    "hvac_ducts": "2 CFM25 per 100ft2, R-4"
   },
   "sample_files/base-hvac-wall-furnace-elec-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_fuel": "electricity",
-    "heating_system": "Wall Furnace, 98% AFUE",
-    "cooling_system": "None",
+    "hvac_heating_system": "Wall Furnace, 98% AFUE",
+    "hvac_cooling_system": "None",
     "cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-lighting-ceiling-fans.xml": {
@@ -2836,7 +2836,7 @@
   },
   "sample_files/base-mechvent-multiple.xml": {
     "parent_hpxml": "sample_files/base-mechvent-bath-kitchen-fans.xml",
-    "ducts": "2 CFM25 per 100ft2, R-4"
+    "hvac_ducts": "2 CFM25 per 100ft2, R-4"
   },
   "sample_files/base-mechvent-supply.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2901,8 +2901,8 @@
     "site_iecc_zone": null,
     "site_state_code": null,
     "geometry_unit_num_bathrooms": null,
-    "roof_material": null,
-    "wall_siding": null,
+    "enclosure_roof_material": null,
+    "enclosure_wall_siding": null,
     "window_fraction_operable": null,
     "window_interior_shading_winter": null,
     "window_interior_shading_summer": null,
@@ -3101,22 +3101,22 @@
     "parent_hpxml": "sample_files/base.xml",
     "whole_sfa_or_mf_building_sim": true,
     "geometry_unit_type": "apartment unit",
-    "geometry_unit_right_wall_is_adiabatic": true,
+    "geometry_attached_walls": "1 Side: Right",
     "geometry_unit_cfa": 1200,
     "geometry_unit_aspect_ratio": 0.75,
     "geometry_building_num_units": 6,
     "floor_over_foundation_assembly_r": 22.84,
     "air_leakage_type": "unit exterior only",
-    "air_leakage": "0.375 nACH",
+    "enclosure_air_leakage": "0.375 nACH",
     "window_area_or_wwr_front": 0.18,
     "window_area_or_wwr_back": 0.18,
     "window_area_or_wwr_left": 0.18,
     "window_area_or_wwr_right": 0.18,
     "door_area": 20,
-    "cooling_system": "Room AC, EER 8.5",
+    "hvac_cooling_system": "Room AC, EER 8.5",
     "cooling_system_cooling_capacity": 12000,
     "heating_system_fuel": "electricity",
-    "heating_system": "Electric Resistance",
+    "hvac_heating_system": "Electric Resistance",
     "heating_system_heating_capacity": 12000,
     "clothes_dryer_present": false
   },
@@ -3382,6 +3382,6 @@
     "heating_system_fraction_heat_load_served": 0.5,
     "cooling_system_cooling_capacity": 12000,
     "cooling_system_fraction_cool_load_served": 0.5,
-    "ducts": "4 CFM25 per 100ft2, R-4"
+    "hvac_ducts": "4 CFM25 per 100ft2, R-4"
   }
 }

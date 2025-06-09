@@ -664,10 +664,10 @@ module Geometry
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
-  # @param geometry_unit_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
-  # @param geometry_unit_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
-  # @param geometry_unit_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
-  # @param geometry_unit_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
+  # @param geometry_attached_walls_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
+  # @param geometry_attached_walls_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
+  # @param geometry_attached_walls_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
+  # @param geometry_attached_walls_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
   # @return [Boolean] true if model is successfully updated with a single-family attached unit
   def self.create_single_family_attached(model,
                                          geometry_unit_cfa:,
@@ -680,10 +680,10 @@ module Geometry
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
-                                         geometry_unit_left_wall_is_adiabatic:,
-                                         geometry_unit_right_wall_is_adiabatic:,
-                                         geometry_unit_front_wall_is_adiabatic:,
-                                         geometry_unit_back_wall_is_adiabatic:,
+                                         geometry_attached_walls_left_wall_is_adiabatic:,
+                                         geometry_attached_walls_right_wall_is_adiabatic:,
+                                         geometry_attached_walls_front_wall_is_adiabatic:,
+                                         geometry_attached_walls_back_wall_is_adiabatic:,
                                          **)
 
     cfa = geometry_unit_cfa
@@ -699,10 +699,10 @@ module Geometry
     end
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch
-    adiabatic_left_wall = geometry_unit_left_wall_is_adiabatic
-    adiabatic_right_wall = geometry_unit_right_wall_is_adiabatic
-    adiabatic_front_wall = geometry_unit_front_wall_is_adiabatic
-    adiabatic_back_wall = geometry_unit_back_wall_is_adiabatic
+    adiabatic_left_wall = geometry_attached_walls_left_wall_is_adiabatic
+    adiabatic_right_wall = geometry_attached_walls_right_wall_is_adiabatic
+    adiabatic_front_wall = geometry_attached_walls_front_wall_is_adiabatic
+    adiabatic_back_wall = geometry_attached_walls_back_wall_is_adiabatic
 
     # Convert to SI
     cfa = UnitConversions.convert(cfa, 'ft^2', 'm^2')
@@ -966,10 +966,10 @@ module Geometry
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
-  # @param geometry_unit_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
-  # @param geometry_unit_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
-  # @param geometry_unit_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
-  # @param geometry_unit_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
+  # @param geometry_attached_walls_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
+  # @param geometry_attached_walls_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
+  # @param geometry_attached_walls_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
+  # @param geometry_attached_walls_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
   # @return [Boolean] true if model is successfully updated with an apartment unit
   def self.create_apartment(model,
                             geometry_unit_cfa:,
@@ -982,10 +982,10 @@ module Geometry
                             geometry_attic_type:,
                             geometry_roof_type:,
                             geometry_roof_pitch:,
-                            geometry_unit_left_wall_is_adiabatic:,
-                            geometry_unit_right_wall_is_adiabatic:,
-                            geometry_unit_front_wall_is_adiabatic:,
-                            geometry_unit_back_wall_is_adiabatic:,
+                            geometry_attached_walls_left_wall_is_adiabatic:,
+                            geometry_attached_walls_right_wall_is_adiabatic:,
+                            geometry_attached_walls_front_wall_is_adiabatic:,
+                            geometry_attached_walls_back_wall_is_adiabatic:,
                             **)
 
     cfa = geometry_unit_cfa
@@ -998,10 +998,10 @@ module Geometry
     attic_type = geometry_attic_type
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch
-    adiabatic_left_wall = geometry_unit_left_wall_is_adiabatic
-    adiabatic_right_wall = geometry_unit_right_wall_is_adiabatic
-    adiabatic_front_wall = geometry_unit_front_wall_is_adiabatic
-    adiabatic_back_wall = geometry_unit_back_wall_is_adiabatic
+    adiabatic_left_wall = geometry_attached_walls_left_wall_is_adiabatic
+    adiabatic_right_wall = geometry_attached_walls_right_wall_is_adiabatic
+    adiabatic_front_wall = geometry_attached_walls_front_wall_is_adiabatic
+    adiabatic_back_wall = geometry_attached_walls_back_wall_is_adiabatic
 
     if foundation_type == HPXML::FoundationTypeAboveApartment
       foundation_type = HPXML::LocationOtherHousingUnit

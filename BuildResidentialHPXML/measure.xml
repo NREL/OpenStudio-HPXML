@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>0017b1a3-fa27-4383-81bb-175b24be960e</version_id>
-  <version_modified>2025-06-06T21:58:28Z</version_modified>
+  <version_id>a83fd5aa-145d-4ed1-86fd-dc2d6d360764</version_id>
+  <version_modified>2025-06-09T19:01:06Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -769,78 +769,73 @@
       </choices>
     </argument>
     <argument>
-      <name>geometry_unit_left_wall_is_adiabatic</name>
-      <display_name>Geometry: Unit Left Wall Is Adiabatic</display_name>
-      <description>Presence of an adiabatic left wall.</description>
-      <type>Boolean</type>
+      <name>geometry_attached_walls</name>
+      <display_name>Geometry: Unit Attached Walls</display_name>
+      <description>The location of the attached walls if a dwelling unit of type 'single-family attached' or 'apartment unit'.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
+      <default_value>None</default_value>
       <choices>
         <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>None</value>
+          <display_name>None</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>geometry_unit_right_wall_is_adiabatic</name>
-      <display_name>Geometry: Unit Right Wall Is Adiabatic</display_name>
-      <description>Presence of an adiabatic right wall.</description>
-      <type>Boolean</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>1 Side: Front</value>
+          <display_name>1 Side: Front</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>geometry_unit_front_wall_is_adiabatic</name>
-      <display_name>Geometry: Unit Front Wall Is Adiabatic</display_name>
-      <description>Presence of an adiabatic front wall, for example, the unit is adjacent to a conditioned corridor.</description>
-      <type>Boolean</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>1 Side: Back</value>
+          <display_name>1 Side: Back</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>geometry_unit_back_wall_is_adiabatic</name>
-      <display_name>Geometry: Unit Back Wall Is Adiabatic</display_name>
-      <description>Presence of an adiabatic back wall.</description>
-      <type>Boolean</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>1 Side: Left</value>
+          <display_name>1 Side: Left</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
+          <value>1 Side: Right</value>
+          <display_name>1 Side: Right</display_name>
+        </choice>
+        <choice>
+          <value>2 Sides: Front, Left</value>
+          <display_name>2 Sides: Front, Left</display_name>
+        </choice>
+        <choice>
+          <value>2 Sides: Front, Right</value>
+          <display_name>2 Sides: Front, Right</display_name>
+        </choice>
+        <choice>
+          <value>2 Sides: Back, Left</value>
+          <display_name>2 Sides: Back, Left</display_name>
+        </choice>
+        <choice>
+          <value>2 Sides: Back, Right</value>
+          <display_name>2 Sides: Back, Right</display_name>
+        </choice>
+        <choice>
+          <value>2 Sides: Front, Back</value>
+          <display_name>2 Sides: Front, Back</display_name>
+        </choice>
+        <choice>
+          <value>2 Sides: Left, Right</value>
+          <display_name>2 Sides: Left, Right</display_name>
+        </choice>
+        <choice>
+          <value>3 Sides: Front, Back, Left</value>
+          <display_name>3 Sides: Front, Back, Left</display_name>
+        </choice>
+        <choice>
+          <value>3 Sides: Front, Back, Right</value>
+          <display_name>3 Sides: Front, Back, Right</display_name>
+        </choice>
+        <choice>
+          <value>3 Sides: Front, Left, Right</value>
+          <display_name>3 Sides: Front, Left, Right</display_name>
+        </choice>
+        <choice>
+          <value>3 Sides: Back, Left, Right</value>
+          <display_name>3 Sides: Back, Left, Right</display_name>
         </choice>
       </choices>
     </argument>
@@ -1314,7 +1309,7 @@
       </choices>
     </argument>
     <argument>
-      <name>foundation_wall</name>
+      <name>enclosure_foundation_wall</name>
       <display_name>Enclosure: Foundation Wall</display_name>
       <description>The type of foundation wall.</description>
       <type>Choice</type>
@@ -1386,8 +1381,8 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>slab</name>
-      <display_name>Slab</display_name>
+      <name>enclosure_slab</name>
+      <display_name>Enclosure: Slab</display_name>
       <description>The type of slab. Applies to slab-on-grade and basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.</description>
       <type>Choice</type>
       <required>false</required>
@@ -1489,9 +1484,9 @@
       </choices>
     </argument>
     <argument>
-      <name>slab_carpet</name>
-      <display_name>Slab: Carpet</display_name>
-      <description>The fraction of the slab floor area that is carpeted and the carpet R-value.</description>
+      <name>enclosure_slab_carpet</name>
+      <display_name>Enclosure: Slab Carpet</display_name>
+      <description>The amount of slab floor area that is carpeted.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1541,7 +1536,7 @@
       <default_value>31.6</default_value>
     </argument>
     <argument>
-      <name>roof_material</name>
+      <name>enclosure_roof_material</name>
       <display_name>Enclosure: Roof Material</display_name>
       <description>The material type/color of the roof. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'&gt;HPXML Roofs&lt;/a&gt;) is used.</description>
       <type>Choice</type>
@@ -1844,7 +1839,7 @@
       </choices>
     </argument>
     <argument>
-      <name>wall_siding</name>
+      <name>enclosure_wall_siding</name>
       <display_name>Enclosure: Wall Siding</display_name>
       <description>The siding type/color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-walls'&gt;HPXML Walls&lt;/a&gt;) is used.</description>
       <type>Choice</type>
@@ -2530,9 +2525,9 @@
       <default_value>4.4</default_value>
     </argument>
     <argument>
-      <name>air_leakage</name>
-      <display_name>Air Leakage</display_name>
-      <description>The Leakiness Description (qualitative), or numeric air leakage value (ACH or CFM at specified pressure, nACH or nCFM, or ELA). When a leakiness description is used, the Year Built of the home is also required.</description>
+      <name>enclosure_air_leakage</name>
+      <display_name>Enclosure: Air Leakage</display_name>
+      <description>The amount of air leakage. When a leakiness description is used, the Year Built of the home is also required.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -2752,9 +2747,9 @@
       </choices>
     </argument>
     <argument>
-      <name>heating_system</name>
-      <display_name>Heating System</display_name>
-      <description>The heating system type/efficiency. Efficiency is Rated AFUE or Percent as a Fraction. Use 'none' if there is no heating system or if there is a heat pump serving a heating load.</description>
+      <name>hvac_heating_system</name>
+      <display_name>HVAC: Heating System</display_name>
+      <description>The heating system type/efficiency. Use 'None' if there is no heating system or if there is a heat pump serving a heating load.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3069,9 +3064,9 @@
       <default_value>1</default_value>
     </argument>
     <argument>
-      <name>cooling_system</name>
-      <display_name>Cooling System</display_name>
-      <description>The cooling system type, efficiency type, and efficiency. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.</description>
+      <name>hvac_cooling_system</name>
+      <display_name>HVAC: Cooling System</display_name>
+      <description>The cooling system type/efficiency. Use 'None' if there is no cooling system or if there is a heat pump serving a cooling load.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3282,8 +3277,8 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>heat_pump</name>
-      <display_name>Heat Pump</display_name>
+      <name>hvac_heat_pump</name>
+      <display_name>HVAC: Heat Pump</display_name>
       <description>The heat pump type/efficiency.</description>
       <type>Choice</type>
       <required>true</required>
@@ -3621,9 +3616,9 @@
       <default_value>1</default_value>
     </argument>
     <argument>
-      <name>heat_pump_backup</name>
-      <display_name>Heat Pump: Backup Type</display_name>
-      <description>The type, fuel type, and efficiency of the heat pump backup. Use 'none' if there is no backup heating. If Backup Type is 'separate', Heating System 2 is used to specify the backup.</description>
+      <name>hvac_heat_pump_backup</name>
+      <display_name>HVAC: Heat Pump Backup Type</display_name>
+      <description>The heat pump backup type/efficiency. Use 'None' if there is no backup heating. If Backup Type is 'separate', Heating System 2 is used to specify the backup.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3782,9 +3777,9 @@
       </choices>
     </argument>
     <argument>
-      <name>geothermal_loop</name>
-      <display_name>Geothermal Loop</display_name>
-      <description>The geothermal loop configuration (only vertical is currently supported), borefield configuration, grout/pipe type, and other numerical inputs that specify a detailed geothermal loop.</description>
+      <name>hvac_geothermal_loop</name>
+      <display_name>HVAC: Geothermal Loop</display_name>
+      <description>The geothermal loop configuration if there's a ground-to-air heat pump.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -3840,9 +3835,9 @@
       </choices>
     </argument>
     <argument>
-      <name>heating_system_2</name>
-      <display_name>Heating System 2</display_name>
-      <description>The type/efficiency of the second heating system. Efficiency is Rated AFUE or Percent as a Fraction. If a heat pump is specified and the backup type is 'separate', this heating system represents 'separate' backup heating.</description>
+      <name>hvac_heating_system_2</name>
+      <display_name>HVAC: Heating System 2</display_name>
+      <description>The type/efficiency of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents the 'separate' backup heating.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -4342,8 +4337,8 @@
       </choices>
     </argument>
     <argument>
-      <name>ducts</name>
-      <display_name>Ducts</display_name>
+      <name>hvac_ducts</name>
+      <display_name>HVAC: Ducts</display_name>
       <description>The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.</description>
       <type>Choice</type>
       <required>true</required>
@@ -8843,7 +8838,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>801D6C79</checksum>
+      <checksum>A4A1D140</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -8860,7 +8855,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7DA94E39</checksum>
+      <checksum>F5989522</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -8872,13 +8867,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AD07B4F9</checksum>
-    </file>
-    <file>
-      <filename>options/air_leakage.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8FD1C6A2</checksum>
+      <checksum>F605941C</checksum>
     </file>
     <file>
       <filename>options/battery.tsv</filename>
@@ -8887,49 +8876,91 @@
       <checksum>B4AB147E</checksum>
     </file>
     <file>
-      <filename>options/cooling_system.tsv</filename>
+      <filename>options/enclosure_air_leakage.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A4B04136</checksum>
+      <checksum>8FD1C6A2</checksum>
     </file>
     <file>
-      <filename>options/ducts.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A9036BDA</checksum>
-    </file>
-    <file>
-      <filename>options/foundation_wall.tsv</filename>
+      <filename>options/enclosure_foundation_wall.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>40D242F8</checksum>
     </file>
     <file>
-      <filename>options/geothermal_loop.tsv</filename>
+      <filename>options/enclosure_roof_material.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>589A63D3</checksum>
+    </file>
+    <file>
+      <filename>options/enclosure_slab.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9792E3B7</checksum>
+    </file>
+    <file>
+      <filename>options/enclosure_slab_carpet.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0D77B1A0</checksum>
+    </file>
+    <file>
+      <filename>options/enclosure_wall_siding.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D86ECF8A</checksum>
+    </file>
+    <file>
+      <filename>options/geometry_attached_walls.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2395913B</checksum>
+    </file>
+    <file>
+      <filename>options/geometry_neighbor_buildings.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>267E466D</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_cooling_system.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A4B04136</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_ducts.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A9036BDA</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_geothermal_loop.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>06B6E3F3</checksum>
     </file>
     <file>
-      <filename>options/heat_pump.tsv</filename>
+      <filename>options/hvac_heat_pump.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>62CAE12B</checksum>
     </file>
     <file>
-      <filename>options/heat_pump_backup.tsv</filename>
+      <filename>options/hvac_heat_pump_backup.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>E02724BE</checksum>
     </file>
     <file>
-      <filename>options/heating_system.tsv</filename>
+      <filename>options/hvac_heating_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>5F77DA59</checksum>
     </file>
     <file>
-      <filename>options/heating_system_2.tsv</filename>
+      <filename>options/hvac_heating_system_2.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>5F77DA59</checksum>
@@ -8953,12 +8984,6 @@
       <checksum>73C0AC95</checksum>
     </file>
     <file>
-      <filename>options/neighbor_buildings.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>267E466D</checksum>
-    </file>
-    <file>
       <filename>options/pv_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -8971,34 +8996,10 @@
       <checksum>61C120ED</checksum>
     </file>
     <file>
-      <filename>options/roof_material.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>589A63D3</checksum>
-    </file>
-    <file>
       <filename>options/site_soil_type.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>90838051</checksum>
-    </file>
-    <file>
-      <filename>options/slab.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9792E3B7</checksum>
-    </file>
-    <file>
-      <filename>options/slab_carpet.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0D77B1A0</checksum>
-    </file>
-    <file>
-      <filename>options/wall_siding.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D86ECF8A</checksum>
     </file>
     <file>
       <filename>options.rb</filename>
@@ -9016,7 +9017,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>28E67CD8</checksum>
+      <checksum>D4F0DA97</checksum>
     </file>
   </files>
 </measure>

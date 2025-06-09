@@ -417,47 +417,16 @@ The type of dwelling unit. Use single-family attached for a dwelling unit with 1
 
 <br/>
 
-**Geometry: Unit Left Wall Is Adiabatic**
+**Geometry: Unit Attached Walls**
 
-Presence of an adiabatic left wall.
+The location of the attached walls if a dwelling unit of type 'single-family attached' or 'apartment unit'.
 
-- **Name:** ``geometry_unit_left_wall_is_adiabatic``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geometry: Unit Right Wall Is Adiabatic**
-
-Presence of an adiabatic right wall.
-
-- **Name:** ``geometry_unit_right_wall_is_adiabatic``
-- **Type:** ``Boolean``
+- **Name:** ``geometry_attached_walls``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Geometry: Unit Front Wall Is Adiabatic**
-
-Presence of an adiabatic front wall, for example, the unit is adjacent to a conditioned corridor.
-
-- **Name:** ``geometry_unit_front_wall_is_adiabatic``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Geometry: Unit Back Wall Is Adiabatic**
-
-Presence of an adiabatic back wall.
-
-- **Name:** ``geometry_unit_back_wall_is_adiabatic``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
+- **Choices:** `None`, `1 Side: Front`, `1 Side: Back`, `1 Side: Left`, `1 Side: Right`, `2 Sides: Front, Left`, `2 Sides: Front, Right`, `2 Sides: Back, Left`, `2 Sides: Back, Right`, `2 Sides: Front, Back`, `2 Sides: Left, Right`, `3 Sides: Front, Back, Left`, `3 Sides: Front, Back, Right`, `3 Sides: Front, Left, Right`, `3 Sides: Back, Left, Right`
 
 <br/>
 
@@ -803,7 +772,7 @@ The type of floors.
 
 The type of foundation wall.
 
-- **Name:** ``foundation_wall``
+- **Name:** ``enclosure_foundation_wall``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
@@ -825,11 +794,11 @@ Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Requ
 
 <br/>
 
-**Slab**
+**Enclosure: Slab**
 
 The type of slab. Applies to slab-on-grade and basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.
 
-- **Name:** ``slab``
+- **Name:** ``enclosure_slab``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -838,11 +807,11 @@ The type of slab. Applies to slab-on-grade and basement/crawlspace foundations. 
 
 <br/>
 
-**Slab: Carpet**
+**Enclosure: Slab Carpet**
 
-The fraction of the slab floor area that is carpeted and the carpet R-value.
+The amount of slab floor area that is carpeted.
 
-- **Name:** ``slab_carpet``
+- **Name:** ``enclosure_slab_carpet``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -868,7 +837,7 @@ Assembly R-value for the ceiling (attic floor).
 
 The material type/color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
 
-- **Name:** ``roof_material``
+- **Name:** ``enclosure_roof_material``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -933,7 +902,7 @@ The type of walls.
 
 The siding type/color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-walls'>HPXML Walls</a>) is used.
 
-- **Name:** ``wall_siding``
+- **Name:** ``enclosure_wall_siding``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1443,11 +1412,11 @@ R-value of the opaque door(s).
 
 <br/>
 
-**Air Leakage**
+**Enclosure: Air Leakage**
 
-The Leakiness Description (qualitative), or numeric air leakage value (ACH or CFM at specified pressure, nACH or nCFM, or ELA). When a leakiness description is used, the Year Built of the home is also required.
+The amount of air leakage. When a leakiness description is used, the Year Built of the home is also required.
 
-- **Name:** ``air_leakage``
+- **Name:** ``enclosure_air_leakage``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1480,11 +1449,11 @@ Presence of flue or chimney with combustion air from conditioned space; used for
 
 <br/>
 
-**Heating System**
+**HVAC: Heating System**
 
-The heating system type/efficiency. Efficiency is Rated AFUE or Percent as a Fraction. Use 'none' if there is no heating system or if there is a heat pump serving a heating load.
+The heating system type/efficiency. Use 'None' if there is no heating system or if there is a heat pump serving a heating load.
 
-- **Name:** ``heating_system``
+- **Name:** ``hvac_heating_system``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
@@ -1556,11 +1525,11 @@ The heating load served by the heating system.
 
 <br/>
 
-**Cooling System**
+**HVAC: Cooling System**
 
-The cooling system type, efficiency type, and efficiency. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.
+The cooling system type/efficiency. Use 'None' if there is no cooling system or if there is a heat pump serving a cooling load.
 
-- **Name:** ``cooling_system``
+- **Name:** ``hvac_cooling_system``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
@@ -1645,11 +1614,11 @@ The heating load served by the heating system integrated into cooling system. On
 
 <br/>
 
-**Heat Pump**
+**HVAC: Heat Pump**
 
 The heat pump type/efficiency.
 
-- **Name:** ``heat_pump``
+- **Name:** ``hvac_heat_pump``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
@@ -1758,11 +1727,11 @@ The cooling load served by the heat pump.
 
 <br/>
 
-**Heat Pump: Backup Type**
+**HVAC: Heat Pump Backup Type**
 
-The type, fuel type, and efficiency of the heat pump backup. Use 'none' if there is no backup heating. If Backup Type is 'separate', Heating System 2 is used to specify the backup.
+The heat pump backup type/efficiency. Use 'None' if there is no backup heating. If Backup Type is 'separate', Heating System 2 is used to specify the backup.
 
-- **Name:** ``heat_pump_backup``
+- **Name:** ``hvac_heat_pump_backup``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
@@ -1834,11 +1803,11 @@ The auto-sizing methodology to use when the heat pump backup capacity is not pro
 
 <br/>
 
-**Geothermal Loop**
+**HVAC: Geothermal Loop**
 
-The geothermal loop configuration (only vertical is currently supported), borefield configuration, grout/pipe type, and other numerical inputs that specify a detailed geothermal loop.
+The geothermal loop configuration if there's a ground-to-air heat pump.
 
-- **Name:** ``geothermal_loop``
+- **Name:** ``hvac_geothermal_loop``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1847,11 +1816,11 @@ The geothermal loop configuration (only vertical is currently supported), borefi
 
 <br/>
 
-**Heating System 2**
+**HVAC: Heating System 2**
 
-The type/efficiency of the second heating system. Efficiency is Rated AFUE or Percent as a Fraction. If a heat pump is specified and the backup type is 'separate', this heating system represents 'separate' backup heating.
+The type/efficiency of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents the 'separate' backup heating.
 
-- **Name:** ``heating_system_2``
+- **Name:** ``hvac_heating_system_2``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
@@ -2015,11 +1984,11 @@ Specifies whether the HVAC system has airflow and/or refrigerant charge installa
 
 <br/>
 
-**Ducts**
+**HVAC: Ducts**
 
 The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.
 
-- **Name:** ``ducts``
+- **Name:** ``hvac_ducts``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
