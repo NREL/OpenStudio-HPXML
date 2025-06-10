@@ -255,9 +255,9 @@
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
             <Overhangs>
-              <Depth>2.5</Depth>
-              <DistanceToTopOfWindow>0.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.0</DistanceToBottomOfWindow>
+              <Depth>1.5</Depth>
+              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>6.0</DistanceToBottomOfWindow>
             </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
@@ -314,7 +314,7 @@
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>7.0</DistanceToBottomOfWindow>
+              <DistanceToBottomOfWindow>6.0</DistanceToBottomOfWindow>
             </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>

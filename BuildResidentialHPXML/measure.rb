@@ -709,88 +709,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The type of storm, if present. If not provided, assumes there is no storm.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_depth', true)
-    arg.setDisplayName('Overhangs: Front Depth')
-    arg.setUnits('ft')
-    arg.setDescription('The depth of overhangs for windows for the front facade.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_distance_to_top_of_window', true)
-    arg.setDisplayName('Overhangs: Front Distance to Top of Window')
-    arg.setUnits('ft')
-    arg.setDescription('The overhangs distance to the top of window for the front facade.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_front_distance_to_bottom_of_window', true)
-    arg.setDisplayName('Overhangs: Front Distance to Bottom of Window')
-    arg.setUnits('ft')
-    arg.setDescription('The overhangs distance to the bottom of window for the front facade.')
-    arg.setDefaultValue(4)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_back_depth', true)
-    arg.setDisplayName('Overhangs: Back Depth')
-    arg.setUnits('ft')
-    arg.setDescription('The depth of overhangs for windows for the back facade.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_back_distance_to_top_of_window', true)
-    arg.setDisplayName('Overhangs: Back Distance to Top of Window')
-    arg.setUnits('ft')
-    arg.setDescription('The overhangs distance to the top of window for the back facade.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_back_distance_to_bottom_of_window', true)
-    arg.setDisplayName('Overhangs: Back Distance to Bottom of Window')
-    arg.setUnits('ft')
-    arg.setDescription('The overhangs distance to the bottom of window for the back facade.')
-    arg.setDefaultValue(4)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_left_depth', true)
-    arg.setDisplayName('Overhangs: Left Depth')
-    arg.setUnits('ft')
-    arg.setDescription('The depth of overhangs for windows for the left facade.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_left_distance_to_top_of_window', true)
-    arg.setDisplayName('Overhangs: Left Distance to Top of Window')
-    arg.setUnits('ft')
-    arg.setDescription('The overhangs distance to the top of window for the left facade.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_left_distance_to_bottom_of_window', true)
-    arg.setDisplayName('Overhangs: Left Distance to Bottom of Window')
-    arg.setUnits('ft')
-    arg.setDescription('The overhangs distance to the bottom of window for the left facade.')
-    arg.setDefaultValue(4)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_right_depth', true)
-    arg.setDisplayName('Overhangs: Right Depth')
-    arg.setUnits('ft')
-    arg.setDescription('The depth of overhangs for windows for the right facade.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_right_distance_to_top_of_window', true)
-    arg.setDisplayName('Overhangs: Right Distance to Top of Window')
-    arg.setUnits('ft')
-    arg.setDescription('The overhangs distance to the top of window for the right facade.')
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('overhangs_right_distance_to_bottom_of_window', true)
-    arg.setDisplayName('Overhangs: Right Distance to Bottom of Window')
-    arg.setUnits('ft')
-    arg.setDescription('The overhangs distance to the bottom of window for the right facade.')
-    arg.setDefaultValue(4)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_overhangs', choices[:enclosure_overhangs], false)
+    arg.setDisplayName('Enclosure: Window Overhangs')
+    arg.setDescription('The type of window overhangs.')
+    arg.setDefaultValue(choices[:enclosure_overhangs][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_front', true)
@@ -974,13 +896,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heat_pump_backup', choices[:hvac_heat_pump_backup], true)
     arg.setDisplayName('HVAC: Heat Pump Backup Type')
-    arg.setDescription("The heat pump backup type/efficiency. Use 'None' if there is no backup heating. If Backup Type is '#{HPXML::HeatPumpBackupTypeSeparate}', Heating System 2 is used to specify the backup.")
+    arg.setDescription("The heat pump backup type/efficiency. Use 'None' if there is no backup heating. If Backup Type is Separate Heating System, Heating System 2 is used to specify the backup.")
     arg.setDefaultValue('Integrated, Electricity, 100% Efficiency')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_capacity_heat_pump_backup', choices[:hvac_capacity_heat_pump_backup], false)
     arg.setDisplayName('HVAC: Heat Pump Backup Capacity')
-    arg.setDescription("The output capacity of the heat pump backup if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'.")
+    arg.setDescription('The output capacity of the heat pump backup if there is integrated backup heating.')
     arg.setDefaultValue(choices[:hvac_capacity_heat_pump_backup][0])
     args << arg
 
@@ -4466,22 +4388,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       sub_surface_height = Geometry.get_surface_height(sub_surface)
       sub_surface_facade = Geometry.get_surface_facade(sub_surface)
 
-      if (sub_surface_facade == Constants::FacadeFront) && ((args[:overhangs_front_depth] > 0) || args[:overhangs_front_distance_to_top_of_window] > 0)
-        overhangs_depth = args[:overhangs_front_depth]
-        overhangs_distance_to_top_of_window = args[:overhangs_front_distance_to_top_of_window]
-        overhangs_distance_to_bottom_of_window = args[:overhangs_front_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeBack) && ((args[:overhangs_back_depth] > 0) || args[:overhangs_back_distance_to_top_of_window] > 0)
-        overhangs_depth = args[:overhangs_back_depth]
-        overhangs_distance_to_top_of_window = args[:overhangs_back_distance_to_top_of_window]
-        overhangs_distance_to_bottom_of_window = args[:overhangs_back_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeLeft) && ((args[:overhangs_left_depth] > 0) || args[:overhangs_left_distance_to_top_of_window] > 0)
-        overhangs_depth = args[:overhangs_left_depth]
-        overhangs_distance_to_top_of_window = args[:overhangs_left_distance_to_top_of_window]
-        overhangs_distance_to_bottom_of_window = args[:overhangs_left_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeRight) && ((args[:overhangs_right_depth] > 0) || args[:overhangs_right_distance_to_top_of_window] > 0)
-        overhangs_depth = args[:overhangs_right_depth]
-        overhangs_distance_to_top_of_window = args[:overhangs_right_distance_to_top_of_window]
-        overhangs_distance_to_bottom_of_window = args[:overhangs_right_distance_to_bottom_of_window]
+      if ((sub_surface_facade == Constants::FacadeFront) && (args[:enclosure_overhangs_front_depth].to_f > 0) ||
+          (sub_surface_facade == Constants::FacadeBack) && (args[:enclosure_overhangs_back_depth].to_f > 0) ||
+          (sub_surface_facade == Constants::FacadeLeft) && (args[:enclosure_overhangs_left_depth].to_f > 0) ||
+          (sub_surface_facade == Constants::FacadeRight) && (args[:enclosure_overhangs_right_depth].to_f > 0))
+        # Add window overhangs
+        if sub_surface_facade == Constants::FacadeFront
+          overhangs_depth = args[:enclosure_overhangs_front_depth]
+        elsif sub_surface_facade == Constants::FacadeBack
+          overhangs_depth = args[:enclosure_overhangs_back_depth]
+        elsif sub_surface_facade == Constants::FacadeLeft
+          overhangs_depth = args[:enclosure_overhangs_left_depth]
+        elsif sub_surface_facade == Constants::FacadeRight
+          overhangs_depth = args[:enclosure_overhangs_right_depth]
+        end
+        overhangs_distance_to_top_of_window = args[:enclosure_overhangs_distance_to_top_of_window]
+        overhangs_distance_to_bottom_of_window = args[:enclosure_overhangs_distance_to_bottom_of_window]
       elsif args[:geometry_eaves_depth] > 0
         # Get max z coordinate of eaves
         eaves_z = args[:geometry_average_ceiling_height] * args[:geometry_unit_num_floors_above_grade] + args[:geometry_rim_joist_height]

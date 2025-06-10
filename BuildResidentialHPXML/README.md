@@ -1141,159 +1141,16 @@ The type of storm, if present. If not provided, assumes there is no storm.
 
 <br/>
 
-**Overhangs: Front Depth**
+**Enclosure: Window Overhangs**
 
-The depth of overhangs for windows for the front facade.
+The type of window overhangs.
 
-- **Name:** ``overhangs_front_depth``
-- **Type:** ``Double``
+- **Name:** ``enclosure_overhangs``
+- **Type:** ``Choice``
 
-- **Units:** ``ft``
+- **Required:** ``false``
 
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Front Distance to Top of Window**
-
-The overhangs distance to the top of window for the front facade.
-
-- **Name:** ``overhangs_front_distance_to_top_of_window``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Front Distance to Bottom of Window**
-
-The overhangs distance to the bottom of window for the front facade.
-
-- **Name:** ``overhangs_front_distance_to_bottom_of_window``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Back Depth**
-
-The depth of overhangs for windows for the back facade.
-
-- **Name:** ``overhangs_back_depth``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Back Distance to Top of Window**
-
-The overhangs distance to the top of window for the back facade.
-
-- **Name:** ``overhangs_back_distance_to_top_of_window``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Back Distance to Bottom of Window**
-
-The overhangs distance to the bottom of window for the back facade.
-
-- **Name:** ``overhangs_back_distance_to_bottom_of_window``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Left Depth**
-
-The depth of overhangs for windows for the left facade.
-
-- **Name:** ``overhangs_left_depth``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Left Distance to Top of Window**
-
-The overhangs distance to the top of window for the left facade.
-
-- **Name:** ``overhangs_left_distance_to_top_of_window``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Left Distance to Bottom of Window**
-
-The overhangs distance to the bottom of window for the left facade.
-
-- **Name:** ``overhangs_left_distance_to_bottom_of_window``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Right Depth**
-
-The depth of overhangs for windows for the right facade.
-
-- **Name:** ``overhangs_right_depth``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Right Distance to Top of Window**
-
-The overhangs distance to the top of window for the right facade.
-
-- **Name:** ``overhangs_right_distance_to_top_of_window``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Overhangs: Right Distance to Bottom of Window**
-
-The overhangs distance to the bottom of window for the right facade.
-
-- **Name:** ``overhangs_right_distance_to_bottom_of_window``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
+- **Choices:** `None`, `1ft, All Windows`, `2ft, All Windows`, `3ft, All Windows`, `4ft, All Windows`, `5ft, All Windows`, `10ft, All Windows`, `1ft, Front Windows`, `2ft, Front Windows`, `3ft, Front Windows`, `4ft, Front Windows`, `5ft, Front Windows`, `10ft, Front Windows`, `1ft, Back Windows`, `2ft, Back Windows`, `3ft, Back Windows`, `4ft, Back Windows`, `5ft, Back Windows`, `10ft, Back Windows`, `1ft, Left Windows`, `2ft, Left Windows`, `3ft, Left Windows`, `4ft, Left Windows`, `5ft, Left Windows`, `10ft, Left Windows`, `1ft, Right Windows`, `2ft, Right Windows`, `3ft, Right Windows`, `4ft, Right Windows`, `5ft, Right Windows`, `10ft, Right Windows`, `Detailed Example: 1.5ft, Back/Left/Right Windows, 2ft Offset, 4ft Window Height`, `Detailed Example: 2.5ft, Front Windows, 1ft Offset, 5ft Window Height`
 
 <br/>
 
@@ -1484,7 +1341,7 @@ The output capacity of the heating system.
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit`
+- **Choices:** `Autosize`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 
@@ -1523,7 +1380,7 @@ The output capacity of the cooling system.
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `0.5 tons`, `0.75 tons`, `1.0 tons`, `1.5 tons`, `2.0 tons`, `2.5 tons`, `3.0 tons`, `3.5 tons`, `4.0 tons`, `4.5 tons`, `5.0 tons`, `5.5 tons`, `6.0 tons`, `6.5 tons`, `7.0 tons`, `7.5 tons`, `8.0 tons`, `8.5 tons`, `9.0 tons`, `9.5 tons`, `10.0 tons`, `Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit`
+- **Choices:** `Autosize`, `0.5 tons`, `0.75 tons`, `1.0 tons`, `1.5 tons`, `2.0 tons`, `2.5 tons`, `3.0 tons`, `3.5 tons`, `4.0 tons`, `4.5 tons`, `5.0 tons`, `5.5 tons`, `6.0 tons`, `6.5 tons`, `7.0 tons`, `7.5 tons`, `8.0 tons`, `8.5 tons`, `9.0 tons`, `9.5 tons`, `10.0 tons`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit`
 
 <br/>
 
@@ -1588,7 +1445,7 @@ The output capacity of the heat pump.
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `0.5 tons`, `0.75 tons`, `1.0 tons`, `1.5 tons`, `2.0 tons`, `2.5 tons`, `3.0 tons`, `3.5 tons`, `4.0 tons`, `4.5 tons`, `5.0 tons`, `5.5 tons`, `6.0 tons`, `6.5 tons`, `7.0 tons`, `7.5 tons`, `8.0 tons`, `8.5 tons`, `9.0 tons`, `9.5 tons`, `10.0 tons`, `Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit`
+- **Choices:** `Autosize`, `0.5 tons`, `0.75 tons`, `1.0 tons`, `1.5 tons`, `2.0 tons`, `2.5 tons`, `3.0 tons`, `3.5 tons`, `4.0 tons`, `4.5 tons`, `5.0 tons`, `5.5 tons`, `6.0 tons`, `6.5 tons`, `7.0 tons`, `7.5 tons`, `8.0 tons`, `8.5 tons`, `9.0 tons`, `9.5 tons`, `10.0 tons`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit`
 
 <br/>
 
@@ -1620,7 +1477,7 @@ The cooling load served by the heat pump.
 
 **HVAC: Heat Pump Backup Type**
 
-The heat pump backup type/efficiency. Use 'None' if there is no backup heating. If Backup Type is 'separate', Heating System 2 is used to specify the backup.
+The heat pump backup type/efficiency. Use 'None' if there is no backup heating. If Backup Type is Separate Heating System, Heating System 2 is used to specify the backup.
 
 - **Name:** ``hvac_heat_pump_backup``
 - **Type:** ``Choice``
@@ -1633,14 +1490,14 @@ The heat pump backup type/efficiency. Use 'None' if there is no backup heating. 
 
 **HVAC: Heat Pump Backup Capacity**
 
-The output capacity of the heat pump backup if Backup Type is 'integrated'.
+The output capacity of the heat pump backup if there is integrated backup heating.
 
 - **Name:** ``hvac_capacity_heat_pump_backup``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `5 kW`, `10 kW`, `15 kW`, `20 kW`, `25 kW`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
+- **Choices:** `Autosize`, `5 kW`, `10 kW`, `15 kW`, `20 kW`, `25 kW`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 
@@ -1731,7 +1588,7 @@ The output capacity of the second heating system.
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
+- **Choices:** `Autosize`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 

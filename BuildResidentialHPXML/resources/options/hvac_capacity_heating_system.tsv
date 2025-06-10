@@ -1,7 +1,5 @@
 Option Name	Capacity [Btu/hr]	Autosizing Factor [mult]	Autosizing Limit [Btu/hr]
 Autosize			
-"Autosize, 140% Multiplier"		1.4	
-"Autosize, 170% Multiplier"		1.7	
 5 kBtu/hr	5000		
 10 kBtu/hr	10000		
 15 kBtu/hr	15000		
@@ -32,6 +30,8 @@ Autosize
 140 kBtu/hr	140000		
 145 kBtu/hr	145000		
 150 kBtu/hr	150000		
+"Detailed Example: Autosize, 140% Multiplier"		1.4	
+"Detailed Example: Autosize, 170% Multiplier"		1.7	
 "Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit"		1.4	45000
 			
 Capacity: The output capacity.			

@@ -46,18 +46,7 @@
     "window_shgc": 0.67,
     "window_interior_shading_winter": 1,
     "window_interior_shading_summer": 1,
-    "overhangs_front_depth": 0,
-    "overhangs_front_distance_to_top_of_window": 0,
-    "overhangs_front_distance_to_bottom_of_window": 0,
-    "overhangs_back_depth": 0,
-    "overhangs_back_distance_to_top_of_window": 0,
-    "overhangs_back_distance_to_bottom_of_window": 0,
-    "overhangs_left_depth": 0,
-    "overhangs_left_distance_to_top_of_window": 0,
-    "overhangs_left_distance_to_bottom_of_window": 0,
-    "overhangs_right_depth": 0,
-    "overhangs_right_distance_to_top_of_window": 0,
-    "overhangs_right_distance_to_bottom_of_window": 0,
+    "enclosure_overhangs": "None",
     "skylight_area_front": 0,
     "skylight_area_back": 0,
     "skylight_area_left": 0,
@@ -177,9 +166,7 @@
   },
   "tests/ASHRAE_Standard_140/L155AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L150AC.xml",
-    "overhangs_front_depth": 2.5,
-    "overhangs_front_distance_to_top_of_window": 1,
-    "overhangs_front_distance_to_bottom_of_window": 6
+    "enclosure_overhangs": "Detailed Example: 2.5ft, Front Windows, 1ft Offset, 5ft Window Height"
   },
   "tests/ASHRAE_Standard_140/L160AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -261,9 +248,7 @@
   },
   "tests/ASHRAE_Standard_140/L155AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L150AL.xml",
-    "overhangs_front_depth": 2.5,
-    "overhangs_front_distance_to_top_of_window": 1,
-    "overhangs_front_distance_to_bottom_of_window": 6
+    "enclosure_overhangs": "Detailed Example: 2.5ft, Front Windows, 1ft Offset, 5ft Window Height"
   },
   "tests/ASHRAE_Standard_140/L160AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -539,18 +524,7 @@
     "window_shgc": 0.45,
     "window_interior_shading_winter": 0.85,
     "window_interior_shading_summer": 0.7,
-    "overhangs_front_depth": 0,
-    "overhangs_front_distance_to_top_of_window": 0,
-    "overhangs_front_distance_to_bottom_of_window": 0,
-    "overhangs_back_depth": 0,
-    "overhangs_back_distance_to_top_of_window": 0,
-    "overhangs_back_distance_to_bottom_of_window": 0,
-    "overhangs_left_depth": 0,
-    "overhangs_left_distance_to_top_of_window": 0,
-    "overhangs_left_distance_to_bottom_of_window": 0,
-    "overhangs_right_depth": 0,
-    "overhangs_right_distance_to_top_of_window": 0,
-    "overhangs_right_distance_to_bottom_of_window": 0,
+    "enclosure_overhangs": "None",
     "skylight_area_front": 0,
     "skylight_area_back": 0,
     "skylight_area_left": 0,
@@ -1558,14 +1532,7 @@
   },
   "sample_files/base-enclosure-overhangs.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "overhangs_back_depth": 2.5,
-    "overhangs_back_distance_to_bottom_of_window": 4,
-    "overhangs_left_depth": 1.5,
-    "overhangs_left_distance_to_top_of_window": 2,
-    "overhangs_left_distance_to_bottom_of_window": 7,
-    "overhangs_right_depth": 1.5,
-    "overhangs_right_distance_to_top_of_window": 2,
-    "overhangs_right_distance_to_bottom_of_window": 6
+    "enclosure_overhangs": "Detailed Example: 1.5ft, Back/Left/Right Windows, 2ft Offset, 4ft Window Height"
   },
   "sample_files/base-enclosure-rooftypes.xml": {
     "parent_hpxml": "sample_files/base.xml"

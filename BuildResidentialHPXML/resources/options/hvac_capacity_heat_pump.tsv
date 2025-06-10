@@ -1,7 +1,5 @@
 Option Name	Capacity [Btu/hr]	Autosizing Factor [mult]	Autosizing Limit [Btu/hr]
 Autosize			
-"Autosize, 140% Multiplier"		1.4	
-"Autosize, 170% Multiplier"		1.7	
 0.5 tons	6000		
 0.75 tons	9000		
 1.0 tons	12000		
@@ -23,6 +21,8 @@ Autosize
 9.0 tons	108000		
 9.5 tons	114000		
 10.0 tons	120000		
+"Detailed Example: Autosize, 140% Multiplier"		1.4	
+"Detailed Example: Autosize, 170% Multiplier"		1.7	
 "Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit"		1.7	36000
 			
 Capacity: The output capacity.			
