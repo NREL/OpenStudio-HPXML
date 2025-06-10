@@ -587,19 +587,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['cooking_range_oven_is_induction'] = false
       args['cooking_range_oven_is_convection'] = false
       args['ceiling_fan_present'] = false
-      args['misc_plug_loads_television_present'] = true
-      args['misc_plug_loads_television_annual_kwh'] = 620.0
-      args['misc_plug_loads_other_annual_kwh'] = 2457.0
-      args['misc_plug_loads_other_frac_sensible'] = 0.855
-      args['misc_plug_loads_other_frac_latent'] = 0.045
-      args['misc_plug_loads_well_pump_present'] = false
+      args['misc_plug_loads'] = '100%'
+      args['misc_television'] = '100%'
+      args['misc_well_pump'] = 'None'
       args['misc_plug_loads_vehicle_present'] = false
-      args['misc_fuel_loads_grill_present'] = false
-      args['misc_fuel_loads_grill_fuel_type'] = HPXML::FuelTypeNaturalGas
-      args['misc_fuel_loads_lighting_present'] = false
-      args['misc_fuel_loads_lighting_fuel_type'] = HPXML::FuelTypeNaturalGas
-      args['misc_fuel_loads_fireplace_present'] = false
-      args['misc_fuel_loads_fireplace_fuel_type'] = HPXML::FuelTypeNaturalGas
+      args['misc_grill'] = 'None'
+      args['misc_lighting'] = 'None'
+      args['misc_fireplace'] = 'None'
       args['pool_present'] = false
       args['pool_heater_type'] = HPXML::HeaterTypeElectricResistance
       args['permanent_spa_present'] = false
@@ -888,7 +882,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('geometry_rim_joist_height')
       args['floor_over_foundation_assembly_r'] = 18.7
       args.delete('rim_joist_assembly_r')
-      args['misc_plug_loads_other_annual_kwh'] = 1228.5
     when 'extra-sfa-rear-units.xml'
       args['geometry_building_num_units'] = 4
     when 'extra-sfa-exterior-corridor.xml'
@@ -924,7 +917,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('geometry_rim_joist_height')
       args['floor_over_foundation_assembly_r'] = 18.7
       args.delete('rim_joist_assembly_r')
-      args['misc_plug_loads_other_annual_kwh'] = 1228.5
     when 'extra-mf-rear-units.xml'
       args['geometry_building_num_units'] = 18
     when 'extra-mf-exterior-corridor.xml'

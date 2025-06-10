@@ -1,0 +1,51 @@
+Option Name	Fuel Type	Annual Energy Use [therm/yr]	Usage Multiplier
+None		0	
+"Natural Gas, 25%"	natural gas		0.25
+"Natural Gas, 33%"	natural gas		0.33
+"Natural Gas, 50%"	natural gas		0.5
+"Natural Gas, 67%"	natural gas		0.67
+"Natural Gas, 90%"	natural gas		0.9
+"Natural Gas, 100%"	natural gas		1
+"Natural Gas, 110%"	natural gas		1.1
+"Natural Gas, 150%"	natural gas		1.5
+"Natural Gas, 200%"	natural gas		2
+"Natural Gas, 300%"	natural gas		3
+"Natural Gas, 400%"	natural gas		4
+"Propane, 25%"	propane		0.25
+"Propane, 33%"	propane		0.33
+"Propane, 50%"	propane		0.5
+"Propane, 67%"	propane		0.67
+"Propane, 90%"	propane		0.9
+"Propane, 100%"	propane		1
+"Propane, 110%"	propane		1.1
+"Propane, 150%"	propane		1.5
+"Propane, 200%"	propane		2
+"Propane, 300%"	propane		3
+"Propane, 400%"	propane		4
+"Wood, 25%"	wood		0.25
+"Wood, 33%"	wood		0.33
+"Wood, 50%"	wood		0.5
+"Wood, 67%"	wood		0.67
+"Wood, 90%"	wood		0.9
+"Wood, 100%"	wood		1
+"Wood, 110%"	wood		1.1
+"Wood, 150%"	wood		1.5
+"Wood, 200%"	wood		2
+"Wood, 300%"	wood		3
+"Wood, 400%"	wood		4
+"Electric, 25%"	electricity		0.25
+"Electric, 33%"	electricity		0.33
+"Electric, 50%"	electricity		0.5
+"Electric, 67%"	electricity		0.67
+"Electric, 90%"	electricity		0.9
+"Electric, 100%"	electricity		1
+"Electric, 110%"	electricity		1.1
+"Electric, 150%"	electricity		1.5
+"Electric, 200%"	electricity		2
+"Electric, 300%"	electricity		3
+"Electric, 400%"	electricity		4
+"Detailed Example: Wood, 55 therm/yr"	wood	55	
+			
+Fuel Type: The fuel type of the grill.			
+"Annual Energy Use: The annual energy consumption of the grill. If not provided, the OS-HPXML default is used."			
+"Usage Multiplier: Multiplier on the energy usage that can reflect, e.g., high/low usage occupants."			

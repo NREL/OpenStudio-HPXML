@@ -4079,123 +4079,42 @@ The cooling setpoint temperature offset during months when the ceiling fans are 
 
 <br/>
 
-**Misc Plug Loads: Television Present**
+**Misc: Television**
 
-Whether there are televisions.
+The amount of television usage, relative to the national average.
 
-- **Name:** ``misc_plug_loads_television_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Misc Plug Loads: Television Annual kWh**
-
-The annual energy consumption of the television plug loads. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_television_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Plug Loads: Television Usage Multiplier**
-
-Multiplier on the television energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_television_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Plug Loads: Other Annual kWh**
-
-The annual energy consumption of the other residual plug loads. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_other_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Plug Loads: Other Sensible Fraction**
-
-Fraction of other residual plug loads' internal gains that are sensible. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_other_frac_sensible``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Plug Loads: Other Latent Fraction**
-
-Fraction of other residual plug loads' internal gains that are latent. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_other_frac_latent``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Plug Loads: Other Usage Multiplier**
-
-Multiplier on the other energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_other_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Plug Loads: Well Pump Present**
-
-Whether there is a well pump.
-
-- **Name:** ``misc_plug_loads_well_pump_present``
-- **Type:** ``Boolean``
+- **Name:** ``misc_television``
+- **Type:** ``Choice``
 
 - **Required:** ``true``
 
-<br/>
-
-**Misc Plug Loads: Well Pump Annual kWh**
-
-The annual energy consumption of the well pump plug loads. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_well_pump_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
+- **Choices:** `None`, `25%`, `33%`, `50%`, `75%`, `80%`, `90%`, `100%`, `110%`, `125%`, `150%`, `200%`, `300%`, `400%`, `Detailed Example: 620 kWh/yr`
 
 <br/>
 
-**Misc Plug Loads: Well Pump Usage Multiplier**
+**Misc: Plug Loads**
 
-Multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
+The amount of additional plug load usage, relative to the national average.
 
-- **Name:** ``misc_plug_loads_well_pump_usage_multiplier``
-- **Type:** ``Double``
+- **Name:** ``misc_plug_loads``
+- **Type:** ``Choice``
 
-- **Required:** ``false``
+- **Required:** ``true``
+
+- **Choices:** `None`, `25%`, `33%`, `50%`, `75%`, `80%`, `90%`, `100%`, `110%`, `125%`, `150%`, `200%`, `300%`, `400%`, `Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent`, `Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent`
+
+<br/>
+
+**Misc: Well Pump**
+
+The amount of well pump usage, relative to the national average.
+
+- **Name:** ``misc_well_pump``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `None`, `Typical Efficiency`, `High Efficiency`, `Detailed Example: 475 kWh/yr`
 
 <br/>
 
@@ -4234,173 +4153,42 @@ Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low
 
 <br/>
 
-**Misc Fuel Loads: Grill Present**
+**Misc: Gas Grill**
 
-Whether there is a fuel loads grill.
+The amount of outdoor gas grill usage, relative to the national average.
 
-- **Name:** ``misc_fuel_loads_grill_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Misc Fuel Loads: Grill Fuel Type**
-
-The fuel type of the fuel loads grill.
-
-- **Name:** ``misc_fuel_loads_grill_fuel_type``
+- **Name:** ``misc_grill``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`
+- **Choices:** `None`, `Natural Gas, 25%`, `Natural Gas, 33%`, `Natural Gas, 50%`, `Natural Gas, 67%`, `Natural Gas, 90%`, `Natural Gas, 100%`, `Natural Gas, 110%`, `Natural Gas, 150%`, `Natural Gas, 200%`, `Natural Gas, 300%`, `Natural Gas, 400%`, `Propane, 25%`, `Propane, 33%`, `Propane, 50%`, `Propane, 67%`, `Propane, 90%`, `Propane, 100%`, `Propane, 110%`, `Propane, 150%`, `Propane, 200%`, `Propane, 300%`, `Propane, 400%`, `Detailed Example: Propane, 25 therm/yr`
 
 <br/>
 
-**Misc Fuel Loads: Grill Annual therm**
+**Misc: Gas Lighting**
 
-The annual energy consumption of the fuel loads grill. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.
+The amount of gas lighting usage, relative to the national average.
 
-- **Name:** ``misc_fuel_loads_grill_annual_therm``
-- **Type:** ``Double``
-
-- **Units:** ``therm/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Fuel Loads: Grill Usage Multiplier**
-
-Multiplier on the fuel loads grill energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.
-
-- **Name:** ``misc_fuel_loads_grill_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Fuel Loads: Lighting Present**
-
-Whether there is fuel loads lighting.
-
-- **Name:** ``misc_fuel_loads_lighting_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Misc Fuel Loads: Lighting Fuel Type**
-
-The fuel type of the fuel loads lighting.
-
-- **Name:** ``misc_fuel_loads_lighting_fuel_type``
+- **Name:** ``misc_lighting``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`
+- **Choices:** `None`, `Natural Gas, 25%`, `Natural Gas, 33%`, `Natural Gas, 50%`, `Natural Gas, 67%`, `Natural Gas, 90%`, `Natural Gas, 100%`, `Natural Gas, 110%`, `Natural Gas, 150%`, `Natural Gas, 200%`, `Natural Gas, 300%`, `Natural Gas, 400%`, `Detailed Example: Natural Gas, 28 therm/yr`
 
 <br/>
 
-**Misc Fuel Loads: Lighting Annual therm**
+**Misc: Fireplace**
 
-The annual energy consumption of the fuel loads lighting. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-fuel-loads'>HPXML Fuel Loads</a>)is used.
+The amount of fireplace usage, relative to the national average. Fireplaces can also be specified as heating systems that meet a portion of the heating load.
 
-- **Name:** ``misc_fuel_loads_lighting_annual_therm``
-- **Type:** ``Double``
-
-- **Units:** ``therm/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Fuel Loads: Lighting Usage Multiplier**
-
-Multiplier on the fuel loads lighting energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.
-
-- **Name:** ``misc_fuel_loads_lighting_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Fuel Loads: Fireplace Present**
-
-Whether there is fuel loads fireplace.
-
-- **Name:** ``misc_fuel_loads_fireplace_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Misc Fuel Loads: Fireplace Fuel Type**
-
-The fuel type of the fuel loads fireplace.
-
-- **Name:** ``misc_fuel_loads_fireplace_fuel_type``
+- **Name:** ``misc_fireplace``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`
-
-<br/>
-
-**Misc Fuel Loads: Fireplace Annual therm**
-
-The annual energy consumption of the fuel loads fireplace. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.
-
-- **Name:** ``misc_fuel_loads_fireplace_annual_therm``
-- **Type:** ``Double``
-
-- **Units:** ``therm/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Fuel Loads: Fireplace Sensible Fraction**
-
-Fraction of fireplace residual fuel loads' internal gains that are sensible. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.
-
-- **Name:** ``misc_fuel_loads_fireplace_frac_sensible``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Fuel Loads: Fireplace Latent Fraction**
-
-Fraction of fireplace residual fuel loads' internal gains that are latent. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.
-
-- **Name:** ``misc_fuel_loads_fireplace_frac_latent``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Misc Fuel Loads: Fireplace Usage Multiplier**
-
-Multiplier on the fuel loads fireplace energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.
-
-- **Name:** ``misc_fuel_loads_fireplace_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Natural Gas, 25%`, `Natural Gas, 33%`, `Natural Gas, 50%`, `Natural Gas, 67%`, `Natural Gas, 90%`, `Natural Gas, 100%`, `Natural Gas, 110%`, `Natural Gas, 150%`, `Natural Gas, 200%`, `Natural Gas, 300%`, `Natural Gas, 400%`, `Propane, 25%`, `Propane, 33%`, `Propane, 50%`, `Propane, 67%`, `Propane, 90%`, `Propane, 100%`, `Propane, 110%`, `Propane, 150%`, `Propane, 200%`, `Propane, 300%`, `Propane, 400%`, `Wood, 25%`, `Wood, 33%`, `Wood, 50%`, `Wood, 67%`, `Wood, 90%`, `Wood, 100%`, `Wood, 110%`, `Wood, 150%`, `Wood, 200%`, `Wood, 300%`, `Wood, 400%`, `Electric, 25%`, `Electric, 33%`, `Electric, 50%`, `Electric, 67%`, `Electric, 90%`, `Electric, 100%`, `Electric, 110%`, `Electric, 150%`, `Electric, 200%`, `Electric, 300%`, `Electric, 400%`, `Detailed Example: Wood, 55 therm/yr`
 
 <br/>
 

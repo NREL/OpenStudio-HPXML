@@ -118,18 +118,13 @@
     "cooking_range_oven_present": false,
     "cooking_range_oven_fuel_type": "electricity",
     "ceiling_fan_present": false,
-    "misc_plug_loads_television_present": false,
-    "misc_plug_loads_other_annual_kwh": 7302,
-    "misc_plug_loads_other_frac_sensible": 0.822,
-    "misc_plug_loads_other_frac_latent": 0.178,
-    "misc_plug_loads_well_pump_present": false,
+    "misc_plug_loads": "Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent",
+    "misc_television": "None",
+    "misc_well_pump": "None",
     "misc_plug_loads_vehicle_present": false,
-    "misc_fuel_loads_grill_present": false,
-    "misc_fuel_loads_grill_fuel_type": "natural gas",
-    "misc_fuel_loads_lighting_present": false,
-    "misc_fuel_loads_lighting_fuel_type": "natural gas",
-    "misc_fuel_loads_fireplace_present": false,
-    "misc_fuel_loads_fireplace_fuel_type": "natural gas",
+    "misc_grill": "None",
+    "misc_lighting": "None",
+    "misc_fireplace": "None",
     "pool_present": false,
     "pool_heater_type": "none",
     "permanent_spa_present": false,
@@ -177,9 +172,7 @@
   },
   "tests/ASHRAE_Standard_140/L170AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "misc_plug_loads_other_annual_kwh": 0,
-    "misc_plug_loads_other_frac_sensible": null,
-    "misc_plug_loads_other_frac_latent": null
+    "misc_plug_loads": "None"
   },
   "tests/ASHRAE_Standard_140/L200AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -259,9 +252,7 @@
   },
   "tests/ASHRAE_Standard_140/L170AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "misc_plug_loads_other_annual_kwh": 0,
-    "misc_plug_loads_other_frac_sensible": null,
-    "misc_plug_loads_other_frac_latent": null
+    "misc_plug_loads": "None"
   },
   "tests/ASHRAE_Standard_140/L200AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -403,10 +394,8 @@
     "refrigerator_present": true,
     "cooking_range_oven_present": true,
     "lighting": "10% CFL",
-    "misc_plug_loads_other_annual_kwh": null,
-    "misc_plug_loads_other_frac_sensible": null,
-    "misc_plug_loads_other_frac_latent": null,
-    "misc_plug_loads_television_present": true
+    "misc_plug_loads": "100%",
+    "misc_television": "100%"
   },
   "tests/HERS_Hot_Water/L100AD-HW-02.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
@@ -630,19 +619,13 @@
     "cooking_range_oven_is_induction": false,
     "cooking_range_oven_is_convection": false,
     "ceiling_fan_present": false,
-    "misc_plug_loads_television_present": true,
-    "misc_plug_loads_television_annual_kwh": 620,
-    "misc_plug_loads_other_annual_kwh": 2457,
-    "misc_plug_loads_other_frac_sensible": 0.855,
-    "misc_plug_loads_other_frac_latent": 0.045,
-    "misc_plug_loads_well_pump_present": false,
+    "misc_plug_loads": "100%",
+    "misc_television": "100%",
+    "misc_well_pump": "None",
     "misc_plug_loads_vehicle_present": false,
-    "misc_fuel_loads_grill_present": false,
-    "misc_fuel_loads_grill_fuel_type": "natural gas",
-    "misc_fuel_loads_lighting_present": false,
-    "misc_fuel_loads_lighting_fuel_type": "natural gas",
-    "misc_fuel_loads_fireplace_present": false,
-    "misc_fuel_loads_fireplace_fuel_type": "natural gas",
+    "misc_grill": "None",
+    "misc_lighting": "None",
+    "misc_fireplace": "None",
     "pool_present": false,
     "pool_heater_type": "none",
     "permanent_spa_present": false,
@@ -747,8 +730,7 @@
     "clothes_dryer_location": "basement - conditioned",
     "dishwasher_location": "basement - conditioned",
     "refrigerator_location": "basement - conditioned",
-    "cooking_range_oven_location": "basement - conditioned",
-    "misc_plug_loads_other_annual_kwh": 3276
+    "cooking_range_oven_location": "basement - conditioned"
   },
   "sample_files/base-atticroof-flat.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -866,8 +848,7 @@
     "window_area_or_wwr_left": 0.18,
     "window_area_or_wwr_right": 0.18,
     "air_leakage_type": "unit exterior only",
-    "hvac_capacity_heating_system": "25 kBtu/hr",
-    "misc_plug_loads_other_annual_kwh": 1638
+    "hvac_capacity_heating_system": "25 kBtu/hr"
   },
   "sample_files/base-bldgtype-sfa-unit-2stories.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-sfa-unit.xml",
@@ -875,8 +856,7 @@
     "geometry_unit_cfa": 2700,
     "hvac_capacity_heating_system": "50 kBtu/hr",
     "hvac_capacity_cooling_system": "3.0 tons",
-    "hvac_ducts": "4 CFM25 per 100ft2, R-4",
-    "misc_plug_loads_other_annual_kwh": 2457
+    "hvac_ducts": "4 CFM25 per 100ft2, R-4"
   },
   "sample_files/base-bldgtype-sfa-unit-atticroof-cathedral.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-sfa-unit-2stories.xml",
@@ -910,8 +890,7 @@
     "hvac_capacity_cooling_system": "1.0 tons",
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
     "ducts_supply_location": "conditioned space",
-    "ducts_return_location": "conditioned space",
-    "misc_plug_loads_other_annual_kwh": 819
+    "ducts_return_location": "conditioned space"
   },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-multifamily-buffer-space.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
@@ -958,9 +937,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-residents-1.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "geometry_unit_num_occupants": 1,
-    "misc_plug_loads_television_annual_kwh": null,
-    "misc_plug_loads_other_annual_kwh": null
+    "geometry_unit_num_occupants": 1
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
@@ -1440,38 +1417,32 @@
     "window_area_or_wwr_left": 144,
     "window_area_or_wwr_right": 144,
     "hvac_capacity_heating_system": "50 kBtu/hr",
-    "hvac_capacity_cooling_system": "3.0 tons",
-    "misc_plug_loads_other_annual_kwh": 3685.5
+    "hvac_capacity_cooling_system": "3.0 tons"
   },
   "sample_files/base-enclosure-2stories-garage.xml": {
     "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
     "geometry_unit_cfa": 3250,
     "geometry_garage_width": 20,
-    "floor_over_garage_assembly_r": 39.3,
-    "misc_plug_loads_other_annual_kwh": 2957.5
+    "floor_over_garage_assembly_r": 39.3
   },
   "sample_files/base-enclosure-beds-1.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_bedrooms": 1,
-    "geometry_unit_num_bathrooms": 1,
-    "misc_plug_loads_television_annual_kwh": 482
+    "geometry_unit_num_bathrooms": 1
   },
   "sample_files/base-enclosure-beds-2.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_bedrooms": 2,
-    "geometry_unit_num_bathrooms": 1,
-    "misc_plug_loads_television_annual_kwh": 551
+    "geometry_unit_num_bathrooms": 1
   },
   "sample_files/base-enclosure-beds-4.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "geometry_unit_num_bedrooms": 4,
-    "misc_plug_loads_television_annual_kwh": 689
+    "geometry_unit_num_bedrooms": 4
   },
   "sample_files/base-enclosure-beds-5.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_bedrooms": 5,
-    "geometry_unit_num_bathrooms": 3,
-    "misc_plug_loads_television_annual_kwh": 758
+    "geometry_unit_num_bathrooms": 3
   },
   "sample_files/base-enclosure-ceilingtypes.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -1632,12 +1603,10 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "Ambient",
-    "floor_over_foundation_assembly_r": 18.7,
-    "misc_plug_loads_other_annual_kwh": 1228.5
+    "floor_over_foundation_assembly_r": 18.7
   },
   "sample_files/base-foundation-basement-garage.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "misc_plug_loads_other_annual_kwh": 1729
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-foundation-belly-wing-skirt.xml": {
     "parent_hpxml": "sample_files/base-foundation-ambient.xml",
@@ -1683,8 +1652,7 @@
     "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "crawlspace - conditioned",
     "ducts_return_location": "crawlspace - conditioned",
-    "water_heater_location": "crawlspace - conditioned",
-    "misc_plug_loads_other_annual_kwh": 1228.5
+    "water_heater_location": "crawlspace - conditioned"
   },
   "sample_files/base-foundation-slab.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1695,8 +1663,7 @@
     "enclosure_slab": "Whole Slab, R-5",
     "enclosure_slab_carpet": "100% Carpet, R-2.5",
     "ducts_supply_location": "under slab",
-    "ducts_return_location": "under slab",
-    "misc_plug_loads_other_annual_kwh": 1228.5
+    "ducts_return_location": "under slab"
   },
   "sample_files/base-foundation-slab-exterior-horizontal-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
@@ -1719,8 +1686,7 @@
     "clothes_dryer_location": "basement - unconditioned",
     "dishwasher_location": "basement - unconditioned",
     "refrigerator_location": "basement - unconditioned",
-    "cooking_range_oven_location": "basement - unconditioned",
-    "misc_plug_loads_other_annual_kwh": 1228.5
+    "cooking_range_oven_location": "basement - unconditioned"
   },
   "sample_files/base-foundation-unconditioned-basement-above-grade.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
@@ -1744,8 +1710,7 @@
     "floor_over_foundation_assembly_r": 18.7,
     "ducts_supply_location": "crawlspace - unvented",
     "ducts_return_location": "crawlspace - unvented",
-    "water_heater_location": "crawlspace - unvented",
-    "misc_plug_loads_other_annual_kwh": 1228.5
+    "water_heater_location": "crawlspace - unvented"
   },
   "sample_files/base-foundation-vented-crawlspace.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1755,8 +1720,7 @@
     "floor_over_foundation_assembly_r": 18.7,
     "ducts_supply_location": "crawlspace - vented",
     "ducts_return_location": "crawlspace - vented",
-    "water_heater_location": "crawlspace - vented",
-    "misc_plug_loads_other_annual_kwh": 1228.5
+    "water_heater_location": "crawlspace - vented"
   },
   "sample_files/base-foundation-vented-crawlspace-above-grade.xml": {
     "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
@@ -2876,11 +2840,7 @@
     "cooking_range_oven_location": null,
     "cooking_range_oven_is_induction": null,
     "cooking_range_oven_is_convection": null,
-    "ceiling_fan_present": true,
-    "misc_plug_loads_television_annual_kwh": null,
-    "misc_plug_loads_other_annual_kwh": null,
-    "misc_plug_loads_other_frac_sensible": null,
-    "misc_plug_loads_other_frac_latent": null
+    "ceiling_fan_present": true
   },
   "sample_files/base-misc-emissions.xml": {
     "parent_hpxml": "sample_files/base-pv-battery-and-vehicle-ev.xml",
@@ -2916,20 +2876,14 @@
     "freezer_present": true,
     "freezer_location": "conditioned space",
     "freezer_rated_annual_kwh": 300,
-    "misc_plug_loads_well_pump_present": true,
-    "misc_plug_loads_well_pump_annual_kwh": 475,
+    "misc_plug_loads": "Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent",
+    "misc_television": "Detailed Example: 620 kWh/yr",
+    "misc_well_pump": "Detailed Example: 475 kWh/yr",
     "misc_plug_loads_vehicle_present": true,
     "misc_plug_loads_vehicle_annual_kwh": 1500,
-    "misc_fuel_loads_grill_present": true,
-    "misc_fuel_loads_grill_fuel_type": "propane",
-    "misc_fuel_loads_grill_annual_therm": 25,
-    "misc_fuel_loads_lighting_present": true,
-    "misc_fuel_loads_lighting_annual_therm": 28,
-    "misc_fuel_loads_fireplace_present": true,
-    "misc_fuel_loads_fireplace_fuel_type": "wood",
-    "misc_fuel_loads_fireplace_annual_therm": 55,
-    "misc_fuel_loads_fireplace_frac_sensible": 0.5,
-    "misc_fuel_loads_fireplace_frac_latent": 0.1,
+    "misc_grill": "Detailed Example: Propane, 25 therm/yr",
+    "misc_lighting": "Detailed Example: Natural Gas, 28 therm/yr",
+    "misc_fireplace": "Detailed Example: Wood, 55 therm/yr",
     "pool_present": true,
     "pool_pump_annual_kwh": 2700,
     "pool_heater_type": "gas fired",
@@ -2941,18 +2895,14 @@
   },
   "sample_files/base-misc-loads-large-uncommon2.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon.xml",
-    "misc_fuel_loads_grill_fuel_type": "fuel oil",
-    "misc_fuel_loads_fireplace_fuel_type": "wood pellets",
     "pool_heater_type": "none",
     "permanent_spa_heater_type": "heat pump",
     "permanent_spa_heater_annual_kwh": 260
   },
   "sample_files/base-misc-loads-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "misc_plug_loads_television_present": false,
-    "misc_plug_loads_other_annual_kwh": 0,
-    "misc_plug_loads_other_frac_sensible": null,
-    "misc_plug_loads_other_frac_latent": null
+    "misc_plug_loads": "None",
+    "misc_television": "None"
   },
   "sample_files/base-misc-neighbor-shading.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2987,21 +2937,11 @@
     "freezer_rated_annual_kwh": 300,
     "freezer_usage_multiplier": 0.9,
     "cooking_range_oven_usage_multiplier": 0.9,
-    "misc_plug_loads_television_usage_multiplier": 0.9,
-    "misc_plug_loads_other_usage_multiplier": 0.9,
-    "misc_fuel_loads_grill_present": true,
-    "misc_fuel_loads_grill_fuel_type": "propane",
-    "misc_fuel_loads_grill_annual_therm": 25,
-    "misc_fuel_loads_grill_usage_multiplier": 0.9,
-    "misc_fuel_loads_lighting_present": true,
-    "misc_fuel_loads_lighting_annual_therm": 28,
-    "misc_fuel_loads_lighting_usage_multiplier": 0.9,
-    "misc_fuel_loads_fireplace_present": true,
-    "misc_fuel_loads_fireplace_fuel_type": "wood",
-    "misc_fuel_loads_fireplace_annual_therm": 55,
-    "misc_fuel_loads_fireplace_frac_sensible": 0.5,
-    "misc_fuel_loads_fireplace_frac_latent": 0.1,
-    "misc_fuel_loads_fireplace_usage_multiplier": 0.9,
+    "misc_plug_loads": "90%",
+    "misc_television": "90%",
+    "misc_grill": "Propane, 90%",
+    "misc_lighting": "Natural Gas, 90%",
+    "misc_fireplace": "Wood, 90%",
     "pool_present": true,
     "pool_pump_annual_kwh": 2700,
     "pool_pump_usage_multiplier": 0.9,
@@ -3099,20 +3039,12 @@
   },
   "sample_files/base-residents-1.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "geometry_unit_num_occupants": 1,
-    "misc_plug_loads_television_annual_kwh": null,
-    "misc_plug_loads_other_annual_kwh": null
+    "geometry_unit_num_occupants": 1
   },
   "sample_files/base-residents-1-misc-loads-large-uncommon.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon.xml",
     "geometry_unit_num_occupants": 1,
-    "misc_plug_loads_television_annual_kwh": null,
-    "misc_plug_loads_other_annual_kwh": null,
-    "misc_plug_loads_well_pump_annual_kwh": null,
     "misc_plug_loads_vehicle_annual_kwh": null,
-    "misc_fuel_loads_grill_annual_therm": null,
-    "misc_fuel_loads_lighting_annual_therm": null,
-    "misc_fuel_loads_fireplace_annual_therm": null,
     "pool_pump_annual_kwh": null,
     "pool_heater_annual_therm": null,
     "permanent_spa_pump_annual_kwh": null,
@@ -3121,13 +3053,7 @@
   "sample_files/base-residents-1-misc-loads-large-uncommon2.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon2.xml",
     "geometry_unit_num_occupants": 1,
-    "misc_plug_loads_television_annual_kwh": null,
-    "misc_plug_loads_other_annual_kwh": null,
-    "misc_plug_loads_well_pump_annual_kwh": null,
     "misc_plug_loads_vehicle_annual_kwh": null,
-    "misc_fuel_loads_grill_annual_therm": null,
-    "misc_fuel_loads_lighting_annual_therm": null,
-    "misc_fuel_loads_fireplace_annual_therm": null,
     "pool_pump_annual_kwh": null,
     "pool_heater_annual_therm": null,
     "permanent_spa_pump_annual_kwh": null,

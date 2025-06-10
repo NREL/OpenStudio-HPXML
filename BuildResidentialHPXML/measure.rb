@@ -2282,61 +2282,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan quantity is greater than zero. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_television_present', true)
-    arg.setDisplayName('Misc Plug Loads: Television Present')
-    arg.setDescription('Whether there are televisions.')
-    arg.setDefaultValue(true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_television', choices[:misc_television], true)
+    arg.setDisplayName('Misc: Television')
+    arg.setDescription('The amount of television usage, relative to the national average.')
+    arg.setDefaultValue('100%')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_television_annual_kwh', false)
-    arg.setDisplayName('Misc Plug Loads: Television Annual kWh')
-    arg.setDescription("The annual energy consumption of the television plug loads. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    arg.setUnits('kWh/yr')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_plug_loads', choices[:misc_plug_loads], true)
+    arg.setDisplayName('Misc: Plug Loads')
+    arg.setDescription('The amount of additional plug load usage, relative to the national average.')
+    arg.setDefaultValue('100%')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_television_usage_multiplier', false)
-    arg.setDisplayName('Misc Plug Loads: Television Usage Multiplier')
-    arg.setDescription("Multiplier on the television energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_other_annual_kwh', false)
-    arg.setDisplayName('Misc Plug Loads: Other Annual kWh')
-    arg.setDescription("The annual energy consumption of the other residual plug loads. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    arg.setUnits('kWh/yr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_other_frac_sensible', false)
-    arg.setDisplayName('Misc Plug Loads: Other Sensible Fraction')
-    arg.setDescription("Fraction of other residual plug loads' internal gains that are sensible. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_other_frac_latent', false)
-    arg.setDisplayName('Misc Plug Loads: Other Latent Fraction')
-    arg.setDescription("Fraction of other residual plug loads' internal gains that are latent. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_other_usage_multiplier', false)
-    arg.setDisplayName('Misc Plug Loads: Other Usage Multiplier')
-    arg.setDescription("Multiplier on the other energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_well_pump_present', true)
-    arg.setDisplayName('Misc Plug Loads: Well Pump Present')
-    arg.setDescription('Whether there is a well pump.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_well_pump_annual_kwh', false)
-    arg.setDisplayName('Misc Plug Loads: Well Pump Annual kWh')
-    arg.setDescription("The annual energy consumption of the well pump plug loads. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    arg.setUnits('kWh/yr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_well_pump_usage_multiplier', false)
-    arg.setDisplayName('Misc Plug Loads: Well Pump Usage Multiplier')
-    arg.setDescription("Multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_well_pump', choices[:misc_well_pump], true)
+    arg.setDisplayName('Misc: Well Pump')
+    arg.setDescription('The amount of well pump usage, relative to the national average.')
+    arg.setDefaultValue(choices[:misc_well_pump][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_vehicle_present', true)
@@ -2356,92 +2317,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
     args << arg
 
-    misc_fuel_loads_fuel_choices = OpenStudio::StringVector.new
-    misc_fuel_loads_fuel_choices << HPXML::FuelTypeNaturalGas
-    misc_fuel_loads_fuel_choices << HPXML::FuelTypeOil
-    misc_fuel_loads_fuel_choices << HPXML::FuelTypePropane
-    misc_fuel_loads_fuel_choices << HPXML::FuelTypeWoodCord
-    misc_fuel_loads_fuel_choices << HPXML::FuelTypeWoodPellets
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_fuel_loads_grill_present', true)
-    arg.setDisplayName('Misc Fuel Loads: Grill Present')
-    arg.setDescription('Whether there is a fuel loads grill.')
-    arg.setDefaultValue(false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_grill', choices[:misc_grill], true)
+    arg.setDisplayName('Misc: Gas Grill')
+    arg.setDescription('The amount of outdoor gas grill usage, relative to the national average.')
+    arg.setDefaultValue(choices[:misc_grill][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_fuel_loads_grill_fuel_type', misc_fuel_loads_fuel_choices, true)
-    arg.setDisplayName('Misc Fuel Loads: Grill Fuel Type')
-    arg.setDescription('The fuel type of the fuel loads grill.')
-    arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_lighting', choices[:misc_lighting], true)
+    arg.setDisplayName('Misc: Gas Lighting')
+    arg.setDescription('The amount of gas lighting usage, relative to the national average.')
+    arg.setDefaultValue(choices[:misc_lighting][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_fuel_loads_grill_annual_therm', false)
-    arg.setDisplayName('Misc Fuel Loads: Grill Annual therm')
-    arg.setDescription("The annual energy consumption of the fuel loads grill. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.")
-    arg.setUnits('therm/yr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_fuel_loads_grill_usage_multiplier', false)
-    arg.setDisplayName('Misc Fuel Loads: Grill Usage Multiplier')
-    arg.setDescription("Multiplier on the fuel loads grill energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_fuel_loads_lighting_present', true)
-    arg.setDisplayName('Misc Fuel Loads: Lighting Present')
-    arg.setDescription('Whether there is fuel loads lighting.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_fuel_loads_lighting_fuel_type', misc_fuel_loads_fuel_choices, true)
-    arg.setDisplayName('Misc Fuel Loads: Lighting Fuel Type')
-    arg.setDescription('The fuel type of the fuel loads lighting.')
-    arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_fuel_loads_lighting_annual_therm', false)
-    arg.setDisplayName('Misc Fuel Loads: Lighting Annual therm')
-    arg.setDescription("The annual energy consumption of the fuel loads lighting. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>)is used.")
-    arg.setUnits('therm/yr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_fuel_loads_lighting_usage_multiplier', false)
-    arg.setDisplayName('Misc Fuel Loads: Lighting Usage Multiplier')
-    arg.setDescription("Multiplier on the fuel loads lighting energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_fuel_loads_fireplace_present', true)
-    arg.setDisplayName('Misc Fuel Loads: Fireplace Present')
-    arg.setDescription('Whether there is fuel loads fireplace.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_fuel_loads_fireplace_fuel_type', misc_fuel_loads_fuel_choices, true)
-    arg.setDisplayName('Misc Fuel Loads: Fireplace Fuel Type')
-    arg.setDescription('The fuel type of the fuel loads fireplace.')
-    arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_fuel_loads_fireplace_annual_therm', false)
-    arg.setDisplayName('Misc Fuel Loads: Fireplace Annual therm')
-    arg.setDescription("The annual energy consumption of the fuel loads fireplace. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.")
-    arg.setUnits('therm/yr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_fuel_loads_fireplace_frac_sensible', false)
-    arg.setDisplayName('Misc Fuel Loads: Fireplace Sensible Fraction')
-    arg.setDescription("Fraction of fireplace residual fuel loads' internal gains that are sensible. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.")
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_fuel_loads_fireplace_frac_latent', false)
-    arg.setDisplayName('Misc Fuel Loads: Fireplace Latent Fraction')
-    arg.setDescription("Fraction of fireplace residual fuel loads' internal gains that are latent. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.")
-    arg.setUnits('Frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_fuel_loads_fireplace_usage_multiplier', false)
-    arg.setDisplayName('Misc Fuel Loads: Fireplace Usage Multiplier')
-    arg.setDescription("Multiplier on the fuel loads fireplace energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-fuel-loads'>HPXML Fuel Loads</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_fireplace', choices[:misc_fireplace], true)
+    arg.setDisplayName('Misc: Fireplace')
+    arg.setDescription('The amount of fireplace usage, relative to the national average. Fireplaces can also be specified as heating systems that meet a portion of the heating load.')
+    arg.setDefaultValue(choices[:misc_fireplace][0])
     args << arg
 
     heater_type_choices = OpenStudio::StringVector.new
@@ -6361,12 +6252,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_plug_loads_television(hpxml_bldg, args)
-    return unless args[:misc_plug_loads_television_present]
+    return if args[:misc_television_annual_energy_use].to_f == 0 && args[:misc_television_usage_multiplier].to_f == 0
+
+    if args[:misc_television_usage_multiplier].to_f != 1
+      usage_multiplier = args[:misc_television_usage_multiplier]
+    end
 
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeTelevision,
-                              kwh_per_year: args[:misc_plug_loads_television_annual_kwh],
-                              usage_multiplier: args[:misc_plug_loads_television_usage_multiplier])
+                              kwh_per_year: args[:misc_television_annual_energy_use],
+                              usage_multiplier: usage_multiplier)
   end
 
   # Sets the HPXML miscellaneous other plug loads properties.
@@ -6375,12 +6270,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_plug_loads_other(hpxml_bldg, args)
+    if args[:misc_plug_loads_usage_multiplier].to_f != 1
+      usage_multiplier = args[:misc_plug_loads_usage_multiplier]
+    end
+
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeOther,
-                              kwh_per_year: args[:misc_plug_loads_other_annual_kwh],
-                              frac_sensible: args[:misc_plug_loads_other_frac_sensible],
-                              frac_latent: args[:misc_plug_loads_other_frac_latent],
-                              usage_multiplier: args[:misc_plug_loads_other_usage_multiplier])
+                              kwh_per_year: args[:misc_plug_loads_annual_energy_use],
+                              frac_sensible: args[:misc_plug_loads_sensible_fraction],
+                              frac_latent: args[:misc_plug_loads_latent_fraction],
+                              usage_multiplier: usage_multiplier)
   end
 
   # Sets the HPXML miscellaneous well pump plug loads properties.
@@ -6389,12 +6288,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_plug_loads_well_pump(hpxml_bldg, args)
-    return unless args[:misc_plug_loads_well_pump_present]
+    return if args[:misc_well_pump_annual_energy_use].to_f == 0 && args[:misc_well_pump_usage_multiplier].to_f == 0
+
+    if args[:misc_well_pump_usage_multiplier].to_f != 1
+      usage_multiplier = args[:misc_well_pump_usage_multiplier]
+    end
 
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeWellPump,
-                              kwh_per_year: args[:misc_plug_loads_well_pump_annual_kwh],
-                              usage_multiplier: args[:misc_plug_loads_well_pump_usage_multiplier])
+                              kwh_per_year: args[:misc_well_pump_annual_energy_use],
+                              usage_multiplier: usage_multiplier)
   end
 
   # Sets the HPXML miscellaneous vehicle plug loads properties.
@@ -6417,13 +6320,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_fuel_loads_grill(hpxml_bldg, args)
-    return unless args[:misc_fuel_loads_grill_present]
+    return if args[:misc_grill_annual_energy_use].to_f == 0 && args[:misc_grill_usage_multiplier].to_f == 0
+
+    if args[:misc_grill_usage_multiplier].to_f != 1
+      usage_multiplier = args[:misc_grill_usage_multiplier]
+    end
 
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeGrill,
-                              fuel_type: args[:misc_fuel_loads_grill_fuel_type],
-                              therm_per_year: args[:misc_fuel_loads_grill_annual_therm],
-                              usage_multiplier: args[:misc_fuel_loads_grill_usage_multiplier])
+                              fuel_type: args[:misc_grill_fuel_type],
+                              therm_per_year: args[:misc_grill_annual_energy_use],
+                              usage_multiplier: usage_multiplier)
   end
 
   # Sets the HPXML miscellaneous lighting fuel loads properties.
@@ -6432,13 +6339,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_fuel_loads_lighting(hpxml_bldg, args)
-    return unless args[:misc_fuel_loads_lighting_present]
+    return if args[:misc_lighting_annual_energy_use].to_f == 0 && args[:misc_lighting_usage_multiplier].to_f == 0
+
+    if args[:misc_lighting_usage_multiplier].to_f != 1
+      usage_multiplier = args[:misc_lighting_usage_multiplier]
+    end
 
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeLighting,
-                              fuel_type: args[:misc_fuel_loads_lighting_fuel_type],
-                              therm_per_year: args[:misc_fuel_loads_lighting_annual_therm],
-                              usage_multiplier: args[:misc_fuel_loads_lighting_usage_multiplier])
+                              fuel_type: args[:misc_lighting_fuel_type],
+                              therm_per_year: args[:misc_lighting_annual_energy_use],
+                              usage_multiplier: usage_multiplier)
   end
 
   # Sets the HPXML miscellaneous fireplace fuel loads properties.
@@ -6447,15 +6358,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_fuel_loads_fireplace(hpxml_bldg, args)
-    return unless args[:misc_fuel_loads_fireplace_present]
+    return if args[:misc_fireplace_annual_energy_use].to_f == 0 && args[:misc_fireplace_usage_multiplier].to_f == 0
+
+    if args[:misc_fireplace_usage_multiplier].to_f != 1
+      usage_multiplier = args[:misc_fireplace_usage_multiplier]
+    end
 
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeFireplace,
-                              fuel_type: args[:misc_fuel_loads_fireplace_fuel_type],
-                              therm_per_year: args[:misc_fuel_loads_fireplace_annual_therm],
-                              frac_sensible: args[:misc_fuel_loads_fireplace_frac_sensible],
-                              frac_latent: args[:misc_fuel_loads_fireplace_frac_latent],
-                              usage_multiplier: args[:misc_fuel_loads_fireplace_usage_multiplier])
+                              fuel_type: args[:misc_fireplace_fuel_type],
+                              therm_per_year: args[:misc_fireplace_annual_energy_use],
+                              usage_multiplier: usage_multiplier)
   end
 
   # Sets the HPXML pool properties.

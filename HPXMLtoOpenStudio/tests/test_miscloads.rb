@@ -356,12 +356,12 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscPlugLoads)
-    assert_in_delta(1920, kwh_yr, 1.0)
+    assert_in_delta(2457, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check television
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscTelevision)
-    assert_in_delta(588, kwh_yr, 1.0)
+    assert_in_delta(620, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check vehicle
@@ -371,7 +371,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     # Check well pump
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscWellPump)
-    assert_in_delta(337, kwh_yr, 1.0)
+    assert_in_delta(475, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check pool pump
@@ -402,12 +402,12 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
     # Check lighting
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscLighting)
     assert_equal(0, kwh_yr)
-    assert_in_delta(15, therm_yr, 1.0)
+    assert_in_delta(28, therm_yr, 1.0)
 
     # Check fireplace
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscFireplace)
     assert_equal(0, kwh_yr)
-    assert_in_delta(51, therm_yr, 1.0)
+    assert_in_delta(55, therm_yr, 1.0)
   end
 
   def test_operational_large_uncommon_loads2
@@ -417,12 +417,12 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscPlugLoads)
-    assert_in_delta(1920, kwh_yr, 1.0)
+    assert_in_delta(2457, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check television
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscTelevision)
-    assert_in_delta(588, kwh_yr, 1.0)
+    assert_in_delta(620, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check vehicle
@@ -432,7 +432,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     # Check well pump
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscWellPump)
-    assert_in_delta(337, kwh_yr, 1.0)
+    assert_in_delta(475, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check pool pump
@@ -463,12 +463,12 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
     # Check lighting
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscLighting)
     assert_equal(0, kwh_yr)
-    assert_in_delta(15, therm_yr, 1.0)
+    assert_in_delta(28, therm_yr, 1.0)
 
     # Check fireplace
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscFireplace)
     assert_equal(0, kwh_yr)
-    assert_in_delta(51, therm_yr, 1.0)
+    assert_in_delta(55, therm_yr, 1.0)
   end
 
   def _test_measure(args_hash)
