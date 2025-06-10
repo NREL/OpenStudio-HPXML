@@ -327,7 +327,7 @@
                 <Value>10.7</Value>
               </AnnualCoolingEfficiency>
               <IntegratedHeatingSystemFuel>electricity</IntegratedHeatingSystemFuel>
-              <IntegratedHeatingSystemCapacity>36000.0</IntegratedHeatingSystemCapacity>
+              <IntegratedHeatingSystemCapacity>40000.0</IntegratedHeatingSystemCapacity>
               <IntegratedHeatingSystemAnnualEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>

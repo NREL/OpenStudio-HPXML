@@ -329,7 +329,7 @@
               </AnnualCoolingEfficiency>
               <extension>
                 <CoolingAutosizingFactor>1.7</CoolingAutosizingFactor>
-                <CoolingAutosizingLimit>37000.0</CoolingAutosizingLimit>
+                <CoolingAutosizingLimit>36000.0</CoolingAutosizingLimit>
               </extension>
             </CoolingSystem>
           </HVACPlant>

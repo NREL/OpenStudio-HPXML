@@ -322,7 +322,7 @@
                 <Fireplace/>
               </HeatingSystemType>
               <HeatingSystemFuel>wood</HeatingSystemFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
+              <HeatingCapacity>35000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>0.8</Value>

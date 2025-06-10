@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>ccc7b126-e2bc-4d3c-9738-bf84f27d4358</version_id>
-  <version_modified>2025-06-09T23:44:09Z</version_modified>
+  <version_id>3c01288c-3b97-40a7-a00d-1f0ff7baf82e</version_id>
+  <version_modified>2025-06-10T04:15:42Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2987,11 +2987,12 @@
     </argument>
     <argument>
       <name>heating_system_fuel</name>
-      <display_name>Heating System: Fuel Type</display_name>
+      <display_name>HVAC: Heating System Fuel Type</display_name>
       <description>The fuel type of the heating system. Ignored for ElectricResistance.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>natural gas</default_value>
       <choices>
         <choice>
           <value>electricity</value>
@@ -3024,34 +3025,155 @@
       </choices>
     </argument>
     <argument>
-      <name>heating_system_heating_capacity</name>
-      <display_name>Heating System: Heating Capacity</display_name>
-      <description>The output heating capacity of the heating system. If not provided, the OS-HPXML autosized default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-heating-systems'&gt;HPXML Heating Systems&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
+      <name>hvac_capacity_heating_system</name>
+      <display_name>HVAC: Heating System Capacity</display_name>
+      <description>The output capacity of the heating system.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heating_system_heating_autosizing_factor</name>
-      <display_name>Heating System: Heating Autosizing Factor</display_name>
-      <description>The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heating_system_heating_autosizing_limit</name>
-      <display_name>Heating System: Heating Autosizing Limit</display_name>
-      <description>The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
+      <default_value>Autosize</default_value>
+      <choices>
+        <choice>
+          <value>Autosize</value>
+          <display_name>Autosize</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 140% Multiplier</value>
+          <display_name>Autosize, 140% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 170% Multiplier</value>
+          <display_name>Autosize, 170% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>5 kBtu/hr</value>
+          <display_name>5 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>10 kBtu/hr</value>
+          <display_name>10 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>15 kBtu/hr</value>
+          <display_name>15 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>20 kBtu/hr</value>
+          <display_name>20 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>25 kBtu/hr</value>
+          <display_name>25 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>30 kBtu/hr</value>
+          <display_name>30 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>35 kBtu/hr</value>
+          <display_name>35 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>40 kBtu/hr</value>
+          <display_name>40 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>45 kBtu/hr</value>
+          <display_name>45 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>50 kBtu/hr</value>
+          <display_name>50 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>55 kBtu/hr</value>
+          <display_name>55 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>60 kBtu/hr</value>
+          <display_name>60 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>65 kBtu/hr</value>
+          <display_name>65 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>70 kBtu/hr</value>
+          <display_name>70 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>75 kBtu/hr</value>
+          <display_name>75 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>80 kBtu/hr</value>
+          <display_name>80 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>85 kBtu/hr</value>
+          <display_name>85 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>90 kBtu/hr</value>
+          <display_name>90 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>95 kBtu/hr</value>
+          <display_name>95 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>100 kBtu/hr</value>
+          <display_name>100 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>105 kBtu/hr</value>
+          <display_name>105 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>110 kBtu/hr</value>
+          <display_name>110 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>115 kBtu/hr</value>
+          <display_name>115 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>120 kBtu/hr</value>
+          <display_name>120 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>125 kBtu/hr</value>
+          <display_name>125 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>130 kBtu/hr</value>
+          <display_name>130 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>135 kBtu/hr</value>
+          <display_name>135 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>140 kBtu/hr</value>
+          <display_name>140 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>145 kBtu/hr</value>
+          <display_name>145 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>150 kBtu/hr</value>
+          <display_name>150 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit</value>
+          <display_name>Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>heating_system_fraction_heat_load_served</name>
-      <display_name>Heating System: Fraction Heat Load Served</display_name>
+      <display_name>HVAC: Heating System Fraction Heat Load Served</display_name>
       <description>The heating load served by the heating system.</description>
       <type>Double</type>
       <units>Frac</units>
@@ -3066,6 +3188,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Central AC, SEER 13</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -3218,34 +3341,119 @@
       </choices>
     </argument>
     <argument>
-      <name>cooling_system_cooling_capacity</name>
-      <display_name>Cooling System: Cooling Capacity</display_name>
-      <description>The output cooling capacity of the cooling system. If not provided, the OS-HPXML autosized default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#central-air-conditioner'&gt;Central Air Conditioner&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner'&gt;Room Air Conditioner&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-air-conditioner'&gt;Packaged Terminal Air Conditioner&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#evaporative-cooler'&gt;Evaporative Cooler&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-air-conditioner'&gt;Mini-Split Air Conditioner&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
+      <name>hvac_capacity_cooling_system</name>
+      <display_name>HVAC: Cooling System Capacity</display_name>
+      <description>The output capacity of the cooling system.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>cooling_system_cooling_autosizing_factor</name>
-      <display_name>Cooling System: Cooling Autosizing Factor</display_name>
-      <description>The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>cooling_system_cooling_autosizing_limit</name>
-      <display_name>Cooling System: Cooling Autosizing Limit</display_name>
-      <description>The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
+      <default_value>Autosize</default_value>
+      <choices>
+        <choice>
+          <value>Autosize</value>
+          <display_name>Autosize</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 140% Multiplier</value>
+          <display_name>Autosize, 140% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 170% Multiplier</value>
+          <display_name>Autosize, 170% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>0.5 tons</value>
+          <display_name>0.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>0.75 tons</value>
+          <display_name>0.75 tons</display_name>
+        </choice>
+        <choice>
+          <value>1.0 tons</value>
+          <display_name>1.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>1.5 tons</value>
+          <display_name>1.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>2.0 tons</value>
+          <display_name>2.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>2.5 tons</value>
+          <display_name>2.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>3.0 tons</value>
+          <display_name>3.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>3.5 tons</value>
+          <display_name>3.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>4.0 tons</value>
+          <display_name>4.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>4.5 tons</value>
+          <display_name>4.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>5.0 tons</value>
+          <display_name>5.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>5.5 tons</value>
+          <display_name>5.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>6.0 tons</value>
+          <display_name>6.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>6.5 tons</value>
+          <display_name>6.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>7.0 tons</value>
+          <display_name>7.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>7.5 tons</value>
+          <display_name>7.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>8.0 tons</value>
+          <display_name>8.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>8.5 tons</value>
+          <display_name>8.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>9.0 tons</value>
+          <display_name>9.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>9.5 tons</value>
+          <display_name>9.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>10.0 tons</value>
+          <display_name>10.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit</value>
+          <display_name>Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>cooling_system_fraction_cool_load_served</name>
-      <display_name>Cooling System: Fraction Cool Load Served</display_name>
+      <display_name>HVAC: Cooling System Fraction Cool Load Served</display_name>
       <description>The cooling load served by the cooling system.</description>
       <type>Double</type>
       <units>Frac</units>
@@ -3254,18 +3462,144 @@
       <default_value>1</default_value>
     </argument>
     <argument>
-      <name>cooling_system_integrated_heating_system_capacity</name>
-      <display_name>Cooling System: Integrated Heating System Heating Capacity</display_name>
-      <description>The output heating capacity of the heating system integrated into cooling system. If not provided, the OS-HPXML autosized default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner'&gt;Room Air Conditioner&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-air-conditioner'&gt;Packaged Terminal Air Conditioner&lt;/a&gt;) is used. Only used for room air conditioner and packaged terminal air conditioner.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
+      <name>hvac_capacity_cooling_system_integrated_heating</name>
+      <display_name>HVAC: Cooling System Integrated Heating Capacity</display_name>
+      <description>The output capacity of the cooling system's integrated heating system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Autosize</default_value>
+      <choices>
+        <choice>
+          <value>Autosize</value>
+          <display_name>Autosize</display_name>
+        </choice>
+        <choice>
+          <value>5 kBtu/hr</value>
+          <display_name>5 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>10 kBtu/hr</value>
+          <display_name>10 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>15 kBtu/hr</value>
+          <display_name>15 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>20 kBtu/hr</value>
+          <display_name>20 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>25 kBtu/hr</value>
+          <display_name>25 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>30 kBtu/hr</value>
+          <display_name>30 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>35 kBtu/hr</value>
+          <display_name>35 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>40 kBtu/hr</value>
+          <display_name>40 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>45 kBtu/hr</value>
+          <display_name>45 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>50 kBtu/hr</value>
+          <display_name>50 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>55 kBtu/hr</value>
+          <display_name>55 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>60 kBtu/hr</value>
+          <display_name>60 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>65 kBtu/hr</value>
+          <display_name>65 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>70 kBtu/hr</value>
+          <display_name>70 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>75 kBtu/hr</value>
+          <display_name>75 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>80 kBtu/hr</value>
+          <display_name>80 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>85 kBtu/hr</value>
+          <display_name>85 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>90 kBtu/hr</value>
+          <display_name>90 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>95 kBtu/hr</value>
+          <display_name>95 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>100 kBtu/hr</value>
+          <display_name>100 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>105 kBtu/hr</value>
+          <display_name>105 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>110 kBtu/hr</value>
+          <display_name>110 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>115 kBtu/hr</value>
+          <display_name>115 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>120 kBtu/hr</value>
+          <display_name>120 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>125 kBtu/hr</value>
+          <display_name>125 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>130 kBtu/hr</value>
+          <display_name>130 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>135 kBtu/hr</value>
+          <display_name>135 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>140 kBtu/hr</value>
+          <display_name>140 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>145 kBtu/hr</value>
+          <display_name>145 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>150 kBtu/hr</value>
+          <display_name>150 kBtu/hr</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>cooling_system_integrated_heating_system_fraction_heat_load_served</name>
-      <display_name>Cooling System: Integrated Heating System Fraction Heat Load Served</display_name>
-      <description>The heating load served by the heating system integrated into cooling system. Only used for packaged terminal air conditioner and room air conditioner.</description>
+      <display_name>HVAC: Cooling System Integrated Heating Fraction Heat Load Served</display_name>
+      <description>The heating load served by the heating system integrated into cooling system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.</description>
       <type>Double</type>
       <units>Frac</units>
       <required>false</required>
@@ -3278,6 +3612,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -3490,56 +3825,115 @@
       </choices>
     </argument>
     <argument>
-      <name>heat_pump_heating_capacity</name>
-      <display_name>Heat Pump: Heating Capacity</display_name>
-      <description>The output heating capacity of the heat pump. If not provided, the OS-HPXML autosized default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'&gt;Air-to-Air Heat Pump&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'&gt;Mini-Split Heat Pump&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'&gt;Packaged Terminal Heat Pump&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'&gt;Room Air Conditioner w/ Reverse Cycle&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#ground-to-air-heat-pump'&gt;Ground-to-Air Heat Pump&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
+      <name>hvac_capacity_heat_pump</name>
+      <display_name>HVAC: Heat Pump Capacity</display_name>
+      <description>The output capacity of the heat pump.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heat_pump_heating_autosizing_factor</name>
-      <display_name>Heat Pump: Heating Autosizing Factor</display_name>
-      <description>The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heat_pump_heating_autosizing_limit</name>
-      <display_name>Heat Pump: Heating Autosizing Limit</display_name>
-      <description>The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heat_pump_cooling_capacity</name>
-      <display_name>Heat Pump: Cooling Capacity</display_name>
-      <description>The output cooling capacity of the heat pump. If not provided, the OS-HPXML autosized default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'&gt;Air-to-Air Heat Pump&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'&gt;Mini-Split Heat Pump&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'&gt;Packaged Terminal Heat Pump&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'&gt;Room Air Conditioner w/ Reverse Cycle&lt;/a&gt;, &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#ground-to-air-heat-pump'&gt;Ground-to-Air Heat Pump&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heat_pump_cooling_autosizing_factor</name>
-      <display_name>Heat Pump: Cooling Autosizing Factor</display_name>
-      <description>The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heat_pump_cooling_autosizing_limit</name>
-      <display_name>Heat Pump: Cooling Autosizing Limit</display_name>
-      <description>The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
+      <default_value>Autosize</default_value>
+      <choices>
+        <choice>
+          <value>Autosize</value>
+          <display_name>Autosize</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 140% Multiplier</value>
+          <display_name>Autosize, 140% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 170% Multiplier</value>
+          <display_name>Autosize, 170% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>0.5 tons</value>
+          <display_name>0.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>0.75 tons</value>
+          <display_name>0.75 tons</display_name>
+        </choice>
+        <choice>
+          <value>1.0 tons</value>
+          <display_name>1.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>1.5 tons</value>
+          <display_name>1.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>2.0 tons</value>
+          <display_name>2.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>2.5 tons</value>
+          <display_name>2.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>3.0 tons</value>
+          <display_name>3.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>3.5 tons</value>
+          <display_name>3.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>4.0 tons</value>
+          <display_name>4.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>4.5 tons</value>
+          <display_name>4.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>5.0 tons</value>
+          <display_name>5.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>5.5 tons</value>
+          <display_name>5.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>6.0 tons</value>
+          <display_name>6.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>6.5 tons</value>
+          <display_name>6.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>7.0 tons</value>
+          <display_name>7.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>7.5 tons</value>
+          <display_name>7.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>8.0 tons</value>
+          <display_name>8.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>8.5 tons</value>
+          <display_name>8.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>9.0 tons</value>
+          <display_name>9.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>9.5 tons</value>
+          <display_name>9.5 tons</display_name>
+        </choice>
+        <choice>
+          <value>10.0 tons</value>
+          <display_name>10.0 tons</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit</value>
+          <display_name>Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>heat_pump_fraction_heat_load_served</name>
@@ -3645,30 +4039,171 @@
       </choices>
     </argument>
     <argument>
-      <name>heat_pump_backup_heating_autosizing_factor</name>
-      <display_name>Heat Pump: Backup Heating Autosizing Factor</display_name>
-      <description>The capacity scaling factor applied to the auto-sizing methodology if Backup Type is 'integrated'. If not provided, 1.0 is used. If Backup Type is 'separate', use Heating System 2: Heating Autosizing Factor.</description>
-      <type>Double</type>
+      <name>hvac_capacity_heat_pump_backup</name>
+      <display_name>HVAC: Heat Pump Backup Capacity</display_name>
+      <description>The output capacity of the heat pump backup if Backup Type is 'integrated'.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heat_pump_backup_heating_autosizing_limit</name>
-      <display_name>Heat Pump: Backup Heating Autosizing Limit</display_name>
-      <description>The maximum capacity limit applied to the auto-sizing methodology if Backup Type is 'integrated'. If not provided, no limit is used. If Backup Type is 'separate', use Heating System 2: Heating Autosizing Limit.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heat_pump_backup_heating_capacity</name>
-      <display_name>Heat Pump: Backup Heating Capacity</display_name>
-      <description>The backup output heating capacity of the heat pump. If not provided, the OS-HPXML autosized default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#backup'&gt;Backup&lt;/a&gt;) is used. Only applies if Backup Type is 'integrated'.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
+      <default_value>Autosize</default_value>
+      <choices>
+        <choice>
+          <value>Autosize</value>
+          <display_name>Autosize</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 140% Multiplier</value>
+          <display_name>Autosize, 140% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 170% Multiplier</value>
+          <display_name>Autosize, 170% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>5 kW</value>
+          <display_name>5 kW</display_name>
+        </choice>
+        <choice>
+          <value>10 kW</value>
+          <display_name>10 kW</display_name>
+        </choice>
+        <choice>
+          <value>15 kW</value>
+          <display_name>15 kW</display_name>
+        </choice>
+        <choice>
+          <value>20 kW</value>
+          <display_name>20 kW</display_name>
+        </choice>
+        <choice>
+          <value>25 kW</value>
+          <display_name>25 kW</display_name>
+        </choice>
+        <choice>
+          <value>5 kBtu/hr</value>
+          <display_name>5 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>10 kBtu/hr</value>
+          <display_name>10 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>15 kBtu/hr</value>
+          <display_name>15 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>20 kBtu/hr</value>
+          <display_name>20 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>25 kBtu/hr</value>
+          <display_name>25 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>30 kBtu/hr</value>
+          <display_name>30 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>35 kBtu/hr</value>
+          <display_name>35 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>40 kBtu/hr</value>
+          <display_name>40 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>45 kBtu/hr</value>
+          <display_name>45 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>50 kBtu/hr</value>
+          <display_name>50 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>55 kBtu/hr</value>
+          <display_name>55 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>60 kBtu/hr</value>
+          <display_name>60 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>65 kBtu/hr</value>
+          <display_name>65 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>70 kBtu/hr</value>
+          <display_name>70 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>75 kBtu/hr</value>
+          <display_name>75 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>80 kBtu/hr</value>
+          <display_name>80 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>85 kBtu/hr</value>
+          <display_name>85 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>90 kBtu/hr</value>
+          <display_name>90 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>95 kBtu/hr</value>
+          <display_name>95 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>100 kBtu/hr</value>
+          <display_name>100 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>105 kBtu/hr</value>
+          <display_name>105 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>110 kBtu/hr</value>
+          <display_name>110 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>115 kBtu/hr</value>
+          <display_name>115 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>120 kBtu/hr</value>
+          <display_name>120 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>125 kBtu/hr</value>
+          <display_name>125 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>130 kBtu/hr</value>
+          <display_name>130 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>135 kBtu/hr</value>
+          <display_name>135 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>140 kBtu/hr</value>
+          <display_name>140 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>145 kBtu/hr</value>
+          <display_name>145 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>150 kBtu/hr</value>
+          <display_name>150 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit</value>
+          <display_name>Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>hvac_heat_pump_temps</name>
@@ -4074,6 +4609,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>electricity</default_value>
       <choices>
         <choice>
           <value>electricity</value>
@@ -4106,30 +4642,151 @@
       </choices>
     </argument>
     <argument>
-      <name>heating_system_2_heating_capacity</name>
-      <display_name>Heating System 2: Heating Capacity</display_name>
-      <description>The output heating capacity of the second heating system. If not provided, the OS-HPXML autosized default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-heating-systems'&gt;HPXML Heating Systems&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
+      <name>hvac_capacity_heating_system_2</name>
+      <display_name>HVAC: Heating System 2 Capacity</display_name>
+      <description>The output capacity of the second heating system.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heating_system_2_heating_autosizing_factor</name>
-      <display_name>Heating System 2: Heating Autosizing Factor</display_name>
-      <description>The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heating_system_2_heating_autosizing_limit</name>
-      <display_name>Heating System 2: Heating Autosizing Limit</display_name>
-      <description>The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.</description>
-      <type>Double</type>
-      <units>Btu/hr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
+      <default_value>Autosize</default_value>
+      <choices>
+        <choice>
+          <value>Autosize</value>
+          <display_name>Autosize</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 140% Multiplier</value>
+          <display_name>Autosize, 140% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>Autosize, 170% Multiplier</value>
+          <display_name>Autosize, 170% Multiplier</display_name>
+        </choice>
+        <choice>
+          <value>5 kBtu/hr</value>
+          <display_name>5 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>10 kBtu/hr</value>
+          <display_name>10 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>15 kBtu/hr</value>
+          <display_name>15 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>20 kBtu/hr</value>
+          <display_name>20 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>25 kBtu/hr</value>
+          <display_name>25 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>30 kBtu/hr</value>
+          <display_name>30 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>35 kBtu/hr</value>
+          <display_name>35 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>40 kBtu/hr</value>
+          <display_name>40 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>45 kBtu/hr</value>
+          <display_name>45 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>50 kBtu/hr</value>
+          <display_name>50 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>55 kBtu/hr</value>
+          <display_name>55 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>60 kBtu/hr</value>
+          <display_name>60 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>65 kBtu/hr</value>
+          <display_name>65 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>70 kBtu/hr</value>
+          <display_name>70 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>75 kBtu/hr</value>
+          <display_name>75 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>80 kBtu/hr</value>
+          <display_name>80 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>85 kBtu/hr</value>
+          <display_name>85 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>90 kBtu/hr</value>
+          <display_name>90 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>95 kBtu/hr</value>
+          <display_name>95 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>100 kBtu/hr</value>
+          <display_name>100 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>105 kBtu/hr</value>
+          <display_name>105 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>110 kBtu/hr</value>
+          <display_name>110 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>115 kBtu/hr</value>
+          <display_name>115 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>120 kBtu/hr</value>
+          <display_name>120 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>125 kBtu/hr</value>
+          <display_name>125 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>130 kBtu/hr</value>
+          <display_name>130 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>135 kBtu/hr</value>
+          <display_name>135 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>140 kBtu/hr</value>
+          <display_name>140 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>145 kBtu/hr</value>
+          <display_name>145 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>150 kBtu/hr</value>
+          <display_name>150 kBtu/hr</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit</value>
+          <display_name>Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>heating_system_2_fraction_heat_load_served</name>
@@ -8830,7 +9487,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>0BEB939A</checksum>
+      <checksum>0AA000E7</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -8847,7 +9504,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4D1E3FAC</checksum>
+      <checksum>2CB2D910</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -8914,6 +9571,42 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>AE328677</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_capacity_cooling_system.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1D8BE486</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_capacity_cooling_system_integrated_heating.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>641F8B4C</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_capacity_heat_pump.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1D8BE486</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_capacity_heat_pump_backup.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>41D2CB97</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_capacity_heating_system.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E74A8CEF</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_capacity_heating_system_2.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>18709546</checksum>
     </file>
     <file>
       <filename>options/hvac_cooling_system.tsv</filename>
@@ -9015,7 +9708,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>23F65D6D</checksum>
+      <checksum>180518F5</checksum>
     </file>
   </files>
 </measure>

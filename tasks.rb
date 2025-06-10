@@ -263,8 +263,38 @@ def apply_hpxml_modification_hers_hvac_dse(hpxml_path, hpxml)
                                       distribution_system_type: HPXML::HVACDistributionTypeDSE,
                                       annual_heating_dse: 1.0,
                                       annual_cooling_dse: 1.0)
+    if ['HVAC1a.xml', 'HVAC1b.xml', 'HVAC2a.xml', 'HVAC2b.xml', 'HVAC2e.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 56100
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38300
+    elsif ['HVAC2c.xml', 'HVAC2d.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heat_pumps[0].heating_capacity = 56100
+      hpxml_bldg.heat_pumps[0].cooling_capacity = 56100
+    end
   end
   if hpxml_path.include? 'HERS_DSE'
+    if ['HVAC3a.xml', 'HVAC3e.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 46600
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38400
+    elsif ['HVAC3b.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 56000
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38400
+    elsif ['HVAC3c.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 49000
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38400
+    elsif ['HVAC3d.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 61000
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38400
+    elsif ['HVAC3f.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 46600
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 49900
+    elsif ['HVAC3g.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 46600
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 42200
+    elsif ['HVAC3h.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 46600
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 55000
+    end
+
     # Assign duct surface area
     hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = nil
     hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_area = nil
@@ -2020,6 +2050,13 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         heating_system.fan_watts = 0
       elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
         heating_system.fan_watts = 40
+      end
+    end
+    if hpxml_file.include? 'heat-pump'
+      if hpxml_file.include? 'cooling-only'
+        hpxml_bldg.heat_pumps[0].heating_capacity = 0
+      elsif hpxml_file.include? 'heating-only'
+        hpxml_bldg.heat_pumps[0].cooling_capacity = 0
       end
     end
 

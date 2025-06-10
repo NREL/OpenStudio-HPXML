@@ -341,11 +341,11 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <CoolingAutosizingFactor>1.7</CoolingAutosizingFactor>
-                <HeatingAutosizingFactor>1.4</HeatingAutosizingFactor>
+                <HeatingAutosizingFactor>1.7</HeatingAutosizingFactor>
                 <BackupHeatingAutosizingFactor>0.9</BackupHeatingAutosizingFactor>
-                <CoolingAutosizingLimit>53000.0</CoolingAutosizingLimit>
-                <HeatingAutosizingLimit>44000.0</HeatingAutosizingLimit>
-                <BackupHeatingAutosizingLimit>28000.0</BackupHeatingAutosizingLimit>
+                <CoolingAutosizingLimit>36000.0</CoolingAutosizingLimit>
+                <HeatingAutosizingLimit>36000.0</HeatingAutosizingLimit>
+                <BackupHeatingAutosizingLimit>45000.0</BackupHeatingAutosizingLimit>
               </extension>
             </HeatPump>
           </HVACPlant>

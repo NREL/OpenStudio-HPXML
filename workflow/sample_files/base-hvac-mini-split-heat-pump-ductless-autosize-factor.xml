@@ -334,9 +334,9 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <CoolingAutosizingFactor>1.7</CoolingAutosizingFactor>
-                <HeatingAutosizingFactor>1.4</HeatingAutosizingFactor>
-                <CoolingAutosizingLimit>41000.0</CoolingAutosizingLimit>
-                <HeatingAutosizingLimit>33000.0</HeatingAutosizingLimit>
+                <HeatingAutosizingFactor>1.7</HeatingAutosizingFactor>
+                <CoolingAutosizingLimit>36000.0</CoolingAutosizingLimit>
+                <HeatingAutosizingLimit>36000.0</HeatingAutosizingLimit>
               </extension>
             </HeatPump>
           </HVACPlant>

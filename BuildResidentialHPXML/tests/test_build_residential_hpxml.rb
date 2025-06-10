@@ -493,18 +493,17 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_air_leakage'] = '3 ACH50'
       args['heating_system_fuel'] = HPXML::FuelTypeNaturalGas
       args['hvac_heating_system'] = 'Central Furnace, 92% AFUE'
-      args['heating_system_heating_capacity'] = 36000.0
+      args['hvac_capacity_heating_system'] = '40 kBtu/hr'
       args['heating_system_fraction_heat_load_served'] = 1
       args['hvac_cooling_system'] = 'Central AC, SEER 13'
-      args['cooling_system_cooling_capacity'] = 24000.0
+      args['hvac_capacity_cooling_system'] = '2.0 tons'
       args['cooling_system_fraction_cool_load_served'] = 1
       args['hvac_heat_pump'] = 'None'
-      args['heat_pump_heating_capacity'] = 36000.0
-      args['heat_pump_cooling_capacity'] = 36000.0
+      args['hvac_capacity_heat_pump'] = '3.0 tons'
       args['heat_pump_fraction_heat_load_served'] = 1
       args['heat_pump_fraction_cool_load_served'] = 1
       args['hvac_heat_pump_backup'] = 'Integrated, Electricity, 100% Efficiency'
-      args['heat_pump_backup_heating_capacity'] = 36000.0
+      args['hvac_capacity_heat_pump_backup'] = '35 kBtu/hr'
       args['hvac_geothermal_loop'] = 'Default'
       args['hvac_control_heating_weekday_setpoint'] = 68
       args['hvac_control_heating_weekend_setpoint'] = 68
@@ -711,21 +710,21 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['extra_refrigerator_location'] = HPXML::LocationConditionedSpace
     when 'extra-second-heating-system-portable-heater-to-heating-system.xml'
       args['heating_system_fuel'] = HPXML::FuelTypeElectricity
-      args['heating_system_heating_capacity'] = 48000.0
+      args['hvac_capacity_heating_system'] = '50 kBtu/hr'
       args['heating_system_fraction_heat_load_served'] = 0.75
       args['hvac_ducts'] = '0 CFM25 per 100ft2, Uninsulated'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['hvac_heating_system_2'] = 'Space Heater, 100% Efficiency'
-      args['heating_system_2_heating_capacity'] = 16000.0
+      args['hvac_capacity_heating_system_2'] = '15 kBtu/hr'
     when 'extra-second-heating-system-fireplace-to-heating-system.xml'
       args['heating_system_fuel'] = HPXML::FuelTypeElectricity
       args['hvac_heating_system'] = 'Electric Resistance'
-      args['heating_system_heating_capacity'] = 48000.0
+      args['hvac_capacity_heating_system'] = '50 kBtu/hr'
       args['heating_system_fraction_heat_load_served'] = 0.75
       args['hvac_cooling_system'] = 'None'
       args['hvac_heating_system_2'] = 'Fireplace, 100% Efficiency'
-      args['heating_system_2_heating_capacity'] = 16000.0
+      args['hvac_capacity_heating_system_2'] = '15 kBtu/hr'
     when 'extra-second-heating-system-boiler-to-heating-system.xml'
       args['hvac_heating_system'] = 'Boiler, 92% AFUE'
       args['heating_system_fraction_heat_load_served'] = 0.75
@@ -735,21 +734,21 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_cooling_system'] = 'None'
       args['hvac_heat_pump'] = 'Central HP, SEER 10, 6.2 HSPF'
       args['hvac_heat_pump_backup'] = 'Integrated, Electricity, 100% Efficiency'
-      args['heat_pump_heating_capacity'] = 48000.0
+      args['hvac_capacity_heat_pump'] = '4.0 tons'
       args['heat_pump_fraction_heat_load_served'] = 0.75
       args['hvac_ducts'] = '0 CFM25 per 100ft2, R-4'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['hvac_heating_system_2'] = 'Space Heater, 100% Efficiency'
-      args['heating_system_2_heating_capacity'] = 16000.0
+      args['hvac_capacity_heating_system_2'] = '15 kBtu/hr'
     when 'extra-second-heating-system-fireplace-to-heat-pump.xml'
       args['hvac_heating_system'] = 'None'
       args['hvac_cooling_system'] = 'None'
       args['hvac_heat_pump'] = 'Mini-Split HP, SEER 19, 10 HSPF, Ducted'
-      args['heat_pump_heating_capacity'] = 48000.0
+      args['hvac_capacity_heat_pump'] = '4.0 tons'
       args['heat_pump_fraction_heat_load_served'] = 0.75
       args['hvac_heating_system_2'] = 'Fireplace, 100% Efficiency'
-      args['heating_system_2_heating_capacity'] = 16000.0
+      args['hvac_capacity_heating_system_2'] = '15 kBtu/hr'
     when 'extra-second-heating-system-boiler-to-heat-pump.xml'
       args['hvac_heating_system'] = 'None'
       args['hvac_cooling_system'] = 'None'
@@ -855,9 +854,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-detailed-performance-autosize.xml'
       args['hvac_heating_system'] = 'None'
       args['hvac_cooling_system'] = 'None'
-      args['hvac_heat_pump'] = 'Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance'
-      args.delete('heat_pump_heating_capacity')
-      args.delete('heat_pump_cooling_capacity')
+      args['hvac_heat_pump'] = 'Detailed Example: Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance'
     when 'extra-power-outage-periods.xml'
       args['schedules_unavailable_period_types'] = 'Power Outage, Power Outage'
       args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'

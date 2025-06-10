@@ -1462,7 +1462,7 @@ The heating system type/efficiency. Use 'None' if there is no heating system or 
 
 <br/>
 
-**Heating System: Fuel Type**
+**HVAC: Heating System Fuel Type**
 
 The fuel type of the heating system. Ignored for ElectricResistance.
 
@@ -1475,44 +1475,20 @@ The fuel type of the heating system. Ignored for ElectricResistance.
 
 <br/>
 
-**Heating System: Heating Capacity**
+**HVAC: Heating System Capacity**
 
-The output heating capacity of the heating system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
+The output capacity of the heating system.
 
-- **Name:** ``heating_system_heating_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
+- **Name:** ``hvac_capacity_heating_system``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Heating System: Heating Autosizing Factor**
-
-The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
-
-- **Name:** ``heating_system_heating_autosizing_factor``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 
-**Heating System: Heating Autosizing Limit**
-
-The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
-
-- **Name:** ``heating_system_heating_autosizing_limit``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heating System: Fraction Heat Load Served**
+**HVAC: Heating System Fraction Heat Load Served**
 
 The heating load served by the heating system.
 
@@ -1538,44 +1514,20 @@ The cooling system type/efficiency. Use 'None' if there is no cooling system or 
 
 <br/>
 
-**Cooling System: Cooling Capacity**
+**HVAC: Cooling System Capacity**
 
-The output cooling capacity of the cooling system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#central-air-conditioner'>Central Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner'>Room Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#evaporative-cooler'>Evaporative Cooler</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.
+The output capacity of the cooling system.
 
-- **Name:** ``cooling_system_cooling_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
+- **Name:** ``hvac_capacity_cooling_system``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Cooling System: Cooling Autosizing Factor**
-
-The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
-
-- **Name:** ``cooling_system_cooling_autosizing_factor``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `0.5 tons`, `0.75 tons`, `1.0 tons`, `1.5 tons`, `2.0 tons`, `2.5 tons`, `3.0 tons`, `3.5 tons`, `4.0 tons`, `4.5 tons`, `5.0 tons`, `5.5 tons`, `6.0 tons`, `6.5 tons`, `7.0 tons`, `7.5 tons`, `8.0 tons`, `8.5 tons`, `9.0 tons`, `9.5 tons`, `10.0 tons`, `Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit`
 
 <br/>
 
-**Cooling System: Cooling Autosizing Limit**
-
-The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
-
-- **Name:** ``cooling_system_cooling_autosizing_limit``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooling System: Fraction Cool Load Served**
+**HVAC: Cooling System Fraction Cool Load Served**
 
 The cooling load served by the cooling system.
 
@@ -1588,22 +1540,22 @@ The cooling load served by the cooling system.
 
 <br/>
 
-**Cooling System: Integrated Heating System Heating Capacity**
+**HVAC: Cooling System Integrated Heating Capacity**
 
-The output heating capacity of the heating system integrated into cooling system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner'>Room Air Conditioner</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>) is used. Only used for room air conditioner and packaged terminal air conditioner.
+The output capacity of the cooling system's integrated heating system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.
 
-- **Name:** ``cooling_system_integrated_heating_system_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
+- **Name:** ``hvac_capacity_cooling_system_integrated_heating``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
+- **Choices:** `Autosize`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`
+
 <br/>
 
-**Cooling System: Integrated Heating System Fraction Heat Load Served**
+**HVAC: Cooling System Integrated Heating Fraction Heat Load Served**
 
-The heating load served by the heating system integrated into cooling system. Only used for packaged terminal air conditioner and room air conditioner.
+The heating load served by the heating system integrated into cooling system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.
 
 - **Name:** ``cooling_system_integrated_heating_system_fraction_heat_load_served``
 - **Type:** ``Double``
@@ -1627,77 +1579,16 @@ The heat pump type/efficiency.
 
 <br/>
 
-**Heat Pump: Heating Capacity**
+**HVAC: Heat Pump Capacity**
 
-The output heating capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.
+The output capacity of the heat pump.
 
-- **Name:** ``heat_pump_heating_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
+- **Name:** ``hvac_capacity_heat_pump``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Heat Pump: Heating Autosizing Factor**
-
-The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
-
-- **Name:** ``heat_pump_heating_autosizing_factor``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Heating Autosizing Limit**
-
-The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
-
-- **Name:** ``heat_pump_heating_autosizing_limit``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Cooling Capacity**
-
-The output cooling capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.
-
-- **Name:** ``heat_pump_cooling_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Cooling Autosizing Factor**
-
-The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
-
-- **Name:** ``heat_pump_cooling_autosizing_factor``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Cooling Autosizing Limit**
-
-The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
-
-- **Name:** ``heat_pump_cooling_autosizing_limit``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
+- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `0.5 tons`, `0.75 tons`, `1.0 tons`, `1.5 tons`, `2.0 tons`, `2.5 tons`, `3.0 tons`, `3.5 tons`, `4.0 tons`, `4.5 tons`, `5.0 tons`, `5.5 tons`, `6.0 tons`, `6.5 tons`, `7.0 tons`, `7.5 tons`, `8.0 tons`, `8.5 tons`, `9.0 tons`, `9.5 tons`, `10.0 tons`, `Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit`
 
 <br/>
 
@@ -1740,40 +1631,16 @@ The heat pump backup type/efficiency. Use 'None' if there is no backup heating. 
 
 <br/>
 
-**Heat Pump: Backup Heating Autosizing Factor**
+**HVAC: Heat Pump Backup Capacity**
 
-The capacity scaling factor applied to the auto-sizing methodology if Backup Type is 'integrated'. If not provided, 1.0 is used. If Backup Type is 'separate', use Heating System 2: Heating Autosizing Factor.
+The output capacity of the heat pump backup if Backup Type is 'integrated'.
 
-- **Name:** ``heat_pump_backup_heating_autosizing_factor``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Backup Heating Autosizing Limit**
-
-The maximum capacity limit applied to the auto-sizing methodology if Backup Type is 'integrated'. If not provided, no limit is used. If Backup Type is 'separate', use Heating System 2: Heating Autosizing Limit.
-
-- **Name:** ``heat_pump_backup_heating_autosizing_limit``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
+- **Name:** ``hvac_capacity_heat_pump_backup``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Heat Pump: Backup Heating Capacity**
-
-The backup output heating capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#backup'>Backup</a>) is used. Only applies if Backup Type is 'integrated'.
-
-- **Name:** ``heat_pump_backup_heating_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
+- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `5 kW`, `10 kW`, `15 kW`, `20 kW`, `25 kW`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 
@@ -1855,40 +1722,16 @@ The fuel type of the second heating system. Ignored for ElectricResistance.
 
 <br/>
 
-**Heating System 2: Heating Capacity**
+**HVAC: Heating System 2 Capacity**
 
-The output heating capacity of the second heating system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
+The output capacity of the second heating system.
 
-- **Name:** ``heating_system_2_heating_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
+- **Name:** ``hvac_capacity_heating_system_2``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Heating System 2: Heating Autosizing Factor**
-
-The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
-
-- **Name:** ``heating_system_2_heating_autosizing_factor``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heating System 2: Heating Autosizing Limit**
-
-The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
-
-- **Name:** ``heating_system_2_heating_autosizing_limit``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
+- **Choices:** `Autosize`, `Autosize, 140% Multiplier`, `Autosize, 170% Multiplier`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 
