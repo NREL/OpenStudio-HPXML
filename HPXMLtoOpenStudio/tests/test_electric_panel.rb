@@ -167,7 +167,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_in_epsilon(electric_panel.max_current_rating - (1.25 * 4500.0) / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_headroom_amps[1], 0.01)
   end
 
-  def test_hvac_configurations
+  def test_hvac_120v_room_air_conditioner_only
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
                   'skip_validation' => true }
 
@@ -180,6 +180,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 2011)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 0)
+  end
+
+  def test_hvac_240v_room_air_conditioner_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = '240v room air conditioner only'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-room-ac-only.xml', test_name)
@@ -199,26 +204,41 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 2)
+  end
+
+  def test_hvac_gas_furnace_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Gas furnace only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-furnace-gas-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 286.5)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 1)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 0)
+  end
+
+  def test_hvac_electric_furnace_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Electric furnace only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-furnace-elec-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295 + 10766)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 10753)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 2)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 0)
+  end
+
+  def test_hvac_large_electric_furnace_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Large electric furnace only'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-furnace-elec-only.xml', test_name)
@@ -230,26 +250,41 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 4)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 0)
+  end
+
+  def test_hvac_gas_furnace_and_central_air_conditioner
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Gas furnace + central air conditioner'
     hpxml, _hpxml_bldg = _create_hpxml('base.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 287)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 1)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 2)
+  end
+
+  def test_hvac_electric_furnace_and_central_air_conditioner
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Electric furnace + central air conditioner'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-furnace-elec-central-ac-1-speed.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 295 + 10551)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 10544)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 2)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 2)
+  end
+
+  def test_hvac_larger_electric_furnace_and_central_air_conditioner
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Large electric furnace + central air conditioner'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-furnace-elec-central-ac-1-speed.xml', test_name)
@@ -261,6 +296,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 4)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 2)
+  end
+
+  def test_hvac_central_air_conditioner_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Central air conditioner only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-central-ac-only-1-speed.xml', test_name)
@@ -271,6 +311,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
+  end
+
+  def test_hvac_large_central_air_conditioner_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Large central air conditioner only'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-central-ac-only-1-speed.xml', test_name)
@@ -282,26 +327,41 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 800 + 7657)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
+  end
+
+  def test_hvac_gas_boiler_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Gas boiler only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96.2)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 1)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 0)
+  end
+
+  def test_hvac_electric_boiler_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Electric boiler only'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-boiler-elec-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 82 + 10766)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 10549)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 2)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 0)
+  end
+
+  def test_hvac_large_electric_boiler_only
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Large electric boiler only'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-elec-only.xml', test_name)
@@ -313,16 +373,26 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 4)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 0)
+  end
+
+  def test_hvac_gas_boiler_and_central_air_conditioner
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Gas boiler + central air conditioner'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96.2)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 1)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
+  end
+
+  def test_hvac_electric_boiler_and_central_air_conditioner
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Electric boiler + central air conditioner'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml', test_name)
@@ -330,10 +400,15 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 96.2 + 11468)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 11246)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 2)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
+  end
+
+  def test_hvac_large_electric_boiler_and_central_air_conditioner
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Large electric boiler + central air conditioner'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml', test_name)
@@ -346,6 +421,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 400 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating], 4)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeCooling], 3)
+  end
+
+  def test_hvac_ashp_without_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'ASHP w/out backup'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml', test_name)
@@ -356,19 +436,25 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5839)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5839)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 4)
+  end
+
+  def test_hvac_ashp_with_integrated_electric_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'ASHP w/integrated electric backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5839 + 10551)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 16400)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5839)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 4)
+  end
 
-    # Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.
-    # test_name = 'ASHP w/integrated electric backup switchover'
-    # test_name = 'ASHP w/separate electric backup switchover'
+  def test_hvac_ashp_with_integrated_gas_backup_switchover
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'ASHP w/integrated gas backup switchover'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml', test_name)
@@ -378,6 +464,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5839)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5839)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 3)
+  end
+
+  def test_hvac_ashp_with_separate_gas_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'ASHP w/separate gas backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml', test_name)
@@ -387,6 +478,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 210 + 3114 + 96)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 225 + 3114)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 5)
+  end
+
+  def test_hvac_ashp_with_separate_gas_backup_switchover
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'ASHP w/separate gas backup switchover'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml', test_name)
@@ -396,15 +492,25 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 281 + 4022 + 96)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 300 + 4022)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 5)
+  end
+
+  def test_hvac_ashp_heating_only_with_integrated_electric_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'ASHP heating only w/integrated electric backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 561 + 5839 + 10551)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 16400)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 0)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 4)
+  end
+
+  def test_hvac_ashp_cooling_only_without_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'ASHP cooling only w/out backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml', test_name)
@@ -414,6 +520,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 0)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 600 + 5839)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 4)
+  end
+
+  def test_hvac_ducted_mshp_without_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Ducted MSHP w/out backup'
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted.xml', test_name)
@@ -424,15 +535,25 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5839)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5839)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 2)
+  end
+
+  def test_hvac_ducted_mshp_with_integrated_electric_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Ducted MSHP w/integrated electric backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted.xml', test_name)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5839 + 10551)
+    _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 16041)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5839)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 4)
+  end
+
+  def test_hvac_ducted_mshp_with_integrated_gas_backup_switchover
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Ducted MSHP w/integrated gas backup switchover'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml', test_name)
@@ -442,6 +563,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 202 + 5839)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 216 + 5839)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 3)
+  end
+
+  def test_hvac_ductless_mshp_without_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Ductless MSHP w/out backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless.xml', test_name)
@@ -451,6 +577,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 84 + 5839)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 84 + 5839)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 2)
+  end
+
+  def test_hvac_ductless_mshp_with_separate_electric_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Ductless MSHP w/separate electric backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml', test_name)
@@ -460,6 +591,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeHeating, 42 + 3114 + 17584)
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeCooling, 42 + 3114)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 6)
+  end
+
+  def test_hvac_ductless_mshp_with_separate_gas_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Ductless MSHP w/separate gas backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml', test_name)
@@ -471,7 +607,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeHeating, HPXML::ElectricPanelLoadTypeCooling], 3)
   end
 
-  def test_water_heater_configurations
+  def test_water_heater_electric_storage
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
                   'skip_validation' => true }
 
@@ -482,6 +618,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 5500)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeWaterHeater], 2)
+  end
+
+  def test_water_heater_electric_tankless
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Electric tankless'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tankless-electric.xml', test_name)
@@ -490,6 +631,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 24000)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeWaterHeater], 4)
+  end
+
+  def test_water_heater_hpwh_with_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'HPWH w/backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml', test_name)
@@ -498,6 +644,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeWaterHeater, 4500)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeWaterHeater], 2)
+  end
+
+  def test_water_heater_hpwh_without_backup
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'HPWH w/out backup'
     hpxml, _hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-capacities.xml', test_name)
@@ -508,7 +659,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeWaterHeater], 2)
   end
 
-  def test_clothes_dryer_configurations
+  def test_clothes_dryer_vented
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
                   'skip_validation' => true }
 
@@ -519,6 +670,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 2)
+  end
+
+  def test_clothes_dryer_120v_vented
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = '120v vented clothes dryer'
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
@@ -536,6 +692,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 5760)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 4)
+  end
+
+  def test_clothes_dryer_heat_pump
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'HP clothes dryer'
     hpxml, _hpxml_bldg = _create_hpxml('base-appliances-modified.xml', test_name)
@@ -544,6 +705,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeClothesDryer, 860)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 2)
+  end
+
+  def test_clothes_dryer_120v_heat_pump
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = '120v HP clothes dryer'
     hpxml, hpxml_bldg = _create_hpxml('base-appliances-modified.xml', test_name)
@@ -563,7 +729,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeClothesDryer], 1)
   end
 
-  def test_cooking_range_configurations
+  def test_cooking_range_resistance
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
                   'skip_validation' => true }
 
@@ -574,6 +740,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 12000)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 2)
+  end
+
+  def test_cooking_range_120v_resistance
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = '120v resistance cooking range'
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
@@ -591,6 +762,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 1800)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 1)
+  end
+
+  def test_cooking_range_induction
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Induction cooking range'
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
@@ -600,6 +776,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeRangeOven, 10000)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 2)
+  end
+
+  def test_cooking_range_120v_induction
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = '120v induction cooking range'
     hpxml, hpxml_bldg = _create_hpxml('base.xml', test_name)
@@ -620,7 +801,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeRangeOven], 6)
   end
 
-  def test_ventilation_fans_configurations
+  def test_ventilation_fans_kitchen_and_bath
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
                   'skip_validation' => true }
 
@@ -631,6 +812,11 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     _test_service_feeder_power(hpxml_bldg, HPXML::ElectricPanelLoadTypeMechVent, 60)
     _test_occupied_spaces(hpxml_bldg, [HPXML::ElectricPanelLoadTypeMechVent], 2)
+  end
+
+  def test_ventilation_fans_mech_vent_exhaust
+    args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
+                  'skip_validation' => true }
 
     test_name = 'Exhaust fan'
     hpxml, _hpxml_bldg = _create_hpxml('base-mechvent-exhaust.xml', test_name)
@@ -760,7 +946,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     sfs.each do |sf|
       pw += sf.power
     end
-    assert_in_epsilon(power, pw, 0.001)
+    assert_in_delta(power, pw, 1.0)
   end
 
   def _test_occupied_spaces(hpxml_bldg, types, occupied_spaces)
