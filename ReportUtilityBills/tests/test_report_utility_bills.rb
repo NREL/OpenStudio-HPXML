@@ -78,10 +78,13 @@ class ReportUtilityBillsTest < Minitest::Test
                                              propane_marginal_rate: 2.4532692307692305,
                                              fuel_oil_marginal_rate: 3.495346153846154)
 
-    # Check for presence of fuels once
-    has_fuel = @hpxml_bldg.has_fuels()
+    @has_fuel = {}
+    @has_fuel[HPXML::FuelTypeElectricity] = true
+    HPXML::fossil_fuels.each do |fuel|
+      @has_fuel[fuel] = true
+    end
     Defaults.apply_header(@hpxml_header, @hpxml_bldg, nil)
-    Defaults.apply_utility_bill_scenarios(nil, @hpxml_header, @hpxml_bldg, has_fuel)
+    Defaults.apply_utility_bill_scenarios(nil, @hpxml_header, @hpxml_bldg, @has_fuel)
 
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
@@ -1227,7 +1230,7 @@ class ReportUtilityBillsTest < Minitest::Test
 
     utility_rates, utility_bills = @measure.setup_utility_outputs()
     pv_monthly_fee = @measure.get_pv_monthly_fee(utility_bill_scenario, hpxml_buildings)
-    @measure.get_utility_rates(@hpxml_path, fuels, utility_rates, utility_bill_scenario, pv_monthly_fee)
+    @measure.get_utility_rates(@hpxml_path, @has_fuel, utility_rates, utility_bill_scenario, pv_monthly_fee)
     @measure.get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
 
     # Annual
