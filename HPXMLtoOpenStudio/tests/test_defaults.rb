@@ -1620,8 +1620,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.375, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.64, 11.23, 40.0, 1.2, HPXML::HVACEquipmentTypeSpaceConstrained)
 
-    # Test fan model type based on watts/cfm
-    hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.4
+    # Test fan model type based on compressor type
+    hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.3
     hpxml_bldg.cooling_systems[0].fan_motor_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
@@ -1652,6 +1652,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = 10.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_motor_type)
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_watts_per_cfm)
     _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], nil, 12345, 40.0, 1.0, 10.0)
 
     # Test autosizing with factors
@@ -1670,6 +1672,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_motor_type)
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_watts_per_cfm)
     _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], nil, nil, 0.0, 1.0, 8.42)
   end
 
@@ -1679,6 +1683,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_capacity = 12345
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_motor_type)
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_watts_per_cfm)
     _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], nil, 12345, 1.0)
 
     # Test autosizing with factors
@@ -1694,6 +1700,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_motor_type)
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_watts_per_cfm)
     _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], nil, nil, 1.0)
   end
 
