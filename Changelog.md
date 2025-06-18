@@ -46,7 +46,7 @@ __Bugfixes__
 - BuildResidentialHPXML measure: Fixes error when specifying a combi boiler as the water heater type and a *shared* boiler as the heating system type.
 - BuildResidentialScheduleFile measure: Fixes out-of-sync shifting of occupancy and end use schedule resulting in activities even when there is no occupancy.
 - BuildResidentialScheduleFile measure: Fixes a small bug in sink schedule generation resulting in more concentrated schedule.
-- ReportUtilityBills measure: Apply fixed charges for fuels that are referenced by the HPXML file but not consumed throughout the year.
+- ReportUtilityBills measure: Apply fixed charges for fuels that are referenced by the HPXML file but consume no energy (e.g., gas heating system in Florida).
 
 ## OpenStudio-HPXML v1.9.1
 
