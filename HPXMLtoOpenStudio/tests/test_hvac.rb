@@ -1359,7 +1359,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for [min, rated, max] speeds
     expected_clg_cops_95 = [5.67, 3.97, 3.71]
     expected_clg_capacities_95 = [2838, 10709, 11490]
-    expected_htg_cops_47 = [4.63, 3.78, 3.57]
+    expected_htg_cops_47 = [4.28, 3.47, 3.27]
     expected_htg_capacities_47 = [3156, 10392, 11408]
     expected_c_d = 0.4
 
@@ -1417,7 +1417,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for [min, rated, max] speeds
     expected_clg_cops_95 = [5.35, 4.11, 3.85]
     expected_clg_capacities_95 = [2957, 10819, 11620]
-    expected_htg_cops_47 = [4.34, 3.62, 3.42]
+    expected_htg_cops_47 = [4.04, 3.34, 3.15]
     expected_htg_capacities_47 = [3151, 10282, 11269]
     expected_c_d = 0.4
 

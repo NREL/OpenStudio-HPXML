@@ -351,9 +351,6 @@
                 <Units>HSPF</Units>
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
-              <extension>
-                <HeatingCapacityFraction17F>0.6</HeatingCapacityFraction17F>
-              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>

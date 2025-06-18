@@ -333,7 +333,6 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <HeatingCapacityFraction17F>0.6</HeatingCapacityFraction17F>
                 <CoolingAutosizingFactor>1.7</CoolingAutosizingFactor>
                 <HeatingAutosizingFactor>1.7</HeatingAutosizingFactor>
                 <CoolingAutosizingLimit>36000.0</CoolingAutosizingLimit>
