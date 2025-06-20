@@ -828,18 +828,18 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
       assert_in_epsilon(expected_clg_cop_95, clg_coil.ratedCOP, 0.01)
       assert_in_epsilon(expected_clg_capacity_95, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
-      assert_in_epsilon(clg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-      assert_in_epsilon(clg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-      assert_in_epsilon(clg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
+      assert_in_epsilon(1.0 - expected_c_d, clg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, clg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, clg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
 
       # Check heating coil
       assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
       htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
       assert_in_epsilon(expected_htg_cop_47, htg_coil.ratedCOP, 0.01)
       assert_in_epsilon(expected_htg_capacity_47, htg_coil.ratedTotalHeatingCapacity.get, 0.01)
-      assert_in_epsilon(htg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-      assert_in_epsilon(htg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-      assert_in_epsilon(htg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
+      assert_in_epsilon(1.0 - expected_c_d, htg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, htg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, htg_coil.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
 
       # Check supp heating coil
       assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -961,11 +961,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     clg_coil.stages.each do |stage|
       assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+      assert_in_epsilon(1.0 - expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
     end
-    # FIXME: It only matters for stage 1, but we have those curves for all stages, do we need to check stage 2?
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
@@ -977,9 +976,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_htg_capacities_47.each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
+    htg_coil.stages.each do |stage|
+      assert_in_epsilon(1.0 - expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
+    end
 
     # Check supp heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -1023,10 +1024,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     clg_coil.stages.each do |stage|
       assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+      assert_in_epsilon(1.0 - expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
     end
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
@@ -1038,9 +1039,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_htg_capacities_47.each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
+    htg_coil.stages.each do |stage|
+      assert_in_epsilon(1.0 - expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
+    end
 
     # Check supp heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)
@@ -1375,10 +1378,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     clg_coil.stages.each do |stage|
       assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+      assert_in_epsilon(1.0 - expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
     end
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
@@ -1390,9 +1393,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_htg_capacities_47.each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
+    htg_coil.stages.each do |stage|
+      assert_in_epsilon(1.0 - expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
+    end
 
     # Check supp heating coil
     assert_equal(0, model.getCoilHeatingElectrics.size)
@@ -1433,10 +1438,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     clg_coil.stages.each do |stage|
       assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+      assert_in_epsilon(1.0 - expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
     end
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-    assert_in_epsilon(clg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
 
 
     # Check heating coil
@@ -1449,9 +1454,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     expected_htg_capacities_47.each_with_index do |htg_capacity, i|
       assert_in_epsilon(htg_capacity, htg_coil.stages[i].grossRatedHeatingCapacity.get, 0.01)
     end
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 1.0 - expected_c_d, 0.01)
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, expected_c_d, 0.01)
-    assert_in_epsilon(htg_coil.stages[0].partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.0, 0.01)
+    htg_coil.stages.each do |stage|
+      assert_in_epsilon(1.0 - expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient1Constant, 0.01)
+      assert_in_epsilon(expected_c_d, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient2x, 0.01)
+      assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
+    end
 
     # Check supp heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)

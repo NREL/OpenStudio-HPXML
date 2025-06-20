@@ -2133,7 +2133,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.375, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 13.3, 13.0, 6.72, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost, false, HPXML::HVACEquipmentTypePackaged)
 
     # Test fan model type based on watts/cfm
-    # FIXME: Should really update the defaults to guess at BPM vs PSC when fan W/cfm provided instead of fan motor type
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.17
     hpxml_bldg.heat_pumps[0].fan_motor_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
