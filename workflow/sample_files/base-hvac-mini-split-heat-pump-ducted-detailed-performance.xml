@@ -227,7 +227,6 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -329,8 +328,6 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
-              <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>variable speed</CompressorType>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
@@ -338,7 +335,7 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -669,22 +666,10 @@
         <PlugLoad>
           <SystemIdentifier id='PlugLoad1'/>
           <PlugLoadType>TV other</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>620.0</Value>
-          </Load>
         </PlugLoad>
         <PlugLoad>
           <SystemIdentifier id='PlugLoad2'/>
           <PlugLoadType>other</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>2457.0</Value>
-          </Load>
-          <extension>
-            <FracSensible>0.855</FracSensible>
-            <FracLatent>0.045</FracLatent>
-          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

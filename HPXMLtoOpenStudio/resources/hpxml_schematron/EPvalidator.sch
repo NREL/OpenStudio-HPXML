@@ -1339,6 +1339,7 @@
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="EER"]/h:Value) &lt; 6'>EER should typically be greater than or equal to 6.</sch:report>
       <sch:report role='WARN' test='number(h:AnnualCoolingEfficiency[h:Units="CEER"]/h:Value) &lt; 5.9'>CEER should typically be greater than or equal to 5.9.</sch:report>
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
+      <sch:report role='WARN' test='count(h:extension/h:FanPowerWattsPerCFM) + count(h:extension/h:FanMotorType) &gt; 0'>Fan power watts per cfm or fan motor type is not used for simulation of this HVAC system type.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -1354,6 +1355,7 @@
       <sch:assert role='ERROR' test='count(h:IntegratedHeatingSystemFuel) = 0'>Expected 0 element(s) for xpath: IntegratedHeatingSystemFuel</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
+      <sch:report role='WARN' test='count(h:extension/h:FanPowerWattsPerCFM) + count(h:extension/h:FanMotorType) &gt; 0'>Fan power watts per cfm or fan motor type is not used for simulation of this HVAC system type.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -1687,6 +1689,8 @@
       <sch:assert role='ERROR' test='h:HeatPumpFuel[text()="electricity"] or not(h:HeatPumpFuel)'>Expected HeatPumpFuel to be 'electricity'</sch:assert>
       <sch:assert role='ERROR' test='count(h:BackupType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BackupType</sch:assert> <!-- See [HeatPumpBackup] or [HeatPumpBackup=Integrated] or [HeatPumpBackup=Separate] -->
       <sch:assert role='ERROR' test='h:BackupType[text()="integrated" or text()="separate"] or not(h:BackupType)'>Expected BackupType to be 'integrated' or 'separate'</sch:assert>
+      <!-- Warnings -->
+      <sch:report role='WARN' test='count(h:extension/h:FanPowerWattsPerCFM) + count(h:extension/h:FanMotorType) &gt; 0'>Fan power watts per cfm or fan motor type is not used for simulation of this HVAC system type.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -1718,6 +1722,7 @@
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:HeatingCapacity) &lt;= 1000 and number(h:HeatingCapacity) &gt; 0 and h:HeatingCapacity'>Heating capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
+      <sch:report role='WARN' test='count(h:extension/h:FanPowerWattsPerCFM) + count(h:extension/h:FanMotorType) &gt; 0'>Fan power watts per cfm or fan motor type is not used for simulation of this HVAC system type.</sch:report>
     </sch:rule>
   </sch:pattern>
 

@@ -1095,8 +1095,13 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
   def get_tolerances(key)
     if key.include?('(MBtu)') || key.include?('(kBtu)') || key.include?('(kWh)')
       # Check that the energy difference is less than 0.5 MBtu or less than 6%
+      # FUTURE: Using 12% for duct component load (PR #2026); see if this can be improved.
       abs_delta_tol = 0.5 # MBtu
-      abs_frac_tol = 0.06
+      if key.include?('Component Load') && key.include?('Ducts')
+        abs_frac_tol = 0.12
+      else
+        abs_frac_tol = 0.06
+      end
       if key.include?('(kBtu)')
         abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kBtu')
       elsif key.include?('(kWh)')

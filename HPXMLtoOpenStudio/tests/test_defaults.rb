@@ -1620,12 +1620,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.375, HPXML::HVACFanMotorTypeBPM, nil, -0.11, -0.22, nil, 11.64, 11.23, 40.0, 1.2, HPXML::HVACEquipmentTypeSpaceConstrained)
 
-    # Test fan model type based on watts/cfm
-    hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.4
+    # Test fan model type based on compressor type
+    hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.3
     hpxml_bldg.cooling_systems[0].fan_motor_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.4, HPXML::HVACFanMotorTypePSC, nil, -0.11, -0.22, nil, 11.64, 11.23, 40.0, 1.2, HPXML::HVACEquipmentTypeSpaceConstrained)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.3, HPXML::HVACFanMotorTypePSC, nil, -0.11, -0.22, nil, 11.64, 11.23, 40.0, 1.2, HPXML::HVACEquipmentTypeSpaceConstrained)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = nil
@@ -1652,6 +1652,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = 10.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_motor_type)
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_watts_per_cfm)
     _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], nil, 12345, 40.0, 1.0, 10.0)
 
     # Test autosizing with factors
@@ -1670,6 +1672,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_motor_type)
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_watts_per_cfm)
     _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], nil, nil, 0.0, 1.0, 8.42)
   end
 
@@ -1679,6 +1683,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_capacity = 12345
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_motor_type)
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_watts_per_cfm)
     _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], nil, 12345, 1.0)
 
     # Test autosizing with factors
@@ -1694,6 +1700,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_motor_type)
+    assert_nil(default_hpxml_bldg.cooling_systems[0].fan_watts_per_cfm)
     _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], nil, nil, 1.0)
   end
 
@@ -2125,7 +2133,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.375, HPXML::HVACFanMotorTypeBPM, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 13.3, 13.0, 6.72, 40.0, 1.5, 1.2, 1.1, 99.0, HPXML::HVACPanHeaterControlTypeDefrost, false, HPXML::HVACEquipmentTypePackaged)
 
     # Test fan model type based on watts/cfm
-    # FIXME: Should really update the defaults to guess at BPM vs PSC when fan W/cfm provided instead of fan motor type
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.17
     hpxml_bldg.heat_pumps[0].fan_motor_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
@@ -2167,8 +2174,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].cooling_efficiency_eer2 = 13.0
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = nil
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf2 = 6.8
-    # Fixme: Heating capacity fraction 17F is ignored with detailed performance data, because 17F data is always provided, should we throw warning?
-    # hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = 0.1
     hpxml_bldg.heat_pumps[0].crankcase_heater_watts = 40.0
     nom_cap_at_47f = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 47.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
     nom_cap_at_17f = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == 17.0 && dp.capacity_description == HPXML::CapacityDescriptionNominal }.capacity
@@ -3764,14 +3769,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     electric_panel = default_hpxml_bldg.electric_panels[0]
     _test_default_electric_panel_values(electric_panel, nil, nil, nil, nil)
 
-    # Test electric panel inputs not overriden by defaults
+    # Test electric panel inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-detailed-electric-panel.xml')
     electric_panel = hpxml_bldg.electric_panels[0]
     electric_panel.voltage = HPXML::ElectricPanelVoltage240
     electric_panel.max_current_rating = 200.0
     electric_panel.headroom_spaces = 5
 
-    # Test branch circuit inputs not overriden by defaults
+    # Test branch circuit inputs not overridden by defaults
     branch_circuits = electric_panel.branch_circuits
     branch_circuits.clear
     branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
@@ -3889,8 +3894,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_branch_circuit_values(branch_circuits[0], HPXML::ElectricPanelVoltage120, 15.0, 0)
     _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage120, 15.0, 0)
     _test_default_branch_circuit_values(branch_circuits[2], HPXML::ElectricPanelVoltage240, 50.0, 2)
-    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 523.0, false)
-    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }, 2844.4, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 500.5, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }, 3383.5, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeWaterHeater }, 0.0, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeClothesDryer }, 0.0, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeDishwasher }, 1200.0, false)

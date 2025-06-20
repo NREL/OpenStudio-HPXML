@@ -428,6 +428,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.fuel_loads[0].frac_latent = 0.3
       when 'frac-total-plug-load'
         hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
+        hpxml_bldg.plug_loads[1].frac_sensible = 0.855
         hpxml_bldg.plug_loads[1].frac_latent = 0.245
       when 'furnace-invalid-afue'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -1013,6 +1014,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                           'HSPF should typically be greater than or equal to 6.',
                                                           'EER should typically be greater than or equal to 6.',
                                                           'COP should typically be greater than or equal to 2.'],
+                              'hvac-fan-inputs-ignored' => ['Fan power watts per cfm or fan motor type is not used for simulation of this HVAC system type.'],
                               'hvac-research-features-onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1.'],
                               'hvac-setpoints-high' => ['Heating setpoint should typically be less than or equal to 76 deg-F.',
                                                         'Cooling setpoint should typically be less than or equal to 86 deg-F.'],
@@ -1146,6 +1148,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             end
           end
         end
+      when 'hvac-fan-inputs-ignored'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-pthp.xml')
+        hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.45
+        hpxml_bldg.heat_pumps[0].fan_motor_type = HPXML::HVACFanMotorTypePSC
       when 'hvac-setpoints-high'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.hvac_controls[0].heating_setpoint_temp = 100
