@@ -332,6 +332,7 @@
               <extension>
                 <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
                 <AirflowDefectRatio>-0.25</AirflowDefectRatio>
+                <HeatingDesignAirflowCFM>700.0</HeatingDesignAirflowCFM>
               </extension>
             </HeatingSystem>
           </HVACPlant>
