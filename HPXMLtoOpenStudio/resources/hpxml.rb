@@ -96,6 +96,10 @@ class HPXML < Object
   ColorReflective = 'reflective'
   DehumidifierTypePortable = 'portable'
   DehumidifierTypeWholeHome = 'whole-home'
+  DryingMethodConventional = 'conventional'
+  DryingMethodCondensing = 'condensing'
+  DryingMethodHeatPump = 'heat pump'
+  DryingMethodOther = 'other'
   DuctBuriedInsulationNone = 'not buried'
   DuctBuriedInsulationPartial = 'partially buried'
   DuctBuriedInsulationFull = 'fully buried'
@@ -10529,6 +10533,7 @@ class HPXML < Object
              :number_of_units_served, # [Integer] NumberofUnitsServed
              :location,               # [String] Location (HPXML::LocationXXX)
              :fuel_type,              # [String] FuelType (HPXML::FuelTypeXXX)
+             :drying_method,          # [String] DryingMethod (HPXML::DryingMethodXXX)
              :energy_factor,          # [Double] EnergyFactor (lb/kWh)
              :combined_energy_factor, # [Double] CombinedEnergyFactor (lb/kWh)
              :control_type,           # [String] ControlType (HPXML::ClothesDryerControlTypeXXX)
@@ -10585,6 +10590,7 @@ class HPXML < Object
       XMLHelper.add_element(clothes_dryer, 'NumberofUnitsServed', @number_of_units_served, :integer) unless @number_of_units_served.nil?
       XMLHelper.add_element(clothes_dryer, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(clothes_dryer, 'FuelType', @fuel_type, :string) unless @fuel_type.nil?
+      XMLHelper.add_element(clothes_dryer, 'DryingMethod', @drying_method, :string, @drying_method_isdefaulted) unless @drying_method.nil?
       XMLHelper.add_element(clothes_dryer, 'EnergyFactor', @energy_factor, :float) unless @energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'CombinedEnergyFactor', @combined_energy_factor, :float, @combined_energy_factor_isdefaulted) unless @combined_energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type, :string, @control_type_isdefaulted) unless @control_type.nil?
@@ -10609,6 +10615,7 @@ class HPXML < Object
       @number_of_units_served = XMLHelper.get_value(clothes_dryer, 'NumberofUnitsServed', :integer)
       @location = XMLHelper.get_value(clothes_dryer, 'Location', :string)
       @fuel_type = XMLHelper.get_value(clothes_dryer, 'FuelType', :string)
+      @drying_method = XMLHelper.get_value(clothes_dryer, 'DryingMethod', :string)
       @energy_factor = XMLHelper.get_value(clothes_dryer, 'EnergyFactor', :float)
       @combined_energy_factor = XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor', :float)
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType', :string)

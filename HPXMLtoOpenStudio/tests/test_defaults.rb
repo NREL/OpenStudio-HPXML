@@ -3948,11 +3948,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.clothes_dryers[0].weekday_fractions = ConstantDaySchedule
     hpxml_bldg.clothes_dryers[0].weekend_fractions = ConstantDaySchedule
     hpxml_bldg.clothes_dryers[0].monthly_multipliers = ConstantMonthSchedule
+    hpxml_bldg.clothes_dryers[0].is_vented = false
+    hpxml_bldg.clothes_dryers[0].drying_method = HPXML::DryingMethodOther
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], true, HPXML::LocationBasementConditioned, 3.33, 1.1, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], true, HPXML::LocationBasementConditioned, 3.33, 1.1, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, HPXML::DryingMethodOther, false)
 
-    # Test defaults w/ electric clothes dryer
+    # Test defaults w/ electric condensing clothes dryer
     hpxml_bldg.clothes_dryers[0].location = nil
     hpxml_bldg.clothes_dryers[0].is_shared_appliance = nil
     hpxml_bldg.clothes_dryers[0].combined_energy_factor = nil
@@ -3960,29 +3962,37 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.clothes_dryers[0].weekday_fractions = nil
     hpxml_bldg.clothes_dryers[0].weekend_fractions = nil
     hpxml_bldg.clothes_dryers[0].monthly_multipliers = nil
+    hpxml_bldg.clothes_dryers[0].is_vented = nil
+    hpxml_bldg.clothes_dryers[0].drying_method = HPXML::DryingMethodCondensing
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     default_cd_sched = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]
-    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 3.01, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'])
+    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 3.01, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'], HPXML::DryingMethodCondensing, false)
+
+    # Test defaults w/ unspecified electric clothes dryer
+    hpxml_bldg.clothes_dryers[0].drying_method = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 3.01, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'], HPXML::DryingMethodConventional, true)
 
     # Test defaults w/ gas clothes dryer
     hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 3.01, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'])
+    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 3.01, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'], HPXML::DryingMethodConventional, true)
 
     # Test defaults w/ electric clothes dryer before 301-2019 Addendum A
     hpxml.header.eri_calculation_versions = ['2019']
     hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeElectricity
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 2.62, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'])
+    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 2.62, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'], HPXML::DryingMethodConventional, true)
 
     # Test defaults w/ gas clothes dryer before 301-2019 Addendum A
     hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 2.32, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'])
+    _test_default_clothes_dryer_values(default_hpxml_bldg.clothes_dryers[0], false, HPXML::LocationConditionedSpace, 2.32, 1.0, default_cd_sched['WeekdayScheduleFractions'], default_cd_sched['WeekendScheduleFractions'], default_cd_sched['MonthlyScheduleMultipliers'], HPXML::DryingMethodConventional, true)
   end
 
   def test_clothes_dryer_exhaust
@@ -6117,7 +6127,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_clothes_dryer_values(clothes_dryer, is_shared, location, cef, usage_multiplier,
-                                         weekday_sch, weekend_sch, monthly_mults)
+                                         weekday_sch, weekend_sch, monthly_mults, drying_method, is_vented)
     assert_equal(is_shared, clothes_dryer.is_shared_appliance)
     assert_equal(location, clothes_dryer.location)
     assert_equal(cef, clothes_dryer.combined_energy_factor)
@@ -6137,6 +6147,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(monthly_mults, clothes_dryer.monthly_multipliers)
     end
+    assert_equal(drying_method, clothes_dryer.drying_method)
+    assert_equal(is_vented, clothes_dryer.is_vented)
   end
 
   def _test_default_clothes_dryer_exhaust_values(clothes_dryer, is_vented, vented_flow_rate)
