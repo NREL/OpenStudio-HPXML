@@ -428,6 +428,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.fuel_loads[0].frac_latent = 0.3
       when 'frac-total-plug-load'
         hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
+        hpxml_bldg.plug_loads[1].frac_sensible = 0.855
         hpxml_bldg.plug_loads[1].frac_latent = 0.245
       when 'furnace-invalid-afue'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
