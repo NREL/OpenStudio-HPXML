@@ -4805,8 +4805,8 @@ module HVAC
     defrost_program.addLine('EndIf')
   end
 
-  # Create EMS program and Other equipment objects to account for delivered cooling load and supplemental heating energy during defrost
-  # when using the advanced defrost model.
+  # Create EMS program and Other equipment objects to account for delivered cooling load and supplemental heating energy during defrost.
+  # The defrost model is defined per RESNET MINHERS Addendum 82.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed]  OpenStudio Heating Coil object
