@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
-- Updates to OpenStudio 3.10/EnergyPlus 25.1.
+- Updates to OpenStudio 3.10/EnergyPlus 25.1/HPXML v4.2-rc2.
 - HVAC modeling updates per RESNET MINHERS Addendum 82:
   - **Breaking change**: `CompressorType` required for central and mini-split air conditioners and heat pumps as well as ground-to-air heat pumps.
   - **Breaking change**: Replaces `HeatingCapacityRetention[Fraction | Temperature]` with `HeatingCapacityFraction17F`.
@@ -12,6 +12,7 @@ __New Features__
   - Allows optional `extension/FanMotorType` input for central equipment; updates `FanPowerWattsPerCFM` defaults to be based on fan motor type.
   - Allows optional `extension/EquipmentType` inputs for central air conditioners and heat pumps; only used for SEER/SEER2, EER/EER2, and HSPF/HSPF2 conversions.
   - Allows optional design airflow rate inputs (`extension/HeatingDesignAirflowCFM` and `extension/CoolingDesignAirflowCFM`).
+  - Updates default compressor lockout temperature for dual-fuel heat pumps from 25F to 40F.
   - Updates default design airflow rates to use cfm/ton assumptions rather than Manual S-based approach.
   - Updates defrost model to better account for load and energy use during defrost:
     - Allows optional defrost supplemental heat input (`extension/BackupHeatingActiveDuringDefrost`) for air-source heat pumps with integrated backup.
@@ -25,6 +26,9 @@ __New Features__
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
   - Updates the default schedule for the EV charging `PlugLoad` to better reflect real-world hourly/monthly variation.
+- Electric panel NEC load calculations (experimental research feature):
+  - Allows optional `ElectricPanel` inputs for describing branch circuits and service feeders
+  - Optionally reports breaker spaces and calculated loads for specified NEC calculation types (`SoftwareInfo/extension/ElectricPanelCalculations/ServiceFeeders/Type`)
 - Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
 - BuildResidentialScheduleFile measure:
   - Adds stochastic schedule generation for electric vehicle charging (using `Vehicles`).
@@ -58,6 +62,7 @@ __Bugfixes__
 - BuildResidentialHPXML measure: Fixes error when specifying a combi boiler as the water heater type and a *shared* boiler as the heating system type.
 - BuildResidentialScheduleFile measure: Fixes out-of-sync shifting of occupancy and end use schedule resulting in activities even when there is no occupancy.
 - BuildResidentialScheduleFile measure: Fixes a small bug in sink schedule generation resulting in more concentrated schedule.
+- ReportUtilityBills measure: Apply fixed charges for fuels that are referenced by the HPXML file but consume no energy (e.g., gas heating system in Florida).
 
 ## OpenStudio-HPXML v1.9.1
 
