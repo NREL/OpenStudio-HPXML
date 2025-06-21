@@ -1488,7 +1488,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceConditioned }
         hpxml_bldg.foundations << fnd.dup
         hpxml_bldg.foundations[-1].id = 'Duplicate'
-        hpxml_bldg.foundations[-1].within_infiltration_volume = true
+        hpxml_bldg.foundations[-1].within_infiltration_volume = false
       when 'inconsistent-vented-attic-ventilation-rate'
         hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
         attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeVented }
