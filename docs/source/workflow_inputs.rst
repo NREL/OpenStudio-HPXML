@@ -664,7 +664,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``NumberofUnits``                        integer              >= 1                               No        1         Unit multiplier [#]_
   ``NumberofConditionedFloors``            double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
   ``NumberofConditionedFloorsAboveGrade``  double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``AverageCeilingHeight``                 double    ft         > 0                                No        8.2       Floor to ceiling height within conditioned space
+  ``AverageCeilingHeight``                 double    ft         > 0                                No        See [#]_  Floor to ceiling height within conditioned space
   ``NumberofBedrooms``                     integer              >= 0                               Yes                 Number of bedrooms
   ``NumberofBathrooms``                    integer              > 0                                No        See [#]_  Number of bathrooms
   ``ConditionedFloorArea``                 double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
@@ -689,6 +689,8 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
 
          \- Heat Pump Backup Capacity Increment (see :ref:`hpxml_simulation_control`)
 
+  .. [#] If AverageCeilingHeight not provided, defaults to (ConditionedBuildingVolume - ConditionedCrawlspaceVolume) / ConditionedFloorArea if ConditionedBuildingVolume is provided.
+         If ConditionedBuildingVolume not provided, AverageCeilingHeight defaults to 8.0 ft (unless there is a cathedral ceiling, in which case the value is adjusted).
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
@@ -1205,6 +1207,16 @@ If the dwelling unit has a vented attic, attic ventilation information can be op
 HPXML Foundations
 *****************
 
+If the dwelling unit has a conditioned basement, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='true']``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean         See [#]_     No        true     In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+  .. [#] If there are multiple conditioned basements, they must all have the same value.
+
 If the dwelling unit has an unconditioned basement, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='false']``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
@@ -1237,6 +1249,16 @@ If the dwelling unit has a vented crawlspace, crawlspace ventilation information
   .. [#] UnitofMeasure only choice is "SLA" (specific leakage area).
   .. [#] If there are multiple vented crawlspaces, they must all have the same value.
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+
+If the dwelling unit has a conditioned crawlspace, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Conditioned='true']``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean         See [#]_     No        true     In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+  .. [#] If there are multiple conditioned crawlspaces, they must all have the same value.
 
 If the dwelling has a manufactured home belly-and-wing foundation, whether a skirt is present can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing``.
 
@@ -4697,37 +4719,37 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
   .. [#] If Voltage not provided, defaults based on optional referenced components as follows:
 
          \- ``HeatingSystem[HeatingSystemFuel="electricity"]``: 240
-         
+
          \- ``CoolingSystem[CoolingSystemType!="room air conditioner"]``: 240
-         
+
          \- ``HeatPump[HeatPumpFuel="electricity"]``: 240
-                  
+
          \- ``WaterHeatingSystem[FuelType="electricity"]``: 240
-         
+
          \- ``ClothesDryer[FuelType="electricity"]``: 240
-         
+
          \- ``CookingRange[FuelType="electricity"]``: 240
-                  
+
          \- ``PermanentSpa/Pumps/Pump``: 240
-         
+
          \- ``PermanentSpa/Heater[Type="electric resistance" or "heat pump"]``: 240
-         
+
          \- ``Pool/Pumps/Pump``: 240
-         
+
          \- ``Pool/Heater[Type="electric resistance" or "heat pump"]``: 240
-         
+
          \- ``PlugLoad[PlugLoadType="well pump"]``: 240
-         
+
          \- ``PVSystem``: 240
-         
+
          \- ``Battery``: 240
-         
+
          \- Otherwise: 120
 
   .. [#] If MaxCurrentRating not provided, defaults based on Voltage as follows:
-  
+
          \- **120**: 15
-         
+
          \- **240**: 50
 
   .. [#] OccupiedSpaces choices are 0.0, 0.5, 1.0, or 2.0.
@@ -4736,11 +4758,11 @@ Individual branch circuits entered in ``BranchCircuits/BranchCircuit``.
          If no corresponding Voltage is specified, the other Voltage classification will be used.
          Occupied breaker spaces will be recalculated based on the new Voltage classification.
          Occupied breaker spaces are calculated based on PowerRating, Voltage, and MaxCurrentRating as follows:
-         
+
          RequiredAmperage = PowerRating / Voltage
-         
+
          NumBranches = ceiling(RequiredAmperage / MaxCurrentRating)
-         
+
          NumBreakers = NumBranches * (Voltage / 120)
 
   .. [#] Provide a AttachedToComponent element for each referenced component.
@@ -4804,7 +4826,7 @@ Individual service feeders entered in ``ServiceFeeders/ServiceFeeder``.
          \- **laundry**
 
          \- **other**
-  
+
   .. [#] Provide a AttachedToComponent element for each referenced component.
 
 .. _panels_default:
