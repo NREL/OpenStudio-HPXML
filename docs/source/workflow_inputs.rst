@@ -1040,15 +1040,15 @@ HPXML Air Infiltration
 
 Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
 
-  =====================================  ======  =====  ===========  =========  =========================  ===============================================
-  Element                                Type    Units  Constraints  Required   Default                    Notes
-  =====================================  ======  =====  ===========  =========  =========================  ===============================================
-  ``SystemIdentifier``                   id                          Yes                                   Unique identifier
-  ``TypeOfInfiltrationLeakage``          string         See [#]_     See [#]_                              Type of infiltration leakage
-  ``InfiltrationVolume``                 double  ft3    > 0          No         ConditionedBuildingVolume  Volume associated with infiltration measurement [#]_
-  ``InfiltrationHeight``                 double  ft     > 0          No         See [#]_                   Height associated with infiltration measurement [#]_
-  ``extension/Aext``                     double  frac   > 0          No         See [#]_                   Exterior area ratio for SFA/MF dwelling units
-  =====================================  ======  =====  ===========  =========  =========================  ===============================================
+  =====================================  ======  =====  ===========  =========  ========  ===============================================
+  Element                                Type    Units  Constraints  Required   Default   Notes
+  =====================================  ======  =====  ===========  =========  ========  ===============================================
+  ``SystemIdentifier``                   id                          Yes                  Unique identifier
+  ``TypeOfInfiltrationLeakage``          string         See [#]_     See [#]_             Type of infiltration leakage
+  ``InfiltrationVolume``                 double  ft3    > 0          No         See [#]_  Volume associated with infiltration measurement [#]_
+  ``InfiltrationHeight``                 double  ft     > 0          No         See [#]_  Height associated with infiltration measurement [#]_
+  ``extension/Aext``                     double  frac   > 0          No         See [#]_  Exterior area ratio for SFA/MF dwelling units
+  =====================================  ======  =====  ===========  =========  ========  ===============================================
 
   .. [#] TypeOfInfiltrationLeakage choices are "unit total" or "unit exterior only", and are described as follows:
 
@@ -1057,9 +1057,10 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
          \- **unit exterior only**: the provided infiltration value represents the infiltration to the dwelling unit from outside only, as measured by a guarded test.
 
   .. [#] TypeOfInfiltrationLeakage required if single-family attached or apartment unit.
+  .. [#] If InfiltrationVolume not provided, it is inferred from other inputs (e.g., ConditionedBuildingVolume, attics/foundations with WithinInfiltrationVolume=true, etc.).
   .. [#] InfiltrationVolume can be thought of as the volume of space most impacted by a blower door test.
          Note that InfiltrationVolume can be larger than ConditionedBuildingVolume as it can include, e.g., attics or basements with access doors/hatches that are open during the blower door test.
-  .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
+  .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., ConditionedFloorArea, NumberofConditionedFloorsAboveGrade, attics/foundations with WithinInfiltrationVolume=true, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
          It is used along with the ``UnitHeightAboveGrade`` in :ref:`bldg_constr` to calculate the wind speed for the infiltration model.
   .. [#] If Aext not provided and TypeOfInfiltrationLeakage is "unit total", defaults for single-family attached and apartment units to the ratio of exterior (adjacent to outside) envelope surface area to total (adjacent to outside, other dwelling units, or other MF spaces) envelope surface area, as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_ and `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_.
@@ -5061,8 +5062,9 @@ If not entered, the simulation will not include a clothes dryer.
   ``IsSharedAppliance``                         boolean                       No        false              Whether it serves multiple dwelling units [#]_
   ``Location``                                  string           See [#]_     No        conditioned space  Location
   ``FuelType``                                  string           See [#]_     Yes                          Fuel type
+  ``DryingMethod``                              string           See [#]_     No        conventional       The method of drying clothes
   ``CombinedEnergyFactor`` or ``EnergyFactor``  double   lb/kWh  > 0          No        See [#]_           Efficiency [#]_
-  ``Vented``                                    boolean                       No        true               Whether dryer is vented
+  ``Vented``                                    boolean                       No        See [#]_           Whether dryer is vented
   ``VentedFlowRate``                            double   cfm     >= 0         No        100 [#]_           Exhaust flow rate during operation
   ``extension/UsageMultiplier``                 double           >= 0         No        1.0                Multiplier on energy use
   ``extension/WeekdayScheduleFractions``        array                         No        See [#]_           24 comma-separated weekday fractions
@@ -5074,11 +5076,13 @@ If not entered, the simulation will not include a clothes dryer.
   .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxml_locations` for descriptions.
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
+  .. [#] DryingMethod choices are "conventional", "condensing", "heat pump", or "other".
   .. [#] If neither CombinedEnergyFactor nor EnergyFactor provided, the following default values representing a standard clothes dryer from 2006 will be used:
          CombinedEnergyFactor = 3.01.
   .. [#] If EnergyFactor (EF) provided instead of CombinedEnergyFactor (CEF), it will be converted using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_:
          CEF = EF / 1.15.
          CEF may be found using the manufacturer’s data sheet, the `California Energy Commission Appliance Database <https://cacertappliances.energy.ca.gov/Pages/ApplianceSearch.aspx>`_, the `EPA ENERGY STAR website <https://www.energystar.gov/productfinder/>`_, or another reputable source.
+  .. [#] If Vented not provided, defaults to false if DryingMethod is "condensing" or "heat pump", otherwise true.
   .. [#] VentedFlowRate default based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
