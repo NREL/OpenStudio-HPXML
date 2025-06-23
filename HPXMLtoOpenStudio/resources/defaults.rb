@@ -5345,6 +5345,10 @@ module Defaults
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
     cond_volume = hpxml_bldg.building_construction.conditioned_building_volume
     base_infil_height = avg_ceiling_height * ncfl_ag
+    if ncfl_ag > 1
+      # Add assumed rim joists between stories
+      base_infil_height += (ncfl_ag - 1) * UnitConversions.convert(6, 'in', 'ft') # 2x6 (5.5") rim joist + 0.5" subfloor
+    end
 
     # Get base infiltration volume, excluding foundations and attics
     base_infil_volume = cond_volume
@@ -5379,12 +5383,9 @@ module Defaults
       this_height = Geometry.calculate_zone_height(hpxml_bldg, foundation.to_location, above_grade: true)
 
       # Add assumed rim joist height
-      if hpxml_bldg.rim_joists.any? { |rj| rj.is_exterior && rj.interior_adjacent_to == foundation.to_location }
-        this_height += UnitConversions.convert(9, 'in', 'ft')
-      end
+      this_height += UnitConversions.convert(9, 'in', 'ft') # 2x8 (7.5") rim joist + 1.5" sill plate per ASHRAE 140
 
       foundation_height = [foundation_height, this_height].max
-
       foundation_volume += Geometry.calculate_zone_volume(hpxml_bldg, foundation.to_location)
     end
     if hpxml_bldg.has_location(HPXML::LocationBasementConditioned) && (ncfl == ncfl_ag)

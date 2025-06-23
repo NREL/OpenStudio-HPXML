@@ -825,7 +825,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    assert_in_epsilon(16, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(16.5, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
     assert_in_epsilon(21600, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
 
     # Test 2 story building
@@ -835,7 +835,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    assert_in_epsilon(17.75, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(18.25, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
     assert_in_epsilon(32400, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
 
     # Test cathedral ceiling
