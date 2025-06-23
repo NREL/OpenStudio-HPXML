@@ -1057,10 +1057,10 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
          \- **unit exterior only**: the provided infiltration value represents the infiltration to the dwelling unit from outside only, as measured by a guarded test.
 
   .. [#] TypeOfInfiltrationLeakage required if single-family attached or apartment unit.
-  .. [#] If InfiltrationVolume not provided, it is inferred from other inputs (e.g., ConditionedBuildingVolume, attics/foundations with WithinInfiltrationVolume=true, etc.).
+  .. [#] If InfiltrationVolume not provided, it is estimated from other inputs (e.g., ConditionedBuildingVolume, attics/foundations with WithinInfiltrationVolume=true, etc.).
   .. [#] InfiltrationVolume can be thought of as the volume of space most impacted by a blower door test.
          Note that InfiltrationVolume can be larger than ConditionedBuildingVolume as it can include, e.g., attics or basements with access doors/hatches that are open during the blower door test.
-  .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., ConditionedFloorArea, NumberofConditionedFloorsAboveGrade, attics/foundations with WithinInfiltrationVolume=true, etc.).
+  .. [#] If InfiltrationHeight not provided, it is estimated from other inputs (e.g., ConditionedFloorArea, NumberofConditionedFloorsAboveGrade, attics/foundations with WithinInfiltrationVolume=true, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
          It is used along with the ``UnitHeightAboveGrade`` in :ref:`bldg_constr` to calculate the wind speed for the infiltration model.
   .. [#] If Aext not provided and TypeOfInfiltrationLeakage is "unit total", defaults for single-family attached and apartment units to the ratio of exterior (adjacent to outside) envelope surface area to total (adjacent to outside, other dwelling units, or other MF spaces) envelope surface area, as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_ and `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_.
