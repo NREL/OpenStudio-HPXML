@@ -1182,7 +1182,7 @@ The presence of a flue or chimney with combustion air from conditioned space can
 HPXML Attics
 ************
 
-If the dwelling unit has an unvented attic, whether it is within the infiltration volume can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]``.
+If the dwelling unit has an unvented attic, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
   Element                       Type     Units  Constraints  Required  Default  Notes
@@ -1192,7 +1192,7 @@ If the dwelling unit has an unvented attic, whether it is within the infiltratio
 
   .. [#] If there are multiple unvented attics, they must all have the same value.
 
-If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
+If the dwelling unit has a vented attic, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
 
   =================  ======  =====  ===========  ========  ==========  ==========================
   Element            Type    Units  Constraints  Required  Default     Notes
@@ -1208,7 +1208,7 @@ If the dwelling unit has a vented attic, attic ventilation information can be op
 HPXML Foundations
 *****************
 
-If the dwelling unit has a conditioned basement, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='true']``.
+If the dwelling unit has a conditioned basement, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='true']``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
   Element                       Type     Units  Constraints  Required  Default  Notes
@@ -1218,7 +1218,7 @@ If the dwelling unit has a conditioned basement, whether it is within the infilt
 
   .. [#] If there are multiple conditioned basements, they must all have the same value.
 
-If the dwelling unit has an unconditioned basement, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='false']``.
+If the dwelling unit has an unconditioned basement, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='false']``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
   Element                       Type     Units  Constraints  Required  Default  Notes
@@ -1228,7 +1228,7 @@ If the dwelling unit has an unconditioned basement, whether it is within the inf
 
   .. [#] If there are multiple unconditioned basements, they must all have the same value.
 
-If the dwelling unit has an unvented crawlspace, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Vented='false']``.
+If the dwelling unit has an unvented crawlspace, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Vented='false']``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
   Element                       Type     Units  Constraints  Required  Default  Notes
@@ -1238,7 +1238,7 @@ If the dwelling unit has an unvented crawlspace, whether it is within the infilt
 
   .. [#] If there are multiple unvented crawlspaces, they must all have the same value.
 
-If the dwelling unit has a vented crawlspace, crawlspace ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``.
+If the dwelling unit has a vented crawlspace, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``.
 
   =================  ======  =====  ===========  ========  ==========  ==========================
   Element            Type    Units  Constraints  Required  Default     Notes
@@ -1251,7 +1251,7 @@ If the dwelling unit has a vented crawlspace, crawlspace ventilation information
   .. [#] If there are multiple vented crawlspaces, they must all have the same value.
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
-If the dwelling unit has a conditioned crawlspace, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Conditioned='true']``.
+If the dwelling unit has a conditioned crawlspace, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Conditioned='true']``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
   Element                       Type     Units  Constraints  Required  Default  Notes
@@ -1261,7 +1261,7 @@ If the dwelling unit has a conditioned crawlspace, whether it is within the infi
 
   .. [#] If there are multiple conditioned crawlspaces, they must all have the same value.
 
-If the dwelling has a manufactured home belly-and-wing foundation, whether a skirt is present can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing``.
+If the dwelling has a manufactured home belly-and-wing foundation, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing``.
 
   =================  =======  =====  ===========  ========  ==========  ==========================
   Element            Type     Units  Constraints  Required  Default     Notes
