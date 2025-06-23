@@ -912,7 +912,7 @@ module Defaults
     if hpxml_bldg.building_construction.unit_height_above_grade.nil?
       floors = hpxml_bldg.floors.select { |floor| floor.is_floor && floor.is_thermal_boundary }
       exterior_floors = floors.select { |floor| floor.is_exterior }
-      if floors.size > 0 && floors.size == exterior_floors.size && hpxml_bldg.slabs.size == 0 && !hpxml_header.apply_ashrae140_assumptions
+      if floors.size > 0 && floors.size == exterior_floors.size && hpxml_bldg.slabs.size == 0 && (!hpxml_header.nil? && !hpxml_header.apply_ashrae140_assumptions)
         # All floors are exterior (adjacent to ambient/bellywing) and there are no slab floors
         hpxml_bldg.building_construction.unit_height_above_grade = 2.0
       elsif hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
@@ -5334,7 +5334,8 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Double, Double] Default infiltration height (ft) and volume (ft3)
   def self.get_infiltration_height_and_volume(hpxml_bldg)
-    # Make sure WithinInfiltrationVolume properties have been set
+    # Make sure AverageCeilingHeight & WithinInfiltrationVolume properties have been set
+    apply_building_construction(nil, hpxml_bldg)
     apply_attics(hpxml_bldg)
     apply_foundations(hpxml_bldg)
 
