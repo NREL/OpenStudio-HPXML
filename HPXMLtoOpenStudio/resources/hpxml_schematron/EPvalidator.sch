@@ -252,7 +252,7 @@
       <sch:assert role='ERROR' test='count(h:ClimateandRiskZones/h:ClimateZoneIECC) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ClimateandRiskZones/ClimateZoneIECC</sch:assert> <!-- See [ClimateZoneIECC] -->
       <sch:assert role='ERROR' test='count(h:Zones) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Zones</sch:assert> <!-- See [Zones] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Attics/h:Attic) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Attics/Attic</sch:assert> <!-- See [VentedAttic] or [UnventedAttic] -->
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:Foundations/h:Foundation) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Foundations/Foundation</sch:assert> <!-- See [VentedCrawl] or [UnventedCrawl] or [UncondBasement] or [ManufacturedHomeBelly] -->
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:Foundations/h:Foundation) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Foundations/Foundation</sch:assert> <!-- See [VentedCrawl] or [UnventedCrawl] or [UncondBasement] or [CondBasement] or [ManufacturedHomeBelly] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:extension/h:HasFlueOrChimneyInConditionedSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Enclosure/AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:LeakinessDescription]) = 1'>Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/AirLeakage | EffectiveLeakageArea | LeakinessDescription]</sch:assert> <!-- See [AirInfiltrationMeasurement] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Roofs/h:Roof) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Roofs/Roof</sch:assert> <!-- See [Roof] -->
@@ -659,6 +659,13 @@
   <sch:pattern>
     <sch:title>[UncondBasement]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Foundations/h:Foundation[h:FoundationType/h:Basement[h:Conditioned="false"]]'>
+      <sch:assert role='ERROR' test='count(h:WithinInfiltrationVolume) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WithinInfiltrationVolume</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[CondBasement]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Foundations/h:Foundation[h:FoundationType/h:Basement[h:Conditioned="true"]]'>
       <sch:assert role='ERROR' test='count(h:WithinInfiltrationVolume) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WithinInfiltrationVolume</sch:assert>
     </sch:rule>
   </sch:pattern>
