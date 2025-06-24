@@ -3304,10 +3304,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     clothes_dryer_efficiency_type_choices << 'EnergyFactor'
     clothes_dryer_efficiency_type_choices << 'CombinedEnergyFactor'
 
+    clothes_dryer_drying_method_choices = OpenStudio::StringVector.new
+    clothes_dryer_drying_method_choices << HPXML::DryingMethodConventional
+    clothes_dryer_drying_method_choices << HPXML::DryingMethodCondensing
+    clothes_dryer_drying_method_choices << HPXML::DryingMethodHeatPump
+    clothes_dryer_drying_method_choices << HPXML::DryingMethodOther
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_fuel_type', clothes_dryer_fuel_choices, true)
     arg.setDisplayName('Clothes Dryer: Fuel Type')
     arg.setDescription('Type of fuel used by the clothes dryer.')
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_drying_method', clothes_dryer_drying_method_choices, false)
+    arg.setDisplayName('Clothes Dryer: Drying Method')
+    arg.setDescription("The method of drying used by the clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_efficiency_type', clothes_dryer_efficiency_type_choices, true)
@@ -3320,12 +3331,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Clothes Dryer: Efficiency')
     arg.setUnits('lb/kWh')
     arg.setDescription("The efficiency of the clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_vented_flow_rate', false)
-    arg.setDisplayName('Clothes Dryer: Vented Flow Rate')
-    arg.setDescription("The exhaust flow rate of the vented clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
-    arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_usage_multiplier', false)
@@ -7817,21 +7822,12 @@ module HPXMLFile
       combined_energy_factor = args[:clothes_dryer_efficiency]
     end
 
-    if not args[:clothes_dryer_vented_flow_rate].nil?
-      is_vented = false
-      if args[:clothes_dryer_vented_flow_rate] > 0
-        is_vented = true
-        vented_flow_rate = args[:clothes_dryer_vented_flow_rate]
-      end
-    end
-
     hpxml_bldg.clothes_dryers.add(id: "ClothesDryer#{hpxml_bldg.clothes_dryers.size + 1}",
                                   location: args[:clothes_dryer_location],
                                   fuel_type: args[:clothes_dryer_fuel_type],
+                                  drying_method: args[:clothes_dryer_drying_method],
                                   energy_factor: energy_factor,
                                   combined_energy_factor: combined_energy_factor,
-                                  is_vented: is_vented,
-                                  vented_flow_rate: vented_flow_rate,
                                   usage_multiplier: args[:clothes_dryer_usage_multiplier])
   end
 
