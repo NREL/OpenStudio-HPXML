@@ -10,9 +10,6 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <AdvancedResearchFeatures>
-          <DefrostModelType>standard</DefrostModelType>
-        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -344,9 +341,6 @@
                 <Units>HSPF</Units>
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
-              <extension>
-                <BackupHeatingActiveDuringDefrost>true</BackupHeatingActiveDuringDefrost>
-              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>
