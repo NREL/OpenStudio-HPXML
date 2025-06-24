@@ -2234,7 +2234,7 @@ module Waterheater
   # @param mw_temp_schedule [OpenStudio::Model::ScheduleConstant] The mixed water temperature schedule
   # @param showers_schedule_name [String] The name of the shower schedule
   # @return [nil]
-  def self.unmet_showers_program(model, water_heating_systems, plantloop_map, mw_temp_schedule, showers_schedule_name)
+  def self.unmet_showers_program(model, water_heating_systems, plantloop_map, mw_temp_schedule, _showers_schedule_name)
     return if water_heating_systems.empty? || mw_temp_schedule.nil?
 
     # EMS sensors

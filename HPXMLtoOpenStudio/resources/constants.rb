@@ -77,7 +77,7 @@ module Constants
   ObjectTypeRefrigerator = 'fridge'
   ObjectTypeRoomAC = 'room ac'
   ObjectTypeRoomHP = 'room ac with reverse cycle'
-  ObjectTypeShowers = 'hot_water_showers'
+  ObjectTypeShowers = 'hot_water_showers_minutes'
   ObjectTypeSolarHotWater = 'solar hot water'
   ObjectTypeTotalAirflowsProgram = 'total airflows program'
   ObjectTypeTotalLoadsProgram = 'total loads program'

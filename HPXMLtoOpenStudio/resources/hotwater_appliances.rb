@@ -380,10 +380,10 @@ module HotWaterAndAppliances
 
       # Create a separate shower schedule (from fixtures) used only for unmet showers calculation
       showers_schedule = nil
-      showers_col_name = SchedulesFile::Columns[:HotWaterShowers].name
+      showers_col_name = SchedulesFile::Column:HotWaterShowersMinutes].name
       showers_obj_name = Constants::ObjectTypeShowers
       if not schedules_file.nil?
-        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
+        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name)
         showers_schedule_name = showers_col_name
       end
       if showers_schedule.nil?
