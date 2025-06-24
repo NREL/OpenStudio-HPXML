@@ -886,6 +886,7 @@ module Defaults
         hpxml_bldg.building_construction.average_ceiling_height = ((cond_volume - cond_crawl_volume) / cfa).round(2)
       else
         if hpxml_bldg.roofs.any? { |r| r.interior_adjacent_to == HPXML::LocationConditionedSpace }
+          # This is a very crude estimate for cathedral ceiling and conditioned attic, but better than nothing
           roof_height, roof_footprint_area = Geometry.calculate_height_and_footprint_of_roofs(hpxml_bldg, HPXML::LocationConditionedSpace)
           roof_avg_height = roof_height / 3.0 # Assume square hip roof
           roof_cfa_frac = roof_footprint_area / cfa
