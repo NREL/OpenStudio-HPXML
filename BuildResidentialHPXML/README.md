@@ -5729,6 +5729,19 @@ Type of fuel used by the clothes dryer.
 
 <br/>
 
+**Clothes Dryer: Drying Method**
+
+The method of drying used by the clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
+
+- **Name:** ``clothes_dryer_drying_method``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conventional`, `condensing`, `heat pump`, `other`
+
+<br/>
+
 **Clothes Dryer: Efficiency Type**
 
 The efficiency type of the clothes dryer.
@@ -5750,19 +5763,6 @@ The efficiency of the clothes dryer. If not provided, the OS-HPXML default (see 
 - **Type:** ``Double``
 
 - **Units:** ``lb/kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Dryer: Vented Flow Rate**
-
-The exhaust flow rate of the vented clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.10.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
-
-- **Name:** ``clothes_dryer_vented_flow_rate``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
 
 - **Required:** ``false``
 

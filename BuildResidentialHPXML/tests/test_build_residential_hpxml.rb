@@ -628,7 +628,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['clothes_dryer_fuel_type'] = HPXML::FuelTypeElectricity
       args['clothes_dryer_efficiency_type'] = 'CombinedEnergyFactor'
       args['clothes_dryer_efficiency'] = 3.73
-      args['clothes_dryer_vented_flow_rate'] = 150.0
       args['dishwasher_present'] = true
       args['dishwasher_location'] = HPXML::LocationConditionedSpace
       args['dishwasher_efficiency_type'] = 'RatedAnnualkWh'

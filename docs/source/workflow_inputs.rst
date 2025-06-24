@@ -5135,8 +5135,9 @@ If not entered, the simulation will not include a clothes dryer.
   ``IsSharedAppliance``                         boolean                       No        false              Whether it serves multiple dwelling units [#]_
   ``Location``                                  string           See [#]_     No        conditioned space  Location
   ``FuelType``                                  string           See [#]_     Yes                          Fuel type
+  ``DryingMethod``                              string           See [#]_     No        conventional       The method of drying clothes
   ``CombinedEnergyFactor`` or ``EnergyFactor``  double   lb/kWh  > 0          No        See [#]_           Efficiency [#]_
-  ``Vented``                                    boolean                       No        true               Whether dryer is vented
+  ``Vented``                                    boolean                       No        See [#]_           Whether dryer is vented
   ``VentedFlowRate``                            double   cfm     >= 0         No        100 [#]_           Exhaust flow rate during operation
   ``extension/UsageMultiplier``                 double           >= 0         No        1.0                Multiplier on energy use
   ``extension/WeekdayScheduleFractions``        array                         No        See [#]_           24 comma-separated weekday fractions
@@ -5148,11 +5149,13 @@ If not entered, the simulation will not include a clothes dryer.
   .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxml_locations` for descriptions.
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
+  .. [#] DryingMethod choices are "conventional", "condensing", "heat pump", or "other".
   .. [#] If neither CombinedEnergyFactor nor EnergyFactor provided, the following default values representing a standard clothes dryer from 2006 will be used:
          CombinedEnergyFactor = 3.01.
   .. [#] If EnergyFactor (EF) provided instead of CombinedEnergyFactor (CEF), it will be converted using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_:
          CEF = EF / 1.15.
          CEF may be found using the manufacturer’s data sheet, the `California Energy Commission Appliance Database <https://cacertappliances.energy.ca.gov/Pages/ApplianceSearch.aspx>`_, the `EPA ENERGY STAR website <https://www.energystar.gov/productfinder/>`_, or another reputable source.
+  .. [#] If Vented not provided, defaults to false if DryingMethod is "condensing" or "heat pump", otherwise true.
   .. [#] VentedFlowRate default based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.

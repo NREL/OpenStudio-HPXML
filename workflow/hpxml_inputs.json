@@ -808,7 +808,7 @@
     "clothes_dryer_fuel_type": "electricity",
     "clothes_dryer_efficiency_type": "CombinedEnergyFactor",
     "clothes_dryer_efficiency": 3.73,
-    "clothes_dryer_vented_flow_rate": 150,
+    "clothes_dryer_drying_method": "conventional",
     "dishwasher_present": true,
     "dishwasher_location": "conditioned space",
     "dishwasher_efficiency_type": "RatedAnnualkWh",
@@ -874,7 +874,6 @@
     "parent_hpxml": "sample_files/base.xml",
     "clothes_dryer_fuel_type": "natural gas",
     "clothes_dryer_efficiency": 3.3,
-    "clothes_dryer_vented_flow_rate": null,
     "cooking_range_oven_fuel_type": "natural gas"
   },
   "sample_files/base-appliances-oil.xml": {
@@ -898,7 +897,7 @@
     "clothes_washer_efficiency": 1.65,
     "clothes_dryer_efficiency_type": "EnergyFactor",
     "clothes_dryer_efficiency": 4.29,
-    "clothes_dryer_vented_flow_rate": 0,
+    "clothes_dryer_drying_method": "condensing",
     "dishwasher_efficiency_type": "EnergyFactor",
     "dishwasher_efficiency": 0.7,
     "dishwasher_place_setting_capacity": 6
@@ -3580,7 +3579,6 @@
     "clothes_washer_capacity": null,
     "clothes_dryer_location": null,
     "clothes_dryer_efficiency": null,
-    "clothes_dryer_vented_flow_rate": null,
     "dishwasher_location": null,
     "dishwasher_efficiency": null,
     "dishwasher_label_electric_rate": null,
