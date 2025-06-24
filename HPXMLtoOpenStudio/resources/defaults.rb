@@ -3953,8 +3953,12 @@ module Defaults
         clothes_dryer.usage_multiplier = 1.0
         clothes_dryer.usage_multiplier_isdefaulted = true
       end
+      if clothes_dryer.drying_method.nil?
+        clothes_dryer.drying_method = HPXML::DryingMethodConventional
+        clothes_dryer.drying_method_isdefaulted = true
+      end
       if clothes_dryer.is_vented.nil?
-        clothes_dryer.is_vented = true
+        clothes_dryer.is_vented = (![HPXML::DryingMethodCondensing, HPXML::DryingMethodHeatPump].include? clothes_dryer.drying_method)
         clothes_dryer.is_vented_isdefaulted = true
       end
       if clothes_dryer.is_vented && clothes_dryer.vented_flow_rate.nil?

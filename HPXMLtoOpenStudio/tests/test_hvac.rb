@@ -1347,7 +1347,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       assert_in_epsilon(0.0, stage.partLoadFractionCorrelationCurve.to_CurveQuadratic.get.coefficient3xPOW2, 0.01)
     end
 
-
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
