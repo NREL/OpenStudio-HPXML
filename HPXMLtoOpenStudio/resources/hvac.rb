@@ -462,9 +462,9 @@ module HVAC
     add_variable_speed_power_ems_program(runner, model, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
     if is_heatpump
-      defrost_program = apply_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg.building_construction.number_of_units)
+      ems_program = apply_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg.building_construction.number_of_units)
       if cooling_system.pan_heater_watts.to_f > 0
-        apply_pan_heater_ems_program(model, defrost_program, htg_coil, control_zone.spaces[0], cooling_system, hvac_unavailable_periods[:htg])
+        apply_pan_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, hvac_unavailable_periods[:htg])
       end
     end
     return air_loop
@@ -4748,13 +4748,13 @@ module HVAC
   # result in fan obstruction or coil damage.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param defrost_program [OpenStudio::Model::EnergyManagementSystemProgram] OpenStudio EMS program for defrost models
+  # @param ems_program [OpenStudio::Model::EnergyManagementSystemProgram] OpenStudio EMS program w/ defrost model
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @param heating_unavailable_periods [HPXML::UnavailablePeriods] Unavailable periods for heating
   # @return [nil]
-  def self.apply_pan_heater_ems_program(model, defrost_program, htg_coil, conditioned_space, heat_pump, heating_unavailable_periods)
+  def self.apply_pan_heater_ems_program(model, ems_program, htg_coil, conditioned_space, heat_pump, heating_unavailable_periods)
     # Other equipment/actuator
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypePanHeater } # Ensure unique meter for each heat pump
     pan_heater_energy_oe = Model.add_other_equipment(
@@ -4791,18 +4791,18 @@ module HVAC
 
     # EMS program
     if htg_avail_sensor.nil?
-      defrost_program.addLine("If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')})")
+      ems_program.addLine("If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')})")
     else # Don't run pan heater during heating unavailable period
-      defrost_program.addLine("If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (#{htg_avail_sensor.name} == 1)")
+      ems_program.addLine("If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (#{htg_avail_sensor.name} == 1)")
     end
     if heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeContinuous
-      defrost_program.addLine("  Set #{pan_heater_energy_oe_act.name} = #{heat_pump.pan_heater_watts}")
+      ems_program.addLine("  Set #{pan_heater_energy_oe_act.name} = #{heat_pump.pan_heater_watts}")
     elsif heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeDefrost
-      defrost_program.addLine("  Set #{pan_heater_energy_oe_act.name} = fraction_defrost * #{heat_pump.pan_heater_watts}")
+      ems_program.addLine("  Set #{pan_heater_energy_oe_act.name} = fraction_defrost * #{heat_pump.pan_heater_watts}")
     end
-    defrost_program.addLine('Else')
-    defrost_program.addLine("  Set #{pan_heater_energy_oe_act.name} = 0.0")
-    defrost_program.addLine('EndIf')
+    ems_program.addLine('Else')
+    ems_program.addLine("  Set #{pan_heater_energy_oe_act.name} = 0.0")
+    ems_program.addLine('EndIf')
   end
 
   # Create EMS program and Other equipment objects to account for delivered cooling load and supplemental heating energy during defrost.
