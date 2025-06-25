@@ -807,11 +807,17 @@ module Airflow
     if object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
       supply_fan = object.supplyAirFan
     elsif object.is_a? OpenStudio::Model::AirLoopHVAC
-      system = HVAC.get_unitary_system_from_air_loop_hvac(object)
-      if system.nil? # Evaporative cooler supply fan directly on air loop
+      supply_fan = nil
+      if object.supplyFan.is_initialized
+        # Evaporative cooler supply fan directly on air loop
         supply_fan = object.supplyFan.get
       else
-        supply_fan = system.supplyFan.get
+        # Supply fan associated with AirLoopHVACUnitarySystem
+        object.supplyComponents.each do |comp|
+          next unless comp.to_AirLoopHVACUnitarySystem.is_initialized
+
+          supply_fan = comp.to_AirLoopHVACUnitarySystem.get.supplyFan.get
+        end
       end
     else
       fail 'Unexpected object type.'
