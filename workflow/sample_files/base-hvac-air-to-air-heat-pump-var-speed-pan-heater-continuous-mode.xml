@@ -10,9 +10,6 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <AdvancedResearchFeatures>
-          <DefrostModelType>advanced</DefrostModelType>
-        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -327,25 +324,28 @@
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
-              <CompressorType>two stage</CompressorType>
+              <CompressorType>variable speed</CompressorType>
               <BackupType>integrated</BackupType>
-              <BackupSystemFuel>natural gas</BackupSystemFuel>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.95</Value>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
-              <BackupHeatingSwitchoverTemperature>30.0</BackupHeatingSwitchoverTemperature>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>18.0</Value>
+                <Value>22.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>9.3</Value>
+                <Value>10.0</Value>
               </AnnualHeatingEfficiency>
+              <extension>
+                <PanHeaterPowerWatts>100.0</PanHeaterPowerWatts>
+                <PanHeaterControlType>continuous</PanHeaterControlType>
+              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>
