@@ -266,6 +266,7 @@ end
 
 def apply_hpxml_modification_hers_hvac_dse(hpxml_path, hpxml)
   # Set detailed HPXML values for HERS HVAC/DSE test files
+  hpxml.header.eri_calculation_versions = ['2022CE']
   hpxml_bldg = hpxml.buildings[0]
 
   if hpxml_path.include? 'HERS_HVAC'
@@ -295,6 +296,7 @@ end
 
 def apply_hpxml_modification_hers_hot_water(hpxml)
   # Set detailed HPXML values for HERS Hot Water test files
+  hpxml.header.eri_calculation_versions = ['2022CE']
   hpxml_bldg = hpxml.buildings[0]
 
   hpxml.header.xml_generated_by = 'tasks.rb'

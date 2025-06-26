@@ -39,7 +39,7 @@ class WorkflowHERSTest < Minitest::Test
     _hvac_energy = _write_hers_hvac_results(hvac_results, test_results_csv)
 
     # Check results
-    # FIXME: Temporarily disabled
+    # FIXME: Temporarily disabled until RESNET updates acceptance criteria for HERS Addendum 82
     # _check_hvac_test_results(hvac_energy)
   end
 
@@ -92,11 +92,9 @@ class WorkflowHERSTest < Minitest::Test
       dhw_results[xml] = _get_simulation_hot_water_results(results)
     end
 
-    _dhw_energy = _write_hers_hot_water_results(dhw_results, test_results_csv)
+    dhw_energy = _write_hers_hot_water_results(dhw_results, test_results_csv)
 
     # Check results
-    # FIXME: Temporarily disabled until RESNET acceptance criteria are updated
-    # Needs to be updated because of MINHERS Addenda 81 and 90f
-    # _check_hot_water(dhw_energy)
+    _check_hot_water(dhw_energy)
   end
 end

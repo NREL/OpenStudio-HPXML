@@ -32,9 +32,6 @@ module Defaults
     else
       eri_version = hpxml.header.eri_calculation_versions[0]
     end
-    if eri_version == 'latest'
-      eri_version = Constants::ERIVersions[-1]
-    end
 
     if hpxml.buildings.size > 1
       # This is helpful if we need to make unique HPXML IDs across dwelling units
