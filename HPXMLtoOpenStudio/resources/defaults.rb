@@ -7708,10 +7708,10 @@ module Defaults
     # Calculates COP82min from SEER2 using bi-linear interpolation per RESNET MINERS Addendum 82
     def self.interpolate_seer2(seer2, eer2, seer2_array, seer2_eer2_ratio_array, cop82min_array)
       seer2_eer2_ratio = seer2 / eer2
-      x1, x2 = seer2_array.min_by(2) { |x| (x - seer2).abs }.sort
-      y1, y2 = seer2_eer2_ratio_array.min_by(2) { |x| (x - seer2_eer2_ratio).abs }.sort
-      x_indexes = [x1, x2].map { |x| seer2_array.find_index(x) }.sort
-      y_indexes = [y1, y2].map { |y| seer2_eer2_ratio_array.find_index(y) }.sort
+      x1, x2 = MathTools.find_array_neighbor_values(seer2_array, seer2)
+      y1, y2 = MathTools.find_array_neighbor_values(seer2_eer2_ratio_array, seer2_eer2_ratio)
+      x_indexes = [x1, x2].map { |x| seer2_array.find_index(x) }
+      y_indexes = [y1, y2].map { |y| seer2_eer2_ratio_array.find_index(y) }
       fx1y1 = cop82min_array[x_indexes[0]][y_indexes[0]]
       fx1y2 = cop82min_array[x_indexes[0]][y_indexes[1]]
       fx2y1 = cop82min_array[x_indexes[1]][y_indexes[0]]
@@ -7914,10 +7914,10 @@ module Defaults
   def self.set_hvac_heating_performance(heating_system, hpxml_header)
     # Calculates COP47full from HSPF2 using bi-linear interpolation per RESNET MINERS Addendum 82
     def self.interpolate_hspf2(hspf2, qm17full, hspf2_array, qm17full_array, cop47full_array)
-      x1, x2 = hspf2_array.min_by(2) { |x| (x - hspf2).abs }.sort
-      y1, y2 = qm17full_array.min_by(2) { |x| (x - qm17full).abs }.sort
-      x_indexes = [x1, x2].map { |x| hspf2_array.find_index(x) }.sort
-      y_indexes = [y1, y2].map { |y| qm17full_array.find_index(y) }.sort
+      x1, x2 = MathTools.find_array_neighbor_values(hspf2_array, hspf2)
+      y1, y2 = MathTools.find_array_neighbor_values(qm17full_array, qm17full)
+      x_indexes = [x1, x2].map { |x| hspf2_array.find_index(x) }
+      y_indexes = [y1, y2].map { |y| qm17full_array.find_index(y) }
       fx1y1 = cop47full_array[x_indexes[0]][y_indexes[0]]
       fx1y2 = cop47full_array[x_indexes[0]][y_indexes[1]]
       fx2y1 = cop47full_array[x_indexes[1]][y_indexes[0]]
