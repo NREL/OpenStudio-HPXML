@@ -873,18 +873,29 @@ module Defaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_building_construction(hpxml_header, hpxml_bldg)
-    cond_crawl_volume = hpxml_bldg.inferred_conditioned_crawlspace_volume()
+    cond_volume = hpxml_bldg.building_construction.conditioned_building_volume
+    cond_crawl_volume = Geometry.calculate_zone_volume(hpxml_bldg, HPXML::LocationCrawlspaceConditioned)
+    cfa = hpxml_bldg.building_construction.conditioned_floor_area
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     if hpxml_bldg.building_construction.average_ceiling_height.nil?
-      # Note: We do not try to calculate it from CFA & ConditionedBuildingVolume since
-      # that is not a reliable assumption if there is a, e.g., conditioned crawlspace.
-      hpxml_bldg.building_construction.average_ceiling_height = 8.2 # ASHRAE 62.2 default
+      if not cond_volume.nil?
+        hpxml_bldg.building_construction.average_ceiling_height = ((cond_volume - cond_crawl_volume) / cfa).round(2)
+      else
+        if hpxml_bldg.roofs.any? { |r| r.interior_adjacent_to == HPXML::LocationConditionedSpace }
+          # This is a very crude estimate for cathedral ceiling and conditioned attic, but better than nothing
+          roof_height, roof_footprint_area = Geometry.calculate_height_and_footprint_of_roofs(hpxml_bldg, HPXML::LocationConditionedSpace)
+          roof_avg_height = roof_height / 3.0 # Assume square hip roof
+          roof_cfa_frac = roof_footprint_area / cfa
+          hpxml_bldg.building_construction.average_ceiling_height = ((8.0 + roof_avg_height) * roof_cfa_frac + 8.0 * (1.0 - roof_cfa_frac)).round(2)
+        else
+          hpxml_bldg.building_construction.average_ceiling_height = 8.0
+        end
+      end
       hpxml_bldg.building_construction.average_ceiling_height_isdefaulted = true
     end
     if hpxml_bldg.building_construction.conditioned_building_volume.nil?
-      cfa = hpxml_bldg.building_construction.conditioned_floor_area
-      ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
-      hpxml_bldg.building_construction.conditioned_building_volume = (cfa * ceiling_height + cond_crawl_volume).round
+      avg_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
+      hpxml_bldg.building_construction.conditioned_building_volume = (cfa * avg_ceiling_height + cond_crawl_volume).round
       hpxml_bldg.building_construction.conditioned_building_volume_isdefaulted = true
     end
     if hpxml_bldg.building_construction.number_of_bathrooms.nil?
@@ -898,7 +909,7 @@ module Defaults
     if hpxml_bldg.building_construction.unit_height_above_grade.nil?
       floors = hpxml_bldg.floors.select { |floor| floor.is_floor && floor.is_thermal_boundary }
       exterior_floors = floors.select { |floor| floor.is_exterior }
-      if floors.size > 0 && floors.size == exterior_floors.size && hpxml_bldg.slabs.size == 0 && !hpxml_header.apply_ashrae140_assumptions
+      if floors.size > 0 && floors.size == exterior_floors.size && hpxml_bldg.slabs.size == 0 && (!hpxml_header.nil? && !hpxml_header.apply_ashrae140_assumptions)
         # All floors are exterior (adjacent to ambient/bellywing) and there are no slab floors
         hpxml_bldg.building_construction.unit_height_above_grade = 2.0
       elsif hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
@@ -977,7 +988,7 @@ module Defaults
         unvented_attic.within_infiltration_volume_isdefaulted = true
       end
       if unvented_attics.map { |a| a.within_infiltration_volume }.uniq.size != 1
-        fail 'All unvented attics must have the same WithinInfiltrationVolume.'
+        fail 'All unvented attics must have the same WithinInfiltrationVolume value.'
       end
     end
 
@@ -1022,7 +1033,25 @@ module Defaults
         unvented_crawl.within_infiltration_volume_isdefaulted = true
       end
       if unvented_crawls.map { |f| f.within_infiltration_volume }.uniq.size != 1
-        fail 'All unvented crawlspaces must have the same WithinInfiltrationVolume.'
+        fail 'All unvented crawlspaces must have the same WithinInfiltrationVolume value.'
+      end
+    end
+
+    if hpxml_bldg.has_location(HPXML::LocationCrawlspaceConditioned)
+      cond_crawls = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceConditioned }
+      if cond_crawls.empty?
+        hpxml_bldg.foundations.add(id: 'ConditionedCrawlspace',
+                                   foundation_type: HPXML::FoundationTypeCrawlspaceConditioned)
+        cond_crawls << hpxml_bldg.foundations[-1]
+      end
+      cond_crawls.each do |cond_crawl|
+        next unless cond_crawl.within_infiltration_volume.nil?
+
+        cond_crawl.within_infiltration_volume = true
+        cond_crawl.within_infiltration_volume_isdefaulted = true
+      end
+      if cond_crawls.map { |f| f.within_infiltration_volume }.uniq.size != 1
+        fail 'All conditioned crawlspaces must have the same WithinInfiltrationVolume value.'
       end
     end
 
@@ -1040,7 +1069,25 @@ module Defaults
         uncond_bsmt.within_infiltration_volume_isdefaulted = true
       end
       if uncond_bsmts.map { |f| f.within_infiltration_volume }.uniq.size != 1
-        fail 'All unconditioned basements must have the same WithinInfiltrationVolume.'
+        fail 'All unconditioned basements must have the same WithinInfiltrationVolume value.'
+      end
+    end
+
+    if hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
+      cond_bsmts = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBasementConditioned }
+      if cond_bsmts.empty?
+        hpxml_bldg.foundations.add(id: 'ConditionedBasement',
+                                   foundation_type: HPXML::FoundationTypeBasementConditioned)
+        cond_bsmts << hpxml_bldg.foundations[-1]
+      end
+      cond_bsmts.each do |cond_bsmt|
+        next unless cond_bsmt.within_infiltration_volume.nil?
+
+        cond_bsmt.within_infiltration_volume = true
+        cond_bsmt.within_infiltration_volume_isdefaulted = true
+      end
+      if cond_bsmts.map { |f| f.within_infiltration_volume }.uniq.size != 1
+        fail 'All conditioned basements must have the same WithinInfiltrationVolume value.'
       end
     end
 
@@ -1089,12 +1136,13 @@ module Defaults
   # @return [nil]
   def self.apply_infiltration(hpxml_bldg)
     infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
+    default_infil_height, default_infil_volume = get_infiltration_height_and_volume(hpxml_bldg)
     if infil_measurement.infiltration_volume.nil?
-      infil_measurement.infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
+      infil_measurement.infiltration_volume = default_infil_volume
       infil_measurement.infiltration_volume_isdefaulted = true
     end
     if infil_measurement.infiltration_height.nil?
-      infil_measurement.infiltration_height = hpxml_bldg.inferred_infiltration_height(infil_measurement.infiltration_volume)
+      infil_measurement.infiltration_height = default_infil_height
       infil_measurement.infiltration_height_isdefaulted = true
     end
     if (not infil_measurement.leakiness_description.nil?) && infil_measurement.air_leakage.nil? && infil_measurement.effective_leakage_area.nil?
@@ -1169,7 +1217,7 @@ module Defaults
     if infil_measurement.a_ext.nil?
       if (infil_measurement.infiltration_type == HPXML::InfiltrationTypeUnitTotal) &&
          [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml_bldg.building_construction.residential_facility_type)
-        tot_cb_area, ext_cb_area = hpxml_bldg.compartmentalization_boundary_areas()
+        tot_cb_area, ext_cb_area = get_compartmentalization_boundary_areas(hpxml_bldg)
         infil_measurement.a_ext = (ext_cb_area / tot_cb_area).round(5)
         infil_measurement.a_ext_isdefaulted = true
       end
@@ -5603,6 +5651,134 @@ module Defaults
     else
       fail "Unexpected fan_type: '#{vent_fan.fan_type}'."
     end
+  end
+
+  # Gets the default infiltration height/volume. Infiltration height is the vertical distance between lowest
+  # and highest above-grade points within the pressure boundary. Infiltration volume is the above-grade conditioned
+  # volume plus the volume of any spaces within the infiltration volume.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Double, Double] Default infiltration height (ft) and volume (ft3)
+  def self.get_infiltration_height_and_volume(hpxml_bldg)
+    # Make sure AverageCeilingHeight & WithinInfiltrationVolume properties have been set
+    apply_building_construction(nil, hpxml_bldg)
+    apply_attics(hpxml_bldg)
+    apply_foundations(hpxml_bldg)
+
+    # Get base infiltration height, excluding foundations and attics
+    avg_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
+    ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
+    ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+    cond_volume = hpxml_bldg.building_construction.conditioned_building_volume
+    base_infil_height = avg_ceiling_height * ncfl_ag
+    if ncfl_ag > 1
+      # Add assumed rim joists between stories
+      base_infil_height += (ncfl_ag - 1) * UnitConversions.convert(6, 'in', 'ft') # 2x6 (5.5") rim joist + 0.5" subfloor
+    end
+
+    # Get base infiltration volume, excluding foundations and attics
+    base_infil_volume = cond_volume
+    hpxml_bldg.foundations.each do |foundation|
+      next unless HPXML::conditioned_below_grade_locations.include? foundation.to_location
+
+      base_infil_volume -= Geometry.calculate_zone_volume(hpxml_bldg, foundation.to_location)
+    end
+
+    # For attics within infiltration volume:
+    # 1. Determine max attic height
+    # 2. Determine total attic volume
+    attic_height = 0.0
+    attic_volume = 0.0
+    hpxml_bldg.attics.each do |attic|
+      next unless attic.within_infiltration_volume
+
+      this_height = Geometry.calculate_zone_height(hpxml_bldg, attic.to_location)
+      attic_height = [attic_height, this_height].max
+
+      attic_volume += Geometry.calculate_zone_volume(hpxml_bldg, attic.to_location)
+    end
+
+    # For foundations within infiltration volume:
+    # 1. Determine max *above-grade* foundation height
+    # 2. Determine total foundation volume
+    foundation_height = 0.0
+    foundation_volume = 0.0
+    hpxml_bldg.foundations.each do |foundation|
+      next unless foundation.within_infiltration_volume
+
+      this_height = Geometry.calculate_zone_height(hpxml_bldg, foundation.to_location, above_grade: true)
+
+      # Add assumed rim joist height
+      this_height += UnitConversions.convert(9, 'in', 'ft') # 2x8 (7.5") rim joist + 1.5" sill plate per ASHRAE 140
+
+      foundation_height = [foundation_height, this_height].max
+      foundation_volume += Geometry.calculate_zone_volume(hpxml_bldg, foundation.to_location)
+    end
+    if hpxml_bldg.has_location(HPXML::LocationBasementConditioned) && (ncfl == ncfl_ag)
+      # Walkout basement, basement height already included in the base infiltration height
+      foundation_height = 0.0
+    end
+
+    infil_height = base_infil_height + attic_height + foundation_height
+    infil_volume = base_infil_volume + attic_volume + foundation_volume
+
+    return infil_height, infil_volume
+  end
+
+  # Gets the total and exterior compartmentalization boundary area. Used to convert between total infiltration
+  # and exterior infiltration for SFA/MF dwelling units.
+  #
+  # Source: ANSI/RESNET/ICC 301
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Array<Double, Double>] Total and exterior compartmentalization areas (ft2)
+  def self.get_compartmentalization_boundary_areas(hpxml_bldg)
+    # Make sure WithinInfiltrationVolume properties have been set
+    apply_attics(hpxml_bldg)
+    apply_foundations(hpxml_bldg)
+
+    total_area = 0.0 # Total surface area that bounds the Infiltration Volume
+    exterior_area = 0.0 # Same as above excluding surfaces attached to garage, other housing units, or other multifamily spaces
+
+    # Determine which locations are within infiltration volume
+    locations_within_infil_volume = [HPXML::LocationConditionedSpace]
+    hpxml_bldg.attics.each do |attic|
+      next unless attic.within_infiltration_volume
+
+      locations_within_infil_volume << attic.to_location
+    end
+    hpxml_bldg.foundations.each do |foundation|
+      next unless foundation.within_infiltration_volume
+
+      locations_within_infil_volume << foundation.to_location
+    end
+
+    # Get surfaces bounding infiltration volume
+    locations_within_infil_volume.each do |location|
+      (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls + hpxml_bldg.floors + hpxml_bldg.slabs).each do |surface|
+        is_adiabatic_surface = (surface.interior_adjacent_to == surface.exterior_adjacent_to)
+        next unless [surface.interior_adjacent_to,
+                     surface.exterior_adjacent_to].include? location
+
+        if not is_adiabatic_surface
+          # Exclude surfaces between two different locations that are both within infiltration volume
+          next if locations_within_infil_volume.include?(surface.interior_adjacent_to) && locations_within_infil_volume.include?(surface.exterior_adjacent_to)
+        end
+
+        # Update Compartmentalization Boundary areas
+        total_area += surface.area
+        next unless (not [HPXML::LocationGarage,
+                          HPXML::LocationOtherHousingUnit,
+                          HPXML::LocationOtherHeatedSpace,
+                          HPXML::LocationOtherMultifamilyBufferSpace,
+                          HPXML::LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to) &&
+                    (not is_adiabatic_surface)
+
+        exterior_area += surface.area
+      end
+    end
+
+    return total_area, exterior_area
   end
 
   # Gets the default infiltration ACH50 based on the provided leakiness description.

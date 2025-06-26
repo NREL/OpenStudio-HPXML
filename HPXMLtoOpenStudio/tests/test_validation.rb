@@ -1278,9 +1278,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-shared-chiller-negative-seer-eq' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem1', double-check inputs."],
                             'inconsistent-belly-wing-skirt-present' => ['All belly-and-wing foundations must have the same SkirtPresent.'],
                             'inconsistent-cond-zone-assignment' => ["Surface 'Floor1' is not adjacent to conditioned space but was assigned to conditioned Zone 'ConditionedZone'."],
-                            'inconsistent-uncond-basement-within-infiltration-volume' => ['All unconditioned basements must have the same WithinInfiltrationVolume.'],
-                            'inconsistent-unvented-attic-within-infiltration-volume' => ['All unvented attics must have the same WithinInfiltrationVolume.'],
-                            'inconsistent-unvented-crawl-within-infiltration-volume' => ['All unvented crawlspaces must have the same WithinInfiltrationVolume.'],
+                            'inconsistent-cond-basement-within-infiltration-volume' => ['All conditioned basements must have the same WithinInfiltrationVolume value.'],
+                            'inconsistent-uncond-basement-within-infiltration-volume' => ['All unconditioned basements must have the same WithinInfiltrationVolume value.'],
+                            'inconsistent-unvented-attic-within-infiltration-volume' => ['All unvented attics must have the same WithinInfiltrationVolume value.'],
+                            'inconsistent-unvented-crawl-within-infiltration-volume' => ['All unvented crawlspaces must have the same WithinInfiltrationVolume value.'],
+                            'inconsistent-cond-crawl-within-infiltration-volume' => ['All conditioned crawlspaces must have the same WithinInfiltrationVolume value.'],
                             'inconsistent-vented-attic-ventilation-rate' => ['All vented attics must have the same VentilationRate.'],
                             'inconsistent-vented-attic-ventilation-rate2' => ['All vented attics must have the same VentilationRate.'],
                             'inconsistent-vented-crawl-ventilation-rate' => ['All vented crawlspaces must have the same VentilationRate.'],
@@ -1545,6 +1547,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         grg_ceiling = hpxml_bldg.floors.find { |f| f.interior_adjacent_to == HPXML::LocationGarage && f.exterior_adjacent_to == HPXML::LocationAtticUnvented }
         grg_ceiling.attached_to_space_idref = hpxml_bldg.conditioned_spaces[0].id
+      when 'inconsistent-cond-basement-within-infiltration-volume'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeBasementConditioned }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].within_infiltration_volume = false
       when 'inconsistent-uncond-basement-within-infiltration-volume'
         hpxml, hpxml_bldg = _create_hpxml('base-foundation-unconditioned-basement.xml')
         fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeBasementUnconditioned }
@@ -1563,6 +1571,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.foundations << fnd.dup
         hpxml_bldg.foundations[-1].id = 'Duplicate'
         hpxml_bldg.foundations[-1].within_infiltration_volume = true
+      when 'inconsistent-cond-crawl-within-infiltration-volume'
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceConditioned }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].within_infiltration_volume = false
       when 'inconsistent-vented-attic-ventilation-rate'
         hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
         attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeVented }

@@ -1923,17 +1923,6 @@ class HPXML < Object
       return @heating_systems.total_fraction_heat_load_served + @heat_pumps.total_fraction_heat_load_served + @cooling_systems.total_fraction_heat_load_served
     end
 
-    # Estimates whether the building has a walkout basement based on its foundation
-    # type and the number of conditioned floors (total and above-grade).
-    #
-    # return [Boolean] True if the building has a walkout basement
-    def has_walkout_basement
-      has_conditioned_basement = has_location(LocationBasementConditioned)
-      ncfl = @building_construction.number_of_conditioned_floors
-      ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
-      return (has_conditioned_basement && (ncfl == ncfl_ag))
-    end
-
     # Calculates above-grade and below-grade thermal boundary wall areas.
     # Used to calculate the window area in the ERI Reference Home.
     #
@@ -2010,114 +1999,6 @@ class HPXML < Object
         end
       end
       return area
-    end
-
-    # Returns the total and exterior compartmentalization boundary area.
-    # Used to convert between total infiltration and exterior infiltration for
-    # SFA/MF dwelling units.
-    #
-    # Source: ANSI/RESNET/ICC 301
-    #
-    # @return [Array<Double, Double>] Total and exterior compartmentalization areas (ft2)
-    def compartmentalization_boundary_areas
-      total_area = 0.0 # Total surface area that bounds the Infiltration Volume
-      exterior_area = 0.0 # Same as above excluding surfaces attached to garage, other housing units, or other multifamily spaces
-
-      # Determine which spaces are within infiltration volume
-      spaces_within_infil_volume = HPXML::conditioned_locations_this_unit
-      @attics.each do |attic|
-        next unless [AtticTypeUnvented].include? attic.attic_type
-        next unless attic.within_infiltration_volume
-
-        spaces_within_infil_volume << attic.to_location
-      end
-      @foundations.each do |foundation|
-        next unless [FoundationTypeBasementUnconditioned,
-                     FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
-        next unless foundation.within_infiltration_volume
-
-        spaces_within_infil_volume << foundation.to_location
-      end
-
-      # Get surfaces bounding infiltration volume
-      spaces_within_infil_volume.each do |location|
-        (@roofs + @rim_joists + @walls + @foundation_walls + @floors + @slabs).each do |surface|
-          is_adiabatic_surface = (surface.interior_adjacent_to == surface.exterior_adjacent_to)
-          next unless [surface.interior_adjacent_to,
-                       surface.exterior_adjacent_to].include? location
-
-          if not is_adiabatic_surface
-            # Exclude surfaces between two different spaces that are both within infiltration volume
-            next if spaces_within_infil_volume.include?(surface.interior_adjacent_to) && spaces_within_infil_volume.include?(surface.exterior_adjacent_to)
-          end
-
-          # Update Compartmentalization Boundary areas
-          total_area += surface.area
-          next unless (not [LocationGarage,
-                            LocationOtherHousingUnit,
-                            LocationOtherHeatedSpace,
-                            LocationOtherMultifamilyBufferSpace,
-                            LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to) &&
-                      (not is_adiabatic_surface)
-
-          exterior_area += surface.area
-        end
-      end
-
-      return total_area, exterior_area
-    end
-
-    # Calculates the inferred infiltration height.
-    # Infiltration height is the vertical distance between lowest and highest
-    # above-grade points within the pressure boundary.
-    #
-    # Note: The WithinInfiltrationVolume properties are intentionally ignored for now.
-    #
-    # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
-    # @return [Double] Inferred infiltration height (ft)
-    def inferred_infiltration_height(infil_volume)
-      cfa = @building_construction.conditioned_floor_area
-
-      ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
-      if has_walkout_basement()
-        infil_height = ncfl_ag * infil_volume / cfa
-      else
-        infil_volume -= inferred_conditioned_crawlspace_volume()
-
-        # Calculate maximum above-grade height of conditioned foundation walls
-        max_cond_fnd_wall_height_ag = 0.0
-        @foundation_walls.each do |foundation_wall|
-          next unless foundation_wall.is_exterior && HPXML::conditioned_below_grade_locations.include?(foundation_wall.interior_adjacent_to)
-
-          height_ag = foundation_wall.height - foundation_wall.depth_below_grade
-          next unless height_ag > max_cond_fnd_wall_height_ag
-
-          max_cond_fnd_wall_height_ag = height_ag
-        end
-
-        # Add assumed rim joist height
-        cond_fnd_rim_joist_height = 0
-        @rim_joists.each do |rim_joist|
-          next unless rim_joist.is_exterior && HPXML::conditioned_below_grade_locations.include?(rim_joist.interior_adjacent_to)
-
-          cond_fnd_rim_joist_height = UnitConversions.convert(9, 'in', 'ft')
-        end
-
-        infil_height = ncfl_ag * infil_volume / cfa + max_cond_fnd_wall_height_ag + cond_fnd_rim_joist_height
-      end
-      return infil_height
-    end
-
-    # Calculates the inferred conditioned crawlspace volume.
-    #
-    # @return [Double] Inferred conditioned crawlspace volume (ft3)
-    def inferred_conditioned_crawlspace_volume
-      if has_location(HPXML::LocationCrawlspaceConditioned)
-        conditioned_crawl_area = @slabs.select { |s| s.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |s| s.area }.sum
-        conditioned_crawl_height = @foundation_walls.select { |w| w.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |w| w.height }.max
-        return conditioned_crawl_area * conditioned_crawl_height
-      end
-      return 0.0
     end
 
     # Deletes any adiabatic sub-surfaces since EnergyPlus does not allow it.

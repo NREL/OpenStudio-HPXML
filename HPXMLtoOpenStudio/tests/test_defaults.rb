@@ -508,12 +508,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_construction.unit_height_above_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 22140, 8.2, 2, 1, -7)
+    _test_default_building_construction_values(default_hpxml_bldg, 21600, 8.0, 2, 1, -7)
 
     # Test defaults w/ conditioned crawlspace
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.unit_height_above_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 16200, 8.0, 2, 1, 0)
@@ -521,7 +520,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ belly-and-wing foundation
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-belly-wing-skirt.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.unit_height_above_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 10800, 8.0, 2, 1, 2)
@@ -529,10 +527,23 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ pier & beam foundation
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-ambient.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.unit_height_above_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 10800, 8.0, 2, 1, 2)
+
+    # Test defaults w/ cathedral ceiling
+    hpxml, hpxml_bldg = _create_hpxml('base-atticroof-cathedral.xml')
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_building_construction_values(default_hpxml_bldg, 32400, 12.0, 2, 1, -7)
+
+    # Test defaults w/ conditioned attic
+    hpxml, hpxml_bldg = _create_hpxml('base-atticroof-conditioned.xml')
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_building_construction_values(default_hpxml_bldg, 28800, 8.0, 2, 1, -7)
   end
 
   def test_climate_and_risk_zones
@@ -771,6 +782,99 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_infiltration_compartmentalization_test_values(default_hpxml_bldg.air_infiltration_measurements[0], 0.247)
+  end
+
+  def test_infiltration_height_and_volume
+    # Test conditioned basement
+    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml_bldg.building_construction.average_ceiling_height = nil
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_height = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(9.75, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(21600, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
+
+    # Test w/ conditioned basement not within infiltration volume
+    hpxml_bldg.foundations[0].within_infiltration_volume = false
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(8, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(10800, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
+
+    # Test w/ attic within infiltration volume
+    hpxml_bldg.attics[0].within_infiltration_volume = true
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(16.22, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(14500, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
+
+    # Test conditioned crawlspace
+    hpxml, hpxml_bldg = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
+    hpxml_bldg.building_construction.average_ceiling_height = nil
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_height = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(9.75, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(16200, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
+
+    # Test unconditioned basement
+    hpxml, hpxml_bldg = _create_hpxml('base-foundation-unconditioned-basement.xml')
+    hpxml_bldg.building_construction.average_ceiling_height = nil
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_height = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(8, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(10800, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
+
+    # Test walkout basement
+    hpxml, hpxml_bldg = _create_hpxml('base-foundation-walkout-basement.xml')
+    hpxml_bldg.building_construction.average_ceiling_height = nil
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_height = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(16.5, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(21600, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
+
+    # Test 2 story building
+    hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories.xml')
+    hpxml_bldg.building_construction.average_ceiling_height = nil
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_height = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(18.25, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(32400, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
+
+    # Test cathedral ceiling
+    hpxml, hpxml_bldg = _create_hpxml('base-atticroof-cathedral.xml')
+    hpxml_bldg.building_construction.average_ceiling_height = nil
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_height = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(11.12, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(25300, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
+
+    # Test conditioned attic
+    hpxml, hpxml_bldg = _create_hpxml('base-atticroof-conditioned.xml')
+    hpxml_bldg.building_construction.average_ceiling_height = nil
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_height = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    assert_in_epsilon(19.37, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_height, 0.01)
+    assert_in_epsilon(30816, default_hpxml_bldg.air_infiltration_measurements[0].infiltration_volume, 0.01)
   end
 
   def test_attics
@@ -5291,7 +5395,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
   def _test_default_building_construction_values(hpxml_bldg, building_volume, average_ceiling_height, number_of_bathrooms,
                                                  number_of_units, unit_height_above_grade)
-    assert_equal(building_volume, hpxml_bldg.building_construction.conditioned_building_volume)
+    assert_in_epsilon(building_volume, hpxml_bldg.building_construction.conditioned_building_volume, 0.01)
     assert_in_epsilon(average_ceiling_height, hpxml_bldg.building_construction.average_ceiling_height, 0.01)
     assert_equal(number_of_bathrooms, hpxml_bldg.building_construction.number_of_bathrooms)
     assert_equal(number_of_units, hpxml_bldg.building_construction.number_of_units)

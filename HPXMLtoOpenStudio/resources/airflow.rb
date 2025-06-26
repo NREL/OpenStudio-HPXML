@@ -210,12 +210,12 @@ module Airflow
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     measurement = get_infiltration_measurement_of_interest(hpxml_bldg)
 
+    default_infil_height, default_infil_volume = Defaults.get_infiltration_height_and_volume(hpxml_bldg)
     infil_volume = measurement.infiltration_volume
+    infil_volume = default_infil_volume if infil_volume.nil?
     infil_height = measurement.infiltration_height
-    if infil_height.nil?
-      infil_height = hpxml_bldg.inferred_infiltration_height(infil_volume)
-    end
-    infil_avg_ceil_height = infil_volume / cfa
+    infil_height = default_infil_height if infil_height.nil?
+    infil_avg_ceil_height = infil_volume / cfa # Per ANSI/RESNET/ICC 380
 
     sla, ach50, nach = nil
     if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure)

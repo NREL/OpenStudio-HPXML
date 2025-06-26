@@ -384,6 +384,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
       hpxml_bldg.building_construction.number_of_conditioned_floors = 2
       hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 1
+      hpxml_bldg.building_construction.average_ceiling_height = hpxml_bldg.building_construction.conditioned_building_volume / 2700
       hpxml_bldg.building_construction.conditioned_floor_area = 2700
       hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700
       hpxml_bldg.attics[0].attic_type = HPXML::AtticTypeCathedral

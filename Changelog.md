@@ -23,6 +23,9 @@ __New Features__
     - Adds more error-checking to ensure appropriate data inputs.
 - Updates asset calculations for dishwashers, clothes washers, fixtures, and hot water waste per RESNET MINHERS Addenda 81 and 90f.
 - Allows optional `ClothesDryer/DryingMethod` input to inform whether the appliance is vented or ventless.
+- Infiltration improvements:
+  - Improves defaults for `InfiltrationVolume`, `InfiltrationHeight`, and `AverageCeilingHeight`.
+  - Allows optional `WithinInfiltrationVolume` input for conditioned basements; defaults to true.
 - Electric vehicle enhancements:
   - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
   - Adds EV driving unmet hours output.
