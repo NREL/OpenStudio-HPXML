@@ -513,8 +513,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ conditioned crawlspace
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.unit_height_above_grade = nil
-    hpxml_bldg.building_construction.average_ceiling_height = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 16200, 8.0, 2, 1, 0)
@@ -522,8 +520,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ belly-and-wing foundation
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-belly-wing-skirt.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.unit_height_above_grade = nil
-    hpxml_bldg.building_construction.average_ceiling_height = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 10800, 8.0, 2, 1, 2)
@@ -531,8 +527,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ pier & beam foundation
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-ambient.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.unit_height_above_grade = nil
-    hpxml_bldg.building_construction.average_ceiling_height = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 10800, 8.0, 2, 1, 2)
@@ -540,20 +534,16 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ cathedral ceiling
     hpxml, hpxml_bldg = _create_hpxml('base-atticroof-cathedral.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.unit_height_above_grade = nil
-    hpxml_bldg.building_construction.average_ceiling_height = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 25300, 9.37, 2, 1, -7)
+    _test_default_building_construction_values(default_hpxml_bldg, 32400, 12.0, 2, 1, -7)
 
     # Test defaults w/ conditioned attic
     hpxml, hpxml_bldg = _create_hpxml('base-atticroof-conditioned.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.unit_height_above_grade = nil
-    hpxml_bldg.building_construction.average_ceiling_height = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 30816, 8.56, 2, 1, -7)
+    _test_default_building_construction_values(default_hpxml_bldg, 28800, 8.0, 2, 1, -7)
   end
 
   def test_climate_and_risk_zones
@@ -3364,7 +3354,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 32.0, 91.3)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 29.9, 85.5)
 
     # Test inputs not overridden by defaults w/ CFIS
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis.xml')
