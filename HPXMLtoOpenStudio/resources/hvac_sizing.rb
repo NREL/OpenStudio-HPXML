@@ -673,41 +673,21 @@ module HVACSizing
     slm_avg_lat = []
     for cnt in 0..8 # S/SW/W/NW/N/NE/E/SE/S
       # psf/psf_horiz
-      if hpxml_bldg.latitude <= psf_lats[0]
-        psf_lat << psf[cnt][0]
-        psf_lat_horiz = psf_horiz[0]
-      elsif hpxml_bldg.latitude >= psf_lats[-1]
-        psf_lat << psf[cnt][-1]
-        psf_lat_horiz = psf_horiz[-1]
-      else
-        cnt_lat_s = psf_lats.bsearch_index { |i| hpxml_bldg.latitude < i } - 1
-        psf_lat << MathTools.interp2(hpxml_bldg.latitude, psf_lats[cnt_lat_s], psf_lats[cnt_lat_s + 1], psf[cnt][cnt_lat_s], psf[cnt][cnt_lat_s + 1])
-        psf_lat_horiz = MathTools.interp2(hpxml_bldg.latitude, psf_lats[cnt_lat_s], psf_lats[cnt_lat_s + 1], psf_horiz[cnt_lat_s], psf_horiz[cnt_lat_s + 1])
-      end
+      idx1, idx2 = MathTools.find_array_neighbor_indices(psf_lats, hpxml_bldg.latitude)
+      psf_lat << MathTools.interp2(hpxml_bldg.latitude, psf_lats[idx1], psf_lats[idx2], psf[cnt][idx1], psf[cnt][idx2])
+      psf_lat_horiz = MathTools.interp2(hpxml_bldg.latitude, psf_lats[idx1], psf_lats[idx2], psf_horiz[idx1], psf_horiz[idx2])
 
       # slm_hr
-      if hpxml_bldg.latitude <= slm_hr_lats[0]
-        slm_hr_lat << slm_hr[cnt][0]
-      elsif hpxml_bldg.latitude >= slm_hr_lats[-1]
-        slm_hr_lat << slm_hr[cnt][-1]
-      else
-        cnt_lat_s = slm_hr_lats.bsearch_index { |i| hpxml_bldg.latitude < i } - 1
-        inner_array = []
-        for i in 0..slm_hr[0][0].size - 1
-          inner_array << MathTools.interp2(hpxml_bldg.latitude, slm_hr_lats[cnt_lat_s], slm_hr_lats[cnt_lat_s + 1], slm_hr[cnt][cnt_lat_s][i], slm_hr[cnt][cnt_lat_s + 1][i])
-        end
-        slm_hr_lat << inner_array
+      idx1, idx2 = MathTools.find_array_neighbor_indices(slm_hr_lats, hpxml_bldg.latitude)
+      inner_array = []
+      for i in 0..slm_hr[0][0].size - 1
+        inner_array << MathTools.interp2(hpxml_bldg.latitude, slm_hr_lats[idx1], slm_hr_lats[idx2], slm_hr[cnt][idx1][i], slm_hr[cnt][idx2][i])
       end
+      slm_hr_lat << inner_array
 
       # slm_avg
-      if hpxml_bldg.latitude <= alm_avg_lats[0]
-        slm_avg_lat << slm_avg[cnt][0]
-      elsif hpxml_bldg.latitude >= alm_avg_lats[-1]
-        slm_avg_lat << slm_avg[cnt][-1]
-      else
-        cnt_lat_s = alm_avg_lats.bsearch_index { |i| hpxml_bldg.latitude < i } - 1
-        slm_avg_lat << MathTools.interp2(hpxml_bldg.latitude, alm_avg_lats[cnt_lat_s], alm_avg_lats[cnt_lat_s + 1], slm_avg[cnt][cnt_lat_s], slm_avg[cnt][cnt_lat_s + 1])
-      end
+      idx1, idx2 = MathTools.find_array_neighbor_indices(alm_avg_lats, hpxml_bldg.latitude)
+      slm_avg_lat << MathTools.interp2(hpxml_bldg.latitude, alm_avg_lats[idx1], alm_avg_lats[idx2], slm_avg[cnt][idx1], slm_avg[cnt][idx2])
     end
 
     # Windows
@@ -2421,48 +2401,47 @@ module HVACSizing
     }[table_number]
 
     # Get BHLF (interpolate or extrapolate)
-    # FIXME: Check extrapolation works correctly
-    fa_idx = floor_areas.bsearch_index { |i| fa < i }.to_i - 1
-    htg_oat_idx = bhlf_oats.bsearch_index { |i| htg_oat < i }.to_i - 1
+    fa_idx1, fa_idx2 = MathTools.find_array_neighbor_indices(floor_areas, fa)
+    htg_oat_idx1, htg_oat_idx2 = MathTools.find_array_neighbor_indices(bhlf_oats, htg_oat)
     bhlf = MathTools.interp4(htg_oat, fa,
-                             bhlf_oats[htg_oat_idx], bhlf_oats[htg_oat_idx + 1],
-                             floor_areas[fa_idx], floor_areas[fa_idx + 1],
-                             bhlf_table[htg_oat_idx][fa_idx], bhlf_table[htg_oat_idx][fa_idx + 1],
-                             bhlf_table[htg_oat_idx + 1][fa_idx], bhlf_table[htg_oat_idx + 1][fa_idx + 1])
+                             bhlf_oats[htg_oat_idx1], bhlf_oats[htg_oat_idx2],
+                             floor_areas[fa_idx1], floor_areas[fa_idx2],
+                             bhlf_table[htg_oat_idx1][fa_idx1], bhlf_table[htg_oat_idx1][fa_idx2],
+                             bhlf_table[htg_oat_idx2][fa_idx1], bhlf_table[htg_oat_idx2][fa_idx2])
 
     # Get BSGF (interpolate or extrapolate)
-    clg_oat_idx = bsgf_oats.bsearch_index { |i| clg_oat < i }.to_i - 1
+    clg_oat_idx1, clg_oat_idx2 = MathTools.find_array_neighbor_indices(bsgf_oats, clg_oat)
     bsgf = MathTools.interp4(clg_oat, fa,
-                             bsgf_oats[clg_oat_idx], bsgf_oats[clg_oat_idx + 1],
-                             floor_areas[fa_idx], floor_areas[fa_idx + 1],
-                             bsgf_table[clg_oat_idx][fa_idx], bsgf_table[clg_oat_idx][fa_idx + 1],
-                             bsgf_table[clg_oat_idx + 1][fa_idx], bsgf_table[clg_oat_idx + 1][fa_idx + 1])
+                             bsgf_oats[clg_oat_idx1], bsgf_oats[clg_oat_idx2],
+                             floor_areas[fa_idx1], floor_areas[fa_idx2],
+                             bsgf_table[clg_oat_idx1][fa_idx1], bsgf_table[clg_oat_idx1][fa_idx2],
+                             bsgf_table[clg_oat_idx2][fa_idx1], bsgf_table[clg_oat_idx2][fa_idx2])
 
     # Get BLG (interpolate or extrapolate)
-    clg_grn_idx = blg_grains.bsearch_index { |i| clg_grn < i }.to_i - 1
+    clg_grn_idx1, clg_grn_idx2 = MathTools.find_array_neighbor_indices(blg_grains, clg_grn)
     blg = MathTools.interp4(clg_grn, fa,
-                            blg_grains[clg_grn_idx], blg_grains[clg_grn_idx + 1],
-                            floor_areas[fa_idx], floor_areas[fa_idx + 1],
-                            blg_table[clg_grn_idx][fa_idx], blg_table[clg_grn_idx][fa_idx + 1],
-                            blg_table[clg_grn_idx + 1][fa_idx], blg_table[clg_grn_idx + 1][fa_idx + 1])
+                            blg_grains[clg_grn_idx1], blg_grains[clg_grn_idx2],
+                            floor_areas[fa_idx1], floor_areas[fa_idx2],
+                            blg_table[clg_grn_idx1][fa_idx1], blg_table[clg_grn_idx1][fa_idx2],
+                            blg_table[clg_grn_idx2][fa_idx1], blg_table[clg_grn_idx2][fa_idx2])
 
     # Get R-value corrections
-    rvalue_idx = rvalues.bsearch_index { |i| rvalue < i }.to_i - 1
+    rvalue_idx1, rvalue_idx2 = MathTools.find_array_neighbor_indices(rvalues, rvalue)
     hl_rcorr = MathTools.interp2(rvalue,
-                                 rvalues[rvalue_idx], rvalues[rvalue_idx + 1],
-                                 hl_rcorr_table[rvalue_idx], hl_rcorr_table[rvalue_idx + 1])
+                                 rvalues[rvalue_idx1], rvalues[rvalue_idx2],
+                                 hl_rcorr_table[rvalue_idx1], hl_rcorr_table[rvalue_idx2])
     sg_rcorr = MathTools.interp2(rvalue,
-                                 rvalues[rvalue_idx], rvalues[rvalue_idx + 1],
-                                 sg_rcorr_table[rvalue_idx], sg_rcorr_table[rvalue_idx + 1])
+                                 rvalues[rvalue_idx1], rvalues[rvalue_idx2],
+                                 sg_rcorr_table[rvalue_idx1], sg_rcorr_table[rvalue_idx2])
 
     # Get LCFs
     leakage_idx = leakages.index(leakage_level)
     hl_lcf = MathTools.interp2(rvalue,
-                               rvalues[rvalue_idx], rvalues[rvalue_idx + 1],
-                               hl_lcf_table[leakage_idx][rvalue_idx], hl_lcf_table[leakage_idx][rvalue_idx + 1])
+                               rvalues[rvalue_idx1], rvalues[rvalue_idx2],
+                               hl_lcf_table[leakage_idx][rvalue_idx1], hl_lcf_table[leakage_idx][rvalue_idx2])
     sg_lcf = MathTools.interp2(rvalue,
-                               rvalues[rvalue_idx], rvalues[rvalue_idx + 1],
-                               sg_lcf_table[leakage_idx][rvalue_idx], sg_lcf_table[leakage_idx][rvalue_idx + 1])
+                               rvalues[rvalue_idx1], rvalues[rvalue_idx2],
+                               sg_lcf_table[leakage_idx][rvalue_idx1], sg_lcf_table[leakage_idx][rvalue_idx2])
     lg_lcf = lg_lcf_table[leakage_idx]
 
     if ['7K', '7L'].include? table_number
@@ -2472,11 +2451,11 @@ module HVACSizing
     elsif (not supply_area.nil?) && (not return_area.nil?)
       # Get default duct areas
       def_area_s = MathTools.interp2(fa,
-                                     floor_areas[fa_idx], floor_areas[fa_idx + 1],
-                                     duct_area_table[fa_idx][0], duct_area_table[fa_idx + 1][0])
+                                     floor_areas[fa_idx1], floor_areas[fa_idx2],
+                                     duct_area_table[fa_idx1][0], duct_area_table[fa_idx2][0])
       def_area_r = MathTools.interp2(fa,
-                                     floor_areas[fa_idx], floor_areas[fa_idx + 1],
-                                     duct_area_table[fa_idx][1], duct_area_table[fa_idx + 1][1])
+                                     floor_areas[fa_idx1], floor_areas[fa_idx2],
+                                     duct_area_table[fa_idx1][1], duct_area_table[fa_idx2][1])
 
       # Get surface area factors
       k_s, k_r = saf_table[leakage_idx]
