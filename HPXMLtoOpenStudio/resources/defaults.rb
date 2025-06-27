@@ -2268,14 +2268,14 @@ module Defaults
       when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit
         if heat_pump.pan_heater_watts.nil?
           if heat_pump.fraction_heat_load_served > 0
-            heat_pump.pan_heater_watts = 150.0 # W, per RESNET MINHERS Addendum 82
+            heat_pump.pan_heater_watts = 150.0 # W, per RESNET HERS Addendum 82
           else
             heat_pump.pan_heater_watts = 0.0
           end
           heat_pump.pan_heater_watts_isdefaulted = true
         end
         if heat_pump.pan_heater_control_type.nil? && heat_pump.pan_heater_watts > 0
-          heat_pump.pan_heater_control_type = HPXML::HVACPanHeaterControlTypeContinuous # Per RESNET MINHERS Addendum 82
+          heat_pump.pan_heater_control_type = HPXML::HVACPanHeaterControlTypeContinuous # Per RESNET HERS Addendum 82
           heat_pump.pan_heater_control_type_isdefaulted = true
         end
       end
@@ -3238,7 +3238,7 @@ module Defaults
       if HVAC.is_room_dx_hvac_system(hvac_system)
         hvac_system.crankcase_heater_watts = 0.0
       else
-        # 10 W/ton of cooling capacity per RESNET MINHERS Addendum 82
+        # 10 W/ton of cooling capacity per RESNET HERS Addendum 82
         if hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.fraction_cool_load_served == 0)
           # Heat pump only provides heating, use heating capacity instead
           hvac_system.crankcase_heater_watts = 10.0 * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
@@ -7592,7 +7592,7 @@ module Defaults
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     else
-      # Based on RESNET MINHERS Addendum 82
+      # Based on RESNET HERS Addendum 82
       psc_ducted_watts_per_cfm = 0.414 # W/cfm, PSC fan
       psc_ductless_watts_per_cfm = 0.414 # W/cfm, PSC fan
       bpm_ducted_watts_per_cfm = 0.281 # W/cfm, BPM fan
@@ -7654,7 +7654,7 @@ module Defaults
     if HVAC.is_room_dx_hvac_system(hvac_system)
       hvac_ap.c_d = 0.22
     else
-      # Per RESNET MINHERS Addendum 82
+      # Per RESNET HERS Addendum 82
       case hvac_system.compressor_type
       when HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage
         hvac_ap.c_d = 0.08
@@ -7728,12 +7728,12 @@ module Defaults
     end
     clg_ap.cool_ff_chg_values = [26.67, 35.0]
 
-    # Coefficients for HVAC installation quality per RESNET MINHERS Addendum 82
+    # Coefficients for HVAC installation quality per RESNET HERS Addendum 82
     clg_ap.cool_cap_fflow_spec_iq = [0.718664047, 0.41797409, -0.136638137]
     clg_ap.cool_eir_fflow_spec_iq = [1.143487507, -0.13943972, -0.004047787]
 
     if cooling_system.is_a?(HPXML::HeatPump) && cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      # Based on RESNET MINHERS Addendum 82
+      # Based on RESNET HERS Addendum 82
       clg_ap.cool_rated_shr_gross = 0.708
       clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
 
@@ -7824,7 +7824,7 @@ module Defaults
       return
     end
 
-    # Based on RESNET MINHERS Addendum 82
+    # Based on RESNET HERS Addendum 82
     clg_ap.cool_cap_fflow_spec = clg_ap.cool_cap_fflow_spec_iq
     clg_ap.cool_eir_fflow_spec = clg_ap.cool_eir_fflow_spec_iq
     set_hvac_degradation_coefficient(cooling_system)
@@ -7847,7 +7847,7 @@ module Defaults
 
     clg_ap.cop95full = UnitConversions.convert(cooling_system.cooling_efficiency_eer2, 'Btu/hr', 'W')
 
-    # Based on RESNET MINHERS Addendum 82
+    # Based on RESNET HERS Addendum 82
     case compressor_type
     when HPXML::HVACCompressorTypeSingleStage
       clg_ap.qm95full = 0.936 # Q95full/Q82full
@@ -7902,7 +7902,7 @@ module Defaults
     clg_ap.cool_rated_shr_gross = 0.708
   end
 
-  # Sets heating performance factors based on RESNET MINHERS Addendum 82.
+  # Sets heating performance factors based on RESNET HERS Addendum 82.
   #
   #
   # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML heating system or heat pump of interest
@@ -7935,12 +7935,12 @@ module Defaults
     end
     htg_ap.heat_ff_chg_values = [0.0, 8.33] # Add a zero term to combine cooling and heating calculation
 
-    # Coefficients for HVAC installation quality per RESNET MINHERS Addendum 82
+    # Coefficients for HVAC installation quality per RESNET HERS Addendum 82
     htg_ap.heat_cap_fflow_spec_iq = [0.694045465, 0.474207981, -0.168253446]
     htg_ap.heat_eir_fflow_spec_iq = [2.185418751, -1.942827919, 0.757409168]
 
     if heating_system.is_a?(HPXML::HeatPump) && heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      # Based on RESNET MINHERS Addendum 82
+      # Based on RESNET HERS Addendum 82
       htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
 
       case hpxml_header.ground_to_air_heat_pump_model_type
@@ -8080,7 +8080,7 @@ module Defaults
     hspf2 = heating_system.heating_efficiency_hspf2
     compressor_type = heating_system.compressor_type
 
-    # Based on RESNET MINHERS Addendum 82
+    # Based on RESNET HERS Addendum 82
     case compressor_type
     when HPXML::HVACCompressorTypeSingleStage
       htg_ap.eirm17full = 1.356 # (P17full/Q17full)/(P47full/Q47full)
@@ -8150,7 +8150,7 @@ module Defaults
     htg_ap.heat_eir_ft_spec = [0.722917608, 0.003520184, 0.000143097, -0.005760341, 0.000141736, -0.000216676]
   end
 
-  # Adds default heat pump detailed performance datapoints based on RESNET MINHERS Addendum 82.
+  # Adds default heat pump detailed performance datapoints based on RESNET HERS Addendum 82.
   #
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
   # @return [nil]
@@ -8341,7 +8341,7 @@ module Defaults
                                   isdefaulted: true) unless capacityLCTmin.nil?
   end
 
-  # Adds default heat pump or air conditioner detailed performance datapoints based on RESNET MINHERS Addendum 82.
+  # Adds default heat pump or air conditioner detailed performance datapoints based on RESNET HERS Addendum 82.
   #
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
   # @return [nil]

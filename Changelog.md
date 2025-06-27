@@ -2,7 +2,7 @@
 
 __New Features__
 - Updates to OpenStudio 3.10/EnergyPlus 25.1/HPXML v4.2-rc2.
-- HVAC modeling updates per RESNET MINHERS Addendum 82:
+- HVAC modeling updates per RESNET HERS Addendum 82:
   - **Breaking change**: `CompressorType` required for central and mini-split air conditioners and heat pumps as well as ground-to-air heat pumps.
   - **Breaking change**: Replaces `HeatingCapacityRetention[Fraction | Temperature]` with `HeatingCapacityFraction17F`.
   - Optional input `SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType` to choose "standard" (default) or "experimental"; "experimental" ground-to-air heat pump model better accounts for coil staging.
@@ -21,7 +21,7 @@ __New Features__
     - **Breaking change**: Updated requirements for allowed combinations of `CapacityDescription` and `OutdoorTemperature`; see the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#hpxml-hvac-detailed-perf-data) for more details.
     - Detailed performance datapoints can now be specified for single stage and two stage equipment too.
     - Adds more error-checking to ensure appropriate data inputs.
-- Updates asset calculations for dishwashers, clothes washers, fixtures, and hot water waste per RESNET MINHERS Addenda 81 and 90f.
+- Updates asset calculations for dishwashers, clothes washers, fixtures, and hot water waste per RESNET HERS Addenda 81 and 90f.
 - Allows optional `ClothesDryer/DryingMethod` input to inform whether the appliance is vented or ventless.
 - Infiltration improvements:
   - Improves defaults for `InfiltrationVolume`, `InfiltrationHeight`, and `AverageCeilingHeight`.

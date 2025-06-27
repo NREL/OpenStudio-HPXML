@@ -8,8 +8,8 @@ module HVAC
   AirSourceCoolRatedOWB = 75.0 # degF, Rated outdoor wetbulb for air-source systems, cooling
   AirSourceCoolRatedIDB = 80.0 # degF, Rated indoor drybulb for air-source systems, cooling
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
-  RatedCFMPerTon = 400.0 # cfm/ton of rated capacity, RESNET MINHERS Addendum 82
-  CrankcaseHeaterTemp = 50.0 # degF, RESNET MINHERS Addendum 82
+  RatedCFMPerTon = 400.0 # cfm/ton of rated capacity, RESNET HERS Addendum 82
+  CrankcaseHeaterTemp = 50.0 # degF, RESNET HERS Addendum 82
   MinCapacity = 1.0 # Btuh
   MinAirflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
   GroundSourceHeatRatedWET = 70.0 # degF, Rated water entering temperature for ground-source systems, heating
@@ -2412,7 +2412,7 @@ module HVAC
 
       return max_fan_power
     else
-      # Based on RESNET MINHERS Addendum 82
+      # Based on RESNET HERS Addendum 82
       if hvac_system.fan_motor_type == HPXML::HVACFanMotorTypeBPM
         pow = hvac_system.distribution_system_idref.nil? ? 3 : 2.75
         return max_fan_power * (fan_ratio**pow)
@@ -2641,7 +2641,7 @@ module HVAC
   end
 
   # Extrapolate data points at the min/max outdoor drybulb temperatures to cover the full range of
-  # equipment operation. Extrapolates net capacity and input power per RESNET MINHERS Addendum 82:
+  # equipment operation. Extrapolates net capacity and input power per RESNET HERS Addendum 82:
   # - Cooling, Min ODB: Linear from 82F and 95F, but no less than 50% power of the 82F value
   # - Cooling, Max ODB: Linear from 82F and 95F
   # - Heating, Min ODB: Linear from lowest two temperatures
@@ -2837,7 +2837,7 @@ module HVAC
           else
             new_dp = HPXML::HeatingPerformanceDataPoint.new(nil)
           end
-          # Interpolate based on net power and capacity per RESNET MINHERS Addendum 82.
+          # Interpolate based on net power and capacity per RESNET HERS Addendum 82.
           new_dp.input_power = dp.input_power + Float(j) / (n_pt + 1) * (dp2.input_power - dp.input_power)
           new_dp.capacity = (dp.capacity + Float(j) / (n_pt + 1) * (dp2.capacity - dp.capacity)).round
           new_dp.outdoor_temperature = dp.outdoor_temperature + Float(j) / (n_pt + 1) * (dp2.outdoor_temperature - dp.outdoor_temperature)
@@ -2851,7 +2851,7 @@ module HVAC
   end
 
   # Adds detailed performance datapoints to include sensitivity to indoor temperatures.
-  # Based on RESNET MINHERS Addendum 82.
+  # Based on RESNET HERS Addendum 82.
   #
   # @param hvac_system [HPXML::HeatingSystem or HPXML::CoolingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
   # @param datapoints_by_speed [Hash] Map of capacity description => array of detailed performance datapoints
@@ -4717,7 +4717,7 @@ module HVAC
   end
 
   # Create EMS program and Other equipment objects to account for delivered cooling load and supplemental heating energy during defrost.
-  # The defrost model is defined per RESNET MINHERS Addendum 82.
+  # The defrost model is defined per RESNET HERS Addendum 82.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
