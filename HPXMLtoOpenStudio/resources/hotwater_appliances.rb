@@ -617,7 +617,7 @@ module HotWaterAndAppliances
       lcy = dishwasher.label_usage * 52.0
       kwh_per_cyc = ((dishwasher.label_annual_gas_cost * 0.5497 / dishwasher.label_gas_rate - dishwasher.rated_annual_kwh * dishwasher.label_electric_rate * 0.02504 / dishwasher.label_electric_rate) / (dishwasher.label_electric_rate * 0.5497 / dishwasher.label_gas_rate - 0.02504)) / lcy
       if n_occ.nil? # Asset calculation
-        if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
+        if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('latest') # FIXME: Change from 'latest' when incorporated in 301 standard
           # RESNET MINHERS Addendum 81 Eq. 4.2-36a
           if unit_type == HPXML::ResidentialTypeApartment
             scy = 135.7 + 13.5 * nbeds
@@ -718,7 +718,7 @@ module HotWaterAndAppliances
       end
       rmc = (0.97 * (clothes_washer.capacity / clothes_washer.integrated_modified_energy_factor) - clothes_washer.rated_annual_kwh / 312.0) / ((2.0104 * clothes_washer.capacity + 1.4242) * 0.455) + 0.04
       if n_occ.nil? # Asset calculation
-        if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
+        if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('latest') # FIXME: Change from 'latest' when incorporated in 301 standard
           # RESNET MINHERS Addendum 81 Eq. 4.2-34
           if unit_type == HPXML::ResidentialTypeApartment
             scy = 213.9 + 27.5 * nbeds
@@ -832,7 +832,7 @@ module HotWaterAndAppliances
       elec_h20 = 0.0178 # (gal/cyc) per (kWh/y)
       lcy = clothes_washer.label_usage * 52.0 # label cycles per year
       if n_occ.nil? # Asset calculation
-        if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
+        if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('latest') # FIXME: Change from 'latest' when incorporated in 301 standard
           # RESNET MINHERS Addendum 81 Eq. 4.2-34
           if unit_type == HPXML::ResidentialTypeApartment
             scy = 213.9 + 27.5 * nbeds
@@ -1190,7 +1190,7 @@ module HotWaterAndAppliances
 
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2014A')
       if n_occ.nil? # Asset calculation
-        if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
+        if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('latest') # FIXME: Change from 'latest' when incorporated in 301 standard
           # RESNET MINHERS Addendum 90f Eq. 4.2-29 (refFgpd)
           if unit_type == HPXML::ResidentialTypeApartment
             ref_f_gpd = 21.75 + 8.46 * nbeds
@@ -1255,7 +1255,7 @@ module HotWaterAndAppliances
     end
 
     if n_occ.nil? # Asset calculation
-      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
+      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('latest') # FIXME: Change from 'latest' when incorporated in 301 standard
         # RESNET MINHERS Addendum 81 Eq. 4.2-29 (refWgpd)
         if unit_type == HPXML::ResidentialTypeApartment
           ref_w_gpd = 11.27 * (nbeds**0.323)
