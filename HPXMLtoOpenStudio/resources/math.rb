@@ -145,6 +145,52 @@ module MathTools
     return [0.0, [max1, max2].min - [min1, min2].max].max
   end
 
+  # For a given target value, finds the neighboring values in a sorted array and
+  # returns their indices.
+  # If the target is below the array minimum, returns the first two indices.
+  # If the target is above the array maximum, returns the last two indices.
+  #
+  # For example, if the sorted array is [1.000, 1.747, 2.120, 2.307, 2.400]:
+  #   0.9 => 0, 1
+  #   1.7 => 0, 1
+  #   3.5 => 3, 4
+  #
+  # @param sorted_array <Array<Double>> Sorted array
+  # @param target <Double> Value to lookup neighbors with
+  # @return [Double, Double] Lower and upper neighbors
+  def self.find_array_neighbor_indices(sorted_array, target)
+    if sorted_array != sorted_array.sort
+      fail 'Array must be sorted.'
+    end
+
+    index = sorted_array.bsearch_index { |x| x >= target }
+    if index.nil? # Target is greater than all elements
+      return -2, -1
+    elsif index == 0 # Target is less than or equal to the smallest element
+      return 0, 1
+    else # Target is in the middle
+      return index - 1, index
+    end
+  end
+
+  # For a given target value, finds and returns the neighboring values in a sorted
+  # array.
+  # If the target is below the array minimum, returns the smallest two values.
+  # If the target is above the array maximum, returns the largest two values.
+  #
+  # For example, if the sorted array is [1.000, 1.747, 2.120, 2.307, 2.400]:
+  #   0.9 => 1.000, 1.747
+  #   1.7 => 1.000, 1.747
+  #   3.5 => 2.307, 2.400
+  #
+  # @param sorted_array <Array<Double>> Sorted array
+  # @param target <Double> Value to lookup neighbors with
+  # @return [Double, Double] Lower and upper neighbors
+  def self.find_array_neighbor_values(sorted_array, target)
+    idx1, idx2 = find_array_neighbor_indices(sorted_array, target)
+    return sorted_array[idx1], sorted_array[idx2]
+  end
+
   # Determine if a guess is within tolerance for convergence.
   # If not, output a new guess using the Newton-Raphson method.
   #

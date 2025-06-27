@@ -440,8 +440,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [5.93, 4.68, 4.39]
-    expected_clg_capacities_95 = [1996, 7213, 7747]
+    expected_clg_cops_95 = [7.28, 4.68, 4.39]
+    expected_clg_capacities_95 = [1668, 7213, 7747]
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -1001,8 +1001,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Values for [min, rated, max] speeds
-    expected_clg_cops_95 = [3.84, 4.45, 4.17]
-    expected_clg_capacities_95 = [4296, 10819, 11620]
+    expected_clg_cops_95 = [6.51, 4.45, 4.17]
+    expected_clg_capacities_95 = [2655, 10819, 11620]
     expected_htg_cops_47 = [4.04, 3.34, 3.15]
     expected_htg_capacities_47 = [3151, 10282, 11269]
     expected_c_d = 0.4
