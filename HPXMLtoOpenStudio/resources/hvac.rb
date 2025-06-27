@@ -2669,8 +2669,6 @@ module HVAC
       end
 
       # Determine min/max ODB temperatures to extrapolate to, to cover full range of equipment operation.
-      # Note: Since we create the TableLookup object using ExtrapolationMethod='constant', we do not
-      # need to create additional datapoints just to maintain constant performance.
       outdoor_dry_bulbs = []
       if mode == :clg
         # Max cooling ODB temperature
@@ -2810,7 +2808,7 @@ module HVAC
   # Adds datapoints at intermediate outdoor drybulb temperatures to ensure EIR performance is appropriately
   # calculated over the full range of equipment operation. An adaptive step size is used to ensure we
   # reasonably reflect the extrapolation of net power/capacity curves without adding too many points and
-  # incurring a runtime penalty.
+  # incurring a runtime penalty. See https://github.com/NREL/EnergyPlus/issues/10169 for context.
   #
   # @param datapoints_by_speed [Hash] Map of capacity description => array of detailed performance datapoints
   # @param mode [Symbol] Heating (:htg) or cooling (:clg)
