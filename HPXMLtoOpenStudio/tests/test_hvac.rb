@@ -54,9 +54,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     tol = 0.02 # 2%, higher tolerance because expected values from spreadsheet are not rounded like they are in the RESNET Standard
 
-    # ============== #
-    # Variable Speed #
-    # ============== #
+    # ====================== #
+    # Variable Speed, Ducted #
+    # ====================== #
 
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed.xml')
     hpxml_bldg.heat_pumps[0].cooling_capacity = 8000.0
@@ -167,9 +167,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     assert_in_epsilon(fan.electricPowerPerUnitFlowRate, expected_watts_per_flow)
 
-    # ========= #
-    # Two Stage #
-    # ========= #
+    # ================= #
+    # Two Stage, Ducted #
+    # ================= #
 
     hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
@@ -265,9 +265,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     assert_in_epsilon(fan.electricPowerPerUnitFlowRate, expected_watts_per_flow)
 
-    # ============ #
-    # Single Stage #
-    # ============ #
+    # ==================== #
+    # Single Stage, Ducted #
+    # ==================== #
 
     # Values for rated speed
     expected_clg_cfm = 266.7
@@ -349,9 +349,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
     assert_in_epsilon(fan.electricPowerPerUnitFlowRate, expected_watts_per_flow)
 
-    # ======== #
-    # Ductless #
-    # ======== #
+    # ======================== #
+    # Variable Speed, Ductless #
+    # ======================== #
 
     hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
     hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
@@ -361,12 +361,86 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
-    # FIXME: Should we add coil checks for ductless system?
+    # Values for [min, rated, max] speeds
+    expected_clg_cfms = [91.7, 266.7, 285.6]
+    expected_clg_cops = {
+      104 => [3.26, 2.93, 2.73],
+      95 => [3.86, 3.51, 3.27],
+      82 => [5.09, 4.72, 4.41],
+      55.6 => [11.42, 11.54, 10.83],
+      40 => [12.07, 12.27, 11.51],
+    }
+    expected_clg_capacities = {
+      104 => [2653.0, 7805.7, 8379.4],
+      95 => [2758.4, 8155.6, 8755.8],
+      82 => [2910.5, 8661.1, 9299.6],
+      55.6 => [3219.2, 9686.3, 10402.3],
+      40 => [3402.2, 10294.2, 11056.2],
+    }
+    expected_htg_cfms = [86.7, 290.0, 319.2]
+    expected_htg_cops = {
+      70 => [8.31, 3.48, 3.70],
+      47 => [3.39, 2.72, 2.56],
+      17 => [2.19, 1.99, 1.79],
+      5 => [1.74, 1.52, 1.53],
+      -20 => [1.20, 1.05, 1.05],
+    }
+    expected_htg_capacities = {
+      70 => [2190.8, 9424.0, 9627.9],
+      47 => [2594.2, 8504.0, 9321.4],
+      17 => [3120.4, 7304.0, 8921.7],
+      5 => [2545.6, 7661.4, 7695.6],
+      -20 => [1590.3, 4662.8, 4661.0],
+    }
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(3, clg_coil.stages.size)
+    expected_clg_cfms.each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(clg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), tol)
+    end
+    expected_clg_cops.each do |odb, cops|
+      cops.each_with_index do |cop, i|
+        eir_adj = _get_table_lookup_factor(clg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, odb)
+        assert_in_epsilon(cop, 1.0 / eir_adj * clg_coil.stages[i].grossRatedCoolingCOP, tol)
+      end
+    end
+    expected_clg_capacities.each do |odb, capacities|
+      capacities.each_with_index do |capacity, i|
+        cap_adj = _get_table_lookup_factor(clg_coil.stages[i].totalCoolingCapacityFunctionofTemperatureCurve, HVAC::AirSourceCoolRatedIWB, odb)
+        assert_in_epsilon(capacity, cap_adj * UnitConversions.convert(clg_coil.stages[i].grossRatedTotalCoolingCapacity.get, 'W', 'Btu/hr'), tol)
+      end
+    end
+    clg_coil.stages.each do |stage|
+      assert_equal(0.708, stage.grossRatedSensibleHeatRatio.get)
+    end
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(3, htg_coil.stages.size)
+    expected_htg_cfms.each_with_index do |cfm, i|
+      assert_in_epsilon(cfm, UnitConversions.convert(htg_coil.stages[i].ratedAirFlowRate.get, 'm^3/s', 'cfm'), tol)
+    end
+    expected_htg_cops.each do |odb, cops|
+      cops.each_with_index do |cop, i|
+        eir_adj = _get_table_lookup_factor(htg_coil.stages[i].energyInputRatioFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, odb)
+        assert_in_epsilon(cop, 1.0 / eir_adj * htg_coil.stages[i].grossRatedHeatingCOP, tol)
+      end
+    end
+    expected_htg_capacities.each do |odb, capacities|
+      capacities.each_with_index do |capacity, i|
+        cap_adj = _get_table_lookup_factor(htg_coil.stages[i].heatingCapacityFunctionofTemperatureCurve, HVAC::AirSourceHeatRatedIDB, odb)
+        assert_in_epsilon(capacity, cap_adj * UnitConversions.convert(htg_coil.stages[i].grossRatedHeatingCapacity.get, 'W', 'Btu/hr'), tol)
+      end
+    end
+
     # Check fan
     fan_cfms = [82.67, 240.0, 256.96, 78.19, 261.0, 287.44]
     expected_watts_per_flow = UnitConversions.convert(0.07, 'm^3/s', 'cfm')
     expected_fan_cfm_fractions = fan_cfms.map { |cfm| cfm / fan_cfms.max }.sort
-    #  relationship for BPM fan, ducetless
+    #  relationship for BPM fan, ductless
     expected_fan_power_fractions = expected_fan_cfm_fractions.map { |cfm_fraction| cfm_fraction**3 }
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
     fan = unitary_system.supplyFan.get.to_FanSystemModel.get
