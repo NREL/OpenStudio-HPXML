@@ -36,11 +36,10 @@ class WorkflowHERSTest < Minitest::Test
       hvac_results[xml] = _get_simulation_hvac_energy_results(results, is_heat, is_electric_heat)
     end
 
-    _hvac_energy = _write_hers_hvac_results(hvac_results, test_results_csv)
+    hvac_energy = _write_hers_hvac_results(hvac_results, test_results_csv)
 
     # Check results
-    # FIXME: Temporarily disabled until RESNET updates acceptance criteria for HERS Addendum 82
-    # _check_hvac_test_results(hvac_energy)
+    _check_hvac_test_results(hvac_energy)
   end
 
   def test_hers_dse
