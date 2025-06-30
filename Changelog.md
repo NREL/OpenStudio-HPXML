@@ -1,3 +1,8 @@
+## OpenStudio-HPXML v1.11.0
+
+__New Features__
+- Updates to HPXML v4.2-rc3.
+
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
