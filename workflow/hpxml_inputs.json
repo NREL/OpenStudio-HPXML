@@ -598,7 +598,7 @@
     "clothes_dryer_fuel_type": "electricity",
     "clothes_dryer_efficiency_type": "CombinedEnergyFactor",
     "clothes_dryer_efficiency": 3.73,
-    "clothes_dryer_vented_flow_rate": 150,
+    "clothes_dryer_drying_method": "conventional",
     "dishwasher_present": true,
     "dishwasher_location": "conditioned space",
     "dishwasher_efficiency_type": "RatedAnnualkWh",
@@ -662,7 +662,6 @@
     "parent_hpxml": "sample_files/base.xml",
     "clothes_dryer_fuel_type": "natural gas",
     "clothes_dryer_efficiency": 3.3,
-    "clothes_dryer_vented_flow_rate": null,
     "cooking_range_oven_fuel_type": "natural gas"
   },
   "sample_files/base-appliances-oil.xml": {
@@ -686,7 +685,7 @@
     "clothes_washer_efficiency": 1.65,
     "clothes_dryer_efficiency_type": "EnergyFactor",
     "clothes_dryer_efficiency": 4.29,
-    "clothes_dryer_vented_flow_rate": 0,
+    "clothes_dryer_drying_method": "condensing",
     "dishwasher_efficiency_type": "EnergyFactor",
     "dishwasher_efficiency": 0.7,
     "dishwasher_place_setting_capacity": 6
@@ -1757,6 +1756,10 @@
     "electric_panel_load_cooling_system_power_rating": 3542,
     "electric_panel_load_other_power_rating": 559
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-detailed-performance.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "hvac_heat_pump": "Detailed Example: Central HP, SEER 13, 7.7 HSPF, Absolute Detailed Performance"
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "hvac_capacity_heat_pump": "Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit",
@@ -1790,16 +1793,22 @@
     "simulation_control_timestep": 1,
     "hvac_capacity_heat_pump_backup": "10 kW",
     "simulation_control_onoff_thermostat_deadband": 2,
-    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
-    "simulation_control_defrost_model_type": "advanced"
+    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "hvac_heat_pump": "Detailed Example: Central HP, SEER2 12.4, HSPF2 6.5"
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-space-constrained.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "hvac_heat_pump": "Central HP, SEER 18, 9.3 HSPF"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-2-speed-detailed-performance.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
+    "hvac_heat_pump": "Detailed Example: Central HP, SEER 18, 9.3 HSPF, Absolute Detailed Performance"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
@@ -1809,8 +1818,7 @@
     "simulation_control_timestep": 1,
     "simulation_control_onoff_thermostat_deadband": 2,
     "hvac_capacity_heat_pump_backup": "10 kW",
-    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
-    "simulation_control_defrost_model_type": "advanced"
+    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -1831,10 +1839,6 @@
     "hvac_heating_system_2": "Boiler, 80% AFUE",
     "heating_system_2_fuel": "natural gas",
     "hvac_capacity_heating_system_2": "60 kBtu/hr"
-  },
-  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-advanced-defrost.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
-    "simulation_control_defrost_model_type": "advanced"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-hvac-seasons.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
@@ -1857,11 +1861,19 @@
     "hvac_capacity_heat_pump": "Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit",
     "hvac_capacity_heating_system_2": "Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit"
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-pan-heater-continuous-mode.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-pan-heater-defrost-mode.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-pan-heater-none.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml"
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv",
-    "simulation_control_timestep": 60,
-    "simulation_control_defrost_model_type": "advanced"
+    "simulation_control_timestep": 60
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -1941,6 +1953,10 @@
     "hvac_heating_system": "None",
     "heating_system_fraction_heat_load_served": 0
   },
+  "sample_files/base-hvac-central-ac-only-1-speed-detailed-performance.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
+    "hvac_cooling_system": "Detailed Example: Central AC, SEER 13, Absolute Detailed Performance"
+  },
   "sample_files/base-hvac-central-ac-only-1-speed-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "hvac_capacity_cooling_system": "Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit"
@@ -1949,9 +1965,16 @@
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "hvac_cooling_system": "Central AC, SEER2 12.4"
   },
+  "sample_files/base-hvac-central-ac-only-1-speed-space-constrained.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml"
+  },
   "sample_files/base-hvac-central-ac-only-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "hvac_cooling_system": "Central AC, SEER 18"
+  },
+  "sample_files/base-hvac-central-ac-only-2-speed-detailed-performance.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
+    "hvac_cooling_system": "Detailed Example: Central AC, SEER 18, Absolute Detailed Performance"
   },
   "sample_files/base-hvac-central-ac-only-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2000,10 +2023,6 @@
     "hvac_heat_pump": "Central HP, SEER 18, 9.3 HSPF",
     "hvac_heat_pump_backup": "Integrated, Natural Gas, 95% AFUE",
     "hvac_heat_pump_temps": "30F Min Compressor Temp, 30F Max HP Backup Temp"
-  },
-  "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed-advanced-defrost.xml": {
-    "parent_hpxml": "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml",
-    "simulation_control_defrost_model_type": "advanced"
   },
   "sample_files/base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -2077,6 +2096,9 @@
   "sample_files/base-hvac-evap-cooler-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-evap-cooler-only.xml",
     "hvac_cooling_system": "Evaporative Cooler, Ducted"
+  },
+  "sample_files/base-hvac-fan-motor-type.xml": {
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-hvac-fireplace-wood-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-stove-oil-only.xml",
@@ -2349,10 +2371,6 @@
     "hvac_heat_pump": "Mini-Split HP, SEER 19, 10 HSPF",
     "hvac_heat_pump_backup": "None"
   },
-  "sample_files/base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
-    "simulation_control_defrost_model_type": "advanced"
-  },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "hvac_capacity_heat_pump": "Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit"
@@ -2383,10 +2401,12 @@
     "hvac_heating_system_2": "Electric Resistance",
     "heating_system_2_fuel": "electricity"
   },
-  "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-advanced-defrost.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml",
-    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency",
-    "simulation_control_defrost_model_type": "advanced"
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-integrated.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
+    "hvac_heat_pump_backup": "Integrated, Electricity, 100% Efficiency"
+  },
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-integrated-defrost-with-backup-heat-active.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-integrated.xml"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-backup-stove.xml",
@@ -2827,7 +2847,6 @@
     "clothes_washer_capacity": null,
     "clothes_dryer_location": null,
     "clothes_dryer_efficiency": null,
-    "clothes_dryer_vented_flow_rate": null,
     "dishwasher_location": null,
     "dishwasher_efficiency": null,
     "dishwasher_label_electric_rate": null,

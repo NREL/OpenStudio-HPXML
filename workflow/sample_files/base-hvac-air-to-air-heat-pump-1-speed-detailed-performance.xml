@@ -10,9 +10,6 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <AdvancedResearchFeatures>
-          <DefrostModelType>advanced</DefrostModelType>
-        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -327,25 +324,64 @@
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>36000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
-              <CompressorType>two stage</CompressorType>
+              <CompressorType>single stage</CompressorType>
               <BackupType>integrated</BackupType>
-              <BackupSystemFuel>natural gas</BackupSystemFuel>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.95</Value>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
-              <BackupHeatingSwitchoverTemperature>30.0</BackupHeatingSwitchoverTemperature>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>18.0</Value>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>9.3</Value>
+                <Value>7.7</Value>
               </AnnualHeatingEfficiency>
+              <CoolingDetailedPerformanceData>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>95.0</OutdoorTemperature>
+                  <Capacity>36000.0</Capacity>
+                  <CapacityDescription>nominal</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>3.8</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>82.0</OutdoorTemperature>
+                  <Capacity>39000.0</Capacity>
+                  <CapacityDescription>nominal</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>3.9</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+              </CoolingDetailedPerformanceData>
+              <HeatingDetailedPerformanceData>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>47.0</OutdoorTemperature>
+                  <Capacity>36000.0</Capacity>
+                  <CapacityDescription>nominal</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>2.9</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+                <PerformanceDataPoint>
+                  <OutdoorTemperature>17.0</OutdoorTemperature>
+                  <Capacity>23000.0</Capacity>
+                  <CapacityDescription>nominal</CapacityDescription>
+                  <Efficiency>
+                    <Units>COP</Units>
+                    <Value>1.8</Value>
+                  </Efficiency>
+                </PerformanceDataPoint>
+              </HeatingDetailedPerformanceData>
             </HeatPump>
           </HVACPlant>
           <HVACControl>
@@ -458,9 +494,8 @@
           <SystemIdentifier id='ClothesDryer1'/>
           <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
+          <DryingMethod>conventional</DryingMethod>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <Vented>true</Vented>
-          <VentedFlowRate>150.0</VentedFlowRate>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
