@@ -43,7 +43,7 @@ None	none
 "Geothermal HP, EER 30.9, COP 4.4"	ground-to-air	EER	30.9	variable speed	COP	4.4																			
 "Packaged Terminal HP, EER 11.4, COP 3.6"	packaged terminal heat pump	EER	11.4		COP	3.6																			
 "Room AC w/ Reverse Cycle, EER 11.4, COP 3.6"	room air conditioner with reverse cycle	EER	11.4		COP	3.6																			
-"Detailed Example: Central HP, SEER2 12.4, HSPF2 6.5"	air-to-air	SEER2	12.4	single stage	HSPF2	6.5																			
+"Detailed Example: Central HP, SEER2 12.4, HSPF2 6.5"	air-to-air	SEER2	12.35	single stage	HSPF2	6.545																			
 "Detailed Example: Central HP, SEER 13, 7.7 HSPF, Absolute Detailed Performance"	air-to-air	SEER	13	single stage	HSPF	7.7					Absolute capacities	"47.0, 17.0"		"36000, 23000"			"2.9, 1.8"		"95.0, 82.0"		"36000, 39000"			"3.8, 3.9"	
 "Detailed Example: Central HP, SEER 18, 9.3 HSPF, Absolute Detailed Performance"	air-to-air	SEER	18	two stage	HSPF	9.3					Absolute capacities	"47.0, 17.0, 5.0"	"24500, 14200, 9900"	"36000, 21600"		"3.9, 3.0, 2.2"	"3.1, 2.3"		"95.0, 82.0"	"24000, 29000"	"36000, 39000"		"4.1, 5.4"	"3.6, 4.8"	
 "Detailed Example: Central HP, SEER 17.5, 9.5 HSPF, Absolute Detailed Performance"	air-to-air	SEER	17.5	variable speed	HSPF	9.5					Absolute capacities	"47.0, 17.0, 5.0"	"9900, 3600, 1100"	"35800, 24600"	"35800, 24600, 19700"	"4.68, 1.57, 0.47"	"3.4, 2.58"	"3.4, 2.58, 2.63"	"95.0, 82.0"	"11900, 13400"	36000	"36000, 40500"	"4.47, 6.33"	2.64	"2.64, 3.46"
