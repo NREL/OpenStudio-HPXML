@@ -530,7 +530,7 @@ module Airflow
     max_flow_rate = max_rate * infil_values[:volume] / UnitConversions.convert(1.0, 'hr', 'min')
     neutral_level = 0.5
     hor_lk_frac = 0.0
-    c_w, c_s = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, conditioned_space, infil_values[:height])
+    c_w, c_s = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, HPXML::LocationConditionedSpace, infil_values[:height])
     max_oa_hr = 0.0115 # From ANSI/RESNET/ICC 301-2022
 
     # Program
@@ -550,8 +550,8 @@ module Airflow
       vent_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
     else
       # No HVAC system; use the average of defaulted heating/cooling setpoints.
-      htg_weekday_setpoints, htg_weekend_setpoints = Defaults.get_heating_setpoint(HPXML::HVACControlTypeManual, hpxml_header.eri_calculation_version)
-      clg_weekday_setpoints, clg_weekend_setpoints = Defaults.get_cooling_setpoint(HPXML::HVACControlTypeManual, hpxml_header.eri_calculation_version)
+      htg_weekday_setpoints, htg_weekend_setpoints = Defaults.get_heating_setpoint(HPXML::HVACControlTypeManual, hpxml_header.eri_calculation_versions[0])
+      clg_weekday_setpoints, clg_weekend_setpoints = Defaults.get_cooling_setpoint(HPXML::HVACControlTypeManual, hpxml_header.eri_calculation_versions[0])
       if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
         default_htg_sp = UnitConversions.convert(htg_weekend_setpoints.split(', ').uniq[0].to_f, 'F', 'C')
       else
@@ -1712,7 +1712,7 @@ module Airflow
     neutral_level = 0.5 # DOE-2 Default
     sla = get_infiltration_SLA_from_ACH50(ach50, volume / area)
     ela = sla * area
-    c_w_SG, c_s_SG = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, space)
+    c_w_SG, c_s_SG = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, HPXML::LocationGarage)
     apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG, duct_lk_imbals)
   end
 
@@ -1743,7 +1743,7 @@ module Airflow
 
     vented_crawl = hpxml_bldg.foundations.find { |foundation| foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
     space = spaces[HPXML::LocationCrawlspaceVented]
-    height = Geometry.get_space_height(space)
+    height = Geometry.calculate_zone_height(hpxml_bldg, HPXML::LocationCrawlspaceVented)
     sla = vented_crawl.vented_crawlspace_sla
     ach = get_infiltration_ACH_from_SLA(sla, height, ReferenceHeight, weather)
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil, duct_lk_imbals)
@@ -1797,7 +1797,7 @@ module Airflow
       neutral_level = 0.5 # DOE-2 Default
       sla = vented_attic_sla
       ela = sla * vented_attic_area
-      c_w_SG, c_s_SG = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, space)
+      c_w_SG, c_s_SG = calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, HPXML::LocationAtticVented)
       apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG, duct_lk_imbals)
     elsif not vented_attic_const_ach.nil?
       ach = vented_attic_const_ach
@@ -2391,14 +2391,14 @@ module Airflow
     infil_program.addLine('Set Qfan_with_ducts = (@Max Qexhaust Qsupply)')
 
     # Total combined air exchange
-    if Constants::ERIVersions.index(hpxml_header.eri_calculation_version) >= Constants::ERIVersions.index('2022')
+    if Constants::ERIVersions.index(hpxml_header.eri_calculation_versions[0]) >= Constants::ERIVersions.index('2022')
       infil_program.addLine('Set Qimb = (@Abs (Qsupply - Qexhaust))')
       infil_program.addLine('If Qinf + Qimb > 0')
       infil_program.addLine('  Set Qtot = Qfan_with_ducts + (Qinf^2) / (Qinf + Qimb)')
       infil_program.addLine('Else')
       infil_program.addLine('  Set Qtot = Qfan_with_ducts')
       infil_program.addLine('EndIf')
-    elsif Constants::ERIVersions.index(hpxml_header.eri_calculation_version) >= Constants::ERIVersions.index('2019')
+    elsif Constants::ERIVersions.index(hpxml_header.eri_calculation_versions[0]) >= Constants::ERIVersions.index('2019')
       # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
       infil_program.addLine('If Qfan_with_ducts > 0')
       # Balanced system if the total supply airflow and total exhaust airflow are within 10% of their average.
@@ -2841,16 +2841,27 @@ module Airflow
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hor_lk_frac [Double] Fraction of leakage that is in the floor and ceiling
   # @param neutral_level [Double] Fraction of space height at which the indoor-outdoor pressure difference due to stack effect is zero
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
+  # @param location [String] The location of interest (HPXML::LocationXXX)
   # @param space_height [Double] Height of the space (ft)
   # @return [Array<Double, Double>] Wind and stack coefficients
-  def self.calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, space, space_height = nil)
+  def self.calc_wind_stack_coeffs(hpxml_bldg, hor_lk_frac, neutral_level, location, space_height = nil)
     site_ap = hpxml_bldg.site.additional_properties
     if space_height.nil?
-      space_height = Geometry.get_space_height(space)
+      space_height = Geometry.calculate_zone_height(hpxml_bldg, location)
     end
-    coord_z = Geometry.get_z_origin_for_zone(space.thermalZone.get)
-    f_t_SG = site_ap.site_terrain_multiplier * ((space_height + coord_z) / 32.8)**site_ap.site_terrain_exponent / (site_ap.terrain_multiplier * (site_ap.height / 32.8)**site_ap.terrain_exponent)
+
+    # Get distance above ground for the space
+    walls_top = hpxml_bldg.building_construction.additional_properties.walls_height_above_grade
+    foundation_top = hpxml_bldg.building_construction.additional_properties.foundation_height_above_grade
+    if [HPXML::LocationConditionedSpace, HPXML::LocationGarage].include? location
+      space_height_ag = foundation_top
+    elsif [HPXML::LocationAtticVented].include? location
+      space_height_ag = walls_top
+    else
+      fail "Unexpected location: #{location}"
+    end
+
+    f_t_SG = site_ap.site_terrain_multiplier * ((space_height + space_height_ag) / 32.8)**site_ap.site_terrain_exponent / (site_ap.terrain_multiplier * (site_ap.height / 32.8)**site_ap.terrain_exponent)
     f_s_SG = 2.0 / 3.0 * (1 + hor_lk_frac / 2.0) * (2.0 * neutral_level * (1.0 - neutral_level))**0.5 / (neutral_level**0.5 + (1.0 - neutral_level)**0.5)
     f_w_SG = site_ap.s_g_shielding_coef * (1.0 - hor_lk_frac)**(1.0 / 3.0) * f_t_SG
     c_s_SG = f_s_SG**2.0 * Gravity * space_height / UnitConversions.convert(AssumedInsideTemp, 'F', 'R')

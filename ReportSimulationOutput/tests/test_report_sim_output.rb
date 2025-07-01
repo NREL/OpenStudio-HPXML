@@ -9,6 +9,7 @@ require_relative '../measure.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
 require_relative '../../HPXMLtoOpenStudio/resources/version.rb'
+require_relative '../../HPXMLtoOpenStudio/resources/calendar.rb'
 require 'oga'
 require 'json'
 
@@ -66,7 +67,6 @@ class ReportSimulationOutputTest < Minitest::Test
     "End Use: #{FT::Elec}: #{EUT::CeilingFan} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::Television} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::PlugLoads} (MBtu)",
-    "End Use: #{FT::Elec}: #{EUT::Vehicle} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::WellPump} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::PoolHeater} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::PoolPump} (MBtu)",
@@ -75,6 +75,7 @@ class ReportSimulationOutputTest < Minitest::Test
     "End Use: #{FT::Elec}: #{EUT::PV} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::Generator} (MBtu)",
     "End Use: #{FT::Elec}: #{EUT::Battery} (MBtu)",
+    "End Use: #{FT::Elec}: #{EUT::Vehicle} (MBtu)",
     "End Use: #{FT::Gas}: #{EUT::Heating} (MBtu)",
     "End Use: #{FT::Gas}: #{EUT::HeatingHeatPumpBackup} (MBtu)",
     "End Use: #{FT::Gas}: #{EUT::HotWater} (MBtu)",
@@ -151,9 +152,13 @@ class ReportSimulationOutputTest < Minitest::Test
     "Load: #{LT::HotWaterSolarThermal} (MBtu)",
     "Unmet Hours: #{UHT::Heating} (hr)",
     "Unmet Hours: #{UHT::Cooling} (hr)",
+    "Unmet Hours: #{UHT::Driving} (hr)",
     "Peak Electricity: #{PFT::Winter} #{TE::Total} (W)",
     "Peak Electricity: #{PFT::Summer} #{TE::Total} (W)",
     "Peak Electricity: #{PFT::Annual} #{TE::Total} (W)",
+    "Peak Electricity: #{PFT::Winter} #{TE::Net} (W)",
+    "Peak Electricity: #{PFT::Summer} #{TE::Net} (W)",
+    "Peak Electricity: #{PFT::Annual} #{TE::Net} (W)",
     "Peak Load: #{PLT::Heating} (kBtu/hr)",
     "Peak Load: #{PLT::Cooling} (kBtu/hr)",
     "Component Load: Heating: #{CLT::Roofs} (MBtu)",
@@ -332,6 +337,7 @@ class ReportSimulationOutputTest < Minitest::Test
   BaseHPXMLTimeseriesColsUnmetHours = [
     "Unmet Hours: #{UHT::Heating}",
     "Unmet Hours: #{UHT::Cooling}",
+    "Unmet Hours: #{UHT::Driving}",
   ]
 
   BaseHPXMLTimeseriesColsZoneTemps = [
@@ -339,6 +345,19 @@ class ReportSimulationOutputTest < Minitest::Test
     'Temperature: Conditioned Space',
     'Temperature: Heating Setpoint',
     'Temperature: Cooling Setpoint',
+  ]
+
+  BaseHPXMLTimeseriesColsZoneConds = [
+    'Humidity Ratio: Attic - Unvented',
+    'Humidity Ratio: Conditioned Space',
+    'Relative Humidity: Attic - Unvented',
+    'Relative Humidity: Conditioned Space',
+    'Dewpoint Temperature: Attic - Unvented',
+    'Dewpoint Temperature: Conditioned Space',
+    'Radiant Temperature: Attic - Unvented',
+    'Radiant Temperature: Conditioned Space',
+    'Operative Temperature: Attic - Unvented',
+    'Operative Temperature: Conditioned Space',
   ]
 
   BaseHPXMLTimeseriesColsAirflows = [
@@ -401,6 +420,11 @@ class ReportSimulationOutputTest < Minitest::Test
     'Surface Construction Index: Window4'
   ]
 
+  BaseHPXMLTimeseriesColsEnergyPlusOutputMeters = [
+    'MainsWater:Facility',
+    'HeatingCoils:EnergyTransfer'
+  ]
+
   def all_base_hpxml_timeseries_cols
     return (BaseHPXMLTimeseriesColsEnergy +
             BaseHPXMLTimeseriesColsFuels +
@@ -410,6 +434,7 @@ class ReportSimulationOutputTest < Minitest::Test
             BaseHPXMLTimeseriesColsTotalLoads +
             BaseHPXMLTimeseriesColsUnmetHours +
             BaseHPXMLTimeseriesColsZoneTemps +
+            BaseHPXMLTimeseriesColsZoneConds +
             BaseHPXMLTimeseriesColsAirflows +
             BaseHPXMLTimeseriesColsWeather)
   end
@@ -425,113 +450,113 @@ class ReportSimulationOutputTest < Minitest::Test
   def emission_annual_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: #{TE::Total} (lb)",
-               "Emissions: #{scenario}: #{TE::Net} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{TE::Total} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{TE::Net} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{TE::Total} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{TE::Total} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{TE::Total} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{TE::Total} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{TE::Total} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Heating} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingFanPump} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingHeatPumpBackup} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingHeatPumpBackupFanPump} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Cooling} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::CoolingFanPump} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWater} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWaterRecircPump} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWaterSolarThermalPump} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsInterior} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsGarage} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsExterior} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVent} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVentPreheat} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVentPrecool} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::WholeHouseFan} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Refrigerator} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Freezer} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dehumidifier} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dishwasher} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesWasher} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesDryer} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::RangeOven} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::CeilingFan} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Television} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PlugLoads} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Vehicle} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::WellPump} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PoolHeater} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PoolPump} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PermanentSpaHeater} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PermanentSpaPump} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HeatingHeatPumpBackup} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HotWater} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::ClothesDryer} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::RangeOven} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::PoolHeater} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::PermanentSpaHeater} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Grill} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Lighting} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Fireplace} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::MechVentPreheat} (lb)",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Heating} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::HeatingHeatPumpBackup} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::HotWater} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::ClothesDryer} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::RangeOven} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Grill} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Lighting} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Fireplace} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::MechVentPreheat} (lb)",
-               "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Heating} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::HeatingHeatPumpBackup} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::HotWater} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::ClothesDryer} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::RangeOven} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Grill} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Lighting} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Fireplace} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::MechVentPreheat} (lb)",
-               "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Heating} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::HeatingHeatPumpBackup} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::HotWater} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::ClothesDryer} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::RangeOven} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Grill} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Lighting} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Fireplace} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::MechVentPreheat} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Heating} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::HeatingHeatPumpBackup} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::HotWater} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::ClothesDryer} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::RangeOven} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Grill} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Lighting} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Fireplace} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::MechVentPreheat} (lb)",
-               "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Generator} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Heating} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::HeatingHeatPumpBackup} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::HotWater} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::ClothesDryer} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::RangeOven} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Grill} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Lighting} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Fireplace} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::MechVentPreheat} (lb)",
-               "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Generator} (lb)"]
+      cols.concat(["Emissions: #{scenario}: #{TE::Total} (lb)",
+                   "Emissions: #{scenario}: #{TE::Net} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{TE::Total} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{TE::Net} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{TE::Total} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{TE::Total} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{TE::Total} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{TE::Total} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{TE::Total} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Heating} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingFanPump} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingHeatPumpBackup} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingHeatPumpBackupFanPump} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Cooling} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::CoolingFanPump} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWaterRecircPump} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWaterSolarThermalPump} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsInterior} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsGarage} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsExterior} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVent} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVentPreheat} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::MechVentPrecool} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::WholeHouseFan} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Refrigerator} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Freezer} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dehumidifier} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dishwasher} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesWasher} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesDryer} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::RangeOven} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::CeilingFan} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Television} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PlugLoads} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::WellPump} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PoolHeater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PoolPump} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PermanentSpaHeater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PermanentSpaPump} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Generator} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery} (lb)",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Vehicle} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HeatingHeatPumpBackup} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::HotWater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::ClothesDryer} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::RangeOven} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::PoolHeater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::PermanentSpaHeater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Grill} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Lighting} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Fireplace} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::MechVentPreheat} (lb)",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Generator} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Heating} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::HeatingHeatPumpBackup} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::HotWater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::ClothesDryer} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::RangeOven} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Grill} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Lighting} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Fireplace} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::MechVentPreheat} (lb)",
+                   "Emissions: #{scenario}: #{FT::Oil}: #{EUT::Generator} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Heating} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::HeatingHeatPumpBackup} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::HotWater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::ClothesDryer} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::RangeOven} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Grill} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Lighting} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Fireplace} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::MechVentPreheat} (lb)",
+                   "Emissions: #{scenario}: #{FT::Propane}: #{EUT::Generator} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Heating} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::HeatingHeatPumpBackup} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::HotWater} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::ClothesDryer} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::RangeOven} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Grill} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Lighting} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Fireplace} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::MechVentPreheat} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodCord}: #{EUT::Generator} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Heating} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::HeatingHeatPumpBackup} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::HotWater} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::ClothesDryer} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::RangeOven} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Grill} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Lighting} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Fireplace} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::MechVentPreheat} (lb)",
+                   "Emissions: #{scenario}: #{FT::WoodPellets}: #{EUT::Generator} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Heating} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::HeatingHeatPumpBackup} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::HotWater} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::ClothesDryer} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::RangeOven} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Grill} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Lighting} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Fireplace} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::MechVentPreheat} (lb)",
+                   "Emissions: #{scenario}: #{FT::Coal}: #{EUT::Generator} (lb)"])
     end
     return cols
   end
@@ -539,8 +564,8 @@ class ReportSimulationOutputTest < Minitest::Test
   def emissions_timeseries_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: #{TE::Total}",
-               "Emissions: #{scenario}: #{TE::Net}"]
+      cols.concat(["Emissions: #{scenario}: #{TE::Total}",
+                   "Emissions: #{scenario}: #{TE::Net}"])
     end
     return cols
   end
@@ -548,9 +573,9 @@ class ReportSimulationOutputTest < Minitest::Test
   def emission_fuels_timeseries_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: #{FT::Elec}: #{TE::Total}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{TE::Net}",
-               "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total}"]
+      cols.concat(["Emissions: #{scenario}: #{FT::Elec}: #{TE::Total}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{TE::Net}",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{TE::Total}"])
     end
     return cols
   end
@@ -558,29 +583,31 @@ class ReportSimulationOutputTest < Minitest::Test
   def emission_end_uses_timeseries_cols
     cols = []
     emission_scenarios.each do |scenario|
-      cols += ["Emissions: #{scenario}: #{FT::Elec}: #{EUT::Cooling}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::CoolingFanPump}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingFanPump}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWater}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsInterior}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsExterior}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Refrigerator}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dishwasher}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesWasher}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesDryer}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::RangeOven}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Television}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PlugLoads}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV}",
-               "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery}",
-               "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating}"]
+      cols.concat(["Emissions: #{scenario}: #{FT::Elec}: #{EUT::Cooling}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::CoolingFanPump}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HeatingFanPump}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::HotWater}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsInterior}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::LightsExterior}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Refrigerator}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Dishwasher}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesWasher}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::ClothesDryer}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::RangeOven}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Television}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PlugLoads}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::PV}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Battery}",
+                   "Emissions: #{scenario}: #{FT::Elec}: #{EUT::Vehicle}",
+                   "Emissions: #{scenario}: #{FT::Gas}: #{EUT::Heating}"])
     end
     return cols
   end
 
   def pv_battery_timeseries_cols
     return ["End Use: #{FT::Elec}: #{EUT::PV}",
-            "End Use: #{FT::Elec}: #{EUT::Battery}"]
+            "End Use: #{FT::Elec}: #{EUT::Battery}",
+            "End Use: #{FT::Elec}: #{EUT::Vehicle}"]
   end
 
   def test_annual_only
@@ -600,6 +627,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_unmet_hours' => false,
                   'include_timeseries_component_loads' => false,
                   'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_zone_conditions' => false,
                   'include_timeseries_airflows' => false,
                   'include_timeseries_weather' => false,
                   'include_timeseries_resilience' => false }
@@ -616,6 +644,11 @@ class ReportSimulationOutputTest < Minitest::Test
     actual_fridge_energy_use = actual_annual_rows["End Use: #{FT::Elec}: #{EUT::Refrigerator} (MBtu)"]
     rated_fridge_energy_use = UnitConversions.convert(hpxml.buildings[0].refrigerators[0].rated_annual_kwh, 'kWh', 'MBtu')
     assert_in_epsilon(0.93, actual_fridge_energy_use / rated_fridge_energy_use, 0.1)
+
+    # Verify Total/Net outputs when no PV
+    actual_annual_rows = _get_annual_values(annual_csv)
+    assert_equal(actual_annual_rows["Energy Use: #{TE::Total} (MBtu)"], actual_annual_rows["Energy Use: #{TE::Net} (MBtu)"])
+    assert_equal(actual_annual_rows["Fuel Use: #{FT::Elec}: #{TE::Total} (MBtu)"], actual_annual_rows["Fuel Use: #{FT::Elec}: #{TE::Net} (MBtu)"])
   end
 
   def test_annual_only2
@@ -635,6 +668,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_unmet_hours' => true,
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_zone_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
                   'include_timeseries_resilience' => true }
@@ -689,6 +723,10 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Energy Use: #{TE::Total}",
                                                              "Energy Use: #{TE::Net}"])
+    # Verify Total/Net outputs when PV
+    actual_annual_rows = _get_annual_values(annual_csv)
+    assert_operator(actual_annual_rows["Energy Use: #{TE::Total} (MBtu)"], :>, actual_annual_rows["Energy Use: #{TE::Net} (MBtu)"])
+    assert_operator(actual_annual_rows["Fuel Use: #{FT::Elec}: #{TE::Total} (MBtu)"], :>, actual_annual_rows["Fuel Use: #{FT::Elec}: #{TE::Net} (MBtu)"])
   end
 
   def test_timeseries_hourly_fuels
@@ -878,13 +916,13 @@ class ReportSimulationOutputTest < Minitest::Test
                                                              "Component Load: Cooling: #{CLT::InternalGains}"])
   end
 
-  def test_timeseries_hourly_unmet_hours
-    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-hvac-undersized.xml'),
+  def check_timeseries_hourly_unmet_hours(xml_file, unmet_hours_cols)
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), "../../workflow/sample_files/#{xml_file}"),
                   'skip_validation' => true,
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_unmet_hours' => true }
-    annual_csv, timeseries_csv = _test_measure(args_hash)
+    annual_csv, timeseries_csv, run_log = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
     expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsUnmetHours
@@ -894,8 +932,15 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Unmet Hours: #{UHT::Heating}",
-                                                             "Unmet Hours: #{UHT::Cooling}"])
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, unmet_hours_cols)
+    if xml_file.include? 'base-vehicle-ev-charger-undercharged'
+      assert(File.readlines(run_log).any? { |line| line.include?('driving hours could not be met') })
+    end
+  end
+
+  def test_timeseries_hourly_unmet_hours
+    check_timeseries_hourly_unmet_hours('base-hvac-undersized.xml', ["Unmet Hours: #{UHT::Heating}", "Unmet Hours: #{UHT::Cooling}"])
+    check_timeseries_hourly_unmet_hours('base-vehicle-ev-charger-undercharged.xml', ["Unmet Hours: #{UHT::Driving}"])
   end
 
   def test_timeseries_hourly_zone_temperatures
@@ -962,6 +1007,24 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     timeseries_rows = CSV.read(timeseries_csv)
     assert_equal(8760, timeseries_rows.size - 2)
+  end
+
+  def test_timeseries_hourly_zone_conditions
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-hvac-furnace-gas-only.xml'),
+                  'skip_validation' => true,
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_zone_conditions' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsZoneConds
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsZoneConds)
   end
 
   def test_timeseries_hourly_airflows_with_mechvent
@@ -1034,6 +1097,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_unmet_hours' => true,
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_zone_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
                   'include_timeseries_resilience' => true }
@@ -1077,6 +1141,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_unmet_hours' => true,
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_zone_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
                   'include_timeseries_resilience' => true }
@@ -1116,6 +1181,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_timeseries_unmet_hours' => true,
                   'include_timeseries_component_loads' => true,
                   'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_zone_conditions' => true,
                   'include_timeseries_airflows' => true,
                   'include_timeseries_weather' => true,
                   'include_timeseries_resilience' => true }
@@ -1318,6 +1384,38 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsEnergyPlusOutputVariables)
     assert(File.readlines(run_log).any? { |line| line.include?("Request for output variable 'Foo'") })
+  end
+
+  def test_timeseries_energyplus_output_variables_freq_none
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
+                  'skip_validation' => true,
+                  'add_component_loads' => true,
+                  'timeseries_frequency' => 'none',
+                  'user_output_variables' => 'Zone People Occupant Count, Zone People Total Heating Energy, Foo, Surface Construction Index' }
+    annual_csv, timeseries_csv, run_log = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+    assert(!File.readlines(run_log).any? { |line| line.include?("Request for output variable 'Foo'") })
+  end
+
+  def test_timeseries_energyplus_output_meters
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
+                  'skip_validation' => true,
+                  'add_component_loads' => true,
+                  'timeseries_frequency' => 'hourly',
+                  'user_output_meters' => 'MainsWater:Facility, Foo:Meter, HeatingCoils:EnergyTransfer' }
+    annual_csv, timeseries_csv, run_log = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + BaseHPXMLTimeseriesColsEnergyPlusOutputMeters
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+    timeseries_cols = timeseries_rows.transpose
+    assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsEnergyPlusOutputMeters)
+    assert(File.readlines(run_log).any? { |line| line.include?("Request for output meter 'Foo:Meter'") })
   end
 
   def test_for_unsuccessful_simulation_infinity

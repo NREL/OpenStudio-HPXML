@@ -50,6 +50,9 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         return
+      elsif hpxml_bldg.vehicles.size > 0
+        # Same as battery issue above
+        return
       elsif hpxml.header.hvac_onoff_thermostat_deadband
         # On off thermostat not supported with unit multiplier yet
       elsif hpxml.header.heat_pump_backup_heating_capacity_increment
@@ -94,22 +97,23 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
   annual_csv_path = File.join(rundir, 'results_annual.csv')
   monthly_csv_path = File.join(rundir, 'results_timeseries.csv')
   bills_csv_path = File.join(rundir, 'results_bills.csv')
+  panel_csv_path = File.join(rundir, 'results_panel.csv')
   assert(File.exist? annual_csv_path)
   assert(File.exist? monthly_csv_path)
 
   # Check outputs
   hpxml_defaults_path = File.join(rundir, 'in.xml')
   schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
-  schematron_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml'))
+  schematron_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.sch'))
   hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator) # Validate in.xml to ensure it can be run back through OS-HPXML
   if not hpxml.errors.empty?
     puts 'ERRORS:'
     hpxml.errors.each do |error|
       puts error
     end
-    flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
+    flunk "EPvalidator.sch error in #{hpxml_defaults_path}."
   end
-  annual_results = _get_simulation_annual_results(annual_csv_path, bills_csv_path)
+  annual_results = _get_simulation_annual_results(annual_csv_path, bills_csv_path, panel_csv_path)
   monthly_results = _get_simulation_monthly_results(monthly_csv_path)
   _verify_outputs(rundir, xml, annual_results, hpxml, unit_multiplier)
   if unit_multiplier > 1
@@ -119,7 +123,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
   return annual_results, monthly_results
 end
 
-def _get_simulation_annual_results(annual_csv_path, bills_csv_path)
+def _get_simulation_annual_results(annual_csv_path, bills_csv_path, panel_csv_path)
   # Grab all outputs from reporting measure CSV annual results
   results = {}
   CSV.foreach(annual_csv_path) do |row|
@@ -135,6 +139,15 @@ def _get_simulation_annual_results(annual_csv_path, bills_csv_path)
       next if (1..12).to_a.any? { |month| row[0].include?(": Month #{month}:") }
 
       results["Utility Bills: #{row[0]}"] = Float(row[1])
+    end
+  end
+
+  # Grab all outputs from reporting measure CSV panel results
+  if File.exist? panel_csv_path
+    CSV.foreach(panel_csv_path) do |row|
+      next if row.nil? || (row.size < 2)
+
+      results[row[0]] = Float(row[1])
     end
   end
 
@@ -228,6 +241,18 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?) }
       next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
     end
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && vehicle.ev_charger_idref.nil? } }
+      next if message.include? 'Electric vehicle specified with no charger provided; home EV charging will not be modeled.'
+    end
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? && vehicle.ev_weekday_fractions.nil? } && !hpxml_bldg.header.schedules_filepaths.empty? }
+      next if message.include? 'driving hours could not be met'
+    end
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV } && hpxml_bldg.plug_loads.any? { |p| p.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging } }
+      next if message.include? 'Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'
+    end
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.vehicles.any? { |vehicle| vehicle.vehicle_type != HPXML::VehicleTypeBEV } }
+      next if message.include?('Vehicle type') && message.include?('is not currently handled, the vehicle will not be modeled')
+    end
     if hpxml_path.include? 'base-location-capetown-zaf.xml'
       next if message.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
       next if message.include? 'Could not find a marginal Electricity rate.'
@@ -247,7 +272,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
     end
     if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw' }
-      next if message.include? 'No design condition info found; calculating design conditions from EPW weather data.'
+      next if message.include? 'No EPW design conditions found; calculating design conditions from EPW weather data.'
     end
     if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }
       next if message.include? 'NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'
@@ -350,12 +375,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
     # Evaporative coolers
     if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.cooling_systems.count { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler } > 0 }
-      # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
-      # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
-      # Manually removing Controller:MechanicalVentilation from idf eliminates these two warnings.
-      # FUTURE: Can we update OS to allow removing it?
-      next if message.include?('Zone') && message.include?('is not accounted for by Controller:MechanicalVentilation object')
-      next if message.include?('PEOPLE object for zone') && message.include?('is not accounted for by Controller:MechanicalVentilation object')
       # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
       next if message.include?('GetAirPathData: AirLoopHVAC') && message.include?('has no Controllers')
       # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
@@ -1104,7 +1123,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
       abs_frac_tol = nil
-    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:')
+    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:') || key.include?('Electric Panel Load:') || key.include?('Electric Panel Breaker Spaces:')
       # Check that there is no difference
       abs_delta_tol = 0
       abs_frac_tol = nil
@@ -1125,6 +1144,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
   annual_results_10x = annual_results_10x.dup
   ['System Use:',
    'Temperature:',
+   'Humidity Ratio:', 'Relative Humidity:', 'Dewpoint Temperature:', 'Radiant Temperature:', 'Operative Temperature:',
    'Utility Bills:',
    'HVAC Zone Design Load:',
    'HVAC Space Design Load:'].each do |key|
@@ -1219,6 +1239,7 @@ def _write_results(results, csv_out, output_groups_filter: [])
     'hvac' => ['HVAC Design Temperature', 'HVAC Capacity', 'HVAC Design Load'],
     'misc' => ['Unmet Hours', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
     'bills' => ['Utility Bills'],
+    'panel' => ['Electric Panel Load', 'Electric Panel Breaker Spaces'],
   }
 
   output_groups.each do |output_group, key_types|

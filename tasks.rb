@@ -79,19 +79,19 @@ def create_hpxmls
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
       suffix = "_#{i}" if i > 1
 
-      if hpxml_path.include?('whole-building-common-spaces')
-        build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv")
+      if hpxml_path.include? 'whole-building-common-spaces'
+        build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 7 ? 'VentedAttic' : 'BelowApartment')
         build_residential_hpxml['geometry_average_ceiling_height'] = (i >= 7 ? 2.0 : 8.0)
         build_residential_hpxml['geometry_unit_num_bedrooms'] = (i >= 7 ? 0 : 3)
-        build_residential_hpxml['geometry_unit_num_bathrooms'] = (i >= 7 ? 1 : 2) # FIXME: schema requirement : min exclusive 0
+        build_residential_hpxml['geometry_unit_num_bathrooms'] = (i >= 7 ? 1 : 2)
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => -7.0, 2 => -7.0, 3 => 1.0, 4 => 1.0, 5 => 9.0, 6 => 9.0, 7 => 17.0, 8 => 17.0 }[i]
         # Partially conditioned basement + one unconditioned hallway each floor + unconditioned attic
         build_residential_hpxml['heating_system_type'] = { 1 => 'ElectricResistance', 2 => 'none', 3 => 'none', 4 => 'ElectricResistance', 5 => 'none', 6 => 'ElectricResistance', 7 => 'none', 8 => 'none' }[i]
         build_residential_hpxml['cooling_system_type'] = { 1 => 'room air conditioner', 2 => 'none', 3 => 'none', 4 => 'room air conditioner', 5 => 'none', 6 => 'room air conditioner', 7 => 'none', 8 => 'none' }[i]
-      elsif hpxml_path.include?('whole-building')
-        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
+      elsif hpxml_path.include? 'whole-building'
+        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
@@ -211,6 +211,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     end
     roof.emittance = 0.9
     roof.roof_color = nil
+    roof.roof_type = nil
   end
   (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
     if wall.color == HPXML::ColorReflective
@@ -220,6 +221,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     end
     wall.emittance = 0.9
     wall.color = nil
+    wall.siding = nil
     if wall.is_a?(HPXML::Wall)
       if wall.attic_wall_type == HPXML::AtticWallTypeGable
         wall.insulation_assembly_r_value = 2.15
@@ -317,8 +319,10 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
     surface.emittance = 0.9
     if surface.is_a? HPXML::Roof
       surface.roof_color = nil
+      surface.roof_type = nil
     else
       surface.color = nil
+      surface.siding = nil
     end
   end
 
@@ -395,6 +399,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.building_construction.number_of_conditioned_floors = 2
       hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 1
       hpxml_bldg.building_construction.conditioned_floor_area = 2700
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700
       hpxml_bldg.attics[0].attic_type = HPXML::AtticTypeCathedral
     elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
       hpxml_bldg.building_construction.conditioned_building_volume = 23850
@@ -407,6 +412,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
     elsif ['base-foundation-basement-garage.xml'].include? hpxml_file
       hpxml_bldg.building_construction.conditioned_floor_area -= 400 * 2
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served -= 400 * 2
       hpxml_bldg.building_construction.conditioned_building_volume -= 400 * 2 * 8
       hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
     elsif ['base-bldgtype-mf-unit-infil-compartmentalization-test.xml'].include? hpxml_file
@@ -449,17 +455,26 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.cooling_systems[-1].id = 'CoolingSystem2'
         hpxml_bldg.cooling_systems[-1].attached_to_zone_idref = hpxml_bldg.zones[1].id
         hpxml_bldg.cooling_systems[-1].primary_system = false
+        hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served /= 2.0
         hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                           distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                          air_type: HPXML::AirTypeRegularVelocity)
+                                          air_type: HPXML::AirTypeRegularVelocity,
+                                          conditioned_floor_area_served: hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served)
         hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[0].dup
         hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].dup
-        hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
-        hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
-        hpxml_bldg.hvac_distributions[-1].ducts[0].id = 'Ducts3'
-        hpxml_bldg.hvac_distributions[-1].ducts[1].id = 'Ducts4'
+        hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+          hpxml_bldg.hvac_distributions[-1].ducts << duct.dup
+          hpxml_bldg.hvac_distributions[-1].ducts[-1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + hpxml_bldg.hvac_distributions[1].ducts.size}"
+        end
         hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+      end
+      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+        hvac_distribution.ducts.each do |duct|
+          duct.duct_fraction_area = nil
+          duct.duct_surface_area = (duct.duct_type == HPXML::DuctTypeSupply ? 150.0 : 50.0)
+          duct.duct_surface_area /= hpxml_bldg.hvac_distributions.size
+        end
       end
 
       # Add spaces
@@ -633,14 +648,15 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if ['base-bldgtype-mf-unit-adjacent-to-multifamily-buffer-space.xml',
         'base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml',
         'base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml',
-        'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml'].include? hpxml_file
-      if hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-multifamily-buffer-space.xml'
+        'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml',
+        'base-bldgtype-mf-unit-adjacent-to-other-housing-unit-basement.xml'].include? hpxml_file
+      if hpxml_file.include? 'multifamily-buffer-space'
         adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
-      elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml'
+      elsif hpxml_file.include? 'non-freezing-space'
         adjacent_to = HPXML::LocationOtherNonFreezingSpace
-      elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml'
+      elsif hpxml_file.include? 'other-heated-space'
         adjacent_to = HPXML::LocationOtherHeatedSpace
-      elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml'
+      elsif hpxml_file.include? 'other-housing-unit'
         adjacent_to = HPXML::LocationOtherHousingUnit
       end
       wall = hpxml_bldg.walls.select { |w|
@@ -648,10 +664,13 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                  w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
              }[0]
       wall.exterior_adjacent_to = adjacent_to
-      hpxml_bldg.floors[0].exterior_adjacent_to = adjacent_to
       hpxml_bldg.floors[1].exterior_adjacent_to = adjacent_to
-      if hpxml_file != 'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml'
+      if hpxml_file.include? 'basement'
+        hpxml_bldg.rim_joists[1].exterior_adjacent_to = adjacent_to
+        hpxml_bldg.foundation_walls[1].exterior_adjacent_to = adjacent_to
+      elsif !hpxml_file.include? 'other-housing-unit'
         wall.insulation_assembly_r_value = 23
+        hpxml_bldg.floors[0].exterior_adjacent_to = adjacent_to
         hpxml_bldg.floors[0].insulation_assembly_r_value = 18.7
         hpxml_bldg.floors[1].insulation_assembly_r_value = 18.7
       end
@@ -1031,8 +1050,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       end
       hpxml_bldg.doors[0].azimuth = nil
     elsif ['base-enclosure-2stories.xml',
-           'base-enclosure-2stories-garage.xml',
-           'base-hvac-ducts-area-fractions.xml'].include? hpxml_file
+           'base-enclosure-2stories-garage.xml'].include? hpxml_file
       hpxml_bldg.rim_joists << hpxml_bldg.rim_joists[-1].dup
       hpxml_bldg.rim_joists[-1].id = "RimJoist#{hpxml_bldg.rim_joists.size}"
       hpxml_bldg.rim_joists[-1].insulation_id = "RimJoist#{hpxml_bldg.rim_joists.size}Insulation"
@@ -1485,10 +1503,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         window.overhangs_distance_to_bottom_of_window = 0.0
       end
     end
-    if ['base-enclosure-2stories-garage.xml',
-        'base-enclosure-garage.xml',
-        'base-zones-spaces.xml',
-        'base-zones-spaces-multiple.xml'].include? hpxml_file
+    if hpxml_bldg.has_location(HPXML::LocationGarage)
       grg_wall = hpxml_bldg.walls.select { |w|
                    w.interior_adjacent_to == HPXML::LocationGarage &&
                      w.exterior_adjacent_to == HPXML::LocationOutside
@@ -1687,24 +1702,17 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
           hpxml_bldg.heating_systems[i].fraction_heat_load_served = 0.35
         end
       end
-    elsif ['base-hvac-ducts-area-fractions.xml'].include? hpxml_file
-      hpxml_bldg.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
-      hpxml_bldg.hvac_distributions[0].ducts[2].duct_insulation_r_value = 4.0
     elsif ['base-enclosure-2stories.xml',
            'base-enclosure-2stories-garage.xml'].include? hpxml_file
-      hpxml_bldg.hvac_distributions[0].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
-      hpxml_bldg.hvac_distributions[0].ducts[-1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size}"
-      hpxml_bldg.hvac_distributions[0].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
-      hpxml_bldg.hvac_distributions[0].ducts[-1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size}"
       hpxml_bldg.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
-      hpxml_bldg.hvac_distributions[0].ducts[2].duct_surface_area = 37.5
+      hpxml_bldg.hvac_distributions[0].ducts[2].duct_insulation_r_value = 4.0
       hpxml_bldg.hvac_distributions[0].ducts[3].duct_location = HPXML::LocationConditionedSpace
-      hpxml_bldg.hvac_distributions[0].ducts[3].duct_surface_area = 12.5
+      hpxml_bldg.hvac_distributions[0].ducts[3].duct_insulation_r_value = 0
     elsif ['base-hvac-ducts-effective-rvalue.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_insulation_r_value = nil
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_insulation_r_value = nil
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_effective_r_value = 4.38
-      hpxml_bldg.hvac_distributions[0].ducts[1].duct_effective_r_value = 1.7
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_effective_r_value = 5.0
     elsif ['base-hvac-multiple.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions.reverse_each do |hvac_distribution|
         hvac_distribution.delete
@@ -1834,15 +1842,13 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                      cooling_system_fuel: HPXML::FuelTypeElectricity,
                                      cooling_capacity: 9600,
                                      fraction_cool_load_served: 0.1333,
-                                     cooling_efficiency_eer: 8.5,
-                                     cooling_shr: 0.65)
+                                     cooling_efficiency_eer: 8.5)
       hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
                                      cooling_system_type: HPXML::HVACTypePTAC,
                                      cooling_system_fuel: HPXML::FuelTypeElectricity,
                                      cooling_capacity: 9600,
                                      fraction_cool_load_served: 0.1333,
-                                     cooling_efficiency_eer: 10.7,
-                                     cooling_shr: 0.65)
+                                     cooling_efficiency_eer: 10.7)
       hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
                                 distribution_system_idref: hpxml_bldg.hvac_distributions[4].id,
                                 heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
@@ -1858,7 +1864,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 heating_efficiency_hspf: 7.7,
                                 cooling_efficiency_seer: 13,
                                 heating_capacity_17F: 4800 * 0.6,
-                                cooling_shr: 0.73,
                                 compressor_type: HPXML::HVACCompressorTypeSingleStage)
       hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
                                 distribution_system_idref: hpxml_bldg.hvac_distributions[5].id,
@@ -1866,6 +1871,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 heat_pump_fuel: HPXML::FuelTypeElectricity,
                                 heating_capacity: 4800,
                                 cooling_capacity: 4800,
+                                compressor_type: HPXML::HVACCompressorTypeSingleStage,
                                 backup_type: HPXML::HeatPumpBackupTypeIntegrated,
                                 backup_heating_fuel: HPXML::FuelTypeElectricity,
                                 backup_heating_capacity: 3412,
@@ -1874,7 +1880,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 fraction_cool_load_served: 0.2,
                                 heating_efficiency_cop: 3.6,
                                 cooling_efficiency_eer: 16.6,
-                                cooling_shr: 0.73,
                                 pump_watts_per_ton: 100.0)
       hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
                                 heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
@@ -1890,7 +1895,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 heating_efficiency_hspf: 10,
                                 cooling_efficiency_seer: 19,
                                 heating_capacity_17F: 4800 * 0.6,
-                                cooling_shr: 0.73,
+                                compressor_type: HPXML::HVACCompressorTypeVariableSpeed,
                                 primary_cooling_system: true,
                                 primary_heating_system: true)
     elsif ['base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml'].include? hpxml_file
@@ -1902,27 +1907,31 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.7
       hpxml_bldg.heat_pumps[-1].fraction_heat_load_served = 0.3
       hpxml_bldg.heat_pumps[-1].fraction_cool_load_served = 0.3
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served /= 2.0
       hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                         distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                        air_type: HPXML::AirTypeRegularVelocity)
+                                        air_type: HPXML::AirTypeRegularVelocity,
+                                        conditioned_floor_area_served: hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served)
       hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[0].dup
       hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].dup
-      hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
-      hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
-      hpxml_bldg.hvac_distributions[-1].ducts[0].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}"
-      hpxml_bldg.hvac_distributions[-1].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 2}"
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        hpxml_bldg.hvac_distributions[-1].ducts << duct.dup
+        hpxml_bldg.hvac_distributions[-1].ducts[-1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + hpxml_bldg.hvac_distributions[1].ducts.size}"
+      end
       hpxml_bldg.heat_pumps[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
     elsif ['base-mechvent-multiple.xml',
            'base-bldgtype-mf-unit-shared-mechvent-multiple.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served /= 2.0
       hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                         distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                        air_type: HPXML::AirTypeRegularVelocity)
+                                        air_type: HPXML::AirTypeRegularVelocity,
+                                        conditioned_floor_area_served: hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served)
       hpxml_bldg.hvac_distributions[1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[0].dup
       hpxml_bldg.hvac_distributions[1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].dup
-      hpxml_bldg.hvac_distributions[1].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
-      hpxml_bldg.hvac_distributions[1].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
-      hpxml_bldg.hvac_distributions[1].ducts[0].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}"
-      hpxml_bldg.hvac_distributions[1].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 2}"
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        hpxml_bldg.hvac_distributions[1].ducts << duct.dup
+        hpxml_bldg.hvac_distributions[1].ducts[-1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + hpxml_bldg.hvac_distributions[1].ducts.size}"
+      end
       hpxml_bldg.heating_systems[0].heating_capacity /= 2.0
       hpxml_bldg.heating_systems[0].fraction_heat_load_served /= 2.0
       hpxml_bldg.heating_systems[0].primary_system = false
@@ -1938,17 +1947,19 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.cooling_systems[1].distribution_system_idref = hpxml_bldg.hvac_distributions[1].id
       hpxml_bldg.cooling_systems[1].primary_system = true
     elsif ['base-bldgtype-mf-unit-adjacent-to-multiple.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_area = 0.5
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_area = 0.5
       hpxml_bldg.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}",
                                                  duct_type: HPXML::DuctTypeSupply,
                                                  duct_insulation_r_value: 4,
                                                  duct_location: HPXML::LocationRoofDeck,
-                                                 duct_surface_area: 150)
+                                                 duct_fraction_area: 0.5)
       hpxml_bldg.hvac_distributions[0].ducts.add(id: "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}",
                                                  duct_type: HPXML::DuctTypeReturn,
                                                  duct_insulation_r_value: 0,
                                                  duct_location: HPXML::LocationRoofDeck,
-                                                 duct_surface_area: 50)
+                                                 duct_fraction_area: 0.5)
     elsif ['base-appliances-dehumidifier-multiple.xml'].include? hpxml_file
       hpxml_bldg.dehumidifiers[0].fraction_served = 0.5
       hpxml_bldg.dehumidifiers.add(id: 'Dehumidifier2',
@@ -1968,17 +1979,20 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hvac_distributions[0].air_type = HPXML::AirTypeRegularVelocity
       hpxml_bldg.hvac_distributions[0].duct_leakage_measurements << hpxml_bldg.hvac_distributions[1].duct_leakage_measurements[0].dup
       hpxml_bldg.hvac_distributions[0].duct_leakage_measurements << hpxml_bldg.hvac_distributions[1].duct_leakage_measurements[1].dup
-      hpxml_bldg.hvac_distributions[0].ducts << hpxml_bldg.hvac_distributions[1].ducts[0].dup
-      hpxml_bldg.hvac_distributions[0].ducts << hpxml_bldg.hvac_distributions[1].ducts[1].dup
-      hpxml_bldg.hvac_distributions[1].ducts[0].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}"
-      hpxml_bldg.hvac_distributions[1].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 2}"
+      hpxml_bldg.hvac_distributions[1].ducts.each do |duct|
+        hpxml_bldg.hvac_distributions[0].ducts << duct.dup
+      end
+      (hpxml_bldg.hvac_distributions[0].ducts + hpxml_bldg.hvac_distributions[1].ducts).each_with_index do |duct, i|
+        duct.id = "Ducts#{i + 1}"
+      end
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = hpxml_bldg.building_construction.conditioned_floor_area
     end
     if ['base-hvac-ducts-area-multipliers.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
     end
     if hpxml_file.include? 'heating-capacity-17f'
-      hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction
+      hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * 0.6
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
     end
@@ -2346,6 +2360,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 number_of_bedrooms_served: 18)
     end
 
+    # -------------------- #
+    # HPXML Electric Panel #
+    # -------------------- #
+    if ['house051.xml'].include? hpxml_file
+      electric_panel = hpxml_bldg.electric_panels[0]
+      branch_circuits = electric_panel.branch_circuits
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                          occupied_spaces: 1,
+                          component_idrefs: [hpxml_bldg.refrigerators[0].id,
+                                             hpxml_bldg.plug_loads[1].id])
+    end
+
     # ------------- #
     # HPXML Battery #
     # ------------- #
@@ -2359,6 +2385,24 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.batteries[0].usable_capacity_ah = hpxml_bldg.batteries[0].nominal_capacity_ah * default_values[:usable_fraction]
       hpxml_bldg.batteries[0].nominal_capacity_kwh = nil
       hpxml_bldg.batteries[0].usable_capacity_kwh = nil
+    end
+
+    # ------------- #
+    # HPXML Vehicle #
+    # ------------- #
+
+    if ['base-vehicle-multiple.xml'].include? hpxml_file
+      hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
+                              vehicle_type: HPXML::VehicleTypeHybrid,
+                              fuel_economy_units: HPXML::UnitsMPG,
+                              fuel_economy_combined: 44.0,
+                              miles_per_year: 15000.0,
+                              hours_per_week: 10.0)
+    end
+    if ['base-schedules-simple.xml'].include? hpxml_file
+      hpxml_bldg.vehicles[0].ev_weekday_fractions = '0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, -0.3535, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.3221, -0.3244, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714'
+      hpxml_bldg.vehicles[0].ev_weekend_fractions = '0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, -0.3334, 0, 0, 0, 0, -0.3293, -0.3372, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588'
+      hpxml_bldg.vehicles[0].ev_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
     end
 
     # ---------------- #
@@ -2547,7 +2591,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   end
 
   # Logic to apply at whole building level, need to be outside hpxml_bldg loop
-  if ['base-bldgtype-mf-whole-building-common-spaces.xml'].include? hpxml_file
+  if ['base-bldgtype-mf-whole-building-common-spaces.xml',
+      'base-bldgtype-mf-whole-building-common-spaces-reverse.xml'].include? hpxml_file
     # basement floor, building0: conditioned, building1: unconditioned
     for i in 0..1
       hpxml.buildings[i].foundation_walls.each do |fnd_wall|
@@ -2675,6 +2720,35 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml.buildings[i].hvac_distributions.add(id: "HVACDistribution1_#{i}",
                                                 sameas_id: 'HVACDistribution1')
     end
+    if hpxml_file == 'base-bldgtype-mf-whole-building-common-spaces-reverse.xml'
+      surface_id_processed = []
+      hpxml.buildings.each do |bldg|
+        (bldg.walls + bldg.foundation_walls + bldg.rim_joists + bldg.floors).each do |surface|
+          next if surface.sameas_id.nil?
+          next if surface_id_processed.include? surface.id
+
+          sameas_obj = surface.sameas
+          surface_id_processed << surface.id
+          surface_id_processed << sameas_obj.id
+          # clone the hpxml object
+          fully_described_surface = sameas_obj.dup
+          fully_described_surface.exterior_adjacent_to = (fully_described_surface.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace) ? HPXML::LocationOtherHousingUnit : HPXML::LocationOtherMultifamilyBufferSpace
+          if surface.is_a? HPXML::Floor
+            fully_described_surface.floor_or_ceiling = (fully_described_surface.floor_or_ceiling == HPXML::FloorOrCeilingFloor) ? HPXML::FloorOrCeilingCeiling : HPXML::FloorOrCeilingFloor
+          end
+          sameas_surface = surface.dup
+          # modify ids
+          fully_described_surface.id = surface.id
+          sameas_surface.id = sameas_obj.id
+          sameas_surface.sameas_id = surface.id
+          # copy attribute values
+          surface.class::ATTRS.each do |attribute|
+            sameas_obj.send("#{attribute}=", sameas_surface.send(attribute))
+            surface.send("#{attribute}=", fully_described_surface.send(attribute))
+          end
+        end
+      end
+    end
   end
 end
 
@@ -2764,36 +2838,10 @@ if ARGV[0].to_sym == :update_measures
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
-  # Apply rubocop
-  cops = ['Layout',
-          'Lint/DeprecatedClassMethods',
-          'Lint/DuplicateElsifCondition',
-          'Lint/DuplicateHashKey',
-          'Lint/DuplicateMethods',
-          'Lint/InterpolationCheck',
-          'Lint/LiteralAsCondition',
-          'Lint/RedundantStringCoercion',
-          'Lint/SelfAssignment',
-          'Lint/UnderscorePrefixedVariableName',
-          'Lint/UnusedBlockArgument',
-          'Lint/UnusedMethodArgument',
-          'Lint/UselessAssignment',
-          'Style/AndOr',
-          'Style/Documentation',
-          'Style/DocumentationMethod',
-          'Style/FrozenStringLiteralComment',
-          'Style/HashSyntax',
-          'Style/Next',
-          'Style/NilComparison',
-          'Style/RedundantParentheses',
-          'Style/RedundantSelf',
-          'Style/ReturnNil',
-          'Style/SelfAssignment',
-          'Style/StringLiterals',
-          'Style/StringLiteralsInInterpolation']
+  # Apply rubocop (uses .rubocop.yml)
   commands = ["\"require 'rubocop/rake_task' \"",
               "\"require 'stringio' \"",
-              "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--autocorrect', '--format', 'simple', '--only', '#{cops.join(',')}'] end\"",
+              "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--autocorrect-all', '--format', 'simple'] end\"",
               '"Rake.application[:rubocop].invoke"']
   command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'

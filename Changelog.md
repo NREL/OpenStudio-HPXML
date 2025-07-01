@@ -1,11 +1,52 @@
 ## OpenStudio-HPXML v1.10.0
 
 __New Features__
+- Updates to OpenStudio 3.10/EnergyPlus 25.1/HPXML v4.2-rc2.
+- HVAC modeling updates:
+  - **Breaking Change**: `CompressorType` required for central and mini-split air conditioners and heat pumps as well as ground-to-air heat pumps.
+  - Optional input `SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType` to choose "standard" (default) or "experimental"; "experimental" ground-to-air heat pump model better accounts for coil staging.
+- Updates asset calculations for dishwashers, clothes washers, fixtures, and hot water waste per RESNET MINHERS Addenda 81 and 90f.
+- Electric vehicle enhancements:
+  - Allows detailed modeling of electric vehicles (batteries and charging/discharging) using `Vehicles` as an alternative to the simple EV charging `PlugLoad`.
+  - Adds EV driving unmet hours output.
+  - Updates the default schedule for the EV charging `PlugLoad` to better reflect real-world hourly/monthly variation.
+- Electric panel NEC load calculations (experimental research feature):
+  - Allows optional `ElectricPanel` inputs for describing branch circuits and service feeders
+  - Optionally reports breaker spaces and calculated loads for specified NEC calculation types (`SoftwareInfo/extension/ElectricPanelCalculations/ServiceFeeders/Type`)
+- Allows requesting timeseries EnergyPlus output meters (e.g., `--hourly "MainsWater:Facility"`), similar to requesting EnergyPlus output variables.
+- BuildResidentialScheduleFile measure:
+  - Adds stochastic schedule generation for electric vehicle charging (using `Vehicles`).
+  - Removes generation of stochastic schedules for building components not present in the HPXML file.
+- Output updates:
+  - **Breaking change**: Adds generator electricity produced to *total* fuel/energy use; previously it was only included in *net* values.
+  - Adds optional new outputs for timeseries zone conditions (humidity ratio and relative humidity and dewpoint, radiant, and operative temperatures).
+  - Adds new outputs for *net* peak electricity (summer/winter/annual); same as *total* peak electricity outputs but subtracts power produced by PV.
+  - Avoids writing the E+ eplustbl.htm by default; use the debug flag to get it.
+  - Deletes eplusout\*.msgpack files by default (run_simulation.rb only); use the debug flag to preserve them.
+- Allows arbitrary columns to be present in a detailed schedule csv file with warning.
 
 __Bugfixes__
+- Fixes EPvalidator schematron file extension (.sch, not .xml).
 - Fixes zero occupants specified for one unit in a whole MF building from being treated like zero occupants for every unit.
 - Fixes using detailed schedules with higher resolution (e.g., 10-min data) than the simulation timestep (e.g., 60-min).
 - Fixes possible heating/cooling spikes when using maximum power ratio detailed schedule for variable-speed HVAC systems.
+- Fixes unavailable periods for two consecutive, but partial, days.
+- Fixes error when specifying a glass block window without interior shading coefficients.
+- Fixes battery charging/discharging not being included in peak electricity outputs.
+- Fixes possible error if there's a surface w/ interior unconditioned space and exterior "other housing unit".
+- Fixes default shading coefficients for window solar screens and solar film.
+- Fixes `SolarFraction` documentation/error-checking for solar thermal systems; must now be <= 0.99.
+- Fixes whole house fans so that they are unavailable during vacancies.
+- Fixes error if there's a vented attic with zero roof pitch.
+- Fixes tank loss coefficient when TankModelType=stratified for a conventional storage water heater.
+- Fixes possibility of incorrect design duct load for really bad ducts (e.g., ducts with high surface area in a cold attic).
+- Fixes duplicate emission end use rows for electricity in results_annual.csv.
+- Adds error-checking to ensure TankModelType=stratified is not used with a non-electric water heater.
+- BuildResidentialHPXML measure: Improves default duct areas/locations for 1-story buildings with a conditioned basement and ducts located in the attic.
+- BuildResidentialHPXML measure: Fixes error when specifying a combi boiler as the water heater type and a *shared* boiler as the heating system type.
+- BuildResidentialScheduleFile measure: Fixes out-of-sync shifting of occupancy and end use schedule resulting in activities even when there is no occupancy.
+- BuildResidentialScheduleFile measure: Fixes a small bug in sink schedule generation resulting in more concentrated schedule.
+- ReportUtilityBills measure: Apply fixed charges for fuels that are referenced by the HPXML file but consume no energy (e.g., gas heating system in Florida).
 
 ## OpenStudio-HPXML v1.9.1
 
@@ -92,7 +133,7 @@ __New Features__
   - Allows shared batteries (batteries serving multiple dwelling units).
   - Updated default CFIS fan power to 0.58 W/cfm.
   - Removed natural ventilation availability RH constraint; HR constraint remains.
-  - Refrigerator and freezer schedules may now be based on ambient temperature using new `TemperatureScheduleCoefficients` and `ConstantScheduleCoefficients` inputs; the refrigerator default schedule uses these new inputs.  
+  - Refrigerator and freezer schedules may now be based on ambient temperature using new `TemperatureScheduleCoefficients` and `ConstantScheduleCoefficients` inputs; the refrigerator default schedule uses these new inputs.
   - Default schedules updated for cooking ranges, lighting, plug loads, televisions, hot water recirculation pumps, and occupant heat gains.
   - Adds schedule inputs for hot water recirculation pumps and general water use internal gains.
   - Updated water heater installation default location.
@@ -158,7 +199,7 @@ __New Features__
   - Adds new optional arguments for registering (with the OpenStudio runner) annual or monthly utility bills.
 - Advanced research features:
   - **Breaking change**: Replaces `SimulationControl/TemperatureCapacitanceMultiplier` with `SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier`.
-  - Allows an optional boolean input `SimulationControl/AdvancedResearchFeatures/DefrostModelType` for heat pump advanced defrost model.
+  - Allows an optional input `SimulationControl/AdvancedResearchFeatures/DefrostModelType` for heat pump advanced defrost model.
   - Adds maximum power ratio detailed schedule for variable-speed HVAC systems to model shedding controls per [AHRI 1380](https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small).
 
 __Bugfixes__
@@ -334,7 +375,7 @@ __New Features__
 - Utility bill calculations:
   - **Breaking change**: Removes utility rate and PV related arguments from the ReportUtilityBills measure in lieu of HPXML file inputs.
   - Allows calculating one or more utility bill scenarios (e.g., net metering vs feed-in tariff compensation types for a simulation with PV).
-  - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.  
+  - Adds detailed calculations for tiered, time-of-use, or real-time pricing electric rates using OpenEI tariff files.
 - Lithium ion battery:
   - Allows detailed charging/discharging schedules via CSV files.
   - Allows setting round trip efficiency.
@@ -375,7 +416,7 @@ __Bugfixes__
 - Fixes possible "Could not identify surface type for surface" error.
 - Fixes possible ruby error when defaulting water heater location.
 - Battery round trip efficiency now correctly affects results.
-- BuildResidentialHPXML measure: 
+- BuildResidentialHPXML measure:
   - Fixes aspect ratio convention for single-family attached and multifamily dwelling units.
 
 ## OpenStudio-HPXML v1.4.0
@@ -508,7 +549,7 @@ __New Features__
 - Relaxes requirement for heating (or cooling) setpoints so that they are only needed if heating (or cooling) equipment is present.
 - Adds an `--ep-input-format` argument to run_simulation.rb to choose epJSON as the EnergyPlus input file format instead of IDF.
 - Eliminates EnergyPlus warnings related to unused objects or invalid output meters/variables.
-- Allows modeling PTAC and PTHP HVAC systems. 
+- Allows modeling PTAC and PTHP HVAC systems.
 - Allows user inputs for partition wall mass and furniture mass.
 
 __Bugfixes__
@@ -538,7 +579,7 @@ __New Features__
 - Relaxes tolerance for duct leakage to outside warning when ducts solely in conditioned space.
 - Removes limitation that a shared water heater serving a shared laundry room can't also serve dwelling unit fixtures (i.e., FractionDHWLoadServed is no longer required to be zero).
 - Adds IDs to schematron validation errors/warnings when possible.
-- Moves additional error-checking from the ruby measure to the schematron validator. 
+- Moves additional error-checking from the ruby measure to the schematron validator.
 
 __Bugfixes__
 - Fixes room air conditioner performance curve.
@@ -691,7 +732,7 @@ __New Features__
 - Modeling improvements:
   - Improved calculation for infiltration height
   - Infiltration & mechanical ventilation now combined using ASHRAE 62.2 Normative Appendix C.
-- Runtime improvements: 
+- Runtime improvements:
   - Optimized ruby require calls.
   - Skip ViewFactor calculations when not needed (i.e., no conditioned basement).
 - Error-checking:

@@ -8,14 +8,13 @@ require_relative '../measure.rb'
 require 'csv'
 require_relative '../resources/xmlhelper.rb'
 require_relative '../resources/xmlvalidator.rb'
-
 class HPXMLtoOpenStudioValidationTest < Minitest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
     schema_path = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
     @schema_validator = XMLValidator.get_xml_validator(schema_path)
-    @schematron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    @schematron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.sch')
     @schematron_validator = XMLValidator.get_xml_validator(@schematron_path)
 
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
@@ -227,6 +226,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                'Expected 0 element(s) for xpath: SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency'],
                             'invalid-water-heater-heating-capacity' => ['Expected HeatingCapacity to be greater than 0.'],
                             'invalid-water-heater-heating-capacity2' => ['Expected HeatingCapacity to be greater than 0.'],
+                            'invalid-water-heater-stratified-tank-model' => ['Expected 0 element(s) for xpath: extension/TankModelType'],
                             'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
                             'leakiness-description-missing-year-built' => ['Expected 1 element(s) for xpath: BuildingSummary/BuildingConstruction/YearBuilt'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting, id: "MyBuilding"]'],
@@ -243,7 +243,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'missing-capacity-detailed-performance' => ['Expected 1 element(s) for xpath: ../../../HeatingCapacity',
                                                                         'Expected 1 element(s) for xpath: ../../../CoolingCapacity'],
                             'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: CFISControls/SupplementalFan'],
-                            'missing-distribution-cfa-served' => ['Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts2"]'],
+                            'missing-distribution-cfa-served' => ['Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts1"]',
+                                                                  'Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts2"]',
+                                                                  'Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts3"]',
+                                                                  'Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts4"]'],
                             'missing-duct-area' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "Ducts2"]'],
                             'missing-duct-location' => ['Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "Ducts2"]'],
                             'missing-elements' => ['Expected 1 element(s) for xpath: NumberofConditionedFloors [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]',
@@ -254,6 +257,17 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                         'Expected only SystemIdentifier specified',
                                                                         'Expected only SystemIdentifier specified',
                                                                         'Expected only SystemIdentifier specified'],
+                            'multifamily-common-space-whole-sfa-or-mf-building-sim-false' => ['Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
+                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true'],
                             'multifamily-reference-appliance' => ['There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
@@ -261,11 +275,20 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'negative-autosizing-factors' => ['CoolingAutosizingFactor should be greater than 0.0',
                                                               'HeatingAutosizingFactor should be greater than 0.0',
                                                               'BackupHeatingAutosizingFactor should be greater than 0.0'],
+                            'panel-negative-headroom-breaker-spaces' => ["Element 'HeadroomSpaces': [facet 'minInclusive'] The value '-1' is less than the minimum value allowed ('0')."],
+                            'panel-zero-total-breaker-spaces' => ["Element 'RatedTotalSpaces': [facet 'minExclusive'] The value '0' must be greater than '0'."],
+                            'panel-without-required-system' => ['Expected 1 or more element(s) for xpath: AttachedToComponent [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
+                            'panel-with-unrequired-system' => ['Expected 0 element(s) for xpath: AttachedToComponent [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
+                            'panel-without-load-type' => ['Expected 1 element(s) for xpath: LoadType [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
+                            'panel-insufficient-voltage' => ["Expected ../../../ElectricPanel/Voltage to be '240' [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/BranchCircuits/BranchCircuit, id: \"BranchCircuit1\"]"],
+                            'panel-zero-meter-based' => ['Expected extension/ElectricPanelBaselinePeakPower to be greater than 0 [context: /HPXML/Building/BuildingDetails/BuildingSummary, id: "MyBuilding"]'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerator-schedule' => ['Expected either schedule fractions/multipliers or schedule coefficients but not both.'],
-                            'solar-fraction-one' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction], id: "SolarThermalSystem1"]'],
+                            'solar-fraction-one' => ['Expected SolarFraction to be less than or equal to 0.99 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction], id: "SolarThermalSystem1"]'],
                             'sum-space-floor-area' => ['Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
                             'sum-space-floor-area2' => ['Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
+                            'vehicle-ev-multiple-BEV' => ['Expected 0 or 1 element(s) for xpath: Vehicle/VehicleType/BatteryElectricVehicle [context: /HPXML/Building/BuildingDetails/Systems/Vehicles, id: "MyBuilding"]'],
+                            'vehicle-ev-invalid-fuel-economy-units' => ['Expected ../../FuelEconomyCombined/Units to be "kWh/mile" or "mile/kWh" or "mpge" [context: /HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle/VehicleType/BatteryElectricVehicle, id: "Vehicle1"]'],
                             'water-heater-location' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
                             'water-heater-location-other' => ["Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'water-heater-recovery-efficiency' => ['Expected RecoveryEfficiency to be greater than EnergyFactor'],
@@ -406,6 +429,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.fuel_loads[0].frac_latent = 0.3
       when 'frac-total-plug-load'
         hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
+        hpxml_bldg.plug_loads[1].frac_sensible = 0.855
         hpxml_bldg.plug_loads[1].frac_latent = 0.245
       when 'furnace-invalid-afue'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -553,11 +577,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.dishwashers[0].label_electric_rate = 0
       when 'invalid-duct-area-fractions'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ducts-area-fractions.xml')
-        hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area = nil
-        hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area = nil
-        hpxml_bldg.hvac_distributions[0].ducts[2].duct_surface_area = nil
-        hpxml_bldg.hvac_distributions[0].ducts[3].duct_surface_area = nil
+        hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories.xml')
         hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_area = 0.65
         hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_area = 0.65
         hpxml_bldg.hvac_distributions[0].ducts[2].duct_fraction_area = 0.15
@@ -689,6 +709,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'invalid-water-heater-heating-capacity2'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
         hpxml_bldg.water_heating_systems[0].heating_capacity = 0
+      when 'invalid-water-heater-stratified-tank-model'
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas.xml')
+        hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
       when 'invalid-window-height'
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-overhangs.xml')
         hpxml_bldg.windows[1].overhangs_distance_to_bottom_of_window = 1.0
@@ -731,12 +754,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.ventilation_fans[1].delete
       when 'missing-distribution-cfa-served'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area = nil
-        hpxml_bldg.hvac_distributions[0].ducts[1].duct_location = nil
+        hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = nil
       when 'missing-duct-area'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = hpxml_bldg.building_construction.conditioned_floor_area
-        hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area = nil
+        hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_area = nil
+        hpxml_bldg.hvac_distributions[0].ducts[3].duct_fraction_area = 1.0
       when 'missing-duct-location'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.hvac_distributions[0].ducts[1].duct_location = nil
@@ -756,6 +779,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.buildings[1].floors[0].area = 20
         hpxml.buildings[1].rim_joists[1].area = 10
         hpxml.buildings[2].walls[1].area = 20
+      when 'multifamily-common-space-whole-sfa-or-mf-building-sim-false'
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-common-spaces.xml')
+        hpxml.header.whole_sfa_or_mf_building_sim = false
       when 'multifamily-reference-appliance'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
@@ -777,6 +803,40 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].heating_autosizing_factor = -0.5
         hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = -1.2
         hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = -0.1
+      when 'panel-negative-headroom-breaker-spaces'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1',
+                                       headroom_spaces: -1)
+      when 'panel-zero-total-breaker-spaces'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1',
+                                       rated_total_spaces: 0)
+      when 'panel-without-required-system'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
+        hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
+                                                          type: HPXML::ElectricPanelLoadTypeHeating)
+      when 'panel-with-unrequired-system'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
+        hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
+                                                          type: HPXML::ElectricPanelLoadTypeLighting,
+                                                          component_idrefs: [hpxml_bldg.lighting_groups[0].id])
+      when 'panel-without-load-type'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
+        hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1')
+      when 'panel-insufficient-voltage'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1',
+                                       voltage: HPXML::ElectricPanelVoltage120)
+        hpxml_bldg.electric_panels[0].branch_circuits.add(id: 'BranchCircuit1',
+                                                          voltage: HPXML::ElectricPanelVoltage240)
+      when 'panel-zero-meter-based'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
+        hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased]
+        hpxml_bldg.header.electric_panel_baseline_peak_power = 0
       when 'refrigerator-location'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.refrigerators[0].location = HPXML::LocationGarage
@@ -797,6 +857,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.conditioned_spaces.each do |space|
           space.floor_area *= 2.0
         end
+      when 'vehicle-ev-multiple-BEV'
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
+        hpxml_bldg.vehicles.add(id: 'ElectricVehicle2',
+                                vehicle_type: HPXML::VehicleTypeBEV)
+      when 'vehicle-ev-invalid-fuel-economy-units'
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
+        hpxml_bldg.vehicles[0].fuel_economy_units = 'mpg'
       when 'water-heater-location'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].location = HPXML::LocationCrawlspaceVented
@@ -847,6 +914,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'dhw-setpoint-low' => ['Hot water setpoint should typically be greater than or equal to 110 deg-F.'],
                               'erv-atre-low' => ['Adjusted total recovery efficiency should typically be at least half of the adjusted sensible recovery efficiency.'],
                               'erv-tre-low' => ['Total recovery efficiency should typically be at least half of the sensible recovery efficiency.'],
+                              'ev-charging-methods' => ['Electric vehicle charging was specified as both a PlugLoad and a Vehicle, the latter will be ignored.'],
                               'fuel-load-type-other' => ["Fuel load type 'other' is not currently handled, the fuel load will not be modeled."],
                               'garage-ventilation' => ['Ventilation fans for the garage are not currently modeled.'],
                               'heat-pump-low-backup-switchover-temp' => ['BackupHeatingSwitchoverTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
@@ -897,6 +965,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                             'No exterior lighting specified, the model will not include exterior lighting energy use.',
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
                               'missing-attached-surfaces' => ['ResidentialFacilityType is single-family attached or apartment unit, but no attached surfaces were found. This may result in erroneous results (e.g., for infiltration).'],
+                              'panel-max-current-rating-high' => ['MaxCurrentRating should typically be less than or equal to 400.'],
                               'plug-load-type-sauna' => ["Plug load type 'sauna' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-aquarium' => ["Plug load type 'aquarium' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-water-bed' => ["Plug load type 'water bed' is not currently handled, the plug load will not be modeled."],
@@ -909,6 +978,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'slab-large-exposed-perimeter' => ['Slab exposed perimeter is more than twice the slab area, this may indicate an input error.'],
                               'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'unit-multiplier' => ['NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'],
+                              'vehicle-phev' => ["Vehicle type 'PlugInHybridElectricVehicle' is not currently handled, the vehicle will not be modeled."],
                               'window-exterior-shading-types' => ["Exterior shading type is 'external overhangs', but overhangs are explicitly defined; exterior shading type will be ignored.",
                                                                   "Exterior shading type is 'building', but neighbor buildings are explicitly defined; exterior shading type will be ignored."],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
@@ -952,6 +1022,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'erv-tre-low'
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-erv.xml')
         hpxml_bldg.ventilation_fans[0].total_recovery_efficiency = 0.1
+      when 'ev-charging-methods'
+        hpxml, _hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-plug-load-ev.xml')
       when 'garage-ventilation'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.ventilation_fans.add(id: 'VentilationFan1',
@@ -1034,6 +1106,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'hvac-research-features-onoff-thermostat-temperature-capacitance-multiplier-one'
         hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-research-features.xml')
         hpxml.header.temperature_capacitance_multiplier = 1
+      when 'panel-max-current-rating-high'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1',
+                                       max_current_rating: 450.0)
       when 'plug-load-type-sauna'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeSauna
@@ -1070,6 +1146,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'unit-multiplier'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.building_construction.number_of_units = 5
+      when 'vehicle-phev'
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger-scheduled.xml')
+        hpxml_bldg.vehicles[0].vehicle_type = 'PlugInHybridElectricVehicle'
       when 'window-exterior-shading-types'
         hpxml, _hpxml_bldg = _create_hpxml('base-enclosure-windows-shading-types-detailed.xml')
       when 'wrong-units'
@@ -1169,6 +1248,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                "Calculated a negative net surface area for surface 'Floor1'."],
                             'orphaned-geothermal-loop' => ["Geothermal loop 'GeothermalLoop1' found but no heat pump attached to it."],
                             'orphaned-hvac-distribution' => ["Distribution system 'HVACDistribution1' found but no HVAC system attached to it."],
+                            'panel-wrong-system-type' => ["One or more referenced components 'WaterHeatingSystem1' not valid for service feeder 'ServiceFeeder1' with LoadType 'heating'."],
                             'refrigerators-multiple-primary' => ['More than one refrigerator designated as the primary.'],
                             'refrigerators-no-primary' => ['Could not find a primary refrigerator.'],
                             'repeated-relatedhvac-dhw-indirect' => ["RelatedHVACSystem 'HeatingSystem1' is attached to multiple water heating systems."],
@@ -1184,7 +1264,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'solar-thermal-system-with-combi-tankless' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
                             'solar-thermal-system-with-dhw-indirect' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
-                            'storm-windows-unexpected-window-ufactor' => ['Unexpected base window U-Factor (0.33) for a storm window.'],
+                            'storm-windows-unexpected-window-ufactor' => ['Storm windows are currently restricted to windows with U-factor >= 0.45, while base window U-Factor was 0.33.'],
                             'surface-attached-to-uncond-space' => ["Surface 'Wall2Space2' is attached to the space of an unconditioned zone."],
                             'surface-attached-to-uncond-space2' => ["Surface 'Slab2Space4' is attached to the space of an unconditioned zone."],
                             'unattached-cfis' => ["Attached HVAC distribution system 'foobar' not found for ventilation fan 'VentilationFan1'."],
@@ -1218,13 +1298,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'battery-bad-values-max-greater-than-one'
         hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
-        csv_data[1][0] = 1.1
+        csv_data[1][csv_data[0].index('battery')] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
       when 'battery-bad-values-min-less-than-neg-one'
         hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
-        csv_data[1][0] = -1.1
+        csv_data[1][csv_data[0].index('battery')] = -1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
       when 'cfis-with-hydronic-distribution'
@@ -1356,13 +1436,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-research-features.xml')
         hpxml_bldg.building_construction.number_of_units = 2
       when 'hvac-gshp-invalid-bore-depth-autosized'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.site.ground_conductivity = 0.1
       when 'hvac-gshp-invalid-num-bore-holes'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml')
         hpxml_bldg.geothermal_loops[0].num_bore_holes = 5
       when 'hvac-gshp-invalid-num-bore-holes-autosized'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.heat_pumps[0].cooling_capacity *= 2
         hpxml_bldg.site.ground_conductivity = 0.08
       when 'hvac-inconsistent-fan-powers'
@@ -1542,6 +1622,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-furnace-gas-room-ac.xml')
         hpxml_bldg.heating_systems[0].delete
         hpxml_bldg.hvac_controls[0].heating_setpoint_temp = nil
+      when 'panel-wrong-system-type'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1')
+        hpxml_bldg.electric_panels[0].service_feeders.add(id: 'ServiceFeeder1',
+                                                          type: HPXML::ElectricPanelLoadTypeHeating,
+                                                          component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
       when 'refrigerators-multiple-primary'
         hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
         hpxml_bldg.refrigerators[1].primary_indicator = true
@@ -1563,19 +1649,19 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'schedule-detailed-bad-values-max-not-one'
         hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
-        csv_data[1][1] = 1.1
+        csv_data[1][csv_data[0].index('lighting_interior')] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
       when 'schedule-detailed-bad-values-negative'
         hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
-        csv_data[1][1] = -0.5
+        csv_data[1][csv_data[0].index('lighting_interior')] = -0.5
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
       when 'schedule-detailed-bad-values-non-numeric'
         hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
-        csv_data[1][1] = 'NA'
+        csv_data[1][csv_data[0].index('lighting_interior')] = 'NA'
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
       when 'schedule-detailed-bad-values-mode-negative'
@@ -1728,7 +1814,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-appliances-dehumidifier.xml')
         hpxml_bldg.building_construction.number_of_units = 2
       when 'whole-mf-building-gshps-unit-multiplier'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.building_construction.number_of_units = 2
       else
         fail "Unhandled case: #{error_case}."
@@ -1777,6 +1863,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'manualj-sum-space-internal-loads-sensible' => ['ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],
                               'manualj-sum-space-internal-loads-latent' => ['ManualJInputs/InternalLoadsLatent (200.0) does not match sum of conditioned spaces (100.0).'],
                               'multiple-conditioned-zone' => ['While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'],
+                              'panel-missing-default' => ["Voltage (240) for 'dishwasher' is not specified in default_panels.csv; PowerRating will be assigned according to Voltage=120.",
+                                                          "Voltage (240) for 'dishwasher' is not specified in default_panels.csv; BreakerSpaces will be recalculated using Voltage=240."],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
@@ -1818,9 +1906,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                   "Both 'plug_loads_other' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'plug_loads_other' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'plug_loads_other' schedule file and monthly multipliers provided; the latter will be ignored.",
-                                                                                  "Both 'plug_loads_vehicle' schedule file and weekday fractions provided; the latter will be ignored.",
-                                                                                  "Both 'plug_loads_vehicle' schedule file and weekend fractions provided; the latter will be ignored.",
-                                                                                  "Both 'plug_loads_vehicle' schedule file and monthly multipliers provided; the latter will be ignored.",
                                                                                   "Both 'plug_loads_well_pump' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'plug_loads_well_pump' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'plug_loads_well_pump' schedule file and monthly multipliers provided; the latter will be ignored.",
@@ -1851,6 +1936,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                   "Both 'permanent_spa_heater' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and monthly multipliers provided; the latter will be ignored."],
+                              'schedule-file-and-weekday-weekend-multipliers-ev' => ["Both schedule file and weekday fractions provided for 'electric_vehicle'; weekday fractions will be ignored.",
+                                                                                     "Both schedule file and weekend fractions provided for 'electric_vehicle'; weekend fractions will be ignored.",
+                                                                                     "Both schedule file and monthly multipliers provided for 'electric_vehicle'; monthly multipliers will be ignored.",],
                               'schedule-file-and-refrigerators-freezer-coefficients' => ["Both 'refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
                                                                                          "Both 'refrigerator' schedule file and temperature coefficients provided; the latter will be ignored.",
                                                                                          "Both 'extra_refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
@@ -1863,7 +1951,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'schedule-file-and-operating-mode' => ["Both 'water_heater_operating_mode' schedule file and operating mode provided; the latter will be ignored."],
                               'schedule-file-max-power-ratio-with-single-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-two-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
-                              'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'] }
+                              'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'],
+                              'schedule-file-unknown-columns' => ['Unknown column found in schedule file: unknown_column'] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
@@ -1882,7 +1971,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
           dlm.duct_leakage_value = 100.0
         end
         hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
-          duct.duct_surface_area = nil
+          duct.duct_fraction_area = nil
           duct.duct_location = nil
         end
       when 'duct-lto-cfm25-uncond-space'
@@ -1898,7 +1987,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
           dlm.duct_leakage_value = 200.0
         end
         hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
-          duct.duct_surface_area = nil
+          duct.duct_fraction_area = nil
           duct.duct_location = nil
         end
       when 'duct-lto-cfm50-uncond-space'
@@ -1914,7 +2003,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
           dlm.duct_leakage_value = 0.035
         end
         hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
-          duct.duct_surface_area = nil
+          duct.duct_fraction_area = nil
           duct.duct_location = nil
         end
       when 'duct-lto-percent-uncond-space'
@@ -1929,7 +2018,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-foundation-unvented-crawlspace.xml')
         hpxml_bldg.floors[0].floor_or_ceiling = HPXML::FloorOrCeilingCeiling
       when 'hvac-gshp-bore-depth-autosized-high'
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.site.ground_conductivity = 0.07
       when 'hvac-seasons'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-seasons.xml')
@@ -1964,6 +2053,17 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         end
       when 'multiple-conditioned-zone'
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-multiple.xml')
+      when 'panel-missing-default'
+        hpxml, hpxml_bldg = _create_hpxml('base-detailed-electric-panel.xml')
+        hpxml_bldg.dishwashers.add(id: 'Dishwasher')
+        service_feeders = hpxml_bldg.electric_panels[0].service_feeders
+        service_feeders.add(id: 'NewServiceFeeder',
+                            type: HPXML::ElectricPanelLoadTypeDishwasher,
+                            component_idrefs: [hpxml_bldg.dishwashers[0].id])
+        branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
+        branch_circuits.add(id: 'NewBranchCircuit',
+                            voltage: HPXML::ElectricPanelVoltage240,
+                            component_idrefs: [hpxml_bldg.dishwashers[0].id])
       when 'power-outage'
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       when 'multistage-backup-more-than-4-stages'
@@ -1979,6 +2079,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekdayScheduleFractions']
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekendScheduleFractions']
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']
+      when 'schedule-file-and-weekday-weekend-multipliers-ev'
+        hpxml, hpxml_bldg = _create_hpxml('base-vehicle-ev-charger.xml')
+        hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/vehicle-ev.csv')
+        hpxml_bldg.vehicles[0].nominal_capacity_kwh = 500
+        hpxml_bldg.vehicles[0].ev_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['WeekdayScheduleFractions']
+        hpxml_bldg.vehicles[0].ev_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['WeekendScheduleFractions']
+        hpxml_bldg.vehicles[0].ev_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ElectricVehicle].name]['MonthlyScheduleMultipliers']
       when 'schedule-file-and-refrigerators-freezer-coefficients'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-stochastic.csv')
@@ -2008,6 +2115,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'schedule-file-max-power-ratio-with-separate-backup-system'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
+      when 'schedule-file-unknown-columns'
+        hpxml, hpxml_bldg = _create_hpxml('base-schedules-detailed-occupancy-stochastic.xml')
+        csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
+        csv_data[0][csv_data[0].find_index('lighting_interior')] = 'unknown_column'
+        File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
+        hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
       else
         fail "Unhandled case: #{warning_case}."
       end
