@@ -121,16 +121,7 @@
             </Insulation>
           </RimJoist>
           <RimJoist>
-            <SystemIdentifier id='RimJoist2'/>
-            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <Area>30.8</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoist2Insulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
-            </Insulation>
+            <SystemIdentifier id='RimJoist2' sameas='RimJoist2_2'/>
           </RimJoist>
         </RimJoists>
         <FoundationWalls>
@@ -158,32 +149,23 @@
             </Insulation>
           </FoundationWall>
           <FoundationWall>
-            <SystemIdentifier id='FoundationWall2'/>
-            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <Type>solid concrete</Type>
-            <Height>8.0</Height>
-            <Area>320.0</Area>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
-            <InteriorFinish>
-              <Type>none</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='FoundationWall2Insulation'/>
-              <Layer>
-                <InstallationType>continuous - exterior</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
-              <Layer>
-                <InstallationType>continuous - interior</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
-            </Insulation>
+            <SystemIdentifier id='FoundationWall2' sameas='FoundationWall2_2'/>
           </FoundationWall>
         </FoundationWalls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='Floor1_1' sameas='Floor1_3'/>
+            <SystemIdentifier id='Floor1_1'/>
+            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
+            <Area>1200.0</Area>
+            <Insulation>
+              <SystemIdentifier id='Floor1Insulation_3'/>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+            </Insulation>
           </Floor>
         </Floors>
         <Slabs>
@@ -486,7 +468,16 @@
             </Insulation>
           </RimJoist>
           <RimJoist>
-            <SystemIdentifier id='RimJoist2_2' sameas='RimJoist2'/>
+            <SystemIdentifier id='RimJoist2_2'/>
+            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+            <Area>30.8</Area>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoist2Insulation'/>
+              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+            </Insulation>
           </RimJoist>
         </RimJoists>
         <FoundationWalls>
@@ -514,12 +505,43 @@
             </Insulation>
           </FoundationWall>
           <FoundationWall>
-            <SystemIdentifier id='FoundationWall2_2' sameas='FoundationWall2'/>
+            <SystemIdentifier id='FoundationWall2_2'/>
+            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+            <Type>solid concrete</Type>
+            <Height>8.0</Height>
+            <Area>320.0</Area>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
+            <InteriorFinish>
+              <Type>none</Type>
+            </InteriorFinish>
+            <Insulation>
+              <SystemIdentifier id='FoundationWall2Insulation'/>
+              <Layer>
+                <InstallationType>continuous - exterior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
+            </Insulation>
           </FoundationWall>
         </FoundationWalls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='Floor1_2' sameas='Floor1_4'/>
+            <SystemIdentifier id='Floor1_2'/>
+            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
+            <Area>1200.0</Area>
+            <Insulation>
+              <SystemIdentifier id='Floor1Insulation_4'/>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+            </Insulation>
           </Floor>
         </Floors>
         <Slabs>
@@ -786,26 +808,41 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall2_3' sameas='Wall2_4'/>
+            <SystemIdentifier id='Wall2_3'/>
+            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+            <WallType>
+              <WoodStud/>
+            </WallType>
+            <Area>320.0</Area>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
+            <Insulation>
+              <SystemIdentifier id='Wall2Insulation_4'/>
+              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+            </Insulation>
           </Wall>
         </Walls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='Floor1_3'/>
+            <SystemIdentifier id='Floor1_3' sameas='Floor1_1'/>
+          </Floor>
+          <Floor>
+            <SystemIdentifier id='Floor2_3'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <FloorOrCeiling>floor</FloorOrCeiling>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <FloorType>
               <WoodFrame/>
             </FloorType>
             <Area>1200.0</Area>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation_3'/>
+              <SystemIdentifier id='Floor1Insulation_5'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor2_3' sameas='Floor1_5'/>
           </Floor>
         </Floors>
         <Windows>
@@ -1099,41 +1136,26 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall2_4'/>
-            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <WoodStud/>
-            </WallType>
-            <Area>320.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall2Insulation_4'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
-            </Insulation>
+            <SystemIdentifier id='Wall2_4' sameas='Wall2_3'/>
           </Wall>
         </Walls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='Floor1_4'/>
+            <SystemIdentifier id='Floor1_4' sameas='Floor1_2'/>
+          </Floor>
+          <Floor>
+            <SystemIdentifier id='Floor2_4'/>
             <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <FloorOrCeiling>floor</FloorOrCeiling>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <FloorType>
               <WoodFrame/>
             </FloorType>
             <Area>1200.0</Area>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation_4'/>
+              <SystemIdentifier id='Floor1Insulation_6'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor2_4' sameas='Floor1_6'/>
           </Floor>
         </Floors>
         <Windows>
@@ -1464,41 +1486,29 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall2_5'/>
-            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <WoodStud/>
-            </WallType>
-            <Area>320.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall2Insulation_5'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
-            </Insulation>
+            <SystemIdentifier id='Wall2_5' sameas='Wall2_6'/>
           </Wall>
         </Walls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='Floor1_5'/>
-            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
+            <SystemIdentifier id='Floor1_5' sameas='Floor2_3'/>
+          </Floor>
+          <Floor>
+            <SystemIdentifier id='Floor2_5'/>
+            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <FloorOrCeiling>floor</FloorOrCeiling>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <FloorType>
               <WoodFrame/>
             </FloorType>
             <Area>1200.0</Area>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation_5'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+              <SystemIdentifier id='Floor1Insulation_7'/>
+              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor2_5' sameas='Floor1_7'/>
           </Floor>
         </Floors>
         <Windows>
@@ -1792,26 +1802,44 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall2_6' sameas='Wall2_5'/>
+            <SystemIdentifier id='Wall2_6'/>
+            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+            <WallType>
+              <WoodStud/>
+            </WallType>
+            <Area>320.0</Area>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
+            <Insulation>
+              <SystemIdentifier id='Wall2Insulation_5'/>
+              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+            </Insulation>
           </Wall>
         </Walls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='Floor1_6'/>
-            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <SystemIdentifier id='Floor1_6' sameas='Floor2_4'/>
+          </Floor>
+          <Floor>
+            <SystemIdentifier id='Floor2_6'/>
+            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <FloorOrCeiling>floor</FloorOrCeiling>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
             <FloorType>
               <WoodFrame/>
             </FloorType>
             <Area>1200.0</Area>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
             <Insulation>
-              <SystemIdentifier id='Floor1Insulation_6'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+              <SystemIdentifier id='Floor1Insulation_8'/>
+              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
-          </Floor>
-          <Floor>
-            <SystemIdentifier id='Floor2_6' sameas='Floor1_8'/>
           </Floor>
         </Floors>
         <Windows>
@@ -2144,38 +2172,12 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall4_7'/>
-            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <WoodStud/>
-            </WallType>
-            <Area>200.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall4Insulation_7'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
-            </Insulation>
+            <SystemIdentifier id='Wall4_7' sameas='Wall2_8'/>
           </Wall>
         </Walls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='Floor1_7'/>
-            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <FloorOrCeiling>floor</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
-            <Area>1200.0</Area>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Floor1Insulation_7'/>
-              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
-            </Insulation>
+            <SystemIdentifier id='Floor1_7' sameas='Floor2_5'/>
           </Floor>
         </Floors>
       </Enclosure>
@@ -2334,26 +2336,24 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall2_8' sameas='Wall4_7'/>
+            <SystemIdentifier id='Wall2_8'/>
+            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+            <WallType>
+              <WoodStud/>
+            </WallType>
+            <Area>200.0</Area>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
+            <Insulation>
+              <SystemIdentifier id='Wall4Insulation_7'/>
+              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+            </Insulation>
           </Wall>
         </Walls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='Floor1_8'/>
-            <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <FloorOrCeiling>floor</FloorOrCeiling>
-            <FloorType>
-              <WoodFrame/>
-            </FloorType>
-            <Area>1200.0</Area>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Floor1Insulation_8'/>
-              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
-            </Insulation>
+            <SystemIdentifier id='Floor1_8' sameas='Floor2_6'/>
           </Floor>
         </Floors>
       </Enclosure>

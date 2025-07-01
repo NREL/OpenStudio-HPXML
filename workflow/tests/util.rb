@@ -15,6 +15,7 @@ def run_simulation_tests(xmls)
 
     next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
     next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
+    next if xml.include? 'base-bldgtype-mf-unit-shared' # FUTURE: Allow someday, but need to use @sameas attribute and size the shared HVAC equipment
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
     # unit multiplier) and check how the results compare to the original run
@@ -81,17 +82,17 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
   command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
   success = system(command)
 
-  if unit_multiplier > 1
-    # Clean up
-    File.delete(xml)
-    xml.gsub!('-10x.xml', '.xml')
-  end
-
   rundir = File.join(rundir, 'run')
 
   # Check results
   print "Simulation failed: #{xml}.\n" unless success
   assert_equal(true, success)
+
+  if unit_multiplier > 1
+    # Clean up
+    File.delete(xml)
+    xml.gsub!('-10x.xml', '.xml')
+  end
 
   # Check for output files
   annual_csv_path = File.join(rundir, 'results_annual.csv')

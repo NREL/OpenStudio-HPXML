@@ -81,8 +81,8 @@ def create_hpxmls
 
       if hpxml_path.include? 'whole-building-common-spaces'
         build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
-        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
-        build_residential_hpxml['geometry_attic_type'] = (i >= 7 ? 'VentedAttic' : 'BelowApartment')
+        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
+        build_residential_hpxml['geometry_attic_type'] = (i >= 7 ? HPXML::AtticTypeVented : HPXML::AtticTypeBelowApartment)
         build_residential_hpxml['geometry_average_ceiling_height'] = (i >= 7 ? 2.0 : 8.0)
         build_residential_hpxml['geometry_unit_num_bedrooms'] = (i >= 7 ? 0 : 3)
         build_residential_hpxml['geometry_unit_num_bathrooms'] = (i >= 7 ? 1 : 2)
@@ -92,8 +92,8 @@ def create_hpxmls
         build_residential_hpxml['cooling_system_type'] = { 1 => 'room air conditioner', 2 => 'none', 3 => 'none', 4 => 'room air conditioner', 5 => 'none', 6 => 'room air conditioner', 7 => 'none', 8 => 'none' }[i]
       elsif hpxml_path.include? 'whole-building'
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
-        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
-        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
+        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
+        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? HPXML::AtticTypeVented : HPXML::AtticTypeBelowApartment)
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
       end
 
@@ -2683,6 +2683,35 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         plug_load.delete
       end
     end
+    if hpxml_file == 'base-bldgtype-mf-whole-building-common-spaces-reverse.xml'
+      surface_id_processed = []
+      hpxml.buildings.each do |bldg|
+        (bldg.walls + bldg.foundation_walls + bldg.rim_joists + bldg.floors).each do |surface|
+          next if surface.sameas_id.nil?
+          next if surface_id_processed.include? surface.id
+
+          sameas_obj = surface.sameas
+          surface_id_processed << surface.id
+          surface_id_processed << sameas_obj.id
+          # clone the hpxml object
+          fully_described_surface = sameas_obj.dup
+          fully_described_surface.exterior_adjacent_to = (fully_described_surface.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace) ? HPXML::LocationOtherHousingUnit : HPXML::LocationOtherMultifamilyBufferSpace
+          if surface.is_a? HPXML::Floor
+            fully_described_surface.floor_or_ceiling = (fully_described_surface.floor_or_ceiling == HPXML::FloorOrCeilingFloor) ? HPXML::FloorOrCeilingCeiling : HPXML::FloorOrCeilingFloor
+          end
+          sameas_surface = surface.dup
+          # modify ids
+          fully_described_surface.id = surface.id
+          sameas_surface.id = sameas_obj.id
+          sameas_surface.sameas_id = surface.id
+          # copy attribute values
+          surface.class::ATTRS.each do |attribute|
+            sameas_obj.send("#{attribute}=", sameas_surface.send(attribute))
+            surface.send("#{attribute}=", fully_described_surface.send(attribute))
+          end
+        end
+      end
+    end
   elsif ['base-bldgtype-mf-whole-building-shared-boilers-sequenced.xml',
          'base-bldgtype-mf-whole-building-shared-boilers-simultaneous.xml'].include? hpxml_file
     if hpxml_file.include? 'sequenced'
@@ -2719,35 +2748,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml.buildings[i].hvac_distributions.clear
       hpxml.buildings[i].hvac_distributions.add(id: "HVACDistribution1_#{i}",
                                                 sameas_id: 'HVACDistribution1')
-    end
-    if hpxml_file == 'base-bldgtype-mf-whole-building-common-spaces-reverse.xml'
-      surface_id_processed = []
-      hpxml.buildings.each do |bldg|
-        (bldg.walls + bldg.foundation_walls + bldg.rim_joists + bldg.floors).each do |surface|
-          next if surface.sameas_id.nil?
-          next if surface_id_processed.include? surface.id
-
-          sameas_obj = surface.sameas
-          surface_id_processed << surface.id
-          surface_id_processed << sameas_obj.id
-          # clone the hpxml object
-          fully_described_surface = sameas_obj.dup
-          fully_described_surface.exterior_adjacent_to = (fully_described_surface.exterior_adjacent_to == HPXML::LocationOtherMultifamilyBufferSpace) ? HPXML::LocationOtherHousingUnit : HPXML::LocationOtherMultifamilyBufferSpace
-          if surface.is_a? HPXML::Floor
-            fully_described_surface.floor_or_ceiling = (fully_described_surface.floor_or_ceiling == HPXML::FloorOrCeilingFloor) ? HPXML::FloorOrCeilingCeiling : HPXML::FloorOrCeilingFloor
-          end
-          sameas_surface = surface.dup
-          # modify ids
-          fully_described_surface.id = surface.id
-          sameas_surface.id = sameas_obj.id
-          sameas_surface.sameas_id = surface.id
-          # copy attribute values
-          surface.class::ATTRS.each do |attribute|
-            sameas_obj.send("#{attribute}=", sameas_surface.send(attribute))
-            surface.send("#{attribute}=", fully_described_surface.send(attribute))
-          end
-        end
-      end
     end
   end
 end
