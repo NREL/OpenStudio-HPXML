@@ -4650,7 +4650,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                           capacity_description: HPXML::CapacityDescriptionMaximum,
                           efficiency_cop: (max_speed_cop.nil? ? nil : Float(max_speed_cop)))
       end
-      hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+      if args[:hvac_cooling_system_detailed_performance_data_capacity_type] == 'Absolute capacities'
+        hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+      end
     end
   end
 
@@ -4811,7 +4813,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               capacity_description: HPXML::CapacityDescriptionMaximum,
                               efficiency_cop: (max_speed_cop.nil? ? nil : Float(max_speed_cop)))
       end
-      hpxml_bldg.heat_pumps[0].heating_capacity = nil
+      if args[:hvac_heat_pump_detailed_performance_data_capacity_type] == 'Absolute capacities'
+        hpxml_bldg.heat_pumps[0].heating_capacity = nil
+      end
     end
 
     if (not args[:hvac_heat_pump_detailed_performance_data_cooling_outdoor_temperatures].nil?) && (args[:heat_pump_fraction_cool_load_served] > 0)
@@ -4861,7 +4865,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                              capacity_description: HPXML::CapacityDescriptionMaximum,
                              efficiency_cop: (max_speed_cop.nil? ? nil : Float(max_speed_cop)))
       end
-      hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+      if args[:hvac_heat_pump_detailed_performance_data_capacity_type] == 'Absolute capacities'
+        hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+      end
     end
   end
 
