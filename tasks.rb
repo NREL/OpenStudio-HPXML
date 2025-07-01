@@ -67,18 +67,19 @@ def create_hpxmls
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-    num_apply_measures = 1
-    if hpxml_path.include?('whole-building-common-spaces')
-      num_apply_measures = 8
-    elsif hpxml_path.include?('whole-building')
-      num_apply_measures = 6
+    num_mf_units = 1
+    if hpxml_path.include? 'whole-building-common-spaces'
+      num_mf_units = 8
+    elsif hpxml_path.include? 'whole-building'
+      num_mf_units = 6
     end
 
-    for i in 1..num_apply_measures
+    for i in 1..num_mf_units
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include?('whole-building-common-spaces')
-        suffix = "_#{i}" if i > 1
+      suffix = "_#{i}" if i > 1
+
+      if hpxml_path.include? 'whole-building-common-spaces'
         build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
         build_residential_hpxml['geometry_attic_type'] = (i >= 7 ? HPXML::AtticTypeVented : HPXML::AtticTypeBelowApartment)
@@ -87,10 +88,9 @@ def create_hpxmls
         build_residential_hpxml['geometry_unit_num_bathrooms'] = (i >= 7 ? 1 : 2)
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => -7.0, 2 => -7.0, 3 => 1.0, 4 => 1.0, 5 => 9.0, 6 => 9.0, 7 => 17.0, 8 => 17.0 }[i]
         # Partially conditioned basement + one unconditioned hallway each floor + unconditioned attic
-        build_residential_hpxml['heating_system_type'] = ([1, 4, 6].include?(i) ? HPXML::HVACTypeElectricResistance : 'none')
-        build_residential_hpxml['cooling_system_type'] = ([1, 4, 6].include?(i) ? HPXML::HVACTypeRoomAirConditioner : 'none')
-      elsif hpxml_path.include?('whole-building')
-        suffix = "_#{i}" if i > 1
+        build_residential_hpxml['heating_system_type'] = { 1 => 'ElectricResistance', 2 => 'none', 3 => 'none', 4 => 'ElectricResistance', 5 => 'none', 6 => 'ElectricResistance', 7 => 'none', 8 => 'none' }[i]
+        build_residential_hpxml['cooling_system_type'] = { 1 => 'room air conditioner', 2 => 'none', 3 => 'none', 4 => 'room air conditioner', 5 => 'none', 6 => 'room air conditioner', 7 => 'none', 8 => 'none' }[i]
+      elsif hpxml_path.include? 'whole-building'
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? HPXML::AtticTypeVented : HPXML::AtticTypeBelowApartment)
@@ -1643,7 +1643,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].number_of_units_served = 6
       hpxml_bldg.heat_pumps[0].pump_watts_per_ton = 0.0
     end
-    if !hpxml_file.include? 'eae'
+    if !hpxml_file.include?('eae') && !hpxml_file.include?('whole-building')
       if hpxml_file.include? 'shared-boiler'
         hpxml_bldg.heating_systems[0].shared_loop_watts = 600
       end
@@ -2711,6 +2711,43 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
           end
         end
       end
+    end
+  elsif ['base-bldgtype-mf-whole-building-shared-boilers-sequenced.xml',
+         'base-bldgtype-mf-whole-building-shared-boilers-simultaneous.xml'].include? hpxml_file
+    if hpxml_file.include? 'sequenced'
+      hpxml.header.shared_boiler_operation = HPXML::SharedBoilerOperationSequenced
+    elsif hpxml_file.include? 'simultaneous'
+      hpxml.header.shared_boiler_operation = HPXML::SharedBoilerOperationSimultaneous
+    end
+    # Add two shared boilers to building1
+    hpxml.buildings[0].heating_systems.clear
+    for j in 1..2
+      hpxml.buildings[0].heating_systems.add(id: "HeatingSystem#{j}",
+                                             is_shared_system: true,
+                                             distribution_system_idref: 'HVACDistribution1',
+                                             heating_system_type: HPXML::HVACTypeBoiler,
+                                             heating_system_fuel: HPXML::FuelTypeNaturalGas,
+                                             heating_capacity: 30000,
+                                             heating_efficiency_afue: 0.8)
+    end
+    hpxml.buildings[0].hvac_distributions.clear
+    hpxml.buildings[0].hvac_distributions.add(id: 'HVACDistribution1',
+                                              distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                              hydronic_type: HPXML::HydronicTypeBaseboard,
+                                              hydronic_supply_temp: 160,
+                                              hydronic_return_temp: 120,
+                                              hydronic_variable_speed_pump: true)
+    # Reference the shared boilers from all other buildings
+    for i in 1..hpxml.buildings.size - 1
+      hpxml.buildings[i].heating_systems.clear
+      for j in 1..2
+        hpxml.buildings[i].heating_systems.add(id: "HeatingSystem#{j}_#{i}",
+                                               distribution_system_idref: "HVACDistribution1_#{i}",
+                                               sameas_id: "HeatingSystem#{j}")
+      end
+      hpxml.buildings[i].hvac_distributions.clear
+      hpxml.buildings[i].hvac_distributions.add(id: "HVACDistribution1_#{i}",
+                                                sameas_id: 'HVACDistribution1')
     end
   end
 end
