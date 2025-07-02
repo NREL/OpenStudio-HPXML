@@ -219,7 +219,7 @@ base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml,3.0,308.0,0.0,1286.4,
 base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml,3.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,3105.2,3411.8,3411.8,3105.2,3411.8,3411.8,36.253,22.646,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml,3.0,169.0,0.0,1286.4,890.5,11239.2,2515.6,3345.4,3234.8,3345.4,3345.4,3234.8,3345.4,31.073,18.467,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,7476.8,4488.8,7476.8,7476.8,4488.8,7476.8,30.541,23.829,0.0
-base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,7476.8,4488.8,7476.8,7476.8,4488.8,7476.8,30.541,23.829,0.0
+base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,7752.2,4585.0,7752.2,7752.2,4585.0,7752.2,30.842,24.011,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,0.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,7770.0,4580.4,7770.0,7770.0,4580.4,7770.0,30.841,24.009,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,343.0,2.5,0.0,1286.4,890.5,11239.3,2515.6,17579.3,6009.5,17579.3,17579.3,6009.5,17579.3,62.577,33.48,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,36.0,0.0,0.0,1286.4,890.5,11239.2,2515.6,7032.1,3048.1,7032.1,7032.1,3048.1,7032.1,28.069,21.943,0.0
