@@ -3513,6 +3513,7 @@ HPXML HVAC Seasons
 ~~~~~~~~~~~~~~~~~~
 
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
+If not provided, OpenStudio-HPXML defaults to year-round availability of heating and cooling.
 
   ===================  ========  =====  ===========  ========  =======  ===========
   Element              Type      Units  Constraints  Required  Default  Notes
