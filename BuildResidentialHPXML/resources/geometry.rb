@@ -664,10 +664,10 @@ module Geometry
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
-  # @param geometry_unit_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
-  # @param geometry_unit_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
-  # @param geometry_unit_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
-  # @param geometry_unit_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
+  # @param geometry_attached_walls_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
+  # @param geometry_attached_walls_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
+  # @param geometry_attached_walls_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
+  # @param geometry_attached_walls_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
   # @return [Boolean] true if model is successfully updated with a single-family attached unit
   def self.create_single_family_attached(model,
                                          geometry_unit_cfa:,
@@ -680,10 +680,10 @@ module Geometry
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
-                                         geometry_unit_left_wall_is_adiabatic:,
-                                         geometry_unit_right_wall_is_adiabatic:,
-                                         geometry_unit_front_wall_is_adiabatic:,
-                                         geometry_unit_back_wall_is_adiabatic:,
+                                         geometry_attached_walls_left_wall_is_adiabatic:,
+                                         geometry_attached_walls_right_wall_is_adiabatic:,
+                                         geometry_attached_walls_front_wall_is_adiabatic:,
+                                         geometry_attached_walls_back_wall_is_adiabatic:,
                                          **)
 
     cfa = geometry_unit_cfa
@@ -699,10 +699,10 @@ module Geometry
     end
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch
-    adiabatic_left_wall = geometry_unit_left_wall_is_adiabatic
-    adiabatic_right_wall = geometry_unit_right_wall_is_adiabatic
-    adiabatic_front_wall = geometry_unit_front_wall_is_adiabatic
-    adiabatic_back_wall = geometry_unit_back_wall_is_adiabatic
+    adiabatic_left_wall = geometry_attached_walls_left_wall_is_adiabatic
+    adiabatic_right_wall = geometry_attached_walls_right_wall_is_adiabatic
+    adiabatic_front_wall = geometry_attached_walls_front_wall_is_adiabatic
+    adiabatic_back_wall = geometry_attached_walls_back_wall_is_adiabatic
 
     # Convert to SI
     cfa = UnitConversions.convert(cfa, 'ft^2', 'm^2')
@@ -966,10 +966,10 @@ module Geometry
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
-  # @param geometry_unit_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
-  # @param geometry_unit_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
-  # @param geometry_unit_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
-  # @param geometry_unit_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
+  # @param geometry_attached_walls_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
+  # @param geometry_attached_walls_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
+  # @param geometry_attached_walls_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
+  # @param geometry_attached_walls_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
   # @return [Boolean] true if model is successfully updated with an apartment unit
   def self.create_apartment(model,
                             geometry_unit_cfa:,
@@ -982,10 +982,10 @@ module Geometry
                             geometry_attic_type:,
                             geometry_roof_type:,
                             geometry_roof_pitch:,
-                            geometry_unit_left_wall_is_adiabatic:,
-                            geometry_unit_right_wall_is_adiabatic:,
-                            geometry_unit_front_wall_is_adiabatic:,
-                            geometry_unit_back_wall_is_adiabatic:,
+                            geometry_attached_walls_left_wall_is_adiabatic:,
+                            geometry_attached_walls_right_wall_is_adiabatic:,
+                            geometry_attached_walls_front_wall_is_adiabatic:,
+                            geometry_attached_walls_back_wall_is_adiabatic:,
                             **)
 
     cfa = geometry_unit_cfa
@@ -998,10 +998,10 @@ module Geometry
     attic_type = geometry_attic_type
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch
-    adiabatic_left_wall = geometry_unit_left_wall_is_adiabatic
-    adiabatic_right_wall = geometry_unit_right_wall_is_adiabatic
-    adiabatic_front_wall = geometry_unit_front_wall_is_adiabatic
-    adiabatic_back_wall = geometry_unit_back_wall_is_adiabatic
+    adiabatic_left_wall = geometry_attached_walls_left_wall_is_adiabatic
+    adiabatic_right_wall = geometry_attached_walls_right_wall_is_adiabatic
+    adiabatic_front_wall = geometry_attached_walls_front_wall_is_adiabatic
+    adiabatic_back_wall = geometry_attached_walls_back_wall_is_adiabatic
 
     if foundation_type == HPXML::FoundationTypeAboveApartment
       foundation_type = HPXML::LocationOtherHousingUnit
@@ -1381,37 +1381,43 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param window_front_wwr [Double] ratio of window to wall area for the unit's front facade (frac)
-  # @param window_back_wwr [Double] ratio of window to wall area for the unit's back facade (frac)
-  # @param window_left_wwr [Double] ratio of window to wall area for the unit's left facade (frac)
-  # @param window_right_wwr [Double] ratio of window to wall area for the unit's right facade (frac)
-  # @param window_area_front [Double] amount of window area on unit's front facade (ft2)
-  # @param window_area_back [Double] amount of window area on unit's back facade (ft2)
-  # @param window_area_left [Double] amount of window area on unit's left facade (ft2)
-  # @param window_area_right [Double] amount of window area on unit's right facade (ft2)
-  # @param window_aspect_ratio [Double] ratio of window height to width (frac)
-  # @param skylight_area_front [Double] amount of skylight area on the unit's front conditioned roof facade (ft2)
-  # @param skylight_area_back [Double] amount of skylight area on the unit's back conditioned roof facade (ft2)
-  # @param skylight_area_left [Double] amount of skylight area on the unit's left conditioned roof facade (ft2)
-  # @param skylight_area_right [Double] amount of skylight area on the unit's right conditioned roof facade (ft2)
+  # @param window_area_or_wwr_front [Double] window area or window-to-wall ratio for unit's front facade (ft2 or frac)
+  # @param window_area_or_wwr_back [Double] window area or window-to-wall ratio for unit's back facade (ft2 or frac)
+  # @param window_area_or_wwr_left [Double] window area or window-to-wall ratio for unit's left facade (ft2 or frac)
+  # @param window_area_or_wwr_right [Double] window area or window-to-wall ratio for unit's right facade (ft2 or frac)
+  # @param skylight_area_front [Double] skylight area for unit's front conditioned roof facade (ft2)
+  # @param skylight_area_back [Double] skylight area for unit's back conditioned roof facade (ft2)
+  # @param skylight_area_left [Double] skylight area for unit's left conditioned roof facade (ft2)
+  # @param skylight_area_right [Double] skylight area for unit's right conditioned roof facade (ft2)
   # @return [Boolean] true if successful
   def self.create_windows_and_skylights(runner, model,
-                                        window_front_wwr:, window_back_wwr:, window_left_wwr:, window_right_wwr:,
-                                        window_area_front:, window_area_back:, window_area_left:, window_area_right:, window_aspect_ratio:,
+                                        window_area_or_wwr_front:, window_area_or_wwr_back:, window_area_or_wwr_left:, window_area_or_wwr_right:,
                                         skylight_area_front:, skylight_area_back:, skylight_area_left:, skylight_area_right:,
                                         **)
     facades = [Constants::FacadeBack, Constants::FacadeRight, Constants::FacadeFront, Constants::FacadeLeft]
 
-    wwrs = {}
-    wwrs[Constants::FacadeBack] = window_back_wwr
-    wwrs[Constants::FacadeRight] = window_right_wwr
-    wwrs[Constants::FacadeFront] = window_front_wwr
-    wwrs[Constants::FacadeLeft] = window_left_wwr
-    window_areas = {}
-    window_areas[Constants::FacadeBack] = window_area_back
-    window_areas[Constants::FacadeRight] = window_area_right
-    window_areas[Constants::FacadeFront] = window_area_front
-    window_areas[Constants::FacadeLeft] = window_area_left
+    wwrs = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
+    window_areas = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
+    if window_area_or_wwr_front < 1
+      wwrs[Constants::FacadeFront] = window_area_or_wwr_front
+    else
+      window_areas[Constants::FacadeFront] = window_area_or_wwr_front
+    end
+    if window_area_or_wwr_back < 1
+      wwrs[Constants::FacadeBack] = window_area_or_wwr_back
+    else
+      window_areas[Constants::FacadeBack] = window_area_or_wwr_back
+    end
+    if window_area_or_wwr_left < 1
+      wwrs[Constants::FacadeLeft] = window_area_or_wwr_left
+    else
+      window_areas[Constants::FacadeLeft] = window_area_or_wwr_left
+    end
+    if window_area_or_wwr_right < 1
+      wwrs[Constants::FacadeRight] = window_area_or_wwr_right
+    else
+      window_areas[Constants::FacadeRight] = window_area_or_wwr_right
+    end
 
     skylight_areas = {}
     skylight_areas[Constants::FacadeBack] = skylight_area_back
@@ -1492,6 +1498,7 @@ module Geometry
     max_single_window_area = 12.0 # sqft
     window_gap_y = 1.0 # ft; distance from top of wall
     window_gap_x = 0.2 # ft; distance between windows in a two-window group
+    window_aspect_ratio = 1.333
     min_wall_height = Math.sqrt(max_single_window_area * window_aspect_ratio) + window_gap_y * 1.05 # allow some wall area above/below
     min_wall_width = Math.sqrt(min_single_window_area / window_aspect_ratio) * 1.05 # allow some wall area to the left/right
 
@@ -1844,7 +1851,7 @@ module Geometry
   def self.get_absolute_tilt(tilt_str:, roof_pitch:, latitude:)
     tilt_str = tilt_str.downcase
     if tilt_str.start_with? 'roofpitch'
-      roof_angle = Math.atan(roof_pitch / 12.0) * 180.0 / Math::PI
+      roof_angle = (Math.atan(roof_pitch / 12.0) * 180.0 / Math::PI).round(2)
       return Float(eval(tilt_str.gsub('roofpitch', roof_angle.to_s)))
     elsif tilt_str.start_with? 'latitude'
       return Float(eval(tilt_str.gsub('latitude', latitude.to_s)))
