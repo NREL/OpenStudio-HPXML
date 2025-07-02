@@ -1012,6 +1012,11 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
 
     [true, false].each do |should_collapse_surfaces|
       _hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
+      hpxml_bldg.windows.each do |window|
+        window.interior_shading_type = nil
+        window.interior_shading_factor_summer = 0.7
+        window.interior_shading_factor_winter = 0.85
+      end
 
       # Make sure that the presence of HPXML zones/spaces doesn't affect this
       add_zones_spaces(hpxml_bldg)

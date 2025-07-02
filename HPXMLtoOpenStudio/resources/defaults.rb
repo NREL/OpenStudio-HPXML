@@ -1613,40 +1613,40 @@ module Defaults
         window.orientation = get_orientation_from_azimuth(window.azimuth)
         window.orientation_isdefaulted = true
       end
-        if window.interior_shading_type.nil?
-          if window.glass_layers == HPXML::WindowLayersGlassBlock
-            window.interior_shading_type = HPXML::InteriorShadingTypeNone
-          else
-            window.interior_shading_type = HPXML::InteriorShadingTypeLightCurtains # ANSI/RESNET/ICC 301-2022
-          end
-          window.interior_shading_type_isdefaulted = true
+      if window.interior_shading_type.nil?
+        if window.glass_layers == HPXML::WindowLayersGlassBlock
+          window.interior_shading_type = HPXML::InteriorShadingTypeNone
+        else
+          window.interior_shading_type = HPXML::InteriorShadingTypeLightCurtains # ANSI/RESNET/ICC 301-2022
         end
-        if window.interior_shading_coverage_summer.nil? && window.interior_shading_type != HPXML::InteriorShadingTypeNone
-          if blinds_types.include? window.interior_shading_type
-            window.interior_shading_coverage_summer = 1.0
-          else
-            window.interior_shading_coverage_summer = 0.5 # ANSI/RESNET/ICC 301-2022
-          end
-          window.interior_shading_coverage_summer_isdefaulted = true
-        end
-        if window.interior_shading_coverage_winter.nil? && window.interior_shading_type != HPXML::InteriorShadingTypeNone
-          if blinds_types.include? window.interior_shading_type
-            window.interior_shading_coverage_winter = 1.0
-          else
-            window.interior_shading_coverage_winter = 0.5 # ANSI/RESNET/ICC 301-2022
-          end
-          window.interior_shading_coverage_winter_isdefaulted = true
-        end
+        window.interior_shading_type_isdefaulted = true
+      end
+      if window.interior_shading_coverage_summer.nil? && window.interior_shading_type != HPXML::InteriorShadingTypeNone
         if blinds_types.include? window.interior_shading_type
-          if window.interior_shading_blinds_summer_closed_or_open.nil?
-            window.interior_shading_blinds_summer_closed_or_open = HPXML::BlindsHalfOpen
-            window.interior_shading_blinds_summer_closed_or_open_isdefaulted = true
-          end
-          if window.interior_shading_blinds_winter_closed_or_open.nil?
-            window.interior_shading_blinds_winter_closed_or_open = HPXML::BlindsHalfOpen
-            window.interior_shading_blinds_winter_closed_or_open_isdefaulted = true
-          end
+          window.interior_shading_coverage_summer = 1.0
+        else
+          window.interior_shading_coverage_summer = 0.5 # ANSI/RESNET/ICC 301-2022
         end
+        window.interior_shading_coverage_summer_isdefaulted = true
+      end
+      if window.interior_shading_coverage_winter.nil? && window.interior_shading_type != HPXML::InteriorShadingTypeNone
+        if blinds_types.include? window.interior_shading_type
+          window.interior_shading_coverage_winter = 1.0
+        else
+          window.interior_shading_coverage_winter = 0.5 # ANSI/RESNET/ICC 301-2022
+        end
+        window.interior_shading_coverage_winter_isdefaulted = true
+      end
+      if blinds_types.include? window.interior_shading_type
+        if window.interior_shading_blinds_summer_closed_or_open.nil?
+          window.interior_shading_blinds_summer_closed_or_open = HPXML::BlindsHalfOpen
+          window.interior_shading_blinds_summer_closed_or_open_isdefaulted = true
+        end
+        if window.interior_shading_blinds_winter_closed_or_open.nil?
+          window.interior_shading_blinds_winter_closed_or_open = HPXML::BlindsHalfOpen
+          window.interior_shading_blinds_winter_closed_or_open_isdefaulted = true
+        end
+      end
       default_int_sf_summer, default_int_sf_winter = get_window_interior_shading_factors(
         window.interior_shading_type,
         window.shgc,
