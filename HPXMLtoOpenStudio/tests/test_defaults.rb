@@ -1744,7 +1744,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].equipment_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.5, HPXML::HVACFanMotorTypePSC, nil, 0, 0, nil, 11.4, 9.79, 28.0, 1.0, HPXML::HVACEquipmentTypeSplit)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.5, HPXML::HVACFanMotorTypePSC, nil, 0, 0, nil, 11.4, 9.79, 28.7, 1.0, HPXML::HVACEquipmentTypeSplit)
   end
 
   def test_room_air_conditioners
@@ -1842,13 +1842,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer2 = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.18, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 18.05, 12.05, 18.6, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.18, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 18.05, 12.05, 19.4, 1.0)
 
     # Test defaults w/ ductless
     hpxml_bldg.cooling_systems[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.07, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 19.0, 12.34, 12.5, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.07, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 19.0, 12.34, 13.1, 1.0)
 
     # Test defaults w/ ductless - SEER2/EER
     hpxml_bldg.cooling_systems[0].cooling_efficiency_seer2 = nil
@@ -1857,7 +1857,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = 12.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.07, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 13.3, 12.0, 12.5, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.07, HPXML::HVACFanMotorTypeBPM, nil, 0, 0, nil, 13.3, 12.0, 13.1, 1.0)
   end
 
   def test_ptac

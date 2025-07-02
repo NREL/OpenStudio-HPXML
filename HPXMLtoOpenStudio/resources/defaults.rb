@@ -1613,7 +1613,6 @@ module Defaults
         window.orientation = get_orientation_from_azimuth(window.azimuth)
         window.orientation_isdefaulted = true
       end
-      if window.interior_shading_factor_winter.nil? || window.interior_shading_factor_summer.nil?
         if window.interior_shading_type.nil?
           if window.glass_layers == HPXML::WindowLayersGlassBlock
             window.interior_shading_type = HPXML::InteriorShadingTypeNone
@@ -1648,23 +1647,22 @@ module Defaults
             window.interior_shading_blinds_winter_closed_or_open_isdefaulted = true
           end
         end
-        default_int_sf_summer, default_int_sf_winter = get_window_interior_shading_factors(
-          window.interior_shading_type,
-          window.shgc,
-          window.interior_shading_coverage_summer,
-          window.interior_shading_coverage_winter,
-          window.interior_shading_blinds_summer_closed_or_open,
-          window.interior_shading_blinds_winter_closed_or_open,
-          eri_version
-        )
-        if window.interior_shading_factor_summer.nil? && (not default_int_sf_summer.nil?)
-          window.interior_shading_factor_summer = default_int_sf_summer
-          window.interior_shading_factor_summer_isdefaulted = true
-        end
-        if window.interior_shading_factor_winter.nil? && (not default_int_sf_winter.nil?)
-          window.interior_shading_factor_winter = default_int_sf_winter
-          window.interior_shading_factor_winter_isdefaulted = true
-        end
+      default_int_sf_summer, default_int_sf_winter = get_window_interior_shading_factors(
+        window.interior_shading_type,
+        window.shgc,
+        window.interior_shading_coverage_summer,
+        window.interior_shading_coverage_winter,
+        window.interior_shading_blinds_summer_closed_or_open,
+        window.interior_shading_blinds_winter_closed_or_open,
+        eri_version
+      )
+      if window.interior_shading_factor_summer.nil? && (not default_int_sf_summer.nil?)
+        window.interior_shading_factor_summer = default_int_sf_summer
+        window.interior_shading_factor_summer_isdefaulted = true
+      end
+      if window.interior_shading_factor_winter.nil? && (not default_int_sf_winter.nil?)
+        window.interior_shading_factor_winter = default_int_sf_winter
+        window.interior_shading_factor_winter_isdefaulted = true
       end
       if window.exterior_shading_factor_winter.nil? || window.exterior_shading_factor_summer.nil?
         if window.exterior_shading_type.nil?

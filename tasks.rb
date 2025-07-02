@@ -979,6 +979,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows[3].shgc = nil
       hpxml_bldg.windows[3].glass_layers = HPXML::WindowLayersGlassBlock
     elsif ['base-enclosure-windows-shading-factors.xml'].include? hpxml_file
+      hpxml_bldg.windows.each do |window|
+        window.interior_shading_type = nil
+      end
+      hpxml_bldg.windows[0].interior_shading_factor_summer = 0.7
+      hpxml_bldg.windows[0].interior_shading_factor_winter = 0.85
       hpxml_bldg.windows[1].exterior_shading_factor_summer = 0.5
       hpxml_bldg.windows[1].exterior_shading_factor_winter = 0.5
       hpxml_bldg.windows[1].interior_shading_factor_summer = 0.5
