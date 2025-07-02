@@ -44,8 +44,7 @@
     "window_fraction_operable": 0,
     "window_ufactor": 1.039,
     "window_shgc": 0.67,
-    "window_interior_shading_winter": 1,
-    "window_interior_shading_summer": 1,
+    "enclosure_window_interior_shading": "None",
     "enclosure_overhangs": "None",
     "skylight_area_front": 0,
     "skylight_area_back": 0,
@@ -374,10 +373,9 @@
     "door_rvalue": 2.86,
     "window_shgc": 0.4,
     "window_ufactor": 0.35,
-    "window_interior_shading_winter": null,
-    "window_interior_shading_summer": null,
+    "enclosure_window_interior_shading": null,
     "heating_system_fuel": "natural gas",
-    "hvac_heating_system":"Central Furnace, 78% AFUE",
+    "hvac_heating_system": "Central Furnace, 78% AFUE",
     "heating_system_fraction_heat_load_served": 1.0,
     "hvac_cooling_system": "Central AC, SEER 13",
     "cooling_system_fraction_cool_load_served": 1,
@@ -511,8 +509,7 @@
     "window_fraction_operable": 0.67,
     "window_ufactor": 0.33,
     "window_shgc": 0.45,
-    "window_interior_shading_winter": 0.85,
-    "window_interior_shading_summer": 0.7,
+    "enclosure_window_interior_shading": "Curtains, Light",
     "enclosure_overhangs": "None",
     "skylight_area_front": 0,
     "skylight_area_back": 0,
@@ -1536,15 +1533,11 @@
   },
   "sample_files/base-enclosure-windows-exterior-shading-solar-film.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "window_exterior_shading_type": "solar film",
-    "window_exterior_shading_winter": null,
-    "window_exterior_shading_summer": null
+    "enclosure_window_exterior_shading": "Solar Film"
   },
   "sample_files/base-enclosure-windows-exterior-shading-solar-screens.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "window_exterior_shading_type": "solar screens",
-    "window_exterior_shading_winter": null,
-    "window_exterior_shading_summer": null
+    "enclosure_window_exterior_shading": "Solar Screen"
   },
   "sample_files/base-enclosure-windows-insect-screens-exterior.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1556,15 +1549,11 @@
   },
   "sample_files/base-enclosure-windows-interior-shading-blinds.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "window_interior_shading_type": "dark blinds",
-    "window_interior_shading_winter": null,
-    "window_interior_shading_summer": null
+    "enclosure_window_interior_shading": "Blinds, Dark"
   },
-  "sample_files/base-enclosure-windows-interior-shading-curtains.xml": {
+  "sample_files/base-enclosure-windows-interior-shading-coefficients.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "window_interior_shading_type": "medium curtains",
-    "window_interior_shading_winter": null,
-    "window_interior_shading_summer": null
+    "enclosure_window_interior_shading": "Summer=0.7, Winter=0.8"
   },
   "sample_files/base-enclosure-windows-natural-ventilation-availability.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1584,8 +1573,7 @@
     "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-enclosure-windows-shading-seasons.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "window_shading_summer_season": "May 1 - Sep 30"
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-enclosure-windows-shading-types-detailed.xml": {
     "parent_hpxml": "sample_files/base-misc-neighbor-shading.xml"
@@ -2806,8 +2794,7 @@
     "enclosure_roof_material": null,
     "enclosure_wall_siding": null,
     "window_fraction_operable": null,
-    "window_interior_shading_winter": null,
-    "window_interior_shading_summer": null,
+    "enclosure_window_interior_shading": null,
     "hvac_control_heating_weekday_setpoint": null,
     "hvac_control_heating_weekend_setpoint": null,
     "hvac_control_cooling_weekday_setpoint": null,

@@ -251,8 +251,7 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <Type>light curtains</Type>
             </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
@@ -270,6 +269,7 @@
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
+              <Type>light curtains</Type>
               <SummerShadingCoefficient>0.5</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.5</WinterShadingCoefficient>
             </InteriorShading>
@@ -289,6 +289,7 @@
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
+              <Type>light curtains</Type>
               <SummerShadingCoefficient>0.01</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.99</WinterShadingCoefficient>
             </InteriorShading>
@@ -308,6 +309,7 @@
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
+              <Type>light curtains</Type>
               <SummerShadingCoefficient>0.0</SummerShadingCoefficient>
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>

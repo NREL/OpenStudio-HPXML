@@ -1547,6 +1547,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.slabs[0].exterior_horizontal_insulation_width = 2.5
       hpxml_bldg.slabs[0].exterior_horizontal_insulation_depth_below_grade = 2.0
     end
+    if ['base-enclosure-windows-shading-seasons.xml'].include? hpxml_file
+      hpxml_bldg.header.shading_summer_begin_month = 5
+      hpxml_bldg.header.shading_summer_begin_day = 1
+      hpxml_bldg.header.shading_summer_end_month = 9
+      hpxml_bldg.header.shading_summer_end_day = 30
+    end
 
     # ---------- #
     # HPXML HVAC #

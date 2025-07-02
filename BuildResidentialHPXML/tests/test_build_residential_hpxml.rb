@@ -468,8 +468,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_fraction_operable'] = 0.67
       args['window_ufactor'] = 0.33
       args['window_shgc'] = 0.45
-      args['window_interior_shading_winter'] = 0.85
-      args['window_interior_shading_summer'] = 0.7
+      args['enclosure_window_interior_shading'] = 'Summer=0.7, Winter=0.8'
       args['enclosure_overhangs'] = 'None'
       args['skylight_area_front'] = 0
       args['skylight_area_back'] = 0
@@ -739,10 +738,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heat_pump_fraction_heat_load_served'] = 0.75
       args['hvac_heating_system_2'] = 'Boiler, 100% AFUE'
     when 'extra-enclosure-windows-shading.xml'
-      args['window_interior_shading_winter'] = 0.99
-      args['window_interior_shading_summer'] = 0.01
-      args['window_exterior_shading_winter'] = 0.9
-      args['window_exterior_shading_summer'] = 0.1
+      args['enclosure_window_interior_shading'] = 'Summer=0.5, Winter=0.9'
+      args['enclosure_window_exterior_shading'] = 'Summer=0.25, Winter=1.00'
     when 'extra-enclosure-garage-partially-protruded.xml'
       args['geometry_garage_width'] = 12
       args['geometry_garage_protrusion'] = 0.5

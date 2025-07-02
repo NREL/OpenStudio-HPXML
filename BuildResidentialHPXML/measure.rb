@@ -621,64 +621,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0.3)
     args << arg
 
-    window_interior_shading_type_choices = OpenStudio::StringVector.new
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeLightCurtains
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeLightShades
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeLightBlinds
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeMediumCurtains
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeMediumShades
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeMediumBlinds
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeDarkCurtains
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeDarkShades
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeDarkBlinds
-    window_interior_shading_type_choices << HPXML::InteriorShadingTypeNone
-    # Not adding inputs for other because that can be anything
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_interior_shading_type', window_interior_shading_type_choices, false)
-    arg.setDisplayName('Windows: Interior Shading Type')
-    arg.setDescription("Type of window interior shading. Summer/winter shading coefficients can be provided below instead. If neither is provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-interior-shading'>HPXML Interior Shading</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_interior_shading', choices[:enclosure_window_interior_shading], false)
+    arg.setDisplayName('Enclosure: Window Interior Shading')
+    arg.setDescription('The type of window interior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_interior_shading_winter', false)
-    arg.setDisplayName('Windows: Winter Interior Shading Coefficient')
-    arg.setUnits('Frac')
-    arg.setDescription("Interior shading coefficient for the winter season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-interior-shading'>HPXML Interior Shading</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_interior_shading_summer', false)
-    arg.setDisplayName('Windows: Summer Interior Shading Coefficient')
-    arg.setUnits('Frac')
-    arg.setDescription("Interior shading coefficient for the summer season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-interior-shading'>HPXML Interior Shading</a>) is used.")
-    args << arg
-
-    window_exterior_shading_type_choices = OpenStudio::StringVector.new
-    window_exterior_shading_type_choices << HPXML::ExteriorShadingTypeSolarFilm
-    window_exterior_shading_type_choices << HPXML::ExteriorShadingTypeSolarScreens
-    window_exterior_shading_type_choices << HPXML::ExteriorShadingTypeNone
-    # Not adding inputs for trees since that is more specific to select windows, whereas this will apply to every window
-    # Not adding inputs for overhangs/neighbors because there are other inputs to describe those (and in more detail)
-    # Not adding inputs for other because that can be anything
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_exterior_shading_type', window_exterior_shading_type_choices, false)
-    arg.setDisplayName('Windows: Exterior Shading Type')
-    arg.setDescription("Type of window exterior shading. Summer/winter shading coefficients can be provided below instead. If neither is provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-exterior-shading'>HPXML Exterior Shading</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_exterior_shading_winter', false)
-    arg.setDisplayName('Windows: Winter Exterior Shading Coefficient')
-    arg.setUnits('Frac')
-    arg.setDescription("Exterior shading coefficient for the winter season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-exterior-shading'>HPXML Exterior Shading</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_exterior_shading_summer', false)
-    arg.setDisplayName('Windows: Summer Exterior Shading Coefficient')
-    arg.setUnits('Frac')
-    arg.setDescription("Exterior shading coefficient for the summer season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-exterior-shading'>HPXML Exterior Shading</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('window_shading_summer_season', false)
-    arg.setDisplayName('Windows: Shading Summer Season')
-    arg.setDescription("Enter a date range like 'May 1 - Sep 30'. Defines the summer season for purposes of shading coefficients; the rest of the year is assumed to be winter. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_exterior_shading', choices[:enclosure_window_exterior_shading], false)
+    arg.setDisplayName('Enclosure: Window Exterior Shading')
+    arg.setDescription('The type of window exterior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.')
     args << arg
 
     window_insect_screen_choices = OpenStudio::StringVector.new
@@ -687,8 +637,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     window_insect_screen_choices << HPXML::LocationInterior
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_insect_screens', window_insect_screen_choices, false)
-    arg.setDisplayName('Windows: Insect Screens')
-    arg.setDescription('The type of insect screens, if present. If not provided, assumes there are no insect screens.')
+    arg.setDisplayName('Enclosure: Window Insect Screens')
+    arg.setDescription('The type of window insect screens, if present. If not provided, assumes there are no insect screens.')
     args << arg
 
     storm_window_type_choices = OpenStudio::StringVector.new
@@ -696,8 +646,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     storm_window_type_choices << HPXML::WindowGlassTypeLowE
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_storm_type', storm_window_type_choices, false)
-    arg.setDisplayName('Windows: Storm Type')
-    arg.setDescription('The type of storm, if present. If not provided, assumes there is no storm.')
+    arg.setDisplayName('Enclosure: Window Storms')
+    arg.setDescription('The type of window storm, if present. If not provided, assumes there is no storm.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_overhangs', choices[:enclosure_overhangs], false)
@@ -3733,14 +3683,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.header.heat_pump_backup_sizing_methodology = args[:heat_pump_backup_sizing_methodology]
     hpxml_bldg.header.natvent_days_per_week = args[:window_natvent_availability]
 
-    if not args[:window_shading_summer_season].nil?
-      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(args[:window_shading_summer_season])
-      hpxml_bldg.header.shading_summer_begin_month = begin_month
-      hpxml_bldg.header.shading_summer_begin_day = begin_day
-      hpxml_bldg.header.shading_summer_end_month = end_month
-      hpxml_bldg.header.shading_summer_end_day = end_day
-    end
-
     if not args[:additional_properties].nil?
       extension_properties = {}
       args[:additional_properties].split('|').map(&:strip).each do |additional_property|
@@ -4298,12 +4240,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                              overhangs_depth: overhangs_depth,
                              overhangs_distance_to_top_of_window: overhangs_distance_to_top_of_window,
                              overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
-                             interior_shading_type: args[:window_interior_shading_type],
-                             interior_shading_factor_winter: args[:window_interior_shading_winter],
-                             interior_shading_factor_summer: args[:window_interior_shading_summer],
-                             exterior_shading_type: args[:window_exterior_shading_type],
-                             exterior_shading_factor_winter: args[:window_exterior_shading_winter],
-                             exterior_shading_factor_summer: args[:window_exterior_shading_summer],
+                             interior_shading_type: args[:enclosure_window_interior_shading_type],
+                             interior_shading_factor_winter: args[:enclosure_window_interior_shading_winter_coefficient],
+                             interior_shading_factor_summer: args[:enclosure_window_interior_shading_summer_coefficient],
+                             exterior_shading_type: args[:enclosure_window_exterior_shading_type],
+                             exterior_shading_factor_winter: args[:enclosure_window_exterior_shading_winter_coefficient],
+                             exterior_shading_factor_summer: args[:enclosure_window_exterior_shading_summer_coefficient],
                              insect_screen_present: insect_screen_present,
                              insect_screen_location: insect_screen_location,
                              fraction_operable: args[:window_fraction_operable],

@@ -1013,98 +1013,35 @@ Full-assembly NFRC solar heat gain coefficient.
 
 <br/>
 
-**Windows: Interior Shading Type**
+**Enclosure: Window Interior Shading**
 
-Type of window interior shading. Summer/winter shading coefficients can be provided below instead. If neither is provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-interior-shading'>HPXML Interior Shading</a>) is used.
+The type of window interior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.
 
-- **Name:** ``window_interior_shading_type``
+- **Name:** ``enclosure_window_interior_shading``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `light curtains`, `light shades`, `light blinds`, `medium curtains`, `medium shades`, `medium blinds`, `dark curtains`, `dark shades`, `dark blinds`, `none`
+- **Choices:** `None`, `Curtains, Light`, `Curtains, Medium`, `Curtains, Dark`, `Shades, Light`, `Shades, Medium`, `Shades, Dark`, `Blinds, Light`, `Blinds, Medium`, `Blinds, Dark`, `Summer=0.5, Winter=0.5`, `Summer=0.5, Winter=0.6`, `Summer=0.5, Winter=0.7`, `Summer=0.5, Winter=0.8`, `Summer=0.5, Winter=0.9`, `Summer=0.6, Winter=0.6`, `Summer=0.6, Winter=0.7`, `Summer=0.6, Winter=0.8`, `Summer=0.6, Winter=0.9`, `Summer=0.7, Winter=0.7`, `Summer=0.7, Winter=0.8`, `Summer=0.7, Winter=0.9`, `Summer=0.8, Winter=0.8`, `Summer=0.8, Winter=0.9`, `Summer=0.9, Winter=0.9`
 
 <br/>
 
-**Windows: Winter Interior Shading Coefficient**
+**Enclosure: Window Exterior Shading**
 
-Interior shading coefficient for the winter season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-interior-shading'>HPXML Interior Shading</a>) is used.
+The type of window exterior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.
 
-- **Name:** ``window_interior_shading_winter``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Windows: Summer Interior Shading Coefficient**
-
-Interior shading coefficient for the summer season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-interior-shading'>HPXML Interior Shading</a>) is used.
-
-- **Name:** ``window_interior_shading_summer``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Windows: Exterior Shading Type**
-
-Type of window exterior shading. Summer/winter shading coefficients can be provided below instead. If neither is provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-exterior-shading'>HPXML Exterior Shading</a>) is used.
-
-- **Name:** ``window_exterior_shading_type``
+- **Name:** ``enclosure_window_exterior_shading``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `solar film`, `solar screens`, `none`
+- **Choices:** `None`, `Solar Film`, `Solar Screen`, `Summer=0.25, Winter=0.25`, `Summer=0.25, Winter=0.50`, `Summer=0.25, Winter=0.75`, `Summer=0.25, Winter=1.00`, `Summer=0.50, Winter=0.25`, `Summer=0.50, Winter=0.50`, `Summer=0.50, Winter=0.75`, `Summer=0.50, Winter=1.00`, `Summer=0.75, Winter=0.25`, `Summer=0.75, Winter=0.50`, `Summer=0.75, Winter=0.75`, `Summer=0.75, Winter=1.00`, `Summer=1.00, Winter=0.25`, `Summer=1.00, Winter=0.50`, `Summer=1.00, Winter=0.75`, `Summer=1.00, Winter=1.00`
 
 <br/>
 
-**Windows: Winter Exterior Shading Coefficient**
+**Enclosure: Window Insect Screens**
 
-Exterior shading coefficient for the winter season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-exterior-shading'>HPXML Exterior Shading</a>) is used.
-
-- **Name:** ``window_exterior_shading_winter``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Windows: Summer Exterior Shading Coefficient**
-
-Exterior shading coefficient for the summer season, which if provided overrides the shading type input. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-exterior-shading'>HPXML Exterior Shading</a>) is used.
-
-- **Name:** ``window_exterior_shading_summer``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Windows: Shading Summer Season**
-
-Enter a date range like 'May 1 - Sep 30'. Defines the summer season for purposes of shading coefficients; the rest of the year is assumed to be winter. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-windows'>HPXML Windows</a>) is used.
-
-- **Name:** ``window_shading_summer_season``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Windows: Insect Screens**
-
-The type of insect screens, if present. If not provided, assumes there are no insect screens.
+The type of window insect screens, if present. If not provided, assumes there are no insect screens.
 
 - **Name:** ``window_insect_screens``
 - **Type:** ``Choice``
@@ -1115,9 +1052,9 @@ The type of insect screens, if present. If not provided, assumes there are no in
 
 <br/>
 
-**Windows: Storm Type**
+**Enclosure: Window Storms**
 
-The type of storm, if present. If not provided, assumes there is no storm.
+The type of window storm, if present. If not provided, assumes there is no storm.
 
 - **Name:** ``window_storm_type``
 - **Type:** ``Choice``
