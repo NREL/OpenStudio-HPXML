@@ -2999,7 +2999,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elsif object.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized || object.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
         return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
 
-      elsif object.to_HeatPumpWaterToWaterEquationFitHeating.is_initialized
+      elsif object.to_HeatPumpWaterToWaterEquationFitHeating.is_initialized || object.to_HeatPumpPlantLoopEIRHeating.is_initialized
         return { [FT::Elec, EUT::Heating] => ["Heat Pump #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
@@ -3051,7 +3051,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elsif object.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized || object.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
         return { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
 
-      elsif object.to_HeatPumpWaterToWaterEquationFitCooling.is_initialized
+      elsif object.to_HeatPumpWaterToWaterEquationFitCooling.is_initialized || object.to_HeatPumpPlantLoopEIRCooling.is_initialized
         return { [FT::Elec, EUT::Cooling] => ["Heat Pump #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_EvaporativeCoolerDirectResearchSpecial.is_initialized

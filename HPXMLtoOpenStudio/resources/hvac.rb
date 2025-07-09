@@ -538,6 +538,7 @@ module HVAC
   def self.apply_ground_source_heat_pump(runner, model, weather, hpxml_bldg, hpxml_header, heat_pump,
                                          hvac_sequential_load_fracs, control_zone, hvac_unavailable_periods)
     ground_to_air = false # FIXME: this is the switch to try out ground-to-water
+    equation_fit = false # FIXME: equation fit vs eir-formulated
 
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     if unit_multiplier > 1
@@ -617,10 +618,17 @@ module HVAC
         # TODO: Add net to gross conversion after RESNET PR: https://github.com/NREL/OpenStudio-HPXML/pull/1879
         htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
       else
-        htg_coil = OpenStudio::Model::HeatPumpWaterToWaterEquationFitHeating.new(model)
-        htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
-        clg_coil = OpenStudio::Model::HeatPumpWaterToWaterEquationFitCooling.new(model)
-        clg_coil.setRatedCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
+        if equation_fit
+          htg_coil = OpenStudio::Model::HeatPumpWaterToWaterEquationFitHeating.new(model)
+          htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
+          clg_coil = OpenStudio::Model::HeatPumpWaterToWaterEquationFitCooling.new(model)
+          clg_coil.setRatedCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
+        else
+          htg_coil = OpenStudio::Model::HeatPumpPlantLoopEIRHeating.new(model)
+          htg_coil.setReferenceCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
+          clg_coil = OpenStudio::Model::HeatPumpPlantLoopEIRCooling.new(model)
+          clg_coil.setReferenceCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
+        end
         htg_coil.setCompanionCoolingHeatPump(clg_coil)
         clg_coil.setCompanionHeatingHeatPump(htg_coil)
       end
@@ -910,9 +918,6 @@ module HVAC
       )
 
       hw_loop.addSupplyBranchForComponent(htg_coil)
-      # hw_loop.addSupplyBranchForComponent(clg_coil) # FIXME: heatpump_plantloop_eir.rb does this
-
-      # chw_loop.addSupplyBranchForComponent(htg_coil) # FIXME: heatpump_plantloop_eir.rb does this
       chw_loop.addSupplyBranchForComponent(clg_coil)
 
       supply_setpoint = Model.add_schedule_constant(
@@ -2231,7 +2236,7 @@ module HVAC
     else
       if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         var = 'Evaporative Cooler Water Volume'
-      elsif clg_object.is_a? OpenStudio::Model::HeatPumpWaterToWaterEquationFitCooling
+      elsif clg_object.is_a?(OpenStudio::Model::HeatPumpWaterToWaterEquationFitCooling) || clg_object.is_a?(OpenStudio::Model::HeatPumpPlantLoopEIRCooling)
         var = 'Heat Pump Electricity Energy'
       else
         var = 'Cooling Coil Total Cooling Energy'
@@ -2252,7 +2257,7 @@ module HVAC
         var = 'Baseboard Total Heating Energy'
       elsif htg_object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
         var = 'Fan Coil Heating Energy'
-      elsif htg_object.is_a? OpenStudio::Model::HeatPumpWaterToWaterEquationFitHeating
+      elsif htg_object.is_a?(OpenStudio::Model::HeatPumpWaterToWaterEquationFitHeating) || htg_object.is_a?(OpenStudio::Model::HeatPumpPlantLoopEIRHeating)
         var = 'Heat Pump Electricity Energy'
       else
         var = 'Heating Coil Heating Energy'
