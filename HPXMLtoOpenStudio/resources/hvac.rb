@@ -895,7 +895,7 @@ module HVAC
       end
     else
       max_water_flow = UnitConversions.convert([heat_pump.heating_capacity, heat_pump.cooling_capacity].max, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
-    
+
       plant_loop.addDemandBranchForComponent(htg_coil)
       plant_loop.addDemandBranchForComponent(clg_coil)
 
@@ -908,7 +908,7 @@ module HVAC
         model,
         name: "#{obj_name} chilled water"
       )
-      
+
       hw_loop.addSupplyBranchForComponent(htg_coil)
       # hw_loop.addSupplyBranchForComponent(clg_coil) # FIXME: heatpump_plantloop_eir.rb does this
 
@@ -926,12 +926,12 @@ module HVAC
       setpoint_manager.setName(obj_name + ' hot water setpoint manager')
       setpoint_manager.setControlVariable('Temperature')
       setpoint_manager.addToNode(hw_loop.supplyOutletNode)
-      
+
       loop_sizing = hw_loop.sizingPlant
       loop_sizing.setLoopType('Heating')
       loop_sizing.setDesignLoopExitTemperature(60.000)
       loop_sizing.setLoopDesignTemperatureDifference(11.111)
-      
+
       htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
       htg_coil.setRatedCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
       bb_ua = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
@@ -939,7 +939,7 @@ module HVAC
       htg_coil.setMaximumWaterFlowRate(max_water_flow)
       htg_coil.setPerformanceInputMethod('NominalCapacity')
       htg_coil.setName(obj_name + ' htg coil')
-      
+
       hw_loop.addDemandBranchForComponent(htg_coil)
 
       pump = Model.add_pump_variable_speed(
@@ -960,12 +960,12 @@ module HVAC
       setpoint_manager.setName(obj_name + ' chilled water setpoint manager')
       setpoint_manager.setControlVariable('Temperature')
       setpoint_manager.addToNode(chw_loop.supplyOutletNode)
-      
+
       loop_sizing = chw_loop.sizingPlant
       loop_sizing.setLoopType('Cooling')
       loop_sizing.setDesignLoopExitTemperature(6.666)
       loop_sizing.setLoopDesignTemperatureDifference(5.611)
-      
+
       clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, model.alwaysOnDiscreteSchedule)
       clg_coil.setName(obj_name + ' clg coil')
       clg_coil.setDesignWaterFlowRate(0.0022)
@@ -975,7 +975,7 @@ module HVAC
       clg_coil.setDesignOutletAirTemperature(10.0)
       clg_coil.setDesignInletAirHumidityRatio(0.012)
       clg_coil.setDesignOutletAirHumidityRatio(0.008)
-      
+
       chw_loop.addDemandBranchForComponent(clg_coil)
 
       pump = Model.add_pump_variable_speed(
@@ -983,7 +983,7 @@ module HVAC
         name: "#{obj_name} chilled water pump",
         rated_power: pump_w
       )
-      pump.addToNode(chw_loop.supplyInletNode)      
+      pump.addToNode(chw_loop.supplyInletNode)
 
       zone_hvac = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, model.alwaysOnDiscreteSchedule, fan, clg_coil, htg_coil)
       zone_hvac.setCapacityControlMethod('CyclingFan')
