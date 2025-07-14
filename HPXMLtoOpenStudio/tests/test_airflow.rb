@@ -17,9 +17,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
   def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    File.delete(File.join(File.dirname(__FILE__), 'in.schedules.csv')) if File.exist? File.join(File.dirname(__FILE__), 'in.schedules.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+    cleanup_results_files
   end
 
   def get_eed_for_ventilation(model, ee_name)

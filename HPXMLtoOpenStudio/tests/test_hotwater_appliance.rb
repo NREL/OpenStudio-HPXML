@@ -6,16 +6,16 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
+require_relative 'util.rb'
 
 class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
-  def teardown
-    File.delete(File.join(File.dirname(__FILE__), 'in.schedules.csv')) if File.exist? File.join(File.dirname(__FILE__), 'in.schedules.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+  def setup
+    @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
+    @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
   end
 
-  def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+  def teardown
+    cleanup_results_files
   end
 
   def get_ee_kwh(model, name)
@@ -113,7 +113,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
     hpxml_names.each do |hpxml_name|
       args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_name))
+      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_name))
       model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
       # water use equipment hot water gal/day
@@ -179,7 +179,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_multiple
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-multiple.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-multiple.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -240,7 +240,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_shared_water_heater_recirc
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-mf-unit-shared-water-heater-recirc.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-water-heater-recirc.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -305,7 +305,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
     # zero bedroom
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # recirc
@@ -316,7 +316,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_shared_laundry
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-mf-unit-shared-laundry-room.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-laundry-room.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -377,7 +377,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_low_flow_fixtures
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-low-flow-fixtures.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-low-flow-fixtures.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -389,7 +389,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_dwhr
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-dwhr.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-dwhr.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -405,7 +405,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_recirc_demand
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-demand.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-recirc-demand.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -416,7 +416,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_recirc_manual
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-manual.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-recirc-manual.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -427,7 +427,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_recirc_no_control
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-nocontrol.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-recirc-nocontrol.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -438,7 +438,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_recirc_timer
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-timer.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-recirc-timer.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -449,7 +449,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_dhw_recirc_temp
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-temperature.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-dhw-recirc-temperature.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -460,7 +460,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_appliances_none
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-none.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-appliances-none.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -497,7 +497,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_appliances_modified
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-modified.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-appliances-modified.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -554,7 +554,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_appliances_oil
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-oil.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-appliances-oil.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -623,7 +623,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_appliances_gas
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-gas.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-appliances-gas.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -692,7 +692,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_appliances_propane
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-propane.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-appliances-propane.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -761,7 +761,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_appliances_wood
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-wood.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-appliances-wood.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -830,7 +830,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_appliances_coal
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-coal.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-appliances-coal.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -899,7 +899,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_operational_0_occupants
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-residents-0.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-residents-0.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -921,7 +921,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_operational_1_occupant
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-residents-1.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-residents-1.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
@@ -982,7 +982,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
   def test_operational_5point5_occupants
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-residents-5-5.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-residents-5-5.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
