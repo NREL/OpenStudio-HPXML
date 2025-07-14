@@ -1712,11 +1712,11 @@ The number of return registers of the ducts. Only used to calculate default retu
 
 <br/>
 
-**Mechanical Ventilation**
+**Ventilation Fans: Whole-Home Mechanical**
 
-The type of mechanical ventilation system.
+The type of whole-home mechanical ventilation system.
 
-- **Name:** ``mech_vent``
+- **Name:** ``ventilation_fans_mechanical``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1725,133 +1725,29 @@ The type of mechanical ventilation system.
 
 <br/>
 
-**Kitchen Fans: Quantity**
+**Ventilation Fans: Kitchen**
 
-The quantity of the kitchen fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
+The type of kitchen ventilation fans.
 
-- **Name:** ``kitchen_fans_quantity``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
+- **Name:** ``ventilation_fans_kitchen``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `None`, `Default`, `100 cfm, 1 hr/day`, `100 cfm, 2 hrs/day`, `200 cfm, 1 hr/day`, `200 cfm, 2 hrs/day`, `300 cfm, 1 hr/day`, `300 cfm, 2 hrs/day`, `Detailed Example: 100 cfm, 1.5 hrs/day @ 6pm, 30 W`
 
 <br/>
 
-**Kitchen Fans: Flow Rate**
+**Ventilation Fans: Bathroom**
 
-The flow rate of the kitchen fan. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
+The type of bathroom ventilation fans.
 
-- **Name:** ``kitchen_fans_flow_rate``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
+- **Name:** ``ventilation_fans_bathroom``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Kitchen Fans: Hours In Operation**
-
-The hours in operation of the kitchen fan. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
-
-- **Name:** ``kitchen_fans_hours_in_operation``
-- **Type:** ``Double``
-
-- **Units:** ``hrs/day``
-
-- **Required:** ``false``
-
-<br/>
-
-**Kitchen Fans: Fan Power**
-
-The fan power of the kitchen fan. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
-
-- **Name:** ``kitchen_fans_power``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Kitchen Fans: Start Hour**
-
-The start hour of the kitchen fan. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
-
-- **Name:** ``kitchen_fans_start_hour``
-- **Type:** ``Integer``
-
-- **Units:** ``hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Bathroom Fans: Quantity**
-
-The quantity of the bathroom fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
-
-- **Name:** ``bathroom_fans_quantity``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
-
-<br/>
-
-**Bathroom Fans: Flow Rate**
-
-The flow rate of the bathroom fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
-
-- **Name:** ``bathroom_fans_flow_rate``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
-
-- **Required:** ``false``
-
-<br/>
-
-**Bathroom Fans: Hours In Operation**
-
-The hours in operation of the bathroom fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
-
-- **Name:** ``bathroom_fans_hours_in_operation``
-- **Type:** ``Double``
-
-- **Units:** ``hrs/day``
-
-- **Required:** ``false``
-
-<br/>
-
-**Bathroom Fans: Fan Power**
-
-The fan power of the bathroom fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
-
-- **Name:** ``bathroom_fans_power``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Bathroom Fans: Start Hour**
-
-The start hour of the bathroom fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.
-
-- **Name:** ``bathroom_fans_start_hour``
-- **Type:** ``Integer``
-
-- **Units:** ``hr``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Default`, `50 cfm/bathroom, 1 hr/day`, `50 cfm/bathroom, 2 hrs/day`, `80 cfm/bathroom, 1 hr/day`, `80 cfm/bathroom, 2 hrs/day`, `100 cfm/bathroom, 1 hr/day`, `100 cfm/bathroom, 2 hrs/day`, `Detailed Example: 50 cfm/bathroom, 1.5 hrs/day @ 7am, 15 W`
 
 <br/>
 
@@ -3977,11 +3873,11 @@ The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label 
 
 <br/>
 
-**Ceiling Fan: Quantity**
+**Ceiling Fan: Count**
 
 Total number of ceiling fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
 
-- **Name:** ``ceiling_fan_quantity``
+- **Name:** ``ceiling_fan_count``
 - **Type:** ``Integer``
 
 - **Units:** ``#``
@@ -3992,7 +3888,7 @@ Total number of ceiling fans. If not provided, the OS-HPXML default (see <a href
 
 **Ceiling Fan: Cooling Setpoint Temperature Offset**
 
-The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan quantity is greater than zero. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
+The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan count is greater than zero. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
 
 - **Name:** ``ceiling_fan_cooling_setpoint_temp_offset``
 - **Type:** ``Double``

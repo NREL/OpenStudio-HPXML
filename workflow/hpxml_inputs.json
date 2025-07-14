@@ -72,9 +72,9 @@
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
-    "mech_vent": "None",
-    "kitchen_fans_quantity": 0,
-    "bathroom_fans_quantity": 0,
+    "ventilation_fans_mechanical": "None",
+    "ventilation_fans_kitchen": "None",
+    "ventilation_fans_bathroom": "None",
     "whole_house_fan_present": false,
     "water_heater_type": "none",
     "water_heater_fuel_type": "electricity",
@@ -542,9 +542,9 @@
     "ducts_supply_location": "attic - unvented",
     "ducts_return_location": "attic - unvented",
     "ducts_supply_leakage_fraction": 0.75,
-    "mech_vent": "None",
-    "kitchen_fans_quantity": 0,
-    "bathroom_fans_quantity": 0,
+    "ventilation_fans_mechanical": "None",
+    "ventilation_fans_kitchen": "None",
+    "ventilation_fans_bathroom": "None",
     "whole_house_fan_present": false,
     "water_heater_type": "storage water heater",
     "water_heater_fuel_type": "electricity",
@@ -1025,7 +1025,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-mechvent.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "mech_vent": "Supply Only"
+    "ventilation_fans_mechanical": "Supply Only"
   },
   "sample_files/base-bldgtype-mf-unit-shared-mechvent-multiple.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
@@ -1391,8 +1391,8 @@
     "cooking_range_oven_fuel_type": "natural gas",
     "clothes_dryer_fuel_type": "natural gas",
     "dishwasher_present": false,
-    "kitchen_fans_quantity": 1,
-    "bathroom_fans_quantity": 2,
+    "ventilation_fans_kitchen": "Default",
+    "ventilation_fans_bathroom": "Default",
     "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
     "electric_panel_baseline_peak_power": 4500,
     "electric_panel_service_voltage": "240",
@@ -2424,7 +2424,7 @@
   },
   "sample_files/base-hvac-ptac-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
-    "mech_vent": "CFIS"
+    "ventilation_fans_mechanical": "CFIS"
   },
   "sample_files/base-hvac-ptac-with-heating-electricity.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
@@ -2446,7 +2446,7 @@
   },
   "sample_files/base-hvac-pthp-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml",
-    "mech_vent": "CFIS"
+    "ventilation_fans_mechanical": "CFIS"
   },
   "sample_files/base-hvac-pthp-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml"
@@ -2543,7 +2543,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "ceiling_fan_present": true,
     "ceiling_fan_efficiency": 100,
-    "ceiling_fan_quantity": 4,
+    "ceiling_fan_count": 4,
     "ceiling_fan_cooling_setpoint_temp_offset": 0.5
   },
   "sample_files/base-lighting-ceiling-fans-label-energy-use.xml": {
@@ -2650,24 +2650,16 @@
   },
   "sample_files/base-mechvent-balanced.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent": "Balanced"
+    "ventilation_fans_mechanical": "Balanced"
   },
   "sample_files/base-mechvent-bath-kitchen-fans.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "kitchen_fans_quantity": 1,
-    "kitchen_fans_flow_rate": 100,
-    "kitchen_fans_hours_in_operation": 1.5,
-    "kitchen_fans_power": 30,
-    "kitchen_fans_start_hour": 18,
-    "bathroom_fans_quantity": 2,
-    "bathroom_fans_flow_rate": 50,
-    "bathroom_fans_hours_in_operation": 1.5,
-    "bathroom_fans_power": 15,
-    "bathroom_fans_start_hour": 7
+    "ventilation_fans_kitchen": "Detailed Example: 100 cfm, 1.5 hrs/day @ 6pm, 30 W",
+    "ventilation_fans_bathroom": "Detailed Example: 50 cfm/bathroom, 1.5 hrs/day @ 7am, 15 W"
   },
   "sample_files/base-mechvent-cfis.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent": "CFIS"
+    "ventilation_fans_mechanical": "CFIS"
   },
   "sample_files/base-mechvent-cfis-15-mins.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
@@ -2681,11 +2673,11 @@
   },
   "sample_files/base-mechvent-cfis-dse.xml": {
     "parent_hpxml": "sample_files/base-hvac-dse.xml",
-    "mech_vent": "CFIS"
+    "ventilation_fans_mechanical": "CFIS"
   },
   "sample_files/base-mechvent-cfis-evap-cooler-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-evap-cooler-only-ducted.xml",
-    "mech_vent": "CFIS"
+    "ventilation_fans_mechanical": "CFIS"
   },
   "sample_files/base-mechvent-cfis-no-additional-runtime.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
@@ -2708,18 +2700,18 @@
   },
   "sample_files/base-mechvent-erv.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent": "ERV, 70%"
+    "ventilation_fans_mechanical": "ERV, 70%"
   },
   "sample_files/base-mechvent-erv-atre-asre.xml": {
     "parent_hpxml": "sample_files/base-mechvent-erv.xml"
   },
   "sample_files/base-mechvent-exhaust.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent": "Exhaust Only"
+    "ventilation_fans_mechanical": "Exhaust Only"
   },
   "sample_files/base-mechvent-hrv.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent": "HRV, 70%"
+    "ventilation_fans_mechanical": "HRV, 70%"
   },
   "sample_files/base-mechvent-hrv-asre.xml": {
     "parent_hpxml": "sample_files/base-mechvent-hrv.xml"
@@ -2730,7 +2722,7 @@
   },
   "sample_files/base-mechvent-supply.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "mech_vent": "Supply Only"
+    "ventilation_fans_mechanical": "Supply Only"
   },
   "sample_files/base-mechvent-whole-house-fan.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2802,9 +2794,9 @@
     "ducts_supply_location": null,
     "ducts_return_location": null,
     "ducts_number_of_return_registers": 2,
-    "mech_vent": "Exhaust Only",
-    "kitchen_fans_quantity": null,
-    "bathroom_fans_quantity": null,
+    "ventilation_fans_mechanical": "Exhaust Only",
+    "ventilation_fans_kitchen": "Default",
+    "ventilation_fans_bathroom": "Default",
     "whole_house_fan_present": true,
     "water_heater_location": null,
     "water_heater_tank_volume": null,

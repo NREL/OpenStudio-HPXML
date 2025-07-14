@@ -496,7 +496,6 @@
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan2'/>
-              <Count>2</Count>
               <RatedFlowRate>25.0</RatedFlowRate>
               <HoursInOperation>1.5</HoursInOperation>
               <FanLocation>bath</FanLocation>
@@ -604,7 +603,6 @@
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan15'/>
-              <Count>2</Count>
               <RatedFlowRate>25.0</RatedFlowRate>
               <HoursInOperation>0.5</HoursInOperation>
               <FanLocation>bath</FanLocation>

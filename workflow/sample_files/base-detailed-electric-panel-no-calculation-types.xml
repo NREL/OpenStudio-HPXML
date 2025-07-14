@@ -407,13 +407,11 @@
           <VentilationFans>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan1'/>
-              <Count>1</Count>
               <FanLocation>kitchen</FanLocation>
               <UsedForLocalVentilation>true</UsedForLocalVentilation>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan2'/>
-              <Count>2</Count>
               <FanLocation>bath</FanLocation>
               <UsedForLocalVentilation>true</UsedForLocalVentilation>
             </VentilationFan>

@@ -1003,70 +1003,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('mech_vent', choices[:mech_vent], false)
-    arg.setDisplayName('Mechanical Ventilation')
-    arg.setDescription('The type of mechanical ventilation system.')
-    arg.setDefaultValue(choices[:mech_vent][0])
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ventilation_fans_mechanical', choices[:ventilation_fans_mechanical], false)
+    arg.setDisplayName('Ventilation Fans: Whole-Home Mechanical')
+    arg.setDescription('The type of whole-home mechanical ventilation system.')
+    arg.setDefaultValue(choices[:ventilation_fans_mechanical][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('kitchen_fans_quantity', false)
-    arg.setDisplayName('Kitchen Fans: Quantity')
-    arg.setDescription("The quantity of the kitchen fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('#')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ventilation_fans_kitchen', choices[:ventilation_fans_kitchen], false)
+    arg.setDisplayName('Ventilation Fans: Kitchen')
+    arg.setDescription('The type of kitchen ventilation fans.')
+    arg.setDefaultValue(choices[:ventilation_fans_kitchen][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fans_flow_rate', false)
-    arg.setDisplayName('Kitchen Fans: Flow Rate')
-    arg.setDescription("The flow rate of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('CFM')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fans_hours_in_operation', false)
-    arg.setDisplayName('Kitchen Fans: Hours In Operation')
-    arg.setDescription("The hours in operation of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('hrs/day')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fans_power', false)
-    arg.setDisplayName('Kitchen Fans: Fan Power')
-    arg.setDescription("The fan power of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('kitchen_fans_start_hour', false)
-    arg.setDisplayName('Kitchen Fans: Start Hour')
-    arg.setDescription("The start hour of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('hr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('bathroom_fans_quantity', false)
-    arg.setDisplayName('Bathroom Fans: Quantity')
-    arg.setDescription("The quantity of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('#')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_flow_rate', false)
-    arg.setDisplayName('Bathroom Fans: Flow Rate')
-    arg.setDescription("The flow rate of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('CFM')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_hours_in_operation', false)
-    arg.setDisplayName('Bathroom Fans: Hours In Operation')
-    arg.setDescription("The hours in operation of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('hrs/day')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_power', false)
-    arg.setDisplayName('Bathroom Fans: Fan Power')
-    arg.setDescription("The fan power of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('bathroom_fans_start_hour', false)
-    arg.setDisplayName('Bathroom Fans: Start Hour')
-    arg.setDescription("The start hour of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
-    arg.setUnits('hr')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ventilation_fans_bathroom', choices[:ventilation_fans_bathroom], false)
+    arg.setDisplayName('Ventilation Fans: Bathroom')
+    arg.setDescription('The type of bathroom ventilation fans.')
+    arg.setDefaultValue(choices[:ventilation_fans_bathroom][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('whole_house_fan_present', true)
@@ -2216,8 +2168,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label Energy Use not provided. If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('ceiling_fan_quantity', false)
-    arg.setDisplayName('Ceiling Fan: Quantity')
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('ceiling_fan_count', false)
+    arg.setDisplayName('Ceiling Fan: Count')
     arg.setUnits('#')
     arg.setDescription("Total number of ceiling fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
     args << arg
@@ -2225,7 +2177,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_cooling_setpoint_temp_offset', false)
     arg.setDisplayName('Ceiling Fan: Cooling Setpoint Temperature Offset')
     arg.setUnits('F')
-    arg.setDescription("The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan quantity is greater than zero. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
+    arg.setDescription("The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan count is greater than zero. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_television', choices[:misc_television], true)
@@ -5307,16 +5259,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_ventilation_fans(hpxml_bldg, args)
-    if not args[:mech_vent_fan_type].nil?
+    if not args[:ventilation_fans_mechanical_fan_type].nil?
 
       distribution_system_idref = nil
 
-      case args[:mech_vent_fan_type]
+      case args[:ventilation_fans_mechanical_fan_type]
       when HPXML::MechVentTypeERV
-        total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency]
-        sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
+        total_recovery_efficiency = args[:ventilation_fans_mechanical_total_recovery_efficiency]
+        sensible_recovery_efficiency = args[:ventilation_fans_mechanical_sensible_recovery_efficiency]
       when HPXML::MechVentTypeHRV
-        sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
+        sensible_recovery_efficiency = args[:ventilation_fans_mechanical_sensible_recovery_efficiency]
       when HPXML::MechVentTypeCFIS
         hpxml_bldg.hvac_distributions.each do |hvac_distribution|
           next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -5344,37 +5296,37 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
 
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                      fan_type: args[:mech_vent_fan_type],
+                                      fan_type: args[:ventilation_fans_mechanical_fan_type],
                                       cfis_addtl_runtime_operating_mode: cfis_addtl_runtime_operating_mode,
-                                      rated_flow_rate: args[:mech_vent_flow_rate],
-                                      hours_in_operation: args[:mech_vent_hours_in_operation],
+                                      rated_flow_rate: args[:ventilation_fans_mechanical_flow_rate],
+                                      hours_in_operation: args[:ventilation_fans_mechanical_hours_in_operation],
                                       used_for_whole_building_ventilation: true,
                                       total_recovery_efficiency: total_recovery_efficiency,
                                       sensible_recovery_efficiency: sensible_recovery_efficiency,
-                                      fan_power: args[:mech_vent_fan_power],
+                                      fan_power: args[:ventilation_fans_mechanical_fan_power],
                                       distribution_system_idref: distribution_system_idref)
     end
 
-    if args[:kitchen_fans_quantity].nil? || (args[:kitchen_fans_quantity] > 0)
+    if args[:ventilation_fans_kitchen_count].nil? || (args[:ventilation_fans_kitchen_count] > 0)
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                      rated_flow_rate: args[:kitchen_fans_flow_rate],
+                                      rated_flow_rate: args[:ventilation_fans_kitchen_flow_rate],
                                       used_for_local_ventilation: true,
-                                      hours_in_operation: args[:kitchen_fans_hours_in_operation],
+                                      hours_in_operation: args[:ventilation_fans_kitchen_hours_in_operation],
                                       fan_location: HPXML::LocationKitchen,
-                                      fan_power: args[:kitchen_fans_power],
-                                      start_hour: args[:kitchen_fans_start_hour],
-                                      count: args[:kitchen_fans_quantity])
+                                      fan_power: args[:ventilation_fans_kitchen_fan_power],
+                                      start_hour: args[:ventilation_fans_kitchen_start_hour],
+                                      count: args[:ventilation_fans_kitchen_count])
     end
 
-    if args[:bathroom_fans_quantity].nil? || (args[:bathroom_fans_quantity] > 0)
+    if args[:ventilation_fans_bathroom_count].nil? || (args[:ventilation_fans_bathroom_count] > 0)
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                      rated_flow_rate: args[:bathroom_fans_flow_rate],
+                                      rated_flow_rate: args[:ventilation_fans_bathroom_flow_rate],
                                       used_for_local_ventilation: true,
-                                      hours_in_operation: args[:bathroom_fans_hours_in_operation],
+                                      hours_in_operation: args[:ventilation_fans_bathroom_hours_in_operation],
                                       fan_location: HPXML::LocationBath,
-                                      fan_power: args[:bathroom_fans_power],
-                                      start_hour: args[:bathroom_fans_start_hour],
-                                      count: args[:bathroom_fans_quantity])
+                                      fan_power: args[:ventilation_fans_bathroom_fan_power],
+                                      start_hour: args[:ventilation_fans_bathroom_start_hour],
+                                      count: args[:ventilation_fans_bathroom_count])
     end
 
     if args[:whole_house_fan_present]
@@ -6193,7 +6145,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.ceiling_fans.add(id: "CeilingFan#{hpxml_bldg.ceiling_fans.size + 1}",
                                 efficiency: args[:ceiling_fan_efficiency],
                                 label_energy_use: args[:ceiling_fan_label_energy_use],
-                                count: args[:ceiling_fan_quantity])
+                                count: args[:ceiling_fan_count])
   end
 
   # Sets the HPXML miscellaneous television plug loads properties.

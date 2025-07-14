@@ -506,9 +506,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_heating_system_2'] = 'None'
       args['heating_system_2_fuel'] = HPXML::FuelTypeElectricity
       args['heating_system_2_fraction_heat_load_served'] = 0.25
-      args['mech_vent'] = 'None'
-      args['kitchen_fans_quantity'] = 0
-      args['bathroom_fans_quantity'] = 0
+      args['ventilation_fans_mechanical'] = 'None'
+      args['ventilation_fans_kitchen'] = 'None'
+      args['ventilation_fans_bathroom'] = 'None'
       args['whole_house_fan_present'] = false
       args['water_heater_type'] = HPXML::WaterHeaterTypeStorage
       args['water_heater_fuel_type'] = HPXML::FuelTypeElectricity
