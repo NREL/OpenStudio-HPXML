@@ -2833,7 +2833,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param existing_hpxml_path [String] Path to the existing HPXML file
   # @return [Oga::XML::Element] Root XML element of the updated HPXML document
   def create(runner, model, args, hpxml_path, existing_hpxml_path)
-    weather = get_weather_if_needed(args)
+    weather = get_weather_if_needed(runner, args)
+    return false if !weather.nil? && !weather
 
     success = create_geometry_envelope(runner, model, args)
     return false if not success
@@ -2936,9 +2937,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
   # Returns the WeatherFile object if we determine we need it for subsequent processing.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param args [Hash] Map of :argument_name => value
   # @return [WeatherFile] Weather object containing EPW information
-  def get_weather_if_needed(args)
+  def get_weather_if_needed(runner, args)
     if (args[:hvac_control_heating_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:hvac_control_cooling_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:solar_thermal_system_type] != Constants::None && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
