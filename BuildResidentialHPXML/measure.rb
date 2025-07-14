@@ -4356,6 +4356,7 @@ module HPXMLFile
 
   # Returns the WeatherFile object if we determine we need it for subsequent processing.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param args [Hash] Map of :argument_name => value
   # @return [WeatherFile] Weather object containing EPW information
   def self.get_weather_if_needed(runner, args)
