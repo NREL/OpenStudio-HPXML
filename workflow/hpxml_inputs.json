@@ -61,8 +61,7 @@
     "window_fraction_operable": 0,
     "window_ufactor": 1.039,
     "window_shgc": 0.67,
-    "window_interior_shading_winter": 1,
-    "window_interior_shading_summer": 1,
+    "window_interior_shading_type": "none",
     "overhangs_front_depth": 0,
     "overhangs_front_distance_to_top_of_window": 0,
     "overhangs_front_distance_to_bottom_of_window": 0,
@@ -506,8 +505,7 @@
     "door_rvalue": 2.86,
     "window_shgc": 0.4,
     "window_ufactor": 0.35,
-    "window_interior_shading_winter": null,
-    "window_interior_shading_summer": null,
+    "window_interior_shading_type": null,
     "heating_system_type": "Furnace",
     "heating_system_fuel": "natural gas",
     "heating_system_heating_efficiency": 0.78,
@@ -666,8 +664,7 @@
     "window_fraction_operable": 0.67,
     "window_ufactor": 0.33,
     "window_shgc": 0.45,
-    "window_interior_shading_winter": 0.85,
-    "window_interior_shading_summer": 0.7,
+    "window_interior_shading_type": "light curtains",
     "overhangs_front_depth": 0,
     "overhangs_front_distance_to_top_of_window": 0,
     "overhangs_front_distance_to_bottom_of_window": 0,
@@ -1865,11 +1862,11 @@
     "window_interior_shading_winter": null,
     "window_interior_shading_summer": null
   },
-  "sample_files/base-enclosure-windows-interior-shading-curtains.xml": {
+  "sample_files/base-enclosure-windows-interior-shading-coefficients.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "window_interior_shading_type": "medium curtains",
-    "window_interior_shading_winter": null,
-    "window_interior_shading_summer": null
+    "window_interior_shading_type": null,
+    "window_interior_shading_winter": 0.8,
+    "window_interior_shading_summer": 0.7
   },
   "sample_files/base-enclosure-windows-natural-ventilation-availability.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1886,7 +1883,10 @@
     "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-enclosure-windows-shading-factors.xml": {
-    "parent_hpxml": "sample_files/base.xml"
+    "parent_hpxml": "sample_files/base.xml",
+    "window_interior_shading_type": null,
+    "window_interior_shading_winter": 0.85,
+    "window_interior_shading_summer": 0.7
   },
   "sample_files/base-enclosure-windows-shading-seasons.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2381,6 +2381,7 @@
   },
   "sample_files/base-hvac-central-ac-only-1-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
+    "cooling_system_cooling_capacity": null,
     "hvac_perf_data_capacity_type": "Absolute capacities",
     "hvac_perf_data_cooling_outdoor_temperatures": "95.0, 82.0",
     "hvac_perf_data_cooling_nom_speed_capacities": "24000, 26000",
@@ -3515,8 +3516,7 @@
     "roof_color": "light",
     "wall_siding_type": null,
     "window_fraction_operable": null,
-    "window_interior_shading_winter": null,
-    "window_interior_shading_summer": null,
+    "window_interior_shading_type": null,
     "hvac_control_heating_weekday_setpoint": null,
     "hvac_control_heating_weekend_setpoint": null,
     "hvac_control_cooling_weekday_setpoint": null,
