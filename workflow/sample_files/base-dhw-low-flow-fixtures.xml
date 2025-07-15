@@ -415,9 +415,7 @@
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
             <SystemType>
-              <Standard>
-                <PipingLength>50.0</PipingLength>
-              </Standard>
+              <Standard/>
             </SystemType>
             <PipeInsulation>
               <PipeRValue>0.0</PipeRValue>

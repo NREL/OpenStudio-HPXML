@@ -521,6 +521,7 @@
     "water_heater_efficiency": 0.56,
     "water_heater_recovery_efficiency": 0.78,
     "water_heater_location": "conditioned space",
+    "hot_water_distribution_pipe_r": 0,
     "clothes_washer_present": true,
     "clothes_dryer_present": true,
     "dishwasher_present": true,
@@ -750,10 +751,9 @@
     "water_heater_setpoint_temperature": 125,
     "water_heater_num_bedrooms_served": 3,
     "hot_water_distribution_system_type": "Standard",
-    "hot_water_distribution_standard_piping_length": 50,
     "hot_water_distribution_pipe_r": 0,
     "dwhr_facilities_connected": "none",
-    "water_fixtures_shower_low_flow": true,
+    "water_fixtures_shower_low_flow": false,
     "water_fixtures_sink_low_flow": false,
     "solar_thermal_system_type": "none",
     "solar_thermal_collector_area": 0,
@@ -1437,6 +1437,7 @@
   },
   "sample_files/base-dhw-low-flow-fixtures.xml": {
     "parent_hpxml": "sample_files/base.xml",
+    "water_fixtures_shower_low_flow": true,
     "water_fixtures_sink_low_flow": true
   },
   "sample_files/base-dhw-multiple.xml": {
@@ -1464,17 +1465,17 @@
     "parent_hpxml": "sample_files/base.xml",
     "hot_water_distribution_system_type": "Recirculation",
     "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_piping_length": 50,
-    "hot_water_distribution_recirc_branch_piping_length": 50,
-    "hot_water_distribution_recirc_pump_power": 50
+    "hot_water_distribution_pipe_r": 3
   },
   "sample_files/base-dhw-recirc-temperature.xml": {
     "parent_hpxml": "sample_files/base-dhw-recirc-nocontrol.xml",
-    "hot_water_distribution_recirc_control_type": "temperature"
+    "hot_water_distribution_recirc_control_type": "temperature",
+    "hot_water_distribution_pipe_r": 3
   },
   "sample_files/base-dhw-recirc-timer.xml": {
     "parent_hpxml": "sample_files/base-dhw-recirc-nocontrol.xml",
-    "hot_water_distribution_recirc_control_type": "timer"
+    "hot_water_distribution_recirc_control_type": "timer",
+    "hot_water_distribution_pipe_r": 3
   },
   "sample_files/base-dhw-solar-direct-evacuated-tube.xml": {
     "parent_hpxml": "sample_files/base-dhw-solar-indirect-flat-plate.xml",
@@ -1675,8 +1676,8 @@
     "dishwasher_present": false,
     "ducts_supply_leakage_to_outside_value": 36.84,
     "ducts_return_leakage_to_outside_value": 12.28,
-    "kitchen_fans_quantity": 1,
-    "bathroom_fans_quantity": 2,
+    "kitchen_fans_quantity": null,
+    "bathroom_fans_quantity": null,
     "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
     "electric_panel_baseline_peak_power": 4500,
     "electric_panel_service_voltage": "240",
@@ -3331,12 +3332,12 @@
   },
   "sample_files/base-mechvent-bath-kitchen-fans.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "kitchen_fans_quantity": 1,
+    "kitchen_fans_quantity": null,
     "kitchen_fans_flow_rate": 100,
     "kitchen_fans_hours_in_operation": 1.5,
     "kitchen_fans_power": 30,
     "kitchen_fans_start_hour": 18,
-    "bathroom_fans_quantity": 2,
+    "bathroom_fans_quantity": null,
     "bathroom_fans_flow_rate": 50,
     "bathroom_fans_hours_in_operation": 1.5,
     "bathroom_fans_power": 15,
@@ -3868,15 +3869,13 @@
   },
   "sample_files/base-residents-5-5.xml": {
     "parent_hpxml": "sample_files/base-misc-defaults.xml",
-    "geometry_unit_num_occupants": 5.5
+    "geometry_unit_num_occupants": 5.5,
+    "hot_water_distribution_pipe_r": 0
   },
   "sample_files/base-schedules-simple.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "hot_water_distribution_system_type": "Recirculation",
     "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_piping_length": 50,
-    "hot_water_distribution_recirc_branch_piping_length": 50,
-    "hot_water_distribution_recirc_pump_power": 50,
     "vehicle_type": "BatteryElectricVehicle",
     "ev_charger_present": true,
     "misc_plug_loads_vehicle_present": false
@@ -3887,20 +3886,14 @@
     "schedules_unavailable_period_dates": "Dec 1 - Jan 31",
     "schedules_unavailable_period_window_natvent_availabilities": "always unavailable",
     "hot_water_distribution_system_type": "Recirculation",
-    "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_piping_length": 50,
-    "hot_water_distribution_recirc_branch_piping_length": 50,
-    "hot_water_distribution_recirc_pump_power": 50
+    "hot_water_distribution_recirc_control_type": "no control"
   },
   "sample_files/base-schedules-simple-power-outage.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "schedules_unavailable_period_types": "Power Outage",
     "schedules_unavailable_period_dates": "Jul 1 5 - Jul 31 14",
     "hot_water_distribution_system_type": "Recirculation",
-    "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_piping_length": 50,
-    "hot_water_distribution_recirc_branch_piping_length": 50,
-    "hot_water_distribution_recirc_pump_power": 50
+    "hot_water_distribution_recirc_control_type": "no control"
   },
   "sample_files/base-schedules-simple-no-space-heating.xml": {
     "parent_hpxml": "sample_files/base.xml",

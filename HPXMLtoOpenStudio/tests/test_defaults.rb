@@ -3658,6 +3658,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test inputs not overridden by defaults -- standard
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
     hpxml_bldg.hot_water_distributions[0].pipe_r_value = 2.5
+    hpxml_bldg.hot_water_distributions[0].standard_piping_length = 50.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_standard_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 50.0, 2.5)
@@ -3666,6 +3667,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base-dhw-recirc-demand.xml')
     hpxml_bldg.hot_water_distributions[0].recirculation_pump_power = 65.0
     hpxml_bldg.hot_water_distributions[0].pipe_r_value = 2.5
+    hpxml_bldg.hot_water_distributions[0].recirculation_piping_loop_length = 50.0
+    hpxml_bldg.hot_water_distributions[0].recirculation_branch_piping_length = 50.0
     hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = ConstantDaySchedule
     hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = ConstantDaySchedule
     hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = ConstantMonthSchedule
@@ -5110,9 +5113,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    default_hpxml = HPXML.new(hpxml_path: File.join(@tmp_output_path, 'in.xml'))
+    hpxml = HPXML.new(hpxml_path: File.join(@tmp_output_path, 'in.xml'))
 
-    return default_hpxml, default_hpxml.buildings[0]
+    File.delete(File.join(@tmp_output_path, 'in.xml'))
+
+    return hpxml, hpxml.buildings[0]
   end
 
   def _test_default_header_values(hpxml, tstep, sim_begin_month, sim_begin_day, sim_end_month, sim_end_day, sim_calendar_year, temperature_capacitance_multiplier,
@@ -6277,8 +6282,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_recirc_distribution_values(hot_water_distribution, piping_length, branch_piping_length, pump_power, pipe_r_value, weekday_sch, weekend_sch, monthly_mults)
-    assert_in_epsilon(piping_length, hot_water_distribution.recirculation_piping_loop_length, 0.01)
-    assert_in_epsilon(branch_piping_length, hot_water_distribution.recirculation_branch_piping_length, 0.01)
+    assert_equal(piping_length, hot_water_distribution.recirculation_piping_loop_length)
+    assert_equal(branch_piping_length, hot_water_distribution.recirculation_branch_piping_length)
     assert_in_epsilon(pump_power, hot_water_distribution.recirculation_pump_power, 0.01)
     assert_equal(pipe_r_value, hot_water_distribution.pipe_r_value)
     if weekday_sch.nil?

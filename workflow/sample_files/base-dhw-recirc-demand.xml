@@ -417,9 +417,6 @@
             <SystemType>
               <Recirculation>
                 <ControlType>presence sensor demand control</ControlType>
-                <RecirculationPipingLoopLength>50.0</RecirculationPipingLoopLength>
-                <BranchPipingLength>50.0</BranchPipingLength>
-                <PumpPower>50.0</PumpPower>
               </Recirculation>
             </SystemType>
             <PipeInsulation>
@@ -429,7 +426,7 @@
           <WaterFixture>
             <SystemIdentifier id='WaterFixture1'/>
             <WaterFixtureType>shower head</WaterFixtureType>
-            <LowFlow>true</LowFlow>
+            <LowFlow>false</LowFlow>
           </WaterFixture>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture2'/>

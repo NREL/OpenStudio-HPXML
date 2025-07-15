@@ -399,9 +399,7 @@
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
             <SystemType>
-              <Standard>
-                <PipingLength>50.0</PipingLength>
-              </Standard>
+              <Standard/>
             </SystemType>
             <PipeInsulation>
               <PipeRValue>0.0</PipeRValue>
@@ -410,7 +408,7 @@
           <WaterFixture>
             <SystemIdentifier id='WaterFixture1'/>
             <WaterFixtureType>shower head</WaterFixtureType>
-            <LowFlow>true</LowFlow>
+            <LowFlow>false</LowFlow>
           </WaterFixture>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture2'/>

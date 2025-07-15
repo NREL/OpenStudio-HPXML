@@ -484,7 +484,6 @@
           <VentilationFans>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan1'/>
-              <Count>1</Count>
               <RatedFlowRate>50.0</RatedFlowRate>
               <HoursInOperation>1.5</HoursInOperation>
               <FanLocation>kitchen</FanLocation>
@@ -496,7 +495,6 @@
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan2'/>
-              <Count>2</Count>
               <RatedFlowRate>25.0</RatedFlowRate>
               <HoursInOperation>1.5</HoursInOperation>
               <FanLocation>bath</FanLocation>
@@ -604,7 +602,6 @@
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan15'/>
-              <Count>2</Count>
               <RatedFlowRate>25.0</RatedFlowRate>
               <HoursInOperation>0.5</HoursInOperation>
               <FanLocation>bath</FanLocation>
@@ -616,7 +613,6 @@
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan16'/>
-              <Count>1</Count>
               <RatedFlowRate>50.0</RatedFlowRate>
               <HoursInOperation>0.5</HoursInOperation>
               <FanLocation>kitchen</FanLocation>
@@ -685,9 +681,7 @@
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
             <SystemType>
-              <Standard>
-                <PipingLength>50.0</PipingLength>
-              </Standard>
+              <Standard/>
             </SystemType>
             <PipeInsulation>
               <PipeRValue>0.0</PipeRValue>
@@ -696,7 +690,7 @@
           <WaterFixture>
             <SystemIdentifier id='WaterFixture1'/>
             <WaterFixtureType>shower head</WaterFixtureType>
-            <LowFlow>true</LowFlow>
+            <LowFlow>false</LowFlow>
           </WaterFixture>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture2'/>
