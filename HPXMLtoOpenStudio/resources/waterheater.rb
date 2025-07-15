@@ -1883,10 +1883,7 @@ module Waterheater
         f_low = 0.2 # Assumed fraction of water volume below lower element, assumed to be unheated
         f_high = 1.0 - f_low # Fraction of water volume above lower element
         if not water_heating_system.energy_factor.nil?
-          #ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
-          ua_old = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
           ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((24.0 * (t - t_env)) * (f_high + f_low * ((t_in - t_env) / (t - t_env)))) # Btu/hr-F
-          puts("ua_old = #{ua_old} Btu/hr-F, ua = #{ua} Btu/hr-F")
         elsif not water_heating_system.uniform_energy_factor.nil?
           ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (f_high + f_low * ((t_in - t_env) / (t - t_env)))) # Btu/hr-F
         end
