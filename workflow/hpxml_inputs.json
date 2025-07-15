@@ -416,7 +416,7 @@
   },
   "tests/HERS_Hot_Water/L100AD-HW-07.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-02.xml",
-    "dhw_drain_water_heat_recovery": "55% Efficient, Preheats Hot and Cold, All Showers"
+    "dhw_drain_water_heat_recovery": "Detailed Example: 54% Efficient, Preheats Hot and Cold, All Showers"
   },
   "tests/HERS_Hot_Water/L100AM-HW-01.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
@@ -1096,7 +1096,7 @@
   },
   "sample_files/base-dhw-dwhr.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "dhw_drain_water_heat_recovery": "Detailed Example: 54% Efficient, Preheats Hot and Cold, All Showers"
+    "dhw_drain_water_heat_recovery": "55% Efficient, Preheats Hot and Cold, All Showers"
   },
   "sample_files/base-dhw-indirect.xml": {
     "parent_hpxml": "sample_files/base-hvac-boiler-gas-only.xml",

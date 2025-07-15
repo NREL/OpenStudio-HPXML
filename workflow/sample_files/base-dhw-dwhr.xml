@@ -423,7 +423,7 @@
             <DrainWaterHeatRecovery>
               <FacilitiesConnected>all</FacilitiesConnected>
               <EqualFlow>true</EqualFlow>
-              <Efficiency>0.54</Efficiency>
+              <Efficiency>0.55</Efficiency>
             </DrainWaterHeatRecovery>
           </HotWaterDistribution>
           <WaterFixture>
