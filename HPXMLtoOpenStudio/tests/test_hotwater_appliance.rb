@@ -399,7 +399,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     assert_in_delta(dist_gpd, get_wu_gpd(model, Constants::ObjectTypeDistributionWaste), 0.01)
 
     # mains temperature
-    avg_tmains = 70.14
+    avg_tmains = 70.37
     assert_in_delta(avg_tmains, UnitConversions.convert(model.getSiteWaterMainsTemperature.temperatureSchedule.get.to_ScheduleInterval.get.timeSeries.averageValue, 'C', 'F'), 0.01)
   end
 
