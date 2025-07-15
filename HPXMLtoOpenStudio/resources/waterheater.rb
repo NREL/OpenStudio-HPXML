@@ -1823,12 +1823,12 @@ module Waterheater
 
   # Disaggregates the water heater's (uniform) energy factor into tank losses and burner efficiency.
   #
-  # If using EF:
-  #   Calculations based on the Energy Factor and Recovery Efficiency of the tank
-  #   Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
   # IF using UEF:
   #   Calculations based on the Uniform Energy Factor, First Hour Rating, and Recovery Efficiency of the tank
   #   Source: Maguire and Roberts 2020 - https://www.nrel.gov/docs/fy21osti/71633.pdf
+  # If using EF:
+  #   Calculations based on the Energy Factor and Recovery Efficiency of the tank
+  #   Using the same approach as in Maguire and Roberts 2020, but with EF specific load and temperatures
   #
   # @param act_vol [Double] Actual tank volume (gal)
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
