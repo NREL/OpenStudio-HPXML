@@ -17,8 +17,8 @@ module Geometry
   # @param geometry_foundation_type_type [String] foundation type of the building
   # @param geometry_foundation_type_height [Double] height of the foundation (ft)
   # @param geometry_foundation_type_rim_joist_height [Double] height of the rim joists (ft)
-  # @param geometry_attic_type [String] attic type of the building
-  # @param geometry_roof_type [String] roof type of the building
+  # @param geometry_attic_type_attic_type [String] attic type of the building
+  # @param geometry_attic_type_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
   # @return [Boolean] true if model is successfully updated with a single-family detached unit
   def self.create_single_family_detached(runner, model,
@@ -33,8 +33,8 @@ module Geometry
                                          geometry_foundation_type_type:,
                                          geometry_foundation_type_height:,
                                          geometry_foundation_type_rim_joist_height:,
-                                         geometry_attic_type:,
-                                         geometry_roof_type:,
+                                         geometry_attic_type_attic_type:,
+                                         geometry_attic_type_roof_type:,
                                          geometry_roof_pitch:,
                                          **)
     cfa = geometry_unit_cfa
@@ -48,11 +48,11 @@ module Geometry
     foundation_type = geometry_foundation_type_type
     foundation_height = geometry_foundation_type_height
     rim_joist_height = geometry_foundation_type_rim_joist_height
-    attic_type = geometry_attic_type
+    attic_type = geometry_attic_type_attic_type
     if attic_type == HPXML::AtticTypeConditioned
       num_floors -= 1
     end
-    roof_type = geometry_roof_type
+    roof_type = geometry_attic_type_roof_type
     roof_pitch = geometry_roof_pitch
 
     # Convert to SI
@@ -661,8 +661,8 @@ module Geometry
   # @param geometry_foundation_type_type [String] foundation type of the building
   # @param geometry_foundation_type_height [Double] height of the foundation (ft)
   # @param geometry_foundation_type_rim_joist_height [Double] height of the rim joists (ft)
-  # @param geometry_attic_type [String] attic type of the building
-  # @param geometry_roof_type [String] roof type of the building
+  # @param geometry_attic_type_attic_type [String] attic type of the building
+  # @param geometry_attic_type_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
   # @param geometry_attached_walls_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
   # @param geometry_attached_walls_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
@@ -677,8 +677,8 @@ module Geometry
                                          geometry_foundation_type_type:,
                                          geometry_foundation_type_height:,
                                          geometry_foundation_type_rim_joist_height:,
-                                         geometry_attic_type:,
-                                         geometry_roof_type:,
+                                         geometry_attic_type_attic_type:,
+                                         geometry_attic_type_roof_type:,
                                          geometry_roof_pitch:,
                                          geometry_attached_walls_left_wall_is_adiabatic:,
                                          geometry_attached_walls_right_wall_is_adiabatic:,
@@ -693,11 +693,11 @@ module Geometry
     foundation_type = geometry_foundation_type_type
     foundation_height = geometry_foundation_type_height
     rim_joist_height = geometry_foundation_type_rim_joist_height
-    attic_type = geometry_attic_type
+    attic_type = geometry_attic_type_attic_type
     if attic_type == HPXML::AtticTypeConditioned
       num_floors -= 1
     end
-    roof_type = geometry_roof_type
+    roof_type = geometry_attic_type_roof_type
     roof_pitch = geometry_roof_pitch
     adiabatic_left_wall = geometry_attached_walls_left_wall_is_adiabatic
     adiabatic_right_wall = geometry_attached_walls_right_wall_is_adiabatic
@@ -963,8 +963,8 @@ module Geometry
   # @param geometry_foundation_type_type [String] foundation type of the building
   # @param geometry_foundation_type_height [Double] height of the foundation (ft)
   # @param geometry_foundation_type_rim_joist_height [Double] height of the rim joists (ft)
-  # @param geometry_attic_type [String] attic type of the building
-  # @param geometry_roof_type [String] roof type of the building
+  # @param geometry_attic_type_attic_type [String] attic type of the building
+  # @param geometry_attic_type_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
   # @param geometry_attached_walls_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
   # @param geometry_attached_walls_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
@@ -979,8 +979,8 @@ module Geometry
                             geometry_foundation_type_type:,
                             geometry_foundation_type_height:,
                             geometry_foundation_type_rim_joist_height:,
-                            geometry_attic_type:,
-                            geometry_roof_type:,
+                            geometry_attic_type_attic_type:,
+                            geometry_attic_type_roof_type:,
                             geometry_roof_pitch:,
                             geometry_attached_walls_left_wall_is_adiabatic:,
                             geometry_attached_walls_right_wall_is_adiabatic:,
@@ -995,8 +995,8 @@ module Geometry
     foundation_type = geometry_foundation_type_type
     foundation_height = geometry_foundation_type_height
     rim_joist_height = geometry_foundation_type_rim_joist_height
-    attic_type = geometry_attic_type
-    roof_type = geometry_roof_type
+    attic_type = geometry_attic_type_attic_type
+    roof_type = geometry_attic_type_roof_type
     roof_pitch = geometry_roof_pitch
     adiabatic_left_wall = geometry_attached_walls_left_wall_is_adiabatic
     adiabatic_right_wall = geometry_attached_walls_right_wall_is_adiabatic

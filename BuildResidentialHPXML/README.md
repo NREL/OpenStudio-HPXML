@@ -614,27 +614,14 @@ The foundation type of the building. Garages are assumed to be over slab-on-grad
 
 **Geometry: Attic Type**
 
-The attic type of the building. Attic type ConditionedAttic is not allowed for apartment units.
+The attic/roof type of the building.
 
 - **Name:** ``geometry_attic_type``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `FlatRoof`, `VentedAttic`, `UnventedAttic`, `ConditionedAttic`, `BelowApartment`
-
-<br/>
-
-**Geometry: Roof Type**
-
-The roof type of the building. Ignored if the building has a flat roof.
-
-- **Name:** ``geometry_roof_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `gable`, `hip`
+- **Choices:** `Flat Roof`, `Attic, Vented, Gable`, `Attic, Vented, Hip`, `Attic, Unvented, Gable`, `Attic, Unvented, Hip`, `Attic, Conditioned, Gable`, `Attic, Conditioned, Hip`, `Below Apartment`
 
 <br/>
 

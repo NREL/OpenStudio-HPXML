@@ -421,9 +421,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_protrusion'] = 0.0
       args['geometry_garage_position'] = Constants::PositionRight
       args['geometry_foundation_type'] = 'Basement, Conditioned'
-      args['geometry_roof_type'] = Constants::RoofTypeGable
       args['geometry_roof_pitch'] = '6:12'
-      args['geometry_attic_type'] = HPXML::AtticTypeUnvented
+      args['geometry_attic_type'] = 'Attic, Unvented, Gable'
       args['geometry_eaves_depth'] = 0
       args['geometry_unit_num_bedrooms'] = 3
       args['geometry_unit_num_bathrooms'] = 2
@@ -575,7 +574,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'base-mf.xml'
       args['geometry_unit_type'] = HPXML::ResidentialTypeApartment
       args['geometry_unit_cfa'] = 900.0
-      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+      args['geometry_attic_type'] = 'Below Apartment'
       args['geometry_foundation_type'] = 'Above Apartment'
       args['geometry_attached_walls'] = '1 Side: Right'
       args['geometry_building_num_units'] = 6
@@ -704,7 +703,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['window_area_or_wwr_front'] = 12.0
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
-      args['geometry_attic_type'] = HPXML::AtticTypeConditioned
+      args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
       args['floor_over_garage_assembly_r'] = 39.3
       args['ducts_supply_location'] = HPXML::LocationGarage
       args['ducts_return_location'] = HPXML::LocationGarage
@@ -712,12 +711,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = 'Slab-on-Grade'
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
-      args['geometry_attic_type'] = HPXML::AtticTypeConditioned
+      args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
       args['geometry_eaves_depth'] = 2
       args['ducts_supply_location'] = HPXML::LocationUnderSlab
       args['ducts_return_location'] = HPXML::LocationUnderSlab
     when 'extra-enclosure-atticroof-conditioned-eaves-hip.xml'
-      args['geometry_roof_type'] = Constants::RoofTypeHip
+      args['geometry_attic_type'] = 'Attic, Conditioned, Hip'
     when 'extra-gas-pool-heater-with-zero-kwh.xml'
       args['pool_present'] = true
       args['pool_heater_type'] = HPXML::HeaterTypeGas
@@ -786,18 +785,18 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['schedules_unavailable_period_types'] = 'Power Outage, Power Outage'
       args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'
     when 'extra-sfa-atticroof-flat.xml'
-      args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
+      args['geometry_attic_type'] = 'Flat Roof'
       args['hvac_ducts'] = '0 CFM25 per 100ft2, R-4'
       args['ducts_supply_location'] = HPXML::LocationBasementConditioned
       args['ducts_return_location'] = HPXML::LocationBasementConditioned
     when 'extra-sfa-atticroof-conditioned-eaves-gable.xml'
       args['geometry_unit_num_floors_above_grade'] = 2
-      args['geometry_attic_type'] = HPXML::AtticTypeConditioned
+      args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
       args['geometry_eaves_depth'] = 2
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
     when 'extra-sfa-atticroof-conditioned-eaves-hip.xml'
-      args['geometry_roof_type'] = Constants::RoofTypeHip
+      args['geometry_attic_type'] = 'Attic, Conditioned, Hip'
     when 'extra-mf-eaves.xml'
       args['geometry_eaves_depth'] = 2
     when 'extra-sfa-slab.xml'
@@ -830,9 +829,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
          'extra-sfa-unvented-crawlspace-right.xml', 'extra-sfa-unconditioned-basement-right.xml'
       args['geometry_attached_walls'] = '1 Side: Left'
     when 'extra-mf-atticroof-flat.xml'
-      args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
+      args['geometry_attic_type'] = 'Flat Roof'
     when 'extra-mf-atticroof-vented.xml'
-      args['geometry_attic_type'] = HPXML::AtticTypeVented
+      args['geometry_attic_type'] = 'Attic, Vented, Gable'
     when 'extra-mf-slab.xml'
       args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = 'Slab-on-Grade'
@@ -856,11 +855,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-mf-slab-left-bottom.xml', 'extra-mf-vented-crawlspace-left-bottom.xml',
          'extra-mf-unvented-crawlspace-left-bottom.xml'
       args['geometry_attached_walls'] = '1 Side: Right'
-      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+      args['geometry_attic_type'] = 'Below Apartment'
     when 'extra-mf-slab-left-middle.xml', 'extra-mf-vented-crawlspace-left-middle.xml',
          'extra-mf-unvented-crawlspace-left-middle.xml'
       args['geometry_attached_walls'] = '1 Side: Right'
-      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+      args['geometry_attic_type'] = 'Below Apartment'
       args['geometry_foundation_type'] = 'Above Apartment'
     when 'extra-mf-slab-left-top.xml', 'extra-mf-vented-crawlspace-left-top.xml',
          'extra-mf-unvented-crawlspace-left-top.xml'
@@ -869,11 +868,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-mf-slab-middle-bottom.xml', 'extra-mf-vented-crawlspace-middle-bottom.xml',
          'extra-mf-unvented-crawlspace-middle-bottom.xml'
       args['geometry_attached_walls'] = '2 Sides: Left, Right'
-      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+      args['geometry_attic_type'] = 'Below Apartment'
     when 'extra-mf-slab-middle-middle.xml', 'extra-mf-vented-crawlspace-middle-middle.xml',
          'extra-mf-unvented-crawlspace-middle-middle.xml'
       args['geometry_attached_walls'] = '2 Sides: Left, Right'
-      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+      args['geometry_attic_type'] = 'Below Apartment'
       args['geometry_foundation_type'] = 'Above Apartment'
     when 'extra-mf-slab-middle-top.xml', 'extra-mf-vented-crawlspace-middle-top.xml',
          'extra-mf-unvented-crawlspace-middle-top.xml'
@@ -882,11 +881,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-mf-slab-right-bottom.xml', 'extra-mf-vented-crawlspace-right-bottom.xml',
          'extra-mf-unvented-crawlspace-right-bottom.xml'
       args['geometry_attached_walls'] = '1 Side: Left'
-      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+      args['geometry_attic_type'] = 'Below Apartment'
     when 'extra-mf-slab-right-middle.xml', 'extra-mf-vented-crawlspace-right-middle.xml',
          'extra-mf-unvented-crawlspace-right-middle.xml'
       args['geometry_attached_walls'] = '1 Side: Left'
-      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+      args['geometry_attic_type'] = 'Below Apartment'
       args['geometry_foundation_type'] = 'Above Apartment'
     when 'extra-mf-slab-right-top.xml', 'extra-mf-vented-crawlspace-right-top.xml',
          'extra-mf-unvented-crawlspace-right-top.xml'
@@ -953,17 +952,17 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-sfa-above-apartment.xml'
       args['geometry_foundation_type'] = 'Above Apartment'
     when 'error-sfa-below-apartment.xml'
-      args['geometry_attic_type'] = HPXML::AtticTypeBelowApartment
+      args['geometry_attic_type'] = 'Below Apartment'
     when 'error-mf-no-building-num-units.xml'
       args.delete('geometry_building_num_units')
     when 'error-mf-two-stories.xml'
       args['geometry_unit_num_floors_above_grade'] = 2
     when 'error-mf-conditioned-attic.xml'
-      args['geometry_attic_type'] = HPXML::AtticTypeConditioned
+      args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
     when 'error-dhw-indirect-without-boiler.xml'
       args['water_heater_type'] = HPXML::WaterHeaterTypeCombiStorage
     when 'error-conditioned-attic-with-one-floor-above-grade.xml'
-      args['geometry_attic_type'] = HPXML::AtticTypeConditioned
+      args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
       args['ceiling_assembly_r'] = 0.0
     when 'error-sfd-with-shared-system.xml'
       args['hvac_heating_system'] = 'Shared Boiler w/ Baseboard, 92% AFUE'
@@ -999,7 +998,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-invalid-garage-protrusion.xml'
       args['geometry_garage_protrusion'] = 1.5
     when 'error-hip-roof-and-protruding-garage.xml'
-      args['geometry_roof_type'] = Constants::RoofTypeHip
+      args['geometry_attic_type'] = 'Attic, Unvented, Hip'
       args['geometry_garage_width'] = 12
       args['geometry_garage_protrusion'] = 0.5
     when 'error-protruding-garage-under-gable-roof.xml'
@@ -1061,19 +1060,19 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['floor_over_foundation_assembly_r'] = 10
       args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
     when 'warning-vented-attic-with-floor-and-roof-insulation.xml'
-      args['geometry_attic_type'] = HPXML::AtticTypeVented
+      args['geometry_attic_type'] = 'Attic, Vented, Gable'
       args['roof_assembly_r'] = 10
       args['ducts_supply_location'] = HPXML::LocationAtticVented
       args['ducts_return_location'] = HPXML::LocationAtticVented
     when 'warning-unvented-attic-with-floor-and-roof-insulation.xml'
-      args['geometry_attic_type'] = HPXML::AtticTypeUnvented
+      args['geometry_attic_type'] = 'Attic, Unvented, Gable'
       args['roof_assembly_r'] = 10
     when 'warning-conditioned-basement-with-ceiling-insulation.xml'
       args['geometry_foundation_type'] = 'Basement, Conditioned'
       args['floor_over_foundation_assembly_r'] = 10
     when 'warning-conditioned-attic-with-floor-insulation.xml'
       args['geometry_unit_num_floors_above_grade'] = 2
-      args['geometry_attic_type'] = HPXML::AtticTypeConditioned
+      args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
     end
