@@ -14,20 +14,14 @@
     "geometry_garage_protrusion": 0,
     "geometry_garage_position": "Right",
     "geometry_foundation_type": "Ambient",
-    "geometry_foundation_height": 7.25,
-    "geometry_foundation_height_above_grade": 0.667,
-    "geometry_rim_joist_height": 9,
     "geometry_attic_type": "VentedAttic",
     "geometry_roof_type": "gable",
     "geometry_roof_pitch": "4:12",
     "geometry_eaves_depth": 0,
-    "geometry_neighbor_buildings": "None",
     "floor_over_foundation_assembly_r": 14.15,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
-    "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
     "rim_joist_assembly_r": 5.01,
-    "enclosure_slab": "Uninsulated",
     "enclosure_slab_carpet": "0% Carpet",
     "ceiling_assembly_r": 18.45,
     "enclosure_roof_material": "0.6 Solar Absorptance",
@@ -45,7 +39,6 @@
     "window_ufactor": 1.039,
     "window_shgc": 0.67,
     "enclosure_window_interior_shading": "None",
-    "enclosure_overhangs": "None",
     "skylight_area_front": 0,
     "skylight_area_back": 0,
     "skylight_area_left": 0,
@@ -64,7 +57,6 @@
     "heat_pump_fraction_heat_load_served": 0,
     "heat_pump_fraction_cool_load_served": 0,
     "hvac_heat_pump_backup": "None",
-    "hvac_heating_system_2": "None",
     "heating_system_2_fuel": "electricity",
     "heating_system_2_fraction_heat_load_served": 0,
     "hvac_control_heating_weekday_setpoint": 68,
@@ -72,18 +64,12 @@
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
-    "ventilation_fans_mechanical": "None",
-    "ventilation_fans_kitchen": "None",
-    "ventilation_fans_bathroom": "None",
     "whole_house_fan_present": false,
     "water_heater_type": "none",
     "water_heater_fuel_type": "electricity",
     "water_heater_efficiency_type": "EnergyFactor",
     "water_heater_efficiency": 0,
     "water_heater_num_bedrooms_served": 0,
-    "dhw_distribution": "Uninsulated, Standard",
-    "dhw_fixtures": "Standard",
-    "dhw_drain_water_heat_recovery": "None",
     "water_fixtures_usage_multiplier": null,
     "solar_thermal_system_type": "none",
     "solar_thermal_collector_area": 0,
@@ -94,7 +80,6 @@
     "solar_thermal_collector_rated_optical_efficiency": 0,
     "solar_thermal_collector_rated_thermal_losses": 0,
     "solar_thermal_solar_fraction": 0,
-    "battery": "None",
     "lighting": "None",
     "holiday_lighting_present": false,
     "dehumidifier_type": "none",
@@ -115,14 +100,9 @@
     "freezer_present": false,
     "cooking_range_oven_present": false,
     "cooking_range_oven_fuel_type": "electricity",
-    "ceiling_fan_present": false,
     "misc_plug_loads": "Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent",
     "misc_television": "None",
-    "misc_well_pump": "None",
     "misc_plug_loads_vehicle_present": false,
-    "misc_grill": "None",
-    "misc_lighting": "None",
-    "misc_fireplace": "None",
     "pool_present": false,
     "pool_heater_type": "none",
     "permanent_spa_present": false,
@@ -186,7 +166,7 @@
   },
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "geometry_foundation_type": "SlabOnGrade",
+    "geometry_foundation_type": "Slab-on-Grade",
     "enclosure_slab_carpet": "100% Carpet, R-2.08"
   },
   "tests/ASHRAE_Standard_140/L304XC.xml": {
@@ -196,7 +176,7 @@
   "tests/ASHRAE_Standard_140/L322XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_unit_cfa": 3078,
-    "geometry_foundation_type": "ConditionedBasement",
+    "geometry_foundation_type": "Detailed Example: Basement, Conditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists",
     "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
     "enclosure_air_leakage": "0.335 nACH"
   },
@@ -306,7 +286,7 @@
   },
   "tests/HERS_DSE/HVAC3a.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L322XC.xml",
-    "geometry_foundation_type": "UnconditionedBasement",
+    "geometry_foundation_type": "Detailed Example: Basement, Unconditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists",
     "geometry_unit_cfa": 1539,
     "enclosure_air_leakage": "0.67 nACH",
     "floor_over_foundation_assembly_r": 13.85,
@@ -470,21 +450,16 @@
     "geometry_garage_depth": 20,
     "geometry_garage_protrusion": 0,
     "geometry_garage_position": "Right",
-    "geometry_foundation_type": "ConditionedBasement",
-    "geometry_foundation_height": 8,
-    "geometry_foundation_height_above_grade": 1,
-    "geometry_rim_joist_height": 9.25,
+    "geometry_foundation_type": "Basement, Conditioned",
     "geometry_attic_type": "UnventedAttic",
     "geometry_roof_type": "gable",
     "geometry_roof_pitch": "6:12",
     "geometry_eaves_depth": 0,
-    "geometry_neighbor_buildings": "None",
     "floor_over_foundation_assembly_r": 0,
     "floor_over_garage_assembly_r": 0,
     "floor_type": "WoodFrame",
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
     "rim_joist_assembly_r": 23,
-    "enclosure_slab": "Uninsulated",
     "enclosure_slab_carpet":"0% Carpet",
     "ceiling_assembly_r": 39.3,
     "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
@@ -502,7 +477,6 @@
     "window_ufactor": 0.33,
     "window_shgc": 0.45,
     "enclosure_window_interior_shading": "Curtains, Light",
-    "enclosure_overhangs": "None",
     "skylight_area_front": 0,
     "skylight_area_back": 0,
     "skylight_area_left": 0,
@@ -523,7 +497,6 @@
     "heat_pump_fraction_heat_load_served": 0,
     "heat_pump_fraction_cool_load_served": 0,
     "hvac_heat_pump_backup": "None",
-    "hvac_heating_system_2": "None",
     "heating_system_2_fuel": "electricity",
     "heating_system_2_fraction_heat_load_served": 0,
     "hvac_control_heating_weekday_setpoint": 68,
@@ -534,9 +507,6 @@
     "ducts_supply_location": "attic - unvented",
     "ducts_return_location": "attic - unvented",
     "ducts_supply_leakage_fraction": 0.75,
-    "ventilation_fans_mechanical": "None",
-    "ventilation_fans_kitchen": "None",
-    "ventilation_fans_bathroom": "None",
     "whole_house_fan_present": false,
     "water_heater_type": "storage water heater",
     "water_heater_fuel_type": "electricity",
@@ -548,9 +518,6 @@
     "water_heater_jacket_rvalue": 0,
     "water_heater_setpoint_temperature": 125,
     "water_heater_num_bedrooms_served": 3,
-    "dhw_distribution": "Uninsulated, Standard",
-    "dhw_fixtures": "Standard",
-    "dhw_drain_water_heat_recovery": "None",
     "solar_thermal_system_type": "none",
     "solar_thermal_collector_area": 0,
     "solar_thermal_collector_loop_type": "liquid indirect",
@@ -560,7 +527,6 @@
     "solar_thermal_collector_rated_optical_efficiency": 0,
     "solar_thermal_collector_rated_thermal_losses": 0,
     "solar_thermal_solar_fraction": 0,
-    "battery": "None",
     "lighting": "Detailed Example: 40% CFL, 10% LFL, 25% LED",
     "holiday_lighting_present": false,
     "dehumidifier_type": "none",
@@ -604,14 +570,9 @@
     "cooking_range_oven_fuel_type": "electricity",
     "cooking_range_oven_is_induction": false,
     "cooking_range_oven_is_convection": false,
-    "ceiling_fan_present": false,
     "misc_plug_loads": "100%",
     "misc_television": "100%",
-    "misc_well_pump": "None",
     "misc_plug_loads_vehicle_present": false,
-    "misc_grill": "None",
-    "misc_lighting": "None",
-    "misc_fireplace": "None",
     "pool_present": false,
     "pool_heater_type": "none",
     "permanent_spa_present": false,
@@ -862,7 +823,7 @@
     "geometry_unit_cfa": 900,
     "geometry_unit_aspect_ratio": 0.6667,
     "geometry_building_num_units": 6,
-    "geometry_foundation_type": "AboveApartment",
+    "geometry_foundation_type": "Above Apartment",
     "geometry_attic_type": "BelowApartment",
     "geometry_unit_height_above_grade": 10,
     "window_area_or_wwr_front": 0.18,
@@ -901,7 +862,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-housing-unit-basement.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "geometry_foundation_type": "UnconditionedBasement",
+    "geometry_foundation_type": "Basement, Unconditioned",
     "floor_over_foundation_assembly_r": 18.7
   },
   "sample_files/base-bldgtype-mf-unit-infil-compartmentalization-test.xml": {
@@ -1580,9 +1541,7 @@
     "parent_hpxml": "sample_files/base-foundation-ambient.xml",
     "geometry_unit_type": "manufactured home",
     "geometry_unit_aspect_ratio": 4.0,
-    "geometry_foundation_type": "BellyAndWingWithSkirt",
-    "geometry_foundation_height": 2,
-    "geometry_foundation_height_above_grade": 2,
+    "geometry_foundation_type": "Belly and Wing, With Skirt",
     "geometry_roof_pitch": "3:12",
     "window_area_or_wwr_front": 140,
     "window_area_or_wwr_back": 140,
@@ -1594,7 +1553,7 @@
   },
   "sample_files/base-foundation-belly-wing-no-skirt.xml": {
     "parent_hpxml": "sample_files/base-foundation-belly-wing-skirt.xml",
-    "geometry_foundation_type": "BellyAndWingNoSkirt"
+    "geometry_foundation_type": "Belly and Wing, No Skirt"
   },
   "sample_files/base-foundation-complex.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -1614,8 +1573,7 @@
   "sample_files/base-foundation-conditioned-crawlspace.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
-    "geometry_foundation_type": "ConditionedCrawlspace",
-    "geometry_foundation_height": 4,
+    "geometry_foundation_type": "Crawlspace, Conditioned",
     "floor_over_foundation_assembly_r": 18.7,
     "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "crawlspace - conditioned",
@@ -1625,9 +1583,7 @@
   "sample_files/base-foundation-slab.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
-    "geometry_foundation_type": "SlabOnGrade",
-    "geometry_foundation_height": 0,
-    "geometry_foundation_height_above_grade": 0,
+    "geometry_foundation_type": "Slab-on-Grade",
     "enclosure_slab": "Whole Slab, R-5",
     "enclosure_slab_carpet": "100% Carpet, R-2.5",
     "ducts_supply_location": "under slab",
@@ -1643,7 +1599,7 @@
   "sample_files/base-foundation-unconditioned-basement.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
-    "geometry_foundation_type": "UnconditionedBasement",
+    "geometry_foundation_type": "Basement, Unconditioned",
     "floor_over_foundation_assembly_r": 18.7,
     "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
     "rim_joist_assembly_r": 4,
@@ -1658,7 +1614,7 @@
   },
   "sample_files/base-foundation-unconditioned-basement-above-grade.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
-    "geometry_foundation_height_above_grade": 4
+    "geometry_foundation_type": "Basement, Unconditioned, Half Above-Grade"
   },
   "sample_files/base-foundation-unconditioned-basement-assembly-r.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
@@ -1673,8 +1629,7 @@
   "sample_files/base-foundation-unvented-crawlspace.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
-    "geometry_foundation_type": "UnventedCrawlspace",
-    "geometry_foundation_height": 4,
+    "geometry_foundation_type": "Crawlspace, Unvented",
     "floor_over_foundation_assembly_r": 18.7,
     "ducts_supply_location": "crawlspace - unvented",
     "ducts_return_location": "crawlspace - unvented",
@@ -1683,8 +1638,7 @@
   "sample_files/base-foundation-vented-crawlspace.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
-    "geometry_foundation_type": "VentedCrawlspace",
-    "geometry_foundation_height": 4,
+    "geometry_foundation_type": "Crawlspace, Vented",
     "floor_over_foundation_assembly_r": 18.7,
     "ducts_supply_location": "crawlspace - vented",
     "ducts_return_location": "crawlspace - vented",
@@ -1692,15 +1646,14 @@
   },
   "sample_files/base-foundation-vented-crawlspace-above-grade.xml": {
     "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
-    "geometry_foundation_height_above_grade": 4
+    "geometry_foundation_type": "Detailed Example: Crawlspace, Vented, Above-Grade"
   },
   "sample_files/base-foundation-vented-crawlspace-above-grade2.xml": {
-    "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
-    "geometry_foundation_height_above_grade": 4
+    "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml"
   },
   "sample_files/base-foundation-walkout-basement.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "geometry_foundation_height_above_grade": 5
+    "geometry_foundation_type": "Detailed Example: Basement, Conditioned, 5 ft Height"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2522,14 +2475,11 @@
   },
   "sample_files/base-lighting-ceiling-fans.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ceiling_fan_present": true,
-    "ceiling_fan_efficiency": 100,
-    "ceiling_fan_count": 4,
-    "ceiling_fan_cooling_setpoint_temp_offset": 0.5
+    "ceiling_fans": "Detailed Example: 4 Fans, 100 cfm/W, 0.5 deg-F Setpoint Offset"
   },
   "sample_files/base-lighting-ceiling-fans-label-energy-use.xml": {
     "parent_hpxml": "sample_files/base-lighting-ceiling-fans.xml",
-    "ceiling_fan_label_energy_use": 39
+    "ceiling_fans": "Detailed Example: 4 Fans, 39 W, 0.5 deg-F Setpoint Offset"
   },
   "sample_files/base-lighting-holiday.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2817,7 +2767,7 @@
     "cooking_range_oven_location": null,
     "cooking_range_oven_is_induction": null,
     "cooking_range_oven_is_convection": null,
-    "ceiling_fan_present": true
+    "ceiling_fans": "#Bedrooms+1 Fans, 45 W"
   },
   "sample_files/base-misc-emissions.xml": {
     "parent_hpxml": "sample_files/base-pv-battery-and-vehicle-ev.xml",

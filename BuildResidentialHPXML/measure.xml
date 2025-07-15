@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>45066129-2aac-4551-8570-e1ba5a283c6b</version_id>
-  <version_modified>2025-07-15T00:13:45Z</version_modified>
+  <version_id>cbf3798a-a9f7-46bf-86ff-c7470457eae9</version_id>
+  <version_modified>2025-07-15T21:08:33Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -969,82 +969,76 @@
     <argument>
       <name>geometry_foundation_type</name>
       <display_name>Geometry: Foundation Type</display_name>
-      <description>The foundation type of the building. Foundation types ConditionedBasement and ConditionedCrawlspace are not allowed for apartment units.</description>
+      <description>The foundation type of the building. Garages are assumed to be over slab-on-grade.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>SlabOnGrade</default_value>
       <choices>
         <choice>
-          <value>SlabOnGrade</value>
-          <display_name>SlabOnGrade</display_name>
+          <value>Slab-on-Grade</value>
+          <display_name>Slab-on-Grade</display_name>
         </choice>
         <choice>
-          <value>VentedCrawlspace</value>
-          <display_name>VentedCrawlspace</display_name>
+          <value>Crawlspace, Vented</value>
+          <display_name>Crawlspace, Vented</display_name>
         </choice>
         <choice>
-          <value>UnventedCrawlspace</value>
-          <display_name>UnventedCrawlspace</display_name>
+          <value>Crawlspace, Unvented</value>
+          <display_name>Crawlspace, Unvented</display_name>
         </choice>
         <choice>
-          <value>ConditionedCrawlspace</value>
-          <display_name>ConditionedCrawlspace</display_name>
+          <value>Crawlspace, Conditioned</value>
+          <display_name>Crawlspace, Conditioned</display_name>
         </choice>
         <choice>
-          <value>UnconditionedBasement</value>
-          <display_name>UnconditionedBasement</display_name>
+          <value>Basement, Unconditioned</value>
+          <display_name>Basement, Unconditioned</display_name>
         </choice>
         <choice>
-          <value>ConditionedBasement</value>
-          <display_name>ConditionedBasement</display_name>
+          <value>Basement, Unconditioned, Half Above-Grade</value>
+          <display_name>Basement, Unconditioned, Half Above-Grade</display_name>
+        </choice>
+        <choice>
+          <value>Basement, Conditioned</value>
+          <display_name>Basement, Conditioned</display_name>
+        </choice>
+        <choice>
+          <value>Basement, Conditioned, Half Above-Grade</value>
+          <display_name>Basement, Conditioned, Half Above-Grade</display_name>
         </choice>
         <choice>
           <value>Ambient</value>
           <display_name>Ambient</display_name>
         </choice>
         <choice>
-          <value>AboveApartment</value>
-          <display_name>AboveApartment</display_name>
+          <value>Above Apartment</value>
+          <display_name>Above Apartment</display_name>
         </choice>
         <choice>
-          <value>BellyAndWingWithSkirt</value>
-          <display_name>BellyAndWingWithSkirt</display_name>
+          <value>Belly and Wing, With Skirt</value>
+          <display_name>Belly and Wing, With Skirt</display_name>
         </choice>
         <choice>
-          <value>BellyAndWingNoSkirt</value>
-          <display_name>BellyAndWingNoSkirt</display_name>
+          <value>Belly and Wing, No Skirt</value>
+          <display_name>Belly and Wing, No Skirt</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Basement, Unconditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists</value>
+          <display_name>Detailed Example: Basement, Unconditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Basement, Conditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists</value>
+          <display_name>Detailed Example: Basement, Conditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Basement, Conditioned, 5 ft Height</value>
+          <display_name>Detailed Example: Basement, Conditioned, 5 ft Height</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Crawlspace, Vented, Above-Grade</value>
+          <display_name>Detailed Example: Crawlspace, Vented, Above-Grade</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>geometry_foundation_height</name>
-      <display_name>Geometry: Foundation Height</display_name>
-      <description>The height of the foundation (e.g., 3ft for crawlspace, 8ft for basement). Only applies to basements/crawlspaces.</description>
-      <type>Double</type>
-      <units>ft</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>geometry_foundation_height_above_grade</name>
-      <display_name>Geometry: Foundation Height Above Grade</display_name>
-      <description>The depth above grade of the foundation wall. Only applies to basements/crawlspaces.</description>
-      <type>Double</type>
-      <units>ft</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>geometry_rim_joist_height</name>
-      <display_name>Geometry: Rim Joist Height</display_name>
-      <description>The height of the rim joists. Only applies to basements/crawlspaces.</description>
-      <type>Double</type>
-      <units>in</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>geometry_attic_type</name>
@@ -1296,7 +1290,7 @@
       <display_name>Enclosure: Foundation Wall</display_name>
       <description>The type of foundation wall.</description>
       <type>Choice</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>Solid Concrete, Uninsulated</default_value>
       <choices>
@@ -4461,7 +4455,7 @@
       <display_name>HVAC: Heating System 2</display_name>
       <description>The type/efficiency of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents the 'separate' backup heating.</description>
       <type>Choice</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>None</default_value>
       <choices>
@@ -8632,59 +8626,99 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>ceiling_fan_present</name>
-      <display_name>Ceiling Fan: Present</display_name>
-      <description>Whether there are any ceiling fans.</description>
-      <type>Boolean</type>
-      <required>true</required>
+      <name>ceiling_fans</name>
+      <display_name>Ceiling Fans</display_name>
+      <description>The type of ceiling fans.</description>
+      <type>Choice</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>true</default_value>
+      <default_value>None</default_value>
       <choices>
         <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>None</value>
+          <display_name>None</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
+          <value>#Bedrooms+1 Fans, 45 W</value>
+          <display_name>#Bedrooms+1 Fans, 45 W</display_name>
+        </choice>
+        <choice>
+          <value>#Bedrooms+1 Fans, 30 W</value>
+          <display_name>#Bedrooms+1 Fans, 30 W</display_name>
+        </choice>
+        <choice>
+          <value>#Bedrooms+1 Fans, 15 W</value>
+          <display_name>#Bedrooms+1 Fans, 15 W</display_name>
+        </choice>
+        <choice>
+          <value>1 Fan, 45 W</value>
+          <display_name>1 Fan, 45 W</display_name>
+        </choice>
+        <choice>
+          <value>1 Fan, 30 W</value>
+          <display_name>1 Fan, 30 W</display_name>
+        </choice>
+        <choice>
+          <value>1 Fan, 15 W</value>
+          <display_name>1 Fan, 15 W</display_name>
+        </choice>
+        <choice>
+          <value>2 Fans, 45 W</value>
+          <display_name>2 Fans, 45 W</display_name>
+        </choice>
+        <choice>
+          <value>2 Fans, 30 W</value>
+          <display_name>2 Fans, 30 W</display_name>
+        </choice>
+        <choice>
+          <value>2 Fans, 15 W</value>
+          <display_name>2 Fans, 15 W</display_name>
+        </choice>
+        <choice>
+          <value>3 Fans, 45 W</value>
+          <display_name>3 Fans, 45 W</display_name>
+        </choice>
+        <choice>
+          <value>3 Fans, 30 W</value>
+          <display_name>3 Fans, 30 W</display_name>
+        </choice>
+        <choice>
+          <value>3 Fans, 15 W</value>
+          <display_name>3 Fans, 15 W</display_name>
+        </choice>
+        <choice>
+          <value>4 Fans, 45 W</value>
+          <display_name>4 Fans, 45 W</display_name>
+        </choice>
+        <choice>
+          <value>4 Fans, 30 W</value>
+          <display_name>4 Fans, 30 W</display_name>
+        </choice>
+        <choice>
+          <value>4 Fans, 15 W</value>
+          <display_name>4 Fans, 15 W</display_name>
+        </choice>
+        <choice>
+          <value>5 Fans, 45 W</value>
+          <display_name>5 Fans, 45 W</display_name>
+        </choice>
+        <choice>
+          <value>5 Fans, 30 W</value>
+          <display_name>5 Fans, 30 W</display_name>
+        </choice>
+        <choice>
+          <value>5 Fans, 15 W</value>
+          <display_name>5 Fans, 15 W</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 4 Fans, 39 W, 0.5 deg-F Setpoint Offset</value>
+          <display_name>Detailed Example: 4 Fans, 39 W, 0.5 deg-F Setpoint Offset</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 4 Fans, 100 cfm/W, 0.5 deg-F Setpoint Offset</value>
+          <display_name>Detailed Example: 4 Fans, 100 cfm/W, 0.5 deg-F Setpoint Offset</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>ceiling_fan_label_energy_use</name>
-      <display_name>Ceiling Fan: Label Energy Use</display_name>
-      <description>The label average energy use of the ceiling fan(s). If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-ceiling-fans'&gt;HPXML Ceiling Fans&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>W</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>ceiling_fan_efficiency</name>
-      <display_name>Ceiling Fan: Efficiency</display_name>
-      <description>The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label Energy Use not provided. If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-ceiling-fans'&gt;HPXML Ceiling Fans&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>CFM/W</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>ceiling_fan_count</name>
-      <display_name>Ceiling Fan: Count</display_name>
-      <description>Total number of ceiling fans. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-ceiling-fans'&gt;HPXML Ceiling Fans&lt;/a&gt;) is used.</description>
-      <type>Integer</type>
-      <units>#</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>ceiling_fan_cooling_setpoint_temp_offset</name>
-      <display_name>Ceiling Fan: Cooling Setpoint Temperature Offset</display_name>
-      <description>The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan count is greater than zero. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-ceiling-fans'&gt;HPXML Ceiling Fans&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>F</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>misc_television</name>
@@ -8837,7 +8871,7 @@
       <display_name>Misc: Well Pump</display_name>
       <description>The amount of well pump usage, relative to the national average.</description>
       <type>Choice</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>None</default_value>
       <choices>
@@ -8900,7 +8934,7 @@
       <display_name>Misc: Gas Grill</display_name>
       <description>The amount of outdoor gas grill usage, relative to the national average.</description>
       <type>Choice</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>None</default_value>
       <choices>
@@ -9007,7 +9041,7 @@
       <display_name>Misc: Gas Lighting</display_name>
       <description>The amount of gas lighting usage, relative to the national average.</description>
       <type>Choice</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>None</default_value>
       <choices>
@@ -9070,7 +9104,7 @@
       <display_name>Misc: Fireplace</display_name>
       <description>The amount of fireplace usage, relative to the national average. Fireplaces can also be specified as heating systems that meet a portion of the heating load.</description>
       <type>Choice</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>None</default_value>
       <choices>
@@ -9265,7 +9299,7 @@
       <display_name>Pool: Present</display_name>
       <description>Whether there is a pool.</description>
       <type>Boolean</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
       <choices>
@@ -9354,7 +9388,7 @@
       <display_name>Permanent Spa: Present</display_name>
       <description>Whether there is a permanent spa.</description>
       <type>Boolean</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
       <choices>
@@ -9801,7 +9835,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>8F56D3A1</checksum>
+      <checksum>4160A9E0</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9818,7 +9852,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>11223AE2</checksum>
+      <checksum>3CBB6B0E</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9830,13 +9864,19 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F605941C</checksum>
+      <checksum>B3A9E030</checksum>
     </file>
     <file>
       <filename>options/battery.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>ADFC3F87</checksum>
+    </file>
+    <file>
+      <filename>options/ceiling_fans.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>161FFC63</checksum>
     </file>
     <file>
       <filename>options/dhw_distribution.tsv</filename>
@@ -9915,6 +9955,12 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>2395913B</checksum>
+    </file>
+    <file>
+      <filename>options/geometry_foundation_type.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>951C8138</checksum>
     </file>
     <file>
       <filename>options/geometry_neighbor_buildings.tsv</filename>
@@ -10106,7 +10152,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B294D834</checksum>
+      <checksum>75FEAC26</checksum>
     </file>
   </files>
 </measure>

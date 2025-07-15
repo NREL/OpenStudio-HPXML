@@ -14,9 +14,9 @@ module Geometry
   # @param geometry_garage_depth [Double] depth of the garage (ft)
   # @param geometry_garage_protrusion [Double] fraction of garage that protrudes from conditioned space
   # @param geometry_garage_position [String] Right or Left
-  # @param geometry_foundation_type [String] foundation type of the building
-  # @param geometry_foundation_height [Double] height of the foundation (ft)
-  # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
+  # @param geometry_foundation_type_type [String] foundation type of the building
+  # @param geometry_foundation_type_height [Double] height of the foundation (ft)
+  # @param geometry_foundation_type_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
@@ -30,9 +30,9 @@ module Geometry
                                          geometry_garage_depth:,
                                          geometry_garage_protrusion:,
                                          geometry_garage_position:,
-                                         geometry_foundation_type:,
-                                         geometry_foundation_height:,
-                                         geometry_rim_joist_height:,
+                                         geometry_foundation_type_type:,
+                                         geometry_foundation_type_height:,
+                                         geometry_foundation_type_rim_joist_height:,
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
@@ -45,9 +45,9 @@ module Geometry
     garage_depth = geometry_garage_depth
     garage_protrusion = geometry_garage_protrusion
     garage_position = geometry_garage_position
-    foundation_type = geometry_foundation_type
-    foundation_height = geometry_foundation_height
-    rim_joist_height = geometry_rim_joist_height
+    foundation_type = geometry_foundation_type_type
+    foundation_height = geometry_foundation_type_height
+    rim_joist_height = geometry_foundation_type_rim_joist_height
     attic_type = geometry_attic_type
     if attic_type == HPXML::AtticTypeConditioned
       num_floors -= 1
@@ -658,9 +658,9 @@ module Geometry
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
-  # @param geometry_foundation_type [String] foundation type of the building
-  # @param geometry_foundation_height [Double] height of the foundation (ft)
-  # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
+  # @param geometry_foundation_type_type [String] foundation type of the building
+  # @param geometry_foundation_type_height [Double] height of the foundation (ft)
+  # @param geometry_foundation_type_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
@@ -674,9 +674,9 @@ module Geometry
                                          geometry_average_ceiling_height:,
                                          geometry_unit_num_floors_above_grade:,
                                          geometry_unit_aspect_ratio:,
-                                         geometry_foundation_type:,
-                                         geometry_foundation_height:,
-                                         geometry_rim_joist_height:,
+                                         geometry_foundation_type_type:,
+                                         geometry_foundation_type_height:,
+                                         geometry_foundation_type_rim_joist_height:,
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
@@ -690,9 +690,9 @@ module Geometry
     average_ceiling_height = geometry_average_ceiling_height
     num_floors = geometry_unit_num_floors_above_grade
     aspect_ratio = geometry_unit_aspect_ratio
-    foundation_type = geometry_foundation_type
-    foundation_height = geometry_foundation_height
-    rim_joist_height = geometry_rim_joist_height
+    foundation_type = geometry_foundation_type_type
+    foundation_height = geometry_foundation_type_height
+    rim_joist_height = geometry_foundation_type_rim_joist_height
     attic_type = geometry_attic_type
     if attic_type == HPXML::AtticTypeConditioned
       num_floors -= 1
@@ -960,9 +960,9 @@ module Geometry
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
-  # @param geometry_foundation_type [String] foundation type of the building
-  # @param geometry_foundation_height [Double] height of the foundation (ft)
-  # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
+  # @param geometry_foundation_type_type [String] foundation type of the building
+  # @param geometry_foundation_type_height [Double] height of the foundation (ft)
+  # @param geometry_foundation_type_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
@@ -976,9 +976,9 @@ module Geometry
                             geometry_average_ceiling_height:,
                             geometry_unit_num_floors_above_grade:,
                             geometry_unit_aspect_ratio:,
-                            geometry_foundation_type:,
-                            geometry_foundation_height:,
-                            geometry_rim_joist_height:,
+                            geometry_foundation_type_type:,
+                            geometry_foundation_type_height:,
+                            geometry_foundation_type_rim_joist_height:,
                             geometry_attic_type:,
                             geometry_roof_type:,
                             geometry_roof_pitch:,
@@ -992,9 +992,9 @@ module Geometry
     average_ceiling_height = geometry_average_ceiling_height
     num_floors = geometry_unit_num_floors_above_grade
     aspect_ratio = geometry_unit_aspect_ratio
-    foundation_type = geometry_foundation_type
-    foundation_height = geometry_foundation_height
-    rim_joist_height = geometry_rim_joist_height
+    foundation_type = geometry_foundation_type_type
+    foundation_height = geometry_foundation_type_height
+    rim_joist_height = geometry_foundation_type_rim_joist_height
     attic_type = geometry_attic_type
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch

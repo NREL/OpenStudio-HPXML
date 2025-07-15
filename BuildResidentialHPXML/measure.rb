@@ -358,42 +358,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants::PositionRight)
     args << arg
 
-    foundation_type_choices = OpenStudio::StringVector.new
-    foundation_type_choices << HPXML::FoundationTypeSlab
-    foundation_type_choices << HPXML::FoundationTypeCrawlspaceVented
-    foundation_type_choices << HPXML::FoundationTypeCrawlspaceUnvented
-    foundation_type_choices << HPXML::FoundationTypeCrawlspaceConditioned
-    foundation_type_choices << HPXML::FoundationTypeBasementUnconditioned
-    foundation_type_choices << HPXML::FoundationTypeBasementConditioned
-    foundation_type_choices << HPXML::FoundationTypeAmbient
-    foundation_type_choices << HPXML::FoundationTypeAboveApartment # I.e., adiabatic
-    foundation_type_choices << "#{HPXML::FoundationTypeBellyAndWing}WithSkirt"
-    foundation_type_choices << "#{HPXML::FoundationTypeBellyAndWing}NoSkirt"
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_foundation_type', foundation_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_foundation_type', choices[:geometry_foundation_type], true)
     arg.setDisplayName('Geometry: Foundation Type')
-    arg.setDescription("The foundation type of the building. Foundation types #{HPXML::FoundationTypeBasementConditioned} and #{HPXML::FoundationTypeCrawlspaceConditioned} are not allowed for #{HPXML::ResidentialTypeApartment}s.")
-    arg.setDefaultValue(HPXML::FoundationTypeSlab)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_foundation_height', true)
-    arg.setDisplayName('Geometry: Foundation Height')
-    arg.setUnits('ft')
-    arg.setDescription('The height of the foundation (e.g., 3ft for crawlspace, 8ft for basement). Only applies to basements/crawlspaces.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_foundation_height_above_grade', true)
-    arg.setDisplayName('Geometry: Foundation Height Above Grade')
-    arg.setUnits('ft')
-    arg.setDescription('The depth above grade of the foundation wall. Only applies to basements/crawlspaces.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_rim_joist_height', false)
-    arg.setDisplayName('Geometry: Rim Joist Height')
-    arg.setUnits('in')
-    arg.setDescription('The height of the rim joists. Only applies to basements/crawlspaces.')
+    arg.setDescription('The foundation type of the building. Garages are assumed to be over slab-on-grade.')
     args << arg
 
     attic_type_choices = OpenStudio::StringVector.new
@@ -478,7 +445,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::FloorTypeWoodFrame)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_foundation_wall', choices[:enclosure_foundation_wall], true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_foundation_wall', choices[:enclosure_foundation_wall], false)
     arg.setDisplayName('Enclosure: Foundation Wall')
     arg.setDescription('The type of foundation wall.')
     arg.setDefaultValue(choices[:enclosure_foundation_wall][0])
@@ -869,7 +836,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(choices[:hvac_geothermal_loop][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system_2', choices[:hvac_heating_system_2], true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system_2', choices[:hvac_heating_system_2], false)
     arg.setDisplayName('HVAC: Heating System 2')
     arg.setDescription("The type/efficiency of the second heating system. If a heat pump is specified and the backup type is '#{HPXML::HeatPumpBackupTypeSeparate}', this heating system represents the '#{HPXML::HeatPumpBackupTypeSeparate}' backup heating.")
     arg.setDefaultValue(choices[:hvac_heating_system_2][0])
@@ -1320,7 +1287,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2', choices[:pv_system_2], false)
     arg.setDisplayName('PV System 2')
     arg.setDescription('The size and type of the second PV system.')
-    arg.setDefaultValue(choices[:pv_system][0])
+    arg.setDefaultValue(choices[:pv_system_2][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_array_azimuth', false)
@@ -2079,34 +2046,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ceiling_fan_present', true)
-    arg.setDisplayName('Ceiling Fan: Present')
-    arg.setDescription('Whether there are any ceiling fans.')
-    arg.setDefaultValue(true)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_label_energy_use', false)
-    arg.setDisplayName('Ceiling Fan: Label Energy Use')
-    arg.setUnits('W')
-    arg.setDescription("The label average energy use of the ceiling fan(s). If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_efficiency', false)
-    arg.setDisplayName('Ceiling Fan: Efficiency')
-    arg.setUnits('CFM/W')
-    arg.setDescription("The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label Energy Use not provided. If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('ceiling_fan_count', false)
-    arg.setDisplayName('Ceiling Fan: Count')
-    arg.setUnits('#')
-    arg.setDescription("Total number of ceiling fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_cooling_setpoint_temp_offset', false)
-    arg.setDisplayName('Ceiling Fan: Cooling Setpoint Temperature Offset')
-    arg.setUnits('F')
-    arg.setDescription("The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan count is greater than zero. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ceiling_fans', choices[:ceiling_fans], false)
+    arg.setDisplayName('Ceiling Fans')
+    arg.setDescription('The type of ceiling fans.')
+    arg.setDefaultValue(choices[:ceiling_fans][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_television', choices[:misc_television], true)
@@ -2121,7 +2064,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('100%')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_well_pump', choices[:misc_well_pump], true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_well_pump', choices[:misc_well_pump], false)
     arg.setDisplayName('Misc: Well Pump')
     arg.setDescription('The amount of well pump usage, relative to the national average.')
     arg.setDefaultValue(choices[:misc_well_pump][0])
@@ -2144,19 +2087,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_grill', choices[:misc_grill], true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_grill', choices[:misc_grill], false)
     arg.setDisplayName('Misc: Gas Grill')
     arg.setDescription('The amount of outdoor gas grill usage, relative to the national average.')
     arg.setDefaultValue(choices[:misc_grill][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_lighting', choices[:misc_lighting], true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_lighting', choices[:misc_lighting], false)
     arg.setDisplayName('Misc: Gas Lighting')
     arg.setDescription('The amount of gas lighting usage, relative to the national average.')
     arg.setDefaultValue(choices[:misc_lighting][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_fireplace', choices[:misc_fireplace], true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_fireplace', choices[:misc_fireplace], false)
     arg.setDisplayName('Misc: Fireplace')
     arg.setDescription('The amount of fireplace usage, relative to the national average. Fireplaces can also be specified as heating systems that meet a portion of the heating load.')
     arg.setDefaultValue(choices[:misc_fireplace][0])
@@ -2168,7 +2111,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heater_type_choices << HPXML::HeaterTypeGas
     heater_type_choices << HPXML::HeaterTypeHeatPump
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pool_present', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pool_present', false)
     arg.setDisplayName('Pool: Present')
     arg.setDescription('Whether there is a pool.')
     arg.setDefaultValue(false)
@@ -2208,7 +2151,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the pool heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#pool-heater'>Pool Heater</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('permanent_spa_present', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('permanent_spa_present', false)
     arg.setDisplayName('Permanent Spa: Present')
     arg.setDescription('Whether there is a permanent spa.')
     arg.setDefaultValue(false)
@@ -2484,19 +2427,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = ([HPXML::WaterHeaterTypeHeatPump].include?(args[:water_heater_type]) && (args[:water_heater_fuel_type] != HPXML::FuelTypeElectricity))
     warnings << 'Cannot model a heat pump water heater with non-electric fuel type.' if warning
 
-    warning = [HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type]) && (args[:geometry_foundation_height] > 0)
-    warnings << "Foundation type of '#{args[:geometry_foundation_type]}' cannot have a non-zero height. Assuming height is zero." if warning
+    warning = [HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type_type]) && (args[:geometry_foundation_type_height] > 0)
+    warnings << "Foundation type of '#{args[:geometry_foundation_type_type]}' cannot have a non-zero height. Assuming height is zero." if warning
 
-    warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height_above_grade] > 0)
+    warning = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_type_height_above_grade] > 0)
     warnings << 'Specified a slab foundation type with a non-zero height above grade.' if warning
 
-    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:enclosure_foundation_wall_insulation_nominal_r_value].to_f > 0) || !args[:enclosure_foundation_wall_assembly_r_value].nil?) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
+    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type_type]) && ((args[:enclosure_foundation_wall_insulation_nominal_r_value].to_f > 0) || !args[:enclosure_foundation_wall_assembly_r_value].nil?) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
     warnings << 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.' if warning
 
     warning = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue) && (args[:roof_assembly_r] > max_uninsulated_roof_rvalue)
     warnings << 'Home with unconditioned attic type has both ceiling insulation and roof insulation.' if warning
 
-    warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
+    warning = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeBasementConditioned) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
     warnings << 'Home with conditioned basement has floor insulation.' if warning
 
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue)
@@ -2519,10 +2462,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:hvac_cooling_system_type] != Constants::None) && (args[:hvac_heat_pump_type] != Constants::None) && (args[:cooling_system_fraction_cool_load_served] > 0) && (args[:heat_pump_fraction_cool_load_served] > 0)
     errors << 'Multiple central cooling systems are not currently supported.' if error
 
-    error = ![HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type]) && (args[:geometry_foundation_height] == 0)
-    errors << "Foundation type of '#{args[:geometry_foundation_type]}' cannot have a height of zero." if error
+    error = ![HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type_type]) && (args[:geometry_foundation_type_height] == 0)
+    errors << "Foundation type of '#{args[:geometry_foundation_type_type]}' cannot have a height of zero." if error
 
-    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && ([HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceConditioned].include? args[:geometry_foundation_type])
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && ([HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceConditioned].include? args[:geometry_foundation_type_type])
     errors << 'Conditioned basement/crawlspace foundation type for apartment units is not currently supported.' if error
 
     error = (args[:hvac_heating_system_type] == Constants::None) && (args[:hvac_heat_pump_type] == Constants::None) && (args[:hvac_heating_system_2_type] != Constants::None)
@@ -2541,7 +2484,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_unit_num_floors_above_grade] > 1)
     errors << 'Apartment units can only have one above-grade floor.' if error
 
-    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFD) && (args[:geometry_attached_walls_front_wall_is_adiabatic] || args[:geometry_attached_walls_back_wall_is_adiabatic] || args[:geometry_attached_walls_left_wall_is_adiabatic] || args[:geometry_attached_walls_right_wall_is_adiabatic] || (args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment) || (args[:geometry_foundation_type] == HPXML::FoundationTypeAboveApartment))
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFD) && (args[:geometry_attached_walls_front_wall_is_adiabatic] || args[:geometry_attached_walls_back_wall_is_adiabatic] || args[:geometry_attached_walls_left_wall_is_adiabatic] || args[:geometry_attached_walls_right_wall_is_adiabatic] || (args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment) || (args[:geometry_foundation_type_type] == HPXML::FoundationTypeAboveApartment))
     errors << 'No adiabatic surfaces can be applied to single-family detached homes.' if error
 
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_attic_type] == HPXML::AtticTypeConditioned)
@@ -2556,11 +2499,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:hvac_heating_system_type].include?('Shared')
     errors << 'Specified a shared system for a single-family detached unit.' if error
 
-    error = !args[:geometry_rim_joist_height].nil? && args[:rim_joist_assembly_r].nil?
+    error = args[:geometry_foundation_type_rim_joist_height].to_f > 0 && args[:rim_joist_assembly_r].nil?
     errors << 'Specified a rim joist height but no rim joist assembly R-value.' if error
-
-    error = !args[:rim_joist_assembly_r].nil? && args[:geometry_rim_joist_height].nil?
-    errors << 'Specified a rim joist assembly R-value but no rim joist height.' if error
 
     schedules_unavailable_period_args_initialized = [!args[:schedules_unavailable_period_types].nil?,
                                                      !args[:schedules_unavailable_period_dates].nil?]
@@ -2675,16 +2615,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_aspect_ratio] <= 0)
     errors << 'Aspect ratio must be greater than zero.' if error
 
-    error = (args[:geometry_foundation_height] < 0)
-    errors << 'Foundation height cannot be negative.' if error
-
     error = (args[:geometry_unit_num_floors_above_grade] > 6)
     errors << 'Number of above-grade floors must be six or less.' if error
 
     error = (args[:geometry_garage_protrusion] < 0) || (args[:geometry_garage_protrusion] > 1)
     errors << 'Garage protrusion fraction must be between zero and one.' if error
 
-    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_foundation_type] == HPXML::FoundationTypeAboveApartment)
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_foundation_type_type] == HPXML::FoundationTypeAboveApartment)
     errors << 'Single-family attached units cannot be above another unit.' if error
 
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment)
@@ -2696,7 +2633,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_garage_protrusion] > 0) && (args[:geometry_unit_aspect_ratio] < 1) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0) && (args[:geometry_roof_type] == Constants::RoofTypeGable)
     errors << 'Cannot handle protruding garage and attic ridge running from front to back.' if error
 
-    error = (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+    error = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
     errors << 'Cannot handle garages with an ambient foundation type.' if error
 
     error = (args[:door_area] < 0)
@@ -2910,14 +2847,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    '11:12' => 11.0 / 12.0,
                                    '12:12' => 12.0 / 12.0 }[args[:geometry_roof_pitch]]
 
-    args[:geometry_rim_joist_height] = args[:geometry_rim_joist_height].to_f / 12.0
+    args[:geometry_foundation_type_rim_joist_height] = args[:geometry_foundation_type_rim_joist_height].to_f / 12.0
 
-    if args[:geometry_foundation_type] == HPXML::FoundationTypeSlab
-      args[:geometry_foundation_height] = 0.0
-      args[:geometry_foundation_height_above_grade] = 0.0
-      args[:geometry_rim_joist_height] = 0.0
-    elsif (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) || args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
-      args[:geometry_rim_joist_height] = 0.0
+    if args[:geometry_foundation_type_type] == HPXML::FoundationTypeSlab
+      args[:geometry_foundation_type_height] = 0.0
+      args[:geometry_foundation_type_height_above_grade] = 0.0
+      args[:geometry_foundation_type_rim_joist_height] = 0.0
+    elsif (args[:geometry_foundation_type_type] == HPXML::FoundationTypeAmbient) || args[:geometry_foundation_type_type].start_with?(HPXML::FoundationTypeBellyAndWing)
+      args[:geometry_foundation_type_rim_joist_height] = 0.0
     end
 
     if model.getSpaces.size > 0
@@ -3467,13 +3404,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         hpxml_bldg.site.surroundings = HPXML::SurroundingsStandAlone
       end
       if args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment
-        if args[:geometry_foundation_type] == HPXML::FoundationTypeAboveApartment
+        if args[:geometry_foundation_type_type] == HPXML::FoundationTypeAboveApartment
           hpxml_bldg.site.vertical_surroundings = HPXML::VerticalSurroundingsAboveAndBelow
         else
           hpxml_bldg.site.vertical_surroundings = HPXML::VerticalSurroundingsAbove
         end
       else
-        if args[:geometry_foundation_type] == HPXML::FoundationTypeAboveApartment
+        if args[:geometry_foundation_type_type] == HPXML::FoundationTypeAboveApartment
           hpxml_bldg.site.vertical_surroundings = HPXML::VerticalSurroundingsBelow
         else
           hpxml_bldg.site.vertical_surroundings = HPXML::VerticalSurroundingsNoAboveOrBelow
@@ -3535,7 +3472,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
     number_of_conditioned_floors_above_grade = args[:geometry_unit_num_floors_above_grade]
     number_of_conditioned_floors = number_of_conditioned_floors_above_grade
-    if args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned
+    if args[:geometry_foundation_type_type] == HPXML::FoundationTypeBasementConditioned
       number_of_conditioned_floors += 1
     end
 
@@ -3692,7 +3629,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != EPlus::SurfaceTypeWall
       next unless [EPlus::BoundaryConditionOutdoors, EPlus::BoundaryConditionAdiabatic].include? surface.outsideBoundaryCondition
-      next unless Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
+      next unless Geometry.surface_is_rim_joist(surface, args[:geometry_foundation_type_rim_joist_height])
 
       interior_adjacent_to = Geometry.get_surface_adjacent_to(surface)
       next unless [HPXML::LocationBasementConditioned,
@@ -3752,7 +3689,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def set_walls(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != EPlus::SurfaceTypeWall
-      next if Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
+      next if Geometry.surface_is_rim_joist(surface, args[:geometry_foundation_type_rim_joist_height])
 
       interior_adjacent_to = Geometry.get_surface_adjacent_to(surface)
       next unless [HPXML::LocationConditionedSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
@@ -3842,7 +3779,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != EPlus::SurfaceTypeWall
       next unless [EPlus::BoundaryConditionFoundation, EPlus::BoundaryConditionAdiabatic].include? surface.outsideBoundaryCondition
-      next if Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
+      next if Geometry.surface_is_rim_joist(surface, args[:geometry_foundation_type_rim_joist_height])
 
       interior_adjacent_to = Geometry.get_surface_adjacent_to(surface)
       next unless [HPXML::LocationBasementConditioned,
@@ -3900,10 +3837,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                       interior_adjacent_to: interior_adjacent_to,
                                       type: args[:enclosure_foundation_wall_type],
                                       azimuth: azimuth,
-                                      height: args[:geometry_foundation_height],
+                                      height: args[:geometry_foundation_type_height],
                                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                                       thickness: args[:enclosure_foundation_wall_thickness],
-                                      depth_below_grade: args[:geometry_foundation_height] - args[:geometry_foundation_height_above_grade],
+                                      depth_below_grade: args[:geometry_foundation_type_height] - args[:geometry_foundation_type_height_above_grade],
                                       insulation_assembly_r_value: insulation_assembly_r_value,
                                       insulation_interior_r_value: insulation_interior_r_value,
                                       insulation_interior_distance_to_top: insulation_interior_distance_to_top,
@@ -3923,7 +3860,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @return [nil]
   def set_floors(hpxml_bldg, args, sorted_surfaces)
     if [HPXML::FoundationTypeBasementConditioned,
-        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
+        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
       args[:floor_over_foundation_assembly_r] = 2.1 # Uninsulated
     end
 
@@ -4048,7 +3985,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       next unless interior_adjacent_to == HPXML::LocationCrawlspaceConditioned
 
       # Increase Conditioned Building Volume & Infiltration Volume
-      conditioned_crawlspace_volume = hpxml_bldg.slabs[-1].area * args[:geometry_foundation_height]
+      conditioned_crawlspace_volume = hpxml_bldg.slabs[-1].area * args[:geometry_foundation_type_height]
       hpxml_bldg.building_construction.conditioned_building_volume += conditioned_crawlspace_volume
       hpxml_bldg.air_infiltration_measurements[0].infiltration_volume += conditioned_crawlspace_volume
     end
@@ -4088,12 +4025,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         overhangs_distance_to_bottom_of_window = args[:enclosure_overhangs_distance_to_bottom_of_window]
       elsif args[:geometry_eaves_depth] > 0
         # Get max z coordinate of eaves
-        eaves_z = args[:geometry_average_ceiling_height] * args[:geometry_unit_num_floors_above_grade] + args[:geometry_rim_joist_height]
+        eaves_z = args[:geometry_average_ceiling_height] * args[:geometry_unit_num_floors_above_grade] + args[:geometry_foundation_type_rim_joist_height]
         if args[:geometry_attic_type] == HPXML::AtticTypeConditioned
           eaves_z += Geometry.get_conditioned_attic_height(model.getSpaces)
         end
-        if args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient
-          eaves_z += args[:geometry_foundation_height]
+        if args[:geometry_foundation_type_type] == HPXML::FoundationTypeAmbient
+          eaves_z += args[:geometry_foundation_type_height]
         end
 
         # Get max z coordinate of this window
@@ -4268,17 +4205,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    if args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
+    if args[:geometry_foundation_type_type].start_with?(HPXML::FoundationTypeBellyAndWing)
       foundation_type = HPXML::FoundationTypeBellyAndWing
-      if args[:geometry_foundation_type].end_with?('WithSkirt')
+      if args[:geometry_foundation_type_type].end_with?('WithSkirt')
         belly_wing_skirt_present = true
-      elsif args[:geometry_foundation_type].end_with?('NoSkirt')
+      elsif args[:geometry_foundation_type_type].end_with?('NoSkirt')
         belly_wing_skirt_present = false
       else
         fail 'Unepected belly and wing foundation type.'
       end
     else
-      foundation_type = args[:geometry_foundation_type]
+      foundation_type = args[:geometry_foundation_type_type]
     end
 
     hpxml_bldg.foundations.add(id: "Foundation#{hpxml_bldg.foundations.size + 1}",
@@ -5171,7 +5108,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                  weekend_heating_setpoints: weekend_heating_setpoints,
                                  weekday_cooling_setpoints: weekday_cooling_setpoints,
                                  weekend_cooling_setpoints: weekend_cooling_setpoints,
-                                 ceiling_fan_cooling_setpoint_temp_offset: args[:ceiling_fan_cooling_setpoint_temp_offset],
+                                 ceiling_fan_cooling_setpoint_temp_offset: args[:ceiling_fans_cooling_setpoint_temperature_offset],
                                  seasons_heating_begin_month: seasons_heating_begin_month,
                                  seasons_heating_begin_day: seasons_heating_begin_day,
                                  seasons_heating_end_month: seasons_heating_end_month,
@@ -6069,12 +6006,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_ceiling_fans(hpxml_bldg, args)
-    return unless args[:ceiling_fan_present]
+    return if args[:ceiling_fans_count] == 0
 
     hpxml_bldg.ceiling_fans.add(id: "CeilingFan#{hpxml_bldg.ceiling_fans.size + 1}",
-                                efficiency: args[:ceiling_fan_efficiency],
-                                label_energy_use: args[:ceiling_fan_label_energy_use],
-                                count: args[:ceiling_fan_count])
+                                efficiency: args[:ceiling_fans_efficiency],
+                                label_energy_use: args[:ceiling_fans_label_energy_use],
+                                count: args[:ceiling_fans_count])
   end
 
   # Sets the HPXML miscellaneous television plug loads properties.
