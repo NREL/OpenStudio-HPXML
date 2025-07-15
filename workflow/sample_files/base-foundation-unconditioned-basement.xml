@@ -237,7 +237,6 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -341,7 +340,7 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
+              <HeatingCapacity>35000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
@@ -458,9 +457,8 @@
           <SystemIdentifier id='ClothesDryer1'/>
           <Location>basement - unconditioned</Location>
           <FuelType>electricity</FuelType>
+          <DryingMethod>conventional</DryingMethod>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <Vented>true</Vented>
-          <VentedFlowRate>150.0</VentedFlowRate>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
@@ -542,22 +540,10 @@
         <PlugLoad>
           <SystemIdentifier id='PlugLoad1'/>
           <PlugLoadType>TV other</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>620.0</Value>
-          </Load>
         </PlugLoad>
         <PlugLoad>
           <SystemIdentifier id='PlugLoad2'/>
           <PlugLoadType>other</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>1228.5</Value>
-          </Load>
-          <extension>
-            <FracSensible>0.855</FracSensible>
-            <FracLatent>0.045</FracLatent>
-          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

@@ -10,9 +10,6 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <AdvancedResearchFeatures>
-          <DefrostModelType>advanced</DefrostModelType>
-        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -224,7 +221,6 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -321,30 +317,21 @@
               <PrimaryHeatingSystem idref='HeatPump1'/>
               <PrimaryCoolingSystem idref='HeatPump1'/>
             </PrimarySystems>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem1'/>
-              <DistributionSystem idref='HVACDistribution1'/>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>60000.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.8</Value>
-              </AnnualHeatingEfficiency>
-              <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
-            </HeatingSystem>
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
-              <DistributionSystem idref='HVACDistribution2'/>
+              <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>18000.0</HeatingCapacity>
-              <CoolingCapacity>18000.0</CoolingCapacity>
+              <HeatingCapacity>36000.0</HeatingCapacity>
+              <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>variable speed</CompressorType>
-              <BackupType>separate</BackupType>
-              <BackupSystem idref='HeatingSystem1'/>
+              <BackupType>integrated</BackupType>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupAnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </BackupAnnualHeatingEfficiency>
+              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -356,10 +343,8 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
+                <PanHeaterPowerWatts>100.0</PanHeaterPowerWatts>
+                <PanHeaterControlType>defrost mode</PanHeaterControlType>
               </extension>
             </HeatPump>
           </HVACPlant>
@@ -370,14 +355,6 @@
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
-            <DistributionSystemType>
-              <HydronicDistribution>
-                <HydronicDistributionType>baseboard</HydronicDistributionType>
-              </HydronicDistribution>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution2'/>
             <DistributionSystemType>
               <AirDistribution>
                 <AirDistributionType>regular velocity</AirDistributionType>
@@ -481,9 +458,8 @@
           <SystemIdentifier id='ClothesDryer1'/>
           <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
+          <DryingMethod>conventional</DryingMethod>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <Vented>true</Vented>
-          <VentedFlowRate>150.0</VentedFlowRate>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
@@ -565,22 +541,10 @@
         <PlugLoad>
           <SystemIdentifier id='PlugLoad1'/>
           <PlugLoadType>TV other</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>620.0</Value>
-          </Load>
         </PlugLoad>
         <PlugLoad>
           <SystemIdentifier id='PlugLoad2'/>
           <PlugLoadType>other</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>2457.0</Value>
-          </Load>
-          <extension>
-            <FracSensible>0.855</FracSensible>
-            <FracLatent>0.045</FracLatent>
-          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

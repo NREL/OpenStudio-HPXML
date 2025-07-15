@@ -221,7 +221,6 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -332,7 +331,7 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -347,10 +346,8 @@
                 <AirflowDefectRatio>-0.25</AirflowDefectRatio>
                 <ChargeDefectRatio>-0.25</ChargeDefectRatio>
                 <FanPowerWattsPerCFM>0.365</FanPowerWattsPerCFM>
-                <HeatingCapacityRetention>
-                  <Fraction>0.6</Fraction>
-                  <Temperature>17.0</Temperature>
-                </HeatingCapacityRetention>
+                <HeatingDesignAirflowCFM>1080.0</HeatingDesignAirflowCFM>
+                <CoolingDesignAirflowCFM>1080.0</CoolingDesignAirflowCFM>
               </extension>
             </HeatPump>
           </HVACPlant>
@@ -449,9 +446,8 @@
           <SystemIdentifier id='ClothesDryer1'/>
           <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
+          <DryingMethod>conventional</DryingMethod>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <Vented>true</Vented>
-          <VentedFlowRate>150.0</VentedFlowRate>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
@@ -533,22 +529,10 @@
         <PlugLoad>
           <SystemIdentifier id='PlugLoad1'/>
           <PlugLoadType>TV other</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>620.0</Value>
-          </Load>
         </PlugLoad>
         <PlugLoad>
           <SystemIdentifier id='PlugLoad2'/>
           <PlugLoadType>other</PlugLoadType>
-          <Load>
-            <Units>kWh/year</Units>
-            <Value>2457.0</Value>
-          </Load>
-          <extension>
-            <FracSensible>0.855</FracSensible>
-            <FracLatent>0.045</FracLatent>
-          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

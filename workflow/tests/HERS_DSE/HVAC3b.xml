@@ -9,6 +9,9 @@
   <SoftwareInfo>
     <extension>
       <ApplyASHRAE140Assumptions>true</ApplyASHRAE140Assumptions>
+      <ERICalculation>
+        <Version>2022CE</Version>
+      </ERICalculation>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -413,7 +416,6 @@
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Area>1539.0</Area>
-            <Thickness>4.0</Thickness>
             <ExposedPerimeter>168.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
