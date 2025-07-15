@@ -2,6 +2,7 @@
 
 __New Features__
 - Updates to HPXML v4.2-rc3.
+- Calculate water heater tank losses when using `EnergyFactor` as the efficiency metric consistent with when the newer `UniformEnergyFactor` is used
 
 ## OpenStudio-HPXML v1.10.0
 
