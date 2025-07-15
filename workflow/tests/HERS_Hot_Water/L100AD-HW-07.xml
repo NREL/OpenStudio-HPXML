@@ -345,10 +345,13 @@
             <SystemType>
               <Standard/>
             </SystemType>
+            <PipeInsulation>
+              <PipeRValue>0.0</PipeRValue>
+            </PipeInsulation>
             <DrainWaterHeatRecovery>
               <FacilitiesConnected>all</FacilitiesConnected>
               <EqualFlow>true</EqualFlow>
-              <Efficiency>0.54</Efficiency>
+              <Efficiency>0.55</Efficiency>
             </DrainWaterHeatRecovery>
           </HotWaterDistribution>
           <WaterFixture>

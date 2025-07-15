@@ -117,8 +117,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
       model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
       # water use equipment hot water gal/day
-      fixture_gpd = 43.97 * hpxml_bldg.water_heating.water_fixtures_usage_multiplier
-      dist_gpd = 9.84 * hpxml_bldg.water_heating.water_fixtures_usage_multiplier
+      fixture_gpd = 44.87 * hpxml_bldg.water_heating.water_fixtures_usage_multiplier
+      dist_gpd = 15.42 * hpxml_bldg.water_heating.water_fixtures_usage_multiplier
       cw_gpd = 3.52 * hpxml_bldg.clothes_washers[0].usage_multiplier
       dw_gpd = 2.44 * hpxml_bldg.dishwashers[0].usage_multiplier
       assert_in_delta(cw_gpd, get_wu_gpd(model, Constants::ObjectTypeClothesWasher), 0.01)
@@ -183,8 +183,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
-    fixture_gpd = 15.39
-    dist_gpd = 3.445
+    fixture_gpd = 15.70
+    dist_gpd = 5.40
     cw_gpd = 1.23
     dw_gpd = 0.85
     assert_in_delta(fixture_gpd, get_wu_gpd(model, Constants::ObjectTypeFixtures), 0.01)
@@ -244,8 +244,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
-    fixture_gpd = 46.19
-    dist_gpd = 12.37
+    fixture_gpd = 47.13
+    dist_gpd = 16.07
     cw_gpd = 3.62
     dw_gpd = 2.49
     assert_in_delta(cw_gpd, get_wu_gpd(model, Constants::ObjectTypeClothesWasher), 0.01)
@@ -320,8 +320,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
-    fixture_gpd = 46.19
-    dist_gpd = 12.37
+    fixture_gpd = 47.13
+    dist_gpd = 16.07
     cw_gpd = 3.62
     dw_gpd = 2.49
     assert_in_delta(cw_gpd, get_wu_gpd(model, Constants::ObjectTypeClothesWasher), 0.01)
@@ -382,7 +382,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
 
     # water use equipment hot water gal/day
     fixture_gpd = 42.63
-    dist_gpd = 9.54
+    dist_gpd = 14.65
     assert_in_delta(fixture_gpd, get_wu_gpd(model, Constants::ObjectTypeFixtures), 0.01)
     assert_in_delta(dist_gpd, get_wu_gpd(model, Constants::ObjectTypeDistributionWaste), 0.01)
   end
@@ -393,13 +393,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
-    fixture_gpd = 43.97
-    dist_gpd = 9.84
+    fixture_gpd = 44.87
+    dist_gpd = 15.42
     assert_in_delta(fixture_gpd, get_wu_gpd(model, Constants::ObjectTypeFixtures), 0.01)
     assert_in_delta(dist_gpd, get_wu_gpd(model, Constants::ObjectTypeDistributionWaste), 0.01)
 
     # mains temperature
-    avg_tmains = 70.91
+    avg_tmains = 70.14
     assert_in_delta(avg_tmains, UnitConversions.convert(model.getSiteWaterMainsTemperature.temperatureSchedule.get.to_ScheduleInterval.get.timeSeries.averageValue, 'C', 'F'), 0.01)
   end
 
@@ -925,8 +925,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
-    fixture_gpd = 13.49
-    dist_gpd = 4.57
+    fixture_gpd = 13.76
+    dist_gpd = 7.16
     cw_gpd = 2.25
     dw_gpd = 1.71
     assert_in_delta(cw_gpd, get_wu_gpd(model, Constants::ObjectTypeClothesWasher), 0.01)
@@ -986,8 +986,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # water use equipment hot water gal/day
-    fixture_gpd = 95.51
-    dist_gpd = 23.14
+    fixture_gpd = 97.46
+    dist_gpd = 23.61
     cw_gpd = 6.67
     dw_gpd = 5.72
     assert_in_delta(cw_gpd, get_wu_gpd(model, Constants::ObjectTypeClothesWasher), 0.01)
@@ -1072,10 +1072,10 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    default_hpxml_path = File.join(File.dirname(__FILE__), 'in.xml')
-    default_hpxml = HPXML.new(hpxml_path: default_hpxml_path)
-    File.delete(default_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), 'in.xml'))
 
-    return model, default_hpxml, default_hpxml.buildings[0]
+    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
+
+    return model, hpxml, hpxml.buildings[0]
   end
 end

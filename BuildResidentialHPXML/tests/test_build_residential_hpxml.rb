@@ -522,18 +522,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['water_heater_jacket_rvalue'] = 0
       args['water_heater_setpoint_temperature'] = 125
       args['water_heater_num_bedrooms_served'] = 3
-      args['hot_water_distribution_system_type'] = HPXML::DHWDistTypeStandard
-      args['hot_water_distribution_standard_piping_length'] = 50
-      args['hot_water_distribution_recirc_control_type'] = HPXML::DHWRecircControlTypeNone
-      args['hot_water_distribution_recirc_piping_length'] = 50
-      args['hot_water_distribution_recirc_branch_piping_length'] = 50
-      args['hot_water_distribution_recirc_pump_power'] = 50
-      args['hot_water_distribution_pipe_r'] = 0.0
-      args['dwhr_facilities_connected'] = Constants::None
-      args['dwhr_equal_flow'] = true
-      args['dwhr_efficiency'] = 0.55
-      args['water_fixtures_shower_low_flow'] = true
-      args['water_fixtures_sink_low_flow'] = false
+      args['dhw_distribution'] = 'Uninsulated, Standard'
+      args['dhw_fixtures'] = 'Standard'
+      args['dhw_drain_water_heat_recovery'] = 'None'
       args['solar_thermal_system_type'] = Constants::None
       args['solar_thermal_collector_area'] = 40.0
       args['solar_thermal_collector_loop_type'] = HPXML::SolarThermalLoopTypeDirect
@@ -673,7 +664,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('ducts_return_location')
       args.delete('water_heater_location')
       args.delete('water_heater_tank_volume')
-      args.delete('hot_water_distribution_standard_piping_length')
       args.delete('clothes_washer_location')
       args.delete('clothes_dryer_location')
       args.delete('refrigerator_location')

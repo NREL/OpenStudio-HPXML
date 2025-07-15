@@ -81,10 +81,9 @@
     "water_heater_efficiency_type": "EnergyFactor",
     "water_heater_efficiency": 0,
     "water_heater_num_bedrooms_served": 0,
-    "hot_water_distribution_system_type": "Standard",
-    "dwhr_facilities_connected": "none",
-    "water_fixtures_shower_low_flow": false,
-    "water_fixtures_sink_low_flow": false,
+    "dhw_distribution": "Uninsulated, Standard",
+    "dhw_fixtures": "Standard",
+    "dhw_drain_water_heat_recovery": "None",
     "water_fixtures_usage_multiplier": null,
     "solar_thermal_system_type": "none",
     "solar_thermal_collector_area": 0,
@@ -405,26 +404,19 @@
   },
   "tests/HERS_Hot_Water/L100AD-HW-04.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-02.xml",
-    "water_fixtures_shower_low_flow": true,
-    "water_fixtures_sink_low_flow": true
+    "dhw_fixtures": "Low Flow"
   },
   "tests/HERS_Hot_Water/L100AD-HW-05.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-02.xml",
-    "hot_water_distribution_system_type": "Recirculation",
-    "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_branch_piping_length": 10,
-    "hot_water_distribution_recirc_pump_power": 50,
-    "hot_water_distribution_pipe_r": 3
+    "dhw_distribution": "Detailed Example: Insulated, Recirc, Uncontrolled, 156.9ft Loop, 10ft Branch, 50 W"
   },
   "tests/HERS_Hot_Water/L100AD-HW-06.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-05.xml",
-    "hot_water_distribution_recirc_control_type": "manual demand control"
+    "dhw_distribution": "Detailed Example: Insulated, Recirc, Manual Demand Control, 156.9ft Loop, 10ft Branch, 50 W"
   },
   "tests/HERS_Hot_Water/L100AD-HW-07.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-02.xml",
-    "dwhr_facilities_connected": "all",
-    "dwhr_equal_flow": true,
-    "dwhr_efficiency": 0.54
+    "dhw_drain_water_heat_recovery": "55% Efficient, Preheats Hot and Cold, All Showers"
   },
   "tests/HERS_Hot_Water/L100AM-HW-01.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
@@ -556,12 +548,9 @@
     "water_heater_jacket_rvalue": 0,
     "water_heater_setpoint_temperature": 125,
     "water_heater_num_bedrooms_served": 3,
-    "hot_water_distribution_system_type": "Standard",
-    "hot_water_distribution_standard_piping_length": 50,
-    "hot_water_distribution_pipe_r": 0,
-    "dwhr_facilities_connected": "none",
-    "water_fixtures_shower_low_flow": true,
-    "water_fixtures_sink_low_flow": false,
+    "dhw_distribution": "Uninsulated, Standard",
+    "dhw_fixtures": "Standard",
+    "dhw_drain_water_heat_recovery": "None",
     "solar_thermal_system_type": "none",
     "solar_thermal_collector_area": 0,
     "solar_thermal_collector_loop_type": "liquid indirect",
@@ -1107,9 +1096,7 @@
   },
   "sample_files/base-dhw-dwhr.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "dwhr_facilities_connected": "all",
-    "dwhr_equal_flow": true,
-    "dwhr_efficiency": 0.55
+    "dhw_drain_water_heat_recovery": "Detailed Example: 54% Efficient, Preheats Hot and Cold, All Showers"
   },
   "sample_files/base-dhw-indirect.xml": {
     "parent_hpxml": "sample_files/base-hvac-boiler-gas-only.xml",
@@ -1155,7 +1142,7 @@
   },
   "sample_files/base-dhw-low-flow-fixtures.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "water_fixtures_sink_low_flow": true
+    "dhw_fixtures": "Low Flow"
   },
   "sample_files/base-dhw-multiple.xml": {
     "parent_hpxml": "sample_files/base-hvac-boiler-gas-only.xml"
@@ -1167,32 +1154,26 @@
   },
   "sample_files/base-dhw-recirc-demand.xml": {
     "parent_hpxml": "sample_files/base-dhw-recirc-nocontrol.xml",
-    "hot_water_distribution_recirc_control_type": "presence sensor demand control",
-    "hot_water_distribution_pipe_r": 3
+    "dhw_distribution": "Insulated, Recirc, Presence Sensor Demand Control"
   },
   "sample_files/base-dhw-recirc-demand-scheduled.xml": {
     "parent_hpxml": "sample_files/base-dhw-recirc-demand.xml"
   },
   "sample_files/base-dhw-recirc-manual.xml": {
     "parent_hpxml": "sample_files/base-dhw-recirc-nocontrol.xml",
-    "hot_water_distribution_recirc_control_type": "manual demand control",
-    "hot_water_distribution_pipe_r": 3
+    "dhw_distribution": "Insulated, Recirc, Manual Demand Control"
   },
   "sample_files/base-dhw-recirc-nocontrol.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hot_water_distribution_system_type": "Recirculation",
-    "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_piping_length": 50,
-    "hot_water_distribution_recirc_branch_piping_length": 50,
-    "hot_water_distribution_recirc_pump_power": 50
+    "dhw_distribution": "Insulated, Recirc, Uncontrolled"
   },
   "sample_files/base-dhw-recirc-temperature.xml": {
     "parent_hpxml": "sample_files/base-dhw-recirc-nocontrol.xml",
-    "hot_water_distribution_recirc_control_type": "temperature"
+    "dhw_distribution": "Insulated, Recirc, Temperature Control"
   },
   "sample_files/base-dhw-recirc-timer.xml": {
     "parent_hpxml": "sample_files/base-dhw-recirc-nocontrol.xml",
-    "hot_water_distribution_recirc_control_type": "timer"
+    "dhw_distribution": "Insulated, Recirc, Timer Control"
   },
   "sample_files/base-dhw-solar-direct-evacuated-tube.xml": {
     "parent_hpxml": "sample_files/base-dhw-solar-indirect-flat-plate.xml",
@@ -2801,8 +2782,6 @@
     "water_heater_location": null,
     "water_heater_tank_volume": null,
     "water_heater_setpoint_temperature": null,
-    "hot_water_distribution_standard_piping_length": null,
-    "hot_water_distribution_pipe_r": null,
     "solar_thermal_system_type": "hot water",
     "solar_thermal_collector_area": 40,
     "solar_thermal_collector_loop_type": "liquid direct",
@@ -2866,7 +2845,7 @@
   },
   "sample_files/base-misc-loads-large-uncommon.xml": {
     "parent_hpxml": "sample_files/base-schedules-simple.xml",
-    "hot_water_distribution_system_type": "Standard",
+    "dhw_distribution": "Uninsulated, Standard",
     "vehicle_type": "none",
     "ev_charger_present": false,
     "extra_refrigerator_present": true,
@@ -3075,11 +3054,7 @@
   },
   "sample_files/base-schedules-simple.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hot_water_distribution_system_type": "Recirculation",
-    "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_piping_length": 50,
-    "hot_water_distribution_recirc_branch_piping_length": 50,
-    "hot_water_distribution_recirc_pump_power": 50,
+    "dhw_distribution": "Uninsulated, Recirc, Uncontrolled",
     "vehicle_type": "BatteryElectricVehicle",
     "ev_charger_present": true,
     "misc_plug_loads_vehicle_present": false
@@ -3089,21 +3064,13 @@
     "schedules_unavailable_period_types": "Vacancy",
     "schedules_unavailable_period_dates": "Dec 1 - Jan 31",
     "schedules_unavailable_period_window_natvent_availabilities": "always unavailable",
-    "hot_water_distribution_system_type": "Recirculation",
-    "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_piping_length": 50,
-    "hot_water_distribution_recirc_branch_piping_length": 50,
-    "hot_water_distribution_recirc_pump_power": 50
+    "dhw_distribution": "Uninsulated, Recirc, Uncontrolled"
   },
   "sample_files/base-schedules-simple-power-outage.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "schedules_unavailable_period_types": "Power Outage",
     "schedules_unavailable_period_dates": "Jul 1 5 - Jul 31 14",
-    "hot_water_distribution_system_type": "Recirculation",
-    "hot_water_distribution_recirc_control_type": "no control",
-    "hot_water_distribution_recirc_piping_length": 50,
-    "hot_water_distribution_recirc_branch_piping_length": 50,
-    "hot_water_distribution_recirc_pump_power": 50
+    "dhw_distribution": "Uninsulated, Recirc, Uncontrolled"
   },
   "sample_files/base-schedules-simple-no-space-heating.xml": {
     "parent_hpxml": "sample_files/base.xml",

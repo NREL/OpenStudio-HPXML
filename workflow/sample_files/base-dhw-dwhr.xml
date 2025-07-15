@@ -415,9 +415,7 @@
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
             <SystemType>
-              <Standard>
-                <PipingLength>50.0</PipingLength>
-              </Standard>
+              <Standard/>
             </SystemType>
             <PipeInsulation>
               <PipeRValue>0.0</PipeRValue>
@@ -425,13 +423,13 @@
             <DrainWaterHeatRecovery>
               <FacilitiesConnected>all</FacilitiesConnected>
               <EqualFlow>true</EqualFlow>
-              <Efficiency>0.55</Efficiency>
+              <Efficiency>0.54</Efficiency>
             </DrainWaterHeatRecovery>
           </HotWaterDistribution>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture1'/>
             <WaterFixtureType>shower head</WaterFixtureType>
-            <LowFlow>true</LowFlow>
+            <LowFlow>false</LowFlow>
           </WaterFixture>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture2'/>

@@ -1188,93 +1188,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The water heater operating mode. The '#{HPXML::WaterHeaterOperatingModeHeatPumpOnly}' option only uses the heat pump, while '#{HPXML::WaterHeaterOperatingModeHybridAuto}' allows the backup electric resistance to come on in high demand situations. This is ignored if a scheduled operating mode type is selected. Applies only to #{HPXML::WaterHeaterTypeHeatPump}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>) is used.")
     args << arg
 
-    hot_water_distribution_system_type_choices = OpenStudio::StringVector.new
-    hot_water_distribution_system_type_choices << HPXML::DHWDistTypeStandard
-    hot_water_distribution_system_type_choices << HPXML::DHWDistTypeRecirc
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hot_water_distribution_system_type', hot_water_distribution_system_type_choices, true)
-    arg.setDisplayName('Hot Water Distribution: System Type')
-    arg.setDescription('The type of the hot water distribution system.')
-    arg.setDefaultValue(HPXML::DHWDistTypeStandard)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_distribution', choices[:dhw_distribution], false)
+    arg.setDisplayName('Hot Water Distribution')
+    arg.setDescription('The type of domestic hot water distrubtion.')
+    arg.setDefaultValue(choices[:dhw_distribution][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_standard_piping_length', false)
-    arg.setDisplayName('Hot Water Distribution: Standard Piping Length')
-    arg.setUnits('ft')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeStandard}, the length of the piping. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#standard'>Standard</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_fixtures', choices[:dhw_fixtures], false)
+    arg.setDisplayName('Hot Water Fixtures')
+    arg.setDescription('The type of domestic hot water fixtures.')
+    arg.setDefaultValue(choices[:dhw_fixtures][0])
     args << arg
 
-    recirculation_control_type_choices = OpenStudio::StringVector.new
-    recirculation_control_type_choices << HPXML::DHWRecircControlTypeNone
-    recirculation_control_type_choices << HPXML::DHWRecircControlTypeTimer
-    recirculation_control_type_choices << HPXML::DHWRecircControlTypeTemperature
-    recirculation_control_type_choices << HPXML::DHWRecircControlTypeSensor
-    recirculation_control_type_choices << HPXML::DHWRecircControlTypeManual
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hot_water_distribution_recirc_control_type', recirculation_control_type_choices, false)
-    arg.setDisplayName('Hot Water Distribution: Recirculation Control Type')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the type of hot water recirculation control, if any.")
-    arg.setDefaultValue(HPXML::DHWRecircControlTypeNone)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_recirc_piping_length', false)
-    arg.setDisplayName('Hot Water Distribution: Recirculation Piping Length')
-    arg.setUnits('ft')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation piping. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_recirc_branch_piping_length', false)
-    arg.setDisplayName('Hot Water Distribution: Recirculation Branch Piping Length')
-    arg.setUnits('ft')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation branch piping. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_recirc_pump_power', false)
-    arg.setDisplayName('Hot Water Distribution: Recirculation Pump Power')
-    arg.setUnits('W')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the recirculation pump power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_pipe_r', false)
-    arg.setDisplayName('Hot Water Distribution: Pipe Insulation Nominal R-Value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription("Nominal R-value of the pipe insulation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hot-water-distribution'>HPXML Hot Water Distribution</a>) is used.")
-    args << arg
-
-    dwhr_facilities_connected_choices = OpenStudio::StringVector.new
-    dwhr_facilities_connected_choices << Constants::None
-    dwhr_facilities_connected_choices << HPXML::DWHRFacilitiesConnectedOne
-    dwhr_facilities_connected_choices << HPXML::DWHRFacilitiesConnectedAll
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dwhr_facilities_connected', dwhr_facilities_connected_choices, true)
-    arg.setDisplayName('Drain Water Heat Recovery: Facilities Connected')
-    arg.setDescription("Which facilities are connected for the drain water heat recovery. Use '#{Constants::None}' if there is no drain water heat recovery system.")
-    arg.setDefaultValue(Constants::None)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dwhr_equal_flow', false)
-    arg.setDisplayName('Drain Water Heat Recovery: Equal Flow')
-    arg.setDescription('Whether the drain water heat recovery has equal flow.')
-    arg.setDefaultValue(true)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dwhr_efficiency', false)
-    arg.setDisplayName('Drain Water Heat Recovery: Efficiency')
-    arg.setUnits('Frac')
-    arg.setDescription('The efficiency of the drain water heat recovery.')
-    arg.setDefaultValue(0.55)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_fixtures_shower_low_flow', true)
-    arg.setDisplayName('Hot Water Fixtures: Is Shower Low Flow')
-    arg.setDescription('Whether the shower fixture is low flow.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_fixtures_sink_low_flow', true)
-    arg.setDisplayName('Hot Water Fixtures: Is Sink Low Flow')
-    arg.setDescription('Whether the sink fixture is low flow.')
-    arg.setDefaultValue(false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_drain_water_heat_recovery', choices[:dhw_drain_water_heat_recovery], false)
+    arg.setDisplayName('Drain Water Heat Reovery')
+    arg.setDescription('The type of drain water heater recovery.')
+    arg.setDefaultValue(choices[:dhw_drain_water_heat_recovery][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_fixtures_usage_multiplier', false)
@@ -5463,29 +5392,29 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def set_hot_water_distribution(hpxml_bldg, args)
     return if args[:water_heater_type] == Constants::None
 
-    if args[:dwhr_facilities_connected] != Constants::None
-      dwhr_facilities_connected = args[:dwhr_facilities_connected]
-      dwhr_equal_flow = args[:dwhr_equal_flow]
-      dwhr_efficiency = args[:dwhr_efficiency]
+    if args[:dhw_drain_water_heat_recovery_facilities_connected] != Constants::None
+      dwhr_facilities_connected = args[:dhw_drain_water_heat_recovery_facilities_connected]
+      dwhr_equal_flow = args[:dhw_drain_water_heat_recovery_equal_flow]
+      dwhr_efficiency = args[:dhw_drain_water_heat_recovery_efficiency]
     end
 
-    if args[:hot_water_distribution_system_type] == HPXML::DHWDistTypeStandard
-      standard_piping_length = args[:hot_water_distribution_standard_piping_length]
+    if args[:dhw_distribution_system_type] == HPXML::DHWDistTypeStandard
+      standard_piping_length = args[:dhw_distribution_standard_piping_length]
     else
-      recirculation_control_type = args[:hot_water_distribution_recirc_control_type]
-      recirculation_piping_loop_length = args[:hot_water_distribution_recirc_piping_length]
-      recirculation_branch_piping_length = args[:hot_water_distribution_recirc_branch_piping_length]
-      recirculation_pump_power = args[:hot_water_distribution_recirc_pump_power]
+      recirculation_control_type = args[:dhw_distribution_recirculation_control_type]
+      recirculation_piping_loop_length = args[:dhw_distribution_recirculation_piping_loop_length]
+      recirculation_branch_piping_length = args[:dhw_distribution_recirculation_branch_piping_length]
+      recirculation_pump_power = args[:dhw_distribution_recirculation_pump_power]
     end
 
     hpxml_bldg.hot_water_distributions.add(id: "HotWaterDistribution#{hpxml_bldg.hot_water_distributions.size + 1}",
-                                           system_type: args[:hot_water_distribution_system_type],
+                                           system_type: args[:dhw_distribution_system_type],
                                            standard_piping_length: standard_piping_length,
                                            recirculation_control_type: recirculation_control_type,
                                            recirculation_piping_loop_length: recirculation_piping_loop_length,
                                            recirculation_branch_piping_length: recirculation_branch_piping_length,
                                            recirculation_pump_power: recirculation_pump_power,
-                                           pipe_r_value: args[:hot_water_distribution_pipe_r],
+                                           pipe_r_value: args[:dhw_distribution_pipe_insulation_nominal_r_value],
                                            dwhr_facilities_connected: dwhr_facilities_connected,
                                            dwhr_equal_flow: dwhr_equal_flow,
                                            dwhr_efficiency: dwhr_efficiency)
@@ -5501,11 +5430,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     hpxml_bldg.water_fixtures.add(id: "WaterFixture#{hpxml_bldg.water_fixtures.size + 1}",
                                   water_fixture_type: HPXML::WaterFixtureTypeShowerhead,
-                                  low_flow: args[:water_fixtures_shower_low_flow])
+                                  low_flow: args[:dhw_fixtures_low_flow_showers])
 
     hpxml_bldg.water_fixtures.add(id: "WaterFixture#{hpxml_bldg.water_fixtures.size + 1}",
                                   water_fixture_type: HPXML::WaterFixtureTypeFaucet,
-                                  low_flow: args[:water_fixtures_sink_low_flow])
+                                  low_flow: args[:dhw_fixtures_low_flow_sinks])
 
     hpxml_bldg.water_heating.water_fixtures_usage_multiplier = args[:water_fixtures_usage_multiplier]
   end

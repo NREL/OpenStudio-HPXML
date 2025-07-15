@@ -2005,153 +2005,42 @@ The water heater operating mode. The 'heat pump only' option only uses the heat 
 
 <br/>
 
-**Hot Water Distribution: System Type**
+**Hot Water Distribution**
 
-The type of the hot water distribution system.
+The type of domestic hot water distrubtion.
 
-- **Name:** ``hot_water_distribution_system_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `Standard`, `Recirculation`
-
-<br/>
-
-**Hot Water Distribution: Standard Piping Length**
-
-If the distribution system is Standard, the length of the piping. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#standard'>Standard</a>) is used.
-
-- **Name:** ``hot_water_distribution_standard_piping_length``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Hot Water Distribution: Recirculation Control Type**
-
-If the distribution system is Recirculation, the type of hot water recirculation control, if any.
-
-- **Name:** ``hot_water_distribution_recirc_control_type``
+- **Name:** ``dhw_distribution``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `no control`, `timer`, `temperature`, `presence sensor demand control`, `manual demand control`
+- **Choices:** `Uninsulated, Standard`, `Uninsulated, Recirc, Uncontrolled`, `Uninsulated, Recirc, Timer Control`, `Uninsulated, Recirc, Temperature Control`, `Uninsulated, Recirc, Presence Sensor Demand Control`, `Uninsulated, Recirc, Manual Demand Control`, `Insulated, Standard`, `Insulated, Recirc, Uncontrolled`, `Insulated, Recirc, Timer Control`, `Insulated, Recirc, Temperature Control`, `Insulated, Recirc, Presence Sensor Demand Control`, `Insulated, Recirc, Manual Demand Control`, `Detailed Example: Insulated, Recirc, Uncontrolled, 156.9ft Loop, 10ft Branch, 50 W`, `Detailed Example: Insulated, Recirc, Manual Demand Control, 156.9ft Loop, 10ft Branch, 50 W`
 
 <br/>
 
-**Hot Water Distribution: Recirculation Piping Length**
+**Hot Water Fixtures**
 
-If the distribution system is Recirculation, the length of the recirculation piping. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.
+The type of domestic hot water fixtures.
 
-- **Name:** ``hot_water_distribution_recirc_piping_length``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Hot Water Distribution: Recirculation Branch Piping Length**
-
-If the distribution system is Recirculation, the length of the recirculation branch piping. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.
-
-- **Name:** ``hot_water_distribution_recirc_branch_piping_length``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Hot Water Distribution: Recirculation Pump Power**
-
-If the distribution system is Recirculation, the recirculation pump power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.
-
-- **Name:** ``hot_water_distribution_recirc_pump_power``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Hot Water Distribution: Pipe Insulation Nominal R-Value**
-
-Nominal R-value of the pipe insulation. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hot-water-distribution'>HPXML Hot Water Distribution</a>) is used.
-
-- **Name:** ``hot_water_distribution_pipe_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
-
-- **Required:** ``false``
-
-<br/>
-
-**Drain Water Heat Recovery: Facilities Connected**
-
-Which facilities are connected for the drain water heat recovery. Use 'none' if there is no drain water heat recovery system.
-
-- **Name:** ``dwhr_facilities_connected``
+- **Name:** ``dhw_fixtures``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
-- **Choices:** `none`, `one`, `all`
+- **Choices:** `Standard`, `Low Flow`
 
 <br/>
 
-**Drain Water Heat Recovery: Equal Flow**
+**Drain Water Heat Reovery**
 
-Whether the drain water heat recovery has equal flow.
+The type of drain water heater recovery.
 
-- **Name:** ``dwhr_equal_flow``
-- **Type:** ``Boolean``
+- **Name:** ``dhw_drain_water_heat_recovery``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Drain Water Heat Recovery: Efficiency**
-
-The efficiency of the drain water heat recovery.
-
-- **Name:** ``dwhr_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Hot Water Fixtures: Is Shower Low Flow**
-
-Whether the shower fixture is low flow.
-
-- **Name:** ``water_fixtures_shower_low_flow``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Hot Water Fixtures: Is Sink Low Flow**
-
-Whether the sink fixture is low flow.
-
-- **Name:** ``water_fixtures_sink_low_flow``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
+- **Choices:** `None`, `25% Efficient, Preheats Hot Only, All Showers`, `25% Efficient, Preheats Hot Only, 1 Shower`, `25% Efficient, Preheats Hot and Cold, All Showers`, `25% Efficient, Preheats Hot and Cold, 1 Shower`, `35% Efficient, Preheats Hot Only, All Showers`, `35% Efficient, Preheats Hot Only, 1 Shower`, `35% Efficient, Preheats Hot and Cold, All Showers`, `35% Efficient, Preheats Hot and Cold, 1 Shower`, `45% Efficient, Preheats Hot Only, All Showers`, `45% Efficient, Preheats Hot Only, 1 Shower`, `45% Efficient, Preheats Hot and Cold, All Showers`, `45% Efficient, Preheats Hot and Cold, 1 Shower`, `55% Efficient, Preheats Hot Only, All Showers`, `55% Efficient, Preheats Hot Only, 1 Shower`, `55% Efficient, Preheats Hot and Cold, All Showers`, `55% Efficient, Preheats Hot and Cold, 1 Shower`, `Detailed Example: 54% Efficient, Preheats Hot and Cold, All Showers`
 
 <br/>
 
