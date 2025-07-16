@@ -21,7 +21,6 @@
         "geometry_average_ceiling_height": 8.0,
         "geometry_eaves_depth": 0,
         "geometry_foundation_type": "Basement, Conditioned",
-        "geometry_garage_width": 0.0,
         "geometry_roof_pitch": "6:12",
         "geometry_unit_aspect_ratio": 1.5,
         "geometry_unit_cfa": 2700.0,

@@ -9,10 +9,6 @@
     "geometry_unit_num_bedrooms": 3,
     "geometry_unit_num_occupants": 0,
     "geometry_average_ceiling_height": 8,
-    "geometry_garage_width": 0,
-    "geometry_garage_depth": 0,
-    "geometry_garage_protrusion": 0,
-    "geometry_garage_position": "Right",
     "geometry_foundation_type": "Ambient",
     "geometry_attic_type": "Attic, Vented, Gable",
     "geometry_roof_pitch": "4:12",
@@ -25,8 +21,7 @@
     "ceiling_assembly_r": 18.45,
     "enclosure_roof_material": "0.6 Solar Absorptance",
     "roof_assembly_r": 1.99,
-    "radiant_barrier_grade": 2,
-    "radiant_barrier_attic_location": "none",
+    "enclosure_radiant_barrier": "None",
     "wall_type": "WoodStud",
     "enclosure_wall_siding": "0.6 Solar Absorptance",
     "wall_assembly_r": 11.76,
@@ -445,10 +440,6 @@
     "geometry_unit_num_bedrooms": 3,
     "geometry_unit_num_bathrooms": 2,
     "geometry_average_ceiling_height": 8,
-    "geometry_garage_width": 0,
-    "geometry_garage_depth": 20,
-    "geometry_garage_protrusion": 0,
-    "geometry_garage_position": "Right",
     "geometry_foundation_type": "Basement, Conditioned",
     "geometry_attic_type": "Attic, Unvented, Gable",
     "geometry_roof_pitch": "6:12",
@@ -462,8 +453,7 @@
     "ceiling_assembly_r": 39.3,
     "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
     "roof_assembly_r": 2.3,
-    "radiant_barrier_grade": 2,
-    "radiant_barrier_attic_location": "none",
+    "enclosure_radiant_barrier": "None",
     "wall_type": "WoodStud",
     "enclosure_wall_siding": "Wood, Medium",
     "wall_assembly_r": 23,
@@ -687,12 +677,11 @@
   "sample_files/base-atticroof-radiant-barrier.xml": {
     "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
     "ceiling_assembly_r": 8.7,
-    "radiant_barrier_grade": 2,
-    "radiant_barrier_attic_location": "Attic roof and gable walls"
+    "enclosure_radiant_barrier": "Attic Roof and Gable Walls"
   },
   "sample_files/base-atticroof-radiant-barrier-ceiling.xml": {
     "parent_hpxml": "sample_files/base-atticroof-radiant-barrier.xml",
-    "radiant_barrier_attic_location": "Attic floor"
+    "enclosure_radiant_barrier": "Attic Floor"
   },
   "sample_files/base-atticroof-unvented-insulated-roof.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1358,7 +1347,7 @@
   "sample_files/base-enclosure-2stories-garage.xml": {
     "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
     "geometry_unit_cfa": 3250,
-    "geometry_garage_width": 20,
+    "geometry_garage_type": "2 Car, Right, Fully Inset",
     "floor_over_garage_assembly_r": 39.3
   },
   "sample_files/base-enclosure-beds-1.xml": {
@@ -1388,8 +1377,7 @@
   },
   "sample_files/base-enclosure-garage.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "geometry_garage_width": 30,
-    "geometry_garage_protrusion": 1,
+    "geometry_garage_type": "3 Car, Right, Fully Protruding",
     "window_area_or_wwr_front": 12,
     "ducts_supply_location": "garage",
     "ducts_return_location": "garage",

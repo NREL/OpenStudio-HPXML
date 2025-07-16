@@ -190,13 +190,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-bills-args-not-all-same-size.xml' => 'base-sfd.xml',
       'error-invalid-aspect-ratio.xml' => 'base-sfd.xml',
       'error-too-many-floors.xml' => 'base-sfd.xml',
-      'error-invalid-garage-protrusion.xml' => 'base-sfd.xml',
       'error-hip-roof-and-protruding-garage.xml' => 'base-sfd.xml',
       'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
       'error-invalid-door-area.xml' => 'base-sfd.xml',
-      'error-garage-too-wide.xml' => 'base-sfd.xml',
-      'error-garage-too-deep.xml' => 'base-sfd.xml',
       'error-vented-attic-with-zero-floor-insulation.xml' => 'base-sfd.xml',
       'error-different-software-program.xml' => 'base-sfd-header.xml',
       'error-different-simulation-control.xml' => 'base-sfd-header.xml',
@@ -241,13 +238,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-bills-args-not-all-same-size.xml' => ['One or more utility bill arguments does not have enough comma-separated elements specified.'],
       'error-invalid-aspect-ratio.xml' => ['Aspect ratio must be greater than zero.'],
       'error-too-many-floors.xml' => ['Number of above-grade floors must be six or less.'],
-      'error-invalid-garage-protrusion.xml' => ['Garage protrusion fraction must be between zero and one.'],
       'error-hip-roof-and-protruding-garage.xml' => ['Cannot handle protruding garage and hip roof.'],
       'error-protruding-garage-under-gable-roof.xml' => ['Cannot handle protruding garage and attic ridge running from front to back.'],
       'error-ambient-with-garage.xml' => ['Cannot handle garages with an ambient foundation type.'],
       'error-invalid-door-area.xml' => ['Door area cannot be negative.'],
-      'error-garage-too-wide.xml' => ['Garage is as wide as the single-family detached unit.'],
-      'error-garage-too-deep.xml' => ['Garage is as deep as the single-family detached unit.'],
       'error-vented-attic-with-zero-floor-insulation.xml' => ["Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
       'error-different-software-program.xml' => ["'Software Info: Program Used' cannot vary across dwelling units.",
                                                  "'Software Info: Program Version' cannot vary across dwelling units."],
@@ -416,10 +410,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_average_ceiling_height'] = 8.0
       args['geometry_unit_orientation'] = 180.0
       args['geometry_unit_aspect_ratio'] = 1.5
-      args['geometry_garage_width'] = 0.0
-      args['geometry_garage_depth'] = 20.0
-      args['geometry_garage_protrusion'] = 0.0
-      args['geometry_garage_position'] = Constants::PositionRight
       args['geometry_foundation_type'] = 'Basement, Conditioned'
       args['geometry_roof_pitch'] = '6:12'
       args['geometry_attic_type'] = 'Attic, Unvented, Gable'
@@ -436,8 +426,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['ceiling_assembly_r'] = 39.3
       args['enclosure_roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
       args['roof_assembly_r'] = 2.3
-      args['radiant_barrier_attic_location'] = Constants::None
-      args['radiant_barrier_grade'] = 1
       args['wall_type'] = HPXML::WallTypeWoodStud
       args['enclosure_wall_siding'] = 'Wood, Medium'
       args['wall_assembly_r'] = 23
@@ -695,11 +683,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_window_interior_shading'] = 'Summer=0.5, Winter=0.9'
       args['enclosure_window_exterior_shading'] = 'Summer=0.25, Winter=1.00'
     when 'extra-enclosure-garage-partially-protruded.xml'
-      args['geometry_garage_width'] = 12
-      args['geometry_garage_protrusion'] = 0.5
+      args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
     when 'extra-enclosure-garage-atticroof-conditioned.xml'
-      args['geometry_garage_width'] = 30.0
-      args['geometry_garage_protrusion'] = 1.0
+      args['geometry_garage_type'] = '3 Car, Right, Half Protruding'
       args['window_area_or_wwr_front'] = 12.0
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
@@ -995,26 +981,17 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_aspect_ratio'] = -1
     when 'error-too-many-floors.xml'
       args['geometry_unit_num_floors_above_grade'] = 7
-    when 'error-invalid-garage-protrusion.xml'
-      args['geometry_garage_protrusion'] = 1.5
     when 'error-hip-roof-and-protruding-garage.xml'
       args['geometry_attic_type'] = 'Attic, Unvented, Hip'
-      args['geometry_garage_width'] = 12
-      args['geometry_garage_protrusion'] = 0.5
+      args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
     when 'error-protruding-garage-under-gable-roof.xml'
       args['geometry_unit_aspect_ratio'] = 0.5
-      args['geometry_garage_width'] = 12
-      args['geometry_garage_protrusion'] = 0.5
+      args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
     when 'error-ambient-with-garage.xml'
-      args['geometry_garage_width'] = 12
+      args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
       args['geometry_foundation_type'] = 'Ambient'
     when 'error-invalid-door-area.xml'
       args['door_area'] = -10
-    when 'error-garage-too-wide.xml'
-      args['geometry_garage_width'] = 72
-    when 'error-garage-too-deep.xml'
-      args['geometry_garage_width'] = 12
-      args['geometry_garage_depth'] = 40
     when 'error-vented-attic-with-zero-floor-insulation.xml'
       args['ceiling_assembly_r'] = 0
     when 'error-different-software-program.xml'

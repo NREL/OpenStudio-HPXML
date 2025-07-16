@@ -327,35 +327,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Describes the above-grade height of apartment units on upper floors or homes above ambient or belly-and-wing foundations. It is defined as the height of the lowest conditioned floor above grade and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-construction'>HPXML Building Construction</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_garage_width', true)
-    arg.setDisplayName('Geometry: Garage Width')
-    arg.setUnits('ft')
-    arg.setDescription("The width of the garage. Enter zero for no garage. Only applies to #{HPXML::ResidentialTypeSFD} units.")
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_garage_depth', true)
-    arg.setDisplayName('Geometry: Garage Depth')
-    arg.setUnits('ft')
-    arg.setDescription("The depth of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units.")
-    arg.setDefaultValue(20.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_garage_protrusion', true)
-    arg.setDisplayName('Geometry: Garage Protrusion')
-    arg.setUnits('Frac')
-    arg.setDescription("The fraction of the garage that is protruding from the conditioned space. Only applies to #{HPXML::ResidentialTypeSFD} units.")
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    garage_position_choices = OpenStudio::StringVector.new
-    garage_position_choices << Constants::PositionRight
-    garage_position_choices << Constants::PositionLeft
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_garage_position', garage_position_choices, true)
-    arg.setDisplayName('Geometry: Garage Position')
-    arg.setDescription("The position of the garage. Only applies to #{HPXML::ResidentialTypeSFD} units.")
-    arg.setDefaultValue(Constants::PositionRight)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_garage_type', choices[:geometry_garage_type], false)
+    arg.setDisplayName('Geometry: Attached Garage')
+    arg.setDescription("The type of attached garage. Only applies to #{HPXML::ResidentialTypeSFD} units.")
+    arg.setDefaultValue(choices[:geometry_garage_type][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_foundation_type', choices[:geometry_foundation_type], true)
@@ -469,25 +444,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.3)
     args << arg
 
-    radiant_barrier_attic_location_choices = OpenStudio::StringVector.new
-    radiant_barrier_attic_location_choices << Constants::None
-    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofOnly
-    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
-    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticFloor
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
-    arg.setDisplayName('Attic: Radiant Barrier Location')
-    arg.setDescription('The location of the radiant barrier in the attic.')
-    args << arg
-
-    radiant_barrier_grade_choices = OpenStudio::StringVector.new
-    radiant_barrier_grade_choices << '1'
-    radiant_barrier_grade_choices << '2'
-    radiant_barrier_grade_choices << '3'
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_grade', radiant_barrier_grade_choices, false)
-    arg.setDisplayName('Attic: Radiant Barrier Grade')
-    arg.setDescription("The grade of the radiant barrier in the attic. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_radiant_barrier', choices[:enclosure_radiant_barrier], false)
+    arg.setDisplayName('Enclosure: Radiant Barrier')
+    arg.setDescription('The type of radiant barrier in the attic.')
+    arg.setDefaultValue(choices[:enclosure_radiant_barrier][0])
     args << arg
 
     wall_type_choices = OpenStudio::StringVector.new
@@ -2600,7 +2560,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_num_floors_above_grade] > 6)
     errors << 'Number of above-grade floors must be six or less.' if error
 
-    error = (args[:geometry_garage_protrusion] < 0) || (args[:geometry_garage_protrusion] > 1)
+    error = (args[:geometry_garage_type_protrusion] < 0) || (args[:geometry_garage_type_protrusion] > 1)
     errors << 'Garage protrusion fraction must be between zero and one.' if error
 
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_foundation_type_type] == HPXML::FoundationTypeAboveApartment)
@@ -2609,13 +2569,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (args[:geometry_attic_type_attic_type] == HPXML::AtticTypeBelowApartment)
     errors << 'Single-family attached units cannot be below another unit.' if error
 
-    error = (args[:geometry_garage_protrusion] > 0) && (args[:geometry_attic_type_roof_type] == Constants::RoofTypeHip) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+    error = (args[:geometry_garage_type_protrusion] > 0) && (args[:geometry_attic_type_roof_type] == Constants::RoofTypeHip) && (args[:geometry_garage_type_width] * args[:geometry_garage_type_depth] > 0)
     errors << 'Cannot handle protruding garage and hip roof.' if error
 
-    error = (args[:geometry_garage_protrusion] > 0) && (args[:geometry_unit_aspect_ratio] < 1) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0) && (args[:geometry_attic_type_roof_type] == Constants::RoofTypeGable)
+    error = (args[:geometry_garage_type_protrusion] > 0) && (args[:geometry_unit_aspect_ratio] < 1) && (args[:geometry_garage_type_width] * args[:geometry_garage_type_depth] > 0) && (args[:geometry_attic_type_roof_type] == Constants::RoofTypeGable)
     errors << 'Cannot handle protruding garage and attic ridge running from front to back.' if error
 
-    error = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+    error = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_garage_type_width] * args[:geometry_garage_type_depth] > 0)
     errors << 'Cannot handle garages with an ambient foundation type.' if error
 
     error = (args[:door_area] < 0)
@@ -3592,11 +3552,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
 
-      next unless [HPXML::RadiantBarrierLocationAtticRoofOnly, HPXML::RadiantBarrierLocationAtticRoofAndGableWalls].include?(args[:radiant_barrier_attic_location].to_s)
+      next unless [HPXML::RadiantBarrierLocationAtticRoofOnly, HPXML::RadiantBarrierLocationAtticRoofAndGableWalls].include?(args[:enclosure_radiant_barrier_location].to_s)
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.roofs[-1].interior_adjacent_to)
 
       hpxml_bldg.roofs[-1].radiant_barrier = true
-      hpxml_bldg.roofs[-1].radiant_barrier_grade = args[:radiant_barrier_grade]
     end
   end
 
@@ -3742,11 +3701,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         hpxml_bldg.walls[-1].insulation_assembly_r_value = 4.0 # Uninsulated
       end
 
-      next unless hpxml_bldg.walls[-1].attic_wall_type == HPXML::AtticWallTypeGable && args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
+      next unless hpxml_bldg.walls[-1].attic_wall_type == HPXML::AtticWallTypeGable && args[:enclosure_radiant_barrier_location].to_s == HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.walls[-1].interior_adjacent_to)
 
       hpxml_bldg.walls[-1].radiant_barrier = true
-      hpxml_bldg.walls[-1].radiant_barrier_grade = args[:radiant_barrier_grade]
     end
   end
 
@@ -3903,11 +3861,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
       end
 
-      next unless args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticFloor
+      next unless args[:enclosure_radiant_barrier_location].to_s == HPXML::RadiantBarrierLocationAtticFloor
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.floors[-1].exterior_adjacent_to) && hpxml_bldg.floors[-1].interior_adjacent_to == HPXML::LocationConditionedSpace
 
       hpxml_bldg.floors[-1].radiant_barrier = true
-      hpxml_bldg.floors[-1].radiant_barrier_grade = args[:radiant_barrier_grade]
     end
   end
 
@@ -5739,7 +5696,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @return [nil]
   def set_lighting(hpxml_bldg, args)
     if not args[:lighting_interior_fraction_cfl].nil? # Has lighting
-      has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
+      has_garage = (args[:geometry_garage_type_width] * args[:geometry_garage_type_depth] > 0)
 
       # Interior
       interior_usage_multiplier = args[:lighting_interior_usage_multiplier]

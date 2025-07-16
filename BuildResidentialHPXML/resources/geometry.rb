@@ -10,10 +10,10 @@ module Geometry
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
-  # @param geometry_garage_width [Double] width of the garage (ft)
-  # @param geometry_garage_depth [Double] depth of the garage (ft)
-  # @param geometry_garage_protrusion [Double] fraction of garage that protrudes from conditioned space
-  # @param geometry_garage_position [String] Right or Left
+  # @param geometry_garage_type_width [Double] width of the garage (ft)
+  # @param geometry_garage_type_depth [Double] depth of the garage (ft)
+  # @param geometry_garage_type_protrusion [Double] fraction of garage that protrudes from conditioned space
+  # @param geometry_garage_type_position [String] Right or Left
   # @param geometry_foundation_type_type [String] foundation type of the building
   # @param geometry_foundation_type_height [Double] height of the foundation (ft)
   # @param geometry_foundation_type_rim_joist_height [Double] height of the rim joists (ft)
@@ -26,10 +26,10 @@ module Geometry
                                          geometry_average_ceiling_height:,
                                          geometry_unit_num_floors_above_grade:,
                                          geometry_unit_aspect_ratio:,
-                                         geometry_garage_width:,
-                                         geometry_garage_depth:,
-                                         geometry_garage_protrusion:,
-                                         geometry_garage_position:,
+                                         geometry_garage_type_width:,
+                                         geometry_garage_type_depth:,
+                                         geometry_garage_type_protrusion:,
+                                         geometry_garage_type_position:,
                                          geometry_foundation_type_type:,
                                          geometry_foundation_type_height:,
                                          geometry_foundation_type_rim_joist_height:,
@@ -41,10 +41,10 @@ module Geometry
     average_ceiling_height = geometry_average_ceiling_height
     num_floors = geometry_unit_num_floors_above_grade
     aspect_ratio = geometry_unit_aspect_ratio
-    garage_width = geometry_garage_width
-    garage_depth = geometry_garage_depth
-    garage_protrusion = geometry_garage_protrusion
-    garage_position = geometry_garage_position
+    garage_width = geometry_garage_type_width
+    garage_depth = geometry_garage_type_depth
+    garage_protrusion = geometry_garage_type_protrusion
+    garage_position = geometry_garage_type_position
     foundation_type = geometry_foundation_type_type
     foundation_height = geometry_foundation_type_height
     rim_joist_height = geometry_foundation_type_rim_joist_height
@@ -1745,17 +1745,17 @@ module Geometry
   # This is perimeter adjacent to a 100% protruding garage that is not exposed.
   # We need this because it's difficult to set this surface to Adiabatic using our geometry methods.
   #
-  # @param geometry_garage_protrusion [Double] fraction of the garage that is protruding from the conditioned space
-  # @param geometry_garage_width [Double] width of the garage (ft)
-  # @param geometry_garage_depth [Double] depth of the garage (ft)
+  # @param geometry_garage_type_protrusion [Double] fraction of the garage that is protruding from the conditioned space
+  # @param geometry_garage_type_width [Double] width of the garage (ft)
+  # @param geometry_garage_type_depth [Double] depth of the garage (ft)
   # @return [Double] the unexposed garage perimeter
-  def self.get_unexposed_garage_perimeter(geometry_garage_protrusion:,
-                                          geometry_garage_width:,
-                                          geometry_garage_depth:,
+  def self.get_unexposed_garage_perimeter(geometry_garage_type_protrusion:,
+                                          geometry_garage_type_width:,
+                                          geometry_garage_type_depth:,
                                           **)
-    protrusion = geometry_garage_protrusion
-    width = geometry_garage_width
-    depth = geometry_garage_depth
+    protrusion = geometry_garage_type_protrusion
+    width = geometry_garage_type_width
+    depth = geometry_garage_type_depth
 
     if (protrusion == 1.0) && (width * depth > 0)
       return width

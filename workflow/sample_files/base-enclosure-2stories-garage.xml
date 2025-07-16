@@ -108,7 +108,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>1509.3</Area>
+            <Area>1524.3</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -124,7 +124,7 @@
             <SystemIdentifier id='RimJoist1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>115.6</Area>
+            <Area>116.2</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -155,7 +155,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>320.0</Area>
+            <Area>328.0</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -171,7 +171,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>2080.0</Area>
+            <Area>2083.8</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -190,7 +190,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>320.0</Area>
+            <Area>328.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <InteriorFinish>
@@ -209,7 +209,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>225.0</Area>
+            <Area>227.2</Area>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -226,7 +226,7 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>solid concrete</Type>
             <Height>8.0</Height>
-            <Area>1200.0</Area>
+            <Area>1205.9</Area>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
               <Type>gypsum board</Type>
@@ -253,7 +253,7 @@
             <FloorType>
               <WoodFrame/>
             </FloorType>
-            <Area>400.0</Area>
+            <Area>420.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
@@ -267,7 +267,7 @@
             <FloorType>
               <WoodFrame/>
             </FloorType>
-            <Area>1350.0</Area>
+            <Area>1363.3</Area>
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
@@ -281,8 +281,8 @@
           <Slab>
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
-            <Area>400.0</Area>
-            <ExposedPerimeter>40.0</ExposedPerimeter>
+            <Area>420.0</Area>
+            <ExposedPerimeter>41.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
               <Layer>
@@ -305,8 +305,8 @@
           <Slab>
             <SystemIdentifier id='Slab2'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>950.0</Area>
-            <ExposedPerimeter>110.0</ExposedPerimeter>
+            <Area>943.3</Area>
+            <ExposedPerimeter>109.7</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab2PerimeterInsulation'/>
               <Layer>

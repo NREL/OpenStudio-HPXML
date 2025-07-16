@@ -167,7 +167,6 @@
               <Type>gypsum board</Type>
             </InteriorFinish>
             <RadiantBarrier>true</RadiantBarrier>
-            <RadiantBarrierGrade>2</RadiantBarrierGrade>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
               <AssemblyEffectiveRValue>8.7</AssemblyEffectiveRValue>

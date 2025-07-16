@@ -547,55 +547,16 @@ Describes the above-grade height of apartment units on upper floors or homes abo
 
 <br/>
 
-**Geometry: Garage Width**
+**Geometry: Attached Garage**
 
-The width of the garage. Enter zero for no garage. Only applies to single-family detached units.
+The type of attached garage. Only applies to single-family detached units.
 
-- **Name:** ``geometry_garage_width``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Geometry: Garage Depth**
-
-The depth of the garage. Only applies to single-family detached units.
-
-- **Name:** ``geometry_garage_depth``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``true``
-
-<br/>
-
-**Geometry: Garage Protrusion**
-
-The fraction of the garage that is protruding from the conditioned space. Only applies to single-family detached units.
-
-- **Name:** ``geometry_garage_protrusion``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Geometry: Garage Position**
-
-The position of the garage. Only applies to single-family detached units.
-
-- **Name:** ``geometry_garage_position``
+- **Name:** ``geometry_garage_type``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
-- **Choices:** `Right`, `Left`
+- **Choices:** `None`, `1 Car, Left, Fully Inset`, `1 Car, Left, Half Protruding`, `1 Car, Left, Fully Protruding`, `1 Car, Right, Fully Inset`, `1 Car, Right, Half Protruding`, `1 Car, Right, Fully Protruding`, `2 Car, Left, Fully Inset`, `2 Car, Left, Half Protruding`, `2 Car, Left, Fully Protruding`, `2 Car, Right, Fully Inset`, `2 Car, Right, Half Protruding`, `2 Car, Right, Fully Protruding`, `3 Car, Left, Fully Inset`, `3 Car, Left, Half Protruding`, `3 Car, Left, Fully Protruding`, `3 Car, Right, Fully Inset`, `3 Car, Right, Half Protruding`, `3 Car, Right, Fully Protruding`
 
 <br/>
 
@@ -794,29 +755,16 @@ Assembly R-value of the roof.
 
 <br/>
 
-**Attic: Radiant Barrier Location**
+**Enclosure: Radiant Barrier**
 
-The location of the radiant barrier in the attic.
+The type of radiant barrier in the attic.
 
-- **Name:** ``radiant_barrier_attic_location``
+- **Name:** ``enclosure_radiant_barrier``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `none`, `Attic roof only`, `Attic roof and gable walls`, `Attic floor`
-
-<br/>
-
-**Attic: Radiant Barrier Grade**
-
-The grade of the radiant barrier in the attic. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
-
-- **Name:** ``radiant_barrier_grade``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `1`, `2`, `3`
+- **Choices:** `None`, `Attic Roof Only`, `Attic Roof and Gable Walls`, `Attic Floor`
 
 <br/>
 
