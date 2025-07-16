@@ -289,30 +289,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(choices[:geometry_neighbor_buildings][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('floor_over_foundation_assembly_r', true)
-    arg.setDisplayName('Floor: Over Foundation Assembly R-value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription('Assembly R-value for the floor over the foundation. Ignored if the building has a slab-on-grade foundation.')
-    arg.setDefaultValue(28.1)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_floor_over_foundation', choices[:enclosure_floor_over_foundation], false)
+    arg.setDisplayName('Enclosure: Floor Over Foundation')
+    arg.setDescription('The type of floor over the foundation (e.g., crawlspace or basement).')
+    arg.setDefaultValue(choices[:enclosure_floor_over_foundation][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('floor_over_garage_assembly_r', true)
-    arg.setDisplayName('Floor: Over Garage Assembly R-value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription('Assembly R-value for the floor over the garage. Ignored unless the building has a garage under conditioned space.')
-    arg.setDefaultValue(28.1)
-    args << arg
-
-    floor_type_choices = OpenStudio::StringVector.new
-    floor_type_choices << HPXML::FloorTypeWoodFrame
-    floor_type_choices << HPXML::FloorTypeSIP
-    floor_type_choices << HPXML::FloorTypeConcrete
-    floor_type_choices << HPXML::FloorTypeSteelFrame
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('floor_type', floor_type_choices, true)
-    arg.setDisplayName('Floor: Type')
-    arg.setDescription('The type of floors.')
-    arg.setDefaultValue(HPXML::FloorTypeWoodFrame)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_floor_over_garage', choices[:enclosure_floor_over_garage], false)
+    arg.setDisplayName('Enclosure: Floor Over Garage')
+    arg.setDescription('The type of floor over the garage.')
+    arg.setDefaultValue(choices[:enclosure_floor_over_garage][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_foundation_wall', choices[:enclosure_foundation_wall], false)
@@ -2264,13 +2250,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_type_height_above_grade] > 0)
     warnings << 'Specified a slab foundation type with a non-zero height above grade.' if warning
 
-    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type_type]) && ((args[:enclosure_foundation_wall_insulation_nominal_r_value].to_f > 0) || !args[:enclosure_foundation_wall_assembly_r_value].nil?) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
+    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type_type]) && ((args[:enclosure_foundation_wall_insulation_nominal_r_value].to_f > 0) || !args[:enclosure_foundation_wall_assembly_r_value].nil?) && (args[:enclosure_floor_over_foundation_assembly_r_value] > max_uninsulated_floor_rvalue)
     warnings << 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.' if warning
 
     warning = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type_attic_type]) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue) && (args[:roof_assembly_r] > max_uninsulated_roof_rvalue)
     warnings << 'Home with unconditioned attic type has both ceiling insulation and roof insulation.' if warning
 
-    warning = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeBasementConditioned) && (args[:floor_over_foundation_assembly_r] > max_uninsulated_floor_rvalue)
+    warning = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeBasementConditioned) && (args[:enclosure_floor_over_foundation_assembly_r_value] > max_uninsulated_floor_rvalue)
     warnings << 'Home with conditioned basement has floor insulation.' if warning
 
     warning = (args[:geometry_attic_type_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue)
@@ -3636,8 +3622,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @return [nil]
   def set_floors(hpxml_bldg, args, sorted_surfaces)
     if [HPXML::FoundationTypeBasementConditioned,
-        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
-      args[:floor_over_foundation_assembly_r] = 2.1 # Uninsulated
+        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type_type]) && (args[:enclosure_floor_over_foundation_assembly_r_value] > 5.9)
+      args[:enclosure_floor_over_foundation_assembly_r_value] = 5.9 # Uninsulated
     end
 
     if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type_attic_type]) && (args[:ceiling_assembly_r] > 2.1)
@@ -3672,7 +3658,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml_bldg.floors.add(id: "Floor#{hpxml_bldg.floors.size + 1}",
                             exterior_adjacent_to: exterior_adjacent_to,
                             interior_adjacent_to: interior_adjacent_to,
-                            floor_type: args[:floor_type],
+                            floor_type: HPXML::FloorTypeWoodFrame, # May be overridden below
                             area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                             floor_or_ceiling: floor_or_ceiling)
       if hpxml_bldg.floors[-1].floor_or_ceiling.nil?
@@ -3689,12 +3675,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         when HPXML::LocationAtticUnvented, HPXML::LocationAtticVented
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:ceiling_assembly_r]
         when HPXML::LocationGarage
-          hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:floor_over_garage_assembly_r]
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_floor_over_garage_assembly_r_value]
+          hpxml_bldg.floors[-1].floor_type = args[:enclosure_floor_over_garage_type]
         else
-          hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:floor_over_foundation_assembly_r]
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_floor_over_foundation_assembly_r_value]
+          hpxml_bldg.floors[-1].floor_type = args[:enclosure_floor_over_foundation_type]
         end
       else
-        hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+        hpxml_bldg.floors[-1].insulation_assembly_r_value = 5.9 # Uninsulated
       end
 
       next unless args[:enclosure_radiant_barrier_location].to_s == HPXML::RadiantBarrierLocationAtticFloor

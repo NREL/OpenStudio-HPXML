@@ -14,8 +14,6 @@
         "hvac_ducts": "4 CFM25 per 100ft2, Uninsulated",
         "ducts_return_location": "attic - unvented",
         "ducts_supply_location": "attic - unvented",
-        "floor_over_foundation_assembly_r": 0,
-        "floor_over_garage_assembly_r": 0,
         "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
         "geometry_attic_type": "Attic, Unvented, Gable",
         "geometry_average_ceiling_height": 8.0,

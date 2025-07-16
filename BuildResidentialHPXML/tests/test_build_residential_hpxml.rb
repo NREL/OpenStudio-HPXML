@@ -371,6 +371,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       tsv_contents = File.readlines(tsv_path).map(&:strip)
       property_names = []
       tsv_contents[0].split("\t")[1..-1].each do |property_name|
+        next if property_name == 'Source'
+
         if property_name.include? '[' # strip units
           property_name = property_name[0..property_name.index('[') - 1].strip
         end
@@ -413,9 +415,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_num_bedrooms'] = 3
       args['geometry_unit_num_bathrooms'] = 2
       args['geometry_unit_num_occupants'] = 3
-      args['floor_over_foundation_assembly_r'] = 0
-      args['floor_over_garage_assembly_r'] = 0
-      args['floor_type'] = HPXML::FloorTypeWoodFrame
       args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
       args['rim_joist_assembly_r'] = 23.0
       args['enclosure_slab_carpet'] = '0% Carpet'
@@ -683,7 +682,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
-      args['floor_over_garage_assembly_r'] = 39.3
+      args['enclosure_floor_over_garage'] = 'Wood Frame, R-38'
       args['ducts_supply_location'] = HPXML::LocationGarage
       args['ducts_return_location'] = HPXML::LocationGarage
     when 'extra-enclosure-atticroof-conditioned-eaves-gable.xml'
@@ -732,7 +731,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_control_cooling_season_period'] = Constants::BuildingAmerica
     when 'extra-ducts-crawlspace.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Unvented'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
       args['ducts_supply_location'] = HPXML::LocationCrawlspace
       args['ducts_return_location'] = HPXML::LocationCrawlspace
     when 'extra-ducts-attic.xml'
@@ -740,7 +739,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['ducts_return_location'] = HPXML::LocationAttic
     when 'extra-water-heater-crawlspace.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Unvented'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
       args['water_heater_location'] = HPXML::LocationCrawlspace
     when 'extra-water-heater-attic.xml'
       args['water_heater_location'] = HPXML::LocationAttic
@@ -776,21 +775,21 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = 'Slab-on-Grade'
     when 'extra-sfa-vented-crawlspace.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Vented'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
     when 'extra-sfa-unvented-crawlspace.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Unvented'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
     when 'extra-sfa-conditioned-crawlspace.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Conditioned'
-      args['floor_over_foundation_assembly_r'] = 2.1
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, Uninsulated'
     when 'extra-sfa-unconditioned-basement.xml'
       args['geometry_foundation_type'] = 'Basement, Unconditioned'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
       args['enclosure_foundation_wall'] = 'Solid Concrete, Uninsulated'
     when 'extra-sfa-ambient.xml'
       args['geometry_unit_cfa'] = 900.0
       args['geometry_foundation_type'] = 'Ambient'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
     when 'extra-sfa-rear-units.xml'
       args['geometry_building_num_units'] = 4
     when 'extra-sfa-exterior-corridor.xml'
@@ -811,15 +810,15 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-mf-vented-crawlspace.xml'
       args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = 'Crawlspace, Vented'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
     when 'extra-mf-unvented-crawlspace.xml'
       args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = 'Crawlspace, Unvented'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
     when 'extra-mf-ambient.xml'
       args['geometry_unit_cfa'] = 450.0
       args['geometry_foundation_type'] = 'Ambient'
-      args['floor_over_foundation_assembly_r'] = 18.7
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
       args.delete('rim_joist_assembly_r')
     when 'extra-mf-rear-units.xml'
       args['geometry_building_num_units'] = 18
@@ -1012,15 +1011,15 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['water_heater_efficiency'] = 2.3
     when 'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Vented'
-      args['floor_over_foundation_assembly_r'] = 10
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-11'
       args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
     when 'warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Unvented'
-      args['floor_over_foundation_assembly_r'] = 10
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-11'
       args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
     when 'warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml'
       args['geometry_foundation_type'] = 'Basement, Unconditioned'
-      args['floor_over_foundation_assembly_r'] = 10
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-11'
       args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
     when 'warning-vented-attic-with-floor-and-roof-insulation.xml'
       args['geometry_attic_type'] = 'Attic, Vented, Gable'
@@ -1032,7 +1031,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['roof_assembly_r'] = 10
     when 'warning-conditioned-basement-with-ceiling-insulation.xml'
       args['geometry_foundation_type'] = 'Basement, Conditioned'
-      args['floor_over_foundation_assembly_r'] = 10
+      args['enclosure_floor_over_foundation'] = 'Wood Frame, R-11'
     when 'warning-conditioned-attic-with-floor-insulation.xml'
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'

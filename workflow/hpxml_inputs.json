@@ -13,9 +13,7 @@
     "geometry_attic_type": "Attic, Vented, Gable",
     "geometry_roof_pitch": "4:12",
     "geometry_eaves": "None",
-    "floor_over_foundation_assembly_r": 14.15,
-    "floor_over_garage_assembly_r": 0,
-    "floor_type": "WoodFrame",
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, R-11, 2x6, 24\" o.c., 10% Framing, No Carpet/Subfloor",
     "rim_joist_assembly_r": 5.01,
     "enclosure_slab_carpet": "0% Carpet",
     "ceiling_assembly_r": 18.45,
@@ -146,7 +144,7 @@
   },
   "tests/ASHRAE_Standard_140/L200AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "floor_over_foundation_assembly_r": 4.24,
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, Uninsulated, 2x6, 24\" o.c., 10% Framing, No Carpet/Subfloor",
     "ceiling_assembly_r": 11.75,
     "wall_assembly_r": 4.84,
     "enclosure_air_leakage": "1.5 nACH"
@@ -226,7 +224,7 @@
   },
   "tests/ASHRAE_Standard_140/L200AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "floor_over_foundation_assembly_r": 4.24,
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, Uninsulated, 2x6, 24\" o.c., 10% Framing, No Carpet/Subfloor",
     "ceiling_assembly_r": 11.75,
     "wall_assembly_r": 4.84,
     "enclosure_air_leakage": "1.5 nACH"
@@ -281,7 +279,7 @@
     "geometry_foundation_type": "Detailed Example: Basement, Unconditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists",
     "geometry_unit_cfa": 1539,
     "enclosure_air_leakage": "0.67 nACH",
-    "floor_over_foundation_assembly_r": 13.85,
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, R-11, 2x6, 24\" o.c., 13% Framing, No Carpet/Subfloor",
     "heating_system_fuel": "natural gas",
     "hvac_heating_system": "Central Furnace, 78% AFUE",
     "heating_system_fraction_heat_load_served": 1.0,
@@ -339,7 +337,7 @@
     "enclosure_roof_material": "0.75 Solar Absorptance",
     "enclosure_wall_siding": "0.75 Solar Absorptance",
     "wall_assembly_r": 17.54,
-    "floor_over_foundation_assembly_r": 30.3,
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, U-0.033, 2006 IECC CZ 4C, 5-8",
     "ceiling_assembly_r": 38.46,
     "door_rvalue": 2.86,
     "window_shgc": 0.4,
@@ -394,7 +392,7 @@
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
     "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw",
     "wall_assembly_r": 12.20,
-    "floor_over_foundation_assembly_r": 15.63,
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, U-0.064, 2006 IECC CZ 1-2",
     "ceiling_assembly_r": 28.57,
     "window_shgc": 0.4,
     "window_ufactor": 1.2,
@@ -440,9 +438,6 @@
     "geometry_attic_type": "Attic, Unvented, Gable",
     "geometry_roof_pitch": "6:12",
     "geometry_eaves": "None",
-    "floor_over_foundation_assembly_r": 0,
-    "floor_over_garage_assembly_r": 0,
-    "floor_type": "WoodFrame",
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
     "rim_joist_assembly_r": 23,
     "enclosure_slab_carpet":"0% Carpet",
@@ -843,7 +838,7 @@
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-housing-unit-basement.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "geometry_foundation_type": "Basement, Unconditioned",
-    "floor_over_foundation_assembly_r": 18.7
+    "enclosure_floor_over_foundation": "Wood Frame, R-15"
   },
   "sample_files/base-bldgtype-mf-unit-infil-compartmentalization-test.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
@@ -1341,7 +1336,7 @@
     "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
     "geometry_unit_cfa": 3250,
     "geometry_garage_type": "2 Car, Right, Fully Inset",
-    "floor_over_garage_assembly_r": 39.3
+    "enclosure_floor_over_garage": "Wood Frame, R-38"
   },
   "sample_files/base-enclosure-beds-1.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1511,7 +1506,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "Ambient",
-    "floor_over_foundation_assembly_r": 18.7
+    "enclosure_floor_over_foundation": "Wood Frame, R-15"
   },
   "sample_files/base-foundation-basement-garage.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -1553,7 +1548,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "Crawlspace, Conditioned",
-    "floor_over_foundation_assembly_r": 18.7,
+    "enclosure_floor_over_foundation": "Wood Frame, R-15",
     "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "crawlspace - conditioned",
     "ducts_return_location": "crawlspace - conditioned",
@@ -1579,7 +1574,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "Basement, Unconditioned",
-    "floor_over_foundation_assembly_r": 18.7,
+    "enclosure_floor_over_foundation": "Wood Frame, R-15",
     "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
     "rim_joist_assembly_r": 4,
     "ducts_supply_location": "basement - unconditioned",
@@ -1601,7 +1596,7 @@
   },
   "sample_files/base-foundation-unconditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
-    "floor_over_foundation_assembly_r": 2.1,
+    "enclosure_floor_over_foundation": "Wood Frame, Uninsulated",
     "enclosure_foundation_wall": "Solid Concrete, Half Wall, R-10",
     "rim_joist_assembly_r": 23
   },
@@ -1609,7 +1604,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "Crawlspace, Unvented",
-    "floor_over_foundation_assembly_r": 18.7,
+    "enclosure_floor_over_foundation": "Wood Frame, R-15",
     "ducts_supply_location": "crawlspace - unvented",
     "ducts_return_location": "crawlspace - unvented",
     "water_heater_location": "crawlspace - unvented"
@@ -1618,7 +1613,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "Crawlspace, Vented",
-    "floor_over_foundation_assembly_r": 18.7,
+    "enclosure_floor_over_foundation": "Wood Frame, R-15",
     "ducts_supply_location": "crawlspace - vented",
     "ducts_return_location": "crawlspace - vented",
     "water_heater_location": "crawlspace - vented"
@@ -2828,7 +2823,7 @@
     "geometry_unit_cfa": 1200,
     "geometry_unit_aspect_ratio": 0.75,
     "geometry_building_num_units": 6,
-    "floor_over_foundation_assembly_r": 22.84,
+    "enclosure_floor_over_foundation": "Wood Frame, R-19",
     "air_leakage_type": "unit exterior only",
     "enclosure_air_leakage": "Detailed Example: 0.375 nACH",
     "window_area_or_wwr_front": 0.18,

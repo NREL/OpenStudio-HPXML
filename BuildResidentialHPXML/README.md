@@ -462,42 +462,29 @@ The presence and geometry of neighboring buildings, for shading purposes.
 
 <br/>
 
-**Floor: Over Foundation Assembly R-value**
+**Enclosure: Floor Over Foundation**
 
-Assembly R-value for the floor over the foundation. Ignored if the building has a slab-on-grade foundation.
+The type of floor over the foundation (e.g., crawlspace or basement).
 
-- **Name:** ``floor_over_foundation_assembly_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
-
-- **Required:** ``true``
-
-<br/>
-
-**Floor: Over Garage Assembly R-value**
-
-Assembly R-value for the floor over the garage. Ignored unless the building has a garage under conditioned space.
-
-- **Name:** ``floor_over_garage_assembly_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
-
-- **Required:** ``true``
-
-<br/>
-
-**Floor: Type**
-
-The type of floors.
-
-- **Name:** ``floor_type``
+- **Name:** ``enclosure_floor_over_foundation``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
-- **Choices:** `WoodFrame`, `StructuralInsulatedPanel`, `SolidConcrete`, `SteelFrame`
+- **Choices:** `Wood Frame, Uninsulated`, `Wood Frame, R-11`, `Wood Frame, R-13`, `Wood Frame, R-15`, `Wood Frame, R-19`, `Wood Frame, R-21`, `Wood Frame, R-25`, `Wood Frame, R-30`, `Wood Frame, R-35`, `Wood Frame, R-38`, `Detailed Example: Wood Frame, Uninsulated, 2x6, 24" o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24" o.c., 13% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24" o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, U-0.064, 2006 IECC CZ 1-2`, `Detailed Example: Wood Frame, U-0.047, 2006 IECC CZ 3, 4A, 4B`, `Detailed Example: Wood Frame, U-0.033, 2006 IECC CZ 4C, 5-8`
+
+<br/>
+
+**Enclosure: Floor Over Garage**
+
+The type of floor over the garage.
+
+- **Name:** ``enclosure_floor_over_garage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `Wood Frame, Uninsulated`, `Wood Frame, R-11`, `Wood Frame, R-13`, `Wood Frame, R-15`, `Wood Frame, R-19`, `Wood Frame, R-21`, `Wood Frame, R-25`, `Wood Frame, R-30`, `Wood Frame, R-35`, `Wood Frame, R-38`, `Detailed Example: Wood Frame, Uninsulated, 2x6, 24" o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24" o.c., 13% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24" o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, U-0.064, 2006 IECC CZ 1-2`, `Detailed Example: Wood Frame, U-0.047, 2006 IECC CZ 3, 4A, 4B`, `Detailed Example: Wood Frame, U-0.033, 2006 IECC CZ 4C, 5-8`
 
 <br/>
 
