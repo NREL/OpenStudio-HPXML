@@ -436,16 +436,16 @@ The roof pitch of the attic. Ignored if the building has a flat roof.
 
 <br/>
 
-**Geometry: Eaves Depth**
+**Geometry: Eaves**
 
-The eaves depth of the roof.
+The type of eaves extending from the roof.
 
-- **Name:** ``geometry_eaves_depth``
-- **Type:** ``Double``
+- **Name:** ``geometry_eaves``
+- **Type:** ``Choice``
 
-- **Units:** ``ft``
+- **Required:** ``false``
 
-- **Required:** ``true``
+- **Choices:** `None`, `1 ft`, `2 ft`, `3 ft`, `4 ft`, `5 ft`
 
 <br/>
 

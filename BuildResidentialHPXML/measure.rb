@@ -277,11 +277,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('6:12')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_eaves_depth', true)
-    arg.setDisplayName('Geometry: Eaves Depth')
-    arg.setUnits('ft')
-    arg.setDescription('The eaves depth of the roof.')
-    arg.setDefaultValue(2.0)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_eaves', choices[:geometry_eaves], false)
+    arg.setDisplayName('Geometry: Eaves')
+    arg.setDescription('The type of eaves extending from the roof.')
+    arg.setDefaultValue('2 ft')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_neighbor_buildings', choices[:geometry_neighbor_buildings], false)

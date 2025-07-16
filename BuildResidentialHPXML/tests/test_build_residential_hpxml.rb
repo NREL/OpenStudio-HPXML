@@ -409,7 +409,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = 'Basement, Conditioned'
       args['geometry_roof_pitch'] = '6:12'
       args['geometry_attic_type'] = 'Attic, Unvented, Gable'
-      args['geometry_eaves_depth'] = 0
+      args['geometry_eaves'] = 'None'
       args['geometry_unit_num_bedrooms'] = 3
       args['geometry_unit_num_bathrooms'] = 2
       args['geometry_unit_num_occupants'] = 3
@@ -691,7 +691,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
-      args['geometry_eaves_depth'] = 2
+      args['geometry_eaves'] = '2 ft'
       args['ducts_supply_location'] = HPXML::LocationUnderSlab
       args['ducts_return_location'] = HPXML::LocationUnderSlab
     when 'extra-enclosure-atticroof-conditioned-eaves-hip.xml'
@@ -765,13 +765,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-sfa-atticroof-conditioned-eaves-gable.xml'
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
-      args['geometry_eaves_depth'] = 2
+      args['geometry_eaves'] = '2 ft'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
     when 'extra-sfa-atticroof-conditioned-eaves-hip.xml'
       args['geometry_attic_type'] = 'Attic, Conditioned, Hip'
     when 'extra-mf-eaves.xml'
-      args['geometry_eaves_depth'] = 2
+      args['geometry_eaves'] = '2 ft'
     when 'extra-sfa-slab.xml'
       args['geometry_foundation_type'] = 'Slab-on-Grade'
     when 'extra-sfa-vented-crawlspace.xml'

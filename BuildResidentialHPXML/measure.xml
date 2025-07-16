@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>ec5a398a-86a8-4e5e-9ca1-c52e21317a88</version_id>
-  <version_modified>2025-07-16T05:44:49Z</version_modified>
+  <version_id>a808d308-d373-4b59-a0d2-973a15e0eed1</version_id>
+  <version_modified>2025-07-16T19:59:36Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -761,14 +761,39 @@
       </choices>
     </argument>
     <argument>
-      <name>geometry_eaves_depth</name>
-      <display_name>Geometry: Eaves Depth</display_name>
-      <description>The eaves depth of the roof.</description>
-      <type>Double</type>
-      <units>ft</units>
-      <required>true</required>
+      <name>geometry_eaves</name>
+      <display_name>Geometry: Eaves</display_name>
+      <description>The type of eaves extending from the roof.</description>
+      <type>Choice</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>2</default_value>
+      <default_value>2 ft</default_value>
+      <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
+        <choice>
+          <value>1 ft</value>
+          <display_name>1 ft</display_name>
+        </choice>
+        <choice>
+          <value>2 ft</value>
+          <display_name>2 ft</display_name>
+        </choice>
+        <choice>
+          <value>3 ft</value>
+          <display_name>3 ft</display_name>
+        </choice>
+        <choice>
+          <value>4 ft</value>
+          <display_name>4 ft</display_name>
+        </choice>
+        <choice>
+          <value>5 ft</value>
+          <display_name>5 ft</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>geometry_neighbor_buildings</name>
@@ -9379,7 +9404,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>E96923B4</checksum>
+      <checksum>CDB61A0D</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9396,7 +9421,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>DA0FFAB9</checksum>
+      <checksum>FE2604E0</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9511,6 +9536,12 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>0FBEDDB9</checksum>
+    </file>
+    <file>
+      <filename>options/geometry_eaves.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F059A4C1</checksum>
     </file>
     <file>
       <filename>options/geometry_foundation_type.tsv</filename>
@@ -9714,7 +9745,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>DCE1ADD3</checksum>
+      <checksum>4AC24517</checksum>
     </file>
   </files>
 </measure>
