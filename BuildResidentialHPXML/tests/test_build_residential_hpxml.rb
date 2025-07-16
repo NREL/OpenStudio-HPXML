@@ -371,8 +371,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       tsv_contents = File.readlines(tsv_path).map(&:strip)
       property_names = []
       tsv_contents[0].split("\t")[1..-1].each do |property_name|
-        next if property_name == 'Source'
-
         if property_name.include? '[' # strip units
           property_name = property_name[0..property_name.index('[') - 1].strip
         end

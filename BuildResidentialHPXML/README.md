@@ -484,7 +484,7 @@ The type of floor over the garage.
 
 - **Required:** ``false``
 
-- **Choices:** `Wood Frame, Uninsulated`, `Wood Frame, R-11`, `Wood Frame, R-13`, `Wood Frame, R-15`, `Wood Frame, R-19`, `Wood Frame, R-21`, `Wood Frame, R-25`, `Wood Frame, R-30`, `Wood Frame, R-35`, `Wood Frame, R-38`, `Detailed Example: Wood Frame, Uninsulated, 2x6, 24" o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24" o.c., 13% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24" o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, U-0.064, 2006 IECC CZ 1-2`, `Detailed Example: Wood Frame, U-0.047, 2006 IECC CZ 3, 4A, 4B`, `Detailed Example: Wood Frame, U-0.033, 2006 IECC CZ 4C, 5-8`
+- **Choices:** `Wood Frame, Uninsulated`, `Wood Frame, R-11`, `Wood Frame, R-13`, `Wood Frame, R-15`, `Wood Frame, R-19`, `Wood Frame, R-21`, `Wood Frame, R-25`, `Wood Frame, R-30`, `Wood Frame, R-35`, `Wood Frame, R-38`
 
 <br/>
 
