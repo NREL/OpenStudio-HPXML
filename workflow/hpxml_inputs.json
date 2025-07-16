@@ -43,7 +43,6 @@
     "roof_material_type": "asphalt or fiberglass shingles",
     "roof_color": "medium",
     "roof_assembly_r": 1.99,
-    "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
     "wall_siding_type": "wood siding",
@@ -647,7 +646,6 @@
     "roof_material_type": "asphalt or fiberglass shingles",
     "roof_color": "medium",
     "roof_assembly_r": 2.3,
-    "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
     "wall_siding_type": "wood siding",
@@ -957,7 +955,6 @@
   "sample_files/base-atticroof-radiant-barrier.xml": {
     "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
     "ceiling_assembly_r": 8.7,
-    "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "Attic roof and gable walls"
   },
   "sample_files/base-atticroof-radiant-barrier-ceiling.xml": {
@@ -1705,7 +1702,7 @@
   "sample_files/base-enclosure-2stories-garage.xml": {
     "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
     "geometry_unit_cfa": 3250,
-    "geometry_garage_width": 20,
+    "geometry_garage_width": 21,
     "floor_over_garage_assembly_r": 39.3,
     "ducts_supply_leakage_to_outside_value": 97.5,
     "ducts_return_leakage_to_outside_value": 32.5
@@ -3222,7 +3219,8 @@
   },
   "sample_files/base-lighting-ceiling-fans-label-energy-use.xml": {
     "parent_hpxml": "sample_files/base-lighting-ceiling-fans.xml",
-    "ceiling_fan_label_energy_use": 39
+    "ceiling_fan_label_energy_use": 39,
+    "ceiling_fan_efficiency": null
   },
   "sample_files/base-lighting-holiday.xml": {
     "parent_hpxml": "sample_files/base.xml",
