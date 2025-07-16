@@ -75,13 +75,11 @@
     "solar_thermal_collector_rated_thermal_losses": 0,
     "solar_thermal_solar_fraction": 0,
     "lighting": "None",
-    "holiday_lighting_present": false,
     "dehumidifier_type": "none",
     "dehumidifier_efficiency_type": "EnergyFactor",
     "dehumidifier_efficiency": 0,
     "dehumidifier_capacity": 0,
     "dehumidifier_rh_setpoint": 0,
-    "dehumidifier_fraction_dehumidification_load_served": 0,
     "clothes_washer_present": false,
     "clothes_washer_efficiency_type": "IntegratedModifiedEnergyFactor",
     "clothes_dryer_present": false,
@@ -429,8 +427,6 @@
   "sample_files/base.xml": {
     "simulation_control_timestep": 60,
     "site_type": "suburban",
-    "site_iecc_zone": "5B",
-    "site_state_code": "CO",
     "weather_station_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
     "geometry_unit_type": "single-family detached",
     "geometry_unit_num_floors_above_grade": 1,
@@ -516,13 +512,11 @@
     "solar_thermal_collector_rated_thermal_losses": 0,
     "solar_thermal_solar_fraction": 0,
     "lighting": "Detailed Example: 40% CFL, 10% LFL, 25% LED",
-    "holiday_lighting_present": false,
     "dehumidifier_type": "none",
     "dehumidifier_efficiency_type": "EnergyFactor",
     "dehumidifier_efficiency": 0,
     "dehumidifier_capacity": 0,
     "dehumidifier_rh_setpoint": 0,
-    "dehumidifier_fraction_dehumidification_load_served": 0,
     "clothes_washer_present": true,
     "clothes_washer_location": "conditioned space",
     "clothes_washer_efficiency_type": "IntegratedModifiedEnergyFactor",
@@ -578,8 +572,7 @@
     "dehumidifier_type": "portable",
     "dehumidifier_efficiency": 1.8,
     "dehumidifier_capacity": 40,
-    "dehumidifier_rh_setpoint": 0.5,
-    "dehumidifier_fraction_dehumidification_load_served": 1
+    "dehumidifier_rh_setpoint": 0.5
   },
   "sample_files/base-appliances-dehumidifier-ief-portable.xml": {
     "parent_hpxml": "sample_files/base-appliances-dehumidifier.xml",
@@ -1695,13 +1688,9 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml",
-    "site_iecc_zone": 7,
-    "site_state_code": "MN",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "simulation_control_timestep": 1,
-    "hvac_capacity_heat_pump_backup": "10 kW",
-    "simulation_control_onoff_thermostat_deadband": 2,
-    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71
+    "hvac_capacity_heat_pump_backup": "10 kW"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -1720,13 +1709,9 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
-    "site_iecc_zone": 7,
-    "site_state_code": "MN",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "simulation_control_timestep": 1,
-    "simulation_control_onoff_thermostat_deadband": 2,
-    "hvac_capacity_heat_pump_backup": "10 kW",
-    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71
+    "hvac_capacity_heat_pump_backup": "10 kW"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -2103,24 +2088,21 @@
     "hvac_heat_pump_backup": "None"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-1-speed-experimental.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "hvac_heat_pump": "Geothermal HP, EER 20.5, COP 4.0"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml",
-    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "hvac_heat_pump": "Geothermal HP, EER 30.9, COP 4.4"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml",
-    "simulation_control_ground_to_air_heat_pump_model_type": "experimental"
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-integrated.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2404,8 +2386,7 @@
   },
   "sample_files/base-hvac-room-ac-only-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml",
-    "simulation_control_timestep": 1,
-    "simulation_control_onoff_thermostat_deadband": 2
+    "simulation_control_timestep": 1
   },
   "sample_files/base-hvac-seasons.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2468,10 +2449,7 @@
     "ceiling_fans": "Detailed Example: 4 Fans, 39 W, 0.5 deg-F Setpoint Offset"
   },
   "sample_files/base-lighting-holiday.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "holiday_lighting_present": true,
-    "holiday_lighting_daily_kwh": 1.1,
-    "holiday_lighting_period": "Nov 24 - Jan 6"
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-lighting-kwh-per-year.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2494,74 +2472,50 @@
   },
   "sample_files/base-location-baltimore-md.xml": {
     "parent_hpxml": "sample_files/base-foundation-unvented-crawlspace.xml",
-    "site_iecc_zone": "4A",
-    "site_state_code": "MD",
     "weather_station_epw_filepath": "USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw",
     "hvac_capacity_heating_system": "25 kBtu/hr"
   },
   "sample_files/base-location-capetown-zaf.xml": {
     "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
-    "site_iecc_zone": null,
-    "site_state_code": null,
     "weather_station_epw_filepath": "ZAF_Cape.Town.688160_IWEC.epw",
     "hvac_capacity_heating_system": "25 kBtu/hr"
   },
   "sample_files/base-location-dallas-tx.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "site_iecc_zone": "3A",
-    "site_state_code": "TX",
     "weather_station_epw_filepath": "USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw",
     "hvac_capacity_heating_system": "25 kBtu/hr"
   },
   "sample_files/base-location-detailed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "site_time_zone_utc_offset": -6,
-    "site_elevation": 5548,
-    "site_latitude": 39.77,
-    "site_longitude": -104.73,
-    "site_state_code": "CO",
-    "site_city": "Aurora",
     "site_zip_code": 80019,
     "weather_station_epw_filepath": null
   },
   "sample_files/base-location-duluth-mn.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
-    "site_iecc_zone": 7,
-    "site_state_code": "MN",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw"
   },
   "sample_files/base-location-helena-mt.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "site_iecc_zone": "6B",
-    "site_state_code": "MT",
     "weather_station_epw_filepath": "USA_MT_Helena.Rgnl.AP.727720_TMY3.epw",
     "hvac_capacity_heating_system": "50 kBtu/hr"
   },
   "sample_files/base-location-honolulu-hi.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "site_iecc_zone": "1A",
-    "site_state_code": "HI",
     "weather_station_epw_filepath": "USA_HI_Honolulu.Intl.AP.911820_TMY3.epw",
     "hvac_capacity_heating_system": "10 kBtu/hr"
   },
   "sample_files/base-location-miami-fl.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "site_iecc_zone": "1A",
-    "site_state_code": "FL",
     "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw",
     "hvac_capacity_heating_system": "10 kBtu/hr"
   },
   "sample_files/base-location-phoenix-az.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "site_iecc_zone": "2B",
-    "site_state_code": "AZ",
     "weather_station_epw_filepath": "USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw",
     "hvac_capacity_heating_system": "25 kBtu/hr"
   },
   "sample_files/base-location-portland-or.xml": {
     "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
-    "site_iecc_zone": "4C",
-    "site_state_code": "OR",
     "weather_station_epw_filepath": "USA_OR_Portland.Intl.AP.726980_TMY3.epw",
     "hvac_capacity_heating_system": "25 kBtu/hr"
   },
@@ -2697,8 +2651,6 @@
     "parent_hpxml": "sample_files/base.xml",
     "simulation_control_timestep": null,
     "site_type": null,
-    "site_iecc_zone": null,
-    "site_state_code": null,
     "geometry_unit_num_bathrooms": null,
     "enclosure_roof_material": null,
     "enclosure_wall_siding": null,
@@ -3087,17 +3039,13 @@
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-setbacks.csv"
   },
   "sample_files/base-simcontrol-calendar-year-custom.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "simulation_control_run_period_calendar_year": 2010
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-simcontrol-daylight-saving-custom.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "simulation_control_daylight_saving_enabled": true,
-    "simulation_control_daylight_saving_period": "Mar 10 - Nov 6"
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-simcontrol-daylight-saving-disabled.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "simulation_control_daylight_saving_enabled": false
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-simcontrol-runperiod-1-month.xml": {
     "parent_hpxml": "sample_files/base.xml",

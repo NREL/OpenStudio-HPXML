@@ -134,86 +134,12 @@ Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Simulation Control: Run Period Calendar Year**
-
-This numeric field should contain the calendar year that determines the start day of week. If you are running simulations using AMY weather files, the value entered for calendar year will not be used; it will be overridden by the actual year found in the AMY weather file. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
-
-- **Name:** ``simulation_control_run_period_calendar_year``
-- **Type:** ``Integer``
-
-- **Units:** ``year``
-
-- **Required:** ``false``
-
-<br/>
-
-**Simulation Control: Daylight Saving Enabled**
-
-Whether to use daylight saving. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-building-site'>HPXML Building Site</a>) is used.
-
-- **Name:** ``simulation_control_daylight_saving_enabled``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Simulation Control: Daylight Saving Period**
-
-Enter a date range like 'Mar 15 - Dec 15'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-building-site'>HPXML Building Site</a>) is used.
-
-- **Name:** ``simulation_control_daylight_saving_period``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
 **Simulation Control: Temperature Capacitance Multiplier**
 
 Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
 
 - **Name:** ``simulation_control_temperature_capacitance_multiplier``
 - **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Simulation Control: Ground-to-Air Heat Pump Model Type**
-
-Research feature to select the type of ground-to-air heat pump model. Use standard for standard ground-to-air heat pump modeling. Use experimental for an improved model that better accounts for coil staging. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
-
-- **Name:** ``simulation_control_ground_to_air_heat_pump_model_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `standard`, `experimental`
-
-<br/>
-
-**Simulation Control: HVAC On-Off Thermostat Deadband**
-
-Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.
-
-- **Name:** ``simulation_control_onoff_thermostat_deadband``
-- **Type:** ``Double``
-
-- **Units:** ``deg-F``
-
-- **Required:** ``false``
-
-<br/>
-
-**Simulation Control: Heat Pump Backup Heating Capacity Increment**
-
-Research feature to model capacity increment of multi-stage heat pump backup systems with time-based staging. Only applies to air-source heat pumps where Backup Type is 'integrated' and Backup Fuel Type is 'electricity'. Currently only supported with 1 min timestep.
-
-- **Name:** ``simulation_control_heat_pump_backup_heating_capacity_increment``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
 
 - **Required:** ``false``
 
@@ -258,101 +184,12 @@ The soil and moisture type.
 
 <br/>
 
-**Site: IECC Zone**
-
-IECC zone of the home address.
-
-- **Name:** ``site_iecc_zone``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `1A`, `1B`, `1C`, `2A`, `2B`, `2C`, `3A`, `3B`, `3C`, `4A`, `4B`, `4C`, `5A`, `5B`, `5C`, `6A`, `6B`, `6C`, `7`, `8`
-
-<br/>
-
-**Site: City**
-
-City/municipality of the home address.
-
-- **Name:** ``site_city``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Site: State Code**
-
-State code of the home address. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
-
-- **Name:** ``site_state_code``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `AK`, `AL`, `AR`, `AZ`, `CA`, `CO`, `CT`, `DC`, `DE`, `FL`, `GA`, `HI`, `IA`, `ID`, `IL`, `IN`, `KS`, `KY`, `LA`, `MA`, `MD`, `ME`, `MI`, `MN`, `MO`, `MS`, `MT`, `NC`, `ND`, `NE`, `NH`, `NJ`, `NM`, `NV`, `NY`, `OH`, `OK`, `OR`, `PA`, `RI`, `SC`, `SD`, `TN`, `TX`, `UT`, `VA`, `VT`, `WA`, `WI`, `WV`, `WY`
-
-<br/>
-
 **Site: Zip Code**
 
 Zip code of the home address. Either this or the Weather Station: EnergyPlus Weather (EPW) Filepath input below must be provided.
 
 - **Name:** ``site_zip_code``
 - **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Site: Time Zone UTC Offset**
-
-Time zone UTC offset of the home address. Must be between -12 and 14. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
-
-- **Name:** ``site_time_zone_utc_offset``
-- **Type:** ``Double``
-
-- **Units:** ``hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Site: Elevation**
-
-Elevation of the home address. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
-
-- **Name:** ``site_elevation``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
-
-<br/>
-
-**Site: Latitude**
-
-Latitude of the home address. Must be between -90 and 90. Use negative values for southern hemisphere. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
-
-- **Name:** ``site_latitude``
-- **Type:** ``Double``
-
-- **Units:** ``deg``
-
-- **Required:** ``false``
-
-<br/>
-
-**Site: Longitude**
-
-Longitude of the home address. Must be between -180 and 180. Use negative values for the western hemisphere. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
-
-- **Name:** ``site_longitude``
-- **Type:** ``Double``
-
-- **Units:** ``deg``
 
 - **Required:** ``false``
 
@@ -2942,41 +2779,6 @@ Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/lo
 
 <br/>
 
-**Holiday Lighting: Present**
-
-Whether there is holiday lighting.
-
-- **Name:** ``holiday_lighting_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Holiday Lighting: Daily Consumption**
-
-The daily energy consumption for holiday lighting (exterior). If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
-
-- **Name:** ``holiday_lighting_daily_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/day``
-
-- **Required:** ``false``
-
-<br/>
-
-**Holiday Lighting: Period**
-
-Enter a date range like 'Nov 25 - Jan 5'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
-
-- **Name:** ``holiday_lighting_period``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
 **Dehumidifier: Type**
 
 The type of dehumidifier.
@@ -3034,19 +2836,6 @@ The capacity (water removal rate) of the dehumidifier.
 The relative humidity setpoint of the dehumidifier.
 
 - **Name:** ``dehumidifier_rh_setpoint``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Dehumidifier: Fraction Dehumidification Load Served**
-
-The dehumidification load served fraction of the dehumidifier.
-
-- **Name:** ``dehumidifier_fraction_dehumidification_load_served``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``

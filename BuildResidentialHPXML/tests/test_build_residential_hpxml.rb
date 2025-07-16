@@ -56,9 +56,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-enclosure-atticroof-conditioned-eaves-hip.xml' => 'extra-enclosure-atticroof-conditioned-eaves-gable.xml',
       'extra-gas-pool-heater-with-zero-kwh.xml' => 'base-sfd.xml',
       'extra-gas-hot-tub-heater-with-zero-kwh.xml' => 'base-sfd.xml',
-      'extra-iecc-zone-different-than-epw.xml' => 'base-sfd.xml',
-      'extra-state-code-different-than-epw.xml' => 'base-sfd.xml',
-      'extra-time-zone-different-than-epw.xml' => 'base-sfd.xml',
       'extra-emissions-fossil-fuel-factors.xml' => 'base-sfd.xml',
       'extra-bills-fossil-fuel-rates.xml' => 'base-sfd.xml',
       'extra-seasons-building-america.xml' => 'base-sfd.xml',
@@ -247,7 +244,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
                                                  "'Software Info: Program Version' cannot vary across dwelling units."],
       'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
                                                    "'Simulation Control: Run Period' cannot vary across dwelling units.",
-                                                   "'Simulation Control: Run Period Calendar Year' cannot vary across dwelling units.",
                                                    "'Simulation Control: Temperature Capacitance Multiplier' cannot vary across dwelling units."],
       'error-same-emissions-scenario-name.xml' => ["HPXML header already includes an emissions scenario named 'Emissions' with type 'CO2e'."],
       'error-same-utility-bill-scenario-name.xml' => ["HPXML header already includes a utility bill scenario named 'Bills'."],
@@ -492,13 +488,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['solar_thermal_collector_rated_thermal_losses'] = 0.2799
       args['solar_thermal_solar_fraction'] = 0
       args['lighting'] = 'Detailed Example: 40% CFL, 10% LFL, 25% LED'
-      args['holiday_lighting_present'] = false
       args['dehumidifier_type'] = Constants::None
       args['dehumidifier_efficiency_type'] = 'EnergyFactor'
       args['dehumidifier_efficiency'] = 1.8
       args['dehumidifier_capacity'] = 40
       args['dehumidifier_rh_setpoint'] = 0.5
-      args['dehumidifier_fraction_dehumidification_load_served'] = 1
       args['clothes_washer_present'] = true
       args['clothes_washer_location'] = HPXML::LocationConditionedSpace
       args['clothes_washer_efficiency_type'] = 'IntegratedModifiedEnergyFactor'
@@ -592,7 +586,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['schedules_unavailable_period_dates'] = 'Jan 2 - Jan 5, Feb 10 - Feb 12'
       args['schedules_unavailable_period_window_natvent_availabilities'] = "#{HPXML::ScheduleUnavailable}, #{HPXML::ScheduleAvailable}"
       args['simulation_control_run_period'] = 'Jan 1 - Dec 31'
-      args['simulation_control_run_period_calendar_year'] = 2007
       args['simulation_control_temperature_capacitance_multiplier'] = 1.0
       args['emissions_scenario_names'] = 'Emissions'
       args['emissions_types'] = 'CO2e'
@@ -711,12 +704,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['permanent_spa_present'] = true
       args['permanent_spa_heater_type'] = HPXML::HeaterTypeGas
       args['permanent_spa_heater_annual_kwh'] = 0
-    when 'extra-iecc-zone-different-than-epw.xml'
-      args['site_iecc_zone'] = '6B'
-    when 'extra-state-code-different-than-epw.xml'
-      args['site_state_code'] = 'WY'
-    when 'extra-time-zone-different-than-epw.xml'
-      args['site_time_zone_utc_offset'] = '-6'
     when 'extra-emissions-fossil-fuel-factors.xml'
       args['emissions_scenario_names'] = 'Scenario1, Scenario2'
       args['emissions_types'] = 'CO2e, SO2'
@@ -1004,7 +991,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['simulation_control_timestep'] = 10
       args['simulation_control_run_period'] = 'Jan 2 - Dec 30'
-      args['simulation_control_run_period_calendar_year'] = 2008
       args['simulation_control_temperature_capacitance_multiplier'] = 2.0
       args['emissions_scenario_names'] = 'Emissions2'
       args['utility_bill_scenario_names'] = 'Bills2'

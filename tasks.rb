@@ -336,11 +336,9 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
 end
 
 def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
-  default_schedules_csv_data = Defaults.get_schedules_csv_data()
-
   # Set detailed HPXML values for sample files
   hpxml_file = File.basename(hpxml_path)
-  hpxml_bldg = hpxml.buildings[0]
+  default_schedules_csv_data = Defaults.get_schedules_csv_data()
 
   # ------------ #
   # HPXML Header #
@@ -349,32 +347,97 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
-  if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
-    hpxml_bldg.header.allow_increased_fixed_capacities = true
-  elsif ['base-misc-emissions.xml'].include? hpxml_file
-    hpxml_bldg.egrid_region = 'Western'
-    hpxml_bldg.egrid_subregion = 'RMPA'
-    hpxml_bldg.cambium_region_gea = 'RMPAc'
+  if ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
+    hpxml.header.sim_calendar_year = 2010
   end
-
-  if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
-    hpxml_bldg.header.manualj_heating_design_temp = 0
-    hpxml_bldg.header.manualj_cooling_design_temp = 100
-    hpxml_bldg.header.manualj_heating_setpoint = 60
-    hpxml_bldg.header.manualj_cooling_setpoint = 80
-    hpxml_bldg.header.manualj_humidity_setpoint = 0.55
-    hpxml_bldg.header.manualj_internal_loads_sensible = 4000
-    hpxml_bldg.header.manualj_internal_loads_latent = 200
-    hpxml_bldg.header.manualj_num_occupants = 5
-    hpxml_bldg.header.manualj_daily_temp_range = HPXML::ManualJDailyTempRangeLow
-    hpxml_bldg.header.manualj_humidity_difference = 30
+  if ['base-hvac-air-to-air-heat-pump-1-speed-research-features.xml',
+      'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml',
+      'base-hvac-room-ac-only-research-features.xml'].include? hpxml_file
+    hpxml.header.hvac_onoff_thermostat_deadband = 2
+  end
+  if ['base-hvac-air-to-air-heat-pump-1-speed-research-features.xml',
+      'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml'].include? hpxml_file
+    hpxml.header.heat_pump_backup_heating_capacity_increment = 17060.71
+  end
+  if hpxml_file.include?('ground-to-air') && hpxml_file.include?('experimental')
+    hpxml.header.ground_to_air_heat_pump_model_type = HPXML::GroundToAirHeatPumpModelTypeExperimental
   end
 
   hpxml.buildings.each do |hpxml_bldg|
+    # ------------ #
+    # HPXML Header #
+    # ------------ #
+
     if ['base-misc-emissions.xml'].include? hpxml_file
       hpxml_bldg.egrid_region = 'Western'
       hpxml_bldg.egrid_subregion = 'RMPA'
       hpxml_bldg.cambium_region_gea = 'RMPAc'
+    end
+    if ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
+      hpxml_bldg.dst_enabled = true
+      hpxml_bldg.dst_begin_month = 3
+      hpxml_bldg.dst_begin_day = 10
+      hpxml_bldg.dst_end_month = 11
+      hpxml_bldg.dst_end_day = 6
+    elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
+      hpxml_bldg.dst_enabled = false
+    end
+    if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
+      hpxml_bldg.header.allow_increased_fixed_capacities = true
+    end
+    if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
+      hpxml_bldg.header.manualj_heating_design_temp = 0
+      hpxml_bldg.header.manualj_cooling_design_temp = 100
+      hpxml_bldg.header.manualj_heating_setpoint = 60
+      hpxml_bldg.header.manualj_cooling_setpoint = 80
+      hpxml_bldg.header.manualj_humidity_setpoint = 0.55
+      hpxml_bldg.header.manualj_internal_loads_sensible = 4000
+      hpxml_bldg.header.manualj_internal_loads_latent = 200
+      hpxml_bldg.header.manualj_num_occupants = 5
+      hpxml_bldg.header.manualj_daily_temp_range = HPXML::ManualJDailyTempRangeLow
+      hpxml_bldg.header.manualj_humidity_difference = 30
+    end
+    epw_filepath = hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath
+    if not epw_filepath.nil?
+      if epw_filepath.start_with? 'USA_'
+        hpxml_bldg.state_code = epw_filepath[4..5]
+      elsif epw_filepath.start_with? 'US_'
+        hpxml_bldg.state_code = epw_filepath[3..4]
+      end
+    end
+    if ['base-location-detailed.xml'].include? hpxml_file
+      hpxml_bldg.time_zone_utc_offset = -6
+      hpxml_bldg.latitude = 39.77
+      hpxml_bldg.longitude = -104.73
+      hpxml_bldg.elevation = 5548
+      hpxml_bldg.state_code = 'CO'
+      hpxml_bldg.city = 'Aurora'
+      iecc_zone = '5B'
+    else
+      iecc_zone = {
+        'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw' => '1A',
+        'USA_FL_Miami.Intl.AP.722020_TMY3.epw' => '1A',
+        'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw' => '2B',
+        'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw' => '3A',
+        'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw' => '4A',
+        'USA_OR_Portland.Intl.AP.726980_TMY3.epw' => '4C',
+        'US_CO_Boulder_AMY_2012.epw' => '5B',
+        'USA_CO_Denver.Intl.AP.725650_TMY3.epw' => '5B',
+        'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw' => '6B',
+        'USA_MN_Duluth.Intl.AP.727450_TMY3.epw' => '7',
+      }[epw_filepath]
+    end
+    if not iecc_zone.nil?
+      hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.clear
+      hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: iecc_zone,
+                                                               year: 2006)
+    elsif not hpxml_bldg.state_code.nil?
+      fail 'Unhandled EPW filepath in tasks.rb'
+    end
+    if ['base-misc-defaults.xml',
+        'base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.state_code = nil
+      hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.clear
     end
 
     # --------------------- #
@@ -2692,6 +2755,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.ceiling_fans[0].weekend_fractions = '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
       hpxml_bldg.ceiling_fans[0].monthly_multipliers = '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0'
     elsif ['base-lighting-holiday.xml'].include? hpxml_file
+      hpxml_bldg.lighting.holiday_exists = true
+      hpxml_bldg.lighting.holiday_kwh_per_day = 1.1
+      hpxml_bldg.lighting.holiday_period_begin_month = 11
+      hpxml_bldg.lighting.holiday_period_begin_day = 24
+      hpxml_bldg.lighting.holiday_period_end_month = 1
+      hpxml_bldg.lighting.holiday_period_end_day = 6
       hpxml_bldg.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
       hpxml_bldg.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
     elsif ['base-schedules-simple.xml',

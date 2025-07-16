@@ -107,46 +107,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_calendar_year', false)
-    arg.setDisplayName('Simulation Control: Run Period Calendar Year')
-    arg.setUnits('year')
-    arg.setDescription("This numeric field should contain the calendar year that determines the start day of week. If you are running simulations using AMY weather files, the value entered for calendar year will not be used; it will be overridden by the actual year found in the AMY weather file. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('simulation_control_daylight_saving_enabled', false)
-    arg.setDisplayName('Simulation Control: Daylight Saving Enabled')
-    arg.setDescription("Whether to use daylight saving. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-site'>HPXML Building Site</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_daylight_saving_period', false)
-    arg.setDisplayName('Simulation Control: Daylight Saving Period')
-    arg.setDescription("Enter a date range like 'Mar 15 - Dec 15'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-site'>HPXML Building Site</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_temperature_capacitance_multiplier', false)
     arg.setDisplayName('Simulation Control: Temperature Capacitance Multiplier')
     arg.setDescription("Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
-    args << arg
-
-    ground_to_air_heat_pump_model_type_choices = OpenStudio::StringVector.new
-    ground_to_air_heat_pump_model_type_choices << HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
-    ground_to_air_heat_pump_model_type_choices << HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('simulation_control_ground_to_air_heat_pump_model_type', ground_to_air_heat_pump_model_type_choices, false)
-    arg.setDisplayName('Simulation Control: Ground-to-Air Heat Pump Model Type')
-    arg.setDescription("Research feature to select the type of ground-to-air heat pump model. Use #{HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard} for standard ground-to-air heat pump modeling. Use #{HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental} for an improved model that better accounts for coil staging. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_onoff_thermostat_deadband', false)
-    arg.setDisplayName('Simulation Control: HVAC On-Off Thermostat Deadband')
-    arg.setDescription('Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.')
-    arg.setUnits('deg-F')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_heat_pump_backup_heating_capacity_increment', false)
-    arg.setDisplayName('Simulation Control: Heat Pump Backup Heating Capacity Increment')
-    arg.setDescription("Research feature to model capacity increment of multi-stage heat pump backup systems with time-based staging. Only applies to air-source heat pumps where Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'. Currently only supported with 1 min timestep.")
-    arg.setUnits('Btu/hr')
     args << arg
 
     site_type_choices = OpenStudio::StringVector.new
@@ -174,58 +137,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The soil and moisture type.')
     args << arg
 
-    site_iecc_zone_choices = OpenStudio::StringVector.new
-    Constants::IECCZones.each do |iz|
-      site_iecc_zone_choices << iz
-    end
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_iecc_zone', site_iecc_zone_choices, false)
-    arg.setDisplayName('Site: IECC Zone')
-    arg.setDescription('IECC zone of the home address.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_city', false)
-    arg.setDisplayName('Site: City')
-    arg.setDescription('City/municipality of the home address.')
-    args << arg
-
-    site_state_code_choices = OpenStudio::StringVector.new
-    Constants::StateCodesMap.keys.each do |sc|
-      site_state_code_choices << sc
-    end
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_state_code', site_state_code_choices, false)
-    arg.setDisplayName('Site: State Code')
-    arg.setDescription("State code of the home address. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
     arg.setDisplayName('Site: Zip Code')
     arg.setDescription('Zip code of the home address. Either this or the Weather Station: EnergyPlus Weather (EPW) Filepath input below must be provided.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_time_zone_utc_offset', false)
-    arg.setDisplayName('Site: Time Zone UTC Offset')
-    arg.setDescription("Time zone UTC offset of the home address. Must be between -12 and 14. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
-    arg.setUnits('hr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_elevation', false)
-    arg.setDisplayName('Site: Elevation')
-    arg.setDescription("Elevation of the home address. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
-    arg.setUnits('ft')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_latitude', false)
-    arg.setDisplayName('Site: Latitude')
-    arg.setDescription("Latitude of the home address. Must be between -90 and 90. Use negative values for southern hemisphere. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
-    arg.setUnits('deg')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_longitude', false)
-    arg.setDisplayName('Site: Longitude')
-    arg.setDescription("Longitude of the home address. Must be between -180 and 180. Use negative values for the western hemisphere. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
-    arg.setUnits('deg')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', false)
@@ -1619,23 +1533,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('holiday_lighting_present', true)
-    arg.setDisplayName('Holiday Lighting: Present')
-    arg.setDescription('Whether there is holiday lighting.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('holiday_lighting_daily_kwh', false)
-    arg.setDisplayName('Holiday Lighting: Daily Consumption')
-    arg.setUnits('kWh/day')
-    arg.setDescription("The daily energy consumption for holiday lighting (exterior). If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period', false)
-    arg.setDisplayName('Holiday Lighting: Period')
-    arg.setDescription("Enter a date range like 'Nov 25 - Jan 5'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
-    args << arg
-
     dehumidifier_type_choices = OpenStudio::StringVector.new
     dehumidifier_type_choices << Constants::None
     dehumidifier_type_choices << HPXML::DehumidifierTypePortable
@@ -1676,13 +1573,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The relative humidity setpoint of the dehumidifier.')
     arg.setUnits('Frac')
     arg.setDefaultValue(0.5)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dehumidifier_fraction_dehumidification_load_served', true)
-    arg.setDisplayName('Dehumidifier: Fraction Dehumidification Load Served')
-    arg.setDescription('The dehumidification load served fraction of the dehumidifier.')
-    arg.setUnits('Frac')
-    arg.setDefaultValue(1)
     args << arg
 
     appliance_location_choices = OpenStudio::StringVector.new
@@ -2936,39 +2826,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml.header.sim_end_day = end_day
     end
 
-    if not args[:simulation_control_run_period_calendar_year].nil?
-      if (not hpxml.header.sim_calendar_year.nil?) && (hpxml.header.sim_calendar_year != Integer(args[:simulation_control_run_period_calendar_year]))
-        errors << "'Simulation Control: Run Period Calendar Year' cannot vary across dwelling units."
-      end
-      hpxml.header.sim_calendar_year = args[:simulation_control_run_period_calendar_year]
-    end
-
     if not args[:simulation_control_temperature_capacitance_multiplier].nil?
       if (not hpxml.header.temperature_capacitance_multiplier.nil?) && (hpxml.header.temperature_capacitance_multiplier != Float(args[:simulation_control_temperature_capacitance_multiplier]))
         errors << "'Simulation Control: Temperature Capacitance Multiplier' cannot vary across dwelling units."
       end
       hpxml.header.temperature_capacitance_multiplier = args[:simulation_control_temperature_capacitance_multiplier]
-    end
-
-    if not args[:simulation_control_ground_to_air_heat_pump_model_type].nil?
-      if (not hpxml.header.ground_to_air_heat_pump_model_type.nil?) && (hpxml.header.ground_to_air_heat_pump_model_type != args[:simulation_control_ground_to_air_heat_pump_model_type])
-        errors << "'Simulation Control: Ground-to-Air Heat Pump Model Type' cannot vary across dwelling units."
-      end
-      hpxml.header.ground_to_air_heat_pump_model_type = args[:simulation_control_ground_to_air_heat_pump_model_type]
-    end
-
-    if not args[:simulation_control_onoff_thermostat_deadband].nil?
-      if (not hpxml.header.hvac_onoff_thermostat_deadband.nil?) && (hpxml.header.hvac_onoff_thermostat_deadband != args[:simulation_control_onoff_thermostat_deadband])
-        errors << "'Simulation Control: HVAC On-Off Thermostat Deadband' cannot vary across dwelling units."
-      end
-      hpxml.header.hvac_onoff_thermostat_deadband = args[:simulation_control_onoff_thermostat_deadband]
-    end
-
-    if not args[:simulation_control_heat_pump_backup_heating_capacity_increment].nil?
-      if (not hpxml.header.heat_pump_backup_heating_capacity_increment.nil?) && (hpxml.header.heat_pump_backup_heating_capacity_increment != args[:simulation_control_heat_pump_backup_heating_capacity_increment])
-        errors << "'Simulation Control: Heat Pump Backup Heating Capacity Increment' cannot vary across dwelling units."
-      end
-      hpxml.header.heat_pump_backup_heating_capacity_increment = args[:simulation_control_heat_pump_backup_heating_capacity_increment]
     end
 
     if not args[:emissions_scenario_names].nil?
@@ -3288,30 +3150,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [HPXML::Building] HPXML Building object representing an individual dwelling unit
   def add_building(hpxml, args)
-    if not args[:simulation_control_daylight_saving_period].nil?
-      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(args[:simulation_control_daylight_saving_period])
-      dst_begin_month = begin_month
-      dst_begin_day = begin_day
-      dst_end_month = end_month
-      dst_end_day = end_day
-    end
-
     hpxml.buildings.add(building_id: 'MyBuilding',
                         site_id: 'SiteID',
                         event_type: 'proposed workscope',
-                        city: args[:site_city],
-                        state_code: args[:site_state_code],
-                        zip_code: args[:site_zip_code],
-                        time_zone_utc_offset: args[:site_time_zone_utc_offset],
-                        elevation: args[:site_elevation],
-                        latitude: args[:site_latitude],
-                        longitude: args[:site_longitude],
-                        dst_enabled: args[:simulation_control_daylight_saving_enabled],
-                        dst_begin_month: dst_begin_month,
-                        dst_begin_day: dst_begin_day,
-                        dst_end_month: dst_end_month,
-                        dst_end_day: dst_end_day)
-
+                        zip_code: args[:site_zip_code])
     return hpxml.buildings[-1]
   end
 
@@ -3465,11 +3307,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_climate_and_risk_zones(hpxml_bldg, args)
-    if not args[:site_iecc_zone].nil?
-      hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: args[:site_iecc_zone],
-                                                               year: 2006)
-    end
-
     if not args[:weather_station_epw_filepath].nil?
       hpxml_bldg.climate_and_risk_zones.weather_station_id = 'WeatherStation'
       hpxml_bldg.climate_and_risk_zones.weather_station_name = File.basename(args[:weather_station_epw_filepath]).gsub('.epw', '')
@@ -4980,7 +4817,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def set_hvac_control(hpxml, hpxml_bldg, args, weather)
     return if (args[:hvac_heating_system_type] == Constants::None) && (args[:hvac_cooling_system_type] == Constants::None) && (args[:hvac_heat_pump_type] == Constants::None)
 
-    latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+    latitude = Defaults.get_latitude(nil, weather) unless weather.nil?
 
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
@@ -5331,7 +5168,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+      latitude = Defaults.get_latitude(nil, weather) unless weather.nil?
       collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_rated_optical_efficiency = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_rated_thermal_losses = args[:solar_thermal_collector_rated_thermal_losses]
@@ -5365,7 +5202,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def set_pv_systems(hpxml_bldg, args, weather)
     return if args[:pv_system_maximum_power_output].to_f == 0
 
-    latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+    latitude = Defaults.get_latitude(nil, weather) unless weather.nil?
 
     hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                               location: args[:pv_system_location],
@@ -5754,19 +5591,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         end
       end
     end
-
-    return unless args[:holiday_lighting_present]
-
-    hpxml_bldg.lighting.holiday_exists = true
-    hpxml_bldg.lighting.holiday_kwh_per_day = args[:holiday_lighting_daily_kwh]
-
-    if not args[:holiday_lighting_period].nil?
-      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(args[:holiday_lighting_period])
-      hpxml_bldg.lighting.holiday_period_begin_month = begin_month
-      hpxml_bldg.lighting.holiday_period_begin_day = begin_day
-      hpxml_bldg.lighting.holiday_period_end_month = end_month
-      hpxml_bldg.lighting.holiday_period_end_day = end_day
-    end
   end
 
   # Sets the HPXML dehumidifier properties.
@@ -5790,7 +5614,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                  energy_factor: energy_factor,
                                  integrated_energy_factor: integrated_energy_factor,
                                  rh_setpoint: args[:dehumidifier_rh_setpoint],
-                                 fraction_served: args[:dehumidifier_fraction_dehumidification_load_served],
+                                 fraction_served: 1.0,
                                  location: HPXML::LocationConditionedSpace)
   end
 
