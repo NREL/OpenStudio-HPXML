@@ -247,7 +247,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
         </Floors>

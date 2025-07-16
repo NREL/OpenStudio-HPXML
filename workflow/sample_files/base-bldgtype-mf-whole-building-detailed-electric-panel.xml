@@ -257,7 +257,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
         </Floors>
@@ -773,7 +773,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation_2'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
         </Floors>
@@ -1206,7 +1206,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation_3'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
         </Floors>
@@ -1613,7 +1613,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor2Insulation_4'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
         </Floors>

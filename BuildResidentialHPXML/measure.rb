@@ -5581,7 +5581,7 @@ module HPXMLFile
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:floor_over_foundation_assembly_r]
         end
       else
-        if floor_or_ceiling = HPXML::FloorOrCeilingFloor
+        if floor_or_ceiling == HPXML::FloorOrCeilingFloor
           hpxml_bldg.floors[-1].insulation_assembly_r_value = uninsulated_floor_r
         else
           hpxml_bldg.floors[-1].insulation_assembly_r_value = uninsulated_ceiling_r
