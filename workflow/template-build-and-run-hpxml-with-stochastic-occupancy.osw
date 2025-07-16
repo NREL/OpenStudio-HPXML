@@ -19,7 +19,6 @@
         "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
         "geometry_attic_type": "Attic, Unvented, Gable",
         "geometry_average_ceiling_height": 8.0,
-        "geometry_eaves_depth": 0,
         "geometry_foundation_type": "Basement, Conditioned",
         "geometry_roof_pitch": "6:12",
         "geometry_unit_aspect_ratio": 1.5,
