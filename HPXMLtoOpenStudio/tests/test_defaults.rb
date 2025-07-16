@@ -2321,7 +2321,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_detailed_performance_capacities(default_hpxml_bldg.heat_pumps[0], 30000, 40000, heating_capacities, cooling_capacities)
   end
 
-  def test_default_detailed_performance_data
+  def test_detailed_performance_data
     # Test to verify the default detailed performance data points are consistent with RESNET's NEEP-Statistical-Model.xlsm
     # Spreadsheet can be found in https://github.com/NREL/OpenStudio-HPXML/pull/1879
 

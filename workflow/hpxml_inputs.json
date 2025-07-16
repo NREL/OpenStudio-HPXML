@@ -1147,7 +1147,7 @@
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-housing-unit-basement.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "geometry_foundation_type": "UnconditionedBasement",
-    "floor_over_foundation_assembly_r": 18.7
+    "floor_over_foundation_assembly_r": 19.4
   },
   "sample_files/base-bldgtype-mf-unit-infil-compartmentalization-test.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
@@ -1703,7 +1703,7 @@
     "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
     "geometry_unit_cfa": 3250,
     "geometry_garage_width": 21,
-    "floor_over_garage_assembly_r": 39.3,
+    "floor_over_garage_assembly_r": 35.1,
     "ducts_supply_leakage_to_outside_value": 97.5,
     "ducts_return_leakage_to_outside_value": 32.5
   },
@@ -1905,7 +1905,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "Ambient",
-    "floor_over_foundation_assembly_r": 18.7,
+    "floor_over_foundation_assembly_r": 19.4,
     "ducts_supply_leakage_to_outside_value": 40.5,
     "ducts_return_leakage_to_outside_value": 13.5
   },
@@ -1960,7 +1960,7 @@
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "ConditionedCrawlspace",
     "geometry_foundation_height": 4,
-    "floor_over_foundation_assembly_r": 18.7,
+    "floor_over_foundation_assembly_r": 19.4,
     "ducts_supply_leakage_to_outside_value": 0,
     "ducts_return_leakage_to_outside_value": 0,
     "ducts_supply_location": "crawlspace - conditioned",
@@ -1999,7 +1999,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "UnconditionedBasement",
-    "floor_over_foundation_assembly_r": 18.7,
+    "floor_over_foundation_assembly_r": 19.4,
     "foundation_wall_insulation_r": 0,
     "foundation_wall_insulation_distance_to_bottom": 0,
     "rim_joist_assembly_r": 4,
@@ -2024,7 +2024,7 @@
   },
   "sample_files/base-foundation-unconditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
-    "floor_over_foundation_assembly_r": 2.1,
+    "floor_over_foundation_assembly_r": 5.3,
     "foundation_wall_insulation_r": 10.0,
     "foundation_wall_insulation_distance_to_bottom": 4,
     "rim_joist_assembly_r": 23
@@ -2034,7 +2034,7 @@
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "UnventedCrawlspace",
     "geometry_foundation_height": 4,
-    "floor_over_foundation_assembly_r": 18.7,
+    "floor_over_foundation_assembly_r": 19.4,
     "ducts_supply_location": "crawlspace - unvented",
     "ducts_return_location": "crawlspace - unvented",
     "water_heater_location": "crawlspace - unvented",
@@ -2046,7 +2046,7 @@
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "VentedCrawlspace",
     "geometry_foundation_height": 4,
-    "floor_over_foundation_assembly_r": 18.7,
+    "floor_over_foundation_assembly_r": 19.4,
     "ducts_supply_location": "crawlspace - vented",
     "ducts_return_location": "crawlspace - vented",
     "water_heater_location": "crawlspace - vented",
@@ -3726,7 +3726,7 @@
     "geometry_unit_cfa": 1200,
     "geometry_unit_aspect_ratio": 0.75,
     "geometry_building_num_units": 6,
-    "floor_over_foundation_assembly_r": 22.84,
+    "floor_over_foundation_assembly_r": 22.6,
     "air_leakage_type": "unit exterior only",
     "air_leakage_units": "ACHnatural",
     "air_leakage_value": 0.375,
