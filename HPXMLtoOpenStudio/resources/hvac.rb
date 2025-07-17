@@ -884,14 +884,25 @@ module HVAC
     demand_outlet_pipe.addToNode(plant_loop.demandOutletNode)
 
     # Fan
-    fan_cfms = []
-    hp_ap.cool_capacity_ratios.each do |capacity_ratio|
-      fan_cfms << clg_cfm * capacity_ratio
+    if ground_to_air
+      fan_cfms = []
+      hp_ap.cool_capacity_ratios.each do |capacity_ratio|
+        fan_cfms << clg_cfm * capacity_ratio
+      end
+      hp_ap.heat_capacity_ratios.each do |capacity_ratio|
+        fan_cfms << htg_cfm * capacity_ratio
+      end
+      fan_watts_per_cfm = heat_pump.fan_watts_per_cfm
+    else
+      if heat_pump.cooling_capacity > 1.0
+        fan_cfm = RatedCFMPerTon * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') # CFM
+      else
+        fan_cfm = RatedCFMPerTon * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton') # CFM
+      end
+      fan_watts_per_cfm = 0.0
+      fan_cfms = [fan_cfm]
     end
-    hp_ap.heat_capacity_ratios.each do |capacity_ratio|
-      fan_cfms << htg_cfm * capacity_ratio
-    end
-    fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, fan_cfms, heat_pump)
+    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms, heat_pump)
     add_fan_pump_disaggregation_ems_program(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     if ground_to_air
