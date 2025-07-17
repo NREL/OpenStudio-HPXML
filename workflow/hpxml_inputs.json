@@ -642,7 +642,7 @@
     "slab_under_insulation_width": 0,
     "slab_carpet_fraction": 0,
     "slab_carpet_r": 0,
-    "ceiling_assembly_r": 39.3,
+    "ceiling_assembly_r": 39.6,
     "roof_material_type": "asphalt or fiberglass shingles",
     "roof_color": "medium",
     "roof_assembly_r": 2.3,
@@ -916,7 +916,7 @@
     "geometry_unit_num_floors_above_grade": 2,
     "geometry_unit_cfa": 4050,
     "geometry_attic_type": "ConditionedAttic",
-    "roof_assembly_r": 25.8,
+    "roof_assembly_r": 29.7,
     "window_area_left": 120,
     "window_area_right": 120,
     "window_aspect_ratio": 2,
@@ -946,7 +946,7 @@
   "sample_files/base-atticroof-flat.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_attic_type": "FlatRoof",
-    "roof_assembly_r": 25.8,
+    "roof_assembly_r": 29.7,
     "ducts_supply_leakage_to_outside_value": 0,
     "ducts_return_leakage_to_outside_value": 0,
     "ducts_supply_location": "basement - conditioned",
@@ -964,7 +964,7 @@
   "sample_files/base-atticroof-unvented-insulated-roof.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "ceiling_assembly_r": 2.1,
-    "roof_assembly_r": 25.8
+    "roof_assembly_r": 29.4
   },
   "sample_files/base-atticroof-vented.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1086,7 +1086,8 @@
     "ducts_supply_leakage_to_outside_value": 0,
     "ducts_return_leakage_to_outside_value": 0,
     "ducts_supply_location": "conditioned space",
-    "ducts_return_location": "conditioned space"
+    "ducts_return_location": "conditioned space",
+    "roof_assembly_r": 3.7
   },
   "sample_files/base-bldgtype-sfa-unit-infil-compartmentalization-test.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-sfa-unit.xml",

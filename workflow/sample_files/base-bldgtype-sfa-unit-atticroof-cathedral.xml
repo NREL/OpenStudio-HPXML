@@ -119,7 +119,7 @@
             <Pitch>6.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.7</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>
         </Roofs>
