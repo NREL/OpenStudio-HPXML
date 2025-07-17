@@ -13,12 +13,12 @@
     "geometry_attic_type": "Attic, Vented, Gable",
     "geometry_roof_pitch": "4:12",
     "geometry_eaves": "None",
-    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, R-11, 2x6, 24\" o.c., 10% Framing, No Carpet/Subfloor",
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, R-11, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor",
     "rim_joist_assembly_r": 5.01,
     "enclosure_slab_carpet": "0% Carpet",
-    "ceiling_assembly_r": 18.45,
+    "enclosure_ceiling": "Detailed Example: R-19, 2x6, 24 in o.c., 10% Framing",
     "enclosure_roof_material": "0.6 Solar Absorptance",
-    "roof_assembly_r": 1.99,
+    "enclosure_roof": "Detailed Example: Uninsulated, 0.5 in plywood, 0.25 in asphalt shingle",
     "enclosure_radiant_barrier": "None",
     "wall_type": "WoodStud",
     "enclosure_wall_siding": "0.6 Solar Absorptance",
@@ -105,7 +105,7 @@
   },
   "tests/ASHRAE_Standard_140/L120AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "ceiling_assembly_r": 57.49,
+    "enclosure_ceiling": "Detailed Example: R-19 + R-38, 2x6, 24 in o.c., 10% Framing",
     "wall_assembly_r": 23.58
   },
   "tests/ASHRAE_Standard_140/L130AC.xml": {
@@ -144,8 +144,8 @@
   },
   "tests/ASHRAE_Standard_140/L200AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, Uninsulated, 2x6, 24\" o.c., 10% Framing, No Carpet/Subfloor",
-    "ceiling_assembly_r": 11.75,
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, Uninsulated, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor",
+    "enclosure_ceiling": "Detailed Example: R-11, 2x6, 24 in o.c., 10% Framing",
     "wall_assembly_r": 4.84,
     "enclosure_air_leakage": "1.5 nACH"
   },
@@ -185,7 +185,7 @@
   },
   "tests/ASHRAE_Standard_140/L120AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "ceiling_assembly_r": 57.49,
+    "enclosure_ceiling": "Detailed Example: R-19 + R-38, 2x6, 24 in o.c., 10% Framing",
     "wall_assembly_r": 23.58
   },
   "tests/ASHRAE_Standard_140/L130AL.xml": {
@@ -224,8 +224,8 @@
   },
   "tests/ASHRAE_Standard_140/L200AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, Uninsulated, 2x6, 24\" o.c., 10% Framing, No Carpet/Subfloor",
-    "ceiling_assembly_r": 11.75,
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, Uninsulated, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor",
+    "enclosure_ceiling": "Detailed Example: R-11, 2x6, 24 in o.c., 10% Framing",
     "wall_assembly_r": 4.84,
     "enclosure_air_leakage": "1.5 nACH"
   },
@@ -279,7 +279,7 @@
     "geometry_foundation_type": "Detailed Example: Basement, Unconditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists",
     "geometry_unit_cfa": 1539,
     "enclosure_air_leakage": "0.67 nACH",
-    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, R-11, 2x6, 24\" o.c., 13% Framing, No Carpet/Subfloor",
+    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, R-11, 2x6, 24 in o.c., 13% Framing, No Carpet/Subfloor",
     "heating_system_fuel": "natural gas",
     "hvac_heating_system": "Central Furnace, 78% AFUE",
     "heating_system_fraction_heat_load_served": 1.0,
@@ -337,8 +337,8 @@
     "enclosure_roof_material": "0.75 Solar Absorptance",
     "enclosure_wall_siding": "0.75 Solar Absorptance",
     "wall_assembly_r": 17.54,
-    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, U-0.033, 2006 IECC CZ 4C, 5-8",
-    "ceiling_assembly_r": 38.46,
+    "enclosure_floor_over_foundation": "Wood Frame, IECC U-0.033",
+    "enclosure_ceiling": "IECC U-0.026",
     "door_rvalue": 2.86,
     "window_shgc": 0.4,
     "window_ufactor": 0.35,
@@ -392,8 +392,8 @@
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
     "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw",
     "wall_assembly_r": 12.20,
-    "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, U-0.064, 2006 IECC CZ 1-2",
-    "ceiling_assembly_r": 28.57,
+    "enclosure_floor_over_foundation": "Wood Frame, IECC U-0.064",
+    "enclosure_ceiling": "IECC U-0.035",
     "window_shgc": 0.4,
     "window_ufactor": 1.2,
     "door_rvalue": 0.83
@@ -441,9 +441,9 @@
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
     "rim_joist_assembly_r": 23,
     "enclosure_slab_carpet":"0% Carpet",
-    "ceiling_assembly_r": 39.3,
+    "enclosure_ceiling": "R-38",
     "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
-    "roof_assembly_r": 2.3,
+    "enclosure_roof": "Uninsulated",
     "enclosure_radiant_barrier": "None",
     "wall_type": "WoodStud",
     "enclosure_wall_siding": "Wood, Medium",
@@ -632,7 +632,7 @@
     "geometry_unit_num_floors_above_grade": 2,
     "geometry_unit_cfa": 4050,
     "geometry_attic_type": "Attic, Conditioned, Gable",
-    "roof_assembly_r": 25.8,
+    "enclosure_roof": "R-30",
     "window_area_or_wwr_left": 120,
     "window_area_or_wwr_right": 120,
     "hvac_ducts": "0 CFM25 per 100ft2, R-4",
@@ -657,14 +657,14 @@
   "sample_files/base-atticroof-flat.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_attic_type": "Flat Roof",
-    "roof_assembly_r": 25.8,
+    "enclosure_roof": "R-30",
     "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "ducts_supply_location": "basement - conditioned",
     "ducts_return_location": "basement - conditioned"
   },
   "sample_files/base-atticroof-radiant-barrier.xml": {
     "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
-    "ceiling_assembly_r": 8.7,
+    "enclosure_ceiling": "R-7",
     "enclosure_radiant_barrier": "Attic Roof and Gable Walls"
   },
   "sample_files/base-atticroof-radiant-barrier-ceiling.xml": {
@@ -673,8 +673,8 @@
   },
   "sample_files/base-atticroof-unvented-insulated-roof.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ceiling_assembly_r": 2.1,
-    "roof_assembly_r": 25.8
+    "enclosure_ceiling": "Uninsulated",
+    "enclosure_roof": "R-30"
   },
   "sample_files/base-atticroof-vented.xml": {
     "parent_hpxml": "sample_files/base.xml",

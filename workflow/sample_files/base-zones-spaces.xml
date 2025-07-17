@@ -411,7 +411,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor2InsulationSpace1'/>
-              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>39.6</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
@@ -429,7 +429,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor2InsulationSpace2'/>
-              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>39.6</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
         </Floors>

@@ -464,33 +464,33 @@ The presence and geometry of neighboring buildings, for shading purposes.
 
 **Enclosure: Floor Over Foundation**
 
-The type of floor over the foundation (e.g., crawlspace or basement).
+The type and insulation level of the floor over the foundation (e.g., crawlspace or basement).
 
 - **Name:** ``enclosure_floor_over_foundation``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `Wood Frame, Uninsulated`, `Wood Frame, R-11`, `Wood Frame, R-13`, `Wood Frame, R-15`, `Wood Frame, R-19`, `Wood Frame, R-21`, `Wood Frame, R-25`, `Wood Frame, R-30`, `Wood Frame, R-35`, `Wood Frame, R-38`, `Detailed Example: Wood Frame, Uninsulated, 2x6, 24" o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24" o.c., 13% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24" o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, U-0.064, 2006 IECC CZ 1-2`, `Detailed Example: Wood Frame, U-0.047, 2006 IECC CZ 3, 4A, 4B`, `Detailed Example: Wood Frame, U-0.033, 2006 IECC CZ 4C, 5-8`
+- **Choices:** `Wood Frame, Uninsulated`, `Wood Frame, R-11`, `Wood Frame, R-13`, `Wood Frame, R-15`, `Wood Frame, R-19`, `Wood Frame, R-21`, `Wood Frame, R-25`, `Wood Frame, R-30`, `Wood Frame, R-35`, `Wood Frame, R-38`, `Wood Frame, IECC U-0.064`, `Wood Frame, IECC U-0.047`, `Wood Frame, IECC U-0.033`, `Wood Frame, IECC U-0.028`, `Detailed Example: Wood Frame, Uninsulated, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24 in o.c., 13% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor`
 
 <br/>
 
 **Enclosure: Floor Over Garage**
 
-The type of floor over the garage.
+The type and insulation level of the floor over the garage.
 
 - **Name:** ``enclosure_floor_over_garage``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `Wood Frame, Uninsulated`, `Wood Frame, R-11`, `Wood Frame, R-13`, `Wood Frame, R-15`, `Wood Frame, R-19`, `Wood Frame, R-21`, `Wood Frame, R-25`, `Wood Frame, R-30`, `Wood Frame, R-35`, `Wood Frame, R-38`
+- **Choices:** `Wood Frame, Uninsulated`, `Wood Frame, R-11`, `Wood Frame, R-13`, `Wood Frame, R-15`, `Wood Frame, R-19`, `Wood Frame, R-21`, `Wood Frame, R-25`, `Wood Frame, R-30`, `Wood Frame, R-35`, `Wood Frame, R-38`, `Wood Frame, IECC U-0.064`, `Wood Frame, IECC U-0.047`, `Wood Frame, IECC U-0.033`, `Detailed Example: Wood Frame, Uninsulated, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24 in o.c., 13% Framing, No Carpet/Subfloor`, `Detailed Example: Wood Frame, R-11, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor`
 
 <br/>
 
 **Enclosure: Foundation Wall**
 
-The type of foundation wall.
+The type and insulation level of the foundation walls.
 
 - **Name:** ``enclosure_foundation_wall``
 - **Type:** ``Choice``
@@ -516,7 +516,7 @@ Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Requ
 
 **Enclosure: Slab**
 
-The type of slab. Applies to slab-on-grade and basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.
+The type and insulation level of the slab. Applies to slab-on-grade as well as basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.
 
 - **Name:** ``enclosure_slab``
 - **Type:** ``Choice``
@@ -540,16 +540,29 @@ The amount of slab floor area that is carpeted.
 
 <br/>
 
-**Ceiling: Assembly R-value**
+**Enclosure: Ceiling**
 
-Assembly R-value for the ceiling (attic floor).
+The type and insulation level of the ceiling (attic floor).
 
-- **Name:** ``ceiling_assembly_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
+- **Name:** ``enclosure_ceiling``
+- **Type:** ``Choice``
 
 - **Required:** ``true``
+
+- **Choices:** `Uninsulated`, `R-7`, `R-13`, `R-19`, `R-30`, `R-38`, `R-49`, `R-60`, `IECC U-0.035`, `IECC U-0.030`, `IECC U-0.026`, `IECC U-0.024`, `Detailed Example: R-11, 2x6, 24 in o.c., 10% Framing`, `Detailed Example: R-19, 2x6, 24 in o.c., 10% Framing`, `Detailed Example: R-19 + R-38, 2x6, 24 in o.c., 10% Framing`
+
+<br/>
+
+**Enclosure: Roof**
+
+The type and insulation level of the roof.
+
+- **Name:** ``enclosure_roof``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `Uninsulated`, `R-7`, `R-13`, `R-19`, `R-30`, `R-38`, `R-49`, `IECC U-0.035`, `IECC U-0.030`, `IECC U-0.026`, `IECC U-0.024`, `Detailed Example: Uninsulated, 0.5 in plywood, 0.25 in asphalt shingle`
 
 <br/>
 
@@ -563,19 +576,6 @@ The material type/color of the roof. If not provided, the OS-HPXML default (see 
 - **Required:** ``false``
 
 - **Choices:** `Asphalt/Fiberglass Shingles, Dark`, `Asphalt/Fiberglass Shingles, Medium Dark`, `Asphalt/Fiberglass Shingles, Medium`, `Asphalt/Fiberglass Shingles, Light`, `Asphalt/Fiberglass Shingles, Reflective`, `Tile/Slate, Dark`, `Tile/Slate, Medium Dark`, `Tile/Slate, Medium`, `Tile/Slate, Light`, `Tile/Slate, Reflective`, `Metal, Dark`, `Metal, Medium Dark`, `Metal, Medium`, `Metal, Light`, `Metal, Reflective`, `Wood Shingles/Shakes, Dark`, `Wood Shingles/Shakes, Medium Dark`, `Wood Shingles/Shakes, Medium`, `Wood Shingles/Shakes, Light`, `Wood Shingles/Shakes, Reflective`, `Shingles, Dark`, `Shingles, Medium Dark`, `Shingles, Medium`, `Shingles, Light`, `Shingles, Reflective`, `Synthetic Sheeting, Dark`, `Synthetic Sheeting, Medium Dark`, `Synthetic Sheeting, Medium`, `Synthetic Sheeting, Light`, `Synthetic Sheeting, Reflective`, `EPS Sheathing, Dark`, `EPS Sheathing, Medium Dark`, `EPS Sheathing, Medium`, `EPS Sheathing, Light`, `EPS Sheathing, Reflective`, `Concrete, Dark`, `Concrete, Medium Dark`, `Concrete, Medium`, `Concrete, Light`, `Concrete, Reflective`, `Cool Roof`, `0.2 Solar Absorptance`, `0.4 Solar Absorptance`, `0.6 Solar Absorptance`, `0.75 Solar Absorptance`
-
-<br/>
-
-**Roof: Assembly R-value**
-
-Assembly R-value of the roof.
-
-- **Name:** ``roof_assembly_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
-
-- **Required:** ``true``
 
 <br/>
 

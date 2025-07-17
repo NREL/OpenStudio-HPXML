@@ -416,9 +416,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
       args['rim_joist_assembly_r'] = 23.0
       args['enclosure_slab_carpet'] = '0% Carpet'
-      args['ceiling_assembly_r'] = 39.3
+      args['enclosure_ceiling'] = 'R-38'
       args['enclosure_roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
-      args['roof_assembly_r'] = 2.3
+      args['enclosure_roof'] = 'Uninsulated'
       args['wall_type'] = HPXML::WallTypeWoodStud
       args['enclosure_wall_siding'] = 'Wood, Medium'
       args['wall_assembly_r'] = 23
@@ -933,7 +933,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['water_heater_type'] = HPXML::WaterHeaterTypeCombiStorage
     when 'error-conditioned-attic-with-one-floor-above-grade.xml'
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
-      args['ceiling_assembly_r'] = 0.0
+      args['enclosure_ceiling'] = 'Uninsulated'
     when 'error-sfd-with-shared-system.xml'
       args['hvac_heating_system'] = 'Shared Boiler w/ Baseboard, 92% AFUE'
     when 'error-rim-joist-height-but-no-assembly-r.xml'
@@ -977,7 +977,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-invalid-door-area.xml'
       args['door_area'] = -10
     when 'error-vented-attic-with-zero-floor-insulation.xml'
-      args['ceiling_assembly_r'] = 0
+      args['enclosure_ceiling'] = 'Uninsulated'
     when 'error-different-software-program.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['software_info_program_used'] = 'Program2'
@@ -1021,12 +1021,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
     when 'warning-vented-attic-with-floor-and-roof-insulation.xml'
       args['geometry_attic_type'] = 'Attic, Vented, Gable'
-      args['roof_assembly_r'] = 10
+      args['enclosure_roof'] = 'R-7'
       args['ducts_supply_location'] = HPXML::LocationAtticVented
       args['ducts_return_location'] = HPXML::LocationAtticVented
     when 'warning-unvented-attic-with-floor-and-roof-insulation.xml'
       args['geometry_attic_type'] = 'Attic, Unvented, Gable'
-      args['roof_assembly_r'] = 10
+      args['enclosure_roof'] = 'R-7'
     when 'warning-conditioned-basement-with-ceiling-insulation.xml'
       args['geometry_foundation_type'] = 'Basement, Conditioned'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-11'

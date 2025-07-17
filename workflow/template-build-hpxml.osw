@@ -8,7 +8,7 @@
       "arguments": {
         "hpxml_path": "../built.xml",
         "enclosure_air_leakage": "3 ACH50",
-        "ceiling_assembly_r": 39.3,
+        "enclosure_ceiling": "R-38",
         "door_area": 40.0,
         "door_rvalue": 4.4,
         "hvac_ducts": "4 CFM25 per 100ft2, Uninsulated",
@@ -35,7 +35,7 @@
         "hvac_control_heating_weekday_setpoint": "68",
         "hvac_control_heating_weekend_setpoint": "68",
         "rim_joist_assembly_r": 23.0,
-        "roof_assembly_r": 2.3,
+        "enclosure_roof": "Uninsulated",
         "wall_assembly_r": 23,
         "water_heater_efficiency": 0.95,
         "water_heater_efficiency_type": "EnergyFactor",
