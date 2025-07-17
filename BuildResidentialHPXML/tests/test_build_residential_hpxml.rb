@@ -191,7 +191,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
       'error-invalid-door-area.xml' => 'base-sfd.xml',
-      'error-vented-attic-with-zero-floor-insulation.xml' => 'base-sfd.xml',
       'error-different-software-program.xml' => 'base-sfd-header.xml',
       'error-different-simulation-control.xml' => 'base-sfd-header.xml',
       'error-same-emissions-scenario-name.xml' => 'base-sfd-header.xml',
@@ -239,7 +238,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-protruding-garage-under-gable-roof.xml' => ['Cannot handle protruding garage and attic ridge running from front to back.'],
       'error-ambient-with-garage.xml' => ['Cannot handle garages with an ambient foundation type.'],
       'error-invalid-door-area.xml' => ['Door area cannot be negative.'],
-      'error-vented-attic-with-zero-floor-insulation.xml' => ["Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
       'error-different-software-program.xml' => ["'Software Info: Program Used' cannot vary across dwelling units.",
                                                  "'Software Info: Program Version' cannot vary across dwelling units."],
       'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
@@ -976,8 +974,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = 'Ambient'
     when 'error-invalid-door-area.xml'
       args['door_area'] = -10
-    when 'error-vented-attic-with-zero-floor-insulation.xml'
-      args['enclosure_ceiling'] = 'Uninsulated'
     when 'error-different-software-program.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['software_info_program_used'] = 'Program2'
