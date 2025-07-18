@@ -346,7 +346,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall', choices[:enclosure_wall], true)
-    arg.setDisplayName('Enclosure: Wall')
+    arg.setDisplayName('Enclosure: Walls')
     arg.setDescription('The type and insulation level of the walls.')
     args << arg
 
@@ -362,53 +362,45 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Wood, Medium')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_front', true)
-    arg.setDisplayName('Windows: Front Window Area or Window-to-Wall Ratio')
-    arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's front facade. Enter a fraction if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window', choices[:enclosure_window], true)
+    arg.setDisplayName('Enclosure: Windows')
+    arg.setDescription('The type of windows.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_back', true)
-    arg.setDisplayName('Windows: Back Window Area or Window-to-Wall Ratio')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_window_area_or_wwr_front', true)
+    arg.setDisplayName('Enclosure: Window Front Area or WWR')
     arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's back facade. Enter a fraction if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.")
+    arg.setDescription("The amount of window area on the unit's front facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_left', true)
-    arg.setDisplayName('Windows: Left Window Area or Window-to-Wall Ratio')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_window_area_or_wwr_back', true)
+    arg.setDisplayName('Enclosure: Window Back Area or WWR')
     arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.")
+    arg.setDescription("The amount of window area on the unit's back facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_right', true)
-    arg.setDisplayName('Windows: Right Window Area or Window-to-Wall Ratio')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_window_area_or_wwr_left', true)
+    arg.setDisplayName('Enclosure: Window Left Area or WWR')
     arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.")
+    arg.setDescription("The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_window_area_or_wwr_right', true)
+    arg.setDisplayName('Enclosure: Window Right Area or WWR')
+    arg.setUnits('ft2 or frac')
+    arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_fraction_operable', false)
-    arg.setDisplayName('Windows: Fraction Operable')
+    arg.setDisplayName('Enclosure: Window Fraction Operable')
     arg.setUnits('Frac')
     arg.setDescription("Fraction of windows that are operable. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('window_natvent_availability', false)
-    arg.setDisplayName('Windows: Natural Ventilation Availability')
+    arg.setDisplayName('Enclosure: Window Natural Ventilation Availability')
     arg.setUnits('Days/week')
     arg.setDescription("For operable windows, the number of days/week that windows can be opened by occupants for natural ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_ufactor', true)
-    arg.setDisplayName('Windows: U-Factor')
-    arg.setUnits('Btu/hr-ft2-R')
-    arg.setDescription('Full-assembly NFRC U-factor.')
-    arg.setDefaultValue(0.37)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_shgc', true)
-    arg.setDisplayName('Windows: SHGC')
-    arg.setDescription('Full-assembly NFRC solar heat gain coefficient.')
-    arg.setDefaultValue(0.3)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_interior_shading', choices[:enclosure_window_interior_shading], false)
@@ -426,7 +418,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     window_insect_screen_choices << HPXML::LocationExterior
     window_insect_screen_choices << HPXML::LocationInterior
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_insect_screens', window_insect_screen_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_insect_screens', window_insect_screen_choices, false)
     arg.setDisplayName('Enclosure: Window Insect Screens')
     arg.setDescription('The type of window insect screens, if present. If not provided, assumes there are no insect screens.')
     args << arg
@@ -435,7 +427,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     storm_window_type_choices << HPXML::WindowGlassTypeClear
     storm_window_type_choices << HPXML::WindowGlassTypeLowE
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_storm_type', storm_window_type_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_storm_type', storm_window_type_choices, false)
     arg.setDisplayName('Enclosure: Window Storms')
     arg.setDescription('The type of window storm, if present. If not provided, assumes there is no storm.')
     args << arg
@@ -446,50 +438,38 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(choices[:enclosure_overhangs][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_front', true)
-    arg.setDisplayName('Skylights: Front Roof Area')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_skylight', choices[:enclosure_skylight], false)
+    arg.setDisplayName('Enclosure: Skylights')
+    arg.setDescription('The type of skylights.')
+    arg.setDefaultValue(choices[:enclosure_skylight][0])
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_skylight_area_front', false)
+    arg.setDisplayName('Enclosure: Skylight Front Area')
     arg.setUnits('ft2')
-    arg.setDescription("The amount of skylight area on the unit's front conditioned roof facade.")
+    arg.setDescription("The amount of skylight area on the unit's front conditioned roof.")
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_back', true)
-    arg.setDisplayName('Skylights: Back Roof Area')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_skylight_area_back', false)
+    arg.setDisplayName('Enclosure: Skylight Back Area')
     arg.setUnits('ft2')
-    arg.setDescription("The amount of skylight area on the unit's back conditioned roof facade.")
+    arg.setDescription("The amount of skylight area on the unit's back conditioned roof.")
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_left', true)
-    arg.setDisplayName('Skylights: Left Roof Area')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_skylight_area_left', false)
+    arg.setDisplayName('Enclosure: Skylight Left Area')
     arg.setUnits('ft2')
-    arg.setDescription("The amount of skylight area on the unit's left conditioned roof facade (when viewed from the front).")
+    arg.setDescription("The amount of skylight area on the unit's left conditioned roof (when viewed from the front).")
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_area_right', true)
-    arg.setDisplayName('Skylights: Right Roof Area')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_skylight_area_right', false)
+    arg.setDisplayName('Enclosure: Skylight Right Area')
     arg.setUnits('ft2')
-    arg.setDescription("The amount of skylight area on the unit's right conditioned roof facade (when viewed from the front).")
+    arg.setDescription("The amount of skylight area on the unit's right conditioned roof (when viewed from the front).")
     arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_ufactor', true)
-    arg.setDisplayName('Skylights: U-Factor')
-    arg.setUnits('Btu/hr-ft2-R')
-    arg.setDescription('Full-assembly NFRC U-factor.')
-    arg.setDefaultValue(0.33)
-    args << arg
-
-    skylight_shgc = OpenStudio::Measure::OSArgument::makeDoubleArgument('skylight_shgc', true)
-    skylight_shgc.setDisplayName('Skylights: SHGC')
-    skylight_shgc.setDescription('Full-assembly NFRC solar heat gain coefficient.')
-    skylight_shgc.setDefaultValue(0.45)
-    args << skylight_shgc
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('skylight_storm_type', storm_window_type_choices, false)
-    arg.setDisplayName('Skylights: Storm Type')
-    arg.setDescription('The type of storm, if present. If not provided, assumes there is no storm.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('door_area', true)
@@ -515,13 +495,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     air_leakage_type_choices << HPXML::InfiltrationTypeUnitTotal
     air_leakage_type_choices << HPXML::InfiltrationTypeUnitExterior
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_type', air_leakage_type_choices, false)
-    arg.setDisplayName('Air Leakage: Type')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_air_leakage_type', air_leakage_type_choices, false)
+    arg.setDisplayName('Enclosure: Air Leakage Type')
     arg.setDescription("Type of air leakage if providing a numeric air leakage value. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('air_leakage_has_flue_or_chimney_in_conditioned_space', false)
-    arg.setDisplayName('Air Leakage: Has Flue or Chimney in Conditioned Space')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('enclosure_has_flue_or_chimney_in_conditioned_space', false)
+    arg.setDisplayName('Enclosure: Has Flue or Chimney in Conditioned Space')
     arg.setDescription("Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#flue-or-chimney'>Flue or Chimney</a>) is used.")
     args << arg
 
@@ -3296,9 +3276,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     else
       leakiness_description = args[:enclosure_air_leakage_leakiness_description]
     end
-    if not args[:air_leakage_type].nil?
+    if not args[:enclosure_air_leakage_type].nil?
       if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
-        air_leakage_type = args[:air_leakage_type]
+        air_leakage_type = args[:enclosure_air_leakage_type]
       end
     end
     infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
@@ -3312,7 +3292,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                                  infiltration_type: air_leakage_type,
                                                  leakiness_description: leakiness_description)
 
-    hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space = args[:air_leakage_has_flue_or_chimney_in_conditioned_space]
+    hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space = args[:enclosure_has_flue_or_chimney_in_conditioned_space]
   end
 
   # Sets the HPXML roofs properties.
@@ -3791,17 +3771,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       wall_idref = @surface_ids[surface.name.to_s]
       next if wall_idref.nil?
 
-      insect_screen_present = ([HPXML::LocationExterior, HPXML::LocationInterior].include? args[:window_insect_screens])
+      insect_screen_present = ([HPXML::LocationExterior, HPXML::LocationInterior].include? args[:enclosure_window_insect_screens])
       if insect_screen_present
-        insect_screen_location = args[:window_insect_screens]
+        insect_screen_location = args[:enclosure_window_insect_screens]
       end
 
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2'),
                              azimuth: azimuth,
-                             ufactor: args[:window_ufactor],
-                             shgc: args[:window_shgc],
-                             storm_type: args[:window_storm_type],
+                             ufactor: args[:enclosure_window_u_factor],
+                             shgc: args[:enclosure_window_shgc],
+                             storm_type: args[:enclosure_window_storm_type],
                              overhangs_depth: overhangs_depth,
                              overhangs_distance_to_top_of_window: overhangs_distance_to_top_of_window,
                              overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
@@ -3846,9 +3826,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml_bldg.skylights.add(id: "Skylight#{hpxml_bldg.skylights.size + 1}",
                                area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2'),
                                azimuth: azimuth,
-                               ufactor: args[:skylight_ufactor],
-                               shgc: args[:skylight_shgc],
-                               storm_type: args[:skylight_storm_type],
+                               ufactor: args[:enclosure_skylight_u_factor],
+                               shgc: args[:enclosure_skylight_shgc],
                                attached_to_roof_idref: roof_idref,
                                attached_to_floor_idref: floor_idref)
     end

@@ -980,7 +980,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                              shgc: 0.45,
                              fraction_operable: 0.0,
                              attached_to_wall_idref: hpxml_bldg.foundation_walls[0].id)
-    elsif hpxml_file.include? 'base-enclosure-skylights-cathedral.xml'
+    elsif ['base-enclosure-skylights-cathedral.xml'].include? hpxml_file
       hpxml_bldg.skylights.each do |skylight|
         skylight.curb_area = 5.25
         skylight.curb_assembly_r_value = 1.96
@@ -1012,6 +1012,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.skylights[1].exterior_shading_factor_winter = 0.0
         hpxml_bldg.skylights[1].interior_shading_factor_summer = 0.5
         hpxml_bldg.skylights[1].interior_shading_factor_winter = 1.0
+      elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
+        hpxml_bldg.skylights.each do |skylight|
+          skylight.storm_type = HPXML::WindowGlassTypeClear
+        end
       end
     elsif ['base-enclosure-windows-physical-properties.xml'].include? hpxml_file
       hpxml_bldg.windows[0].ufactor = nil

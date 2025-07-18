@@ -419,20 +419,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_roof'] = 'Uninsulated'
       args['enclosure_wall'] = 'Wood Stud, R-21'
       args['enclosure_wall_siding'] = 'Wood, Medium'
-      args['window_area_or_wwr_front'] = 108.0
-      args['window_area_or_wwr_back'] = 108.0
-      args['window_area_or_wwr_left'] = 72.0
-      args['window_area_or_wwr_right'] = 72.0
+      args['enclosure_window_area_or_wwr_front'] = 108.0
+      args['enclosure_window_area_or_wwr_back'] = 108.0
+      args['enclosure_window_area_or_wwr_left'] = 72.0
+      args['enclosure_window_area_or_wwr_right'] = 72.0
       args['window_fraction_operable'] = 0.67
-      args['window_ufactor'] = 0.33
-      args['window_shgc'] = 0.45
+      args['enclosure_window'] = 'Double, Low-E, Insulated, Air, Med Gain'
       args['enclosure_window_interior_shading'] = 'Summer=0.7, Winter=0.8'
-      args['skylight_area_front'] = 0
-      args['skylight_area_back'] = 0
-      args['skylight_area_left'] = 0
-      args['skylight_area_right'] = 0
-      args['skylight_ufactor'] = 0.33
-      args['skylight_shgc'] = 0.45
       args['door_area'] = 40.0
       args['door_rvalue'] = 4.4
       args['enclosure_air_leakage'] = '3 ACH50'
@@ -536,11 +529,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_cfa'] = 1800.0
       args['geometry_building_num_units'] = 3
       args['geometry_attached_walls'] = '1 Side: Right'
-      args['window_area_or_wwr_front'] = 0.18
-      args['window_area_or_wwr_back'] = 0.18
-      args['window_area_or_wwr_left'] = 0.18
-      args['window_area_or_wwr_right'] = 0.18
-      args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
+      args['enclosure_window_area_or_wwr_front'] = 0.18
+      args['enclosure_window_area_or_wwr_back'] = 0.18
+      args['enclosure_window_area_or_wwr_left'] = 0.18
+      args['enclosure_window_area_or_wwr_right'] = 0.18
+      args['enclosure_air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     when 'base-sfa2.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
       args['whole_sfa_or_mf_building_sim'] = true
@@ -554,16 +547,16 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_foundation_type'] = 'Above Apartment'
       args['geometry_attached_walls'] = '1 Side: Right'
       args['geometry_building_num_units'] = 6
-      args['window_area_or_wwr_front'] = 0.18
-      args['window_area_or_wwr_back'] = 0.18
-      args['window_area_or_wwr_left'] = 0.18
-      args['window_area_or_wwr_right'] = 0.18
+      args['enclosure_window_area_or_wwr_front'] = 0.18
+      args['enclosure_window_area_or_wwr_back'] = 0.18
+      args['enclosure_window_area_or_wwr_left'] = 0.18
+      args['enclosure_window_area_or_wwr_right'] = 0.18
       args['hvac_ducts'] = '0 CFM25 per 100ft2, Uninsulated'
       args['ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['ducts_return_location'] = HPXML::LocationConditionedSpace
       args['ducts_number_of_return_registers'] = 1
       args['door_area'] = 20.0
-      args['air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
+      args['enclosure_air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     when 'base-mf2.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')
       args['whole_sfa_or_mf_building_sim'] = true
@@ -673,7 +666,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
     when 'extra-enclosure-garage-atticroof-conditioned.xml'
       args['geometry_garage_type'] = '3 Car, Right, Half Protruding'
-      args['window_area_or_wwr_front'] = 12.0
+      args['enclosure_window_area_or_wwr_front'] = 12.0
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'

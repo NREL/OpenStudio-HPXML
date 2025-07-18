@@ -47,8 +47,7 @@
         "window_area_or_wwr_front": 108.0,
         "window_area_or_wwr_left": 72.0,
         "window_area_or_wwr_right": 72.0,
-        "window_shgc": 0.45,
-        "window_ufactor": 0.33,
+        "enclosure_window": "Double, Low-E, Insulated, Air, Med Gain",
         "utility_bill_scenario_names": "Bills"
       },
       "measure_dir_name": "BuildResidentialHPXML"

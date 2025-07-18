@@ -292,8 +292,8 @@
             <SystemIdentifier id='Window1'/>
             <Area>43.2</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
               <Type>light curtains</Type>
@@ -305,8 +305,8 @@
             <SystemIdentifier id='Window2'/>
             <Area>43.2</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
               <Type>light curtains</Type>
@@ -318,8 +318,8 @@
             <SystemIdentifier id='Window3'/>
             <Area>57.6</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
               <Type>light curtains</Type>
@@ -808,8 +808,8 @@
             <SystemIdentifier id='Window1_2'/>
             <Area>43.2</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading_2'/>
               <Type>light curtains</Type>
@@ -821,8 +821,8 @@
             <SystemIdentifier id='Window2_2'/>
             <Area>43.2</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading_2'/>
               <Type>light curtains</Type>
@@ -834,8 +834,8 @@
             <SystemIdentifier id='Window3_2'/>
             <Area>57.6</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading_2'/>
               <Type>light curtains</Type>
@@ -1215,8 +1215,8 @@
             <SystemIdentifier id='Window1_3'/>
             <Area>43.2</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading_3'/>
               <Type>light curtains</Type>
@@ -1228,8 +1228,8 @@
             <SystemIdentifier id='Window2_3'/>
             <Area>43.2</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading_3'/>
               <Type>light curtains</Type>
@@ -1241,8 +1241,8 @@
             <SystemIdentifier id='Window3_3'/>
             <Area>57.6</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading_3'/>
               <Type>light curtains</Type>
@@ -1622,8 +1622,8 @@
             <SystemIdentifier id='Window1_4'/>
             <Area>43.2</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading_4'/>
               <Type>light curtains</Type>
@@ -1635,8 +1635,8 @@
             <SystemIdentifier id='Window2_4'/>
             <Area>43.2</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading_4'/>
               <Type>light curtains</Type>
@@ -1648,8 +1648,8 @@
             <SystemIdentifier id='Window3_4'/>
             <Area>57.6</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading_4'/>
               <Type>light curtains</Type>
@@ -2086,8 +2086,8 @@
             <SystemIdentifier id='Window1_5'/>
             <Area>43.2</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading_5'/>
               <Type>light curtains</Type>
@@ -2099,8 +2099,8 @@
             <SystemIdentifier id='Window2_5'/>
             <Area>43.2</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading_5'/>
               <Type>light curtains</Type>
@@ -2112,8 +2112,8 @@
             <SystemIdentifier id='Window3_5'/>
             <Area>57.6</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading_5'/>
               <Type>light curtains</Type>
@@ -2550,8 +2550,8 @@
             <SystemIdentifier id='Window1_6'/>
             <Area>43.2</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading_6'/>
               <Type>light curtains</Type>
@@ -2563,8 +2563,8 @@
             <SystemIdentifier id='Window2_6'/>
             <Area>43.2</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading_6'/>
               <Type>light curtains</Type>
@@ -2576,8 +2576,8 @@
             <SystemIdentifier id='Window3_6'/>
             <Area>57.6</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading_6'/>
               <Type>light curtains</Type>

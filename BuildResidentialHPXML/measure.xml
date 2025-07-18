@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>c20b1490-e692-4ac1-9040-f45f9bc6302f</version_id>
-  <version_modified>2025-07-18T00:05:15Z</version_modified>
+  <version_id>33bd886c-92af-457a-9fd5-8d2444cd7bce</version_id>
+  <version_modified>2025-07-18T17:42:05Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1588,7 +1588,7 @@
     </argument>
     <argument>
       <name>enclosure_wall</name>
-      <display_name>Enclosure: Wall</display_name>
+      <display_name>Enclosure: Walls</display_name>
       <description>The type and insulation level of the walls.</description>
       <type>Choice</type>
       <required>true</required>
@@ -2091,36 +2091,214 @@
       </choices>
     </argument>
     <argument>
-      <name>window_area_or_wwr_front</name>
-      <display_name>Windows: Front Window Area or Window-to-Wall Ratio</display_name>
-      <description>The amount of window area on the unit's front facade. Enter a fraction if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.</description>
+      <name>enclosure_window</name>
+      <display_name>Enclosure: Windows</display_name>
+      <description>The type of windows.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>Single, Clear, Metal</value>
+          <display_name>Single, Clear, Metal</display_name>
+        </choice>
+        <choice>
+          <value>Single, Clear, Non-Metal</value>
+          <display_name>Single, Clear, Non-Metal</display_name>
+        </choice>
+        <choice>
+          <value>Double, Clear, Metal, Air</value>
+          <display_name>Double, Clear, Metal, Air</display_name>
+        </choice>
+        <choice>
+          <value>Double, Clear, Thermal-Break, Air</value>
+          <display_name>Double, Clear, Thermal-Break, Air</display_name>
+        </choice>
+        <choice>
+          <value>Double, Clear, Non-Metal, Air</value>
+          <display_name>Double, Clear, Non-Metal, Air</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, Air, High Gain</value>
+          <display_name>Double, Low-E, Non-Metal, Air, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, Air, Med Gain</value>
+          <display_name>Double, Low-E, Non-Metal, Air, Med Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, Air, Low Gain</value>
+          <display_name>Double, Low-E, Non-Metal, Air, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, Gas, High Gain</value>
+          <display_name>Double, Low-E, Non-Metal, Gas, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, Gas, Med Gain</value>
+          <display_name>Double, Low-E, Non-Metal, Gas, Med Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, Gas, Low Gain</value>
+          <display_name>Double, Low-E, Non-Metal, Gas, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Insulated, Air, High Gain</value>
+          <display_name>Double, Low-E, Insulated, Air, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Insulated, Air, Med Gain</value>
+          <display_name>Double, Low-E, Insulated, Air, Med Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Insulated, Air, Low Gain</value>
+          <display_name>Double, Low-E, Insulated, Air, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Insulated, Gas, High Gain</value>
+          <display_name>Double, Low-E, Insulated, Gas, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Insulated, Gas, Med Gain</value>
+          <display_name>Double, Low-E, Insulated, Gas, Med Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Insulated, Gas, Low Gain</value>
+          <display_name>Double, Low-E, Insulated, Gas, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Low-E, Non-Metal, Air, High Gain</value>
+          <display_name>Triple, Low-E, Non-Metal, Air, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Low-E, Non-Metal, Air, Low Gain</value>
+          <display_name>Triple, Low-E, Non-Metal, Air, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Low-E, Non-Metal, Gas, High Gain</value>
+          <display_name>Triple, Low-E, Non-Metal, Gas, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Low-E, Non-Metal, Gas, Low Gain</value>
+          <display_name>Triple, Low-E, Non-Metal, Gas, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Low-E, Insulated, Air, High Gain</value>
+          <display_name>Triple, Low-E, Insulated, Air, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Low-E, Insulated, Air, Low Gain</value>
+          <display_name>Triple, Low-E, Insulated, Air, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Low-E, Insulated, Gas, High Gain</value>
+          <display_name>Triple, Low-E, Insulated, Gas, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Low-E, Insulated, Gas, Low Gain</value>
+          <display_name>Triple, Low-E, Insulated, Gas, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-1.20, SHGC=0.40</value>
+          <display_name>IECC U-1.20, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-1.20, SHGC=0.30</value>
+          <display_name>IECC U-1.20, SHGC=0.30</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-1.20, SHGC=0.25</value>
+          <display_name>IECC U-1.20, SHGC=0.25</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.75, SHGC=0.40</value>
+          <display_name>IECC U-0.75, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.65, SHGC=0.40</value>
+          <display_name>IECC U-0.65, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.65, SHGC=0.30</value>
+          <display_name>IECC U-0.65, SHGC=0.30</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.50, SHGC=0.30</value>
+          <display_name>IECC U-0.50, SHGC=0.30</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.50, SHGC=0.25</value>
+          <display_name>IECC U-0.50, SHGC=0.25</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.40, SHGC=0.40</value>
+          <display_name>IECC U-0.40, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.40, SHGC=0.25</value>
+          <display_name>IECC U-0.40, SHGC=0.25</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.35, SHGC=0.40</value>
+          <display_name>IECC U-0.35, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.35, SHGC=0.30</value>
+          <display_name>IECC U-0.35, SHGC=0.30</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.35, SHGC=0.25</value>
+          <display_name>IECC U-0.35, SHGC=0.25</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.32, SHGC=0.25</value>
+          <display_name>IECC U-0.32, SHGC=0.25</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.30, SHGC=0.25</value>
+          <display_name>IECC U-0.30, SHGC=0.25</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Single, Clear, Aluminum w/ Thermal Break</value>
+          <display_name>Detailed Example: Single, Clear, Aluminum w/ Thermal Break</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Double, Low-E, Wood, Argon, Insulated Spacer</value>
+          <display_name>Detailed Example: Double, Low-E, Wood, Argon, Insulated Spacer</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>enclosure_window_area_or_wwr_front</name>
+      <display_name>Enclosure: Window Front Area or WWR</display_name>
+      <description>The amount of window area on the unit's front facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.</description>
       <type>Double</type>
       <units>ft2 or frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>window_area_or_wwr_back</name>
-      <display_name>Windows: Back Window Area or Window-to-Wall Ratio</display_name>
-      <description>The amount of window area on the unit's back facade. Enter a fraction if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.</description>
+      <name>enclosure_window_area_or_wwr_back</name>
+      <display_name>Enclosure: Window Back Area or WWR</display_name>
+      <description>The amount of window area on the unit's back facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.</description>
       <type>Double</type>
       <units>ft2 or frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>window_area_or_wwr_left</name>
-      <display_name>Windows: Left Window Area or Window-to-Wall Ratio</display_name>
-      <description>The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.</description>
+      <name>enclosure_window_area_or_wwr_left</name>
+      <display_name>Enclosure: Window Left Area or WWR</display_name>
+      <description>The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.</description>
       <type>Double</type>
       <units>ft2 or frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>window_area_or_wwr_right</name>
-      <display_name>Windows: Right Window Area or Window-to-Wall Ratio</display_name>
-      <description>The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.</description>
+      <name>enclosure_window_area_or_wwr_right</name>
+      <display_name>Enclosure: Window Right Area or WWR</display_name>
+      <description>The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.</description>
       <type>Double</type>
       <units>ft2 or frac</units>
       <required>true</required>
@@ -2128,7 +2306,7 @@
     </argument>
     <argument>
       <name>window_fraction_operable</name>
-      <display_name>Windows: Fraction Operable</display_name>
+      <display_name>Enclosure: Window Fraction Operable</display_name>
       <description>Fraction of windows that are operable. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-windows'&gt;HPXML Windows&lt;/a&gt;) is used.</description>
       <type>Double</type>
       <units>Frac</units>
@@ -2137,31 +2315,12 @@
     </argument>
     <argument>
       <name>window_natvent_availability</name>
-      <display_name>Windows: Natural Ventilation Availability</display_name>
+      <display_name>Enclosure: Window Natural Ventilation Availability</display_name>
       <description>For operable windows, the number of days/week that windows can be opened by occupants for natural ventilation. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-windows'&gt;HPXML Windows&lt;/a&gt;) is used.</description>
       <type>Integer</type>
       <units>Days/week</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>window_ufactor</name>
-      <display_name>Windows: U-Factor</display_name>
-      <description>Full-assembly NFRC U-factor.</description>
-      <type>Double</type>
-      <units>Btu/hr-ft2-R</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0.37</default_value>
-    </argument>
-    <argument>
-      <name>window_shgc</name>
-      <display_name>Windows: SHGC</display_name>
-      <description>Full-assembly NFRC solar heat gain coefficient.</description>
-      <type>Double</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0.3</default_value>
     </argument>
     <argument>
       <name>enclosure_window_interior_shading</name>
@@ -2360,7 +2519,7 @@
       </choices>
     </argument>
     <argument>
-      <name>window_insect_screens</name>
+      <name>enclosure_window_insect_screens</name>
       <display_name>Enclosure: Window Insect Screens</display_name>
       <description>The type of window insect screens, if present. If not provided, assumes there are no insect screens.</description>
       <type>Choice</type>
@@ -2382,7 +2541,7 @@
       </choices>
     </argument>
     <argument>
-      <name>window_storm_type</name>
+      <name>enclosure_window_storm_type</name>
       <display_name>Enclosure: Window Storms</display_name>
       <description>The type of window storm, if present. If not provided, assumes there is no storm.</description>
       <type>Choice</type>
@@ -2543,81 +2702,143 @@
       </choices>
     </argument>
     <argument>
-      <name>skylight_area_front</name>
-      <display_name>Skylights: Front Roof Area</display_name>
-      <description>The amount of skylight area on the unit's front conditioned roof facade.</description>
-      <type>Double</type>
-      <units>ft2</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>skylight_area_back</name>
-      <display_name>Skylights: Back Roof Area</display_name>
-      <description>The amount of skylight area on the unit's back conditioned roof facade.</description>
-      <type>Double</type>
-      <units>ft2</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>skylight_area_left</name>
-      <display_name>Skylights: Left Roof Area</display_name>
-      <description>The amount of skylight area on the unit's left conditioned roof facade (when viewed from the front).</description>
-      <type>Double</type>
-      <units>ft2</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>skylight_area_right</name>
-      <display_name>Skylights: Right Roof Area</display_name>
-      <description>The amount of skylight area on the unit's right conditioned roof facade (when viewed from the front).</description>
-      <type>Double</type>
-      <units>ft2</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0</default_value>
-    </argument>
-    <argument>
-      <name>skylight_ufactor</name>
-      <display_name>Skylights: U-Factor</display_name>
-      <description>Full-assembly NFRC U-factor.</description>
-      <type>Double</type>
-      <units>Btu/hr-ft2-R</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0.33</default_value>
-    </argument>
-    <argument>
-      <name>skylight_shgc</name>
-      <display_name>Skylights: SHGC</display_name>
-      <description>Full-assembly NFRC solar heat gain coefficient.</description>
-      <type>Double</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0.45</default_value>
-    </argument>
-    <argument>
-      <name>skylight_storm_type</name>
-      <display_name>Skylights: Storm Type</display_name>
-      <description>The type of storm, if present. If not provided, assumes there is no storm.</description>
+      <name>enclosure_skylight</name>
+      <display_name>Enclosure: Skylights</display_name>
+      <description>The type of skylights.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Single, Clear, Metal</default_value>
       <choices>
         <choice>
-          <value>clear</value>
-          <display_name>clear</display_name>
+          <value>Single, Clear, Metal</value>
+          <display_name>Single, Clear, Metal</display_name>
         </choice>
         <choice>
-          <value>low-e</value>
-          <display_name>low-e</display_name>
+          <value>Single, Clear, Non-Metal</value>
+          <display_name>Single, Clear, Non-Metal</display_name>
+        </choice>
+        <choice>
+          <value>Double, Clear, Metal</value>
+          <display_name>Double, Clear, Metal</display_name>
+        </choice>
+        <choice>
+          <value>Double, Clear, Non-Metal</value>
+          <display_name>Double, Clear, Non-Metal</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Metal, High Gain</value>
+          <display_name>Double, Low-E, Metal, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, High Gain</value>
+          <display_name>Double, Low-E, Non-Metal, High Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Metal, Med Gain</value>
+          <display_name>Double, Low-E, Metal, Med Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, Med Gain</value>
+          <display_name>Double, Low-E, Non-Metal, Med Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Metal, Low Gain</value>
+          <display_name>Double, Low-E, Metal, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Double, Low-E, Non-Metal, Low Gain</value>
+          <display_name>Double, Low-E, Non-Metal, Low Gain</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Clear, Metal</value>
+          <display_name>Triple, Clear, Metal</display_name>
+        </choice>
+        <choice>
+          <value>Triple, Clear, Non-Metal</value>
+          <display_name>Triple, Clear, Non-Metal</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.75, SHGC=0.40</value>
+          <display_name>IECC U-0.75, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.75, SHGC=0.30</value>
+          <display_name>IECC U-0.75, SHGC=0.30</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.75, SHGC=0.25</value>
+          <display_name>IECC U-0.75, SHGC=0.25</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.65, SHGC=0.40</value>
+          <display_name>IECC U-0.65, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.65, SHGC=0.30</value>
+          <display_name>IECC U-0.65, SHGC=0.30</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.65, SHGC=0.25</value>
+          <display_name>IECC U-0.65, SHGC=0.25</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.60, SHGC=0.40</value>
+          <display_name>IECC U-0.60, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.60, SHGC=0.30</value>
+          <display_name>IECC U-0.60, SHGC=0.30</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.55, SHGC=0.40</value>
+          <display_name>IECC U-0.55, SHGC=0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.55, SHGC=0.25</value>
+          <display_name>IECC U-0.55, SHGC=0.25</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>enclosure_skylight_area_front</name>
+      <display_name>Enclosure: Skylight Front Area</display_name>
+      <description>The amount of skylight area on the unit's front conditioned roof.</description>
+      <type>Double</type>
+      <units>ft2</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>enclosure_skylight_area_back</name>
+      <display_name>Enclosure: Skylight Back Area</display_name>
+      <description>The amount of skylight area on the unit's back conditioned roof.</description>
+      <type>Double</type>
+      <units>ft2</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>enclosure_skylight_area_left</name>
+      <display_name>Enclosure: Skylight Left Area</display_name>
+      <description>The amount of skylight area on the unit's left conditioned roof (when viewed from the front).</description>
+      <type>Double</type>
+      <units>ft2</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>enclosure_skylight_area_right</name>
+      <display_name>Enclosure: Skylight Right Area</display_name>
+      <description>The amount of skylight area on the unit's right conditioned roof (when viewed from the front).</description>
+      <type>Double</type>
+      <units>ft2</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
     </argument>
     <argument>
       <name>door_area</name>
@@ -2826,8 +3047,8 @@
       </choices>
     </argument>
     <argument>
-      <name>air_leakage_type</name>
-      <display_name>Air Leakage: Type</display_name>
+      <name>enclosure_air_leakage_type</name>
+      <display_name>Enclosure: Air Leakage Type</display_name>
       <description>Type of air leakage if providing a numeric air leakage value. If 'unit total', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if 'unit exterior only', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is single-family attached or apartment unit.</description>
       <type>Choice</type>
       <required>false</required>
@@ -2844,8 +3065,8 @@
       </choices>
     </argument>
     <argument>
-      <name>air_leakage_has_flue_or_chimney_in_conditioned_space</name>
-      <display_name>Air Leakage: Has Flue or Chimney in Conditioned Space</display_name>
+      <name>enclosure_has_flue_or_chimney_in_conditioned_space</name>
+      <display_name>Enclosure: Has Flue or Chimney in Conditioned Space</display_name>
       <description>Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#flue-or-chimney'&gt;Flue or Chimney&lt;/a&gt;) is used.</description>
       <type>Boolean</type>
       <required>false</required>
@@ -9828,7 +10049,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>DE977B6D</checksum>
+      <checksum>5373E8B2</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9845,7 +10066,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>6D7A7746</checksum>
+      <checksum>1FC6CDF9</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9857,7 +10078,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>96F525F9</checksum>
+      <checksum>DFF18BF5</checksum>
     </file>
     <file>
       <filename>options/battery.tsv</filename>
@@ -9944,6 +10165,12 @@
       <checksum>CB08121A</checksum>
     </file>
     <file>
+      <filename>options/enclosure_skylight.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6DFA70A3</checksum>
+    </file>
+    <file>
       <filename>options/enclosure_slab.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -9972,6 +10199,12 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>CCFDBCA6</checksum>
+    </file>
+    <file>
+      <filename>options/enclosure_window.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>987765AF</checksum>
     </file>
     <file>
       <filename>options/enclosure_window_exterior_shading.tsv</filename>
@@ -10202,634 +10435,10 @@
       <checksum>821EB998</checksum>
     </file>
     <file>
-      <filename>extra_files/base-mf.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>182B9F0D</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-mf2.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>024D9F88</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-mf3.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>60E50E21</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-mf4.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>03C3557E</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-sfa.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B75D0B97</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-sfa2.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B619A9AF</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-sfa3.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>451CBD63</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-sfd-header-no-duplicates.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>95007846</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-sfd-header.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E63DE297</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-sfd.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0E57EFFC</checksum>
-    </file>
-    <file>
-      <filename>extra_files/base-sfd2.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E0167EF4</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-auto-duct-locations.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D7617ED5</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-auto.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>646539FA</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-bills-fossil-fuel-rates.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2BD32C37</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-detailed-performance-autosize.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EFEC6319</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-dhw-solar-latitude.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1E6C4335</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-ducts-attic.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0E57EFFC</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-ducts-crawlspace.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>05719059</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-emissions-fossil-fuel-factors.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>281A90EC</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-enclosure-atticroof-conditioned-eaves-gable.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B26D424F</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-enclosure-atticroof-conditioned-eaves-hip.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>558B26D4</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-enclosure-garage-atticroof-conditioned.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>91F255F7</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-enclosure-garage-partially-protruded.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>742541A0</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-enclosure-windows-shading.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>814B4E1B</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-gas-hot-tub-heater-with-zero-kwh.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C563E067</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-gas-pool-heater-with-zero-kwh.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>49CF936C</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-ambient.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>47F34BE9</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-atticroof-flat.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>24E39D53</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-atticroof-vented.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F9ECB476</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-eaves.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A43860F5</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-exterior-corridor.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>51E763BD</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>51E763BD</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-left-bottom-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>71AC60D8</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-left-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0D7EAAB1</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-left-middle-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3E68B7C3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-left-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>51E763BD</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-left-top-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3E68B7C3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-left-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>51E763BD</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-middle-bottom-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>71AC60D8</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-middle-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A47E95E7</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-middle-middle-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3E68B7C3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-middle-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0A96B256</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-middle-top-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>23057676</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-middle-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0A96B256</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>71AC60D8</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-right-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>118BA4B1</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-right-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1AE280F3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab-right-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1AE280F3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-slab.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0D7EAAB1</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-left-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D84E62B2</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-left-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>51E763BD</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-left-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>51E763BD</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-middle-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3F53EAF0</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-middle-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0A96B256</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-middle-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0A96B256</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C6512F3D</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-right-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BEC476C7</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-right-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1AE280F3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace-right-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1AE280F3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-unvented-crawlspace.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D84E62B2</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-left-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F2552C78</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-left-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>51E763BD</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-left-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>51E763BD</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-middle-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>14A4ED12</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-middle-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0A96B256</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-middle-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0A96B256</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D2B45F56</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-right-bottom.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BD4FC9FE</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-right-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1AE280F3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace-right-top.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1AE280F3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-mf-vented-crawlspace.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F2552C78</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-power-outage-periods.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3B373DB6</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-pv-roofpitch.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D52BED43</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-seasons-building-america.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>725F17CC</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-boiler-to-heat-pump.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1128B392</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-boiler-to-heating-system.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2986346B</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-fireplace-to-heat-pump.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>709736A0</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-fireplace-to-heating-system.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>27578DBB</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-portable-heater-to-heat-pump.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>FC0B17C2</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-heating-system-portable-heater-to-heating-system.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C85B962F</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-second-refrigerator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0E57EFFC</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-ambient.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8DF73D64</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-gable.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>37E98560</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-atticroof-conditioned-eaves-hip.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A5DF8628</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-atticroof-flat.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>44FB59AE</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-conditioned-crawlspace.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>90EA7B82</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-exterior-corridor.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D8FA15AA</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-rear-units.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D8FA15AA</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-slab-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>00E23071</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-slab-right.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>52CA6BC6</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-slab.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>951AE2E8</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-unconditioned-basement-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7C6930E3</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-unconditioned-basement-right.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>11801B93</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-unconditioned-basement.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>839FDD3B</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-unvented-crawlspace-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>028BEC37</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-unvented-crawlspace-right.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>315DCB0B</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-unvented-crawlspace.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4081373C</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-vented-crawlspace-middle.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7BB73912</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-vented-crawlspace-right.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>89406532</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-sfa-vented-crawlspace.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E85CED69</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-two-batteries.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>380D99E6</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-vehicle-ev.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A2B6F0D1</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-water-heater-attic.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>592B3EEE</checksum>
-    </file>
-    <file>
-      <filename>extra_files/extra-water-heater-crawlspace.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A25B24DE</checksum>
-    </file>
-    <file>
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4BB18875</checksum>
+      <checksum>0D475034</checksum>
     </file>
   </files>
 </measure>

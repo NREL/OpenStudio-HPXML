@@ -592,7 +592,7 @@ The type of radiant barrier in the attic.
 
 <br/>
 
-**Enclosure: Wall**
+**Enclosure: Walls**
 
 The type and insulation level of the walls.
 
@@ -631,11 +631,24 @@ The type, color, and insulation level of the wall siding. The R-value of the sid
 
 <br/>
 
-**Windows: Front Window Area or Window-to-Wall Ratio**
+**Enclosure: Windows**
 
-The amount of window area on the unit's front facade. Enter a fraction if specifying Front Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.
+The type of windows.
 
-- **Name:** ``window_area_or_wwr_front``
+- **Name:** ``enclosure_window``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `Single, Clear, Metal`, `Single, Clear, Non-Metal`, `Double, Clear, Metal, Air`, `Double, Clear, Thermal-Break, Air`, `Double, Clear, Non-Metal, Air`, `Double, Low-E, Non-Metal, Air, High Gain`, `Double, Low-E, Non-Metal, Air, Med Gain`, `Double, Low-E, Non-Metal, Air, Low Gain`, `Double, Low-E, Non-Metal, Gas, High Gain`, `Double, Low-E, Non-Metal, Gas, Med Gain`, `Double, Low-E, Non-Metal, Gas, Low Gain`, `Double, Low-E, Insulated, Air, High Gain`, `Double, Low-E, Insulated, Air, Med Gain`, `Double, Low-E, Insulated, Air, Low Gain`, `Double, Low-E, Insulated, Gas, High Gain`, `Double, Low-E, Insulated, Gas, Med Gain`, `Double, Low-E, Insulated, Gas, Low Gain`, `Triple, Low-E, Non-Metal, Air, High Gain`, `Triple, Low-E, Non-Metal, Air, Low Gain`, `Triple, Low-E, Non-Metal, Gas, High Gain`, `Triple, Low-E, Non-Metal, Gas, Low Gain`, `Triple, Low-E, Insulated, Air, High Gain`, `Triple, Low-E, Insulated, Air, Low Gain`, `Triple, Low-E, Insulated, Gas, High Gain`, `Triple, Low-E, Insulated, Gas, Low Gain`, `IECC U-1.20, SHGC=0.40`, `IECC U-1.20, SHGC=0.30`, `IECC U-1.20, SHGC=0.25`, `IECC U-0.75, SHGC=0.40`, `IECC U-0.65, SHGC=0.40`, `IECC U-0.65, SHGC=0.30`, `IECC U-0.50, SHGC=0.30`, `IECC U-0.50, SHGC=0.25`, `IECC U-0.40, SHGC=0.40`, `IECC U-0.40, SHGC=0.25`, `IECC U-0.35, SHGC=0.40`, `IECC U-0.35, SHGC=0.30`, `IECC U-0.35, SHGC=0.25`, `IECC U-0.32, SHGC=0.25`, `IECC U-0.30, SHGC=0.25`, `Detailed Example: Single, Clear, Aluminum w/ Thermal Break`, `Detailed Example: Double, Low-E, Wood, Argon, Insulated Spacer`
+
+<br/>
+
+**Enclosure: Window Front Area or WWR**
+
+The amount of window area on the unit's front facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.
+
+- **Name:** ``enclosure_window_area_or_wwr_front``
 - **Type:** ``Double``
 
 - **Units:** ``ft2 or frac``
@@ -644,11 +657,11 @@ The amount of window area on the unit's front facade. Enter a fraction if specif
 
 <br/>
 
-**Windows: Back Window Area or Window-to-Wall Ratio**
+**Enclosure: Window Back Area or WWR**
 
-The amount of window area on the unit's back facade. Enter a fraction if specifying Back Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's back facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.
 
-- **Name:** ``window_area_or_wwr_back``
+- **Name:** ``enclosure_window_area_or_wwr_back``
 - **Type:** ``Double``
 
 - **Units:** ``ft2 or frac``
@@ -657,11 +670,11 @@ The amount of window area on the unit's back facade. Enter a fraction if specify
 
 <br/>
 
-**Windows: Left Window Area or Window-to-Wall Ratio**
+**Enclosure: Window Left Area or WWR**
 
-The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction if specifying Left Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.
 
-- **Name:** ``window_area_or_wwr_left``
+- **Name:** ``enclosure_window_area_or_wwr_left``
 - **Type:** ``Double``
 
 - **Units:** ``ft2 or frac``
@@ -670,11 +683,11 @@ The amount of window area on the unit's left facade (when viewed from the front)
 
 <br/>
 
-**Windows: Right Window Area or Window-to-Wall Ratio**
+**Enclosure: Window Right Area or WWR**
 
-The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction if specifying Right Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.
 
-- **Name:** ``window_area_or_wwr_right``
+- **Name:** ``enclosure_window_area_or_wwr_right``
 - **Type:** ``Double``
 
 - **Units:** ``ft2 or frac``
@@ -683,7 +696,7 @@ The amount of window area on the unit's right facade (when viewed from the front
 
 <br/>
 
-**Windows: Fraction Operable**
+**Enclosure: Window Fraction Operable**
 
 Fraction of windows that are operable. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-windows'>HPXML Windows</a>) is used.
 
@@ -696,7 +709,7 @@ Fraction of windows that are operable. If not provided, the OS-HPXML default (se
 
 <br/>
 
-**Windows: Natural Ventilation Availability**
+**Enclosure: Window Natural Ventilation Availability**
 
 For operable windows, the number of days/week that windows can be opened by occupants for natural ventilation. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-windows'>HPXML Windows</a>) is used.
 
@@ -706,30 +719,6 @@ For operable windows, the number of days/week that windows can be opened by occu
 - **Units:** ``Days/week``
 
 - **Required:** ``false``
-
-<br/>
-
-**Windows: U-Factor**
-
-Full-assembly NFRC U-factor.
-
-- **Name:** ``window_ufactor``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr-ft2-R``
-
-- **Required:** ``true``
-
-<br/>
-
-**Windows: SHGC**
-
-Full-assembly NFRC solar heat gain coefficient.
-
-- **Name:** ``window_shgc``
-- **Type:** ``Double``
-
-- **Required:** ``true``
 
 <br/>
 
@@ -763,7 +752,7 @@ The type of window exterior shading. If shading coefficients are selected, note 
 
 The type of window insect screens, if present. If not provided, assumes there are no insect screens.
 
-- **Name:** ``window_insect_screens``
+- **Name:** ``enclosure_window_insect_screens``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -776,7 +765,7 @@ The type of window insect screens, if present. If not provided, assumes there ar
 
 The type of window storm, if present. If not provided, assumes there is no storm.
 
-- **Name:** ``window_storm_type``
+- **Name:** ``enclosure_window_storm_type``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -798,92 +787,68 @@ The type of window overhangs.
 
 <br/>
 
-**Skylights: Front Roof Area**
+**Enclosure: Skylights**
 
-The amount of skylight area on the unit's front conditioned roof facade.
+The type of skylights.
 
-- **Name:** ``skylight_area_front``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``true``
-
-<br/>
-
-**Skylights: Back Roof Area**
-
-The amount of skylight area on the unit's back conditioned roof facade.
-
-- **Name:** ``skylight_area_back``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``true``
-
-<br/>
-
-**Skylights: Left Roof Area**
-
-The amount of skylight area on the unit's left conditioned roof facade (when viewed from the front).
-
-- **Name:** ``skylight_area_left``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``true``
-
-<br/>
-
-**Skylights: Right Roof Area**
-
-The amount of skylight area on the unit's right conditioned roof facade (when viewed from the front).
-
-- **Name:** ``skylight_area_right``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``true``
-
-<br/>
-
-**Skylights: U-Factor**
-
-Full-assembly NFRC U-factor.
-
-- **Name:** ``skylight_ufactor``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr-ft2-R``
-
-- **Required:** ``true``
-
-<br/>
-
-**Skylights: SHGC**
-
-Full-assembly NFRC solar heat gain coefficient.
-
-- **Name:** ``skylight_shgc``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Skylights: Storm Type**
-
-The type of storm, if present. If not provided, assumes there is no storm.
-
-- **Name:** ``skylight_storm_type``
+- **Name:** ``enclosure_skylight``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `clear`, `low-e`
+- **Choices:** `Single, Clear, Metal`, `Single, Clear, Non-Metal`, `Double, Clear, Metal`, `Double, Clear, Non-Metal`, `Double, Low-E, Metal, High Gain`, `Double, Low-E, Non-Metal, High Gain`, `Double, Low-E, Metal, Med Gain`, `Double, Low-E, Non-Metal, Med Gain`, `Double, Low-E, Metal, Low Gain`, `Double, Low-E, Non-Metal, Low Gain`, `Triple, Clear, Metal`, `Triple, Clear, Non-Metal`, `IECC U-0.75, SHGC=0.40`, `IECC U-0.75, SHGC=0.30`, `IECC U-0.75, SHGC=0.25`, `IECC U-0.65, SHGC=0.40`, `IECC U-0.65, SHGC=0.30`, `IECC U-0.65, SHGC=0.25`, `IECC U-0.60, SHGC=0.40`, `IECC U-0.60, SHGC=0.30`, `IECC U-0.55, SHGC=0.40`, `IECC U-0.55, SHGC=0.25`
+
+<br/>
+
+**Enclosure: Skylight Front Area**
+
+The amount of skylight area on the unit's front conditioned roof.
+
+- **Name:** ``enclosure_skylight_area_front``
+- **Type:** ``Double``
+
+- **Units:** ``ft2``
+
+- **Required:** ``false``
+
+<br/>
+
+**Enclosure: Skylight Back Area**
+
+The amount of skylight area on the unit's back conditioned roof.
+
+- **Name:** ``enclosure_skylight_area_back``
+- **Type:** ``Double``
+
+- **Units:** ``ft2``
+
+- **Required:** ``false``
+
+<br/>
+
+**Enclosure: Skylight Left Area**
+
+The amount of skylight area on the unit's left conditioned roof (when viewed from the front).
+
+- **Name:** ``enclosure_skylight_area_left``
+- **Type:** ``Double``
+
+- **Units:** ``ft2``
+
+- **Required:** ``false``
+
+<br/>
+
+**Enclosure: Skylight Right Area**
+
+The amount of skylight area on the unit's right conditioned roof (when viewed from the front).
+
+- **Name:** ``enclosure_skylight_area_right``
+- **Type:** ``Double``
+
+- **Units:** ``ft2``
+
+- **Required:** ``false``
 
 <br/>
 
@@ -926,11 +891,11 @@ The amount of air leakage. When a leakiness description is used, the Year Built 
 
 <br/>
 
-**Air Leakage: Type**
+**Enclosure: Air Leakage Type**
 
 Type of air leakage if providing a numeric air leakage value. If 'unit total', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if 'unit exterior only', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is single-family attached or apartment unit.
 
-- **Name:** ``air_leakage_type``
+- **Name:** ``enclosure_air_leakage_type``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -939,11 +904,11 @@ Type of air leakage if providing a numeric air leakage value. If 'unit total', r
 
 <br/>
 
-**Air Leakage: Has Flue or Chimney in Conditioned Space**
+**Enclosure: Has Flue or Chimney in Conditioned Space**
 
 Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#flue-or-chimney'>Flue or Chimney</a>) is used.
 
-- **Name:** ``air_leakage_has_flue_or_chimney_in_conditioned_space``
+- **Name:** ``enclosure_has_flue_or_chimney_in_conditioned_space``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``

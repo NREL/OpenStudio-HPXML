@@ -1381,49 +1381,51 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param window_area_or_wwr_front [Double] window area or window-to-wall ratio for unit's front facade (ft2 or frac)
-  # @param window_area_or_wwr_back [Double] window area or window-to-wall ratio for unit's back facade (ft2 or frac)
-  # @param window_area_or_wwr_left [Double] window area or window-to-wall ratio for unit's left facade (ft2 or frac)
-  # @param window_area_or_wwr_right [Double] window area or window-to-wall ratio for unit's right facade (ft2 or frac)
-  # @param skylight_area_front [Double] skylight area for unit's front conditioned roof facade (ft2)
-  # @param skylight_area_back [Double] skylight area for unit's back conditioned roof facade (ft2)
-  # @param skylight_area_left [Double] skylight area for unit's left conditioned roof facade (ft2)
-  # @param skylight_area_right [Double] skylight area for unit's right conditioned roof facade (ft2)
+  # @param enclosure_window_area_or_wwr_front [Double] window area or window-to-wall ratio for unit's front facade (ft2 or frac)
+  # @param enclosure_window_area_or_wwr_back [Double] window area or window-to-wall ratio for unit's back facade (ft2 or frac)
+  # @param enclosure_window_area_or_wwr_left [Double] window area or window-to-wall ratio for unit's left facade (ft2 or frac)
+  # @param enclosure_window_area_or_wwr_right [Double] window area or window-to-wall ratio for unit's right facade (ft2 or frac)
+  # @param enclosure_skylight_area_front [Double] skylight area for unit's front conditioned roof facade (ft2)
+  # @param enclosure_skylight_area_back [Double] skylight area for unit's back conditioned roof facade (ft2)
+  # @param enclosure_skylight_area_left [Double] skylight area for unit's left conditioned roof facade (ft2)
+  # @param enclosure_skylight_area_right [Double] skylight area for unit's right conditioned roof facade (ft2)
   # @return [Boolean] true if successful
   def self.create_windows_and_skylights(runner, model,
-                                        window_area_or_wwr_front:, window_area_or_wwr_back:, window_area_or_wwr_left:, window_area_or_wwr_right:,
-                                        skylight_area_front:, skylight_area_back:, skylight_area_left:, skylight_area_right:,
+                                        enclosure_window_area_or_wwr_front:, enclosure_window_area_or_wwr_back:,
+                                        enclosure_window_area_or_wwr_left:, enclosure_window_area_or_wwr_right:,
+                                        enclosure_skylight_area_front:, enclosure_skylight_area_back:,
+                                        enclosure_skylight_area_left:, enclosure_skylight_area_right:,
                                         **)
     facades = [Constants::FacadeBack, Constants::FacadeRight, Constants::FacadeFront, Constants::FacadeLeft]
 
     wwrs = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
     window_areas = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
-    if window_area_or_wwr_front < 1
-      wwrs[Constants::FacadeFront] = window_area_or_wwr_front
+    if enclosure_window_area_or_wwr_front < 1
+      wwrs[Constants::FacadeFront] = enclosure_window_area_or_wwr_front
     else
-      window_areas[Constants::FacadeFront] = window_area_or_wwr_front
+      window_areas[Constants::FacadeFront] = enclosure_window_area_or_wwr_front
     end
-    if window_area_or_wwr_back < 1
-      wwrs[Constants::FacadeBack] = window_area_or_wwr_back
+    if enclosure_window_area_or_wwr_back < 1
+      wwrs[Constants::FacadeBack] = enclosure_window_area_or_wwr_back
     else
-      window_areas[Constants::FacadeBack] = window_area_or_wwr_back
+      window_areas[Constants::FacadeBack] = enclosure_window_area_or_wwr_back
     end
-    if window_area_or_wwr_left < 1
-      wwrs[Constants::FacadeLeft] = window_area_or_wwr_left
+    if enclosure_window_area_or_wwr_left < 1
+      wwrs[Constants::FacadeLeft] = enclosure_window_area_or_wwr_left
     else
-      window_areas[Constants::FacadeLeft] = window_area_or_wwr_left
+      window_areas[Constants::FacadeLeft] = enclosure_window_area_or_wwr_left
     end
-    if window_area_or_wwr_right < 1
-      wwrs[Constants::FacadeRight] = window_area_or_wwr_right
+    if enclosure_window_area_or_wwr_right < 1
+      wwrs[Constants::FacadeRight] = enclosure_window_area_or_wwr_right
     else
-      window_areas[Constants::FacadeRight] = window_area_or_wwr_right
+      window_areas[Constants::FacadeRight] = enclosure_window_area_or_wwr_right
     end
 
     skylight_areas = {}
-    skylight_areas[Constants::FacadeBack] = skylight_area_back
-    skylight_areas[Constants::FacadeRight] = skylight_area_right
-    skylight_areas[Constants::FacadeFront] = skylight_area_front
-    skylight_areas[Constants::FacadeLeft] = skylight_area_left
+    skylight_areas[Constants::FacadeBack] = enclosure_skylight_area_back
+    skylight_areas[Constants::FacadeRight] = enclosure_skylight_area_right
+    skylight_areas[Constants::FacadeFront] = enclosure_skylight_area_front
+    skylight_areas[Constants::FacadeLeft] = enclosure_skylight_area_left
     skylight_areas[Constants::FacadeNone] = 0
 
     # Store surfaces that should get windows by facade
