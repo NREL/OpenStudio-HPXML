@@ -825,10 +825,10 @@ module HVAC
     plant_loop.addDemandBranchForComponent(htg_coil)
     plant_loop.addDemandBranchForComponent(clg_coil)
 
-    # Set the fluid type again because plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert) resets it to Water.
+    # Set the fluid type again because plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert) resets it to Water:
     # https://github.com/NREL/OpenStudio/blob/v3.10.0/src/model/GroundHeatExchangerVertical.cpp#L361
     # I'm not sure why the above referenced line sets the fluid type to Water.
-    # FIXME: Remove the following line if the OpenStudio SDK is ever changed to not reset to Water.
+    # FIXME: Remove the following line if the OpenStudio SDK is ever changed (https://github.com/NREL/OpenStudio/issues/5458) to not reset to Water:
     plant_loop.setFluidType(hp_ap.fluid_type)
 
     sizing_plant = plant_loop.sizingPlant
