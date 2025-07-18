@@ -180,7 +180,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -198,7 +198,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>

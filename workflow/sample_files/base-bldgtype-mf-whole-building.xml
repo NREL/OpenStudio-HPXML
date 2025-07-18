@@ -151,7 +151,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -634,7 +634,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation_2'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -1082,7 +1082,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation_3'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -1456,7 +1456,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation_4'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -1855,7 +1855,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation_5'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -2286,7 +2286,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation_6'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
