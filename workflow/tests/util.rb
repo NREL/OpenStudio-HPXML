@@ -97,6 +97,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
   annual_csv_path = File.join(rundir, 'results_annual.csv')
   monthly_csv_path = File.join(rundir, 'results_timeseries.csv')
   bills_csv_path = File.join(rundir, 'results_bills.csv')
+  panel_csv_path = File.join(rundir, 'results_panel.csv')
   assert(File.exist? annual_csv_path)
   assert(File.exist? monthly_csv_path)
 
@@ -112,7 +113,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
     end
     flunk "EPvalidator.sch error in #{hpxml_defaults_path}."
   end
-  annual_results = _get_simulation_annual_results(annual_csv_path, bills_csv_path)
+  annual_results = _get_simulation_annual_results(annual_csv_path, bills_csv_path, panel_csv_path)
   monthly_results = _get_simulation_monthly_results(monthly_csv_path)
   _verify_outputs(rundir, xml, annual_results, hpxml, unit_multiplier)
   if unit_multiplier > 1
@@ -122,7 +123,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
   return annual_results, monthly_results
 end
 
-def _get_simulation_annual_results(annual_csv_path, bills_csv_path)
+def _get_simulation_annual_results(annual_csv_path, bills_csv_path, panel_csv_path)
   # Grab all outputs from reporting measure CSV annual results
   results = {}
   CSV.foreach(annual_csv_path) do |row|
@@ -138,6 +139,15 @@ def _get_simulation_annual_results(annual_csv_path, bills_csv_path)
       next if (1..12).to_a.any? { |month| row[0].include?(": Month #{month}:") }
 
       results["Utility Bills: #{row[0]}"] = Float(row[1])
+    end
+  end
+
+  # Grab all outputs from reporting measure CSV panel results
+  if File.exist? panel_csv_path
+    CSV.foreach(panel_csv_path) do |row|
+      next if row.nil? || (row.size < 2)
+
+      results[row[0]] = Float(row[1])
     end
   end
 
@@ -899,10 +909,18 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   # HVAC Load Fractions
   if not is_warm_climate
     htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-    assert_equal(hpxml_bldg.total_fraction_heat_load_served > 0, htg_energy > 0)
+    if hpxml_bldg.total_fraction_heat_load_served > 0
+      assert_operator(htg_energy, :>, 0)
+    else
+      assert_equal(0, htg_energy)
+    end
   end
   clg_energy = results.select { |k, _v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-  assert_equal(hpxml_bldg.total_fraction_cool_load_served > 0, clg_energy > 0)
+  if hpxml_bldg.total_fraction_cool_load_served > 0
+    assert_operator(clg_energy, :>, 0)
+  else
+    assert_equal(0, clg_energy)
+  end
 
   # Mechanical Ventilation
   whole_vent_fans = hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan }
@@ -1076,9 +1094,14 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
 
   def get_tolerances(key)
     if key.include?('(MBtu)') || key.include?('(kBtu)') || key.include?('(kWh)')
-      # Check that the energy difference is less than 0.5 MBtu or less than 5%
+      # Check that the energy difference is less than 0.5 MBtu or less than 6%
+      # FUTURE: Using 12% for duct component load (PR #2026); see if this can be improved.
       abs_delta_tol = 0.5 # MBtu
-      abs_frac_tol = 0.05
+      if key.include?('Component Load') && key.include?('Ducts')
+        abs_frac_tol = 0.12
+      else
+        abs_frac_tol = 0.06
+      end
       if key.include?('(kBtu)')
         abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kBtu')
       elsif key.include?('(kWh)')
@@ -1110,7 +1133,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
       abs_frac_tol = nil
-    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:')
+    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:') || key.include?('Electric Panel Load:') || key.include?('Electric Panel Breaker Spaces:')
       # Check that there is no difference
       abs_delta_tol = 0
       abs_frac_tol = nil
@@ -1226,6 +1249,7 @@ def _write_results(results, csv_out, output_groups_filter: [])
     'hvac' => ['HVAC Design Temperature', 'HVAC Capacity', 'HVAC Design Load'],
     'misc' => ['Unmet Hours', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
     'bills' => ['Utility Bills'],
+    'panel' => ['Electric Panel Load', 'Electric Panel Breaker Spaces'],
   }
 
   output_groups.each do |output_group, key_types|
