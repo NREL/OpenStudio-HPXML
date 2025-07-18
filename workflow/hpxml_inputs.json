@@ -26,7 +26,7 @@
     "enclosure_window_area_or_wwr_back": 90,
     "enclosure_window_area_or_wwr_left": 45,
     "enclosure_window_area_or_wwr_right": 45,
-    "window_fraction_operable": 0,
+    "enclosure_window_natural_ventilation": "None",
     "enclosure_window": "Detailed Example: Single, Clear, Aluminum w/ Thermal Break",
     "enclosure_window_interior_shading": "None",
     "door_area": 40,
@@ -442,7 +442,7 @@
     "enclosure_window_area_or_wwr_back": 108,
     "enclosure_window_area_or_wwr_left": 72,
     "enclosure_window_area_or_wwr_right": 72,
-    "window_fraction_operable": 0.67,
+    "enclosure_window_natural_ventilation": "67% Operable Windows",
     "enclosure_window": "Double, Low-E, Non-Metal, Gas, Med Gain",
     "enclosure_window_interior_shading": "Curtains, Light",
     "door_area": 40,
@@ -1457,7 +1457,7 @@
   },
   "sample_files/base-enclosure-windows-natural-ventilation-availability.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "window_natvent_availability": 7
+    "enclosure_window_natural_ventilation": "Detailed Example: 67% Operable Windows, 7 Days/Week"
   },
   "sample_files/base-enclosure-windows-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2633,7 +2633,6 @@
     "geometry_unit_num_bathrooms": null,
     "enclosure_roof_material": null,
     "enclosure_wall_siding": null,
-    "window_fraction_operable": null,
     "enclosure_window_interior_shading": null,
     "hvac_control_heating_weekday_setpoint": null,
     "hvac_control_heating_weekend_setpoint": null,

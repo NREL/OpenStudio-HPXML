@@ -696,29 +696,16 @@ The amount of window area on the unit's right facade (when viewed from the front
 
 <br/>
 
-**Enclosure: Window Fraction Operable**
+**Enclosure: Window Natural Ventilation**
 
-Fraction of windows that are operable. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-windows'>HPXML Windows</a>) is used.
+The amount of natural ventilation from occupants opening operable windows when outdoor conditions are favorable.
 
-- **Name:** ``window_fraction_operable``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
+- **Name:** ``enclosure_window_natural_ventilation``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Enclosure: Window Natural Ventilation Availability**
-
-For operable windows, the number of days/week that windows can be opened by occupants for natural ventilation. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-windows'>HPXML Windows</a>) is used.
-
-- **Name:** ``window_natvent_availability``
-- **Type:** ``Integer``
-
-- **Units:** ``Days/week``
-
-- **Required:** ``false``
+- **Choices:** `None`, `33% Operable Windows`, `50% Operable Windows`, `67% Operable Windows`, `100% Operable Windows`, `Detailed Example: 67% Operable Windows, 7 Days/Week`
 
 <br/>
 

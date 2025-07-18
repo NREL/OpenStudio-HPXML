@@ -391,16 +391,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_fraction_operable', false)
-    arg.setDisplayName('Enclosure: Window Fraction Operable')
-    arg.setUnits('Frac')
-    arg.setDescription("Fraction of windows that are operable. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('window_natvent_availability', false)
-    arg.setDisplayName('Enclosure: Window Natural Ventilation Availability')
-    arg.setUnits('Days/week')
-    arg.setDescription("For operable windows, the number of days/week that windows can be opened by occupants for natural ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_natural_ventilation', choices[:enclosure_window_natural_ventilation], false)
+    arg.setDisplayName('Enclosure: Window Natural Ventilation')
+    arg.setDescription('The amount of natural ventilation from occupants opening operable windows when outdoor conditions are favorable.')
+    arg.setDefaultValue('67% Operable Windows, 3 Days/Week')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_interior_shading', choices[:enclosure_window_interior_shading], false)
@@ -3228,7 +3222,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
     hpxml_bldg.header.heat_pump_sizing_methodology = args[:heat_pump_sizing_methodology]
     hpxml_bldg.header.heat_pump_backup_sizing_methodology = args[:heat_pump_backup_sizing_methodology]
-    hpxml_bldg.header.natvent_days_per_week = args[:window_natvent_availability]
+    hpxml_bldg.header.natvent_days_per_week = args[:enclosure_window_natural_ventilation_availability]
 
     if not args[:additional_properties].nil?
       extension_properties = {}
@@ -3793,7 +3787,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                              exterior_shading_factor_summer: args[:enclosure_window_exterior_shading_summer_coefficient],
                              insect_screen_present: insect_screen_present,
                              insect_screen_location: insect_screen_location,
-                             fraction_operable: args[:window_fraction_operable],
+                             fraction_operable: args[:enclosure_window_natural_ventilation_fraction_operable],
                              attached_to_wall_idref: wall_idref)
     end
   end

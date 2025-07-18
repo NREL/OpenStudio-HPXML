@@ -16,6 +16,11 @@
         "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
         "enclosure_wall": "Wood Stud, R-21",
         "enclosure_roof": "Uninsulated",
+        "enclosure_window": "Double, Low-E, Insulated, Air, Med Gain",
+        "enclosure_window_area_or_wwr_back": 108.0,
+        "enclosure_window_area_or_wwr_front": 108.0,
+        "enclosure_window_area_or_wwr_left": 72.0,
+        "enclosure_window_area_or_wwr_right": 72.0,
         "rim_joist_assembly_r": 23.0,
         "geometry_attic_type": "Attic, Unvented, Gable",
         "geometry_average_ceiling_height": 8.0,
@@ -43,11 +48,6 @@
         "water_heater_tank_volume": 40,
         "water_heater_type": "storage water heater",
         "weather_station_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
-        "window_area_or_wwr_back": 108.0,
-        "window_area_or_wwr_front": 108.0,
-        "window_area_or_wwr_left": 72.0,
-        "window_area_or_wwr_right": 72.0,
-        "enclosure_window": "Double, Low-E, Insulated, Air, Med Gain",
         "utility_bill_scenario_names": "Bills"
       },
       "measure_dir_name": "BuildResidentialHPXML"

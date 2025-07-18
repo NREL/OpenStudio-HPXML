@@ -419,12 +419,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_roof'] = 'Uninsulated'
       args['enclosure_wall'] = 'Wood Stud, R-21'
       args['enclosure_wall_siding'] = 'Wood, Medium'
+      args['enclosure_window'] = 'Double, Low-E, Insulated, Air, Med Gain'
       args['enclosure_window_area_or_wwr_front'] = 108.0
       args['enclosure_window_area_or_wwr_back'] = 108.0
       args['enclosure_window_area_or_wwr_left'] = 72.0
       args['enclosure_window_area_or_wwr_right'] = 72.0
-      args['window_fraction_operable'] = 0.67
-      args['enclosure_window'] = 'Double, Low-E, Insulated, Air, Med Gain'
+      args['enclosure_window_natural_ventilation'] = '67% Operable Windows'
       args['enclosure_window_interior_shading'] = 'Summer=0.7, Winter=0.8'
       args['door_area'] = 40.0
       args['door_rvalue'] = 4.4

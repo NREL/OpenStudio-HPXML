@@ -1130,6 +1130,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         slab.carpet_fraction = nil
       end
       hpxml_bldg.doors[0].azimuth = nil
+      hpxml_bldg.windows.each do |window|
+        window.fraction_operable = nil
+      end
     elsif ['base-enclosure-2stories.xml',
            'base-enclosure-2stories-garage.xml'].include? hpxml_file
       hpxml_bldg.rim_joists << hpxml_bldg.rim_joists[-1].dup
