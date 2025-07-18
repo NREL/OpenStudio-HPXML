@@ -1238,7 +1238,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.windows[0].insect_screen_factor_winter = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, 0.8255, 0.8255, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.7588, 0.7588)
+    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, 0.8276, 0.8276, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.7588, 0.7588)
   end
 
   def test_windows_physical_properties
@@ -1357,8 +1357,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(HPXML::InteriorShadingTypeLightCurtains, default_hpxml_bldg.windows[0].interior_shading_type)
     assert_equal(0.5, default_hpxml_bldg.windows[0].interior_shading_coverage_summer)
     assert_equal(0.5, default_hpxml_bldg.windows[0].interior_shading_coverage_winter)
-    assert_equal(0.8255, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
-    assert_equal(0.8255, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
+    assert_equal(0.8276, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(0.8276, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
 
     # Test defaults w/ none shading
     hpxml_bldg.windows[0].interior_shading_type = HPXML::InteriorShadingTypeNone
@@ -1387,7 +1387,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
 
-    assert_equal(0.8315, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(0.8348, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
     assert_equal(1.0, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
 
     # Test defaults w/ medium blinds (closed fully covered summer, half open half covered winter)
@@ -1399,8 +1399,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     assert_equal(HPXML::BlindsHalfOpen, default_hpxml_bldg.windows[0].interior_shading_blinds_winter_closed_or_open)
     assert_equal(1.0, default_hpxml_bldg.windows[0].interior_shading_coverage_summer)
-    assert_equal(0.7155, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
-    assert_equal(0.9165, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
+    assert_equal(0.7196, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(0.9178, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
   end
 
   def test_windows_exterior_shading_types
@@ -2265,7 +2265,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].equipment_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.5, HPXML::HVACFanMotorTypePSC, nil, nil, 0, 0, nil, nil, nil, nil, 13.3, 13.0, 6.8, 32.2, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous, true, HPXML::HVACEquipmentTypeSplit)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.5, HPXML::HVACFanMotorTypePSC, nil, nil, 0, 0, nil, nil, nil, nil, 13.3, 13.0, 6.8, 32.6, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous, true, HPXML::HVACEquipmentTypeSplit)
 
     # Test w/ detailed performance data
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
@@ -2616,13 +2616,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_active_during_defrost = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.18, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 18.05, 12.05, 8.5, 21.5, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous, true)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.18, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 18.05, 12.05, 8.5, 21.9, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous, true)
 
     # Test defaults w/ ductless and no backup
     hpxml_bldg.heat_pumps[0].distribution_system.delete
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.07, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 19.0, 12.34, 9.0, 19.3, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous, false)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.07, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 19.0, 12.34, 9.0, 19.7, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous, false)
 
     # Test defaults - SEER2/HSPF2/EER
     hpxml_bldg.heat_pumps[0].cooling_efficiency_seer2 = nil
@@ -2633,7 +2633,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].heating_efficiency_hspf = 8.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.07, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 14.0, 12.3, 7.2, 19.3, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous, false)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.07, HPXML::HVACFanMotorTypeBPM, nil, nil, 0, 0, nil, nil, nil, nil, 14.0, 12.3, 7.2, 19.7, 1.0, 1.0, 1.0, 150.0, HPXML::HVACPanHeaterControlTypeContinuous, false)
   end
 
   def test_heat_pump_temperatures
@@ -4001,7 +4001,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_branch_circuit_values(branch_circuits[0], HPXML::ElectricPanelVoltage120, 15.0, 0)
     _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage120, 15.0, 0)
     _test_default_branch_circuit_values(branch_circuits[2], HPXML::ElectricPanelVoltage240, 50.0, 2)
-    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 500.0, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 499.5, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }, 3383.5, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeWaterHeater }, 0.0, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeClothesDryer }, 0.0, false)

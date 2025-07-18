@@ -661,8 +661,8 @@
     "window_area_right": 72,
     "window_aspect_ratio": 1.333,
     "window_fraction_operable": 0.67,
-    "window_ufactor": 0.33,
-    "window_shgc": 0.45,
+    "window_ufactor": 0.35,
+    "window_shgc": 0.44,
     "window_interior_shading_type": "light curtains",
     "overhangs_front_depth": 0,
     "overhangs_front_distance_to_top_of_window": 0,
@@ -680,8 +680,8 @@
     "skylight_area_back": 0,
     "skylight_area_left": 0,
     "skylight_area_right": 0,
-    "skylight_ufactor": 0.33,
-    "skylight_shgc": 0.45,
+    "skylight_ufactor": 0.59,
+    "skylight_shgc": 0.55,
     "door_area": 40,
     "door_rvalue": 4.4,
     "air_leakage_units": "ACH",
@@ -1826,7 +1826,8 @@
   },
   "sample_files/base-enclosure-skylights-storms.xml": {
     "parent_hpxml": "sample_files/base-enclosure-skylights.xml",
-    "skylight_ufactor": 0.6,
+    "skylight_ufactor": 0.69,
+    "skylight_shgc": 0.69,
     "skylight_storm_type": "clear"
   },
   "sample_files/base-enclosure-split-level.xml": {
@@ -1896,7 +1897,8 @@
   },
   "sample_files/base-enclosure-windows-storms.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "window_ufactor": 0.6,
+    "window_ufactor": 0.63,
+    "window_shgc": 0.62,
     "window_storm_type": "low-e"
   },
   "sample_files/base-enclosure-thermal-mass.xml": {
