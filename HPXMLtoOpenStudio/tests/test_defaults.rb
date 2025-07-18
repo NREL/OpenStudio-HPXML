@@ -4001,7 +4001,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_branch_circuit_values(branch_circuits[0], HPXML::ElectricPanelVoltage120, 15.0, 0)
     _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage120, 15.0, 0)
     _test_default_branch_circuit_values(branch_circuits[2], HPXML::ElectricPanelVoltage240, 50.0, 2)
-    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 500.5, false)
+    _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeHeating }, 500.0, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeCooling }, 3383.5, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeWaterHeater }, 0.0, false)
     _test_default_service_feeder_values(service_feeders.find { |sf| sf.type == HPXML::ElectricPanelLoadTypeClothesDryer }, 0.0, false)

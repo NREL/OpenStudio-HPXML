@@ -417,9 +417,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_ceiling'] = 'R-38'
       args['enclosure_roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
       args['enclosure_roof'] = 'Uninsulated'
-      args['wall_type'] = HPXML::WallTypeWoodStud
+      args['enclosure_wall'] = 'Wood Stud, R-21'
       args['enclosure_wall_siding'] = 'Wood, Medium'
-      args['wall_assembly_r'] = 23
       args['window_area_or_wwr_front'] = 108.0
       args['window_area_or_wwr_back'] = 108.0
       args['window_area_or_wwr_left'] = 72.0

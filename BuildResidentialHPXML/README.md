@@ -575,7 +575,7 @@ The material type/color of the roof. If not provided, the OS-HPXML default (see 
 
 - **Required:** ``false``
 
-- **Choices:** `Asphalt/Fiberglass Shingles, Dark`, `Asphalt/Fiberglass Shingles, Medium Dark`, `Asphalt/Fiberglass Shingles, Medium`, `Asphalt/Fiberglass Shingles, Light`, `Asphalt/Fiberglass Shingles, Reflective`, `Tile/Slate, Dark`, `Tile/Slate, Medium Dark`, `Tile/Slate, Medium`, `Tile/Slate, Light`, `Tile/Slate, Reflective`, `Metal, Dark`, `Metal, Medium Dark`, `Metal, Medium`, `Metal, Light`, `Metal, Reflective`, `Wood Shingles/Shakes, Dark`, `Wood Shingles/Shakes, Medium Dark`, `Wood Shingles/Shakes, Medium`, `Wood Shingles/Shakes, Light`, `Wood Shingles/Shakes, Reflective`, `Shingles, Dark`, `Shingles, Medium Dark`, `Shingles, Medium`, `Shingles, Light`, `Shingles, Reflective`, `Synthetic Sheeting, Dark`, `Synthetic Sheeting, Medium Dark`, `Synthetic Sheeting, Medium`, `Synthetic Sheeting, Light`, `Synthetic Sheeting, Reflective`, `EPS Sheathing, Dark`, `EPS Sheathing, Medium Dark`, `EPS Sheathing, Medium`, `EPS Sheathing, Light`, `EPS Sheathing, Reflective`, `Concrete, Dark`, `Concrete, Medium Dark`, `Concrete, Medium`, `Concrete, Light`, `Concrete, Reflective`, `Cool Roof`, `0.2 Solar Absorptance`, `0.4 Solar Absorptance`, `0.6 Solar Absorptance`, `0.75 Solar Absorptance`
+- **Choices:** `Asphalt/Fiberglass Shingles, Dark`, `Asphalt/Fiberglass Shingles, Medium Dark`, `Asphalt/Fiberglass Shingles, Medium`, `Asphalt/Fiberglass Shingles, Light`, `Asphalt/Fiberglass Shingles, Reflective`, `Tile/Slate, Dark`, `Tile/Slate, Medium Dark`, `Tile/Slate, Medium`, `Tile/Slate, Light`, `Tile/Slate, Reflective`, `Metal, Dark`, `Metal, Medium Dark`, `Metal, Medium`, `Metal, Light`, `Metal, Reflective`, `Wood Shingles/Shakes, Dark`, `Wood Shingles/Shakes, Medium Dark`, `Wood Shingles/Shakes, Medium`, `Wood Shingles/Shakes, Light`, `Wood Shingles/Shakes, Reflective`, `Shingles, Dark`, `Shingles, Medium Dark`, `Shingles, Medium`, `Shingles, Light`, `Shingles, Reflective`, `Synthetic Sheeting, Dark`, `Synthetic Sheeting, Medium Dark`, `Synthetic Sheeting, Medium`, `Synthetic Sheeting, Light`, `Synthetic Sheeting, Reflective`, `EPS Sheathing, Dark`, `EPS Sheathing, Medium Dark`, `EPS Sheathing, Medium`, `EPS Sheathing, Light`, `EPS Sheathing, Reflective`, `Concrete, Dark`, `Concrete, Medium Dark`, `Concrete, Medium`, `Concrete, Light`, `Concrete, Reflective`, `Cool Roof`, `Detailed Example: 0.2 Solar Absorptance`, `Detailed Example: 0.4 Solar Absorptance`, `Detailed Example: 0.6 Solar Absorptance`, `Detailed Example: 0.75 Solar Absorptance`
 
 <br/>
 
@@ -592,42 +592,42 @@ The type of radiant barrier in the attic.
 
 <br/>
 
-**Wall: Type**
+**Enclosure: Wall**
 
-The type of walls.
+The type and insulation level of the walls.
 
-- **Name:** ``wall_type``
+- **Name:** ``enclosure_wall``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `WoodStud`, `ConcreteMasonryUnit`, `DoubleWoodStud`, `InsulatedConcreteForms`, `LogWall`, `StructuralInsulatedPanel`, `SolidConcrete`, `SteelFrame`, `Stone`, `StrawBale`, `StructuralBrick`
+- **Choices:** `Wood Stud, Uninsulated`, `Wood Stud, R-7`, `Wood Stud, R-11`, `Wood Stud, R-13`, `Wood Stud, R-15`, `Wood Stud, R-19`, `Wood Stud, R-21`, `Double Wood Stud, R-33`, `Double Wood Stud, R-39`, `Double Wood Stud, R-45`, `Steel Stud, Uninsulated`, `Steel Stud, R-11`, `Steel Stud, R-13`, `Steel Stud, R-15`, `Steel Stud, R-19`, `Steel Stud, R-21`, `Steel Stud, R-25`, `Concrete Masonry Unit, Hollow or Concrete Filled, Uninsulated`, `Concrete Masonry Unit, Hollow or Concrete Filled, R-7`, `Concrete Masonry Unit, Hollow or Concrete Filled, R-11`, `Concrete Masonry Unit, Hollow or Concrete Filled, R-13`, `Concrete Masonry Unit, Hollow or Concrete Filled, R-15`, `Concrete Masonry Unit, Hollow or Concrete Filled, R-19`, `Concrete Masonry Unit, Perlite Filled, Uninsulated`, `Concrete Masonry Unit, Perlite Filled, R-7`, `Concrete Masonry Unit, Perlite Filled, R-11`, `Concrete Masonry Unit, Perlite Filled, R-13`, `Concrete Masonry Unit, Perlite Filled, R-15`, `Concrete Masonry Unit, Perlite Filled, R-19`, `Structural Insulated Panel, R-17.5`, `Structural Insulated Panel, R-27.5`, `Structural Insulated Panel, R-37.5`, `Structural Insulated Panel, R-47.5`, `Insulated Concrete Forms, R-5 per side`, `Insulated Concrete Forms, R-10 per side`, `Insulated Concrete Forms, R-15 per side`, `Insulated Concrete Forms, R-20 per side`, `Structural Brick, Uninsulated`, `Structural Brick, R-7`, `Structural Brick, R-11`, `Structural Brick, R-15`, `Structural Brick, R-19`, `Wood Stud, IECC U-0.084`, `Wood Stud, IECC U-0.082`, `Wood Stud, IECC U-0.060`, `Wood Stud, IECC U-0.057`, `Wood Stud, IECC U-0.048`, `Wood Stud, IECC U-0.045`, `Detailed Example: Wood Stud, Uninsulated, 2x4, 16 in o.c., 25% Framing`, `Detailed Example: Wood Stud, R-11, 2x4, 16 in o.c., 25% Framing`, `Detailed Example: Wood Stud, R-18, 2x6, 24 in o.c., 25% Framing`
+
+<br/>
+
+**Enclosure: Wall Continuous Insulation**
+
+The insulation level of the wall continuous insulation. The R-value of the continuous insulation will be ignored if a wall option with an IECC U-factor is selected.
+
+- **Name:** ``enclosure_wall_continuous_insulation``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `Uninsulated`, `R-5`, `R-6`, `R-7`, `R-10`, `R-12`, `R-14`, `R-15`, `R-18`, `R-20`, `R-21`, `Detailed Example: R-7.2`
 
 <br/>
 
 **Enclosure: Wall Siding**
 
-The siding type/color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-walls'>HPXML Walls</a>) is used.
+The type, color, and insulation level of the wall siding. The R-value of the siding will be ignored if a wall option with an IECC U-factor is selected.
 
 - **Name:** ``enclosure_wall_siding``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Aluminum, Dark`, `Aluminum, Medium`, `Aluminum, Medium Dark`, `Aluminum, Light`, `Aluminum, Reflective`, `Brick, Dark`, `Brick, Medium`, `Brick, Medium Dark`, `Brick, Light`, `Brick, Reflective`, `Fiber-Cement, Dark`, `Fiber-Cement, Medium`, `Fiber-Cement, Medium Dark`, `Fiber-Cement, Light`, `Fiber-Cement, Reflective`, `Asbestos, Dark`, `Asbestos, Medium`, `Asbestos, Medium Dark`, `Asbestos, Light`, `Asbestos, Reflective`, `Composition Shingle, Dark`, `Composition Shingle, Medium`, `Composition Shingle, Medium Dark`, `Composition Shingle, Light`, `Composition Shingle, Reflective`, `Stucco, Dark`, `Stucco, Medium`, `Stucco, Medium Dark`, `Stucco, Light`, `Stucco, Reflective`, `Vinyl, Dark`, `Vinyl, Medium`, `Vinyl, Medium Dark`, `Vinyl, Light`, `Vinyl, Reflective`, `Wood, Dark`, `Wood, Medium`, `Wood, Medium Dark`, `Wood, Light`, `Wood, Reflective`, `Synthetic Stucco, Dark`, `Synthetic Stucco, Medium`, `Synthetic Stucco, Medium Dark`, `Synthetic Stucco, Light`, `Synthetic Stucco, Reflective`, `Masonite, Dark`, `Masonite, Medium`, `Masonite, Medium Dark`, `Masonite, Light`, `Masonite, Reflective`, `0.2 Solar Absorptance`, `0.4 Solar Absorptance`, `0.6 Solar Absorptance`, `0.75 Solar Absorptance`
-
-<br/>
-
-**Wall: Assembly R-value**
-
-Assembly R-value of the walls.
-
-- **Name:** ``wall_assembly_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
-
-- **Required:** ``true``
+- **Choices:** `None`, `Aluminum, Dark`, `Aluminum, Medium`, `Aluminum, Medium Dark`, `Aluminum, Light`, `Aluminum, Reflective`, `Brick, Dark`, `Brick, Medium`, `Brick, Medium Dark`, `Brick, Light`, `Brick, Reflective`, `Fiber-Cement, Dark`, `Fiber-Cement, Medium`, `Fiber-Cement, Medium Dark`, `Fiber-Cement, Light`, `Fiber-Cement, Reflective`, `Asbestos, Dark`, `Asbestos, Medium`, `Asbestos, Medium Dark`, `Asbestos, Light`, `Asbestos, Reflective`, `Composition Shingle, Dark`, `Composition Shingle, Medium`, `Composition Shingle, Medium Dark`, `Composition Shingle, Light`, `Composition Shingle, Reflective`, `Stucco, Dark`, `Stucco, Medium`, `Stucco, Medium Dark`, `Stucco, Light`, `Stucco, Reflective`, `Vinyl, Dark`, `Vinyl, Medium`, `Vinyl, Medium Dark`, `Vinyl, Light`, `Vinyl, Reflective`, `Wood, Dark`, `Wood, Medium`, `Wood, Medium Dark`, `Wood, Light`, `Wood, Reflective`, `Synthetic Stucco, Dark`, `Synthetic Stucco, Medium`, `Synthetic Stucco, Medium Dark`, `Synthetic Stucco, Light`, `Synthetic Stucco, Reflective`, `Masonite, Dark`, `Masonite, Medium`, `Masonite, Medium Dark`, `Masonite, Light`, `Masonite, Reflective`, `Detailed Example: 0.2 Solar Absorptance`, `Detailed Example: 0.4 Solar Absorptance`, `Detailed Example: 0.6 Solar Absorptance`, `Detailed Example: 0.75 Solar Absorptance`
 
 <br/>
 

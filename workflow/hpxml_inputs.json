@@ -17,12 +17,11 @@
     "rim_joist_assembly_r": 5.01,
     "enclosure_slab_carpet": "0% Carpet",
     "enclosure_ceiling": "Detailed Example: R-19, 2x6, 24 in o.c., 10% Framing",
-    "enclosure_roof_material": "0.6 Solar Absorptance",
+    "enclosure_roof_material": "Detailed Example: 0.6 Solar Absorptance",
     "enclosure_roof": "Detailed Example: Uninsulated, 0.5 in plywood, 0.25 in asphalt shingle",
     "enclosure_radiant_barrier": "None",
-    "wall_type": "WoodStud",
-    "enclosure_wall_siding": "0.6 Solar Absorptance",
-    "wall_assembly_r": 11.76,
+    "enclosure_wall": "Detailed Example: Wood Stud, R-11, 2x4, 16 in o.c., 25% Framing",
+    "enclosure_wall_siding": "Detailed Example: 0.6 Solar Absorptance",
     "window_area_or_wwr_front": 90,
     "window_area_or_wwr_back": 90,
     "window_area_or_wwr_left": 45,
@@ -106,7 +105,8 @@
   "tests/ASHRAE_Standard_140/L120AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "enclosure_ceiling": "Detailed Example: R-19 + R-38, 2x6, 24 in o.c., 10% Framing",
-    "wall_assembly_r": 23.58
+    "enclosure_wall": "Detailed Example: Wood Stud, R-18, 2x6, 24 in o.c., 25% Framing",
+    "enclosure_wall_continuous_insulation": "Detailed Example: R-7.2"
   },
   "tests/ASHRAE_Standard_140/L130AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -146,13 +146,13 @@
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, Uninsulated, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor",
     "enclosure_ceiling": "Detailed Example: R-11, 2x6, 24 in o.c., 10% Framing",
-    "wall_assembly_r": 4.84,
+    "enclosure_wall": "Detailed Example: Wood Stud, Uninsulated, 2x4, 16 in o.c., 25% Framing",
     "enclosure_air_leakage": "1.5 nACH"
   },
   "tests/ASHRAE_Standard_140/L202AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AC.xml",
-    "enclosure_roof_material": "0.2 Solar Absorptance",
-    "enclosure_wall_siding": "0.2 Solar Absorptance"
+    "enclosure_roof_material": "Detailed Example: 0.2 Solar Absorptance",
+    "enclosure_wall_siding": "Detailed Example: 0.2 Solar Absorptance"
   },
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -186,7 +186,8 @@
   "tests/ASHRAE_Standard_140/L120AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
     "enclosure_ceiling": "Detailed Example: R-19 + R-38, 2x6, 24 in o.c., 10% Framing",
-    "wall_assembly_r": 23.58
+    "enclosure_wall": "Detailed Example: Wood Stud, R-18, 2x6, 24 in o.c., 25% Framing",
+    "enclosure_wall_continuous_insulation": "Detailed Example: R-7.2"
   },
   "tests/ASHRAE_Standard_140/L130AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -226,13 +227,13 @@
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
     "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, Uninsulated, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor",
     "enclosure_ceiling": "Detailed Example: R-11, 2x6, 24 in o.c., 10% Framing",
-    "wall_assembly_r": 4.84,
+    "enclosure_wall": "Detailed Example: Wood Stud, Uninsulated, 2x4, 16 in o.c., 25% Framing",
     "enclosure_air_leakage": "1.5 nACH"
   },
   "tests/ASHRAE_Standard_140/L202AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L200AL.xml",
-    "enclosure_roof_material": "0.2 Solar Absorptance",
-    "enclosure_wall_siding": "0.2 Solar Absorptance"
+    "enclosure_roof_material": "Detailed Example: 0.2 Solar Absorptance",
+    "enclosure_wall_siding": "Detailed Example: 0.2 Solar Absorptance"
   },
   "tests/HERS_HVAC/HVAC1a.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -334,9 +335,9 @@
     "enclosure_air_leakage": "Detailed Example: 79.8 sq. in. ELA",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "geometry_unit_num_bedrooms": 2,
-    "enclosure_roof_material": "0.75 Solar Absorptance",
-    "enclosure_wall_siding": "0.75 Solar Absorptance",
-    "wall_assembly_r": 17.54,
+    "enclosure_roof_material": "Detailed Example: 0.75 Solar Absorptance",
+    "enclosure_wall_siding": "Detailed Example: 0.75 Solar Absorptance",
+    "enclosure_wall": "Wood Stud, IECC U-0.057",
     "enclosure_floor_over_foundation": "Wood Frame, IECC U-0.033",
     "enclosure_ceiling": "IECC U-0.026",
     "door_rvalue": 2.86,
@@ -391,7 +392,7 @@
   "tests/HERS_Hot_Water/L100AM-HW-01.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
     "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw",
-    "wall_assembly_r": 12.20,
+    "enclosure_wall": "Wood Stud, IECC U-0.082",
     "enclosure_floor_over_foundation": "Wood Frame, IECC U-0.064",
     "enclosure_ceiling": "IECC U-0.035",
     "window_shgc": 0.4,
@@ -445,9 +446,9 @@
     "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
     "enclosure_roof": "Uninsulated",
     "enclosure_radiant_barrier": "None",
-    "wall_type": "WoodStud",
+    "enclosure_wall": "Wood Stud, R-13",
+    "enclosure_wall_continuous_insulation": "R-10",
     "enclosure_wall_siding": "Wood, Medium",
-    "wall_assembly_r": 23,
     "window_area_or_wwr_front": 108,
     "window_area_or_wwr_back": 108,
     "window_area_or_wwr_left": 72,

@@ -345,35 +345,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(choices[:enclosure_radiant_barrier][0])
     args << arg
 
-    wall_type_choices = OpenStudio::StringVector.new
-    wall_type_choices << HPXML::WallTypeWoodStud
-    wall_type_choices << HPXML::WallTypeCMU
-    wall_type_choices << HPXML::WallTypeDoubleWoodStud
-    wall_type_choices << HPXML::WallTypeICF
-    wall_type_choices << HPXML::WallTypeLog
-    wall_type_choices << HPXML::WallTypeSIP
-    wall_type_choices << HPXML::WallTypeConcrete
-    wall_type_choices << HPXML::WallTypeSteelStud
-    wall_type_choices << HPXML::WallTypeStone
-    wall_type_choices << HPXML::WallTypeStrawBale
-    wall_type_choices << HPXML::WallTypeBrick
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall', choices[:enclosure_wall], true)
+    arg.setDisplayName('Enclosure: Wall')
+    arg.setDescription('The type and insulation level of the walls.')
+    args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('wall_type', wall_type_choices, true)
-    arg.setDisplayName('Wall: Type')
-    arg.setDescription('The type of walls.')
-    arg.setDefaultValue(HPXML::WallTypeWoodStud)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall_continuous_insulation', choices[:enclosure_wall_continuous_insulation], false)
+    arg.setDisplayName('Enclosure: Wall Continuous Insulation')
+    arg.setDescription('The insulation level of the wall continuous insulation. The R-value of the continuous insulation will be ignored if a wall option with an IECC U-factor is selected.')
+    arg.setDefaultValue(choices[:enclosure_wall_continuous_insulation][0])
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall_siding', choices[:enclosure_wall_siding], false)
     arg.setDisplayName('Enclosure: Wall Siding')
-    arg.setDescription("The siding type/color of the walls. Also applies to rim joists. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-walls'>HPXML Walls</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('wall_assembly_r', true)
-    arg.setDisplayName('Wall: Assembly R-value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription('Assembly R-value of the walls.')
-    arg.setDefaultValue(11.9)
+    arg.setDescription('The type, color, and insulation level of the wall siding. The R-value of the siding will be ignored if a wall option with an IECC U-factor is selected.')
+    arg.setDefaultValue('Wood, Medium')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_area_or_wwr_front', true)
@@ -3477,7 +3463,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         attic_wall_type = HPXML::AtticWallTypeGable
       end
 
-      wall_type = args[:wall_type]
+      wall_type = args[:enclosure_wall_type]
       if attic_locations.include? interior_adjacent_to
         wall_type = HPXML::WallTypeWoodStud
       end
@@ -3515,7 +3501,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
 
       if hpxml_bldg.walls[-1].is_thermal_boundary || is_uncond_attic_roof_insulated # Assume wall is insulated if roof is insulated
-        hpxml_bldg.walls[-1].insulation_assembly_r_value = args[:wall_assembly_r]
+        if args[:enclosure_wall].include? 'IECC U-'
+          hpxml_bldg.walls[-1].insulation_assembly_r_value = args[:enclosure_wall_assembly_r_value] # Don't add an e.g. siding R-value to the specified assembly U-factor
+        else
+          hpxml_bldg.walls[-1].insulation_assembly_r_value = (args[:enclosure_wall_assembly_r_value] + args[:enclosure_wall_continuous_insulation_r_value] + args[:enclosure_wall_siding_r_value]).round(2)
+        end
       else
         hpxml_bldg.walls[-1].insulation_assembly_r_value = 4.0 # Uninsulated
       end

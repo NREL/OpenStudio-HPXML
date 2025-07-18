@@ -40,10 +40,10 @@ Option Name	Type	Color	Solar Absorptance	Emittance
 "Concrete, Light"	concrete	light		
 "Concrete, Reflective"	concrete	reflective		
 Cool Roof	cool roof	reflective		
-0.2 Solar Absorptance			0.2	0.9
-0.4 Solar Absorptance			0.4	0.9
-0.6 Solar Absorptance			0.6	0.9
-0.75 Solar Absorptance			0.75	0.9
+Detailed Example: 0.2 Solar Absorptance			0.2	0.9
+Detailed Example: 0.4 Solar Absorptance			0.4	0.9
+Detailed Example: 0.6 Solar Absorptance			0.6	0.9
+Detailed Example: 0.75 Solar Absorptance			0.75	0.9
 				
 Type: The type of roof material.				
 Color: The color of the roof.				

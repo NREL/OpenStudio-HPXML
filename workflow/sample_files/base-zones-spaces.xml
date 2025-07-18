@@ -267,7 +267,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall3InsulationSpace1'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -286,7 +286,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall3InsulationSpace2'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -306,7 +306,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall2InsulationSpace1'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -326,7 +326,7 @@
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall2InsulationSpace2'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>

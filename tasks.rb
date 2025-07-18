@@ -460,12 +460,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.building_construction.average_ceiling_height = nil
       hpxml_bldg.building_construction.conditioned_building_volume = nil
-      hpxml_bldg.slabs.each do |slab|
-        slab.carpet_fraction = nil
-      end
-      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
-        duct.duct_surface_area = nil # removes surface area from both supply and return
-      end
     elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
       hpxml_bldg.building_construction.number_of_conditioned_floors = 2
       hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 1
@@ -1117,6 +1111,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         if surface.is_a? HPXML::Roof
           surface.radiant_barrier = nil
         end
+        if surface.is_a?(HPXML::Wall) || surface.is_a?(HPXML::RimJoist)
+          surface.siding = nil
+        end
       end
       (hpxml_bldg.walls + hpxml_bldg.foundation_walls).each do |wall|
         wall.interior_finish_type = nil
@@ -1124,6 +1121,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.foundation_walls.each do |fwall|
         fwall.length = fwall.area / fwall.height
         fwall.area = nil
+      end
+      hpxml_bldg.slabs.each do |slab|
+        slab.carpet_fraction = nil
       end
       hpxml_bldg.doors[0].azimuth = nil
     elsif ['base-enclosure-2stories.xml',
@@ -1629,6 +1629,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     hpxml_bldg.heat_pumps.each do |heat_pump|
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
         heat_pump.pump_watts_per_ton = 100.0
+      end
+    end
+    if ['base-misc-defaults.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        duct.duct_surface_area = nil # removes surface area from both supply and return
       end
     end
     if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
