@@ -408,7 +408,7 @@
             <Location>other exterior</Location>
             <PerformanceAdjustment>0.92</PerformanceAdjustment>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <EnergyFactor>0.99</EnergyFactor>
+            <UniformEnergyFactor>0.98</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>

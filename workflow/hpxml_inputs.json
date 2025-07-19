@@ -741,10 +741,8 @@
     "water_heater_type": "storage water heater",
     "water_heater_fuel_type": "electricity",
     "water_heater_location": "conditioned space",
-    "water_heater_tank_volume": 40,
-    "water_heater_efficiency_type": "EnergyFactor",
-    "water_heater_efficiency": 0.95,
-    "water_heater_heating_capacity": 18767,
+    "water_heater_efficiency_type": "UniformEnergyFactor",
+    "water_heater_efficiency": 0.94,
     "water_heater_jacket_rvalue": 0,
     "water_heater_setpoint_temperature": 125,
     "water_heater_num_bedrooms_served": 3,
@@ -1327,18 +1325,15 @@
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "water_heater_fuel_type": "natural gas",
     "water_heater_tank_volume": 120,
-    "water_heater_efficiency": 0.59,
-    "water_heater_recovery_efficiency": 0.76,
-    "water_heater_heating_capacity": 40000,
+    "water_heater_efficiency": 0.60,
     "water_heater_num_bedrooms_served": 18
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater-heat-pump.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "water_heater_type": "heat pump water heater",
     "water_heater_tank_volume": 120,
-    "water_heater_efficiency": 2.3,
-    "water_heater_num_bedrooms_served": 18,
-    "water_heater_heating_capacity": null
+    "water_heater_efficiency": 3.5,
+    "water_heater_num_bedrooms_served": 18
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml"
@@ -1378,7 +1373,7 @@
   "sample_files/base-dhw-desuperheater-tankless.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "water_heater_type": "instantaneous water heater",
-    "water_heater_efficiency": 0.99,
+    "water_heater_efficiency": 0.98,
     "water_heater_uses_desuperheater": true
   },
   "sample_files/base-dhw-desuperheater-var-speed.xml": {
@@ -1393,8 +1388,7 @@
   },
   "sample_files/base-dhw-indirect.xml": {
     "parent_hpxml": "sample_files/base-hvac-boiler-gas-only.xml",
-    "water_heater_type": "space-heating boiler with storage tank",
-    "water_heater_tank_volume": 50
+    "water_heater_type": "space-heating boiler with storage tank"
   },
   "sample_files/base-dhw-indirect-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-dhw-indirect.xml",
@@ -1519,32 +1513,26 @@
     "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },
-  "sample_files/base-dhw-tank-elec-uef.xml": {
+  "sample_files/base-dhw-tank-elec-ef.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "water_heater_tank_volume": 30,
-    "water_heater_efficiency_type": "UniformEnergyFactor",
-    "water_heater_efficiency": 0.93,
-    "water_heater_usage_bin": "low",
-    "water_heater_heating_capacity": 15354
+    "water_heater_tank_volume": 40,
+    "water_heater_efficiency_type": "EnergyFactor",
+    "water_heater_efficiency": 0.93
   },
   "sample_files/base-dhw-tank-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "water_heater_fuel_type": "natural gas",
-    "water_heater_tank_volume": 50,
-    "water_heater_efficiency": 0.59,
-    "water_heater_recovery_efficiency": 0.76,
-    "water_heater_heating_capacity": 40000
+    "water_heater_efficiency": 0.60
   },
-  "sample_files/base-dhw-tank-gas-uef.xml": {
+  "sample_files/base-dhw-tank-gas-ef.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-gas.xml",
-    "water_heater_tank_volume": 30,
-    "water_heater_efficiency_type": "UniformEnergyFactor",
-    "water_heater_usage_bin": "medium",
-    "water_heater_recovery_efficiency": 0.75,
-    "water_heater_heating_capacity": 30000
+    "water_heater_tank_volume": 50,
+    "water_heater_efficiency_type": "EnergyFactor",
+    "water_heater_efficiency": 0.59,
+    "water_heater_recovery_efficiency": 0.76
   },
-  "sample_files/base-dhw-tank-gas-uef-fhr.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tank-gas-uef.xml"
+  "sample_files/base-dhw-tank-gas-fhr.xml": {
+    "parent_hpxml": "sample_files/base-dhw-tank-gas.xml"
   },
   "sample_files/base-dhw-tank-gas-outside.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-gas.xml",
@@ -1553,9 +1541,7 @@
   "sample_files/base-dhw-tank-heat-pump.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "water_heater_type": "heat pump water heater",
-    "water_heater_tank_volume": 80,
-    "water_heater_efficiency": 2.3,
-    "water_heater_heating_capacity": null
+    "water_heater_efficiency": 3.5
   },
   "sample_files/base-dhw-tank-heat-pump-capacities.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
@@ -1567,12 +1553,11 @@
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
     "water_heater_location": "other exterior"
   },
-  "sample_files/base-dhw-tank-heat-pump-uef.xml": {
+  "sample_files/base-dhw-tank-heat-pump-ef.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
-    "water_heater_tank_volume": 50,
-    "water_heater_efficiency_type": "UniformEnergyFactor",
-    "water_heater_efficiency": 3.75,
-    "water_heater_usage_bin": "medium"
+    "water_heater_efficiency_type": "EnergyFactor",
+    "water_heater_efficiency": 3.1,
+    "water_heater_tank_volume": 80
   },
   "sample_files/base-dhw-tank-heat-pump-with-solar.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
@@ -1590,11 +1575,11 @@
     "solar_thermal_solar_fraction": 0.65
   },
   "sample_files/base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-uef.xml",
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-ef.xml",
     "water_heater_operating_mode": "heat pump only"
   },
   "sample_files/base-dhw-tank-heat-pump-detailed-schedules.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-uef.xml",
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-ef.xml",
     "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv"
   },
@@ -1608,7 +1593,8 @@
   },
   "sample_files/base-dhw-tank-oil.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-gas.xml",
-    "water_heater_fuel_type": "fuel oil"
+    "water_heater_fuel_type": "fuel oil",
+    "water_heater_efficiency": 0.61
   },
   "sample_files/base-dhw-tank-wood.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-gas.xml",
@@ -1617,16 +1603,16 @@
   "sample_files/base-dhw-tankless-electric.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "water_heater_type": "instantaneous water heater",
-    "water_heater_efficiency": 0.99
+    "water_heater_efficiency": 0.98
   },
   "sample_files/base-dhw-tankless-electric-outside.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-electric.xml",
     "water_heater_location": "other exterior"
   },
-  "sample_files/base-dhw-tankless-electric-uef.xml": {
+  "sample_files/base-dhw-tankless-electric-ef.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-electric.xml",
-    "water_heater_efficiency_type": "UniformEnergyFactor",
-    "water_heater_efficiency": 0.98
+    "water_heater_efficiency_type": "EnergyFactor",
+    "water_heater_efficiency": 0.96
   },
   "sample_files/base-dhw-tankless-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1634,10 +1620,10 @@
     "water_heater_fuel_type": "natural gas",
     "water_heater_efficiency": 0.82
   },
-  "sample_files/base-dhw-tankless-gas-uef.xml": {
+  "sample_files/base-dhw-tankless-gas-ef.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
-    "water_heater_efficiency_type": "UniformEnergyFactor",
-    "water_heater_efficiency": 0.93
+    "water_heater_efficiency_type": "EnergyFactor",
+    "water_heater_efficiency": 0.95
   },
   "sample_files/base-dhw-tankless-gas-with-solar.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
@@ -1669,6 +1655,7 @@
     "heating_system_heating_capacity": 50000,
     "cooling_system_cooling_capacity": 18000,
     "water_heater_fuel_type": "natural gas",
+    "water_heater_efficiency": 0.64,
     "cooking_range_oven_fuel_type": "natural gas",
     "clothes_dryer_fuel_type": "natural gas",
     "dishwasher_present": false,
@@ -3870,6 +3857,7 @@
   },
   "sample_files/base-residents-5-5.xml": {
     "parent_hpxml": "sample_files/base-misc-defaults.xml",
+    "roof_material_type": "asphalt or fiberglass shingles",
     "window_fraction_operable": 0.67,
     "wall_siding_type": "wood siding",
     "geometry_unit_num_occupants": 5.5,

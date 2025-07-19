@@ -410,7 +410,7 @@
             <WaterHeaterType>instantaneous water heater</WaterHeaterType>
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <EnergyFactor>0.82</EnergyFactor>
+            <UniformEnergyFactor>0.82</UniformEnergyFactor>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

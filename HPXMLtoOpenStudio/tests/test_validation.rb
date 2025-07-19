@@ -317,10 +317,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-multiple.xml')
         hpxml_bldg.water_heating_systems[0].fraction_dhw_load_served = 0.35
       when 'dhw-invalid-ef-tank'
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas-ef.xml')
         hpxml_bldg.water_heating_systems[0].energy_factor = 1.0
+        hpxml_bldg.water_heating_systems[0].recovery_efficiency = nil
       when 'dhw-invalid-uef-tank-heat-pump'
-        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-uef.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
         hpxml_bldg.water_heating_systems[0].uniform_energy_factor = 1.0
       when 'dishwasher-location'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -927,7 +928,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].location = HPXML::LocationUnconditionedSpace
       when 'water-heater-recovery-efficiency'
-        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas-ef.xml')
         hpxml_bldg.water_heating_systems[0].recovery_efficiency = hpxml_bldg.water_heating_systems[0].energy_factor
       when 'wrong-infiltration-method-blower-door'
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-leakiness-description.xml')

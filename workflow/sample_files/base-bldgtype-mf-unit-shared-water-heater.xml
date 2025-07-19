@@ -308,9 +308,7 @@
             <IsSharedSystem>true</IsSharedSystem>
             <TankVolume>120.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>40000.0</HeatingCapacity>
-            <EnergyFactor>0.59</EnergyFactor>
-            <RecoveryEfficiency>0.76</RecoveryEfficiency>
+            <UniformEnergyFactor>0.6</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
               <NumberofBedroomsServed>18</NumberofBedroomsServed>
