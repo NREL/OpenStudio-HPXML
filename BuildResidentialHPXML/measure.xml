@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>8473eea5-ee42-42ce-904b-c99baa85b6ab</version_id>
-  <version_modified>2025-07-19T00:59:25Z</version_modified>
+  <version_id>741aff95-4f55-456b-915f-526fbfeb1a20</version_id>
+  <version_modified>2025-07-19T04:23:12Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -10027,7 +10027,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>FEA2B7F1</checksum>
+      <checksum>97C5A0F9</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -10039,7 +10039,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DFF18BF5</checksum>
+      <checksum>9752F469</checksum>
     </file>
     <file>
       <filename>options/battery.tsv</filename>
@@ -10411,7 +10411,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>AA1F974F</checksum>
+      <checksum>65904562</checksum>
     </file>
   </files>
 </measure>

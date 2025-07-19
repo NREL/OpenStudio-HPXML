@@ -185,19 +185,16 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-emissions-args-not-all-same-size.xml' => 'base-sfd.xml',
       'error-emissions-natural-gas-args-not-all-specified.xml' => 'base-sfd.xml',
       'error-bills-args-not-all-same-size.xml' => 'base-sfd.xml',
-      'error-invalid-aspect-ratio.xml' => 'base-sfd.xml',
       'error-too-many-floors.xml' => 'base-sfd.xml',
       'error-hip-roof-and-protruding-garage.xml' => 'base-sfd.xml',
       'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
-      'error-invalid-door-area.xml' => 'base-sfd.xml',
       'error-different-software-program.xml' => 'base-sfd-header.xml',
       'error-different-simulation-control.xml' => 'base-sfd-header.xml',
       'error-same-emissions-scenario-name.xml' => 'base-sfd-header.xml',
       'error-same-utility-bill-scenario-name.xml' => 'base-sfd-header.xml',
       'error-could-not-find-epw-file.xml' => 'base-sfd.xml',
 
-      'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
       'warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
       'warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
@@ -232,12 +229,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-emissions-args-not-all-same-size.xml' => ['One or more emissions arguments does not have enough comma-separated elements specified.'],
       'error-emissions-natural-gas-args-not-all-specified.xml' => ['Did not specify fossil fuel emissions units for natural gas emissions values.'],
       'error-bills-args-not-all-same-size.xml' => ['One or more utility bill arguments does not have enough comma-separated elements specified.'],
-      'error-invalid-aspect-ratio.xml' => ['Aspect ratio must be greater than zero.'],
       'error-too-many-floors.xml' => ['Number of above-grade floors must be six or less.'],
       'error-hip-roof-and-protruding-garage.xml' => ['Cannot handle protruding garage and hip roof.'],
       'error-protruding-garage-under-gable-roof.xml' => ['Cannot handle protruding garage and attic ridge running from front to back.'],
       'error-ambient-with-garage.xml' => ['Cannot handle garages with an ambient foundation type.'],
-      'error-invalid-door-area.xml' => ['Door area cannot be negative.'],
       'error-different-software-program.xml' => ["'Software Info: Program Used' cannot vary across dwelling units.",
                                                  "'Software Info: Program Version' cannot vary across dwelling units."],
       'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
@@ -249,7 +244,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     }
 
     expected_warnings = {
-      'warning-non-electric-heat-pump-water-heater.xml' => ['Cannot model a heat pump water heater with non-electric fuel type.'],
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => ['Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.'],
       'warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml' => ['Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.'],
       'warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml' => ['Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.'],
@@ -909,7 +903,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-mf-conditioned-attic.xml'
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
     when 'error-dhw-indirect-without-boiler.xml'
-      args['water_heater_type'] = HPXML::WaterHeaterTypeCombiStorage
+      args['dhw_water_heater'] = 'Space-Heating Boiler w/ Storage Tank'
     when 'error-conditioned-attic-with-one-floor-above-grade.xml'
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
       args['enclosure_ceiling'] = 'Uninsulated'
@@ -940,8 +934,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['utility_bill_scenario_names'] = 'Scenario1'
       args['utility_bill_electricity_fixed_charges'] = '1'
       args['utility_bill_electricity_marginal_rates'] = '2,2'
-    when 'error-invalid-aspect-ratio.xml'
-      args['geometry_unit_aspect_ratio'] = -1
     when 'error-too-many-floors.xml'
       args['geometry_unit_num_floors_above_grade'] = 7
     when 'error-hip-roof-and-protruding-garage.xml'
@@ -953,8 +945,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-ambient-with-garage.xml'
       args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
       args['geometry_foundation_type'] = 'Ambient'
-    when 'error-invalid-door-area.xml'
-      args['door_area'] = -10
     when 'error-different-software-program.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['software_info_program_used'] = 'Program2'
@@ -980,10 +970,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
 
     # Warning
     case hpxml_file
-    when 'warning-non-electric-heat-pump-water-heater.xml'
-      args['water_heater_type'] = HPXML::WaterHeaterTypeHeatPump
-      args['water_heater_fuel_type'] = HPXML::FuelTypeNaturalGas
-      args['water_heater_efficiency'] = 2.3
     when 'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Vented'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-11'

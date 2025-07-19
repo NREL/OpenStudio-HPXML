@@ -1252,7 +1252,6 @@ module Geometry
   def self.create_doors(runner, model, door_area:, **)
     # error checking
     if door_area == 0
-      runner.registerFinalCondition('No doors added because door area was set to 0.')
       return true
     end
 
@@ -1636,10 +1635,6 @@ module Geometry
 
         tot_sky_area += skylight_area
       end
-    end
-
-    if (tot_win_area == 0) && (tot_sky_area == 0)
-      runner.registerFinalCondition('No windows or skylights added.')
     end
 
     return true

@@ -2085,9 +2085,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def argument_warnings(args)
     warnings = []
 
-    warning = ([HPXML::WaterHeaterTypeHeatPump].include?(args[:dhw_water_heater_type]) && (args[:dhw_water_heater_fuel_type] != HPXML::FuelTypeElectricity))
-    warnings << 'Cannot model a heat pump water heater with non-electric fuel type.' if warning
-
     warning = [HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type_type]) && (args[:geometry_foundation_type_height] > 0)
     warnings << "Foundation type of '#{args[:geometry_foundation_type_type]}' cannot have a non-zero height. Assuming height is zero." if warning
 
@@ -2273,9 +2270,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       errors << 'One or more utility bill arguments does not have enough comma-separated elements specified.' if error
     end
 
-    error = (args[:geometry_unit_aspect_ratio] <= 0)
-    errors << 'Aspect ratio must be greater than zero.' if error
-
     error = (args[:geometry_unit_num_floors_above_grade] > 6)
     errors << 'Number of above-grade floors must be six or less.' if error
 
@@ -2296,9 +2290,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     error = (args[:geometry_foundation_type_type] == HPXML::FoundationTypeAmbient) && (args[:geometry_garage_type_width] * args[:geometry_garage_type_depth] > 0)
     errors << 'Cannot handle garages with an ambient foundation type.' if error
-
-    error = (args[:door_area] < 0)
-    errors << 'Door area cannot be negative.' if error
 
     return errors
   end
