@@ -55,8 +55,6 @@ class HPXML < Object
   # Constants
   AddressTypeMailing = 'mailing'
   AddressTypeStreet = 'street'
-  AdvancedResearchGroundToAirHeatPumpModelTypeStandard = 'standard'
-  AdvancedResearchGroundToAirHeatPumpModelTypeExperimental = 'experimental'
   AirTypeFanCoil = 'fan coil'
   AirTypeGravity = 'gravity'
   AirTypeHighVelocity = 'high velocity'
@@ -219,6 +217,8 @@ class HPXML < Object
   GeothermalLoopLoopConfigurationVertical = 'vertical'
   GeothermalLoopGroutOrPipeTypeStandard = 'standard'
   GeothermalLoopGroutOrPipeTypeThermallyEnhanced = 'thermally enhanced'
+  GroundToAirHeatPumpModelTypeStandard = 'standard'
+  GroundToAirHeatPumpModelTypeExperimental = 'experimental'
   HeaterTypeElectricResistance = 'electric resistance'
   HeaterTypeGas = 'gas fired'
   HeaterTypeHeatPump = 'heat pump'
@@ -943,7 +943,7 @@ class HPXML < Object
              :sim_end_day,                                 # [Integer] SoftwareInfo/extension/SimulationControl/EndDayOfMonth
              :sim_calendar_year,                           # [Integer] SoftwareInfo/extension/SimulationControl/CalendarYear
              :temperature_capacitance_multiplier,          # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier
-             :ground_to_air_heat_pump_model_type,          # [String] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType (HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeXXX)
+             :ground_to_air_heat_pump_model_type,          # [String] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType (HPXML::GroundToAirHeatPumpModelTypeXXX)
              :hvac_onoff_thermostat_deadband,              # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature (F)
              :heat_pump_backup_heating_capacity_increment, # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement (Btu/hr)
              :service_feeders_load_calculation_types]      # [Array<String>] SoftwareInfo/extension/ElectricPanelLoadCalculations/ServiceFeeders/Type

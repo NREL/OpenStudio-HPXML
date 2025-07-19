@@ -78,8 +78,8 @@ def create_hpxmls
       if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
-        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
-        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
+        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
+        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'Attic, Vented, Gable' : 'Below Apartment')
         build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
       end
 
@@ -189,25 +189,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
   hpxml_bldg.foundations.reverse_each do |foundation|
     foundation.delete
   end
-  hpxml_bldg.roofs.each do |roof|
-    if roof.roof_color == HPXML::ColorReflective
-      roof.solar_absorptance = 0.2
-    else
-      roof.solar_absorptance = 0.6
-    end
-    roof.emittance = 0.9
-    roof.roof_color = nil
-    roof.roof_type = nil
-  end
   (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
-    if wall.color == HPXML::ColorReflective
-      wall.solar_absorptance = 0.2
-    else
-      wall.solar_absorptance = 0.6
-    end
-    wall.emittance = 0.9
-    wall.color = nil
-    wall.siding = nil
     if wall.is_a?(HPXML::Wall)
       if wall.attic_wall_type == HPXML::AtticWallTypeGable
         wall.insulation_assembly_r_value = 2.15
@@ -224,6 +206,7 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     floor.interior_finish_thickness = 0.5
   end
   hpxml_bldg.foundation_walls.each do |fwall|
+    fwall.thickness = 6.0
     if fwall.insulation_interior_r_value == 0
       fwall.interior_finish_type = HPXML::InteriorFinishNone
     else
@@ -241,6 +224,12 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     next if window.overhangs_depth.nil?
 
     window.overhangs_distance_to_bottom_of_window = 6.0
+  end
+  hpxml_bldg.slabs.each do |slab|
+    if slab.perimeter_insulation_r_value == 5
+      slab.perimeter_insulation_r_value = 5.4
+      slab.perimeter_insulation_depth = 2.5
+    end
   end
 
   # ---------- #
@@ -275,9 +264,46 @@ def apply_hpxml_modification_hers_hvac_dse(hpxml_path, hpxml)
                                       distribution_system_type: HPXML::HVACDistributionTypeDSE,
                                       annual_heating_dse: 1.0,
                                       annual_cooling_dse: 1.0)
+    if ['HVAC1a.xml', 'HVAC1b.xml', 'HVAC2a.xml', 'HVAC2b.xml', 'HVAC2e.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 56100
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38300
+    elsif ['HVAC2c.xml', 'HVAC2d.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heat_pumps[0].heating_capacity = 56100
+      hpxml_bldg.heat_pumps[0].cooling_capacity = 56100
+    end
   end
   if hpxml_path.include? 'HERS_DSE'
-    # For DSE tests, use effective R-values instead of nominal R-values to match the test specs.
+    if ['HVAC3a.xml', 'HVAC3e.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 46600
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38400
+    elsif ['HVAC3b.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 56000
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38400
+    elsif ['HVAC3c.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 49000
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38400
+    elsif ['HVAC3d.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 61000
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 38400
+    elsif ['HVAC3f.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 46600
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 49900
+    elsif ['HVAC3g.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 46600
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 42200
+    elsif ['HVAC3h.xml'].include? File.basename(hpxml_path)
+      hpxml_bldg.heating_systems[0].heating_capacity = 46600
+      hpxml_bldg.cooling_systems[0].cooling_capacity = 55000
+    end
+
+    # Assign duct surface area
+    hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = nil
+    hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_area = nil
+    hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_area = nil
+    hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area = 308.0
+    hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area = 77.0
+
+    # Temporarily use effective R-values instead of nominal R-values to match the test specs.
     hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
       next if duct.duct_insulation_r_value.nil?
 
@@ -302,18 +328,6 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
-  (hpxml_bldg.roofs + hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |surface|
-    surface.solar_absorptance = 0.75
-    surface.emittance = 0.9
-    if surface.is_a? HPXML::Roof
-      surface.roof_color = nil
-      surface.roof_type = nil
-    else
-      surface.color = nil
-      surface.siding = nil
-    end
-  end
-
   hpxml_bldg.hvac_distributions.clear
   hpxml_bldg.hvac_distributions.add(id: 'HVACDistribution1',
                                     distribution_system_type: HPXML::HVACDistributionTypeDSE,
@@ -322,11 +336,9 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
 end
 
 def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
-  default_schedules_csv_data = Defaults.get_schedules_csv_data()
-
   # Set detailed HPXML values for sample files
   hpxml_file = File.basename(hpxml_path)
-  hpxml_bldg = hpxml.buildings[0]
+  default_schedules_csv_data = Defaults.get_schedules_csv_data()
 
   # ------------ #
   # HPXML Header #
@@ -335,32 +347,97 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   hpxml.header.xml_generated_by = 'tasks.rb'
   hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
 
-  if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
-    hpxml_bldg.header.allow_increased_fixed_capacities = true
-  elsif ['base-misc-emissions.xml'].include? hpxml_file
-    hpxml_bldg.egrid_region = 'Western'
-    hpxml_bldg.egrid_subregion = 'RMPA'
-    hpxml_bldg.cambium_region_gea = 'RMPAc'
+  if ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
+    hpxml.header.sim_calendar_year = 2010
   end
-
-  if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
-    hpxml_bldg.header.manualj_heating_design_temp = 0
-    hpxml_bldg.header.manualj_cooling_design_temp = 100
-    hpxml_bldg.header.manualj_heating_setpoint = 60
-    hpxml_bldg.header.manualj_cooling_setpoint = 80
-    hpxml_bldg.header.manualj_humidity_setpoint = 0.55
-    hpxml_bldg.header.manualj_internal_loads_sensible = 4000
-    hpxml_bldg.header.manualj_internal_loads_latent = 200
-    hpxml_bldg.header.manualj_num_occupants = 5
-    hpxml_bldg.header.manualj_daily_temp_range = HPXML::ManualJDailyTempRangeLow
-    hpxml_bldg.header.manualj_humidity_difference = 30
+  if ['base-hvac-air-to-air-heat-pump-1-speed-research-features.xml',
+      'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml',
+      'base-hvac-room-ac-only-research-features.xml'].include? hpxml_file
+    hpxml.header.hvac_onoff_thermostat_deadband = 2
+  end
+  if ['base-hvac-air-to-air-heat-pump-1-speed-research-features.xml',
+      'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml'].include? hpxml_file
+    hpxml.header.heat_pump_backup_heating_capacity_increment = 17060.71
+  end
+  if hpxml_file.include?('ground-to-air') && hpxml_file.include?('experimental')
+    hpxml.header.ground_to_air_heat_pump_model_type = HPXML::GroundToAirHeatPumpModelTypeExperimental
   end
 
   hpxml.buildings.each do |hpxml_bldg|
+    # ------------ #
+    # HPXML Header #
+    # ------------ #
+
     if ['base-misc-emissions.xml'].include? hpxml_file
       hpxml_bldg.egrid_region = 'Western'
       hpxml_bldg.egrid_subregion = 'RMPA'
       hpxml_bldg.cambium_region_gea = 'RMPAc'
+    end
+    if ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
+      hpxml_bldg.dst_enabled = true
+      hpxml_bldg.dst_begin_month = 3
+      hpxml_bldg.dst_begin_day = 10
+      hpxml_bldg.dst_end_month = 11
+      hpxml_bldg.dst_end_day = 6
+    elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
+      hpxml_bldg.dst_enabled = false
+    end
+    if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
+      hpxml_bldg.header.allow_increased_fixed_capacities = true
+    end
+    if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
+      hpxml_bldg.header.manualj_heating_design_temp = 0
+      hpxml_bldg.header.manualj_cooling_design_temp = 100
+      hpxml_bldg.header.manualj_heating_setpoint = 60
+      hpxml_bldg.header.manualj_cooling_setpoint = 80
+      hpxml_bldg.header.manualj_humidity_setpoint = 0.55
+      hpxml_bldg.header.manualj_internal_loads_sensible = 4000
+      hpxml_bldg.header.manualj_internal_loads_latent = 200
+      hpxml_bldg.header.manualj_num_occupants = 5
+      hpxml_bldg.header.manualj_daily_temp_range = HPXML::ManualJDailyTempRangeLow
+      hpxml_bldg.header.manualj_humidity_difference = 30
+    end
+    epw_filepath = hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath
+    if not epw_filepath.nil?
+      if epw_filepath.start_with? 'USA_'
+        hpxml_bldg.state_code = epw_filepath[4..5]
+      elsif epw_filepath.start_with? 'US_'
+        hpxml_bldg.state_code = epw_filepath[3..4]
+      end
+    end
+    if ['base-location-detailed.xml'].include? hpxml_file
+      hpxml_bldg.time_zone_utc_offset = -6
+      hpxml_bldg.latitude = 39.77
+      hpxml_bldg.longitude = -104.73
+      hpxml_bldg.elevation = 5548
+      hpxml_bldg.state_code = 'CO'
+      hpxml_bldg.city = 'Aurora'
+      iecc_zone = '5B'
+    else
+      iecc_zone = {
+        'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw' => '1A',
+        'USA_FL_Miami.Intl.AP.722020_TMY3.epw' => '1A',
+        'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw' => '2B',
+        'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw' => '3A',
+        'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw' => '4A',
+        'USA_OR_Portland.Intl.AP.726980_TMY3.epw' => '4C',
+        'US_CO_Boulder_AMY_2012.epw' => '5B',
+        'USA_CO_Denver.Intl.AP.725650_TMY3.epw' => '5B',
+        'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw' => '6B',
+        'USA_MN_Duluth.Intl.AP.727450_TMY3.epw' => '7',
+      }[epw_filepath]
+    end
+    if not iecc_zone.nil?
+      hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.clear
+      hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: iecc_zone,
+                                                               year: 2006)
+    elsif not hpxml_bldg.state_code.nil?
+      fail 'Unhandled EPW filepath in tasks.rb'
+    end
+    if ['base-misc-defaults.xml',
+        'base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.state_code = nil
+      hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.clear
     end
 
     # --------------------- #
@@ -903,7 +980,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                              shgc: 0.45,
                              fraction_operable: 0.0,
                              attached_to_wall_idref: hpxml_bldg.foundation_walls[0].id)
-    elsif hpxml_file.include? 'base-enclosure-skylights-cathedral.xml'
+    elsif ['base-enclosure-skylights-cathedral.xml'].include? hpxml_file
       hpxml_bldg.skylights.each do |skylight|
         skylight.curb_area = 5.25
         skylight.curb_assembly_r_value = 1.96
@@ -935,6 +1012,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.skylights[1].exterior_shading_factor_winter = 0.0
         hpxml_bldg.skylights[1].interior_shading_factor_summer = 0.5
         hpxml_bldg.skylights[1].interior_shading_factor_winter = 1.0
+      elsif ['base-enclosure-skylights-storms.xml'].include? hpxml_file
+        hpxml_bldg.skylights.each do |skylight|
+          skylight.storm_type = HPXML::WindowGlassTypeClear
+        end
       end
     elsif ['base-enclosure-windows-physical-properties.xml'].include? hpxml_file
       hpxml_bldg.windows[0].ufactor = nil
@@ -959,6 +1040,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows[3].shgc = nil
       hpxml_bldg.windows[3].glass_layers = HPXML::WindowLayersGlassBlock
     elsif ['base-enclosure-windows-shading-factors.xml'].include? hpxml_file
+      hpxml_bldg.windows.each do |window|
+        window.interior_shading_type = nil
+      end
+      hpxml_bldg.windows[0].interior_shading_factor_summer = 0.7
+      hpxml_bldg.windows[0].interior_shading_factor_winter = 0.85
       hpxml_bldg.windows[1].exterior_shading_factor_summer = 0.5
       hpxml_bldg.windows[1].exterior_shading_factor_winter = 0.5
       hpxml_bldg.windows[1].interior_shading_factor_summer = 0.5
@@ -1028,6 +1114,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         surface.emittance = nil
         if surface.is_a? HPXML::Roof
           surface.radiant_barrier = nil
+          surface.roof_type = nil
+        end
+        if surface.is_a?(HPXML::Wall) || surface.is_a?(HPXML::RimJoist)
+          surface.siding = nil
         end
       end
       (hpxml_bldg.walls + hpxml_bldg.foundation_walls).each do |wall|
@@ -1037,7 +1127,13 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         fwall.length = fwall.area / fwall.height
         fwall.area = nil
       end
+      hpxml_bldg.slabs.each do |slab|
+        slab.carpet_fraction = nil
+      end
       hpxml_bldg.doors[0].azimuth = nil
+      hpxml_bldg.windows.each do |window|
+        window.fraction_operable = nil
+      end
     elsif ['base-enclosure-2stories.xml',
            'base-enclosure-2stories-garage.xml'].include? hpxml_file
       hpxml_bldg.rim_joists << hpxml_bldg.rim_joists[-1].dup
@@ -1522,6 +1618,17 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if ['base-foundation-slab.xml'].include? hpxml_file
       hpxml_bldg.slabs[0].gap_insulation_r_value = 0.0
     end
+    if ['base-foundation-slab-exterior-horizontal-insulation.xml'].include? hpxml_file
+      hpxml_bldg.slabs[0].exterior_horizontal_insulation_r_value = 5.0
+      hpxml_bldg.slabs[0].exterior_horizontal_insulation_width = 2.5
+      hpxml_bldg.slabs[0].exterior_horizontal_insulation_depth_below_grade = 2.0
+    end
+    if ['base-enclosure-windows-shading-seasons.xml'].include? hpxml_file
+      hpxml_bldg.header.shading_summer_begin_month = 5
+      hpxml_bldg.header.shading_summer_begin_day = 1
+      hpxml_bldg.header.shading_summer_end_month = 9
+      hpxml_bldg.header.shading_summer_end_day = 30
+    end
 
     # ---------- #
     # HPXML HVAC #
@@ -1530,6 +1637,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     hpxml_bldg.heat_pumps.each do |heat_pump|
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
         heat_pump.pump_watts_per_ton = 100.0
+      end
+    end
+    if ['base-misc-defaults.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        duct.duct_surface_area = nil # removes surface area from both supply and return
       end
     end
     if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
@@ -1690,6 +1802,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         else
           hpxml_bldg.heating_systems[i].fraction_heat_load_served = 0.35
         end
+      end
+    elsif ['base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.slabs.each do |slab|
+        slab.carpet_fraction = nil
       end
     elsif ['base-enclosure-2stories.xml',
            'base-enclosure-2stories-garage.xml'].include? hpxml_file
@@ -1976,6 +2092,15 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       end
       hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = hpxml_bldg.building_construction.conditioned_floor_area
     end
+    if ['base-hvac-ducts-areas.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = nil
+      hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_area = nil
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_area = nil
+      hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area = 150.0
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area = 50.0
+      hpxml_bldg.hvac_distributions[0].ducts[-1].delete
+      hpxml_bldg.hvac_distributions[0].ducts[-1].delete
+    end
     if ['base-hvac-ducts-area-multipliers.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area_multiplier = 0.5
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area_multiplier = 1.5
@@ -1984,8 +2109,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity * 0.6
       hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
     end
-    if hpxml_file.include? 'base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'
-      hpxml_bldg.geothermal_loops[0].shank_spacing = 2.5
+    if hpxml_file.include?('mini-split-air-conditioner-only-ducted') || hpxml_file.include?('mini-split-heat-pump-ducted')
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = nil
+      hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 15.0
+      hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 5.0
+      hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_area = nil
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_area = nil
+      hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area = 30.0
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_surface_area = 10.0
+      hpxml_bldg.hvac_distributions[0].ducts[0].duct_insulation_r_value = 0.0
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_insulation_r_value = 0.0
+      hpxml_bldg.hvac_distributions[0].ducts[-1].delete
+      hpxml_bldg.hvac_distributions[0].ducts[-1].delete
     end
     hpxml_bldg.heating_systems.each do |heating_system|
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler &&
@@ -2004,6 +2139,13 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         heating_system.fan_watts = 0
       elsif [HPXML::HVACTypeStove].include? heating_system.heating_system_type
         heating_system.fan_watts = 40
+      end
+    end
+    if hpxml_file.include? 'heat-pump'
+      if hpxml_file.include? 'cooling-only'
+        hpxml_bldg.heat_pumps[0].heating_capacity = 0
+      elsif hpxml_file.include? 'heating-only'
+        hpxml_bldg.heat_pumps[0].cooling_capacity = 0
       end
     end
     if hpxml_file.include? 'base-hvac-install-quality'
@@ -2042,6 +2184,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         heat_pump.backup_heating_active_during_defrost = true
       end
     end
+    if hpxml_file.include? 'pan-heater'
+      if hpxml_file.include? 'pan-heater-none'
+        hpxml_bldg.heat_pumps[0].pan_heater_watts = 0.0
+      else
+        hpxml_bldg.heat_pumps[0].pan_heater_watts = 100.0
+        if hpxml_file.include? 'pan-heater-continuous-mode'
+          hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeContinuous
+        elsif hpxml_file.include? 'pan-heater-defrost-mode'
+          hpxml_bldg.heat_pumps[0].pan_heater_control_type = HPXML::HVACPanHeaterControlTypeDefrost
+        end
+      end
+    end
     if ['base-hvac-fan-motor-type.xml'].include? hpxml_file
       hpxml_bldg.heating_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
       hpxml_bldg.cooling_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
@@ -2051,11 +2205,13 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML WaterHeating #
     # ------------------ #
 
-    if ['base-schedules-simple.xml',
-        'base-schedules-simple-vacancy.xml',
-        'base-schedules-simple-power-outage.xml',
-        'base-misc-loads-large-uncommon.xml',
-        'base-misc-loads-large-uncommon2.xml'].include? hpxml_file
+    if ['base-misc-defaults.xml'].include? hpxml_file
+      hpxml_bldg.hot_water_distributions[0].pipe_r_value = nil
+    elsif ['base-schedules-simple.xml',
+           'base-schedules-simple-vacancy.xml',
+           'base-schedules-simple-power-outage.xml',
+           'base-misc-loads-large-uncommon.xml',
+           'base-misc-loads-large-uncommon2.xml'].include? hpxml_file
       hpxml_bldg.water_heating.water_fixtures_weekday_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
       hpxml_bldg.water_heating.water_fixtures_weekend_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
       hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
@@ -2162,12 +2318,94 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekendScheduleFractions']
       hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']
     end
+    if hpxml_file.include? 'shared-water-heater'
+      hpxml_bldg.water_heating_systems[0].is_shared_system = true
+      hpxml_bldg.water_heating_systems[0].tank_volume = 120
+      hpxml_bldg.water_heating_systems[0].number_of_bedrooms_served = 18
+    end
+    if ['base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].number_of_bedrooms_served = 6
+    end
+    if ['base-dhw-indirect-standbyloss.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].standby_loss_units = HPXML::UnitsDegFPerHour
+      hpxml_bldg.water_heating_systems[0].standby_loss_value = 1.0
+    end
+    if ['base-dhw-tank-coal.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].fuel_type = HPXML::FuelTypeCoal
+    end
+    if ['base-dhw-tank-wood.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].fuel_type = HPXML::FuelTypeWoodCord
+    end
+    if ['base-dhw-tank-heat-pump-capacities.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].heating_capacity = 3000
+      hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 0
+    end
+    if ['base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].operating_mode = HPXML::WaterHeaterOperatingModeHeatPumpOnly
+    end
+    if hpxml_file.include? 'base-dhw-tank-model-type-stratified'
+      hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
+    end
 
     # -------------------- #
     # HPXML VentilationFan #
     # -------------------- #
 
-    if ['base-bldgtype-mf-unit-shared-mechvent-multiple.xml'].include? hpxml_file
+    if ['base-mechvent-balanced.xml',
+        'base-mechvent-erv.xml',
+        'base-mechvent-erv-atre-asre.xml',
+        'base-mechvent-hrv.xml',
+        'base-mechvent-hrv-asre.xml',
+        'base-mechvent-supply.xml',
+        'base-mechvent-exhaust.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 110.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 24
+      if hpxml_bldg.ventilation_fans[0].is_balanced
+        hpxml_bldg.ventilation_fans[0].fan_power = 60.0
+      else
+        hpxml_bldg.ventilation_fans[0].fan_power = 30.0
+      end
+      if hpxml_file.include? 'atre'
+        hpxml_bldg.ventilation_fans[0].total_recovery_efficiency_adjusted = 1.1 * hpxml_bldg.ventilation_fans[0].total_recovery_efficiency
+        hpxml_bldg.ventilation_fans[0].total_recovery_efficiency = nil
+      end
+      if hpxml_file.include? 'asre'
+        hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency_adjusted = 1.1 * hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency
+        hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency = nil
+      end
+    elsif hpxml_file.include? 'base-mechvent-cfis'
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 330.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 8
+      hpxml_bldg.ventilation_fans[0].fan_power = 300.0
+    elsif ['base-hvac-ptac-cfis.xml',
+           'base-hvac-pthp-cfis.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 100.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 8
+      hpxml_bldg.ventilation_fans[0].fan_power = 100.0
+    end
+    if ['base-bldgtype-mf-unit-shared-mechvent.xml',
+        'base-bldgtype-mf-unit-shared-mechvent-preconditioning.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].is_shared_system = true
+      hpxml_bldg.ventilation_fans[0].in_unit_flow_rate = 80.0
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 800.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 24
+      hpxml_bldg.ventilation_fans[0].fan_power = 240.0
+      hpxml_bldg.ventilation_fans[0].fraction_recirculation = 0.5
+      if hpxml_file == 'base-bldgtype-mf-unit-shared-mechvent-preconditioning.xml'
+        hpxml_bldg.ventilation_fans[0].preheating_fuel = HPXML::FuelTypeNaturalGas
+        hpxml_bldg.ventilation_fans[0].preheating_efficiency_cop = 0.92
+        hpxml_bldg.ventilation_fans[0].preheating_fraction_load_served = 0.7
+        hpxml_bldg.ventilation_fans[0].precooling_fuel = HPXML::FuelTypeElectricity
+        hpxml_bldg.ventilation_fans[0].precooling_efficiency_cop = 4.0
+        hpxml_bldg.ventilation_fans[0].precooling_fraction_load_served = 0.8
+      end
+      hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
+                                      fan_type: HPXML::MechVentTypeExhaust,
+                                      rated_flow_rate: 72.0,
+                                      hours_in_operation: 24,
+                                      fan_power: 26.0,
+                                      used_for_whole_building_ventilation: true)
+    elsif ['base-bldgtype-mf-unit-shared-mechvent-multiple.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       fan_type: HPXML::MechVentTypeSupply,
                                       is_shared_system: true,
@@ -2337,12 +2575,14 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.ventilation_fans[0].cfis_control_type = HPXML::CFISControlTypeTimer
     elsif ['base-mechvent-cfis-no-additional-runtime.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeNone
+      hpxml_bldg.ventilation_fans[0].fan_power = nil
     elsif ['base-mechvent-cfis-no-outdoor-air-control.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].cfis_has_outdoor_air_control = false
     elsif ['base-mechvent-cfis-supplemental-fan-exhaust.xml',
            'base-mechvent-cfis-supplemental-fan-exhaust-15-mins.xml',
            'base-mechvent-cfis-supplemental-fan-supply.xml',
            'base-mechvent-cfis-supplemental-fan-exhaust-synchronized.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].fan_power = nil
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       tested_flow_rate: 120,
                                       fan_power: 30,
@@ -2365,6 +2605,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
     if ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.pv_systems[0].year_modules_manufactured = 2015
+      hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700.0
     elsif ['base-misc-generators.xml',
            'base-misc-generators-battery.xml',
            'base-misc-generators-battery-scheduled.xml',
@@ -2386,6 +2627,16 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 annual_consumption_kbtu: 85000,
                                 annual_output_kwh: 12000,
                                 number_of_bedrooms_served: 18)
+    elsif ['base-bldgtype-mf-unit-shared-pv.xml',
+           'base-bldgtype-mf-unit-shared-pv-battery.xml'].include? hpxml_file
+      hpxml_bldg.pv_systems[0].is_shared_system = true
+      hpxml_bldg.pv_systems[0].location = HPXML::LocationGround
+      hpxml_bldg.pv_systems[0].module_type = HPXML::PVModuleTypeStandard
+      hpxml_bldg.pv_systems[0].tracking = HPXML::PVTrackingTypeFixed
+      hpxml_bldg.pv_systems[0].max_power_output = 30000
+      hpxml_bldg.pv_systems[0].system_losses_fraction = 0.14
+      hpxml_bldg.pv_systems[0].number_of_bedrooms_served = 18
+      hpxml_bldg.inverters[0].inverter_efficiency = 0.96
     end
 
     # -------------------- #
@@ -2413,6 +2664,15 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.batteries[0].usable_capacity_ah = hpxml_bldg.batteries[0].nominal_capacity_ah * default_values[:usable_fraction]
       hpxml_bldg.batteries[0].nominal_capacity_kwh = nil
       hpxml_bldg.batteries[0].usable_capacity_kwh = nil
+    elsif ['base-bldgtype-mf-unit-shared-pv-battery.xml'].include? hpxml_file
+      hpxml_bldg.batteries[0].is_shared_system = true
+      hpxml_bldg.batteries[0].nominal_capacity_kwh = 120.0
+      hpxml_bldg.batteries[0].usable_capacity_kwh = 108.0
+      hpxml_bldg.batteries[0].rated_power_output = 36000
+      hpxml_bldg.batteries[0].number_of_bedrooms_served = 18
+    elsif ['base-misc-defaults.xml',
+           'base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.batteries[0].nominal_capacity_kwh = nil
     end
 
     # ------------- #
@@ -2471,6 +2731,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                               rated_annual_kwh: 400)
       if hpxml_file == 'base-misc-usage-multiplier.xml'
         hpxml_bldg.freezers[-1].usage_multiplier = 0.9
+        hpxml_bldg.building_occupancy.general_water_use_usage_multiplier = 0.9
       end
       (hpxml_bldg.refrigerators + hpxml_bldg.freezers).each do |appliance|
         next if appliance.is_a?(HPXML::Refrigerator) && hpxml_file == 'base-misc-usage-multiplier.xml'
@@ -2526,12 +2787,22 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Lighting #
     # -------------- #
 
+    if ['base-misc-defaults.xml',
+        'base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.ceiling_fans[0].label_energy_use = nil
+    end
     if ['base-lighting-ceiling-fans.xml',
         'base-lighting-ceiling-fans-label-energy-use.xml'].include? hpxml_file
       hpxml_bldg.ceiling_fans[0].weekday_fractions = '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
       hpxml_bldg.ceiling_fans[0].weekend_fractions = '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
       hpxml_bldg.ceiling_fans[0].monthly_multipliers = '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0'
     elsif ['base-lighting-holiday.xml'].include? hpxml_file
+      hpxml_bldg.lighting.holiday_exists = true
+      hpxml_bldg.lighting.holiday_kwh_per_day = 1.1
+      hpxml_bldg.lighting.holiday_period_begin_month = 11
+      hpxml_bldg.lighting.holiday_period_begin_day = 24
+      hpxml_bldg.lighting.holiday_period_end_month = 1
+      hpxml_bldg.lighting.holiday_period_end_day = 6
       hpxml_bldg.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
       hpxml_bldg.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
     elsif ['base-schedules-simple.xml',

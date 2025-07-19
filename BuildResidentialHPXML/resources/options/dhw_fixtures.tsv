@@ -1,0 +1,6 @@
+Option Name	Low Flow Showers	Low Flow Sinks
+Standard	FALSE	FALSE
+Low Flow	TRUE	TRUE
+		
+Low Flow Showers: Whether the shower fixtures are low flow (<= 2.0 gpm).		
+Low Flow Sinks: Whether the sink fixtures are low flow (<= 2.0 gpm).		
