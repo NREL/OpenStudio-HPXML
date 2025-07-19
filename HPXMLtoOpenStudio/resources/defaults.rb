@@ -4539,7 +4539,7 @@ module Defaults
       ceiling_fan.label_energy_use_isdefaulted = true
     end
     if ceiling_fan.count.nil?
-      ceiling_fan.count = get_ceiling_fan_quantity(nbeds)
+      ceiling_fan.count = get_ceiling_fan_count(nbeds)
       ceiling_fan.count_isdefaulted = true
     end
     schedules_file_includes_ceiling_fan = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:CeilingFan].name))
@@ -5494,7 +5494,7 @@ module Defaults
       bsmnt = 1
     end
 
-    return 2.0 * (cfa / ncfl)**0.5 + 10.0 * ncfl + 5.0 * bsmnt # PipeL in ANSI/RESNET/ICC 301
+    return (2.0 * (cfa / ncfl)**0.5 + 10.0 * ncfl + 5.0 * bsmnt).round(2) # PipeL in ANSI/RESNET/ICC 301
   end
 
   # Gets the default loop piping length for a recirculation hot water distribution system.
@@ -5513,7 +5513,7 @@ module Defaults
   # @return [Double] Piping length (ft)
   def self.get_recirc_loop_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
     std_pipe_length = get_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
-    return 2.0 * std_pipe_length - 20.0 # refLoopL in ANSI/RESNET/ICC 301
+    return (2.0 * std_pipe_length - 20.0).round(2) # refLoopL in ANSI/RESNET/ICC 301
   end
 
   # Gets the default branch piping length for a recirculation hot water distribution system.
@@ -6387,13 +6387,13 @@ module Defaults
     return 42.6
   end
 
-  # Gets the default quantity of ceiling fans.
+  # Gets the default number of ceiling fans.
   #
   # Source: ANSI/RESNET/ICC 301
   #
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [Integer] Number of ceiling fans
-  def self.get_ceiling_fan_quantity(nbeds)
+  def self.get_ceiling_fan_count(nbeds)
     return nbeds + 1
   end
 

@@ -6,15 +6,16 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
+require_relative 'util.rb'
 
 class HPXMLtoOpenStudioVehicleTest < Minitest::Test
-  def teardown
-    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+  def setup
+    @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
+    @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
   end
 
-  def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+  def teardown
+    cleanup_results_files
   end
 
   def get_batteries(model, name)
@@ -44,7 +45,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
   def test_vehicle_ev_default
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-defaults.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-misc-defaults.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.vehicles.each do |hpxml_ev|
@@ -82,7 +83,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
   def test_vehicle_ev_no_charger
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-vehicle-ev-no-charger.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-vehicle-ev-no-charger.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     hpxml_bldg.vehicles.each do |hpxml_ev|
       next unless hpxml_ev.vehicle_type == HPXML::VehicleTypeBEV
@@ -97,7 +98,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
   def test_vehicle_ev_no_battery
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-ev-charger.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-ev-charger.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     assert_equal(0, model.getElectricLoadCenterStorageLiIonNMCBatterys.size)
     assert_equal(0, model.getElectricLoadCenterDistributions.size)
@@ -106,7 +107,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
   def test_vehicle_ev_default_schedule
     # EV battery w/ no schedules
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-vehicle-ev-charger.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-vehicle-ev-charger.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.vehicles.each do |hpxml_ev|
@@ -144,7 +145,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
   def test_vehicle_ev_scheduled
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-vehicle-ev-charger-scheduled.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-vehicle-ev-charger-scheduled.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.vehicles.each do |hpxml_ev|
@@ -182,7 +183,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
   def test_vehicle_ev_plug_load_ev
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-vehicle-ev-charger-plug-load-ev.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-vehicle-ev-charger-plug-load-ev.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.vehicles.each do |hpxml_ev|
@@ -198,7 +199,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
   def test_vehicle_ev_home_battery
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-pv-battery-and-vehicle-ev.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-pv-battery-and-vehicle-ev.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Test EV Battery
@@ -301,7 +302,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), 'in.xml'))
 
     File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 
