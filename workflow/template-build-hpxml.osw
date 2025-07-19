@@ -42,11 +42,7 @@
         "hvac_control_cooling_weekend_setpoint": "78",
         "hvac_control_heating_weekday_setpoint": "68",
         "hvac_control_heating_weekend_setpoint": "68",
-        "water_heater_efficiency": 0.95,
-        "water_heater_efficiency_type": "EnergyFactor",
-        "water_heater_fuel_type": "electricity",
-        "water_heater_tank_volume": 40,
-        "water_heater_type": "storage water heater",
+        "dhw_water_heater": "Electricity, Tank, UEF=0.94",
         "weather_station_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
         "utility_bill_scenario_names": "Bills"
       },

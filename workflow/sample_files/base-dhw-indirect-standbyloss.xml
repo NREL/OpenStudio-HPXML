@@ -346,7 +346,6 @@
             <SystemIdentifier id='WaterHeatingSystem1'/>
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <StandbyLoss>
               <Units>F/hr</Units>

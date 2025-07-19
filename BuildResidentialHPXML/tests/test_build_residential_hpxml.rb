@@ -411,14 +411,15 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_num_bedrooms'] = 3
       args['geometry_unit_num_bathrooms'] = 2
       args['geometry_unit_num_occupants'] = 3
-      args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
       args['rim_joist_assembly_r'] = 23.0
+      args['enclosure_air_leakage'] = '3 ACH50'
       args['enclosure_slab_carpet'] = '0% Carpet'
       args['enclosure_ceiling'] = 'R-38'
       args['enclosure_roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
       args['enclosure_roof'] = 'Uninsulated'
       args['enclosure_wall'] = 'Wood Stud, R-21'
       args['enclosure_wall_siding'] = 'Wood, Medium'
+      args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
       args['enclosure_window'] = 'Double, Low-E, Insulated, Air, Med Gain'
       args['enclosure_window_area_or_wwr_front'] = 108.0
       args['enclosure_window_area_or_wwr_back'] = 108.0
@@ -428,7 +429,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_window_interior_shading'] = 'Summer=0.7, Winter=0.8'
       args['door_area'] = 40.0
       args['door_rvalue'] = 4.4
-      args['enclosure_air_leakage'] = '3 ACH50'
       args['heating_system_fuel'] = HPXML::FuelTypeNaturalGas
       args['hvac_heating_system'] = 'Central Furnace, 92% AFUE'
       args['hvac_capacity_heating_system'] = '40 kBtu/hr'
@@ -453,18 +453,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['heating_system_2_fuel'] = HPXML::FuelTypeElectricity
       args['heating_system_2_fraction_heat_load_served'] = 0.25
       args['whole_house_fan_present'] = false
-      args['water_heater_type'] = HPXML::WaterHeaterTypeStorage
-      args['water_heater_fuel_type'] = HPXML::FuelTypeElectricity
-      args['water_heater_location'] = HPXML::LocationConditionedSpace
-      args['water_heater_tank_volume'] = 40
-      args['water_heater_efficiency_type'] = 'EnergyFactor'
-      args['water_heater_efficiency'] = 0.95
-      args['water_heater_recovery_efficiency'] = 0.76
-      args['water_heater_heating_capacity'] = 18767
-      args['water_heater_standby_loss'] = 0
-      args['water_heater_jacket_rvalue'] = 0
-      args['water_heater_setpoint_temperature'] = 125
-      args['water_heater_num_bedrooms_served'] = 3
+      args['dhw_water_heater'] = 'Electricity, Tank, UEF=0.94'
       args['solar_thermal_system_type'] = Constants::None
       args['solar_thermal_collector_area'] = 40.0
       args['solar_thermal_collector_loop_type'] = HPXML::SolarThermalLoopTypeDirect

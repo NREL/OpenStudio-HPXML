@@ -1114,6 +1114,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         surface.emittance = nil
         if surface.is_a? HPXML::Roof
           surface.radiant_barrier = nil
+          surface.roof_type = nil
         end
         if surface.is_a?(HPXML::Wall) || surface.is_a?(HPXML::RimJoist)
           surface.siding = nil
@@ -2248,7 +2249,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.water_heating_systems << hpxml_bldg.water_heating_systems[0].dup
         hpxml_bldg.water_heating_systems[1].id = "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size}"
       end
-    elsif ['base-dhw-tank-gas-uef-fhr.xml'].include? hpxml_file
+    elsif ['base-dhw-tank-gas-fhr.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].first_hour_rating = 56.0
       hpxml_bldg.water_heating_systems[0].usage_bin = nil
     elsif ['base-dhw-tankless-electric-outside.xml'].include? hpxml_file
@@ -2316,6 +2317,34 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekdayScheduleFractions']
       hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekendScheduleFractions']
       hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']
+    end
+    if hpxml_file.include? 'shared-water-heater'
+      hpxml_bldg.water_heating_systems[0].is_shared_system = true
+      hpxml_bldg.water_heating_systems[0].tank_volume = 120
+      hpxml_bldg.water_heating_systems[0].number_of_bedrooms_served = 18
+    end
+    if ['base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].number_of_bedrooms_served = 6
+    end
+    if ['base-dhw-indirect-standbyloss.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].standby_loss_units = HPXML::UnitsDegFPerHour
+      hpxml_bldg.water_heating_systems[0].standby_loss_value = 1.0
+    end
+    if ['base-dhw-tank-coal.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].fuel_type = HPXML::FuelTypeCoal
+    end
+    if ['base-dhw-tank-wood.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].fuel_type = HPXML::FuelTypeWoodCord
+    end
+    if ['base-dhw-tank-heat-pump-capacities.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].heating_capacity = 3000
+      hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 0
+    end
+    if ['base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].operating_mode = HPXML::WaterHeaterOperatingModeHeatPumpOnly
+    end
+    if hpxml_file.include? 'base-dhw-tank-model-type-stratified'
+      hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
     end
 
     # -------------------- #
@@ -2702,6 +2731,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                               rated_annual_kwh: 400)
       if hpxml_file == 'base-misc-usage-multiplier.xml'
         hpxml_bldg.freezers[-1].usage_multiplier = 0.9
+        hpxml_bldg.building_occupancy.general_water_use_usage_multiplier = 0.9
       end
       (hpxml_bldg.refrigerators + hpxml_bldg.freezers).each do |appliance|
         next if appliance.is_a?(HPXML::Refrigerator) && hpxml_file == 'base-misc-usage-multiplier.xml'

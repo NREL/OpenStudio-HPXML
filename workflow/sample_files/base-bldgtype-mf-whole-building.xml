@@ -375,10 +375,8 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <UniformEnergyFactor>0.94</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -858,10 +856,8 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <UniformEnergyFactor>0.94</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -1232,10 +1228,8 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <UniformEnergyFactor>0.94</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -1606,10 +1600,8 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <UniformEnergyFactor>0.94</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -2037,10 +2029,8 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <UniformEnergyFactor>0.94</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -2468,10 +2458,8 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <UniformEnergyFactor>0.94</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>

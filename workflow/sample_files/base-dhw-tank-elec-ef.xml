@@ -403,15 +403,12 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
-            <FuelType>natural gas</FuelType>
+            <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>30.0</TankVolume>
+            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>30000.0</HeatingCapacity>
-            <UniformEnergyFactor>0.59</UniformEnergyFactor>
-            <FirstHourRating>56.0</FirstHourRating>
-            <RecoveryEfficiency>0.75</RecoveryEfficiency>
+            <EnergyFactor>0.93</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>

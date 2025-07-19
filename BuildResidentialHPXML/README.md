@@ -568,7 +568,7 @@ The type and insulation level of the roof.
 
 **Enclosure: Roof Material**
 
-The material type/color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
+The material type and color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
 
 - **Name:** ``enclosure_roof_material``
 - **Type:** ``Choice``
@@ -839,7 +839,7 @@ The amount of skylight area on the unit's right conditioned roof (when viewed fr
 
 <br/>
 
-**Doors: Area**
+**Enclosure: Doors Area**
 
 The area of the opaque door(s).
 
@@ -852,7 +852,7 @@ The area of the opaque door(s).
 
 <br/>
 
-**Doors: R-value**
+**Enclosure: Doors R-value**
 
 R-value of the opaque door(s).
 
@@ -904,7 +904,7 @@ Presence of flue or chimney with combustion air from conditioned space; used for
 
 **HVAC: Heating System**
 
-The heating system type/efficiency. Use 'None' if there is no heating system or if there is a heat pump serving a heating load.
+The type and efficiency of the heating system. Use 'none' if there is no heating system or if there is a heat pump serving a heating load.
 
 - **Name:** ``hvac_heating_system``
 - **Type:** ``Choice``
@@ -956,7 +956,7 @@ The heating load served by the heating system.
 
 **HVAC: Cooling System**
 
-The cooling system type/efficiency. Use 'None' if there is no cooling system or if there is a heat pump serving a cooling load.
+The type and efficiency of the cooling system. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.
 
 - **Name:** ``hvac_cooling_system``
 - **Type:** ``Choice``
@@ -1021,7 +1021,7 @@ The heating load served by the heating system integrated into cooling system. On
 
 **HVAC: Heat Pump**
 
-The heat pump type/efficiency.
+The type and efficiency of the heat pump.
 
 - **Name:** ``hvac_heat_pump``
 - **Type:** ``Choice``
@@ -1045,7 +1045,7 @@ The output capacity of the heat pump.
 
 <br/>
 
-**Heat Pump: Fraction Heat Load Served**
+**HVAC: Heat Pump Fraction Heat Load Served**
 
 The heating load served by the heat pump.
 
@@ -1058,7 +1058,7 @@ The heating load served by the heat pump.
 
 <br/>
 
-**Heat Pump: Fraction Cool Load Served**
+**HVAC: Heat Pump Fraction Cool Load Served**
 
 The cooling load served by the heat pump.
 
@@ -1073,7 +1073,7 @@ The cooling load served by the heat pump.
 
 **HVAC: Heat Pump Backup Type**
 
-The heat pump backup type/efficiency. Use 'None' if there is no backup heating. If Backup Type is Separate Heating System, Heating System 2 is used to specify the backup.
+The type and efficiency of the heat pump backup. Use 'none' if there is no backup heating. If Backup Type is Separate Heating System, Heating System 2 is used to specify the backup.
 
 - **Name:** ``hvac_heat_pump_backup``
 - **Type:** ``Choice``
@@ -1110,7 +1110,7 @@ Specifies the minimum compressor temperature and/or maximum HP backup temperatur
 
 <br/>
 
-**Heat Pump: Sizing Methodology**
+**HVAC: Heat Pump Sizing Methodology**
 
 The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.
 
@@ -1123,7 +1123,7 @@ The auto-sizing methodology to use when the heat pump capacity is not provided. 
 
 <br/>
 
-**Heat Pump: Backup Sizing Methodology**
+**HVAC: Heat Pump Backup Sizing Methodology**
 
 The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.
 
@@ -1151,7 +1151,7 @@ The geothermal loop configuration if there's a ground-to-air heat pump.
 
 **HVAC: Heating System 2**
 
-The type/efficiency of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents the 'separate' backup heating.
+The type and efficiency of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents the 'separate' backup heating.
 
 - **Name:** ``hvac_heating_system_2``
 - **Type:** ``Choice``
@@ -1162,7 +1162,7 @@ The type/efficiency of the second heating system. If a heat pump is specified an
 
 <br/>
 
-**Heating System 2: Fuel Type**
+**HVAC: Heating System 2 Fuel Type**
 
 The fuel type of the second heating system. Ignored for ElectricResistance.
 
@@ -1188,7 +1188,7 @@ The output capacity of the second heating system.
 
 <br/>
 
-**Heating System 2: Fraction Heat Load Served**
+**HVAC: Heating System 2 Fraction Heat Load Served**
 
 The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.
 
@@ -1460,33 +1460,20 @@ The fan power of the whole house fan. If not provided, the OS-HPXML default (see
 
 <br/>
 
-**Water Heater: Type**
+**DHW: Water Heater**
 
-The type of water heater. Use 'none' if there is no water heater.
+The type and efficiency of the water heater.
 
-- **Name:** ``water_heater_type``
+- **Name:** ``dhw_water_heater``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `storage water heater`, `instantaneous water heater`, `heat pump water heater`, `space-heating boiler with storage tank`, `space-heating boiler with tankless coil`
+- **Choices:** `None`, `Electricity, Tank, UEF=0.90`, `Electricity, Tank, UEF=0.92`, `Electricity, Tank, UEF=0.94`, `Electricity, Tankless, UEF=0.94`, `Electricity, Tankless, UEF=0.98`, `Electricity, Heat Pump, UEF=3.50`, `Electricity, Heat Pump, UEF=3.75`, `Electricity, Heat Pump, UEF=4.00`, `Natural Gas, Tank, UEF=0.57`, `Natural Gas, Tank, UEF=0.60`, `Natural Gas, Tank, UEF=0.64`, `Natural Gas, Tank, UEF=0.67`, `Natural Gas, Tank, UEF=0.70`, `Natural Gas, Tank, UEF=0.80`, `Natural Gas, Tankless, UEF=0.82`, `Natural Gas, Tankless, UEF=0.93`, `Natural Gas, Tankless, UEF=0.96`, `Fuel Oil, Tank, UEF=0.61`, `Fuel Oil, Tank, UEF=0.64`, `Fuel Oil, Tank, UEF=0.67`, `Propane, Tank, UEF=0.57`, `Propane, Tank, UEF=0.60`, `Propane, Tank, UEF=0.64`, `Propane, Tank, UEF=0.67`, `Propane, Tank, UEF=0.70`, `Propane, Tank, UEF=0.80`, `Propane, Tankless, UEF=0.82`, `Propane, Tankless, UEF=0.93`, `Propane, Tankless, UEF=0.96`, `Space-Heating Boiler w/ Storage Tank`, `Space-Heating Boiler w/ Tankless Coil`, `Detailed Example: Electricity, Tank, 40 gal, EF=0.93`, `Detailed Example: Electricity, Tankless, EF=0.96`, `Detailed Example: Electricity, Heat Pump, 80 gal, EF=3.1`, `Detailed Example: Natural Gas, Tank, 40 gal, EF=0.56, RE=0.78`, `Detailed Example: Natural Gas, Tank, 40 gal, EF=0.62, RE=0.78`, `Detailed Example: Natural Gas, Tank, 50 gal, EF=0.59, RE=0.76`, `Detailed Example: Natural Gas, Tankless, EF=0.95`
 
 <br/>
 
-**Water Heater: Fuel Type**
-
-The fuel type of water heater. Ignored for heat pump water heater.
-
-- **Name:** ``water_heater_fuel_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
-
-<br/>
-
-**Water Heater: Location**
+**DHW: Water Heater Location**
 
 The location of water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.
 
@@ -1499,109 +1486,7 @@ The location of water heater. If not provided, the OS-HPXML default (see <a href
 
 <br/>
 
-**Water Heater: Tank Volume**
-
-Nominal volume of water heater tank. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#conventional-storage'>Conventional Storage</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#heat-pump'>Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#combi-boiler-w-storage'>Combi Boiler w/ Storage</a>) is used.
-
-- **Name:** ``water_heater_tank_volume``
-- **Type:** ``Double``
-
-- **Units:** ``gal``
-
-- **Required:** ``false``
-
-<br/>
-
-**Water Heater: Efficiency Type**
-
-The efficiency type of water heater. Does not apply to space-heating boilers.
-
-- **Name:** ``water_heater_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `EnergyFactor`, `UniformEnergyFactor`
-
-<br/>
-
-**Water Heater: Efficiency**
-
-Rated Energy Factor or Uniform Energy Factor. Does not apply to space-heating boilers.
-
-- **Name:** ``water_heater_efficiency``
-- **Type:** ``Double``
-
-- **Required:** ``true``
-
-<br/>
-
-**Water Heater: Usage Bin**
-
-The usage of the water heater. Only applies if Efficiency Type is UniformEnergyFactor and Type is not instantaneous water heater. Does not apply to space-heating boilers. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#conventional-storage'>Conventional Storage</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#heat-pump'>Heat Pump</a>) is used.
-
-- **Name:** ``water_heater_usage_bin``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `very small`, `low`, `medium`, `high`
-
-<br/>
-
-**Water Heater: Recovery Efficiency**
-
-Ratio of energy delivered to water heater to the energy content of the fuel consumed by the water heater. Only used for non-electric storage water heaters. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#conventional-storage'>Conventional Storage</a>) is used.
-
-- **Name:** ``water_heater_recovery_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**Water Heater: Heating Capacity**
-
-Heating capacity. Only applies to storage water heater and heat pump water heater (compressor). If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#conventional-storage'>Conventional Storage</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#heat-pump'>Heat Pump</a>) is used.
-
-- **Name:** ``water_heater_heating_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Water Heater: Backup Heating Capacity**
-
-Backup heating capacity for a heat pump water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#heat-pump'>Heat Pump</a>) is used.
-
-- **Name:** ``water_heater_backup_heating_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Water Heater: Standby Loss**
-
-The standby loss of water heater. Only applies to space-heating boilers. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#combi-boiler-w-storage'>Combi Boiler w/ Storage</a>) is used.
-
-- **Name:** ``water_heater_standby_loss``
-- **Type:** ``Double``
-
-- **Units:** ``F/hr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Water Heater: Jacket R-value**
+**DHW: Water Heater Jacket R-value**
 
 The jacket R-value of water heater. Doesn't apply to instantaneous water heater or space-heating boiler with tankless coil. If not provided, defaults to no jacket insulation.
 
@@ -1614,7 +1499,7 @@ The jacket R-value of water heater. Doesn't apply to instantaneous water heater 
 
 <br/>
 
-**Water Heater: Setpoint Temperature**
+**DHW: Water Heater Setpoint Temperature**
 
 The setpoint temperature of water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.
 
@@ -1627,20 +1512,7 @@ The setpoint temperature of water heater. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Water Heater: Number of Bedrooms Served**
-
-Number of bedrooms served (directly or indirectly) by the water heater. Only needed if single-family attached or apartment unit and it is a shared water heater serving multiple dwelling units. Used to apportion water heater tank losses to the unit.
-
-- **Name:** ``water_heater_num_bedrooms_served``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
-
-<br/>
-
-**Water Heater: Uses Desuperheater**
+**DHW: Water Heater Uses Desuperheater**
 
 Requires that the dwelling unit has a air-to-air, mini-split, or ground-to-air heat pump or a central air conditioner or mini-split air conditioner. If not provided, assumes no desuperheater.
 
@@ -1651,33 +1523,7 @@ Requires that the dwelling unit has a air-to-air, mini-split, or ground-to-air h
 
 <br/>
 
-**Water Heater: Tank Type**
-
-Type of tank model to use. The 'stratified' tank generally provide more accurate results, but may significantly increase run time. Applies only to storage water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#conventional-storage'>Conventional Storage</a>) is used.
-
-- **Name:** ``water_heater_tank_model_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `mixed`, `stratified`
-
-<br/>
-
-**Water Heater: Operating Mode**
-
-The water heater operating mode. The 'heat pump only' option only uses the heat pump, while 'hybrid/auto' allows the backup electric resistance to come on in high demand situations. This is ignored if a scheduled operating mode type is selected. Applies only to heat pump water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#heat-pump'>Heat Pump</a>) is used.
-
-- **Name:** ``water_heater_operating_mode``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `hybrid/auto`, `heat pump only`
-
-<br/>
-
-**Hot Water Distribution**
+**DHW: Hot Water Distribution**
 
 The type of domestic hot water distrubtion.
 
@@ -1690,7 +1536,7 @@ The type of domestic hot water distrubtion.
 
 <br/>
 
-**Hot Water Fixtures**
+**DHW: Hot Water Fixtures**
 
 The type of domestic hot water fixtures.
 
@@ -1703,7 +1549,7 @@ The type of domestic hot water fixtures.
 
 <br/>
 
-**Drain Water Heat Reovery**
+**DHW: Drain Water Heat Reovery**
 
 The type of drain water heater recovery.
 
@@ -1716,7 +1562,7 @@ The type of drain water heater recovery.
 
 <br/>
 
-**Hot Water Fixtures: Usage Multiplier**
+**DHW: Hot Water Fixtures Usage Multiplier**
 
 Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-fixtures'>HPXML Water Fixtures</a>) is used.
 
@@ -1727,18 +1573,7 @@ Multiplier on the hot water usage that can reflect, e.g., high/low usage occupan
 
 <br/>
 
-**General Water Use: Usage Multiplier**
-
-Multiplier on internal gains from general water use (floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-building-occupancy'>HPXML Building Occupancy</a>) is used.
-
-- **Name:** ``general_water_use_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Solar Thermal: System Type**
+**DHW: Solar Thermal System Type**
 
 The type of solar thermal system. Use 'none' if there is no solar thermal system.
 
@@ -1751,7 +1586,7 @@ The type of solar thermal system. Use 'none' if there is no solar thermal system
 
 <br/>
 
-**Solar Thermal: Collector Area**
+**DHW: Solar Thermal Collector Area**
 
 The collector area of the solar thermal system.
 
@@ -1764,7 +1599,7 @@ The collector area of the solar thermal system.
 
 <br/>
 
-**Solar Thermal: Collector Loop Type**
+**DHW: Solar Thermal Collector Loop Type**
 
 The collector loop type of the solar thermal system.
 
@@ -1777,7 +1612,7 @@ The collector loop type of the solar thermal system.
 
 <br/>
 
-**Solar Thermal: Collector Type**
+**DHW: Solar Thermal Collector Type**
 
 The collector type of the solar thermal system.
 
@@ -1790,7 +1625,7 @@ The collector type of the solar thermal system.
 
 <br/>
 
-**Solar Thermal: Collector Azimuth**
+**DHW: Solar Thermal Collector Azimuth**
 
 The collector azimuth of the solar thermal system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
 
@@ -1803,7 +1638,7 @@ The collector azimuth of the solar thermal system. Azimuth is measured clockwise
 
 <br/>
 
-**Solar Thermal: Collector Tilt**
+**DHW: Solar Thermal Collector Tilt**
 
 The collector tilt of the solar thermal system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
 
@@ -1814,7 +1649,7 @@ The collector tilt of the solar thermal system. Can also enter, e.g., RoofPitch,
 
 <br/>
 
-**Solar Thermal: Collector Rated Optical Efficiency**
+**DHW: Solar Thermal Collector Rated Optical Efficiency**
 
 The collector rated optical efficiency of the solar thermal system.
 
@@ -1827,7 +1662,7 @@ The collector rated optical efficiency of the solar thermal system.
 
 <br/>
 
-**Solar Thermal: Collector Rated Thermal Losses**
+**DHW: Solar Thermal Collector Rated Thermal Losses**
 
 The collector rated thermal losses of the solar thermal system.
 
@@ -1840,7 +1675,7 @@ The collector rated thermal losses of the solar thermal system.
 
 <br/>
 
-**Solar Thermal: Storage Volume**
+**DHW: Solar Thermal Storage Volume**
 
 The storage volume of the solar thermal system. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#detailed-inputs'>Detailed Inputs</a>) is used.
 
@@ -1853,7 +1688,7 @@ The storage volume of the solar thermal system. If not provided, the OS-HPXML de
 
 <br/>
 
-**Solar Thermal: Solar Fraction**
+**DHW: Solar Thermal Solar Fraction**
 
 The solar fraction of the solar thermal system. If provided, overrides all other solar thermal inputs.
 
@@ -2672,6 +2507,637 @@ The rated power output of the EV charger. If not provided, the OS-HPXML default 
 
 <br/>
 
+**Appliances: Clothes Washer Present**
+
+Whether there is a clothes washer present.
+
+- **Name:** ``clothes_washer_present``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Clothes Washer Location**
+
+The space type for the clothes washer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_location``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+
+<br/>
+
+**Appliances: Clothes Washer Efficiency Type**
+
+The efficiency type of the clothes washer.
+
+- **Name:** ``clothes_washer_efficiency_type``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `ModifiedEnergyFactor`, `IntegratedModifiedEnergyFactor`
+
+<br/>
+
+**Appliances: Clothes Washer Efficiency**
+
+The efficiency of the clothes washer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_efficiency``
+- **Type:** ``Double``
+
+- **Units:** ``ft3/kWh-cyc``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Washer Rated Annual Consumption**
+
+The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_rated_annual_kwh``
+- **Type:** ``Double``
+
+- **Units:** ``kWh/yr``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Washer Label Electric Rate**
+
+The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_label_electric_rate``
+- **Type:** ``Double``
+
+- **Units:** ``$/kWh``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Washer Label Gas Rate**
+
+The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_label_gas_rate``
+- **Type:** ``Double``
+
+- **Units:** ``$/therm``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Washer Label Annual Cost with Gas DHW**
+
+The annual cost of using the system under test conditions. Input is obtained from the EnergyGuide label. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_label_annual_gas_cost``
+- **Type:** ``Double``
+
+- **Units:** ``$``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Washer Label Usage**
+
+The clothes washer loads per week. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_label_usage``
+- **Type:** ``Double``
+
+- **Units:** ``cyc/wk``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Washer Drum Volume**
+
+Volume of the washer drum. Obtained from the EnergyStar website or the manufacturer's literature. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_capacity``
+- **Type:** ``Double``
+
+- **Units:** ``ft3``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Washer Usage Multiplier**
+
+Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+
+- **Name:** ``clothes_washer_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Dryer Present**
+
+Whether there is a clothes dryer present.
+
+- **Name:** ``clothes_dryer_present``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Clothes Dryer Location**
+
+The space type for the clothes dryer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
+
+- **Name:** ``clothes_dryer_location``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+
+<br/>
+
+**Appliances: Clothes Dryer Fuel Type**
+
+Type of fuel used by the clothes dryer.
+
+- **Name:** ``clothes_dryer_fuel_type``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
+
+<br/>
+
+**Appliances: Clothes Dryer Drying Method**
+
+The method of drying used by the clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
+
+- **Name:** ``clothes_dryer_drying_method``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conventional`, `condensing`, `heat pump`, `other`
+
+<br/>
+
+**Appliances: Clothes Dryer Efficiency Type**
+
+The efficiency type of the clothes dryer.
+
+- **Name:** ``clothes_dryer_efficiency_type``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `EnergyFactor`, `CombinedEnergyFactor`
+
+<br/>
+
+**Appliances: Clothes Dryer Efficiency**
+
+The efficiency of the clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
+
+- **Name:** ``clothes_dryer_efficiency``
+- **Type:** ``Double``
+
+- **Units:** ``lb/kWh``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Clothes Dryer Usage Multiplier**
+
+Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
+
+- **Name:** ``clothes_dryer_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Dishwasher Present**
+
+Whether there is a dishwasher present.
+
+- **Name:** ``dishwasher_present``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Dishwasher Location**
+
+The space type for the dishwasher location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+
+- **Name:** ``dishwasher_location``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+
+<br/>
+
+**Appliances: Dishwasher Efficiency Type**
+
+The efficiency type of dishwasher.
+
+- **Name:** ``dishwasher_efficiency_type``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `RatedAnnualkWh`, `EnergyFactor`
+
+<br/>
+
+**Appliances: Dishwasher Efficiency**
+
+The efficiency of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+
+- **Name:** ``dishwasher_efficiency``
+- **Type:** ``Double``
+
+- **Units:** ``RatedAnnualkWh or EnergyFactor``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Dishwasher Label Electric Rate**
+
+The label electric rate of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+
+- **Name:** ``dishwasher_label_electric_rate``
+- **Type:** ``Double``
+
+- **Units:** ``$/kWh``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Dishwasher Label Gas Rate**
+
+The label gas rate of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+
+- **Name:** ``dishwasher_label_gas_rate``
+- **Type:** ``Double``
+
+- **Units:** ``$/therm``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Dishwasher Label Annual Gas Cost**
+
+The label annual gas cost of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+
+- **Name:** ``dishwasher_label_annual_gas_cost``
+- **Type:** ``Double``
+
+- **Units:** ``$``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Dishwasher Label Usage**
+
+The dishwasher loads per week. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+
+- **Name:** ``dishwasher_label_usage``
+- **Type:** ``Double``
+
+- **Units:** ``cyc/wk``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Dishwasher Number of Place Settings**
+
+The number of place settings for the unit. Data obtained from manufacturer's literature. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+
+- **Name:** ``dishwasher_place_setting_capacity``
+- **Type:** ``Integer``
+
+- **Units:** ``#``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Dishwasher Usage Multiplier**
+
+Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+
+- **Name:** ``dishwasher_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Refrigerator Present**
+
+Whether there is a refrigerator present.
+
+- **Name:** ``refrigerator_present``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Refrigerator Location**
+
+The space type for the refrigerator location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+
+- **Name:** ``refrigerator_location``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+
+<br/>
+
+**Appliances: Refrigerator Rated Annual Consumption**
+
+The EnergyGuide rated annual energy consumption for a refrigerator. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+
+- **Name:** ``refrigerator_rated_annual_kwh``
+- **Type:** ``Double``
+
+- **Units:** ``kWh/yr``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Refrigerator Usage Multiplier**
+
+Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+
+- **Name:** ``refrigerator_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Extra Refrigerator Present**
+
+Whether there is an extra refrigerator present.
+
+- **Name:** ``extra_refrigerator_present``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Extra Refrigerator Location**
+
+The space type for the extra refrigerator location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+
+- **Name:** ``extra_refrigerator_location``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+
+<br/>
+
+**Appliances: Extra Refrigerator Rated Annual Consumption**
+
+The EnergyGuide rated annual energy consumption for an extra refrigerator. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+
+- **Name:** ``extra_refrigerator_rated_annual_kwh``
+- **Type:** ``Double``
+
+- **Units:** ``kWh/yr``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Extra Refrigerator Usage Multiplier**
+
+Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+
+- **Name:** ``extra_refrigerator_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Freezer Present**
+
+Whether there is a freezer present.
+
+- **Name:** ``freezer_present``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Freezer Location**
+
+The space type for the freezer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
+
+- **Name:** ``freezer_location``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+
+<br/>
+
+**Appliances: Freezer Rated Annual Consumption**
+
+The EnergyGuide rated annual energy consumption for a freezer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
+
+- **Name:** ``freezer_rated_annual_kwh``
+- **Type:** ``Double``
+
+- **Units:** ``kWh/yr``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Freezer Usage Multiplier**
+
+Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
+
+- **Name:** ``freezer_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Cooking Range/Oven Present**
+
+Whether there is a cooking range/oven present.
+
+- **Name:** ``cooking_range_oven_present``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Cooking Range/Oven Location**
+
+The space type for the cooking range/oven location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
+
+- **Name:** ``cooking_range_oven_location``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+
+<br/>
+
+**Appliances: Cooking Range/Oven Fuel Type**
+
+Type of fuel used by the cooking range/oven.
+
+- **Name:** ``cooking_range_oven_fuel_type``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
+
+<br/>
+
+**Appliances: Cooking Range/Oven Is Induction**
+
+Whether the cooking range is induction. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
+
+- **Name:** ``cooking_range_oven_is_induction``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Cooking Range/Oven Is Convection**
+
+Whether the oven is convection. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
+
+- **Name:** ``cooking_range_oven_is_convection``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Cooking Range/Oven Usage Multiplier**
+
+Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
+
+- **Name:** ``cooking_range_oven_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**Appliances: Dehumidifier Type**
+
+The type of dehumidifier.
+
+- **Name:** ``dehumidifier_type``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `none`, `portable`, `whole-home`
+
+<br/>
+
+**Appliances: Dehumidifier Efficiency Type**
+
+The efficiency type of dehumidifier.
+
+- **Name:** ``dehumidifier_efficiency_type``
+- **Type:** ``Choice``
+
+- **Required:** ``true``
+
+- **Choices:** `EnergyFactor`, `IntegratedEnergyFactor`
+
+<br/>
+
+**Appliances: Dehumidifier Efficiency**
+
+The efficiency of the dehumidifier.
+
+- **Name:** ``dehumidifier_efficiency``
+- **Type:** ``Double``
+
+- **Units:** ``liters/kWh``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Dehumidifier Capacity**
+
+The capacity (water removal rate) of the dehumidifier.
+
+- **Name:** ``dehumidifier_capacity``
+- **Type:** ``Double``
+
+- **Units:** ``pint/day``
+
+- **Required:** ``true``
+
+<br/>
+
+**Appliances: Dehumidifier Relative Humidity Setpoint**
+
+The relative humidity setpoint of the dehumidifier.
+
+- **Name:** ``dehumidifier_rh_setpoint``
+- **Type:** ``Double``
+
+- **Units:** ``Frac``
+
+- **Required:** ``true``
+
+<br/>
+
 **Lighting**
 
 The type of lighting.
@@ -2712,637 +3178,6 @@ Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/
 Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
 
 - **Name:** ``lighting_garage_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Dehumidifier: Type**
-
-The type of dehumidifier.
-
-- **Name:** ``dehumidifier_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `none`, `portable`, `whole-home`
-
-<br/>
-
-**Dehumidifier: Efficiency Type**
-
-The efficiency type of dehumidifier.
-
-- **Name:** ``dehumidifier_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `EnergyFactor`, `IntegratedEnergyFactor`
-
-<br/>
-
-**Dehumidifier: Efficiency**
-
-The efficiency of the dehumidifier.
-
-- **Name:** ``dehumidifier_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``liters/kWh``
-
-- **Required:** ``true``
-
-<br/>
-
-**Dehumidifier: Capacity**
-
-The capacity (water removal rate) of the dehumidifier.
-
-- **Name:** ``dehumidifier_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``pint/day``
-
-- **Required:** ``true``
-
-<br/>
-
-**Dehumidifier: Relative Humidity Setpoint**
-
-The relative humidity setpoint of the dehumidifier.
-
-- **Name:** ``dehumidifier_rh_setpoint``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Clothes Washer: Present**
-
-Whether there is a clothes washer present.
-
-- **Name:** ``clothes_washer_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Clothes Washer: Location**
-
-The space type for the clothes washer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Clothes Washer: Efficiency Type**
-
-The efficiency type of the clothes washer.
-
-- **Name:** ``clothes_washer_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `ModifiedEnergyFactor`, `IntegratedModifiedEnergyFactor`
-
-<br/>
-
-**Clothes Washer: Efficiency**
-
-The efficiency of the clothes washer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``ft3/kWh-cyc``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Washer: Rated Annual Consumption**
-
-The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_rated_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Washer: Label Electric Rate**
-
-The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_label_electric_rate``
-- **Type:** ``Double``
-
-- **Units:** ``$/kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Washer: Label Gas Rate**
-
-The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_label_gas_rate``
-- **Type:** ``Double``
-
-- **Units:** ``$/therm``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Washer: Label Annual Cost with Gas DHW**
-
-The annual cost of using the system under test conditions. Input is obtained from the EnergyGuide label. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_label_annual_gas_cost``
-- **Type:** ``Double``
-
-- **Units:** ``$``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Washer: Label Usage**
-
-The clothes washer loads per week. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_label_usage``
-- **Type:** ``Double``
-
-- **Units:** ``cyc/wk``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Washer: Drum Volume**
-
-Volume of the washer drum. Obtained from the EnergyStar website or the manufacturer's literature. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``ft3``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Washer: Usage Multiplier**
-
-Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Dryer: Present**
-
-Whether there is a clothes dryer present.
-
-- **Name:** ``clothes_dryer_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Clothes Dryer: Location**
-
-The space type for the clothes dryer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
-
-- **Name:** ``clothes_dryer_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Clothes Dryer: Fuel Type**
-
-Type of fuel used by the clothes dryer.
-
-- **Name:** ``clothes_dryer_fuel_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
-
-<br/>
-
-**Clothes Dryer: Drying Method**
-
-The method of drying used by the clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
-
-- **Name:** ``clothes_dryer_drying_method``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conventional`, `condensing`, `heat pump`, `other`
-
-<br/>
-
-**Clothes Dryer: Efficiency Type**
-
-The efficiency type of the clothes dryer.
-
-- **Name:** ``clothes_dryer_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `EnergyFactor`, `CombinedEnergyFactor`
-
-<br/>
-
-**Clothes Dryer: Efficiency**
-
-The efficiency of the clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
-
-- **Name:** ``clothes_dryer_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``lb/kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Clothes Dryer: Usage Multiplier**
-
-Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
-
-- **Name:** ``clothes_dryer_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Dishwasher: Present**
-
-Whether there is a dishwasher present.
-
-- **Name:** ``dishwasher_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Dishwasher: Location**
-
-The space type for the dishwasher location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Dishwasher: Efficiency Type**
-
-The efficiency type of dishwasher.
-
-- **Name:** ``dishwasher_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `RatedAnnualkWh`, `EnergyFactor`
-
-<br/>
-
-**Dishwasher: Efficiency**
-
-The efficiency of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``RatedAnnualkWh or EnergyFactor``
-
-- **Required:** ``false``
-
-<br/>
-
-**Dishwasher: Label Electric Rate**
-
-The label electric rate of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_label_electric_rate``
-- **Type:** ``Double``
-
-- **Units:** ``$/kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Dishwasher: Label Gas Rate**
-
-The label gas rate of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_label_gas_rate``
-- **Type:** ``Double``
-
-- **Units:** ``$/therm``
-
-- **Required:** ``false``
-
-<br/>
-
-**Dishwasher: Label Annual Gas Cost**
-
-The label annual gas cost of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_label_annual_gas_cost``
-- **Type:** ``Double``
-
-- **Units:** ``$``
-
-- **Required:** ``false``
-
-<br/>
-
-**Dishwasher: Label Usage**
-
-The dishwasher loads per week. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_label_usage``
-- **Type:** ``Double``
-
-- **Units:** ``cyc/wk``
-
-- **Required:** ``false``
-
-<br/>
-
-**Dishwasher: Number of Place Settings**
-
-The number of place settings for the unit. Data obtained from manufacturer's literature. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_place_setting_capacity``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
-
-<br/>
-
-**Dishwasher: Usage Multiplier**
-
-Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Refrigerator: Present**
-
-Whether there is a refrigerator present.
-
-- **Name:** ``refrigerator_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Refrigerator: Location**
-
-The space type for the refrigerator location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
-
-- **Name:** ``refrigerator_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Refrigerator: Rated Annual Consumption**
-
-The EnergyGuide rated annual energy consumption for a refrigerator. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
-
-- **Name:** ``refrigerator_rated_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Refrigerator: Usage Multiplier**
-
-Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
-
-- **Name:** ``refrigerator_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Extra Refrigerator: Present**
-
-Whether there is an extra refrigerator present.
-
-- **Name:** ``extra_refrigerator_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Extra Refrigerator: Location**
-
-The space type for the extra refrigerator location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
-
-- **Name:** ``extra_refrigerator_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Extra Refrigerator: Rated Annual Consumption**
-
-The EnergyGuide rated annual energy consumption for an extra refrigerator. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
-
-- **Name:** ``extra_refrigerator_rated_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Extra Refrigerator: Usage Multiplier**
-
-Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
-
-- **Name:** ``extra_refrigerator_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Freezer: Present**
-
-Whether there is a freezer present.
-
-- **Name:** ``freezer_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Freezer: Location**
-
-The space type for the freezer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
-
-- **Name:** ``freezer_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Freezer: Rated Annual Consumption**
-
-The EnergyGuide rated annual energy consumption for a freezer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
-
-- **Name:** ``freezer_rated_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Freezer: Usage Multiplier**
-
-Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
-
-- **Name:** ``freezer_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooking Range/Oven: Present**
-
-Whether there is a cooking range/oven present.
-
-- **Name:** ``cooking_range_oven_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Cooking Range/Oven: Location**
-
-The space type for the cooking range/oven location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
-
-- **Name:** ``cooking_range_oven_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Cooking Range/Oven: Fuel Type**
-
-Type of fuel used by the cooking range/oven.
-
-- **Name:** ``cooking_range_oven_fuel_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
-
-<br/>
-
-**Cooking Range/Oven: Is Induction**
-
-Whether the cooking range is induction. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
-
-- **Name:** ``cooking_range_oven_is_induction``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooking Range/Oven: Is Convection**
-
-Whether the oven is convection. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
-
-- **Name:** ``cooking_range_oven_is_convection``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooking Range/Oven: Usage Multiplier**
-
-Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
-
-- **Name:** ``cooking_range_oven_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``
@@ -3401,7 +3236,7 @@ The amount of well pump usage, relative to the national average.
 
 <br/>
 
-**Misc Plug Loads: Vehicle Present**
+**Misc: Vehicle Present**
 
 Whether there is an electric vehicle.
 
@@ -3412,7 +3247,7 @@ Whether there is an electric vehicle.
 
 <br/>
 
-**Misc Plug Loads: Vehicle Annual kWh**
+**Misc: Vehicle Annual kWh**
 
 The annual energy consumption of the electric vehicle plug loads. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
 
@@ -3425,7 +3260,7 @@ The annual energy consumption of the electric vehicle plug loads. If not provide
 
 <br/>
 
-**Misc Plug Loads: Vehicle Usage Multiplier**
+**Misc: Vehicle Usage Multiplier**
 
 Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
 

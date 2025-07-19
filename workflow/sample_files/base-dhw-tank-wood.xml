@@ -406,11 +406,8 @@
             <FuelType>wood</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>40000.0</HeatingCapacity>
-            <EnergyFactor>0.59</EnergyFactor>
-            <RecoveryEfficiency>0.76</RecoveryEfficiency>
+            <UniformEnergyFactor>0.6</UniformEnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
