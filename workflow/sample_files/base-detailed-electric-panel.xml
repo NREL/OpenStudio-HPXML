@@ -512,7 +512,7 @@
           <Location>conditioned space</Location>
           <FuelType>natural gas</FuelType>
           <DryingMethod>conventional</DryingMethod>
-          <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
+          <CombinedEnergyFactor>3.3</CombinedEnergyFactor>
         </ClothesDryer>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>

@@ -904,7 +904,7 @@ Presence of flue or chimney with combustion air from conditioned space; used for
 
 **HVAC: Heating System**
 
-The type and efficiency of the heating system. Use 'none' if there is no heating system or if there is a heat pump serving a heating load.
+The type and efficiency of the heating system. Use 'None' if there is no heating system or if there is a heat pump serving a heating load.
 
 - **Name:** ``hvac_heating_system``
 - **Type:** ``Choice``
@@ -956,7 +956,7 @@ The heating load served by the heating system.
 
 **HVAC: Cooling System**
 
-The type and efficiency of the cooling system. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.
+The type and efficiency of the cooling system. Use 'None' if there is no cooling system or if there is a heat pump serving a cooling load.
 
 - **Name:** ``hvac_cooling_system``
 - **Type:** ``Choice``
@@ -1073,7 +1073,7 @@ The cooling load served by the heat pump.
 
 **HVAC: Heat Pump Backup Type**
 
-The type and efficiency of the heat pump backup. Use 'none' if there is no backup heating. If Backup Type is Separate Heating System, Heating System 2 is used to specify the backup.
+The type and efficiency of the heat pump backup. Use 'None' if there is no backup heating. If Backup Type is Separate Heating System, Heating System 2 is used to specify the backup.
 
 - **Name:** ``hvac_heat_pump_backup``
 - **Type:** ``Choice``
@@ -2507,14 +2507,16 @@ The rated power output of the EV charger. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Appliances: Clothes Washer Present**
+**Appliances: Clothes Washer**
 
-Whether there is a clothes washer present.
+The type of clothes washer.
 
-- **Name:** ``clothes_washer_present``
-- **Type:** ``Boolean``
+- **Name:** ``appliance_clothes_washer``
+- **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
+
+- **Choices:** `None`, `Standard, 2008-2017`, `Standard, 2018-present`, `EnergyStar, 2006-2017`, `EnergyStar, 2018-present`, `CEE Tier II 2018`, `Detailed Example: ERI Reference 2006`, `Detailed Example: MEF=1.65`
 
 <br/>
 
@@ -2522,116 +2524,12 @@ Whether there is a clothes washer present.
 
 The space type for the clothes washer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
 
-- **Name:** ``clothes_washer_location``
+- **Name:** ``appliance_clothes_washer_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
 - **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Appliances: Clothes Washer Efficiency Type**
-
-The efficiency type of the clothes washer.
-
-- **Name:** ``clothes_washer_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `ModifiedEnergyFactor`, `IntegratedModifiedEnergyFactor`
-
-<br/>
-
-**Appliances: Clothes Washer Efficiency**
-
-The efficiency of the clothes washer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``ft3/kWh-cyc``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Clothes Washer Rated Annual Consumption**
-
-The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_rated_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Clothes Washer Label Electric Rate**
-
-The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_label_electric_rate``
-- **Type:** ``Double``
-
-- **Units:** ``$/kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Clothes Washer Label Gas Rate**
-
-The annual energy consumed by the clothes washer, as rated, obtained from the EnergyGuide label. This includes both the appliance electricity consumption and the energy required for water heating. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_label_gas_rate``
-- **Type:** ``Double``
-
-- **Units:** ``$/therm``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Clothes Washer Label Annual Cost with Gas DHW**
-
-The annual cost of using the system under test conditions. Input is obtained from the EnergyGuide label. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_label_annual_gas_cost``
-- **Type:** ``Double``
-
-- **Units:** ``$``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Clothes Washer Label Usage**
-
-The clothes washer loads per week. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_label_usage``
-- **Type:** ``Double``
-
-- **Units:** ``cyc/wk``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Clothes Washer Drum Volume**
-
-Volume of the washer drum. Obtained from the EnergyStar website or the manufacturer's literature. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
-
-- **Name:** ``clothes_washer_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``ft3``
-
-- **Required:** ``false``
 
 <br/>
 
@@ -2639,21 +2537,23 @@ Volume of the washer drum. Obtained from the EnergyStar website or the manufactu
 
 Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
 
-- **Name:** ``clothes_washer_usage_multiplier``
+- **Name:** ``appliance_clothes_washer_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``
 
 <br/>
 
-**Appliances: Clothes Dryer Present**
+**Appliances: Clothes Dryer**
 
-Whether there is a clothes dryer present.
+The type of clothes dryer.
 
-- **Name:** ``clothes_dryer_present``
-- **Type:** ``Boolean``
+- **Name:** ``appliance_clothes_dryer``
+- **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
+
+- **Choices:** `None`, `Electricity, Standard`, `Electricity, Premium`, `Electricity, Heat Pump`, `Natural Gas, Standard`, `Natural Gas, Premium`, `Propane, Standard`, `Detailed Example: Electricity, ERI Reference 2006`, `Detailed Example: Natural Gas, ERI Reference 2006`, `Detailed Example: Electricity, EF=4.29`
 
 <br/>
 
@@ -2661,7 +2561,7 @@ Whether there is a clothes dryer present.
 
 The space type for the clothes dryer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
 
-- **Name:** ``clothes_dryer_location``
+- **Name:** ``appliance_clothes_dryer_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -2670,63 +2570,11 @@ The space type for the clothes dryer location. If not provided, the OS-HPXML def
 
 <br/>
 
-**Appliances: Clothes Dryer Fuel Type**
-
-Type of fuel used by the clothes dryer.
-
-- **Name:** ``clothes_dryer_fuel_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
-
-<br/>
-
-**Appliances: Clothes Dryer Drying Method**
-
-The method of drying used by the clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
-
-- **Name:** ``clothes_dryer_drying_method``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conventional`, `condensing`, `heat pump`, `other`
-
-<br/>
-
-**Appliances: Clothes Dryer Efficiency Type**
-
-The efficiency type of the clothes dryer.
-
-- **Name:** ``clothes_dryer_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `EnergyFactor`, `CombinedEnergyFactor`
-
-<br/>
-
-**Appliances: Clothes Dryer Efficiency**
-
-The efficiency of the clothes dryer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
-
-- **Name:** ``clothes_dryer_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``lb/kWh``
-
-- **Required:** ``false``
-
-<br/>
-
 **Appliances: Clothes Dryer Usage Multiplier**
 
 Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
 
-- **Name:** ``clothes_dryer_usage_multiplier``
+- **Name:** ``appliance_clothes_dryer_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``

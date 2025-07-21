@@ -2697,6 +2697,30 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Appliances #
     # ---------------- #
 
+    if ['base-misc-defaults.xml',
+        'base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.clothes_washers[0].modified_energy_factor = nil
+      hpxml_bldg.clothes_washers[0].integrated_modified_energy_factor = nil
+      hpxml_bldg.clothes_washers[0].rated_annual_kwh = nil
+      hpxml_bldg.clothes_washers[0].label_electric_rate = nil
+      hpxml_bldg.clothes_washers[0].label_gas_rate = nil
+      hpxml_bldg.clothes_washers[0].label_annual_gas_cost = nil
+      hpxml_bldg.clothes_washers[0].label_usage = nil
+      hpxml_bldg.clothes_washers[0].capacity = nil
+      hpxml_bldg.clothes_dryers[0].drying_method = nil
+      hpxml_bldg.clothes_dryers[0].energy_factor = nil
+      hpxml_bldg.clothes_dryers[0].combined_energy_factor = nil
+      hpxml_bldg.refrigerators[0].primary_indicator = nil
+    end
+    if ['base-appliances-coal.xml'].include? hpxml_file
+      hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeCoal
+    end
+    if ['base-appliances-oil.xml'].include? hpxml_file
+      hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeOil
+    end
+    if ['base-appliances-wood.xml'].include? hpxml_file
+      hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeWoodCord
+    end
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
         'base-schedules-simple-power-outage.xml',
@@ -2768,8 +2792,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.clothes_washers[0].hot_water_distribution_idref = hpxml_bldg.hot_water_distributions[0].id
         hpxml_bldg.dishwashers[0].hot_water_distribution_idref = hpxml_bldg.hot_water_distributions[0].id
       end
-    elsif ['base-misc-defaults.xml'].include? hpxml_file
-      hpxml_bldg.refrigerators[0].primary_indicator = nil
     end
     if ['base-appliances-refrigerator-temperature-dependent-schedule.xml'].include? hpxml_file
       hpxml_bldg.refrigerators[0].constant_coefficients = '-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544'

@@ -368,10 +368,19 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
+          <IntegratedModifiedEnergyFactor>1.0</IntegratedModifiedEnergyFactor>
+          <RatedAnnualkWh>400.0</RatedAnnualkWh>
+          <LabelElectricRate>0.12</LabelElectricRate>
+          <LabelGasRate>1.09</LabelGasRate>
+          <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
+          <LabelUsage>6.0</LabelUsage>
+          <Capacity>3.0</Capacity>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
           <FuelType>electricity</FuelType>
+          <DryingMethod>conventional</DryingMethod>
+          <CombinedEnergyFactor>3.01</CombinedEnergyFactor>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
