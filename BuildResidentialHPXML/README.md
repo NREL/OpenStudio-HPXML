@@ -2581,14 +2581,16 @@ Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low us
 
 <br/>
 
-**Appliances: Dishwasher Present**
+**Appliances: Dishwasher**
 
-Whether there is a dishwasher present.
+The type of dishwasher.
 
-- **Name:** ``dishwasher_present``
-- **Type:** ``Boolean``
+- **Name:** ``appliance_dishwasher``
+- **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
+
+- **Choices:** `None`, `Federal Minimum, Standard`, `EnergyStar, Standard`, `EnergyStar, Compact`, `Detailed Example: ERI Reference 2006`, `Detailed Example: EF=0.7, Compact`
 
 <br/>
 
@@ -2596,103 +2598,12 @@ Whether there is a dishwasher present.
 
 The space type for the dishwasher location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
 
-- **Name:** ``dishwasher_location``
+- **Name:** ``appliance_dishwasher_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
 - **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Appliances: Dishwasher Efficiency Type**
-
-The efficiency type of dishwasher.
-
-- **Name:** ``dishwasher_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `RatedAnnualkWh`, `EnergyFactor`
-
-<br/>
-
-**Appliances: Dishwasher Efficiency**
-
-The efficiency of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``RatedAnnualkWh or EnergyFactor``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Dishwasher Label Electric Rate**
-
-The label electric rate of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_label_electric_rate``
-- **Type:** ``Double``
-
-- **Units:** ``$/kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Dishwasher Label Gas Rate**
-
-The label gas rate of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_label_gas_rate``
-- **Type:** ``Double``
-
-- **Units:** ``$/therm``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Dishwasher Label Annual Gas Cost**
-
-The label annual gas cost of the dishwasher. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_label_annual_gas_cost``
-- **Type:** ``Double``
-
-- **Units:** ``$``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Dishwasher Label Usage**
-
-The dishwasher loads per week. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_label_usage``
-- **Type:** ``Double``
-
-- **Units:** ``cyc/wk``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Dishwasher Number of Place Settings**
-
-The number of place settings for the unit. Data obtained from manufacturer's literature. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
-
-- **Name:** ``dishwasher_place_setting_capacity``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
 
 <br/>
 
@@ -2700,21 +2611,23 @@ The number of place settings for the unit. Data obtained from manufacturer's lit
 
 Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
 
-- **Name:** ``dishwasher_usage_multiplier``
+- **Name:** ``appliance_dishwasher_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``
 
 <br/>
 
-**Appliances: Refrigerator Present**
+**Appliances: Refrigerator**
 
-Whether there is a refrigerator present.
+The type of refrigerator.
 
-- **Name:** ``refrigerator_present``
-- **Type:** ``Boolean``
+- **Name:** ``appliance_refrigerator``
+- **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
+
+- **Choices:** `None`, `1139 kWh/yr`, `748 kWh/yr`, `650 kWh/yr`, `574 kWh/yr`, `547 kWh/yr`, `480 kWh/yr`, `458 kWh/yr`, `434 kWh/yr`, `384 kWh/yr`, `348 kWh/yr`, `Detailed Example: ERI Reference 2006, 2-Bedroom Home`, `Detailed Example: ERI Reference 2006, 3-Bedroom Home`, `Detailed Example: ERI Reference 2006, 4-Bedroom Home`
 
 <br/>
 
@@ -2722,7 +2635,7 @@ Whether there is a refrigerator present.
 
 The space type for the refrigerator location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
 
-- **Name:** ``refrigerator_location``
+- **Name:** ``appliance_refrigerator_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -2731,38 +2644,27 @@ The space type for the refrigerator location. If not provided, the OS-HPXML defa
 
 <br/>
 
-**Appliances: Refrigerator Rated Annual Consumption**
-
-The EnergyGuide rated annual energy consumption for a refrigerator. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
-
-- **Name:** ``refrigerator_rated_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
 **Appliances: Refrigerator Usage Multiplier**
 
 Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
 
-- **Name:** ``refrigerator_usage_multiplier``
+- **Name:** ``appliance_refrigerator_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``
 
 <br/>
 
-**Appliances: Extra Refrigerator Present**
+**Appliances: Extra Refrigerator**
 
-Whether there is an extra refrigerator present.
+The type of extra refrigerator.
 
-- **Name:** ``extra_refrigerator_present``
-- **Type:** ``Boolean``
+- **Name:** ``appliance_extra_refrigerator``
+- **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
+
+- **Choices:** `None`, `1139 kWh/yr`, `748 kWh/yr`, `650 kWh/yr`, `574 kWh/yr`, `547 kWh/yr`, `480 kWh/yr`, `458 kWh/yr`, `434 kWh/yr`, `384 kWh/yr`, `348 kWh/yr`
 
 <br/>
 
@@ -2776,19 +2678,6 @@ The space type for the extra refrigerator location. If not provided, the OS-HPXM
 - **Required:** ``false``
 
 - **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Appliances: Extra Refrigerator Rated Annual Consumption**
-
-The EnergyGuide rated annual energy consumption for an extra refrigerator. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
-
-- **Name:** ``extra_refrigerator_rated_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
 
 <br/>
 

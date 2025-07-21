@@ -471,7 +471,7 @@
         </Refrigerator>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator2'/>
-          <RatedAnnualkWh>700.0</RatedAnnualkWh>
+          <RatedAnnualkWh>748.0</RatedAnnualkWh>
           <PrimaryIndicator>false</PrimaryIndicator>
         </Refrigerator>
         <Freezer>

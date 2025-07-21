@@ -2710,6 +2710,14 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.clothes_dryers[0].drying_method = nil
       hpxml_bldg.clothes_dryers[0].energy_factor = nil
       hpxml_bldg.clothes_dryers[0].combined_energy_factor = nil
+      hpxml_bldg.dishwashers[0].rated_annual_kwh = nil
+      hpxml_bldg.dishwashers[0].energy_factor = nil
+      hpxml_bldg.dishwashers[0].place_setting_capacity = nil
+      hpxml_bldg.dishwashers[0].label_electric_rate = nil
+      hpxml_bldg.dishwashers[0].label_gas_rate = nil
+      hpxml_bldg.dishwashers[0].label_annual_gas_cost = nil
+      hpxml_bldg.dishwashers[0].label_usage = nil
+      hpxml_bldg.refrigerators[0].rated_annual_kwh = nil
       hpxml_bldg.refrigerators[0].primary_indicator = nil
     end
     if ['base-appliances-coal.xml'].include? hpxml_file
