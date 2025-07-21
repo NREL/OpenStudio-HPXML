@@ -533,7 +533,15 @@
     "clothes_dryer_efficiency": 3.01,
     "clothes_dryer_drying_method": "conventional",
     "dishwasher_present": true,
+    "dishwasher_efficiency_type": "RatedAnnualkWh",
+    "dishwasher_efficiency": 467,
+    "dishwasher_label_electric_rate": 0.12,
+    "dishwasher_label_gas_rate": 1.09,
+    "dishwasher_label_annual_gas_cost": 33.12,
+    "dishwasher_label_usage": 4,
+    "dishwasher_place_setting_capacity": 12,
     "refrigerator_present": true,
+    "refrigerator_rated_annual_kwh": 673,
     "cooking_range_oven_present": true,
     "lighting_present": true,
     "lighting_exterior_fraction_cfl": 0.1,
@@ -545,6 +553,7 @@
   },
   "tests/HERS_Hot_Water/L100AD-HW-02.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
+    "refrigerator_rated_annual_kwh": 709,
     "geometry_unit_num_bedrooms": 4
   },
   "tests/HERS_Hot_Water/L100AD-HW-03.xml": {
@@ -3612,7 +3621,7 @@
     "vehicle_type": "none",
     "ev_charger_present": false,
     "extra_refrigerator_present": true,
-    "extra_refrigerator_rated_annual_kwh": 700,
+    "extra_refrigerator_rated_annual_kwh": 748,
     "freezer_present": true,
     "freezer_location": "conditioned space",
     "freezer_rated_annual_kwh": 300,
