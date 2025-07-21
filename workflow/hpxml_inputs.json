@@ -543,6 +543,8 @@
     "refrigerator_present": true,
     "refrigerator_rated_annual_kwh": 673,
     "cooking_range_oven_present": true,
+    "cooking_range_oven_is_induction": false,
+    "cooking_range_oven_is_convection": false,
     "lighting_present": true,
     "lighting_exterior_fraction_cfl": 0.1,
     "misc_plug_loads_other_annual_kwh": null,
@@ -859,7 +861,8 @@
   "sample_files/base-appliances-coal.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
     "clothes_dryer_fuel_type": "coal",
-    "cooking_range_oven_fuel_type": "coal"
+    "cooking_range_oven_fuel_type": "coal",
+    "cooking_range_oven_is_induction": null
   },
   "sample_files/base-appliances-dehumidifier.xml": {
     "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
@@ -885,22 +888,26 @@
     "parent_hpxml": "sample_files/base.xml",
     "clothes_dryer_fuel_type": "natural gas",
     "clothes_dryer_efficiency": 3.3,
-    "cooking_range_oven_fuel_type": "natural gas"
+    "cooking_range_oven_fuel_type": "natural gas",
+    "cooking_range_oven_is_induction": null
   },
   "sample_files/base-appliances-oil.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
     "clothes_dryer_fuel_type": "fuel oil",
-    "cooking_range_oven_fuel_type": "fuel oil"
+    "cooking_range_oven_fuel_type": "fuel oil",
+    "cooking_range_oven_is_induction": null
   },
   "sample_files/base-appliances-propane.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
     "clothes_dryer_fuel_type": "propane",
-    "cooking_range_oven_fuel_type": "propane"
+    "cooking_range_oven_fuel_type": "propane",
+    "cooking_range_oven_is_induction": null
   },
   "sample_files/base-appliances-wood.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
     "clothes_dryer_fuel_type": "wood",
-    "cooking_range_oven_fuel_type": "wood"
+    "cooking_range_oven_fuel_type": "wood",
+    "cooking_range_oven_is_induction": null
   },
   "sample_files/base-appliances-modified.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1675,6 +1682,7 @@
     "water_heater_fuel_type": "natural gas",
     "water_heater_efficiency": 0.64,
     "cooking_range_oven_fuel_type": "natural gas",
+    "cooking_range_oven_is_induction": null,
     "clothes_dryer_fuel_type": "natural gas",
     "clothes_dryer_efficiency": 3.3,
     "dishwasher_present": false,
@@ -3624,7 +3632,7 @@
     "extra_refrigerator_rated_annual_kwh": 748,
     "freezer_present": true,
     "freezer_location": "conditioned space",
-    "freezer_rated_annual_kwh": 300,
+    "freezer_rated_annual_kwh": 354,
     "misc_plug_loads_other_annual_kwh": 2457,
     "misc_plug_loads_other_frac_sensible": 0.855,
     "misc_plug_loads_other_frac_latent": 0.045,
@@ -3702,7 +3710,7 @@
     "refrigerator_usage_multiplier": 0.9,
     "freezer_present": true,
     "freezer_location": "conditioned space",
-    "freezer_rated_annual_kwh": 300,
+    "freezer_rated_annual_kwh": 354,
     "freezer_usage_multiplier": 0.9,
     "cooking_range_oven_usage_multiplier": 0.9,
     "misc_plug_loads_television_usage_multiplier": 0.9,

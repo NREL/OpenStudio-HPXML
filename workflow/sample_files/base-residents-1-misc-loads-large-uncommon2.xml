@@ -477,7 +477,7 @@
         <Freezer>
           <SystemIdentifier id='Freezer1'/>
           <Location>conditioned space</Location>
-          <RatedAnnualkWh>300.0</RatedAnnualkWh>
+          <RatedAnnualkWh>354.0</RatedAnnualkWh>
         </Freezer>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>
