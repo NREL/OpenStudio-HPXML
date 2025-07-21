@@ -1,0 +1,14 @@
+Option Name	Fuel Type	Is Induction	Is Convection
+None			
+"Electricity, Standard, Non-Convection Oven"	electricity	FALSE	FALSE
+"Electricity, Standard, Convection Oven"	electricity	FALSE	TRUE
+"Electricity, Induction, Non-Convection Oven"	electricity	TRUE	FALSE
+"Electricity, Induction, Convection Oven"	electricity	TRUE	TRUE
+"Natural Gas, Non-Convection Oven"	natural gas		FALSE
+"Natural Gas, Convection Oven"	natural gas		TRUE
+"Propane, Non-Convection Oven"	propane		FALSE
+"Propane, Convection Oven"	propane		TRUE
+			
+Fuel Type: Type of fuel used by the cooking range/oven			
+Is Induction: Whether the electric cooking range is induction.			
+Is Convection: Whether the oven is convection			

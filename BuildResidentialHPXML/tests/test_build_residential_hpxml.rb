@@ -470,14 +470,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['appliance_dishwasher'] = 'Federal Minimum, Standard'
       args['appliance_dishwasher_location'] = HPXML::LocationConditionedSpace
       args['appliance_refrigerator'] = '434 kWh/yr'
-      args['refrigerator_location'] = HPXML::LocationConditionedSpace
+      args['appliance_refrigerator_location'] = HPXML::LocationConditionedSpace
       args['appliance_extra_refrigerator'] = 'None'
-      args['freezer_present'] = false
-      args['cooking_range_oven_present'] = true
-      args['cooking_range_oven_location'] = HPXML::LocationConditionedSpace
-      args['cooking_range_oven_fuel_type'] = HPXML::FuelTypeElectricity
-      args['cooking_range_oven_is_induction'] = false
-      args['cooking_range_oven_is_convection'] = false
+      args['appliance_freezer'] = 'None'
+      args['appliance_cooking_range_oven'] = 'Electricity, Standard, Non-Convection Oven'
+      args['appliance_cooking_range_oven_location'] = HPXML::LocationConditionedSpace
       args['misc_plug_loads'] = '100%'
       args['misc_television'] = '100%'
       args['misc_plug_loads_vehicle_present'] = false
@@ -560,7 +557,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('water_heater_tank_volume')
       args.delete('clothes_washer_location')
       args.delete('clothes_dryer_location')
-      args.delete('refrigerator_location')
+      args.delete('appliance_refrigerator_location')
       args['hvac_ducts'] = '4 CFM25 per 100ft2, R-4'
     when 'extra-auto-duct-locations.xml'
       args['ducts_supply_location'] = HPXML::LocationAtticUnvented
@@ -574,7 +571,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['solar_thermal_system_type'] = HPXML::SolarThermalSystemTypeHotWater
       args['solar_thermal_collector_tilt'] = 'Latitude-15'
     when 'extra-second-refrigerator.xml'
-      args['extra_refrigerator_location'] = HPXML::LocationConditionedSpace
+      args['appliance_extra_refrigerator_location'] = HPXML::LocationConditionedSpace
     when 'extra-second-heating-system-portable-heater-to-heating-system.xml'
       args['heating_system_fuel'] = HPXML::FuelTypeElectricity
       args['hvac_capacity_heating_system'] = '50 kBtu/hr'

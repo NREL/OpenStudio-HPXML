@@ -2719,15 +2719,20 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.dishwashers[0].label_usage = nil
       hpxml_bldg.refrigerators[0].rated_annual_kwh = nil
       hpxml_bldg.refrigerators[0].primary_indicator = nil
+      hpxml_bldg.cooking_ranges[0].is_induction = nil
+      hpxml_bldg.ovens[0].is_convection = nil
     end
     if ['base-appliances-coal.xml'].include? hpxml_file
       hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeCoal
+      hpxml_bldg.cooking_ranges[0].fuel_type = HPXML::FuelTypeCoal
     end
     if ['base-appliances-oil.xml'].include? hpxml_file
       hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeOil
+      hpxml_bldg.cooking_ranges[0].fuel_type = HPXML::FuelTypeOil
     end
     if ['base-appliances-wood.xml'].include? hpxml_file
       hpxml_bldg.clothes_dryers[0].fuel_type = HPXML::FuelTypeWoodCord
+      hpxml_bldg.cooking_ranges[0].fuel_type = HPXML::FuelTypeWoodCord
     end
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',

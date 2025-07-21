@@ -2672,7 +2672,7 @@ The type of extra refrigerator.
 
 The space type for the extra refrigerator location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
 
-- **Name:** ``extra_refrigerator_location``
+- **Name:** ``appliance_extra_refrigerator_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -2685,21 +2685,23 @@ The space type for the extra refrigerator location. If not provided, the OS-HPXM
 
 Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
 
-- **Name:** ``extra_refrigerator_usage_multiplier``
+- **Name:** ``appliance_extra_refrigerator_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``
 
 <br/>
 
-**Appliances: Freezer Present**
+**Appliances: Freezer**
 
-Whether there is a freezer present.
+The type of freezer.
 
-- **Name:** ``freezer_present``
-- **Type:** ``Boolean``
+- **Name:** ``appliance_freezer``
+- **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
+
+- **Choices:** `None`, `935 kWh/yr`, `712 kWh/yr`, `641 kWh/yr`, `568 kWh/yr`, `417 kWh/yr`, `375 kWh/yr`, `354 kWh/yr`
 
 <br/>
 
@@ -2707,25 +2709,12 @@ Whether there is a freezer present.
 
 The space type for the freezer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
 
-- **Name:** ``freezer_location``
+- **Name:** ``appliance_freezer_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
 - **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
-
-<br/>
-
-**Appliances: Freezer Rated Annual Consumption**
-
-The EnergyGuide rated annual energy consumption for a freezer. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
-
-- **Name:** ``freezer_rated_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
 
 <br/>
 
@@ -2733,21 +2722,23 @@ The EnergyGuide rated annual energy consumption for a freezer. If not provided, 
 
 Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
 
-- **Name:** ``freezer_usage_multiplier``
+- **Name:** ``appliance_freezer_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``
 
 <br/>
 
-**Appliances: Cooking Range/Oven Present**
+**Appliances: Cooking Range/Oven**
 
-Whether there is a cooking range/oven present.
+The type of cooking range/oven.
 
-- **Name:** ``cooking_range_oven_present``
-- **Type:** ``Boolean``
+- **Name:** ``appliance_cooking_range_oven``
+- **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
+
+- **Choices:** `None`, `Electricity, Standard, Non-Convection Oven`, `Electricity, Standard, Convection Oven`, `Electricity, Induction, Non-Convection Oven`, `Electricity, Induction, Convection Oven`, `Natural Gas, Non-Convection Oven`, `Natural Gas, Convection Oven`, `Propane, Non-Convection Oven`, `Propane, Convection Oven`
 
 <br/>
 
@@ -2755,7 +2746,7 @@ Whether there is a cooking range/oven present.
 
 The space type for the cooking range/oven location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
 
-- **Name:** ``cooking_range_oven_location``
+- **Name:** ``appliance_cooking_range_oven_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -2764,46 +2755,11 @@ The space type for the cooking range/oven location. If not provided, the OS-HPXM
 
 <br/>
 
-**Appliances: Cooking Range/Oven Fuel Type**
-
-Type of fuel used by the cooking range/oven.
-
-- **Name:** ``cooking_range_oven_fuel_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `coal`
-
-<br/>
-
-**Appliances: Cooking Range/Oven Is Induction**
-
-Whether the cooking range is induction. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
-
-- **Name:** ``cooking_range_oven_is_induction``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Appliances: Cooking Range/Oven Is Convection**
-
-Whether the oven is convection. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
-
-- **Name:** ``cooking_range_oven_is_convection``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
 **Appliances: Cooking Range/Oven Usage Multiplier**
 
 Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
 
-- **Name:** ``cooking_range_oven_usage_multiplier``
+- **Name:** ``appliance_cooking_range_oven_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``

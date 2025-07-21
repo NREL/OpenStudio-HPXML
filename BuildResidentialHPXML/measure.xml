@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>b569fefa-8ccf-4277-b46b-61dda492bf85</version_id>
-  <version_modified>2025-07-21T19:36:27Z</version_modified>
+  <version_id>5d762e9a-2e3e-404d-ad88-7fb6fec6ab52</version_id>
+  <version_modified>2025-07-21T22:17:04Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -8228,7 +8228,7 @@
       </choices>
     </argument>
     <argument>
-      <name>extra_refrigerator_location</name>
+      <name>appliance_extra_refrigerator_location</name>
       <display_name>Appliances: Extra Refrigerator Location</display_name>
       <description>The space type for the extra refrigerator location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'&gt;HPXML Refrigerators&lt;/a&gt;) is used.</description>
       <type>Choice</type>
@@ -8270,7 +8270,7 @@
       </choices>
     </argument>
     <argument>
-      <name>extra_refrigerator_usage_multiplier</name>
+      <name>appliance_extra_refrigerator_usage_multiplier</name>
       <display_name>Appliances: Extra Refrigerator Usage Multiplier</display_name>
       <description>Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'&gt;HPXML Refrigerators&lt;/a&gt;) is used.</description>
       <type>Double</type>
@@ -8278,26 +8278,50 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>freezer_present</name>
-      <display_name>Appliances: Freezer Present</display_name>
-      <description>Whether there is a freezer present.</description>
-      <type>Boolean</type>
-      <required>true</required>
+      <name>appliance_freezer</name>
+      <display_name>Appliances: Freezer</display_name>
+      <description>The type of freezer.</description>
+      <type>Choice</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
+      <default_value>None</default_value>
       <choices>
         <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>None</value>
+          <display_name>None</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
+          <value>935 kWh/yr</value>
+          <display_name>935 kWh/yr</display_name>
+        </choice>
+        <choice>
+          <value>712 kWh/yr</value>
+          <display_name>712 kWh/yr</display_name>
+        </choice>
+        <choice>
+          <value>641 kWh/yr</value>
+          <display_name>641 kWh/yr</display_name>
+        </choice>
+        <choice>
+          <value>568 kWh/yr</value>
+          <display_name>568 kWh/yr</display_name>
+        </choice>
+        <choice>
+          <value>417 kWh/yr</value>
+          <display_name>417 kWh/yr</display_name>
+        </choice>
+        <choice>
+          <value>375 kWh/yr</value>
+          <display_name>375 kWh/yr</display_name>
+        </choice>
+        <choice>
+          <value>354 kWh/yr</value>
+          <display_name>354 kWh/yr</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
-      <name>freezer_location</name>
+      <name>appliance_freezer_location</name>
       <display_name>Appliances: Freezer Location</display_name>
       <description>The space type for the freezer location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'&gt;HPXML Freezers&lt;/a&gt;) is used.</description>
       <type>Choice</type>
@@ -8339,16 +8363,7 @@
       </choices>
     </argument>
     <argument>
-      <name>freezer_rated_annual_kwh</name>
-      <display_name>Appliances: Freezer Rated Annual Consumption</display_name>
-      <description>The EnergyGuide rated annual energy consumption for a freezer. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'&gt;HPXML Freezers&lt;/a&gt;) is used.</description>
-      <type>Double</type>
-      <units>kWh/yr</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>freezer_usage_multiplier</name>
+      <name>appliance_freezer_usage_multiplier</name>
       <display_name>Appliances: Freezer Usage Multiplier</display_name>
       <description>Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'&gt;HPXML Freezers&lt;/a&gt;) is used.</description>
       <type>Double</type>
@@ -8356,26 +8371,54 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>cooking_range_oven_present</name>
-      <display_name>Appliances: Cooking Range/Oven Present</display_name>
-      <description>Whether there is a cooking range/oven present.</description>
-      <type>Boolean</type>
-      <required>true</required>
+      <name>appliance_cooking_range_oven</name>
+      <display_name>Appliances: Cooking Range/Oven</display_name>
+      <description>The type of cooking range/oven.</description>
+      <type>Choice</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>true</default_value>
+      <default_value>Electricity, Standard, Non-Convection Oven</default_value>
       <choices>
         <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>None</value>
+          <display_name>None</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
+          <value>Electricity, Standard, Non-Convection Oven</value>
+          <display_name>Electricity, Standard, Non-Convection Oven</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Standard, Convection Oven</value>
+          <display_name>Electricity, Standard, Convection Oven</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Non-Convection Oven</value>
+          <display_name>Electricity, Induction, Non-Convection Oven</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Convection Oven</value>
+          <display_name>Electricity, Induction, Convection Oven</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Non-Convection Oven</value>
+          <display_name>Natural Gas, Non-Convection Oven</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Convection Oven</value>
+          <display_name>Natural Gas, Convection Oven</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Non-Convection Oven</value>
+          <display_name>Propane, Non-Convection Oven</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Convection Oven</value>
+          <display_name>Propane, Convection Oven</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
-      <name>cooking_range_oven_location</name>
+      <name>appliance_cooking_range_oven_location</name>
       <display_name>Appliances: Cooking Range/Oven Location</display_name>
       <description>The space type for the cooking range/oven location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'&gt;HPXML Cooking Range/Oven&lt;/a&gt;) is used.</description>
       <type>Choice</type>
@@ -8417,78 +8460,7 @@
       </choices>
     </argument>
     <argument>
-      <name>cooking_range_oven_fuel_type</name>
-      <display_name>Appliances: Cooking Range/Oven Fuel Type</display_name>
-      <description>Type of fuel used by the cooking range/oven.</description>
-      <type>Choice</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>natural gas</default_value>
-      <choices>
-        <choice>
-          <value>electricity</value>
-          <display_name>electricity</display_name>
-        </choice>
-        <choice>
-          <value>natural gas</value>
-          <display_name>natural gas</display_name>
-        </choice>
-        <choice>
-          <value>fuel oil</value>
-          <display_name>fuel oil</display_name>
-        </choice>
-        <choice>
-          <value>propane</value>
-          <display_name>propane</display_name>
-        </choice>
-        <choice>
-          <value>wood</value>
-          <display_name>wood</display_name>
-        </choice>
-        <choice>
-          <value>coal</value>
-          <display_name>coal</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>cooking_range_oven_is_induction</name>
-      <display_name>Appliances: Cooking Range/Oven Is Induction</display_name>
-      <description>Whether the cooking range is induction. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'&gt;HPXML Cooking Range/Oven&lt;/a&gt;) is used.</description>
-      <type>Boolean</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>cooking_range_oven_is_convection</name>
-      <display_name>Appliances: Cooking Range/Oven Is Convection</display_name>
-      <description>Whether the oven is convection. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'&gt;HPXML Cooking Range/Oven&lt;/a&gt;) is used.</description>
-      <type>Boolean</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>cooking_range_oven_usage_multiplier</name>
+      <name>appliance_cooking_range_oven_usage_multiplier</name>
       <display_name>Appliances: Cooking Range/Oven Usage Multiplier</display_name>
       <description>Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'&gt;HPXML Cooking Range/Oven&lt;/a&gt;) is used.</description>
       <type>Double</type>
@@ -9904,7 +9876,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>539A3C7E</checksum>
+      <checksum>CDBFA862</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9921,7 +9893,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>489E3377</checksum>
+      <checksum>1C863841</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9948,6 +9920,12 @@
       <checksum>C972D10D</checksum>
     </file>
     <file>
+      <filename>options/appliance_cooking_range_oven.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B3106565</checksum>
+    </file>
+    <file>
       <filename>options/appliance_dishwasher.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -9958,6 +9936,12 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>20592B4F</checksum>
+    </file>
+    <file>
+      <filename>options/appliance_freezer.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1BC90259</checksum>
     </file>
     <file>
       <filename>options/appliance_refrigerator.tsv</filename>
@@ -10332,16 +10316,10 @@
       <checksum>821EB998</checksum>
     </file>
     <file>
-      <filename>extra_files/base-sfd.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>60A1E978</checksum>
-    </file>
-    <file>
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>596AC64D</checksum>
+      <checksum>D02CF4F0</checksum>
     </file>
   </files>
 </measure>

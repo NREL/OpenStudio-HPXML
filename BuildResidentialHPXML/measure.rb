@@ -1425,74 +1425,44 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('extra_refrigerator_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_extra_refrigerator_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Extra Refrigerator Location')
     arg.setDescription("The space type for the extra refrigerator location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_extra_refrigerator_usage_multiplier', false)
     arg.setDisplayName('Appliances: Extra Refrigerator Usage Multiplier')
     arg.setDescription("Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('freezer_present', true)
-    arg.setDisplayName('Appliances: Freezer Present')
-    arg.setDescription('Whether there is a freezer present.')
-    arg.setDefaultValue(false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_freezer', choices[:appliance_freezer], false)
+    arg.setDisplayName('Appliances: Freezer')
+    arg.setDescription('The type of freezer.')
+    arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('freezer_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_freezer_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Freezer Location')
     arg.setDescription("The space type for the freezer location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-freezers'>HPXML Freezers</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('freezer_rated_annual_kwh', false)
-    arg.setDisplayName('Appliances: Freezer Rated Annual Consumption')
-    arg.setUnits('kWh/yr')
-    arg.setDescription("The EnergyGuide rated annual energy consumption for a freezer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-freezers'>HPXML Freezers</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('freezer_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_freezer_usage_multiplier', false)
     arg.setDisplayName('Appliances: Freezer Usage Multiplier')
     arg.setDescription("Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-freezers'>HPXML Freezers</a>) is used.")
     args << arg
 
-    cooking_range_oven_fuel_choices = OpenStudio::StringVector.new
-    cooking_range_oven_fuel_choices << HPXML::FuelTypeElectricity
-    cooking_range_oven_fuel_choices << HPXML::FuelTypeNaturalGas
-    cooking_range_oven_fuel_choices << HPXML::FuelTypeOil
-    cooking_range_oven_fuel_choices << HPXML::FuelTypePropane
-    cooking_range_oven_fuel_choices << HPXML::FuelTypeWoodCord
-    cooking_range_oven_fuel_choices << HPXML::FuelTypeCoal
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_oven_present', true)
-    arg.setDisplayName('Appliances: Cooking Range/Oven Present')
-    arg.setDescription('Whether there is a cooking range/oven present.')
-    arg.setDefaultValue(true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_cooking_range_oven', choices[:appliance_cooking_range_oven], false)
+    arg.setDisplayName('Appliances: Cooking Range/Oven')
+    arg.setDescription('The type of cooking range/oven.')
+    arg.setDefaultValue('Electricity, Standard, Non-Convection Oven')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooking_range_oven_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_cooking_range_oven_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Cooking Range/Oven Location')
     arg.setDescription("The space type for the cooking range/oven location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooking_range_oven_fuel_type', cooking_range_oven_fuel_choices, true)
-    arg.setDisplayName('Appliances: Cooking Range/Oven Fuel Type')
-    arg.setDescription('Type of fuel used by the cooking range/oven.')
-    arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_oven_is_induction', false)
-    arg.setDisplayName('Appliances: Cooking Range/Oven Is Induction')
-    arg.setDescription("Whether the cooking range is induction. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_oven_is_convection', false)
-    arg.setDisplayName('Appliances: Cooking Range/Oven Is Convection')
-    arg.setDescription("Whether the oven is convection. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooking_range_oven_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_cooking_range_oven_usage_multiplier', false)
     arg.setDisplayName('Appliances: Cooking Range/Oven Usage Multiplier')
     arg.setDescription("Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.")
     args << arg
@@ -5378,12 +5348,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_freezer(hpxml_bldg, args)
-    return unless args[:freezer_present]
+    return if args[:appliance_freezer] == 'None'
 
     hpxml_bldg.freezers.add(id: "Freezer#{hpxml_bldg.freezers.size + 1}",
-                            location: args[:freezer_location],
-                            rated_annual_kwh: args[:freezer_rated_annual_kwh],
-                            usage_multiplier: args[:freezer_usage_multiplier])
+                            location: args[:appliance_freezer_location],
+                            rated_annual_kwh: args[:appliance_freezer_rated_annual_consumption],
+                            usage_multiplier: args[:appliance_freezer_usage_multiplier])
   end
 
   # Sets the HPXML cooking range/oven properties.
@@ -5392,16 +5362,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_cooking_range_oven(hpxml_bldg, args)
-    return unless args[:cooking_range_oven_present]
+    return if args[:appliance_cooking_range_oven] == 'None'
 
     hpxml_bldg.cooking_ranges.add(id: "CookingRange#{hpxml_bldg.cooking_ranges.size + 1}",
-                                  location: args[:cooking_range_oven_location],
-                                  fuel_type: args[:cooking_range_oven_fuel_type],
-                                  is_induction: args[:cooking_range_oven_is_induction],
-                                  usage_multiplier: args[:cooking_range_oven_usage_multiplier])
+                                  location: args[:appliance_cooking_range_oven_location],
+                                  fuel_type: args[:appliance_cooking_range_oven_fuel_type],
+                                  is_induction: args[:appliance_cooking_range_oven_is_induction],
+                                  usage_multiplier: args[:appliance_cooking_range_oven_usage_multiplier])
 
     hpxml_bldg.ovens.add(id: "Oven#{hpxml_bldg.ovens.size + 1}",
-                         is_convection: args[:cooking_range_oven_is_convection])
+                         is_convection: args[:appliance_cooking_range_oven_is_convection])
   end
 
   # Sets the HPXML ceiling fans properties.

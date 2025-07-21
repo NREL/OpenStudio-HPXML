@@ -71,9 +71,8 @@
     "appliance_dishwasher": "None",
     "appliance_refrigerator": "None",
     "appliance_extra_refrigerator": "None",
-    "freezer_present": false,
-    "cooking_range_oven_present": false,
-    "cooking_range_oven_fuel_type": "electricity",
+    "appliance_freezer": "None",
+    "appliance_cooking_range_oven": "None",
     "misc_plug_loads": "Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent",
     "misc_television": "None",
     "misc_plug_loads_vehicle_present": false,
@@ -337,7 +336,7 @@
     "appliance_clothes_dryer": "Detailed Example: Electricity, ERI Reference 2006",
     "appliance_dishwasher": "Detailed Example: ERI Reference 2006",
     "appliance_refrigerator": "Detailed Example: ERI Reference 2006, 2-Bedroom Home",
-    "cooking_range_oven_present": true,
+    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection Oven",
     "lighting": "10% CFL",
     "misc_plug_loads": "100%",
     "misc_television": "100%"
@@ -485,12 +484,9 @@
     "appliance_refrigerator": "650 kWh/yr",
     "appliance_refrigerator_location": "conditioned space",
     "appliance_extra_refrigerator": "None",
-    "freezer_present": false,
-    "cooking_range_oven_present": true,
-    "cooking_range_oven_location": "conditioned space",
-    "cooking_range_oven_fuel_type": "electricity",
-    "cooking_range_oven_is_induction": false,
-    "cooking_range_oven_is_convection": false,
+    "appliance_freezer": "None",
+    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection Oven",
+    "appliance_cooking_range_oven_location": "conditioned space",
     "misc_plug_loads": "100%",
     "misc_television": "100%",
     "misc_plug_loads_vehicle_present": false,
@@ -502,8 +498,7 @@
     "combine_like_surfaces": true
   },
   "sample_files/base-appliances-coal.xml": {
-    "parent_hpxml": "sample_files/base-appliances-gas.xml",
-    "cooking_range_oven_fuel_type": "coal"
+    "parent_hpxml": "sample_files/base-appliances-gas.xml"
   },
   "sample_files/base-appliances-dehumidifier.xml": {
     "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
@@ -527,20 +522,18 @@
   "sample_files/base-appliances-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "appliance_clothes_dryer": "Natural Gas, Standard",
-    "cooking_range_oven_fuel_type": "natural gas"
+    "appliance_cooking_range_oven": "Natural Gas, Non-Convection Oven"
   },
   "sample_files/base-appliances-oil.xml": {
-    "parent_hpxml": "sample_files/base-appliances-gas.xml",
-    "cooking_range_oven_fuel_type": "fuel oil"
+    "parent_hpxml": "sample_files/base-appliances-gas.xml"
   },
   "sample_files/base-appliances-propane.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
     "appliance_clothes_dryer": "Propane, Standard",
-    "cooking_range_oven_fuel_type": "propane"
+    "appliance_cooking_range_oven": "Propane, Non-Convection Oven"
   },
   "sample_files/base-appliances-wood.xml": {
-    "parent_hpxml": "sample_files/base-appliances-gas.xml",
-    "cooking_range_oven_fuel_type": "wood"
+    "parent_hpxml": "sample_files/base-appliances-gas.xml"
   },
   "sample_files/base-appliances-modified.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -554,7 +547,7 @@
     "appliance_clothes_dryer": "None",
     "appliance_dishwasher": "None",
     "appliance_refrigerator": "None",
-    "cooking_range_oven_present": false
+    "appliance_cooking_range_oven": "None"
   },
   "sample_files/base-appliances-freezer-temperature-dependent-schedule.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -587,7 +580,7 @@
     "appliance_clothes_dryer_location": "basement - conditioned",
     "appliance_dishwasher_location": "basement - conditioned",
     "appliance_refrigerator_location": "basement - conditioned",
-    "cooking_range_oven_location": "basement - conditioned"
+    "appliance_cooking_range_oven_location": "basement - conditioned"
   },
   "sample_files/base-atticroof-flat.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1196,7 +1189,7 @@
     "hvac_capacity_heating_system": "50 kBtu/hr",
     "hvac_capacity_cooling_system": "1.5 tons",
     "dhw_water_heater": "Natural Gas, Tank, UEF=0.64",
-    "cooking_range_oven_fuel_type": "natural gas",
+    "appliance_cooking_range_oven": "Natural Gas, Non-Convection Oven",
     "appliance_clothes_dryer": "Natural Gas, Standard",
     "appliance_dishwasher": "None",
     "ventilation_fans_kitchen": "Default",
@@ -1265,7 +1258,7 @@
     "appliance_clothes_dryer_location": "garage",
     "appliance_dishwasher_location": "garage",
     "appliance_refrigerator_location": "garage",
-    "cooking_range_oven_location": "garage"
+    "appliance_cooking_range_oven_location": "garage"
   },
   "sample_files/base-enclosure-infil-ach-house-pressure.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1476,7 +1469,7 @@
     "appliance_clothes_dryer_location": "basement - unconditioned",
     "appliance_dishwasher_location": "basement - unconditioned",
     "appliance_refrigerator_location": "basement - unconditioned",
-    "cooking_range_oven_location": "basement - unconditioned"
+    "appliance_cooking_range_oven_location": "basement - unconditioned"
   },
   "sample_files/base-foundation-unconditioned-basement-above-grade.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
@@ -2572,9 +2565,7 @@
     "appliance_clothes_dryer_location": null,
     "appliance_dishwasher_location": null,
     "appliance_refrigerator_location": null,
-    "cooking_range_oven_location": null,
-    "cooking_range_oven_is_induction": null,
-    "cooking_range_oven_is_convection": null,
+    "appliance_cooking_range_oven_location": null,
     "ceiling_fans": "#Bedrooms+1 Fans, 45 W"
   },
   "sample_files/base-misc-emissions.xml": {
@@ -2607,9 +2598,8 @@
     "vehicle_type": "none",
     "ev_charger_present": false,
     "appliance_extra_refrigerator": "748 kWh/yr",
-    "freezer_present": true,
-    "freezer_location": "conditioned space",
-    "freezer_rated_annual_kwh": 300,
+    "appliance_freezer": "354 kWh/yr",
+    "appliance_freezer_location": "conditioned space",
     "misc_plug_loads": "Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent",
     "misc_television": "Detailed Example: 620 kWh/yr",
     "misc_well_pump": "Detailed Example: 475 kWh/yr",
@@ -2665,11 +2655,10 @@
     "appliance_clothes_dryer_usage_multiplier": 0.9,
     "appliance_dishwasher_usage_multiplier": 0.9,
     "appliance_refrigerator_usage_multiplier": 0.9,
-    "freezer_present": true,
-    "freezer_location": "conditioned space",
-    "freezer_rated_annual_kwh": 300,
-    "freezer_usage_multiplier": 0.9,
-    "cooking_range_oven_usage_multiplier": 0.9,
+    "appliance_freezer": "354 kWh/yr",
+    "appliance_freezer_location": "conditioned space",
+    "appliance_freezer_usage_multiplier": 0.9,
+    "appliance_cooking_range_oven_usage_multiplier": 0.9,
     "misc_plug_loads": "90%",
     "misc_television": "90%",
     "misc_grill": "Propane, 90%",

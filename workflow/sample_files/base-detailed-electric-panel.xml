@@ -523,7 +523,6 @@
           <SystemIdentifier id='CookingRange1'/>
           <Location>conditioned space</Location>
           <FuelType>natural gas</FuelType>
-          <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven1'/>
