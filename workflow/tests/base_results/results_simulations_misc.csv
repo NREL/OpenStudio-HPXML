@@ -1,7 +1,7 @@
 HPXML,Unmet Hours: Heating (hr),Unmet Hours: Cooling (hr),Unmet Hours: EV Driving (hr),Hot Water: Clothes Washer (gal),Hot Water: Dishwasher (gal),Hot Water: Fixtures (gal),Hot Water: Distribution Waste (gal),Peak Electricity: Winter Total (W),Peak Electricity: Summer Total (W),Peak Electricity: Annual Total (W),Peak Electricity: Winter Net (W),Peak Electricity: Summer Net (W),Peak Electricity: Annual Net (W),Peak Load: Heating: Delivered (kBtu/hr),Peak Load: Cooling: Delivered (kBtu/hr),Resilience: Battery (hr)
 base-appliances-coal.xml,0.0,65.0,0.0,1286.4,890.5,11468.5,3942.3,2188.8,3770.7,3770.7,2188.8,3770.7,3770.7,33.216,22.645,0.0
-base-appliances-dehumidifier-ief-portable.xml,0.0,0.0,0.0,1286.4,890.5,10049.5,3454.5,1955.6,3192.9,3192.9,1955.6,3192.9,3192.9,10.405,16.5,0.0
-base-appliances-dehumidifier-ief-whole-home.xml,0.0,0.0,0.0,1286.4,890.5,10049.5,3454.5,1984.3,3192.9,3192.9,1984.3,3192.9,3192.9,10.418,16.5,0.0
+base-appliances-dehumidifier-ief-portable.xml,0.0,0.0,0.0,1286.4,890.5,10049.5,3454.5,1953.5,3192.9,3192.9,1953.5,3192.9,3192.9,10.422,16.5,0.0
+base-appliances-dehumidifier-ief-whole-home.xml,0.0,0.0,0.0,1286.4,890.5,10049.5,3454.5,1944.6,3192.9,3192.9,1944.6,3192.9,3192.9,10.417,16.5,0.0
 base-appliances-dehumidifier-multiple.xml,0.0,0.0,0.0,1286.4,890.5,10049.5,3454.5,1996.2,3192.9,3192.9,1996.2,3192.9,3192.9,10.429,16.5,0.0
 base-appliances-dehumidifier.xml,0.0,0.0,0.0,1286.4,890.5,10049.5,3454.5,2143.2,3192.9,3192.9,2143.2,3192.9,3192.9,10.429,16.5,0.0
 base-appliances-freezer-temperature-dependent-schedule.xml,0.0,64.0,0.0,1286.4,890.5,11468.5,3942.3,2332.4,3982.4,3982.4,2332.4,3982.4,3982.4,33.101,22.655,0.0
