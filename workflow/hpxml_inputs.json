@@ -875,11 +875,13 @@
   "sample_files/base-appliances-dehumidifier-ief-portable.xml": {
     "parent_hpxml": "sample_files/base-appliances-dehumidifier.xml",
     "dehumidifier_efficiency_type": "IntegratedEnergyFactor",
-    "dehumidifier_efficiency": 1.5
+    "dehumidifier_efficiency": 1.9
   },
   "sample_files/base-appliances-dehumidifier-ief-whole-home.xml": {
     "parent_hpxml": "sample_files/base-appliances-dehumidifier-ief-portable.xml",
-    "dehumidifier_type": "whole-home"
+    "dehumidifier_type": "whole-home",
+    "dehumidifier_capacity": 60,
+    "dehumidifier_efficiency": 2.1
   },
   "sample_files/base-appliances-dehumidifier-multiple.xml": {
     "parent_hpxml": "sample_files/base-appliances-dehumidifier.xml"
@@ -3889,7 +3891,8 @@
     "window_fraction_operable": 0.67,
     "wall_siding_type": "wood siding",
     "geometry_unit_num_occupants": 5.5,
-    "hot_water_distribution_pipe_r": 0
+    "hot_water_distribution_pipe_r": 0,
+    "solar_thermal_storage_volume": 60
   },
   "sample_files/base-schedules-simple.xml": {
     "parent_hpxml": "sample_files/base.xml",
