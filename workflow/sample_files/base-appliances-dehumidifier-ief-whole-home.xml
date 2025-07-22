@@ -411,8 +411,8 @@
           <SystemIdentifier id='Dehumidifier1'/>
           <Type>whole-home</Type>
           <Location>conditioned space</Location>
-          <Capacity>40.0</Capacity>
-          <IntegratedEnergyFactor>1.5</IntegratedEnergyFactor>
+          <Capacity>60.0</Capacity>
+          <IntegratedEnergyFactor>2.1</IntegratedEnergyFactor>
           <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
           <FractionDehumidificationLoadServed>1.0</FractionDehumidificationLoadServed>
         </Dehumidifier>

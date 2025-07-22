@@ -501,11 +501,11 @@ The type and insulation level of the foundation walls.
 
 <br/>
 
-**Rim Joist: Assembly R-value**
+**Enclosure: Rim Joist Assembly R-value**
 
 Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Required if a rim joist height is provided.
 
-- **Name:** ``rim_joist_assembly_r``
+- **Name:** ``enclosure_rim_joist_assembly_r``
 - **Type:** ``Double``
 
 - **Units:** ``F-ft2-hr/Btu``
@@ -919,7 +919,7 @@ The type and efficiency of the heating system. Use 'None' if there is no heating
 
 The fuel type of the heating system. Ignored for ElectricResistance.
 
-- **Name:** ``heating_system_fuel``
+- **Name:** ``hvac_heating_system_fuel``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
@@ -932,7 +932,7 @@ The fuel type of the heating system. Ignored for ElectricResistance.
 
 The output capacity of the heating system.
 
-- **Name:** ``hvac_capacity_heating_system``
+- **Name:** ``hvac_heating_system_capacity``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -945,7 +945,7 @@ The output capacity of the heating system.
 
 The heating load served by the heating system.
 
-- **Name:** ``heating_system_fraction_heat_load_served``
+- **Name:** ``hvac_heating_system_fraction_heat_load_served``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
@@ -971,7 +971,7 @@ The type and efficiency of the cooling system. Use 'None' if there is no cooling
 
 The output capacity of the cooling system.
 
-- **Name:** ``hvac_capacity_cooling_system``
+- **Name:** ``hvac_cooling_system_capacity``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -984,7 +984,7 @@ The output capacity of the cooling system.
 
 The cooling load served by the cooling system.
 
-- **Name:** ``cooling_system_fraction_cool_load_served``
+- **Name:** ``hvac_cooling_system_fraction_cool_load_served``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
@@ -997,7 +997,7 @@ The cooling load served by the cooling system.
 
 The output capacity of the cooling system's integrated heating system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.
 
-- **Name:** ``hvac_capacity_cooling_system_integrated_heating``
+- **Name:** ``hvac_cooling_system_integrated_heating_capacity``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1010,7 +1010,7 @@ The output capacity of the cooling system's integrated heating system. Only used
 
 The heating load served by the heating system integrated into cooling system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.
 
-- **Name:** ``cooling_system_integrated_heating_system_fraction_heat_load_served``
+- **Name:** ``hvac_cooling_system_integrated_heating_fraction_heat_load_served``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
@@ -1036,7 +1036,7 @@ The type and efficiency of the heat pump.
 
 The output capacity of the heat pump.
 
-- **Name:** ``hvac_capacity_heat_pump``
+- **Name:** ``hvac_heat_pump_capacity``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1045,11 +1045,24 @@ The output capacity of the heat pump.
 
 <br/>
 
+**HVAC: Heat Pump Sizing Methodology**
+
+The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.
+
+- **Name:** ``heat_pump_sizing_methodology``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `ACCA`, `HERS`, `MaxLoad`
+
+<br/>
+
 **HVAC: Heat Pump Fraction Heat Load Served**
 
 The heating load served by the heat pump.
 
-- **Name:** ``heat_pump_fraction_heat_load_served``
+- **Name:** ``hvac_heat_pump_fraction_heat_load_served``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
@@ -1062,12 +1075,25 @@ The heating load served by the heat pump.
 
 The cooling load served by the heat pump.
 
-- **Name:** ``heat_pump_fraction_cool_load_served``
+- **Name:** ``hvac_heat_pump_fraction_cool_load_served``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
 
 - **Required:** ``true``
+
+<br/>
+
+**HVAC: Heat Pump Temperatures**
+
+Specifies the minimum compressor temperature and/or maximum HP backup temperature. If both are the same, a binary switchover temperature is used.
+
+- **Name:** ``hvac_heat_pump_temperatures``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `Default`, `-20F Min Compressor Temp`, `-15F Min Compressor Temp`, `-10F Min Compressor Temp`, `-5F Min Compressor Temp`, `0F Min Compressor Temp`, `5F Min Compressor Temp`, `10F Min Compressor Temp`, `15F Min Compressor Temp`, `20F Min Compressor Temp`, `25F Min Compressor Temp`, `30F Min Compressor Temp`, `35F Min Compressor Temp`, `40F Min Compressor Temp`, `30F Min Compressor Temp, 30F Max HP Backup Temp`, `35F Min Compressor Temp, 35F Max HP Backup Temp`, `40F Min Compressor Temp, 40F Max HP Backup Temp`, `Detailed Example: 5F Min Compressor Temp, 35F Max HP Backup Temp`, `Detailed Example: 25F Min Compressor Temp, 45F Max HP Backup Temp`
 
 <br/>
 
@@ -1088,38 +1114,12 @@ The type and efficiency of the heat pump backup. Use 'None' if there is no backu
 
 The output capacity of the heat pump backup if there is integrated backup heating.
 
-- **Name:** ``hvac_capacity_heat_pump_backup``
+- **Name:** ``hvac_heat_pump_backup_capacity``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
 - **Choices:** `Autosize`, `5 kW`, `10 kW`, `15 kW`, `20 kW`, `25 kW`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
-
-<br/>
-
-**HVAC: Heat Pump Temperatures**
-
-Specifies the minimum compressor temperature and/or maximum HP backup temperature. If both are the same, a binary switchover temperature is used.
-
-- **Name:** ``hvac_heat_pump_temps``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `Default`, `-20F Min Compressor Temp`, `-15F Min Compressor Temp`, `-10F Min Compressor Temp`, `-5F Min Compressor Temp`, `0F Min Compressor Temp`, `5F Min Compressor Temp`, `10F Min Compressor Temp`, `15F Min Compressor Temp`, `20F Min Compressor Temp`, `25F Min Compressor Temp`, `30F Min Compressor Temp`, `35F Min Compressor Temp`, `40F Min Compressor Temp`, `30F Min Compressor Temp, 30F Max HP Backup Temp`, `35F Min Compressor Temp, 35F Max HP Backup Temp`, `40F Min Compressor Temp, 40F Max HP Backup Temp`, `Detailed Example: 5F Min Compressor Temp, 35F Max HP Backup Temp`, `Detailed Example: 25F Min Compressor Temp, 45F Max HP Backup Temp`
-
-<br/>
-
-**HVAC: Heat Pump Sizing Methodology**
-
-The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.
-
-- **Name:** ``heat_pump_sizing_methodology``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `ACCA`, `HERS`, `MaxLoad`
 
 <br/>
 
@@ -1166,7 +1166,7 @@ The type and efficiency of the second heating system. If a heat pump is specifie
 
 The fuel type of the second heating system. Ignored for ElectricResistance.
 
-- **Name:** ``heating_system_2_fuel``
+- **Name:** ``hvac_heating_system_2_fuel``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
@@ -1179,7 +1179,7 @@ The fuel type of the second heating system. Ignored for ElectricResistance.
 
 The output capacity of the second heating system.
 
-- **Name:** ``hvac_capacity_heating_system_2``
+- **Name:** ``hvac_heating_system_2_capacity``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1192,7 +1192,7 @@ The output capacity of the second heating system.
 
 The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.
 
-- **Name:** ``heating_system_2_fraction_heat_load_served``
+- **Name:** ``hvac_heating_system_2_fraction_heat_load_served``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
@@ -1284,7 +1284,7 @@ The blower fan efficiency at maximum fan speed. Applies only to split (not packa
 
 Specifies whether the HVAC system has airflow and/or refrigerant charge installation defects. Applies to central furnaces and central/mini-split ACs and HPs.
 
-- **Name:** ``hvac_install_defects``
+- **Name:** ``hvac_installation_defects``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1293,7 +1293,7 @@ Specifies whether the HVAC system has airflow and/or refrigerant charge installa
 
 <br/>
 
-**HVAC: Ducts**
+**HVAC Ducts**
 
 The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.
 
@@ -1306,11 +1306,11 @@ The supply duct leakage to outside, nominal insulation r-value, buried insulatio
 
 <br/>
 
-**Ducts: Supply Location**
+**HVAC Ducts: Supply Location**
 
 The location of the supply ducts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
 
-- **Name:** ``ducts_supply_location``
+- **Name:** ``hvac_ducts_supply_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1319,11 +1319,11 @@ The location of the supply ducts. If not provided, the OS-HPXML default (see <a 
 
 <br/>
 
-**Ducts: Supply Area Fraction**
+**HVAC Ducts: Supply Area Fraction**
 
 The fraction of supply ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
 
-- **Name:** ``ducts_supply_surface_area_fraction``
+- **Name:** ``hvac_ducts_supply_surface_area_fraction``
 - **Type:** ``Double``
 
 - **Units:** ``frac``
@@ -1332,11 +1332,11 @@ The fraction of supply ducts surface area in the given location. Only used if Su
 
 <br/>
 
-**Ducts: Supply Leakage Fraction**
+**HVAC Ducts: Supply Leakage Fraction**
 
 The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts
 
-- **Name:** ``ducts_supply_leakage_fraction``
+- **Name:** ``hvac_ducts_supply_leakage_fraction``
 - **Type:** ``Double``
 
 - **Units:** ``frac``
@@ -1345,11 +1345,11 @@ The fraction of duct leakage associated with the supply ducts; the remainder is 
 
 <br/>
 
-**Ducts: Return Location**
+**HVAC Ducts: Return Location**
 
 The location of the return ducts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
 
-- **Name:** ``ducts_return_location``
+- **Name:** ``hvac_ducts_return_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1358,11 +1358,11 @@ The location of the return ducts. If not provided, the OS-HPXML default (see <a 
 
 <br/>
 
-**Ducts: Return Area Fraction**
+**HVAC Ducts: Return Area Fraction**
 
 The fraction of return ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
 
-- **Name:** ``ducts_return_surface_area_fraction``
+- **Name:** ``hvac_ducts_return_surface_area_fraction``
 - **Type:** ``Double``
 
 - **Units:** ``frac``
@@ -1371,11 +1371,11 @@ The fraction of return ducts surface area in the given location. Only used if Su
 
 <br/>
 
-**Ducts: Number of Return Registers**
+**HVAC Ducts: Number of Return Registers**
 
 The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
 
-- **Name:** ``ducts_number_of_return_registers``
+- **Name:** ``hvac_ducts_number_of_return_registers``
 - **Type:** ``Integer``
 
 - **Units:** ``#``
@@ -1477,7 +1477,7 @@ The type and efficiency of the water heater.
 
 The location of water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.
 
-- **Name:** ``water_heater_location``
+- **Name:** ``dhw_water_heater_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1490,7 +1490,7 @@ The location of water heater. If not provided, the OS-HPXML default (see <a href
 
 The jacket R-value of water heater. Doesn't apply to instantaneous water heater or space-heating boiler with tankless coil. If not provided, defaults to no jacket insulation.
 
-- **Name:** ``water_heater_jacket_rvalue``
+- **Name:** ``dhw_water_heater_jacket_rvalue``
 - **Type:** ``Double``
 
 - **Units:** ``F-ft2-hr/Btu``
@@ -1503,7 +1503,7 @@ The jacket R-value of water heater. Doesn't apply to instantaneous water heater 
 
 The setpoint temperature of water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.
 
-- **Name:** ``water_heater_setpoint_temperature``
+- **Name:** ``dhw_water_heater_setpoint_temperature``
 - **Type:** ``Double``
 
 - **Units:** ``F``
@@ -1516,7 +1516,7 @@ The setpoint temperature of water heater. If not provided, the OS-HPXML default 
 
 Requires that the dwelling unit has a air-to-air, mini-split, or ground-to-air heat pump or a central air conditioner or mini-split air conditioner. If not provided, assumes no desuperheater.
 
-- **Name:** ``water_heater_uses_desuperheater``
+- **Name:** ``dhw_water_heater_uses_desuperheater``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
@@ -1566,138 +1566,47 @@ The type of drain water heater recovery.
 
 Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-fixtures'>HPXML Water Fixtures</a>) is used.
 
-- **Name:** ``water_fixtures_usage_multiplier``
+- **Name:** ``dhw_water_fixtures_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``
 
 <br/>
 
-**DHW: Solar Thermal System Type**
+**DHW: Solar Thermal**
 
-The type of solar thermal system. Use 'none' if there is no solar thermal system.
+The size and type of solar thermal system for domestic hot water.
 
-- **Name:** ``solar_thermal_system_type``
+- **Name:** ``dhw_solar_thermal``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
-- **Choices:** `none`, `hot water`
-
-<br/>
-
-**DHW: Solar Thermal Collector Area**
-
-The collector area of the solar thermal system.
-
-- **Name:** ``solar_thermal_collector_area``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``true``
-
-<br/>
-
-**DHW: Solar Thermal Collector Loop Type**
-
-The collector loop type of the solar thermal system.
-
-- **Name:** ``solar_thermal_collector_loop_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `liquid direct`, `liquid indirect`, `passive thermosyphon`
-
-<br/>
-
-**DHW: Solar Thermal Collector Type**
-
-The collector type of the solar thermal system.
-
-- **Name:** ``solar_thermal_collector_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `evacuated tube`, `single glazing black`, `double glazing black`, `integrated collector storage`
+- **Choices:** `None`, `Indirect, Flat Plate, 40 sqft`, `Indirect, Flat Plate, 64 sqft`, `Direct, Flat Plate, 40 sqft`, `Direct. Flat Plate, 64 sqft`, `Direct, Integrated Collector Storage, 40 sqft`, `Direct, Integrated Collector Storage, 64 sqft`, `Direct, Evacuated Tube, 40 sqft`, `Direct, Evacuated Tube, 64 sqft`, `Thermosyphon, Flat Plate, 40 sqft`, `Thermosyphon, Flat Plate, 64 sqft`, `60% Solar Fraction`, `65% Solar Fraction`, `70% Solar Fraction`, `75% Solar Fraction`, `80% Solar Fraction`, `85% Solar Fraction`, `90% Solar Fraction`, `95% Solar Fraction`
 
 <br/>
 
 **DHW: Solar Thermal Collector Azimuth**
 
-The collector azimuth of the solar thermal system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
+The azimuth of the solar thermal system collectors. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
 
-- **Name:** ``solar_thermal_collector_azimuth``
+- **Name:** ``dhw_solar_thermal_collector_azimuth``
 - **Type:** ``Double``
 
 - **Units:** ``degrees``
-
-- **Required:** ``true``
-
-<br/>
-
-**DHW: Solar Thermal Collector Tilt**
-
-The collector tilt of the solar thermal system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
-
-- **Name:** ``solar_thermal_collector_tilt``
-- **Type:** ``String``
-
-- **Required:** ``true``
-
-<br/>
-
-**DHW: Solar Thermal Collector Rated Optical Efficiency**
-
-The collector rated optical efficiency of the solar thermal system.
-
-- **Name:** ``solar_thermal_collector_rated_optical_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**DHW: Solar Thermal Collector Rated Thermal Losses**
-
-The collector rated thermal losses of the solar thermal system.
-
-- **Name:** ``solar_thermal_collector_rated_thermal_losses``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr-ft2-R``
-
-- **Required:** ``true``
-
-<br/>
-
-**DHW: Solar Thermal Storage Volume**
-
-The storage volume of the solar thermal system. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#detailed-inputs'>Detailed Inputs</a>) is used.
-
-- **Name:** ``solar_thermal_storage_volume``
-- **Type:** ``Double``
-
-- **Units:** ``gal``
 
 - **Required:** ``false``
 
 <br/>
 
-**DHW: Solar Thermal Solar Fraction**
+**DHW: Solar Thermal Collector Tilt**
 
-The solar fraction of the solar thermal system. If provided, overrides all other solar thermal inputs.
+The tilt of the solar thermal system collectors. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
 
-- **Name:** ``solar_thermal_solar_fraction``
-- **Type:** ``Double``
+- **Name:** ``dhw_solar_thermal_collector_tilt``
+- **Type:** ``String``
 
-- **Units:** ``Frac``
-
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1716,7 +1625,7 @@ The size and type of PV system.
 
 **PV System: Array Azimuth**
 
-Array azimuth of the PV system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
+The azimuth of the PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
 
 - **Name:** ``pv_system_array_azimuth``
 - **Type:** ``Double``
@@ -1729,7 +1638,7 @@ Array azimuth of the PV system. Azimuth is measured clockwise from north (e.g., 
 
 **PV System: Array Tilt**
 
-Array tilt of the PV system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
+The tilt of the PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
 
 - **Name:** ``pv_system_array_tilt``
 - **Type:** ``String``
@@ -1753,7 +1662,7 @@ The size and type of the second PV system.
 
 **PV System 2: Array Azimuth**
 
-Array azimuth of the second PV system. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
+The azimuth of the second PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
 
 - **Name:** ``pv_system_2_array_azimuth``
 - **Type:** ``Double``
@@ -1766,7 +1675,7 @@ Array azimuth of the second PV system. Azimuth is measured clockwise from north 
 
 **PV System 2: Array Tilt**
 
-Array tilt of the second PV system. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
+The tilt of the second PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
 
 - **Name:** ``pv_system_2_array_tilt``
 - **Type:** ``String``
@@ -2766,68 +2675,29 @@ Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/l
 
 <br/>
 
-**Appliances: Dehumidifier Type**
+**Appliances: Dehumidifier**
 
 The type of dehumidifier.
 
-- **Name:** ``dehumidifier_type``
+- **Name:** ``appliance_dehumidifier``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
-- **Choices:** `none`, `portable`, `whole-home`
-
-<br/>
-
-**Appliances: Dehumidifier Efficiency Type**
-
-The efficiency type of dehumidifier.
-
-- **Name:** ``dehumidifier_efficiency_type``
-- **Type:** ``Choice``
-
-- **Required:** ``true``
-
-- **Choices:** `EnergyFactor`, `IntegratedEnergyFactor`
-
-<br/>
-
-**Appliances: Dehumidifier Efficiency**
-
-The efficiency of the dehumidifier.
-
-- **Name:** ``dehumidifier_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``liters/kWh``
-
-- **Required:** ``true``
-
-<br/>
-
-**Appliances: Dehumidifier Capacity**
-
-The capacity (water removal rate) of the dehumidifier.
-
-- **Name:** ``dehumidifier_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``pint/day``
-
-- **Required:** ``true``
+- **Choices:** `None`, `Portable, 15 pints/day`, `Portable, 20 pints/day`, `Portable, 30 pints/day`, `Portable, 40 pints/day`, `Whole-Home, 60 pints/day`, `Whole-Home, 75 pints/day`, `Whole-Home, 95 pints/day`, `Whole-Home, 125 pints/day`, `Detailed Example: Portable, 40 pints/day, EF=1.8`
 
 <br/>
 
 **Appliances: Dehumidifier Relative Humidity Setpoint**
 
-The relative humidity setpoint of the dehumidifier.
+The dehumidifier's relative humidity setpoint.
 
-- **Name:** ``dehumidifier_rh_setpoint``
+- **Name:** ``appliance_dehumidifier_rh_setpoint``
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 

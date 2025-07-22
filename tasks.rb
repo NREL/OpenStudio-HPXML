@@ -2207,6 +2207,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
     if ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.hot_water_distributions[0].pipe_r_value = nil
+      hpxml_bldg.solar_thermal_systems[0].storage_volume = nil
     elsif ['base-schedules-simple.xml',
            'base-schedules-simple-vacancy.xml',
            'base-schedules-simple-power-outage.xml',
