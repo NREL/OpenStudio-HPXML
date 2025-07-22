@@ -539,6 +539,7 @@ module HVAC
                                          hvac_sequential_load_fracs, control_zone, hvac_unavailable_periods)
     ground_to_air = false # FIXME: this is the switch to try out ground-to-water
     equation_fit = false # FIXME: equation fit vs eir-formulated
+    fan_coil = false # FIXME: fan coil vs baseboard/panel
 
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     if unit_multiplier > 1
@@ -902,8 +903,11 @@ module HVAC
       fan_watts_per_cfm = 0.0
       fan_cfms = [fan_cfm]
     end
-    fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms, heat_pump)
-    add_fan_pump_disaggregation_ems_program(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
+
+    if ground_to_air || fan_coil
+      fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms, heat_pump)
+      add_fan_pump_disaggregation_ems_program(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
+    end
 
     if ground_to_air
       # Unitary System
@@ -948,14 +952,21 @@ module HVAC
       loop_sizing.setDesignLoopExitTemperature(60.000)
       loop_sizing.setLoopDesignTemperatureDifference(11.111)
 
-      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
-      htg_coil.setRatedCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
+      if fan_coil
+        htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
+        htg_coil.setRatedCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
+        htg_coil.setPerformanceInputMethod('NominalCapacity')
+      else
+        htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
+        htg_coil.setConvergenceTolerance(0.001)
+        htg_coil.setHeatingDesignCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
+        htg_coil.setHeatingDesignCapacityMethod('HeatingDesignCapacity')
+      end
+
       bb_ua = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
       htg_coil.setUFactorTimesAreaValue(bb_ua)
       htg_coil.setMaximumWaterFlowRate(max_water_flow)
-      htg_coil.setPerformanceInputMethod('NominalCapacity')
       htg_coil.setName(obj_name + ' htg coil')
-
       hw_loop.addDemandBranchForComponent(htg_coil)
 
       pump = Model.add_pump_variable_speed(
@@ -982,16 +993,24 @@ module HVAC
       loop_sizing.setDesignLoopExitTemperature(6.666)
       loop_sizing.setLoopDesignTemperatureDifference(5.611)
 
-      clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, model.alwaysOnDiscreteSchedule)
-      clg_coil.setName(obj_name + ' clg coil')
-      clg_coil.setDesignWaterFlowRate(0.0022)
-      clg_coil.setDesignAirFlowRate(1.45)
-      clg_coil.setDesignInletWaterTemperature(6.1)
-      clg_coil.setDesignInletAirTemperature(25.0)
-      clg_coil.setDesignOutletAirTemperature(10.0)
-      clg_coil.setDesignInletAirHumidityRatio(0.012)
-      clg_coil.setDesignOutletAirHumidityRatio(0.008)
+      if fan_coil
+        clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, model.alwaysOnDiscreteSchedule)
+        clg_coil.setDesignWaterFlowRate(0.0022)
+        clg_coil.setDesignAirFlowRate(1.45)
+        clg_coil.setDesignInletWaterTemperature(6.1)
+        clg_coil.setDesignInletAirTemperature(25.0)
+        clg_coil.setDesignOutletAirTemperature(10.0)
+        clg_coil.setDesignInletAirHumidityRatio(0.012)
+        clg_coil.setDesignOutletAirHumidityRatio(0.008)
+      else
+        clg_coil = OpenStudio::Model::CoilCoolingWaterPanelRadiant.new(model)
+        # clg_coil.setCoolingDesignCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
+        clg_coil.setCoolingDesignCapacity(100.0)
+        clg_coil.setCoolingDesignCapacityMethod('CoolingDesignCapacity')
+        # clg_coil.setMaximumChilledWaterFlowRate(0.0022)
+      end
 
+      clg_coil.setName(obj_name + ' clg coil')
       chw_loop.addDemandBranchForComponent(clg_coil)
 
       pump = Model.add_pump_variable_speed(
@@ -1001,18 +1020,29 @@ module HVAC
       )
       pump.addToNode(chw_loop.supplyInletNode)
 
-      zone_hvac = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, model.alwaysOnDiscreteSchedule, fan, clg_coil, htg_coil)
-      zone_hvac.setCapacityControlMethod('CyclingFan')
-      zone_hvac.setName(obj_name + ' fan coil')
-      zone_hvac.setMaximumSupplyAirTemperatureInHeatingMode(UnitConversions.convert(120.0, 'F', 'C'))
-      zone_hvac.setHeatingConvergenceTolerance(0.001)
-      zone_hvac.setMinimumSupplyAirTemperatureInCoolingMode(UnitConversions.convert(55.0, 'F', 'C'))
-      zone_hvac.setMaximumColdWaterFlowRate(max_water_flow)
-      zone_hvac.setCoolingConvergenceTolerance(0.001)
-      zone_hvac.setMaximumOutdoorAirFlowRate(0.0)
-      zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert([htg_cfm, clg_cfm].max, 'cfm', 'm^3/s'))
-      zone_hvac.setMaximumHotWaterFlowRate(max_water_flow)
-      zone_hvac.addToThermalZone(control_zone)
+      if fan_coil
+        zone_hvac = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, model.alwaysOnDiscreteSchedule, fan, clg_coil, htg_coil)
+        zone_hvac.setCapacityControlMethod('CyclingFan')
+        zone_hvac.setName(obj_name + ' fan coil')
+        zone_hvac.setMaximumSupplyAirTemperatureInHeatingMode(UnitConversions.convert(120.0, 'F', 'C'))
+        zone_hvac.setHeatingConvergenceTolerance(0.001)
+        zone_hvac.setMinimumSupplyAirTemperatureInCoolingMode(UnitConversions.convert(55.0, 'F', 'C'))
+        zone_hvac.setMaximumColdWaterFlowRate(max_water_flow)
+        zone_hvac.setCoolingConvergenceTolerance(0.001)
+        zone_hvac.setMaximumOutdoorAirFlowRate(0.0)
+        zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert([htg_cfm, clg_cfm].max, 'cfm', 'm^3/s'))
+        zone_hvac.setMaximumHotWaterFlowRate(max_water_flow)
+        zone_hvac.addToThermalZone(control_zone)
+      else
+        zone_hvac_htg = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, htg_coil)
+        zone_hvac_htg.setName(obj_name + ' baseboard')
+        zone_hvac_htg.addToThermalZone(control_zone)
+
+        zone_hvac_clg = OpenStudio::Model::ZoneHVACCoolingPanelRadiantConvectiveWater.new(model)
+        zone_hvac_clg.setCoolingCoil(clg_coil)
+        zone_hvac_clg.setName(obj_name + ' panel')
+        zone_hvac_clg.addToThermalZone(control_zone)
+      end
     end
 
     if heat_pump.is_shared_system
