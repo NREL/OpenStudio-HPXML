@@ -654,7 +654,7 @@
     "floor_type": "WoodFrame",
     "foundation_wall_type": "solid concrete",
     "foundation_wall_insulation_r": 10.0,
-    "rim_joist_assembly_r": 23,
+    "rim_joist_assembly_r": 21.8,
     "slab_perimeter_insulation_r": 0,
     "slab_perimeter_insulation_depth": 0,
     "slab_perimeter_insulation_depth": 0,
@@ -1961,12 +1961,16 @@
   "sample_files/base-foundation-conditioned-basement-slab-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "slab_under_insulation_r": 10,
-    "slab_under_insulation_width": 4
+    "slab_under_insulation_width": 4,
+    "slab_carpet_fraction": null,
+    "slab_carpet_r": null
   },
   "sample_files/base-foundation-conditioned-basement-slab-insulation-full.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "slab_under_insulation_r": 10,
-    "slab_under_insulation_width": 999
+    "slab_under_insulation_width": 999,
+    "slab_carpet_fraction": null,
+    "slab_carpet_r": null
   },
   "sample_files/base-foundation-conditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2009,7 +2013,9 @@
     "slab_under_insulation_width": 0,
     "slab_exterior_horizontal_insulation_r": 5.0,
     "slab_exterior_horizontal_insulation_width": 2.5,
-    "slab_exterior_horizontal_insulation_depth_below_grade": 2
+    "slab_exterior_horizontal_insulation_depth_below_grade": 2,
+    "slab_carpet_fraction": null,
+    "slab_carpet_r": null
   },
   "sample_files/base-foundation-multiple.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml"
@@ -2021,7 +2027,7 @@
     "floor_over_foundation_assembly_r": 19.4,
     "foundation_wall_insulation_r": 0,
     "foundation_wall_insulation_distance_to_bottom": 0,
-    "rim_joist_assembly_r": 4,
+    "rim_joist_assembly_r": 13.9,
     "ducts_supply_location": "basement - unconditioned",
     "ducts_return_location": "basement - unconditioned",
     "water_heater_location": "basement - unconditioned",
@@ -2045,8 +2051,7 @@
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
     "floor_over_foundation_assembly_r": 5.3,
     "foundation_wall_insulation_r": 10.0,
-    "foundation_wall_insulation_distance_to_bottom": 4,
-    "rim_joist_assembly_r": 23
+    "foundation_wall_insulation_distance_to_bottom": 4
   },
   "sample_files/base-foundation-unvented-crawlspace.xml": {
     "parent_hpxml": "sample_files/base.xml",
