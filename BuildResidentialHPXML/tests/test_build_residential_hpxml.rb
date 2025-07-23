@@ -407,7 +407,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_num_occupants'] = 3
       args['enclosure_rim_joist_assembly_r'] = 23.0
       args['enclosure_air_leakage'] = '3 ACH50'
-      args['enclosure_slab_carpet'] = '0% Carpet'
       args['enclosure_ceiling'] = 'R-38'
       args['enclosure_roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
       args['enclosure_roof'] = 'Uninsulated'
@@ -421,8 +420,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_window_area_or_wwr_right'] = 72.0
       args['enclosure_window_natural_ventilation'] = '67% Operable Windows'
       args['enclosure_window_interior_shading'] = 'Summer=0.7, Winter=0.8'
-      args['door_area'] = 40.0
-      args['door_rvalue'] = 4.4
+      args['enclosure_door_area'] = 40.0
+      args['enclosure_door'] = 'Solid Wood, R-2'
       args['hvac_heating_system_fuel'] = HPXML::FuelTypeNaturalGas
       args['hvac_heating_system'] = 'Central Furnace, 92% AFUE'
       args['hvac_heating_system_capacity'] = '40 kBtu/hr'
@@ -503,7 +502,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['hvac_ducts_return_location'] = HPXML::LocationConditionedSpace
       args['hvac_ducts_number_of_return_registers'] = 1
-      args['door_area'] = 20.0
+      args['enclosure_door_area'] = 20.0
       args['enclosure_air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     when 'base-mf2.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')

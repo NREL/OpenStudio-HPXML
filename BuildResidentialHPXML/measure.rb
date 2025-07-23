@@ -307,21 +307,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Solid Concrete, Uninsulated')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_rim_joist_assembly_r', false)
-    arg.setDisplayName('Enclosure: Rim Joist Assembly R-value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription('Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Required if a rim joist height is provided.')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_rim_joist', choices[:enclosure_rim_joist], false)
+    arg.setDisplayName('Enclosure: Rim Joists')
+    arg.setDescription('The type and insulation level of the rim joists.')
+    arg.setDefaultValue('Uninsulated')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_slab', choices[:enclosure_slab], false)
     arg.setDisplayName('Enclosure: Slab')
     arg.setDescription('The type and insulation level of the slab. Applies to slab-on-grade as well as basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.')
     arg.setDefaultValue('Uninsulated')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_slab_carpet', choices[:enclosure_slab_carpet], false)
-    arg.setDisplayName('Enclosure: Slab Carpet')
-    arg.setDescription('The amount of slab floor area that is carpeted.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_ceiling', choices[:enclosure_ceiling], true)
@@ -467,18 +462,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('door_area', true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_door', choices[:enclosure_door], false)
+    arg.setDisplayName('Enclosure: Doors')
+    arg.setDescription('The type of doors.')
+    arg.setDefaultValue('Solid Wood, R-2')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_door_area', true)
     arg.setDisplayName('Enclosure: Doors Area')
     arg.setUnits('ft2')
     arg.setDescription('The area of the opaque door(s).')
     arg.setDefaultValue(20.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('door_rvalue', true)
-    arg.setDisplayName('Enclosure: Doors R-value')
-    arg.setUnits('F-ft2-hr/Btu')
-    arg.setDescription('R-value of the opaque door(s).')
-    arg.setDefaultValue(4.4)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_air_leakage', choices[:enclosure_air_leakage], false)
@@ -1886,7 +1880,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:hvac_heating_system_type].include?('Shared')
     errors << 'Specified a shared system for a single-family detached unit.' if error
 
-    error = args[:geometry_foundation_type_rim_joist_height].to_f > 0 && args[:enclosure_rim_joist_assembly_r].nil?
+    error = args[:geometry_foundation_type_rim_joist_height].to_f > 0 && args[:enclosure_rim_joist_assembly_r_value].nil?
     errors << 'Specified a rim joist height but no rim joist assembly R-value.' if error
 
     schedules_unavailable_period_args_initialized = [!args[:schedules_unavailable_period_types].nil?,
@@ -2991,7 +2985,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       if interior_adjacent_to == exterior_adjacent_to
         insulation_assembly_r_value = 4.0 # Uninsulated
       else
-        insulation_assembly_r_value = args[:enclosure_rim_joist_assembly_r]
+        insulation_assembly_r_value = (args[:enclosure_rim_joist_assembly_r_value] + args[:enclosure_wall_continuous_insulation_r_value] + args[:enclosure_wall_siding_r_value]).round(2)
       end
 
       azimuth = Geometry.get_surface_azimuth(surface, args[:geometry_unit_orientation])
@@ -3309,7 +3303,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            under_slab_insulation_r_value: args[:enclosure_slab_under_slab_insulation_nominal_r_value],
                            under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab,
                            carpet_fraction: args[:enclosure_slab_carpet_fraction],
-                           carpet_r_value: args[:enclosure_slab_carpet_r])
+                           carpet_r_value: args[:enclosure_slab_carpet_r_value])
       @surface_ids[surface.name.to_s] = hpxml_bldg.slabs[-1].id
 
       next unless interior_adjacent_to == HPXML::LocationCrawlspaceConditioned
@@ -3465,7 +3459,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            attached_to_wall_idref: wall_idref,
                            area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2'),
                            azimuth: args[:geometry_unit_orientation],
-                           r_value: args[:door_rvalue])
+                           r_value: args[:enclosure_door_r_value])
     end
   end
 

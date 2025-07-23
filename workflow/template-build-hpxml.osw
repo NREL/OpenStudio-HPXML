@@ -8,10 +8,10 @@
       "arguments": {
         "hpxml_path": "../built.xml",
         "dhw_water_heater": "Electricity, Tank, UEF=0.94",
-        "door_area": 40.0,
-        "door_rvalue": 4.4,
         "enclosure_air_leakage": "3 ACH50",
         "enclosure_ceiling": "R-38",
+        "enclosure_door": "Solid Wood, R-3",
+        "enclosure_door_area": 40.0,
         "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
         "enclosure_rim_joist_assembly_r": 23.0,
         "enclosure_roof": "Uninsulated",

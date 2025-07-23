@@ -1247,16 +1247,16 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param door_area [Double] the area of the opaque door(s) (ft2)
+  # @param enclosure_door_area [Double] the area of the opaque door(s) (ft2)
   # @return [Boolean] true if successful
-  def self.create_doors(runner, model, door_area:, **)
+  def self.create_doors(runner, model, enclosure_door_area:, **)
     # error checking
-    if door_area == 0
+    if enclosure_door_area == 0
       return true
     end
 
     door_height = 7.0 # ft
-    door_width = door_area / door_height
+    door_width = enclosure_door_area / door_height
     door_offset = 0.5 # ft
 
     # Get all exterior walls prioritized by front, then back, then left, then right
@@ -1305,7 +1305,7 @@ module Geometry
       wall_gross_area = UnitConversions.convert(min_story_avail_wall.grossArea, 'm^2', 'ft^2')
 
       # Try to place door on any surface with enough area
-      next if door_area >= wall_gross_area
+      next if enclosure_door_area >= wall_gross_area
 
       facade = get_surface_facade(min_story_avail_wall)
 

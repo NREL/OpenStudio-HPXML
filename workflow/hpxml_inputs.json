@@ -14,8 +14,6 @@
     "geometry_roof_pitch": "4:12",
     "geometry_eaves": "None",
     "enclosure_floor_over_foundation": "Detailed Example: Wood Frame, R-11, 2x6, 24 in o.c., 10% Framing, No Carpet/Subfloor",
-    "enclosure_rim_joist_assembly_r": 5.01,
-    "enclosure_slab_carpet": "0% Carpet",
     "enclosure_ceiling": "Detailed Example: R-19, 2x6, 24 in o.c., 10% Framing",
     "enclosure_roof_material": "Detailed Example: 0.6 Solar Absorptance",
     "enclosure_roof": "Detailed Example: Uninsulated, 0.5 in plywood, 0.25 in asphalt shingle",
@@ -29,8 +27,8 @@
     "enclosure_window_natural_ventilation": "None",
     "enclosure_window": "Detailed Example: Single, Clear, Aluminum w/ Thermal Break",
     "enclosure_window_interior_shading": "None",
-    "door_area": 40,
-    "door_rvalue": 3.04,
+    "enclosure_door_area": 40,
+    "enclosure_door": "Detailed Example: Solid Wood, R-3.04",
     "enclosure_air_leakage": "0.67 nACH",
     "hvac_heating_system": "None",
     "hvac_heating_system_fuel": "natural gas",
@@ -127,23 +125,26 @@
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_foundation_type": "Slab-on-Grade",
-    "enclosure_slab_carpet": "100% Carpet, R-2.08"
+    "enclosure_slab": "Detailed Example: Uninsulated, 100% R-2.08 Carpet"
   },
   "tests/ASHRAE_Standard_140/L304XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L302XC.xml",
-    "enclosure_slab": "Perimeter, 2ft, R-5"
+    "enclosure_slab": "Detailed Example: Perimeter, 2ft, R-5, 100% R-2.08 Carpet"
   },
   "tests/ASHRAE_Standard_140/L322XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_unit_cfa": 3078,
     "geometry_foundation_type": "Detailed Example: Basement, Conditioned, 7.25 ft Height, 8 in Above-Grade, 9 in Rim Joists",
     "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
+    "enclosure_slab": "Detailed Example: Uninsulated, No Carpet",
+    "enclosure_rim_joist": "Detailed Example: Uninsulated, Fiberboard Sheathing, Hardboard Siding",
     "enclosure_air_leakage": "0.335 nACH"
   },
   "tests/ASHRAE_Standard_140/L324XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L322XC.xml",
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10.2, Interior",
-    "enclosure_rim_joist_assembly_r": 13.14
+    "enclosure_slab": "Detailed Example: Uninsulated, No Carpet",
+    "enclosure_rim_joist": "Detailed Example: R-11, Fiberboard Sheathing, Hardboard Siding"
   },
   "tests/ASHRAE_Standard_140/L100AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -309,7 +310,7 @@
     "enclosure_wall": "Wood Stud, IECC U-0.057",
     "enclosure_floor_over_foundation": "Wood Frame, IECC U-0.033",
     "enclosure_ceiling": "IECC U-0.026",
-    "door_rvalue": 2.86,
+    "enclosure_door": "IECC U-0.35",
     "enclosure_window": "IECC U-0.35, SHGC=0.40",
     "enclosure_window_interior_shading": null,
     "hvac_heating_system_fuel": "natural gas",
@@ -360,7 +361,7 @@
     "enclosure_floor_over_foundation": "Wood Frame, IECC U-0.064",
     "enclosure_ceiling": "IECC U-0.035",
     "enclosure_window": "IECC U-1.20, SHGC=0.40",
-    "door_rvalue": 0.83
+    "enclosure_door": "IECC U-1.20"
   },
   "tests/HERS_Hot_Water/L100AM-HW-02.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-02.xml",
@@ -402,9 +403,9 @@
     "geometry_attic_type": "Attic, Unvented, Gable",
     "geometry_roof_pitch": "6:12",
     "geometry_eaves": "None",
+    "enclosure_slab": "Detailed Example: Uninsulated, No Carpet",
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
-    "enclosure_rim_joist_assembly_r": 23,
-    "enclosure_slab_carpet":"0% Carpet",
+    "enclosure_rim_joist": "R-13",
     "enclosure_ceiling": "R-38",
     "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
     "enclosure_roof": "Uninsulated",
@@ -419,8 +420,8 @@
     "enclosure_window_natural_ventilation": "67% Operable Windows",
     "enclosure_window": "Double, Low-E, Non-Metal, Gas, Med Gain",
     "enclosure_window_interior_shading": "Curtains, Light",
-    "door_area": 40,
-    "door_rvalue": 4.4,
+    "enclosure_door_area": 40,
+    "enclosure_door": "Detailed Example: Insulated Fiberglass/Steel, R-4.4",
     "enclosure_air_leakage": "3 ACH50",
     "hvac_heating_system_fuel": "natural gas",
     "hvac_heating_system": "Central Furnace, 92% AFUE",
@@ -704,7 +705,7 @@
     "enclosure_window_area_or_wwr_back": 0.18,
     "enclosure_window_area_or_wwr_left": 0.18,
     "enclosure_window_area_or_wwr_right": 0.18,
-    "door_area": 20,
+    "enclosure_door_area": 20,
     "enclosure_air_leakage_type": "unit exterior only",
     "hvac_heating_system_capacity": "10 kBtu/hr",
     "hvac_cooling_system_capacity": "1.0 tons",
@@ -1391,8 +1392,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_cfa": 1350,
     "geometry_foundation_type": "Slab-on-Grade",
-    "enclosure_slab": "Whole Slab, R-5",
-    "enclosure_slab_carpet": "100% Carpet, R-2.5",
+    "enclosure_slab": "Detailed Example: Whole Slab, R-5, 100% R-2.5 Carpet",
     "hvac_ducts_supply_location": "under slab",
     "hvac_ducts_return_location": "under slab"
   },
@@ -1409,7 +1409,7 @@
     "geometry_foundation_type": "Basement, Unconditioned",
     "enclosure_floor_over_foundation": "Wood Frame, R-15",
     "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
-    "enclosure_rim_joist_assembly_r": 4,
+    "enclosure_rim_joist": "Uninsulated",
     "hvac_ducts_supply_location": "basement - unconditioned",
     "hvac_ducts_return_location": "basement - unconditioned",
     "dhw_water_heater_location": "basement - unconditioned",
@@ -1430,8 +1430,7 @@
   "sample_files/base-foundation-unconditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
     "enclosure_floor_over_foundation": "Wood Frame, Uninsulated",
-    "enclosure_foundation_wall": "Solid Concrete, Half Wall, R-10",
-    "enclosure_rim_joist_assembly_r": 23
+    "enclosure_foundation_wall": "Solid Concrete, Half Wall, R-10"
   },
   "sample_files/base-foundation-unvented-crawlspace.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2635,7 +2634,7 @@
     "enclosure_window_area_or_wwr_back": 0.18,
     "enclosure_window_area_or_wwr_left": 0.18,
     "enclosure_window_area_or_wwr_right": 0.18,
-    "door_area": 20,
+    "enclosure_door_area": 20,
     "hvac_cooling_system": "Room AC, EER 8.5",
     "hvac_cooling_system_capacity": "1.0 tons",
     "hvac_heating_system_fuel": "electricity",
