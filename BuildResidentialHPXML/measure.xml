@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>695ac1f5-4219-4640-bbc2-171baa8be783</version_id>
-  <version_modified>2025-07-22T00:20:49Z</version_modified>
+  <version_id>877a5811-a799-4971-b78b-5a6c3aca8ac2</version_id>
+  <version_modified>2025-07-23T23:21:14Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1088,13 +1088,51 @@
       </choices>
     </argument>
     <argument>
-      <name>enclosure_rim_joist_assembly_r</name>
-      <display_name>Enclosure: Rim Joist Assembly R-value</display_name>
-      <description>Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Required if a rim joist height is provided.</description>
-      <type>Double</type>
-      <units>F-ft2-hr/Btu</units>
+      <name>enclosure_rim_joist</name>
+      <display_name>Enclosure: Rim Joists</display_name>
+      <description>The type and insulation level of the rim joists.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Uninsulated</default_value>
+      <choices>
+        <choice>
+          <value>Uninsulated</value>
+          <display_name>Uninsulated</display_name>
+        </choice>
+        <choice>
+          <value>R-7</value>
+          <display_name>R-7</display_name>
+        </choice>
+        <choice>
+          <value>R-11</value>
+          <display_name>R-11</display_name>
+        </choice>
+        <choice>
+          <value>R-13</value>
+          <display_name>R-13</display_name>
+        </choice>
+        <choice>
+          <value>R-15</value>
+          <display_name>R-15</display_name>
+        </choice>
+        <choice>
+          <value>R-19</value>
+          <display_name>R-19</display_name>
+        </choice>
+        <choice>
+          <value>R-21</value>
+          <display_name>R-21</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Uninsulated, Fiberboard Sheathing, Hardboard Siding</value>
+          <display_name>Detailed Example: Uninsulated, Fiberboard Sheathing, Hardboard Siding</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: R-11, Fiberboard Sheathing, Hardboard Siding</value>
+          <display_name>Detailed Example: R-11, Fiberboard Sheathing, Hardboard Siding</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>enclosure_slab</name>
@@ -1197,47 +1235,25 @@
           <value>Whole Slab, R-40</value>
           <display_name>Whole Slab, R-40</display_name>
         </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>enclosure_slab_carpet</name>
-      <display_name>Enclosure: Slab Carpet</display_name>
-      <description>The amount of slab floor area that is carpeted.</description>
-      <type>Choice</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
         <choice>
-          <value>0% Carpet</value>
-          <display_name>0% Carpet</display_name>
+          <value>Detailed Example: Uninsulated, No Carpet</value>
+          <display_name>Detailed Example: Uninsulated, No Carpet</display_name>
         </choice>
         <choice>
-          <value>20% Carpet</value>
-          <display_name>20% Carpet</display_name>
+          <value>Detailed Example: Uninsulated, 100% R-2.08 Carpet</value>
+          <display_name>Detailed Example: Uninsulated, 100% R-2.08 Carpet</display_name>
         </choice>
         <choice>
-          <value>40% Carpet</value>
-          <display_name>40% Carpet</display_name>
+          <value>Detailed Example: Uninsulated, 100% R-2.50 Carpet</value>
+          <display_name>Detailed Example: Uninsulated, 100% R-2.50 Carpet</display_name>
         </choice>
         <choice>
-          <value>60% Carpet</value>
-          <display_name>60% Carpet</display_name>
+          <value>Detailed Example: Perimeter, 2ft, R-5, 100% R-2.08 Carpet</value>
+          <display_name>Detailed Example: Perimeter, 2ft, R-5, 100% R-2.08 Carpet</display_name>
         </choice>
         <choice>
-          <value>80% Carpet</value>
-          <display_name>80% Carpet</display_name>
-        </choice>
-        <choice>
-          <value>100% Carpet</value>
-          <display_name>100% Carpet</display_name>
-        </choice>
-        <choice>
-          <value>100% Carpet, R-2.08</value>
-          <display_name>100% Carpet, R-2.08</display_name>
-        </choice>
-        <choice>
-          <value>100% Carpet, R-2.5</value>
-          <display_name>100% Carpet, R-2.5</display_name>
+          <value>Detailed Example: Whole Slab, R-5, 100% R-2.5 Carpet</value>
+          <display_name>Detailed Example: Whole Slab, R-5, 100% R-2.5 Carpet</display_name>
         </choice>
       </choices>
     </argument>
@@ -2858,7 +2874,82 @@
       <default_value>0</default_value>
     </argument>
     <argument>
-      <name>door_area</name>
+      <name>enclosure_door</name>
+      <display_name>Enclosure: Doors</display_name>
+      <description>The type of doors.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Solid Wood, R-2</default_value>
+      <choices>
+        <choice>
+          <value>Solid Wood, R-2</value>
+          <display_name>Solid Wood, R-2</display_name>
+        </choice>
+        <choice>
+          <value>Solid Wood, R-3</value>
+          <display_name>Solid Wood, R-3</display_name>
+        </choice>
+        <choice>
+          <value>Insulated Fiberglass/Steel, R-4</value>
+          <display_name>Insulated Fiberglass/Steel, R-4</display_name>
+        </choice>
+        <choice>
+          <value>Insulated Fiberglass/Steel, R-5</value>
+          <display_name>Insulated Fiberglass/Steel, R-5</display_name>
+        </choice>
+        <choice>
+          <value>Insulated Fiberglass/Steel, R-6</value>
+          <display_name>Insulated Fiberglass/Steel, R-6</display_name>
+        </choice>
+        <choice>
+          <value>Insulated Fiberglass/Steel, R-7</value>
+          <display_name>Insulated Fiberglass/Steel, R-7</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-1.20</value>
+          <display_name>IECC U-1.20</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.75</value>
+          <display_name>IECC U-0.75</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.65</value>
+          <display_name>IECC U-0.65</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.50</value>
+          <display_name>IECC U-0.50</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.40</value>
+          <display_name>IECC U-0.40</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.35</value>
+          <display_name>IECC U-0.35</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.32</value>
+          <display_name>IECC U-0.32</display_name>
+        </choice>
+        <choice>
+          <value>IECC U-0.30</value>
+          <display_name>IECC U-0.30</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Solid Wood, R-3.04</value>
+          <display_name>Detailed Example: Solid Wood, R-3.04</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: Insulated Fiberglass/Steel, R-4.4</value>
+          <display_name>Detailed Example: Insulated Fiberglass/Steel, R-4.4</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>enclosure_door_area</name>
       <display_name>Enclosure: Doors Area</display_name>
       <description>The area of the opaque door(s).</description>
       <type>Double</type>
@@ -2866,16 +2957,6 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>20</default_value>
-    </argument>
-    <argument>
-      <name>door_rvalue</name>
-      <display_name>Enclosure: Doors R-value</display_name>
-      <description>R-value of the opaque door(s).</description>
-      <type>Double</type>
-      <units>F-ft2-hr/Btu</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>4.4</default_value>
     </argument>
     <argument>
       <name>enclosure_air_leakage</name>
@@ -9834,7 +9915,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>9312CDF6</checksum>
+      <checksum>679ABDEA</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9851,7 +9932,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0F40F8B4</checksum>
+      <checksum>D7800DC9</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9863,7 +9944,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9752F469</checksum>
+      <checksum>25F0324C</checksum>
     </file>
     <file>
       <filename>options/appliance_clothes_dryer.tsv</filename>
@@ -9968,6 +10049,12 @@
       <checksum>4294AC88</checksum>
     </file>
     <file>
+      <filename>options/enclosure_door.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>618580AE</checksum>
+    </file>
+    <file>
       <filename>options/enclosure_floor_over_foundation.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -9998,6 +10085,12 @@
       <checksum>93BAAF87</checksum>
     </file>
     <file>
+      <filename>options/enclosure_rim_joist.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BF9B4985</checksum>
+    </file>
+    <file>
       <filename>options/enclosure_roof.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -10019,13 +10112,7 @@
       <filename>options/enclosure_slab.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9792E3B7</checksum>
-    </file>
-    <file>
-      <filename>options/enclosure_slab_carpet.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0D77B1A0</checksum>
+      <checksum>817C7CAA</checksum>
     </file>
     <file>
       <filename>options/enclosure_wall.tsv</filename>
@@ -10289,7 +10376,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>CE502AF7</checksum>
+      <checksum>177D9836</checksum>
     </file>
   </files>
 </measure>

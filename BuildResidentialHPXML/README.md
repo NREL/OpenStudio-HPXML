@@ -501,16 +501,16 @@ The type and insulation level of the foundation walls.
 
 <br/>
 
-**Enclosure: Rim Joist Assembly R-value**
+**Enclosure: Rim Joists**
 
-Assembly R-value for the rim joists. Only applies to basements/crawlspaces. Required if a rim joist height is provided.
+The type and insulation level of the rim joists.
 
-- **Name:** ``enclosure_rim_joist_assembly_r``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
+- **Name:** ``enclosure_rim_joist``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `Uninsulated`, `R-7`, `R-11`, `R-13`, `R-15`, `R-19`, `R-21`, `Detailed Example: Uninsulated, Fiberboard Sheathing, Hardboard Siding`, `Detailed Example: R-11, Fiberboard Sheathing, Hardboard Siding`
 
 <br/>
 
@@ -523,20 +523,7 @@ The type and insulation level of the slab. Applies to slab-on-grade as well as b
 
 - **Required:** ``false``
 
-- **Choices:** `Uninsulated`, `Under Slab, 2ft, R-5`, `Under Slab, 2ft, R-10`, `Under Slab, 2ft, R-15`, `Under Slab, 2ft, R-20`, `Under Slab, 4ft, R-5`, `Under Slab, 4ft, R-10`, `Under Slab, 4ft, R-15`, `Under Slab, 4ft, R-20`, `Perimeter, 2ft, R-5`, `Perimeter, 2ft, R-10`, `Perimeter, 2ft, R-15`, `Perimeter, 2ft, R-20`, `Perimeter, 4ft, R-5`, `Perimeter, 4ft, R-10`, `Perimeter, 4ft, R-15`, `Perimeter, 4ft, R-20`, `Whole Slab, R-5`, `Whole Slab, R-10`, `Whole Slab, R-15`, `Whole Slab, R-20`, `Whole Slab, R-30`, `Whole Slab, R-40`
-
-<br/>
-
-**Enclosure: Slab Carpet**
-
-The amount of slab floor area that is carpeted.
-
-- **Name:** ``enclosure_slab_carpet``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `0% Carpet`, `20% Carpet`, `40% Carpet`, `60% Carpet`, `80% Carpet`, `100% Carpet`, `100% Carpet, R-2.08`, `100% Carpet, R-2.5`
+- **Choices:** `Uninsulated`, `Under Slab, 2ft, R-5`, `Under Slab, 2ft, R-10`, `Under Slab, 2ft, R-15`, `Under Slab, 2ft, R-20`, `Under Slab, 4ft, R-5`, `Under Slab, 4ft, R-10`, `Under Slab, 4ft, R-15`, `Under Slab, 4ft, R-20`, `Perimeter, 2ft, R-5`, `Perimeter, 2ft, R-10`, `Perimeter, 2ft, R-15`, `Perimeter, 2ft, R-20`, `Perimeter, 4ft, R-5`, `Perimeter, 4ft, R-10`, `Perimeter, 4ft, R-15`, `Perimeter, 4ft, R-20`, `Whole Slab, R-5`, `Whole Slab, R-10`, `Whole Slab, R-15`, `Whole Slab, R-20`, `Whole Slab, R-30`, `Whole Slab, R-40`, `Detailed Example: Uninsulated, No Carpet`, `Detailed Example: Uninsulated, 100% R-2.08 Carpet`, `Detailed Example: Uninsulated, 100% R-2.50 Carpet`, `Detailed Example: Perimeter, 2ft, R-5, 100% R-2.08 Carpet`, `Detailed Example: Whole Slab, R-5, 100% R-2.5 Carpet`
 
 <br/>
 
@@ -839,27 +826,27 @@ The amount of skylight area on the unit's right conditioned roof (when viewed fr
 
 <br/>
 
+**Enclosure: Doors**
+
+The type of doors.
+
+- **Name:** ``enclosure_door``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `Solid Wood, R-2`, `Solid Wood, R-3`, `Insulated Fiberglass/Steel, R-4`, `Insulated Fiberglass/Steel, R-5`, `Insulated Fiberglass/Steel, R-6`, `Insulated Fiberglass/Steel, R-7`, `IECC U-1.20`, `IECC U-0.75`, `IECC U-0.65`, `IECC U-0.50`, `IECC U-0.40`, `IECC U-0.35`, `IECC U-0.32`, `IECC U-0.30`, `Detailed Example: Solid Wood, R-3.04`, `Detailed Example: Insulated Fiberglass/Steel, R-4.4`
+
+<br/>
+
 **Enclosure: Doors Area**
 
 The area of the opaque door(s).
 
-- **Name:** ``door_area``
+- **Name:** ``enclosure_door_area``
 - **Type:** ``Double``
 
 - **Units:** ``ft2``
-
-- **Required:** ``true``
-
-<br/>
-
-**Enclosure: Doors R-value**
-
-R-value of the opaque door(s).
-
-- **Name:** ``door_rvalue``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
 
 - **Required:** ``true``
 
