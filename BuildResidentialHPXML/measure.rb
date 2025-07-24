@@ -61,7 +61,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('whole_sfa_or_mf_building_sim', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('whole_sfa_or_mf_building_sim', false)
     arg.setDisplayName('Whole SFA/MF Building Simulation?')
     arg.setDescription('If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.')
     args << arg
@@ -96,18 +96,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The availability of the natural ventilation schedule during unavailable periods. Valid choices are: #{[HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].join(', ')}. If multiple periods, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-unavailable-periods'>HPXML Unavailable Periods</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('simulation_control_timestep', false)
     arg.setDisplayName('Simulation Control: Timestep')
     arg.setUnits('min')
     arg.setDescription("Value must be a divisor of 60. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_run_period', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('simulation_control_run_period', false)
     arg.setDisplayName('Simulation Control: Run Period')
     arg.setDescription("Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_temperature_capacitance_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('simulation_control_temperature_capacitance_multiplier', false)
     arg.setDisplayName('Simulation Control: Temperature Capacitance Multiplier')
     arg.setDescription("Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
@@ -117,7 +117,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     site_type_choices << HPXML::SiteTypeUrban
     site_type_choices << HPXML::SiteTypeRural
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_type', site_type_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_type', site_type_choices, false)
     arg.setDisplayName('Site: Type')
     arg.setDescription("The type of site. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
     args << arg
@@ -127,12 +127,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     site_shielding_of_home_choices << HPXML::ShieldingNormal
     site_shielding_of_home_choices << HPXML::ShieldingWellShielded
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_shielding_of_home', site_shielding_of_home_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_shielding_of_home', site_shielding_of_home_choices, false)
     arg.setDisplayName('Site: Shielding of Home')
     arg.setDescription("Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_type', choices[:site_soil_type], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_soil_type', choices[:site_soil_type], false)
     arg.setDisplayName('Site: Soil Type')
     arg.setDescription('The soil and moisture type.')
     args << arg
@@ -158,101 +158,101 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     unit_type_choices << HPXML::ResidentialTypeApartment
     unit_type_choices << HPXML::ResidentialTypeManufactured
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('unit_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('unit_multiplier', false)
     arg.setDisplayName('Building Construction: Unit Multiplier')
     arg.setDescription('The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value. If not provided, defaults to 1.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_unit_type', unit_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_unit_type', unit_type_choices, true)
     arg.setDisplayName('Geometry: Unit Type')
     arg.setDescription("The type of dwelling unit. Use #{HPXML::ResidentialTypeSFA} for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use #{HPXML::ResidentialTypeApartment} for a dwelling unit with 1 story, attached units to one, two, or three sides, and units above and/or below.")
     arg.setDefaultValue(HPXML::ResidentialTypeSFD)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_attached_walls', choices[:geometry_attached_walls], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_attached_walls', choices[:geometry_attached_walls], false)
     arg.setDisplayName('Geometry: Unit Attached Walls')
     arg.setDescription("The location of the attached walls if a dwelling unit of type '#{HPXML::ResidentialTypeSFA}' or '#{HPXML::ResidentialTypeApartment}'.")
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_unit_num_floors_above_grade', true)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('geometry_unit_num_floors_above_grade', true)
     arg.setDisplayName('Geometry: Unit Number of Floors Above Grade')
     arg.setUnits('#')
     arg.setDescription("The number of floors above grade in the unit. Attic type #{HPXML::AtticTypeConditioned} is included. Assumed to be 1 for #{HPXML::ResidentialTypeApartment}s.")
     arg.setDefaultValue(2)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_cfa', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_unit_cfa', true)
     arg.setDisplayName('Geometry: Unit Conditioned Floor Area')
     arg.setUnits('ft2')
     arg.setDescription("The total floor area of the unit's conditioned space (including any conditioned basement floor area).")
     arg.setDefaultValue(2000.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_aspect_ratio', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_unit_aspect_ratio', true)
     arg.setDisplayName('Geometry: Unit Aspect Ratio')
     arg.setUnits('Frac')
     arg.setDescription('The ratio of front/back wall length to left/right wall length for the unit, excluding any protruding garage wall area.')
     arg.setDefaultValue(2.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_orientation', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_unit_orientation', true)
     arg.setDisplayName('Geometry: Unit Orientation')
     arg.setUnits('degrees')
     arg.setDescription("The unit's orientation is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).")
     arg.setDefaultValue(180.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_unit_num_bedrooms', true)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('geometry_unit_num_bedrooms', true)
     arg.setDisplayName('Geometry: Unit Number of Bedrooms')
     arg.setUnits('#')
     arg.setDescription('The number of bedrooms in the unit.')
     arg.setDefaultValue(3)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_unit_num_bathrooms', false)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('geometry_unit_num_bathrooms', false)
     arg.setDisplayName('Geometry: Unit Number of Bathrooms')
     arg.setUnits('#')
     arg.setDescription("The number of bathrooms in the unit. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-construction'>HPXML Building Construction</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_num_occupants', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_unit_num_occupants', false)
     arg.setDisplayName('Geometry: Unit Number of Occupants')
     arg.setUnits('#')
     arg.setDescription('The number of occupants in the unit. If not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on Number of Bedrooms and Conditioned Floor Area per ANSI/RESNET/ICC 301. If provided, an *operational* calculation is instead performed in which the end use defaults to reflect real-world data (where possible).')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_building_num_units', false)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('geometry_building_num_units', false)
     arg.setDisplayName('Geometry: Building Number of Units')
     arg.setUnits('#')
     arg.setDescription("The number of units in the building. Required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment}s.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_average_ceiling_height', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_average_ceiling_height', true)
     arg.setDisplayName('Geometry: Average Ceiling Height')
     arg.setUnits('ft')
     arg.setDescription('Average distance from the floor to the ceiling.')
     arg.setDefaultValue(8.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_height_above_grade', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_unit_height_above_grade', false)
     arg.setDisplayName('Geometry: Unit Height Above Grade')
     arg.setUnits('ft')
     arg.setDescription("Describes the above-grade height of apartment units on upper floors or homes above ambient or belly-and-wing foundations. It is defined as the height of the lowest conditioned floor above grade and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-construction'>HPXML Building Construction</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_garage_type', choices[:geometry_garage_type], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_garage_type', choices[:geometry_garage_type], false)
     arg.setDisplayName('Geometry: Attached Garage')
     arg.setDescription("The type of attached garage. Only applies to #{HPXML::ResidentialTypeSFD} units.")
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_foundation_type', choices[:geometry_foundation_type], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_foundation_type', choices[:geometry_foundation_type], true)
     arg.setDisplayName('Geometry: Foundation Type')
     arg.setDescription('The foundation type of the building. Garages are assumed to be over slab-on-grade.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_attic_type', choices[:geometry_attic_type], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_attic_type', choices[:geometry_attic_type], true)
     arg.setDisplayName('Geometry: Attic Type')
     arg.setDescription('The attic/roof type of the building.')
     args << arg
@@ -271,134 +271,134 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     roof_pitch_choices << '11:12'
     roof_pitch_choices << '12:12'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_roof_pitch', roof_pitch_choices, true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_roof_pitch', roof_pitch_choices, true)
     arg.setDisplayName('Geometry: Roof Pitch')
     arg.setDescription('The roof pitch of the attic. Ignored if the building has a flat roof.')
     arg.setDefaultValue('6:12')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_eaves', choices[:geometry_eaves], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_eaves', choices[:geometry_eaves], false)
     arg.setDisplayName('Geometry: Eaves')
     arg.setDescription('The type of eaves extending from the roof.')
     arg.setDefaultValue('2 ft')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_neighbor_buildings', choices[:geometry_neighbor_buildings], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_neighbor_buildings', choices[:geometry_neighbor_buildings], false)
     arg.setDisplayName('Geometry: Neighbor Buildings')
     arg.setDescription('The presence and geometry of neighboring buildings, for shading purposes.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_floor_over_foundation', choices[:enclosure_floor_over_foundation], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_floor_over_foundation', choices[:enclosure_floor_over_foundation], false)
     arg.setDisplayName('Enclosure: Floor Over Foundation')
     arg.setDescription('The type and insulation level of the floor over the foundation (e.g., crawlspace or basement).')
     arg.setDefaultValue('Wood Frame, Uninsulated')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_floor_over_garage', choices[:enclosure_floor_over_garage], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_floor_over_garage', choices[:enclosure_floor_over_garage], false)
     arg.setDisplayName('Enclosure: Floor Over Garage')
     arg.setDescription('The type and insulation level of the floor over the garage.')
     arg.setDefaultValue('Wood Frame, Uninsulated')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_foundation_wall', choices[:enclosure_foundation_wall], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_foundation_wall', choices[:enclosure_foundation_wall], false)
     arg.setDisplayName('Enclosure: Foundation Wall')
     arg.setDescription('The type and insulation level of the foundation walls.')
     arg.setDefaultValue('Solid Concrete, Uninsulated')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_rim_joist', choices[:enclosure_rim_joist], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_rim_joist', choices[:enclosure_rim_joist], false)
     arg.setDisplayName('Enclosure: Rim Joists')
     arg.setDescription('The type and insulation level of the rim joists.')
     arg.setDefaultValue('Uninsulated')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_slab', choices[:enclosure_slab], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_slab', choices[:enclosure_slab], false)
     arg.setDisplayName('Enclosure: Slab')
     arg.setDescription('The type and insulation level of the slab. Applies to slab-on-grade as well as basement/crawlspace foundations. Under Slab insulation is placed horizontally from the edge of the slab inward. Perimeter insulation is placed vertically from the top of the slab downward. Whole Slab insulation is placed horizontally below the entire slab area.')
     arg.setDefaultValue('Uninsulated')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_ceiling', choices[:enclosure_ceiling], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_ceiling', choices[:enclosure_ceiling], true)
     arg.setDisplayName('Enclosure: Ceiling')
     arg.setDescription('The type and insulation level of the ceiling (attic floor).')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_roof', choices[:enclosure_roof], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_roof', choices[:enclosure_roof], true)
     arg.setDisplayName('Enclosure: Roof')
     arg.setDescription('The type and insulation level of the roof.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_roof_material', choices[:enclosure_roof_material], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_roof_material', choices[:enclosure_roof_material], false)
     arg.setDisplayName('Enclosure: Roof Material')
     arg.setDescription("The material type and color of the roof. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
     arg.setDefaultValue('Asphalt/Fiberglass Shingles, Medium')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_radiant_barrier', choices[:enclosure_radiant_barrier], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_radiant_barrier', choices[:enclosure_radiant_barrier], false)
     arg.setDisplayName('Enclosure: Radiant Barrier')
     arg.setDescription('The type of radiant barrier in the attic.')
     arg.setDefaultValue(choices[:enclosure_radiant_barrier][0])
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall', choices[:enclosure_wall], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_wall', choices[:enclosure_wall], true)
     arg.setDisplayName('Enclosure: Walls')
     arg.setDescription('The type and insulation level of the walls.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall_continuous_insulation', choices[:enclosure_wall_continuous_insulation], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_wall_continuous_insulation', choices[:enclosure_wall_continuous_insulation], false)
     arg.setDisplayName('Enclosure: Wall Continuous Insulation')
     arg.setDescription('The insulation level of the wall continuous insulation. The R-value of the continuous insulation will be ignored if a wall option with an IECC U-factor is selected.')
     arg.setDefaultValue('Uninsulated')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_wall_siding', choices[:enclosure_wall_siding], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_wall_siding', choices[:enclosure_wall_siding], false)
     arg.setDisplayName('Enclosure: Wall Siding')
     arg.setDescription('The type, color, and insulation level of the wall siding. The R-value of the siding will be ignored if a wall option with an IECC U-factor is selected.')
     arg.setDefaultValue('Wood, Medium')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window', choices[:enclosure_window], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_window', choices[:enclosure_window], true)
     arg.setDisplayName('Enclosure: Windows')
     arg.setDescription('The type of windows.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_window_area_or_wwr_front', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_window_area_or_wwr_front', true)
     arg.setDisplayName('Enclosure: Window Front Area or WWR')
     arg.setUnits('ft2 or frac')
     arg.setDescription("The amount of window area on the unit's front facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_window_area_or_wwr_back', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_window_area_or_wwr_back', true)
     arg.setDisplayName('Enclosure: Window Back Area or WWR')
     arg.setUnits('ft2 or frac')
     arg.setDescription("The amount of window area on the unit's back facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_window_area_or_wwr_left', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_window_area_or_wwr_left', true)
     arg.setDisplayName('Enclosure: Window Left Area or WWR')
     arg.setUnits('ft2 or frac')
     arg.setDescription("The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_window_area_or_wwr_right', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_window_area_or_wwr_right', true)
     arg.setDisplayName('Enclosure: Window Right Area or WWR')
     arg.setUnits('ft2 or frac')
     arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_natural_ventilation', choices[:enclosure_window_natural_ventilation], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_window_natural_ventilation', choices[:enclosure_window_natural_ventilation], false)
     arg.setDisplayName('Enclosure: Window Natural Ventilation')
     arg.setDescription('The amount of natural ventilation from occupants opening operable windows when outdoor conditions are favorable.')
     arg.setDefaultValue('67% Operable Windows, 3 Days/Week')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_interior_shading', choices[:enclosure_window_interior_shading], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_window_interior_shading', choices[:enclosure_window_interior_shading], false)
     arg.setDisplayName('Enclosure: Window Interior Shading')
     arg.setDescription('The type of window interior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_exterior_shading', choices[:enclosure_window_exterior_shading], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_window_exterior_shading', choices[:enclosure_window_exterior_shading], false)
     arg.setDisplayName('Enclosure: Window Exterior Shading')
     arg.setDescription('The type of window exterior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.')
     args << arg
@@ -408,7 +408,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     window_insect_screen_choices << HPXML::LocationExterior
     window_insect_screen_choices << HPXML::LocationInterior
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_insect_screens', window_insect_screen_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_window_insect_screens', window_insect_screen_choices, false)
     arg.setDisplayName('Enclosure: Window Insect Screens')
     arg.setDescription('The type of window insect screens, if present. If not provided, assumes there are no insect screens.')
     args << arg
@@ -417,65 +417,65 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     storm_window_type_choices << HPXML::WindowGlassTypeClear
     storm_window_type_choices << HPXML::WindowGlassTypeLowE
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_window_storm_type', storm_window_type_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_window_storm_type', storm_window_type_choices, false)
     arg.setDisplayName('Enclosure: Window Storms')
     arg.setDescription('The type of window storm, if present. If not provided, assumes there is no storm.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_overhangs', choices[:enclosure_overhangs], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_overhangs', choices[:enclosure_overhangs], false)
     arg.setDisplayName('Enclosure: Window Overhangs')
     arg.setDescription('The type of window overhangs.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_skylight', choices[:enclosure_skylight], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_skylight', choices[:enclosure_skylight], false)
     arg.setDisplayName('Enclosure: Skylights')
     arg.setDescription('The type of skylights.')
     arg.setDefaultValue('Single, Clear, Metal')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_skylight_area_front', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_skylight_area_front', false)
     arg.setDisplayName('Enclosure: Skylight Front Area')
     arg.setUnits('ft2')
     arg.setDescription("The amount of skylight area on the unit's front conditioned roof.")
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_skylight_area_back', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_skylight_area_back', false)
     arg.setDisplayName('Enclosure: Skylight Back Area')
     arg.setUnits('ft2')
     arg.setDescription("The amount of skylight area on the unit's back conditioned roof.")
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_skylight_area_left', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_skylight_area_left', false)
     arg.setDisplayName('Enclosure: Skylight Left Area')
     arg.setUnits('ft2')
     arg.setDescription("The amount of skylight area on the unit's left conditioned roof (when viewed from the front).")
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_skylight_area_right', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_skylight_area_right', false)
     arg.setDisplayName('Enclosure: Skylight Right Area')
     arg.setUnits('ft2')
     arg.setDescription("The amount of skylight area on the unit's right conditioned roof (when viewed from the front).")
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_door', choices[:enclosure_door], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_door', choices[:enclosure_door], false)
     arg.setDisplayName('Enclosure: Doors')
     arg.setDescription('The type of doors.')
     arg.setDefaultValue('Solid Wood, R-2')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('enclosure_door_area', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_door_area', true)
     arg.setDisplayName('Enclosure: Doors Area')
     arg.setUnits('ft2')
     arg.setDescription('The area of the opaque door(s).')
     arg.setDefaultValue(20.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_air_leakage', choices[:enclosure_air_leakage], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_air_leakage', choices[:enclosure_air_leakage], false)
     arg.setDisplayName('Enclosure: Air Leakage')
     arg.setDescription('The amount of air leakage. When a leakiness description is used, the Year Built of the home is also required.')
     args << arg
@@ -484,12 +484,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     air_leakage_type_choices << HPXML::InfiltrationTypeUnitTotal
     air_leakage_type_choices << HPXML::InfiltrationTypeUnitExterior
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('enclosure_air_leakage_type', air_leakage_type_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_air_leakage_type', air_leakage_type_choices, false)
     arg.setDisplayName('Enclosure: Air Leakage Type')
     arg.setDescription("Type of air leakage if providing a numeric air leakage value. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('enclosure_has_flue_or_chimney_in_conditioned_space', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('enclosure_has_flue_or_chimney_in_conditioned_space', false)
     arg.setDisplayName('Enclosure: Has Flue or Chimney in Conditioned Space')
     arg.setDescription("Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#flue-or-chimney'>Flue or Chimney</a>) is used.")
     args << arg
@@ -503,57 +503,57 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_fuel_choices << HPXML::FuelTypeWoodPellets
     heating_system_fuel_choices << HPXML::FuelTypeCoal
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system', choices[:hvac_heating_system], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system', choices[:hvac_heating_system], true)
     arg.setDisplayName('HVAC: Heating System')
     arg.setDescription("The type and efficiency of the heating system. Use 'None' if there is no heating system or if there is a heat pump serving a heating load.")
     arg.setDefaultValue('Fuel Furnace, 78% AFUE')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system_fuel', heating_system_fuel_choices, true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_fuel', heating_system_fuel_choices, true)
     arg.setDisplayName('HVAC: Heating System Fuel Type')
     arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system_capacity', choices[:hvac_heating_system_capacity], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_capacity', choices[:hvac_heating_system_capacity], false)
     arg.setDisplayName('HVAC: Heating System Capacity')
     arg.setDescription('The output capacity of the heating system.')
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_heating_system_fraction_heat_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_heating_system_fraction_heat_load_served', true)
     arg.setDisplayName('HVAC: Heating System Fraction Heat Load Served')
     arg.setDescription('The heating load served by the heating system.')
     arg.setUnits('Frac')
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_cooling_system', choices[:hvac_cooling_system], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system', choices[:hvac_cooling_system], true)
     arg.setDisplayName('HVAC: Cooling System')
     arg.setDescription("The type and efficiency of the cooling system. Use 'None' if there is no cooling system or if there is a heat pump serving a cooling load.")
     arg.setDefaultValue('Central AC, SEER 13')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_cooling_system_capacity', choices[:hvac_cooling_system_capacity], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system_capacity', choices[:hvac_cooling_system_capacity], false)
     arg.setDisplayName('HVAC: Cooling System Capacity')
     arg.setDescription('The output capacity of the cooling system.')
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_cooling_system_fraction_cool_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_cooling_system_fraction_cool_load_served', true)
     arg.setDisplayName('HVAC: Cooling System Fraction Cool Load Served')
     arg.setDescription('The cooling load served by the cooling system.')
     arg.setUnits('Frac')
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_cooling_system_integrated_heating_capacity', choices[:hvac_cooling_system_integrated_heating_capacity], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system_integrated_heating_capacity', choices[:hvac_cooling_system_integrated_heating_capacity], false)
     arg.setDisplayName('HVAC: Cooling System Integrated Heating Capacity')
     arg.setDescription("The output capacity of the cooling system's integrated heating system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner} systems with integrated heating.")
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_cooling_system_integrated_heating_fraction_heat_load_served', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_cooling_system_integrated_heating_fraction_heat_load_served', false)
     arg.setDisplayName('HVAC: Cooling System Integrated Heating Fraction Heat Load Served')
     arg.setDescription("The heating load served by the heating system integrated into cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner} systems with integrated heating.")
     arg.setUnits('Frac')
@@ -568,132 +568,132 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingEmergency
     heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingSupplemental
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heat_pump', choices[:hvac_heat_pump], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump', choices[:hvac_heat_pump], true)
     arg.setDisplayName('HVAC: Heat Pump')
     arg.setDescription('The type and efficiency of the heat pump.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heat_pump_capacity', choices[:hvac_heat_pump_capacity], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_capacity', choices[:hvac_heat_pump_capacity], false)
     arg.setDisplayName('HVAC: Heat Pump Capacity')
     arg.setDescription('The output capacity of the heat pump.')
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_sizing_methodology', heat_pump_sizing_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('heat_pump_sizing_methodology', heat_pump_sizing_choices, false)
     arg.setDisplayName('HVAC: Heat Pump Sizing Methodology')
     arg.setDescription("The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_heat_pump_fraction_heat_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_heat_pump_fraction_heat_load_served', true)
     arg.setDisplayName('HVAC: Heat Pump Fraction Heat Load Served')
     arg.setDescription('The heating load served by the heat pump.')
     arg.setUnits('Frac')
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_heat_pump_fraction_cool_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_heat_pump_fraction_cool_load_served', true)
     arg.setDisplayName('HVAC: Heat Pump Fraction Cool Load Served')
     arg.setDescription('The cooling load served by the heat pump.')
     arg.setUnits('Frac')
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heat_pump_temperatures', choices[:hvac_heat_pump_temperatures], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_temperatures', choices[:hvac_heat_pump_temperatures], false)
     arg.setDisplayName('HVAC: Heat Pump Temperatures')
     arg.setDescription('Specifies the minimum compressor temperature and/or maximum HP backup temperature. If both are the same, a binary switchover temperature is used.')
     arg.setDefaultValue('Default')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heat_pump_backup', choices[:hvac_heat_pump_backup], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_backup', choices[:hvac_heat_pump_backup], true)
     arg.setDisplayName('HVAC: Heat Pump Backup Type')
     arg.setDescription("The type and efficiency of the heat pump backup. Use 'None' if there is no backup heating. If Backup Type is Separate Heating System, Heating System 2 is used to specify the backup.")
     arg.setDefaultValue('Integrated, Electricity, 100% Efficiency')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heat_pump_backup_capacity', choices[:hvac_heat_pump_backup_capacity], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_backup_capacity', choices[:hvac_heat_pump_backup_capacity], false)
     arg.setDisplayName('HVAC: Heat Pump Backup Capacity')
     arg.setDescription('The output capacity of the heat pump backup if there is integrated backup heating.')
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_sizing_methodology', heat_pump_backup_sizing_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('heat_pump_backup_sizing_methodology', heat_pump_backup_sizing_choices, false)
     arg.setDisplayName('HVAC: Heat Pump Backup Sizing Methodology')
     arg.setDescription("The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_geothermal_loop', choices[:hvac_geothermal_loop], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_geothermal_loop', choices[:hvac_geothermal_loop], false)
     arg.setDisplayName('HVAC: Geothermal Loop')
     arg.setDescription("The geothermal loop configuration if there's a #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump.")
     arg.setDefaultValue('Default')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system_2', choices[:hvac_heating_system_2], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_2', choices[:hvac_heating_system_2], false)
     arg.setDisplayName('HVAC: Heating System 2')
     arg.setDescription("The type and efficiency of the second heating system. If a heat pump is specified and the backup type is '#{HPXML::HeatPumpBackupTypeSeparate}', this heating system represents the '#{HPXML::HeatPumpBackupTypeSeparate}' backup heating.")
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system_2_fuel', heating_system_fuel_choices, true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_2_fuel', heating_system_fuel_choices, true)
     arg.setDisplayName('HVAC: Heating System 2 Fuel Type')
     arg.setDescription("The fuel type of the second heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
     arg.setDefaultValue(HPXML::FuelTypeElectricity)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_heating_system_2_capacity', choices[:hvac_heating_system_2_capacity], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_2_capacity', choices[:hvac_heating_system_2_capacity], false)
     arg.setDisplayName('HVAC: Heating System 2 Capacity')
     arg.setDescription('The output capacity of the second heating system.')
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_heating_system_2_fraction_heat_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_heating_system_2_fraction_heat_load_served', true)
     arg.setDisplayName('HVAC: Heating System 2 Fraction Heat Load Served')
     arg.setDescription('The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.')
     arg.setUnits('Frac')
     arg.setDefaultValue(0.25)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekday_setpoint', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_heating_weekday_setpoint', false)
     arg.setDisplayName('HVAC Control: Heating Weekday Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekday heating setpoint schedule. Required unless a detailed CSV schedule is provided.')
     arg.setUnits('F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekend_setpoint', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_heating_weekend_setpoint', false)
     arg.setDisplayName('HVAC Control: Heating Weekend Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekend heating setpoint schedule. Required unless a detailed CSV schedule is provided.')
     arg.setUnits('F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_cooling_weekday_setpoint', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_cooling_weekday_setpoint', false)
     arg.setDisplayName('HVAC Control: Cooling Weekday Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekday cooling setpoint schedule. Required unless a detailed CSV schedule is provided.')
     arg.setUnits('F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_cooling_weekend_setpoint', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_cooling_weekend_setpoint', false)
     arg.setDisplayName('HVAC Control: Cooling Weekend Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekend cooling setpoint schedule. Required unless a detailed CSV schedule is provided.')
     arg.setUnits('F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_season_period', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_heating_season_period', false)
     arg.setDisplayName('HVAC Control: Heating Season Period')
     arg.setDescription("Enter a date range like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_cooling_season_period', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_cooling_season_period', false)
     arg.setDisplayName('HVAC Control: Cooling Season Period')
     arg.setDescription("Enter a date range like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_blower_fan_watts_per_cfm', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_blower_fan_watts_per_cfm', false)
     arg.setDisplayName('HVAC Blower: Fan Efficiency')
     arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless #{HPXML::HVACTypeHeatPumpMiniSplit} systems). If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='#{docs_base_url}#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='#{docs_base_url}#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.")
     arg.setUnits('W/CFM')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_installation_defects', choices[:hvac_installation_defects], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_installation_defects', choices[:hvac_installation_defects], false)
     arg.setDisplayName('HVAC Installation Defects')
     arg.setDescription('Specifies whether the HVAC system has airflow and/or refrigerant charge installation defects. Applies to central furnaces and central/mini-split ACs and HPs.')
     arg.setDefaultValue('None')
@@ -721,84 +721,84 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationOtherNonFreezingSpace
     duct_location_choices << HPXML::LocationManufacturedHomeBelly
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_ducts', choices[:hvac_ducts], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_ducts', choices[:hvac_ducts], true)
     arg.setDisplayName('HVAC Ducts')
     arg.setDescription('The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.')
     arg.setDefaultValue('15% Leakage to Outside, Uninsulated')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_ducts_supply_location', duct_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_ducts_supply_location', duct_location_choices, false)
     arg.setDisplayName('HVAC Ducts: Supply Location')
     arg.setDescription("The location of the supply ducts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_ducts_supply_surface_area_fraction', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_ducts_supply_surface_area_fraction', false)
     arg.setDisplayName('HVAC Ducts: Supply Area Fraction')
     arg.setDescription("The fraction of supply ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
     arg.setUnits('frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_ducts_supply_leakage_fraction', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_ducts_supply_leakage_fraction', false)
     arg.setDisplayName('HVAC Ducts: Supply Leakage Fraction')
     arg.setDescription('The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts')
     arg.setUnits('frac')
     arg.setDefaultValue(0.5)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hvac_ducts_return_location', duct_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_ducts_return_location', duct_location_choices, false)
     arg.setDisplayName('HVAC Ducts: Return Location')
     arg.setDescription("The location of the return ducts. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_ducts_return_surface_area_fraction', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_ducts_return_surface_area_fraction', false)
     arg.setDisplayName('HVAC Ducts: Return Area Fraction')
     arg.setDescription("The fraction of return ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
     arg.setUnits('frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('hvac_ducts_number_of_return_registers', false)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('hvac_ducts_number_of_return_registers', false)
     arg.setDisplayName('HVAC Ducts: Number of Return Registers')
     arg.setDescription("The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-distribution'>Air Distribution</a>) is used.")
     arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ventilation_fans_mechanical', choices[:ventilation_fans_mechanical], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_fans_mechanical', choices[:ventilation_fans_mechanical], false)
     arg.setDisplayName('Ventilation Fans: Whole-Home Mechanical')
     arg.setDescription('The type of whole-home mechanical ventilation system.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ventilation_fans_kitchen', choices[:ventilation_fans_kitchen], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_fans_kitchen', choices[:ventilation_fans_kitchen], false)
     arg.setDisplayName('Ventilation Fans: Kitchen')
     arg.setDescription('The type of kitchen ventilation fans.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ventilation_fans_bathroom', choices[:ventilation_fans_bathroom], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_fans_bathroom', choices[:ventilation_fans_bathroom], false)
     arg.setDisplayName('Ventilation Fans: Bathroom')
     arg.setDescription('The type of bathroom ventilation fans.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('whole_house_fan_present', true)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('whole_house_fan_present', true)
     arg.setDisplayName('Whole House Fan: Present')
     arg.setDescription('Whether there is a whole house fan.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('whole_house_fan_flow_rate', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('whole_house_fan_flow_rate', false)
     arg.setDisplayName('Whole House Fan: Flow Rate')
     arg.setDescription("The flow rate of the whole house fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-whole-house-fans'>HPXML Whole House Fans</a>) is used.")
     arg.setUnits('CFM')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('whole_house_fan_power', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('whole_house_fan_power', false)
     arg.setDisplayName('Whole House Fan: Fan Power')
     arg.setDescription("The fan power of the whole house fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-whole-house-fans'>HPXML Whole House Fans</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_water_heater', choices[:dhw_water_heater], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_water_heater', choices[:dhw_water_heater], true)
     arg.setDisplayName('DHW: Water Heater')
     arg.setDescription('The type and efficiency of the water heater.')
     args << arg
@@ -821,105 +821,105 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
     water_heater_location_choices << HPXML::LocationOtherNonFreezingSpace
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_water_heater_location', water_heater_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_water_heater_location', water_heater_location_choices, false)
     arg.setDisplayName('DHW: Water Heater Location')
     arg.setDescription("The location of water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dhw_water_heater_jacket_rvalue', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('dhw_water_heater_jacket_rvalue', false)
     arg.setDisplayName('DHW: Water Heater Jacket R-value')
     arg.setDescription("The jacket R-value of water heater. Doesn't apply to #{HPXML::WaterHeaterTypeTankless} or #{HPXML::WaterHeaterTypeCombiTankless}. If not provided, defaults to no jacket insulation.")
     arg.setUnits('F-ft2-hr/Btu')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dhw_water_heater_setpoint_temperature', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('dhw_water_heater_setpoint_temperature', false)
     arg.setDisplayName('DHW: Water Heater Setpoint Temperature')
     arg.setDescription("The setpoint temperature of water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.")
     arg.setUnits('F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dhw_water_heater_uses_desuperheater', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('dhw_water_heater_uses_desuperheater', false)
     arg.setDisplayName('DHW: Water Heater Uses Desuperheater')
     arg.setDescription("Requires that the dwelling unit has a #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, or #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump or a #{HPXML::HVACTypeCentralAirConditioner} or #{HPXML::HVACTypeMiniSplitAirConditioner} air conditioner. If not provided, assumes no desuperheater.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_distribution', choices[:dhw_distribution], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_distribution', choices[:dhw_distribution], false)
     arg.setDisplayName('DHW: Hot Water Distribution')
     arg.setDescription('The type of domestic hot water distrubtion.')
     arg.setDefaultValue('Uninsulated, Standard')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_fixtures', choices[:dhw_fixtures], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_fixtures', choices[:dhw_fixtures], false)
     arg.setDisplayName('DHW: Hot Water Fixtures')
     arg.setDescription('The type of domestic hot water fixtures.')
     arg.setDefaultValue('Standard')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_drain_water_heat_recovery', choices[:dhw_drain_water_heat_recovery], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_drain_water_heat_recovery', choices[:dhw_drain_water_heat_recovery], false)
     arg.setDisplayName('DHW: Drain Water Heat Reovery')
     arg.setDescription('The type of drain water heater recovery.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dhw_water_fixtures_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('dhw_water_fixtures_usage_multiplier', false)
     arg.setDisplayName('DHW: Hot Water Fixtures Usage Multiplier')
     arg.setDescription("Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-water-fixtures'>HPXML Water Fixtures</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dhw_solar_thermal', choices[:dhw_solar_thermal], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_solar_thermal', choices[:dhw_solar_thermal], false)
     arg.setDisplayName('DHW: Solar Thermal')
     arg.setDescription('The size and type of solar thermal system for domestic hot water.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dhw_solar_thermal_collector_azimuth', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('dhw_solar_thermal_collector_azimuth', false)
     arg.setDisplayName('DHW: Solar Thermal Collector Azimuth')
     arg.setUnits('degrees')
     arg.setDescription('The azimuth of the solar thermal system collectors. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).')
     arg.setDefaultValue(180)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('dhw_solar_thermal_collector_tilt', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('dhw_solar_thermal_collector_tilt', false)
     arg.setDisplayName('DHW: Solar Thermal Collector Tilt')
     arg.setUnits('degrees')
     arg.setDescription('The tilt of the solar thermal system collectors. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
     arg.setDefaultValue('RoofPitch')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system', choices[:pv_system], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('pv_system', choices[:pv_system], false)
     arg.setDisplayName('PV System')
     arg.setDescription('The size and type of PV system.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_array_azimuth', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('pv_system_array_azimuth', false)
     arg.setDisplayName('PV System: Array Azimuth')
     arg.setUnits('degrees')
     arg.setDescription('The azimuth of the PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).')
     arg.setDefaultValue(180)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('pv_system_array_tilt', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('pv_system_array_tilt', false)
     arg.setDisplayName('PV System: Array Tilt')
     arg.setUnits('degrees')
     arg.setDescription('The tilt of the PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
     arg.setDefaultValue('RoofPitch')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_2', choices[:pv_system_2], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('pv_system_2', choices[:pv_system_2], false)
     arg.setDisplayName('PV System 2')
     arg.setDescription('The size and type of the second PV system.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_2_array_azimuth', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('pv_system_2_array_azimuth', false)
     arg.setDisplayName('PV System 2: Array Azimuth')
     arg.setUnits('degrees')
     arg.setDescription('The azimuth of the second PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).')
     arg.setDefaultValue(180)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('pv_system_2_array_tilt', false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('pv_system_2_array_tilt', false)
     arg.setDisplayName('PV System 2: Array Tilt')
     arg.setUnits('degrees')
     arg.setDescription('The tilt of the second PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
@@ -931,7 +931,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Types of electric panel service/feeder load calculations. These calculations are experimental research features. Possible types are: #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased}, #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased}. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_baseline_peak_power', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_baseline_peak_power', false)
     arg.setDisplayName('Electric Panel: Baseline Peak Power')
     arg.setDescription("Specifies the baseline peak power. Used for #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased}. If not provided, assumed to be zero.")
     arg.setUnits('W')
@@ -941,341 +941,286 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     electric_panel_voltage_choices << HPXML::ElectricPanelVoltage120
     electric_panel_voltage_choices << HPXML::ElectricPanelVoltage240
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_service_voltage', electric_panel_voltage_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('electric_panel_service_voltage', electric_panel_voltage_choices, false)
     arg.setDisplayName('Electric Panel: Service Voltage')
     arg.setDescription("The service voltage of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('V')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_service_max_current_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_service_max_current_rating', false)
     arg.setDisplayName('Electric Panel: Service Max Current Rating')
     arg.setDescription("The service max current rating of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('A')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_headroom', false)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('electric_panel_breaker_spaces_headroom', false)
     arg.setDisplayName('Electric Panel: Breaker Spaces Headroom')
     arg.setDescription("The unoccupied number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_rated_total', false)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('electric_panel_breaker_spaces_rated_total', false)
     arg.setDisplayName('Electric Panel: Breaker Spaces Rated Total')
     arg.setDescription("The rated total number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
     arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heating_system_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_heating_system_power_rating', false)
     arg.setDisplayName('Electric Panel: Heating System Power Rating')
     arg.setDescription("Specifies the panel load heating system power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heating_system_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_heating_system_new_load', false)
     arg.setDisplayName('Electric Panel: Heating System New Load')
     arg.setDescription("Whether the heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_cooling_system_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_cooling_system_power_rating', false)
     arg.setDisplayName('Electric Panel: Cooling System Power Rating')
     arg.setDescription("Specifies the panel load cooling system power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_cooling_system_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_cooling_system_new_load', false)
     arg.setDisplayName('Electric Panel: Cooling System New Load')
     arg.setDescription("Whether the cooling system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_heat_pump_power_rating', false)
     arg.setDisplayName('Electric Panel: Heat Pump Power Rating')
     arg.setDescription("Specifies the panel load heat pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heat_pump_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_heat_pump_new_load', false)
     arg.setDisplayName('Electric Panel: Heat Pump New Load')
     arg.setDescription("Whether the heat pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heating_system_2_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_heating_system_2_power_rating', false)
     arg.setDisplayName('Electric Panel: Heating System 2 Power Rating')
     arg.setDescription("Specifies the panel load second heating system power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heating_system_2_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_heating_system_2_new_load', false)
     arg.setDisplayName('Electric Panel: Heating System 2 New Load')
     arg.setDescription("Whether the second heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_mech_vent_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_mech_vent_power_rating', false)
     arg.setDisplayName('Electric Panel: Mechanical Ventilation Power Rating')
     arg.setDescription("Specifies the panel load mechanical ventilation power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_mech_vent_fan_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_mech_vent_fan_new_load', false)
     arg.setDisplayName('Electric Panel: Mechanical Ventilation New Load')
     arg.setDescription("Whether the mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_whole_house_fan_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_whole_house_fan_power_rating', false)
     arg.setDisplayName('Electric Panel: Whole House Fan Power Rating')
     arg.setDescription("Specifies the panel load whole house fan power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_whole_house_fan_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_whole_house_fan_new_load', false)
     arg.setDisplayName('Electric Panel: Whole House Fan New Load')
     arg.setDescription("Whether the whole house fan is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_kitchen_fans_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_kitchen_fans_power_rating', false)
     arg.setDisplayName('Electric Panel: Kitchen Fans Power Rating')
     arg.setDescription("Specifies the panel load kitchen fans power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_kitchen_fans_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_kitchen_fans_new_load', false)
     arg.setDisplayName('Electric Panel: Kitchen Fans New Load')
     arg.setDescription("Whether the kitchen fans is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_bathroom_fans_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_bathroom_fans_power_rating', false)
     arg.setDisplayName('Electric Panel: Bathroom Fans Power Rating')
     arg.setDescription("Specifies the panel load bathroom fans power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_bathroom_fans_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_bathroom_fans_new_load', false)
     arg.setDisplayName('Electric Panel: Bathroom Fans New Load')
     arg.setDescription("Whether the bathroom fans is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_water_heater_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_electric_water_heater_power_rating', false)
     arg.setDisplayName('Electric Panel: Electric Water Heater Power Rating')
     arg.setDescription("Specifies the panel load water heater power rating. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_electric_water_heater_voltage', electric_panel_voltage_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('electric_panel_load_electric_water_heater_voltage', electric_panel_voltage_choices, false)
     arg.setDisplayName('Electric Panel: Electric Water Heater Voltage')
     arg.setDescription("Specifies the panel load water heater voltage. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('V')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_water_heater_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_electric_water_heater_new_load', false)
     arg.setDisplayName('Electric Panel: Electric Water Heater New Load')
     arg.setDescription("Whether the water heater is a new panel load addition to an existing service panel. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_clothes_dryer_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_electric_clothes_dryer_power_rating', false)
     arg.setDisplayName('Electric Panel: Electric Clothes Dryer Power Rating')
     arg.setDescription("Specifies the panel load clothes dryer power rating. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_electric_clothes_dryer_voltage', electric_panel_voltage_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('electric_panel_load_electric_clothes_dryer_voltage', electric_panel_voltage_choices, false)
     arg.setDisplayName('Electric Panel: Electric Clothes Dryer Voltage')
     arg.setDescription("Specifies the panel load clothes dryer voltage. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('V')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_clothes_dryer_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_electric_clothes_dryer_new_load', false)
     arg.setDisplayName('Electric Panel: Electric Clothes Dryer New Load')
     arg.setDescription("Whether the clothes dryer is a new panel load addition to an existing service panel. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_dishwasher_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_dishwasher_power_rating', false)
     arg.setDisplayName('Electric Panel: Dishwasher Power Rating')
     arg.setDescription("Specifies the panel load dishwasher power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_dishwasher_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_dishwasher_new_load', false)
     arg.setDisplayName('Electric Panel: Dishwasher New Load')
     arg.setDescription("Whether the dishwasher is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_cooking_range_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_electric_cooking_range_power_rating', false)
     arg.setDisplayName('Electric Panel: Electric Cooking Range/Oven Power Rating')
     arg.setDescription("Specifies the panel load cooking range/oven power rating. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_electric_cooking_range_voltage', electric_panel_voltage_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('electric_panel_load_electric_cooking_range_voltage', electric_panel_voltage_choices, false)
     arg.setDisplayName('Electric Panel: Electric Cooking Range/Oven Voltage')
     arg.setDescription("Specifies the panel load cooking range/oven voltage. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('V')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_cooking_range_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_electric_cooking_range_new_load', false)
     arg.setDisplayName('Electric Panel: Electric Cooking Range/Oven New Load')
     arg.setDescription("Whether the cooking range is a new panel load addition to an existing service panel. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_misc_plug_loads_well_pump_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_misc_plug_loads_well_pump_power_rating', false)
     arg.setDisplayName('Electric Panel: Misc Plug Loads Well Pump Power Rating')
     arg.setDescription("Specifies the panel load well pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_misc_plug_loads_well_pump_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_misc_plug_loads_well_pump_new_load', false)
     arg.setDisplayName('Electric Panel: Misc Plug Loads Well Pump New Load')
     arg.setDescription("Whether the well pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_misc_plug_loads_vehicle_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_misc_plug_loads_vehicle_power_rating', false)
     arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle Power Rating')
     arg.setDescription("Specifies the panel load electric vehicle power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_misc_plug_loads_vehicle_voltage', electric_panel_voltage_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('electric_panel_load_misc_plug_loads_vehicle_voltage', electric_panel_voltage_choices, false)
     arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle Voltage')
     arg.setDescription("Specifies the panel load electric vehicle voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('V')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_misc_plug_loads_vehicle_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_misc_plug_loads_vehicle_new_load', false)
     arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle New Load')
     arg.setDescription("Whether the electric vehicle is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_pool_pump_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_pool_pump_power_rating', false)
     arg.setDisplayName('Electric Panel: Pool Pump Power Rating')
     arg.setDescription("Specifies the panel load pool pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_pool_pump_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_pool_pump_new_load', false)
     arg.setDisplayName('Electric Panel: Pool Pump New Load')
     arg.setDescription("Whether the panel load pool pump is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setDescription("Whether the pool pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_pool_heater_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_electric_pool_heater_power_rating', false)
     arg.setDisplayName('Electric Panel: Electric Pool Heater Power Rating')
     arg.setDescription("Specifies the panel load pool heater power rating. Only applies to electric pool heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_pool_heater_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_electric_pool_heater_new_load', false)
     arg.setDisplayName('Electric Panel: Electric Pool Heater New Load')
     arg.setDescription("Whether the pool heater is a new panel load addition to an existing service panel. Only applies to electric pool heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_permanent_spa_pump_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_permanent_spa_pump_power_rating', false)
     arg.setDisplayName('Electric Panel: Permanent Spa Pump Power Rating')
     arg.setDescription("Specifies the panel load permanent spa pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_permanent_spa_pump_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_permanent_spa_pump_new_load', false)
     arg.setDisplayName('Electric Panel: Permanent Spa Pump New Load')
     arg.setDescription("Whether the spa pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_permanent_spa_heater_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_electric_permanent_spa_heater_power_rating', false)
     arg.setDisplayName('Electric Panel: Electric Permanent Spa Heater Power Rating')
     arg.setDescription("Specifies the panel load permanent spa heater power rating. Only applies to electric permanent spa heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_permanent_spa_heater_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_electric_permanent_spa_heater_new_load', false)
     arg.setDisplayName('Electric Panel: Electric Permanent Spa Heater New Load')
     arg.setDescription("Whether the spa heater is a new panel load addition to an existing service panel. Only applies to electric permanent spa heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_other_power_rating', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_panel_load_other_power_rating', false)
     arg.setDisplayName('Electric Panel: Other Power Rating')
     arg.setDescription("Specifies the panel load other power rating. This represents the total of all other electric loads that are fastened in place, permanently connected, or located on a specific circuit. For example, garbage disposal, built-in microwave. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     arg.setUnits('W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_other_new_load', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('electric_panel_load_other_new_load', false)
     arg.setDisplayName('Electric Panel: Other New Load')
     arg.setDescription("Whether the other load is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('battery', choices[:battery], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('battery', choices[:battery], false)
     arg.setDisplayName('Battery')
     arg.setDescription('The size and type of battery storage.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('vehicle_type', false)
-    arg.setDisplayName('Vehicle: Type')
-    arg.setDescription('The type of vehicle present at the home.')
-    arg.setDefaultValue(Constants::None)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('electric_vehicle', choices[:electric_vehicle], false)
+    arg.setDisplayName('Electric Vehicle')
+    arg.setDescription('The type of battery electric vehicle.')
+    arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_battery_capacity', false)
-    arg.setDisplayName('Vehicle: EV Battery Nominal Battery Capacity')
-    arg.setDescription("The nominal capacity of the vehicle battery, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
-    arg.setUnits('kWh')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_battery_usable_capacity', false)
-    arg.setDisplayName('Vehicle: EV Battery Usable Capacity')
-    arg.setDescription("The usable capacity of the vehicle battery, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
-    arg.setUnits('kWh')
-    args << arg
-
-    fuel_economy_units_choices = OpenStudio::StringVector.new
-    fuel_economy_units_choices << HPXML::UnitsKwhPerMile
-    fuel_economy_units_choices << HPXML::UnitsMilePerKwh
-    fuel_economy_units_choices << HPXML::UnitsMPGe
-    fuel_economy_units_choices << HPXML::UnitsMPG
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('vehicle_fuel_economy_units', fuel_economy_units_choices, false)
-    arg.setDisplayName('Vehicle: Combined Fuel Economy Units')
-    arg.setDescription("The combined fuel economy units of the vehicle. Only '#{HPXML::UnitsKwhPerMile}', '#{HPXML::UnitsMilePerKwh}', or '#{HPXML::UnitsMPGe}' are allow for electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fuel_economy_combined', false)
-    arg.setDisplayName('Vehicle: Combined Fuel Economy')
-    arg.setDescription("The combined fuel economy of the vehicle. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_miles_driven_per_year', false)
-    arg.setDisplayName('Vehicle: Miles Driven Per Year')
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_vehicle_miles_driven_per_year', false)
+    arg.setDisplayName('Electric Vehicle: Miles Driven Per Year')
     arg.setDescription("The annual miles the vehicle is driven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
     arg.setUnits('miles')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_hours_driven_per_week', false)
-    arg.setDisplayName('Vehicle: Hours Driven Per Week')
-    arg.setDescription("The weekly hours the vehicle is driven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
-    arg.setUnits('hours')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('vehicle_fraction_charged_home', false)
-    arg.setDisplayName('Vehicle: Fraction Charged at Home')
-    arg.setDescription("The fraction of charging energy provided by the at-home charger to the vehicle, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-vehicles'>HPXML Vehicles</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_charger_present', false)
-    arg.setDisplayName('Electric Vehicle Charger: Present')
-    arg.setDescription('Whether there is an electric vehicle charger present.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    ev_charging_level_choices = OpenStudio::StringVector.new
-    ev_charging_level_choices << '1'
-    ev_charging_level_choices << '2'
-    ev_charging_level_choices << '3'
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ev_charger_level', ev_charging_level_choices, false)
-    arg.setDisplayName('Electric Vehicle Charger: Charging Level')
-    arg.setDescription("The charging level of the EV charger. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_charger_power', false)
-    arg.setDisplayName('Electric Vehicle Charger: Rated Charging Power')
-    arg.setDescription("The rated power output of the EV charger. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.")
-    arg.setUnits('W')
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('electric_vehicle_charger', choices[:electric_vehicle_charger], false)
+    arg.setDisplayName('Electric Vehicle: Charger')
+    arg.setDescription('The type and usage of electric vehicle charger.')
+    arg.setDefaultValue('None')
     args << arg
 
     appliance_location_choices = OpenStudio::StringVector.new
@@ -1288,218 +1233,207 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     appliance_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
     appliance_location_choices << HPXML::LocationOtherNonFreezingSpace
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_clothes_washer', choices[:appliance_clothes_washer], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_washer', choices[:appliance_clothes_washer], false)
     arg.setDisplayName('Appliances: Clothes Washer')
     arg.setDescription('The type of clothes washer.')
     arg.setDefaultValue('Standard, 2008-2017')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_clothes_washer_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_washer_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Clothes Washer Location')
     arg.setDescription("The space type for the clothes washer location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_clothes_washer_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_clothes_washer_usage_multiplier', false)
     arg.setDisplayName('Appliances: Clothes Washer Usage Multiplier')
     arg.setDescription("Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_clothes_dryer', choices[:appliance_clothes_dryer], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_dryer', choices[:appliance_clothes_dryer], false)
     arg.setDisplayName('Appliances: Clothes Dryer')
     arg.setDescription('The type of clothes dryer.')
     arg.setDefaultValue('Electricity, Standard')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_clothes_dryer_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_dryer_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Clothes Dryer Location')
     arg.setDescription("The space type for the clothes dryer location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_clothes_dryer_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_clothes_dryer_usage_multiplier', false)
     arg.setDisplayName('Appliances: Clothes Dryer Usage Multiplier')
     arg.setDescription("Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_dishwasher', choices[:appliance_dishwasher], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_dishwasher', choices[:appliance_dishwasher], false)
     arg.setDisplayName('Appliances: Dishwasher')
     arg.setDescription('The type of dishwasher.')
     arg.setDefaultValue('Federal Minimum, Standard')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_dishwasher_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_dishwasher_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Dishwasher Location')
     arg.setDescription("The space type for the dishwasher location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_dishwasher_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_dishwasher_usage_multiplier', false)
     arg.setDisplayName('Appliances: Dishwasher Usage Multiplier')
     arg.setDescription("Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_refrigerator', choices[:appliance_refrigerator], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_refrigerator', choices[:appliance_refrigerator], false)
     arg.setDisplayName('Appliances: Refrigerator')
     arg.setDescription('The type of refrigerator.')
     arg.setDefaultValue('434 kWh/yr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_refrigerator_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_refrigerator_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Refrigerator Location')
     arg.setDescription("The space type for the refrigerator location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_refrigerator_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_refrigerator_usage_multiplier', false)
     arg.setDisplayName('Appliances: Refrigerator Usage Multiplier')
     arg.setDescription("Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_extra_refrigerator', choices[:appliance_extra_refrigerator], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_extra_refrigerator', choices[:appliance_extra_refrigerator], false)
     arg.setDisplayName('Appliances: Extra Refrigerator')
     arg.setDescription('The type of extra refrigerator.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_extra_refrigerator_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_extra_refrigerator_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Extra Refrigerator Location')
     arg.setDescription("The space type for the extra refrigerator location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_extra_refrigerator_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_extra_refrigerator_usage_multiplier', false)
     arg.setDisplayName('Appliances: Extra Refrigerator Usage Multiplier')
     arg.setDescription("Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_freezer', choices[:appliance_freezer], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_freezer', choices[:appliance_freezer], false)
     arg.setDisplayName('Appliances: Freezer')
     arg.setDescription('The type of freezer.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_freezer_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_freezer_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Freezer Location')
     arg.setDescription("The space type for the freezer location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-freezers'>HPXML Freezers</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_freezer_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_freezer_usage_multiplier', false)
     arg.setDisplayName('Appliances: Freezer Usage Multiplier')
     arg.setDescription("Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-freezers'>HPXML Freezers</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_cooking_range_oven', choices[:appliance_cooking_range_oven], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_cooking_range_oven', choices[:appliance_cooking_range_oven], false)
     arg.setDisplayName('Appliances: Cooking Range/Oven')
     arg.setDescription('The type of cooking range/oven.')
     arg.setDefaultValue('Electricity, Standard, Non-Convection Oven')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_cooking_range_oven_location', appliance_location_choices, false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_cooking_range_oven_location', appliance_location_choices, false)
     arg.setDisplayName('Appliances: Cooking Range/Oven Location')
     arg.setDescription("The space type for the cooking range/oven location. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_cooking_range_oven_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_cooking_range_oven_usage_multiplier', false)
     arg.setDisplayName('Appliances: Cooking Range/Oven Usage Multiplier')
     arg.setDescription("Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('appliance_dehumidifier', choices[:appliance_dehumidifier], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_dehumidifier', choices[:appliance_dehumidifier], false)
     arg.setDisplayName('Appliances: Dehumidifier')
     arg.setDescription('The type of dehumidifier.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('appliance_dehumidifier_rh_setpoint', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_dehumidifier_rh_setpoint', false)
     arg.setDisplayName('Appliances: Dehumidifier Relative Humidity Setpoint')
     arg.setDescription("The dehumidifier's relative humidity setpoint.")
     arg.setUnits('Frac')
     arg.setDefaultValue(0.5)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('lighting', choices[:lighting], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('lighting', choices[:lighting], true)
     arg.setDisplayName('Lighting')
     arg.setDescription('The type of lighting.')
     arg.setDefaultValue('10% CFL')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_interior_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('lighting_interior_usage_multiplier', false)
     arg.setDisplayName('Lighting: Interior Usage Multiplier')
     arg.setDescription("Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_exterior_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('lighting_exterior_usage_multiplier', false)
     arg.setDisplayName('Lighting: Exterior Usage Multiplier')
     arg.setDescription("Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_garage_usage_multiplier', false)
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('lighting_garage_usage_multiplier', false)
     arg.setDisplayName('Lighting: Garage Usage Multiplier')
     arg.setDescription("Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ceiling_fans', choices[:ceiling_fans], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ceiling_fans', choices[:ceiling_fans], false)
     arg.setDisplayName('Ceiling Fans')
     arg.setDescription('The type of ceiling fans.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_television', choices[:misc_television], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_television', choices[:misc_television], false)
     arg.setDisplayName('Misc: Television')
     arg.setDescription('The amount of television usage, relative to the national average.')
     arg.setDefaultValue('100%')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_plug_loads', choices[:misc_plug_loads], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_plug_loads', choices[:misc_plug_loads], false)
     arg.setDisplayName('Misc: Plug Loads')
     arg.setDescription('The amount of additional plug load usage, relative to the national average.')
     arg.setDefaultValue('100%')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_well_pump', choices[:misc_well_pump], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_well_pump', choices[:misc_well_pump], false)
     arg.setDisplayName('Misc: Well Pump')
     arg.setDescription('The amount of well pump usage, relative to the national average.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('misc_plug_loads_vehicle_present', true)
-    arg.setDisplayName('Misc: Vehicle Present')
-    arg.setDescription('Whether there is an electric vehicle.')
-    arg.setDefaultValue(false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_electric_vehicle_charging', choices[:misc_electric_vehicle_charging], false)
+    arg.setDisplayName('Misc: Electric Vehicle Charging')
+    arg.setDescription('The amount of EV charging usage, relative to the national average. Only use this if a detailed EV & EV charger were not otherwise specified.')
+    arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_vehicle_annual_kwh', false)
-    arg.setDisplayName('Misc: Vehicle Annual kWh')
-    arg.setDescription("The annual energy consumption of the electric vehicle plug loads. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    arg.setUnits('kWh/yr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_vehicle_usage_multiplier', false)
-    arg.setDisplayName('Misc: Vehicle Usage Multiplier')
-    arg.setDescription("Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_grill', choices[:misc_grill], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_grill', choices[:misc_grill], false)
     arg.setDisplayName('Misc: Gas Grill')
     arg.setDescription('The amount of outdoor gas grill usage, relative to the national average.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_lighting', choices[:misc_lighting], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_gas_lighting', choices[:misc_gas_lighting], false)
     arg.setDisplayName('Misc: Gas Lighting')
     arg.setDescription('The amount of gas lighting usage, relative to the national average.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_fireplace', choices[:misc_fireplace], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_fireplace', choices[:misc_fireplace], false)
     arg.setDisplayName('Misc: Fireplace')
     arg.setDescription('The amount of fireplace usage, relative to the national average. Fireplaces can also be specified as heating systems that meet a portion of the heating load.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_pool', choices[:misc_pool], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_pool', choices[:misc_pool], false)
     arg.setDisplayName('Misc: Pool')
     arg.setDescription('The type of pool (pump & heater).')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('misc_permanent_spa', choices[:misc_permanent_spa], false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_permanent_spa', choices[:misc_permanent_spa], false)
     arg.setDisplayName('Misc: Permanent Spa')
     arg.setDescription('The type of permanent spa (pump & heater).')
     arg.setDefaultValue('None')
@@ -1618,19 +1552,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Additional properties specified as key-value pairs (i.e., key=value). If multiple additional properties, use a |-separated list. For example, 'LowIncome=false|Remodeled|Description=2-story home in Denver'. These properties will be stored in the HPXML file under /HPXML/SoftwareInfo/extension/AdditionalProperties.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('combine_like_surfaces', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('combine_like_surfaces', false)
     arg.setDisplayName('Combine like surfaces?')
     arg.setDescription('If true, combines like surfaces to simplify the HPXML file generated.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_defaults', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('apply_defaults', false)
     arg.setDisplayName('Apply Default Values?')
     arg.setDescription('If true, applies OS-HPXML default values to the HPXML output file. Setting to true will also force validation of the HPXML output file before applying OS-HPXML default values.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('apply_validation', false)
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('apply_validation', false)
     arg.setDisplayName('Apply Validation?')
     arg.setDescription('If true, validates the HPXML output file. Set to false for faster performance. Note that validation is not needed if the HPXML file will be validated downstream (e.g., via the HPXMLtoOpenStudio measure).')
     arg.setDefaultValue(false)
@@ -4375,7 +4309,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_ventilation_fans(hpxml_bldg, args)
-    if not args[:ventilation_fans_mechanical_fan_type].nil?
+    if args[:ventilation_fans_mechanical] != 'None'
 
       distribution_system_idref = nil
 
@@ -4423,7 +4357,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                       distribution_system_idref: distribution_system_idref)
     end
 
-    if args[:ventilation_fans_kitchen_count].nil? || (args[:ventilation_fans_kitchen_count] > 0)
+    if args[:ventilation_fans_kitchen] != 'None'
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       rated_flow_rate: args[:ventilation_fans_kitchen_flow_rate],
                                       used_for_local_ventilation: true,
@@ -4434,7 +4368,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                       count: args[:ventilation_fans_kitchen_count])
     end
 
-    if args[:ventilation_fans_bathroom_count].nil? || (args[:ventilation_fans_bathroom_count] > 0)
+    if args[:ventilation_fans_bathroom] != 'None'
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
                                       rated_flow_rate: args[:ventilation_fans_bathroom_flow_rate],
                                       used_for_local_ventilation: true,
@@ -4641,7 +4575,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [nil]
   def set_pv_systems(hpxml_bldg, args, weather)
-    return if args[:pv_system_maximum_power_output].to_f == 0
+    return if args[:pv_system] == 'None'
 
     latitude = Defaults.get_latitude(nil, weather) unless weather.nil?
 
@@ -4654,7 +4588,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               max_power_output: args[:pv_system_maximum_power_output],
                               system_losses_fraction: args[:pv_system_system_losses_fraction])
 
-    if args[:pv_system_2_maximum_power_output].to_f > 0
+    if args[:pv_system_2] != 'None'
       hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                                 location: args[:pv_system_2_location],
                                 module_type: args[:pv_system_2_module_type],
@@ -4924,7 +4858,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_battery(hpxml_bldg, args)
-    return if args[:battery_nominal_capacity].nil? && args[:battery_usable_capacity].nil?
+    return if args[:battery] == 'None'
 
     location = get_location(args[:battery_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
 
@@ -4943,26 +4877,23 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_vehicle(hpxml_bldg, args)
-    return unless args[:vehicle_type] || args[:ev_charger_present]
-
     charger_id = nil
-    if args[:ev_charger_present]
+    if args[:electric_vehicle_charger] != 'None'
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
-                                 charging_level: args[:ev_charger_level],
-                                 charging_power: args[:ev_charger_power])
+                                 charging_level: args[:electric_vehicle_charger_level],
+                                 charging_power: args[:electric_vehicle_charger_power])
     end
 
-    if args[:vehicle_type] != Constants::None
+    if args[:electric_vehicle] != 'None'
       hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
-                              vehicle_type: args[:vehicle_type],
-                              nominal_capacity_kwh: args[:vehicle_battery_capacity],
-                              usable_capacity_kwh: args[:vehicle_battery_usable_capacity],
-                              fuel_economy_combined: args[:vehicle_fuel_economy_combined],
-                              fuel_economy_units: args[:vehicle_fuel_economy_units],
-                              miles_per_year: args[:vehicle_miles_driven_per_year],
-                              hours_per_week: args[:vehicle_hours_driven_per_week],
-                              fraction_charged_home: args[:vehicle_fraction_charged_home],
+                              vehicle_type: args[:electric_vehicle_type],
+                              nominal_capacity_kwh: args[:electric_vehicle_nominal_battery_capacity],
+                              usable_capacity_kwh: args[:electric_vehicle_usable_battery_capacity],
+                              fuel_economy_combined: args[:electric_vehicle_fuel_economy_combined],
+                              fuel_economy_units: args[:electric_vehicle_fuel_economy_units],
+                              miles_per_year: args[:electric_vehicle_miles_driven_per_year],
+                              fraction_charged_home: args[:electric_vehicle_charger_fraction_charged_at_home],
                               ev_charger_idref: charger_id)
     end
   end
@@ -4973,63 +4904,63 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_lighting(hpxml_bldg, args)
-    if not args[:lighting_interior_fraction_cfl].nil? # Has lighting
-      has_garage = (args[:geometry_garage_type_width] * args[:geometry_garage_type_depth] > 0)
+    return if args[:lighting] == 'None'
 
-      # Interior
-      interior_usage_multiplier = args[:lighting_interior_usage_multiplier]
-      if interior_usage_multiplier.nil? || interior_usage_multiplier.to_f > 0
+    has_garage = (args[:geometry_garage_type_width] * args[:geometry_garage_type_depth] > 0)
+
+    # Interior
+    interior_usage_multiplier = args[:lighting_interior_usage_multiplier]
+    if interior_usage_multiplier.nil? || interior_usage_multiplier.to_f > 0
+      hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
+                                     location: HPXML::LocationInterior,
+                                     fraction_of_units_in_location: args[:lighting_interior_fraction_cfl],
+                                     lighting_type: HPXML::LightingTypeCFL)
+      hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
+                                     location: HPXML::LocationInterior,
+                                     fraction_of_units_in_location: args[:lighting_interior_fraction_lfl],
+                                     lighting_type: HPXML::LightingTypeLFL)
+      hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
+                                     location: HPXML::LocationInterior,
+                                     fraction_of_units_in_location: args[:lighting_interior_fraction_led],
+                                     lighting_type: HPXML::LightingTypeLED)
+      hpxml_bldg.lighting.interior_usage_multiplier = interior_usage_multiplier
+    end
+
+    # Exterior
+    exterior_usage_multiplier = args[:lighting_exterior_usage_multiplier]
+    if exterior_usage_multiplier.nil? || exterior_usage_multiplier.to_f > 0
+      hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
+                                     location: HPXML::LocationExterior,
+                                     fraction_of_units_in_location: args[:lighting_exterior_fraction_cfl],
+                                     lighting_type: HPXML::LightingTypeCFL)
+      hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
+                                     location: HPXML::LocationExterior,
+                                     fraction_of_units_in_location: args[:lighting_exterior_fraction_lfl],
+                                     lighting_type: HPXML::LightingTypeLFL)
+      hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
+                                     location: HPXML::LocationExterior,
+                                     fraction_of_units_in_location: args[:lighting_exterior_fraction_led],
+                                     lighting_type: HPXML::LightingTypeLED)
+      hpxml_bldg.lighting.exterior_usage_multiplier = exterior_usage_multiplier
+    end
+
+    # Garage
+    if has_garage
+      garage_usage_multiplier = args[:lighting_garage_usage_multiplier]
+      if garage_usage_multiplier.nil? || garage_usage_multiplier.to_f > 0
         hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                       location: HPXML::LocationInterior,
-                                       fraction_of_units_in_location: args[:lighting_interior_fraction_cfl],
+                                       location: HPXML::LocationGarage,
+                                       fraction_of_units_in_location: args[:lighting_garage_fraction_cfl],
                                        lighting_type: HPXML::LightingTypeCFL)
         hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                       location: HPXML::LocationInterior,
-                                       fraction_of_units_in_location: args[:lighting_interior_fraction_lfl],
+                                       location: HPXML::LocationGarage,
+                                       fraction_of_units_in_location: args[:lighting_garage_fraction_lfl],
                                        lighting_type: HPXML::LightingTypeLFL)
         hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                       location: HPXML::LocationInterior,
-                                       fraction_of_units_in_location: args[:lighting_interior_fraction_led],
+                                       location: HPXML::LocationGarage,
+                                       fraction_of_units_in_location: args[:lighting_garage_fraction_led],
                                        lighting_type: HPXML::LightingTypeLED)
-        hpxml_bldg.lighting.interior_usage_multiplier = interior_usage_multiplier
-      end
-
-      # Exterior
-      exterior_usage_multiplier = args[:lighting_exterior_usage_multiplier]
-      if exterior_usage_multiplier.nil? || exterior_usage_multiplier.to_f > 0
-        hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                       location: HPXML::LocationExterior,
-                                       fraction_of_units_in_location: args[:lighting_exterior_fraction_cfl],
-                                       lighting_type: HPXML::LightingTypeCFL)
-        hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                       location: HPXML::LocationExterior,
-                                       fraction_of_units_in_location: args[:lighting_exterior_fraction_lfl],
-                                       lighting_type: HPXML::LightingTypeLFL)
-        hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                       location: HPXML::LocationExterior,
-                                       fraction_of_units_in_location: args[:lighting_exterior_fraction_led],
-                                       lighting_type: HPXML::LightingTypeLED)
-        hpxml_bldg.lighting.exterior_usage_multiplier = exterior_usage_multiplier
-      end
-
-      # Garage
-      if has_garage
-        garage_usage_multiplier = args[:lighting_garage_usage_multiplier]
-        if garage_usage_multiplier.nil? || garage_usage_multiplier.to_f > 0
-          hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                         location: HPXML::LocationGarage,
-                                         fraction_of_units_in_location: args[:lighting_garage_fraction_cfl],
-                                         lighting_type: HPXML::LightingTypeCFL)
-          hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                         location: HPXML::LocationGarage,
-                                         fraction_of_units_in_location: args[:lighting_garage_fraction_lfl],
-                                         lighting_type: HPXML::LightingTypeLFL)
-          hpxml_bldg.lighting_groups.add(id: "LightingGroup#{hpxml_bldg.lighting_groups.size + 1}",
-                                         location: HPXML::LocationGarage,
-                                         fraction_of_units_in_location: args[:lighting_garage_fraction_led],
-                                         lighting_type: HPXML::LightingTypeLED)
-          hpxml_bldg.lighting.garage_usage_multiplier = garage_usage_multiplier
-        end
+        hpxml_bldg.lighting.garage_usage_multiplier = garage_usage_multiplier
       end
     end
   end
@@ -5210,7 +5141,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_ceiling_fans(hpxml_bldg, args)
-    return if args[:ceiling_fans_count] == 0
+    return if args[:ceiling_fans] == 'None'
 
     hpxml_bldg.ceiling_fans.add(id: "CeilingFan#{hpxml_bldg.ceiling_fans.size + 1}",
                                 efficiency: args[:ceiling_fans_efficiency],
@@ -5224,16 +5155,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_plug_loads_television(hpxml_bldg, args)
-    return if args[:misc_television_annual_energy_use].to_f == 0 && args[:misc_television_usage_multiplier].to_f == 0
-
-    if args[:misc_television_usage_multiplier].to_f != 1
-      usage_multiplier = args[:misc_television_usage_multiplier]
-    end
+    return if args[:misc_television] == 'None'
 
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeTelevision,
                               kwh_per_year: args[:misc_television_annual_energy_use],
-                              usage_multiplier: usage_multiplier)
+                              usage_multiplier: args[:misc_television_usage_multiplier])
   end
 
   # Sets the HPXML miscellaneous other plug loads properties.
@@ -5242,16 +5169,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_plug_loads_other(hpxml_bldg, args)
-    if args[:misc_plug_loads_usage_multiplier].to_f != 1
-      usage_multiplier = args[:misc_plug_loads_usage_multiplier]
-    end
-
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeOther,
                               kwh_per_year: args[:misc_plug_loads_annual_energy_use],
                               frac_sensible: args[:misc_plug_loads_sensible_fraction],
                               frac_latent: args[:misc_plug_loads_latent_fraction],
-                              usage_multiplier: usage_multiplier)
+                              usage_multiplier: args[:misc_plug_loads_usage_multiplier])
   end
 
   # Sets the HPXML miscellaneous well pump plug loads properties.
@@ -5260,16 +5183,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_plug_loads_well_pump(hpxml_bldg, args)
-    return if args[:misc_well_pump_annual_energy_use].to_f == 0 && args[:misc_well_pump_usage_multiplier].to_f == 0
-
-    if args[:misc_well_pump_usage_multiplier].to_f != 1
-      usage_multiplier = args[:misc_well_pump_usage_multiplier]
-    end
+    return if args[:misc_well_pump] == 'None'
 
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeWellPump,
                               kwh_per_year: args[:misc_well_pump_annual_energy_use],
-                              usage_multiplier: usage_multiplier)
+                              usage_multiplier: args[:misc_well_pump_usage_multiplier])
   end
 
   # Sets the HPXML miscellaneous vehicle plug loads properties.
@@ -5278,12 +5197,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_plug_loads_vehicle(hpxml_bldg, args)
-    return unless args[:misc_plug_loads_vehicle_present]
+    return if args[:misc_electric_vehicle_charging] == 'None'
 
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
-                              kwh_per_year: args[:misc_plug_loads_vehicle_annual_kwh],
-                              usage_multiplier: args[:misc_plug_loads_vehicle_usage_multiplier])
+                              kwh_per_year: args[:misc_electric_vehicle_charging_annual_energy_use],
+                              usage_multiplier: args[:misc_electric_vehicle_charging_usage_multiplier])
   end
 
   # Sets the HPXML miscellaneous grill fuel loads properties.
@@ -5292,17 +5211,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_fuel_loads_grill(hpxml_bldg, args)
-    return if args[:misc_grill_annual_energy_use].to_f == 0 && args[:misc_grill_usage_multiplier].to_f == 0
-
-    if args[:misc_grill_usage_multiplier].to_f != 1
-      usage_multiplier = args[:misc_grill_usage_multiplier]
-    end
+    return if args[:misc_grill] == 'None'
 
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeGrill,
                               fuel_type: args[:misc_grill_fuel_type],
                               therm_per_year: args[:misc_grill_annual_energy_use],
-                              usage_multiplier: usage_multiplier)
+                              usage_multiplier: args[:misc_grill_usage_multiplier])
   end
 
   # Sets the HPXML miscellaneous lighting fuel loads properties.
@@ -5311,17 +5226,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_fuel_loads_lighting(hpxml_bldg, args)
-    return if args[:misc_lighting_annual_energy_use].to_f == 0 && args[:misc_lighting_usage_multiplier].to_f == 0
-
-    if args[:misc_lighting_usage_multiplier].to_f != 1
-      usage_multiplier = args[:misc_lighting_usage_multiplier]
-    end
+    return if args[:misc_gas_lighting] == 'None'
 
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeLighting,
-                              fuel_type: args[:misc_lighting_fuel_type],
-                              therm_per_year: args[:misc_lighting_annual_energy_use],
-                              usage_multiplier: usage_multiplier)
+                              fuel_type: args[:misc_gas_lighting_fuel_type],
+                              therm_per_year: args[:misc_gas_lighting_annual_energy_use],
+                              usage_multiplier: args[:misc_gas_lighting_usage_multiplier])
   end
 
   # Sets the HPXML miscellaneous fireplace fuel loads properties.
@@ -5330,17 +5241,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_misc_fuel_loads_fireplace(hpxml_bldg, args)
-    return if args[:misc_fireplace_annual_energy_use].to_f == 0 && args[:misc_fireplace_usage_multiplier].to_f == 0
-
-    if args[:misc_fireplace_usage_multiplier].to_f != 1
-      usage_multiplier = args[:misc_fireplace_usage_multiplier]
-    end
+    return if args[:misc_fireplace] == 'None'
 
     hpxml_bldg.fuel_loads.add(id: "FuelLoad#{hpxml_bldg.fuel_loads.size + 1}",
                               fuel_load_type: HPXML::FuelLoadTypeFireplace,
                               fuel_type: args[:misc_fireplace_fuel_type],
                               therm_per_year: args[:misc_fireplace_annual_energy_use],
-                              usage_multiplier: usage_multiplier)
+                              usage_multiplier: args[:misc_fireplace_usage_multiplier])
   end
 
   # Sets the HPXML pool properties.
@@ -5349,7 +5256,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_pool(hpxml_bldg, args)
-    return if args[:misc_pool_pump_annual_energy_use] == 0
+    return if args[:misc_pool] == 'None'
 
     case args[:misc_pool_heater_type]
     when HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump
@@ -5383,7 +5290,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_permanent_spa(hpxml_bldg, args)
-    return if args[:misc_permanent_spa_pump_annual_energy_use] == 0
+    return if args[:misc_permanent_spa] == 'None'
 
     case args[:misc_permanent_spa_heater_type]
     when HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump

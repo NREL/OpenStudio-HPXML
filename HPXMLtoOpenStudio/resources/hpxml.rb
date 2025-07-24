@@ -1523,7 +1523,7 @@ class HPXML < Object
                    :electric_panels,               # [HPXML::ElectricPanels]
                    :batteries,                     # [HPXML::Batteries]
                    :vehicles,                      # [HPXML::Vehicles]
-                   :ev_chargers,                   # [HPXML::EVChargers]
+                   :ev_chargers,                   # [HPXML::ElectricVehicleChargers]
                    :generators,                    # [HPXML::Generators]
                    :clothes_washers,               # [HPXML::ClothesWashers]
                    :clothes_dryers,                # [HPXML::ClothesDryers]

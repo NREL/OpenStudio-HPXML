@@ -48,7 +48,6 @@
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
     "whole_house_fan_present": false,
     "dhw_water_heater": "None",
-    "dhw_solar_thermal": "None",
     "lighting": "None",
     "appliance_clothes_washer": "None",
     "appliance_clothes_dryer": "None",
@@ -60,9 +59,6 @@
     "appliance_dehumidifier": "None",
     "misc_plug_loads": "Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent",
     "misc_television": "None",
-    "misc_plug_loads_vehicle_present": false,
-    "misc_pool": "None",
-    "misc_permanent_spa": "None",
     "combine_like_surfaces": false
   },
   "tests/ASHRAE_Standard_140/L110AC.xml": {
@@ -446,7 +442,6 @@
     "dhw_water_heater": "Electricity, Tank, UEF=0.94",
     "dhw_water_heater_location": "conditioned space",
     "dhw_water_heater_setpoint_temperature": 125,
-    "dhw_solar_thermal": "None",
     "lighting": "Detailed Example: 40% CFL, 10% LFL, 25% LED",
     "appliance_clothes_washer": "Standard, 2008-2017",
     "appliance_clothes_washer_location": "conditioned space",
@@ -463,9 +458,6 @@
     "appliance_dehumidifier": "None",
     "misc_plug_loads": "100%",
     "misc_television": "100%",
-    "misc_plug_loads_vehicle_present": false,
-    "misc_pool": "None",
-    "misc_permanent_spa": "None",
     "utility_bill_scenario_names": "Bills",
     "combine_like_surfaces": true
   },
@@ -594,38 +586,28 @@
   },
   "sample_files/base-vehicle-ev-no-charger.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
-    "vehicle_type": "BatteryElectricVehicle"
+    "electric_vehicle": "Detailed Example: 100 kWh battery, 0.25 kWh/mile",
+    "electric_vehicle_miles_driven_per_year": 10000
   },
   "sample_files/base-ev-charger.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ev_charger_present": true
+    "electric_vehicle_charger": "Detailed Example: Level 2, 7000 W, 75% Charging at Home"
   },
   "sample_files/base-vehicle-ev-charger.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-no-charger.xml",
-    "vehicle_battery_capacity": 100,
-    "vehicle_battery_usable_capacity": 80,
-    "vehicle_miles_driven_per_year": 10000,
-    "vehicle_hours_driven_per_week": 14,
-    "vehicle_fuel_economy_combined": 0.25,
-    "vehicle_fuel_economy_units": "kWh/mile",
-    "vehicle_fraction_charged_home": 0.75,
-    "ev_charger_present": true,
-    "ev_charger_power": 7000
+    "electric_vehicle_charger": "Detailed Example: Level 2, 7000 W, 75% Charging at Home"
   },
   "sample_files/base-vehicle-ev-charger-level1.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
-    "ev_charger_level": 1,
-    "ev_charger_power": null
+    "electric_vehicle_charger": "Level 1, 70% Charging at Home"
   },
   "sample_files/base-vehicle-ev-charger-miles-per-kwh.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
-    "vehicle_fuel_economy_combined": 4.0,
-    "vehicle_fuel_economy_units": "mile/kWh"
+    "electric_vehicle": "Detailed Example: 100 kWh battery, 4.0 miles/kWh"
   },
   "sample_files/base-vehicle-ev-charger-mpge.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
-    "vehicle_fuel_economy_combined": 135.0,
-    "vehicle_fuel_economy_units": "mpge"
+    "electric_vehicle": "Detailed Example: 100 kWh battery, 135.0 mpge"
   },
   "sample_files/base-vehicle-ev-charger-scheduled.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
@@ -637,8 +619,7 @@
   },
   "sample_files/base-vehicle-ev-charger-plug-load-ev.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger-scheduled.xml",
-    "misc_plug_loads_vehicle_present": true,
-    "misc_plug_loads_vehicle_annual_kwh": 3000
+    "misc_electric_vehicle_charging": "Detailed Example: 3000 kWh/yr"
   },
   "sample_files/base-vehicle-multiple.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml"
@@ -649,8 +630,9 @@
   },
   "sample_files/base-pv-battery-and-vehicle-ev.xml": {
     "parent_hpxml": "sample_files/base-pv-battery.xml",
-    "vehicle_type": "BatteryElectricVehicle",
-    "ev_charger_present": true,
+    "electric_vehicle": "Detailed Example: 100 kWh battery, 0.25 kWh/mile",
+    "electric_vehicle_miles_driven_per_year": 10000,
+    "electric_vehicle_charger": "Detailed Example: Level 2, 7000 W, 75% Charging at Home",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/vehicle-ev.csv"
   },
   "sample_files/base-bldgtype-sfa-unit.xml": {
@@ -2497,8 +2479,8 @@
     "pv_system_array_azimuth": 180,
     "pv_system_array_tilt": 20,
     "battery": "20.0 kWh",
-    "vehicle_type": "BatteryElectricVehicle",
-    "ev_charger_present": true,
+    "electric_vehicle": "Midsize, 200 mile range",
+    "electric_vehicle_charger": "Level 1, 50% Charging at Home",
     "appliance_clothes_washer_location": null,
     "appliance_clothes_dryer_location": null,
     "appliance_dishwasher_location": null,
@@ -2533,18 +2515,17 @@
   "sample_files/base-misc-loads-large-uncommon.xml": {
     "parent_hpxml": "sample_files/base-schedules-simple.xml",
     "dhw_distribution": "Uninsulated, Standard",
-    "vehicle_type": "none",
-    "ev_charger_present": false,
+    "electric_vehicle": "None",
+    "electric_vehicle_charger": "None",
     "appliance_extra_refrigerator": "748 kWh/yr",
     "appliance_freezer": "354 kWh/yr",
     "appliance_freezer_location": "conditioned space",
     "misc_plug_loads": "Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent",
     "misc_television": "Detailed Example: 620 kWh/yr",
     "misc_well_pump": "Detailed Example: 475 kWh/yr",
-    "misc_plug_loads_vehicle_present": true,
-    "misc_plug_loads_vehicle_annual_kwh": 1500,
+    "misc_electric_vehicle_charging": "Detailed Example: 1500 kWh/yr",
     "misc_grill": "Detailed Example: Propane, 25 therm/yr",
-    "misc_lighting": "Detailed Example: Natural Gas, 28 therm/yr",
+    "misc_gas_lighting": "Detailed Example: Natural Gas, 28 therm/yr",
     "misc_fireplace": "Detailed Example: Wood, 55 therm/yr",
     "misc_pool": "Detailed Example: Pool, 2700 kWh/yr Pump, 500 therms/yr Natural Gas Heater",
     "misc_permanent_spa": "Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater"
@@ -2593,7 +2574,7 @@
     "misc_plug_loads": "90%",
     "misc_television": "90%",
     "misc_grill": "Propane, 90%",
-    "misc_lighting": "Natural Gas, 90%",
+    "misc_gas_lighting": "Natural Gas, 90%",
     "misc_fireplace": "Wood, 90%",
     "misc_pool": "Detailed Example: Pool, Natural Gas Heater, 90% Usage Multiplier",
     "misc_permanent_spa": "Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater, 90% Usage Multiplier"
@@ -2691,9 +2672,9 @@
     "misc_television": "100%",
     "misc_well_pump": "Typical Efficiency",
     "misc_grill": "Propane, 100%",
-    "misc_lighting": "Natural Gas, 100%",
+    "misc_gas_lighting": "Natural Gas, 100%",
     "misc_fireplace": "Wood, 100%",
-    "misc_plug_loads_vehicle_annual_kwh": null,
+    "misc_electric_vehicle_charging": "100%",
     "misc_pool": "Pool, Natural Gas Heater",
     "misc_permanent_spa": "Spa, Electric Resistance Heater"
   },
@@ -2704,9 +2685,9 @@
     "misc_television": "100%",
     "misc_well_pump": "Typical Efficiency",
     "misc_grill": "Propane, 100%",
-    "misc_lighting": "Natural Gas, 100%",
+    "misc_gas_lighting": "Natural Gas, 100%",
     "misc_fireplace": "Wood, 100%",
-    "misc_plug_loads_vehicle_annual_kwh": null,
+    "misc_electric_vehicle_charging": "100%",
     "misc_pool": "Pool, Unheated",
     "misc_permanent_spa": "Spa, Heat Pump Heater"
   },
@@ -2717,9 +2698,10 @@
   "sample_files/base-schedules-simple.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "dhw_distribution": "Uninsulated, Recirc, Uncontrolled",
-    "vehicle_type": "BatteryElectricVehicle",
-    "ev_charger_present": true,
-    "misc_plug_loads_vehicle_present": false
+    "electric_vehicle": "Detailed Example: 100 kWh battery, 0.25 kWh/mile",
+    "electric_vehicle_miles_driven_per_year": 10000,
+    "electric_vehicle_charger": "Detailed Example: Level 2, 7000 W, 75% Charging at Home",
+    "misc_electric_vehicle_charging": "None"
   },
   "sample_files/base-schedules-simple-vacancy.xml": {
     "parent_hpxml": "sample_files/base.xml",

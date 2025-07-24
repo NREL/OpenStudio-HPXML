@@ -13,7 +13,8 @@ None	0
 200%		2
 300%		3
 400%		4
-Detailed Example: 620 kWh/yr	620	
+Detailed Example: 1500 kWh/yr	1500	
+Detailed Example: 3000 kWh/yr	3000	
 		
-"Annual Energy Use: The annual energy consumption of the televisions. If not provided, the OS-HPXML default is used."		
+Annual Energy Use: The annual energy consumption of the EV charging.		
 "Usage Multiplier: Multiplier on the energy usage that can reflect, e.g., high/low usage occupants."		

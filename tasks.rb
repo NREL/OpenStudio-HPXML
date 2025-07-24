@@ -2680,6 +2680,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Vehicle #
     # ------------- #
 
+    if ['base-misc-defaults.xml',
+        'base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.vehicles[0].miles_per_year = nil
+      hpxml_bldg.vehicles[0].hours_per_week = nil
+      hpxml_bldg.vehicles[0].fuel_economy_combined = nil
+      hpxml_bldg.vehicles[0].fuel_economy_units = nil
+      hpxml_bldg.vehicles[0].fraction_charged_home = nil
+      hpxml_bldg.vehicles[0].nominal_capacity_kwh = nil
+      hpxml_bldg.vehicles[0].usable_capacity_kwh = nil
+      hpxml_bldg.ev_chargers[0].charging_level = nil
+      hpxml_bldg.ev_chargers[0].charging_power = nil
+    end
     if ['base-vehicle-multiple.xml'].include? hpxml_file
       hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
                               vehicle_type: HPXML::VehicleTypeHybrid,
@@ -2692,6 +2704,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.vehicles[0].ev_weekday_fractions = '0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, -0.3535, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.3221, -0.3244, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714'
       hpxml_bldg.vehicles[0].ev_weekend_fractions = '0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, -0.3334, 0, 0, 0, 0, -0.3293, -0.3372, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588'
       hpxml_bldg.vehicles[0].ev_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+    end
+    if ['base-vehicle-ev-charger-occupancy-stochastic.xml'].include? hpxml_file
+      hpxml_bldg.vehicles[0].hours_per_week = 14.0
     end
 
     # ---------------- #

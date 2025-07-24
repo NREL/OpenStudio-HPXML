@@ -2268,72 +2268,24 @@ The size and type of battery storage.
 
 <br/>
 
-**Vehicle: Type**
+**Electric Vehicle**
 
-The type of vehicle present at the home.
+The type of battery electric vehicle.
 
-- **Name:** ``vehicle_type``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Vehicle: EV Battery Nominal Battery Capacity**
-
-The nominal capacity of the vehicle battery, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
-
-- **Name:** ``vehicle_battery_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Vehicle: EV Battery Usable Capacity**
-
-The usable capacity of the vehicle battery, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
-
-- **Name:** ``vehicle_battery_usable_capacity``
-- **Type:** ``Double``
-
-- **Units:** ``kWh``
-
-- **Required:** ``false``
-
-<br/>
-
-**Vehicle: Combined Fuel Economy Units**
-
-The combined fuel economy units of the vehicle. Only 'kWh/mile', 'mile/kWh', or 'mpge' are allow for electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
-
-- **Name:** ``vehicle_fuel_economy_units``
+- **Name:** ``electric_vehicle``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `kWh/mile`, `mile/kWh`, `mpge`, `mpg`
+- **Choices:** `None`, `Compact, 200 mile range`, `Compact, 300 mile range`, `Midsize, 200 mile range`, `Midsize, 300 mile range`, `Pickup, 200 mile range`, `Pickup, 300 mile range`, `SUV, 200 mile range`, `SUV, 300 mile range`, `Detailed Example: 100 kWh battery, 0.25 kWh/mile`, `Detailed Example: 100 kWh battery, 4.0 miles/kWh`, `Detailed Example: 100 kWh battery, 135.0 mpge`
 
 <br/>
 
-**Vehicle: Combined Fuel Economy**
-
-The combined fuel economy of the vehicle. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
-
-- **Name:** ``vehicle_fuel_economy_combined``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Vehicle: Miles Driven Per Year**
+**Electric Vehicle: Miles Driven Per Year**
 
 The annual miles the vehicle is driven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
 
-- **Name:** ``vehicle_miles_driven_per_year``
+- **Name:** ``electric_vehicle_miles_driven_per_year``
 - **Type:** ``Double``
 
 - **Units:** ``miles``
@@ -2342,64 +2294,16 @@ The annual miles the vehicle is driven. If not provided, the OS-HPXML default (s
 
 <br/>
 
-**Vehicle: Hours Driven Per Week**
+**Electric Vehicle: Charger**
 
-The weekly hours the vehicle is driven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+The type and usage of electric vehicle charger.
 
-- **Name:** ``vehicle_hours_driven_per_week``
-- **Type:** ``Double``
-
-- **Units:** ``hours``
-
-- **Required:** ``false``
-
-<br/>
-
-**Vehicle: Fraction Charged at Home**
-
-The fraction of charging energy provided by the at-home charger to the vehicle, only applies to electric vehicles. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
-
-- **Name:** ``vehicle_fraction_charged_home``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Electric Vehicle Charger: Present**
-
-Whether there is an electric vehicle charger present.
-
-- **Name:** ``ev_charger_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Electric Vehicle Charger: Charging Level**
-
-The charging level of the EV charger. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.
-
-- **Name:** ``ev_charger_level``
+- **Name:** ``electric_vehicle_charger``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `1`, `2`, `3`
-
-<br/>
-
-**Electric Vehicle Charger: Rated Charging Power**
-
-The rated power output of the EV charger. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-electric-vehicle-chargers'>HPXML Electric Vehicle Chargers</a>) is used.
-
-- **Name:** ``ev_charger_power``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Level 1, 10% Charging at Home`, `Level 1, 30% Charging at Home`, `Level 1, 50% Charging at Home`, `Level 1, 70% Charging at Home`, `Level 1, 90% Charging at Home`, `Level 1, 100% Charging at Home`, `Level 2, 10% Charging at Home`, `Level 2, 30% Charging at Home`, `Level 2, 50% Charging at Home`, `Level 2, 70% Charging at Home`, `Level 2, 90% Charging at Home`, `Level 2, 100% Charging at Home`, `Detailed Example: Level 2, 7000 W, 75% Charging at Home`
 
 <br/>
 
@@ -2754,7 +2658,7 @@ The amount of television usage, relative to the national average.
 - **Name:** ``misc_television``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `None`, `25%`, `33%`, `50%`, `75%`, `80%`, `90%`, `100%`, `110%`, `125%`, `150%`, `200%`, `300%`, `400%`, `Detailed Example: 620 kWh/yr`
 
@@ -2767,7 +2671,7 @@ The amount of additional plug load usage, relative to the national average.
 - **Name:** ``misc_plug_loads``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `None`, `25%`, `33%`, `50%`, `75%`, `80%`, `90%`, `100%`, `110%`, `125%`, `150%`, `200%`, `300%`, `400%`, `Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent`, `Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent`
 
@@ -2786,38 +2690,16 @@ The amount of well pump usage, relative to the national average.
 
 <br/>
 
-**Misc: Vehicle Present**
+**Misc: Electric Vehicle Charging**
 
-Whether there is an electric vehicle.
+The amount of EV charging usage, relative to the national average. Only use this if a detailed EV & EV charger were not otherwise specified.
 
-- **Name:** ``misc_plug_loads_vehicle_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Misc: Vehicle Annual kWh**
-
-The annual energy consumption of the electric vehicle plug loads. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_vehicle_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
+- **Name:** ``misc_electric_vehicle_charging``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Misc: Vehicle Usage Multiplier**
-
-Multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-plug-loads'>HPXML Plug Loads</a>) is used.
-
-- **Name:** ``misc_plug_loads_vehicle_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `25%`, `33%`, `50%`, `75%`, `80%`, `90%`, `100%`, `110%`, `125%`, `150%`, `200%`, `300%`, `400%`, `Detailed Example: 1500 kWh/yr`, `Detailed Example: 3000 kWh/yr`
 
 <br/>
 
@@ -2838,7 +2720,7 @@ The amount of outdoor gas grill usage, relative to the national average.
 
 The amount of gas lighting usage, relative to the national average.
 
-- **Name:** ``misc_lighting``
+- **Name:** ``misc_gas_lighting``
 - **Type:** ``Choice``
 
 - **Required:** ``false``

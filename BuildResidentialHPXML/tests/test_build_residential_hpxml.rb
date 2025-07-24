@@ -459,7 +459,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['appliance_dehumidifier'] = 'None'
       args['misc_plug_loads'] = '100%'
       args['misc_television'] = '100%'
-      args['misc_plug_loads_vehicle_present'] = false
+      args['misc_electric_vehicle_charging'] = 'None'
       args['misc_pool'] = 'None'
       args['misc_permanent_spa'] = 'None'
     when 'base-sfd2.xml'
@@ -665,10 +665,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-water-heater-attic.xml'
       args['dhw_water_heater_location'] = HPXML::LocationAttic
     when 'extra-vehicle-ev.xml'
-      args['vehicle_type'] = HPXML::VehicleTypeBEV
-      args['ev_charger_present'] = true
+      args['electric_vehicle'] = 'Midsize, 200 mile range'
+      args['electric_vehicle_charger'] = 'Level 2, 70% Charging at Home'
     when 'extra-two-batteries.xml'
-      args['vehicle_type'] = HPXML::VehicleTypeBEV
+      args['electric_vehicle'] = 'Midsize, 200 mile range'
       args['battery'] = '20.0 kWh'
     when 'extra-detailed-performance-autosize.xml'
       args['hvac_heating_system'] = 'None'
