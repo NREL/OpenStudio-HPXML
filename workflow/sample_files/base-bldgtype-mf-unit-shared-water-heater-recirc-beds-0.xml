@@ -309,7 +309,6 @@
             <TankVolume>120.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.6</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
               <NumberofBedroomsServed>6</NumberofBedroomsServed>
             </extension>

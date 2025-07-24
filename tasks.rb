@@ -80,7 +80,6 @@ def create_hpxmls
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'Attic, Vented, Gable' : 'Below Apartment')
-        build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
       end
 
       # Re-generate stochastic schedule CSV?
@@ -362,8 +361,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   if hpxml_file.include?('ground-to-air') && hpxml_file.include?('experimental')
     hpxml.header.ground_to_air_heat_pump_model_type = HPXML::GroundToAirHeatPumpModelTypeExperimental
   end
+  if ['base-simcontrol-temperature-capacitance-multiplier.xml'].include? hpxml_file
+    hpxml.header.temperature_capacitance_multiplier = 10
+  end
 
-  hpxml.buildings.each do |hpxml_bldg|
+  hpxml.buildings.each_with_index do |hpxml_bldg, hpxml_bldg_index|
     # ------------ #
     # HPXML Header #
     # ------------ #
@@ -483,6 +485,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
     elsif ['base-bldgtype-mf-unit-infil-compartmentalization-test.xml'].include? hpxml_file
       hpxml_bldg.air_infiltration_measurements[0].a_ext = 0.2
+    end
+    if hpxml_file.include? 'base-bldgtype-mf-unit'
+      hpxml_bldg.building_construction.unit_height_above_grade = 10
+    elsif hpxml_file.include? 'base-bldgtype-mf-whole-building'
+      hpxml_bldg.building_construction.unit_height_above_grade = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[hpxml_bldg_index + 1]
     end
 
     # ------------------ #
@@ -1629,6 +1636,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.header.shading_summer_end_month = 9
       hpxml_bldg.header.shading_summer_end_day = 30
     end
+    if ['base-enclosure-infil-flue.xml'].include? hpxml_file
+      hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space = true
+    end
 
     # ---------- #
     # HPXML HVAC #
@@ -2347,11 +2357,20 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if hpxml_file.include? 'base-dhw-tank-model-type-stratified'
       hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
     end
+    if ['base-dhw-setpoint-temperature.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].temperature = 135
+    end
 
     # -------------------- #
     # HPXML VentilationFan #
     # -------------------- #
 
+    if ['base-misc-defaults.xml',
+        'base-residents-5-5.xml'].include? hpxml_file
+      vent_fan = hpxml_bldg.ventilation_fans.select { |f| f.used_for_seasonal_cooling_load_reduction }[0]
+      vent_fan.fan_power = nil
+      vent_fan.rated_flow_rate = nil
+    end
     if ['base-mechvent-balanced.xml',
         'base-mechvent-erv.xml',
         'base-mechvent-erv-atre-asre.xml',

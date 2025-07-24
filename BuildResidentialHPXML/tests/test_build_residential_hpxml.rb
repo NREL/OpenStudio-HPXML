@@ -232,8 +232,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-different-software-program.xml' => ["'Software Info: Program Used' cannot vary across dwelling units.",
                                                  "'Software Info: Program Version' cannot vary across dwelling units."],
       'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
-                                                   "'Simulation Control: Run Period' cannot vary across dwelling units.",
-                                                   "'Simulation Control: Temperature Capacitance Multiplier' cannot vary across dwelling units."],
+                                                   "'Simulation Control: Run Period' cannot vary across dwelling units."],
       'error-same-emissions-scenario-name.xml' => ["HPXML header already includes an emissions scenario named 'Emissions' with type 'CO2e'."],
       'error-same-utility-bill-scenario-name.xml' => ["HPXML header already includes a utility bill scenario named 'Bills'."],
       'error-could-not-find-epw-file.xml' => ['Could not find EPW file at']
@@ -441,7 +440,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts_number_of_return_registers'] = 2
       args['hvac_heating_system_2_fuel'] = HPXML::FuelTypeElectricity
       args['hvac_heating_system_2_fraction_heat_load_served'] = 0.25
-      args['whole_house_fan_present'] = false
       args['dhw_water_heater'] = 'Electricity, Tank, UEF=0.94'
       args['lighting'] = 'Detailed Example: 40% CFL, 10% LFL, 25% LED'
       args['appliance_clothes_washer'] = 'Standard, 2008-2017'
@@ -514,7 +512,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['schedules_unavailable_period_dates'] = 'Jan 2 - Jan 5, Feb 10 - Feb 12'
       args['schedules_unavailable_period_window_natvent_availabilities'] = "#{HPXML::ScheduleUnavailable}, #{HPXML::ScheduleAvailable}"
       args['simulation_control_run_period'] = 'Jan 1 - Dec 31'
-      args['simulation_control_temperature_capacitance_multiplier'] = 1.0
       args['emissions_scenario_names'] = 'Emissions'
       args['emissions_types'] = 'CO2e'
       args['emissions_electricity_units'] = 'kg/MWh'
@@ -902,7 +899,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['simulation_control_timestep'] = 10
       args['simulation_control_run_period'] = 'Jan 2 - Dec 30'
-      args['simulation_control_temperature_capacitance_multiplier'] = 2.0
       args['emissions_scenario_names'] = 'Emissions2'
       args['utility_bill_scenario_names'] = 'Bills2'
     when 'error-same-emissions-scenario-name.xml'

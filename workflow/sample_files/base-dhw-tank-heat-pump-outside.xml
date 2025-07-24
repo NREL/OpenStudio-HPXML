@@ -408,7 +408,6 @@
             <Location>other exterior</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>3.5</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

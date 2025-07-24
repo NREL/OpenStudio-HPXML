@@ -46,7 +46,6 @@
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
-    "whole_house_fan_present": false,
     "dhw_water_heater": "None",
     "lighting": "None",
     "appliance_clothes_washer": "None",
@@ -438,10 +437,8 @@
     "hvac_ducts_supply_location": "attic - unvented",
     "hvac_ducts_return_location": "attic - unvented",
     "hvac_ducts_supply_leakage_fraction": 0.75,
-    "whole_house_fan_present": false,
     "dhw_water_heater": "Electricity, Tank, UEF=0.94",
     "dhw_water_heater_location": "conditioned space",
-    "dhw_water_heater_setpoint_temperature": 125,
     "lighting": "Detailed Example: 40% CFL, 10% LFL, 25% LED",
     "appliance_clothes_washer": "Standard, 2008-2017",
     "appliance_clothes_washer_location": "conditioned space",
@@ -678,7 +675,6 @@
     "geometry_building_num_units": 6,
     "geometry_foundation_type": "Above Apartment",
     "geometry_attic_type": "Below Apartment",
-    "geometry_unit_height_above_grade": 10,
     "enclosure_window_area_or_wwr_front": 0.18,
     "enclosure_window_area_or_wwr_back": 0.18,
     "enclosure_window_area_or_wwr_left": 0.18,
@@ -828,7 +824,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-mechvent.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "ventilation_fans_mechanical": "Supply Only"
+    "ventilation_mechanical": "Supply Only"
   },
   "sample_files/base-bldgtype-mf-unit-shared-mechvent-multiple.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
@@ -907,7 +903,6 @@
   },
   "sample_files/base-dhw-indirect-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-dhw-indirect.xml",
-    "dhw_water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },
   "sample_files/base-dhw-indirect-dse.xml": {
@@ -1004,7 +999,6 @@
   },
   "sample_files/base-dhw-tank-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "dhw_water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },
   "sample_files/base-dhw-tank-elec-ef.xml": {
@@ -1055,7 +1049,6 @@
   },
   "sample_files/base-dhw-tank-heat-pump-detailed-schedules.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-ef.xml",
-    "dhw_water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv"
   },
   "sample_files/base-dhw-tank-model-type-stratified.xml": {
@@ -1107,8 +1100,10 @@
   },
   "sample_files/base-dhw-tankless-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
-    "dhw_water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
+  },
+  "sample_files/base-dhw-setpoint-temperature.xml": {
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1119,8 +1114,8 @@
     "appliance_cooking_range_oven": "Natural Gas, Non-Convection Oven",
     "appliance_clothes_dryer": "Natural Gas, Standard",
     "appliance_dishwasher": "None",
-    "ventilation_fans_kitchen": "Default",
-    "ventilation_fans_bathroom": "Default",
+    "ventilation_kitchen": "Default",
+    "ventilation_bathroom": "Default",
     "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
     "electric_panel_baseline_peak_power": 4500,
     "electric_panel_service_voltage": "240",
@@ -1204,8 +1199,7 @@
     "enclosure_air_leakage": "Detailed Example: 123 sq. in. ELA"
   },
   "sample_files/base-enclosure-infil-flue.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "enclosure_has_flue_or_chimney_in_conditioned_space": true
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-enclosure-infil-natural-ach.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2131,7 +2125,7 @@
   },
   "sample_files/base-hvac-ptac-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
-    "ventilation_fans_mechanical": "CFIS"
+    "ventilation_mechanical": "CFIS"
   },
   "sample_files/base-hvac-ptac-with-heating-electricity.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
@@ -2153,7 +2147,7 @@
   },
   "sample_files/base-hvac-pthp-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml",
-    "ventilation_fans_mechanical": "CFIS"
+    "ventilation_mechanical": "CFIS"
   },
   "sample_files/base-hvac-pthp-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml"
@@ -2326,16 +2320,16 @@
   },
   "sample_files/base-mechvent-balanced.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ventilation_fans_mechanical": "Balanced"
+    "ventilation_mechanical": "Balanced"
   },
   "sample_files/base-mechvent-bath-kitchen-fans.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ventilation_fans_kitchen": "Detailed Example: 100 cfm, 1.5 hrs/day @ 6pm, 30 W",
-    "ventilation_fans_bathroom": "Detailed Example: 50 cfm/bathroom, 1.5 hrs/day @ 7am, 15 W"
+    "ventilation_kitchen": "Detailed Example: 100 cfm, 1.5 hrs/day @ 6pm, 30 W",
+    "ventilation_bathroom": "Detailed Example: 50 cfm/bathroom, 1.5 hrs/day @ 7am, 15 W"
   },
   "sample_files/base-mechvent-cfis.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ventilation_fans_mechanical": "CFIS"
+    "ventilation_mechanical": "CFIS"
   },
   "sample_files/base-mechvent-cfis-15-mins.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml",
@@ -2349,11 +2343,11 @@
   },
   "sample_files/base-mechvent-cfis-dse.xml": {
     "parent_hpxml": "sample_files/base-hvac-dse.xml",
-    "ventilation_fans_mechanical": "CFIS"
+    "ventilation_mechanical": "CFIS"
   },
   "sample_files/base-mechvent-cfis-evap-cooler-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-evap-cooler-only-ducted.xml",
-    "ventilation_fans_mechanical": "CFIS"
+    "ventilation_mechanical": "CFIS"
   },
   "sample_files/base-mechvent-cfis-no-additional-runtime.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
@@ -2376,18 +2370,18 @@
   },
   "sample_files/base-mechvent-erv.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ventilation_fans_mechanical": "ERV, 70%"
+    "ventilation_mechanical": "ERV, 70%"
   },
   "sample_files/base-mechvent-erv-atre-asre.xml": {
     "parent_hpxml": "sample_files/base-mechvent-erv.xml"
   },
   "sample_files/base-mechvent-exhaust.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ventilation_fans_mechanical": "Exhaust Only"
+    "ventilation_mechanical": "Exhaust Only"
   },
   "sample_files/base-mechvent-hrv.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ventilation_fans_mechanical": "HRV, 70%"
+    "ventilation_mechanical": "HRV, 70%"
   },
   "sample_files/base-mechvent-hrv-asre.xml": {
     "parent_hpxml": "sample_files/base-mechvent-hrv.xml"
@@ -2398,13 +2392,11 @@
   },
   "sample_files/base-mechvent-supply.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ventilation_fans_mechanical": "Supply Only"
+    "ventilation_mechanical": "Supply Only"
   },
   "sample_files/base-mechvent-whole-house-fan.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "whole_house_fan_present": true,
-    "whole_house_fan_flow_rate": 4500,
-    "whole_house_fan_power": 300
+    "ventilation_whole_house_fan": "Detailed Example: 4500 cfm, 300 W"
   },
   "sample_files/base-misc-additional-properties.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2467,12 +2459,11 @@
     "hvac_ducts_supply_location": null,
     "hvac_ducts_return_location": null,
     "hvac_ducts_number_of_return_registers": 2,
-    "ventilation_fans_mechanical": "Exhaust Only",
-    "ventilation_fans_kitchen": "Default",
-    "ventilation_fans_bathroom": "Default",
-    "whole_house_fan_present": true,
+    "ventilation_mechanical": "Exhaust Only",
+    "ventilation_kitchen": "Default",
+    "ventilation_bathroom": "Default",
+    "ventilation_whole_house_fan": "1000 cfm",
     "dhw_water_heater_location": null,
-    "dhw_water_heater_setpoint_temperature": null,
     "dhw_solar_thermal": "Direct, Flat Plate, 40 sqft",
     "dhw_solar_thermal_collector_tilt": 20,
     "pv_system": "4.0 kW",
@@ -2732,7 +2723,6 @@
     "hvac_control_heating_weekend_setpoint": null,
     "hvac_control_cooling_weekday_setpoint": null,
     "hvac_control_cooling_weekend_setpoint": null,
-    "dhw_water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps.xml": {
@@ -2741,7 +2731,6 @@
     "hvac_control_heating_weekend_setpoint": null,
     "hvac_control_cooling_weekday_setpoint": null,
     "hvac_control_cooling_weekend_setpoint": null,
-    "dhw_water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-30-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps-power-outage.xml": {
@@ -2815,8 +2804,7 @@
     "emissions_electricity_column_numbers": "17, 17, , , "
   },
   "sample_files/base-simcontrol-temperature-capacitance-multiplier.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "simulation_control_temperature_capacitance_multiplier": 7
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-simcontrol-timestep-10-mins.xml": {
     "parent_hpxml": "sample_files/base.xml",

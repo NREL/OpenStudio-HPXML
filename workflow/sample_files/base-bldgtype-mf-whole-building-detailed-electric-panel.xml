@@ -384,7 +384,6 @@
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.94</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
@@ -898,7 +897,6 @@
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.94</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1_2'/>
@@ -1303,7 +1301,6 @@
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.94</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1_3'/>
@@ -1708,7 +1705,6 @@
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.94</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1_4'/>
@@ -2170,7 +2166,6 @@
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.94</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1_5'/>
@@ -2632,7 +2627,6 @@
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.94</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1_6'/>

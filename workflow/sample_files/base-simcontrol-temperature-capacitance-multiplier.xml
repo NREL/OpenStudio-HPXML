@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
         <AdvancedResearchFeatures>
-          <TemperatureCapacitanceMultiplier>7.0</TemperatureCapacitanceMultiplier>
+          <TemperatureCapacitanceMultiplier>10.0</TemperatureCapacitanceMultiplier>
         </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
@@ -411,7 +411,6 @@
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.94</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>

@@ -107,11 +107,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('simulation_control_temperature_capacitance_multiplier', false)
-    arg.setDisplayName('Simulation Control: Temperature Capacitance Multiplier')
-    arg.setDescription("Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
-    args << arg
-
     site_type_choices = OpenStudio::StringVector.new
     site_type_choices << HPXML::SiteTypeSuburban
     site_type_choices << HPXML::SiteTypeUrban
@@ -233,12 +228,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('ft')
     arg.setDescription('Average distance from the floor to the ceiling.')
     arg.setDefaultValue(8.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_unit_height_above_grade', false)
-    arg.setDisplayName('Geometry: Unit Height Above Grade')
-    arg.setUnits('ft')
-    arg.setDescription("Describes the above-grade height of apartment units on upper floors or homes above ambient or belly-and-wing foundations. It is defined as the height of the lowest conditioned floor above grade and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-construction'>HPXML Building Construction</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_garage_type', choices[:geometry_garage_type], false)
@@ -487,11 +476,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_air_leakage_type', air_leakage_type_choices, false)
     arg.setDisplayName('Enclosure: Air Leakage Type')
     arg.setDescription("Type of air leakage if providing a numeric air leakage value. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('enclosure_has_flue_or_chimney_in_conditioned_space', false)
-    arg.setDisplayName('Enclosure: Has Flue or Chimney in Conditioned Space')
-    arg.setDescription("Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#flue-or-chimney'>Flue or Chimney</a>) is used.")
     args << arg
 
     heating_system_fuel_choices = OpenStudio::StringVector.new
@@ -762,40 +746,28 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('#')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_fans_mechanical', choices[:ventilation_fans_mechanical], false)
-    arg.setDisplayName('Ventilation Fans: Whole-Home Mechanical')
-    arg.setDescription('The type of whole-home mechanical ventilation system.')
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_mechanical', choices[:ventilation_mechanical], false)
+    arg.setDisplayName('Ventilation Fans: Mechanical Ventilation')
+    arg.setDescription('The type of mechanical ventilation system used for whole building ventilation.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_fans_kitchen', choices[:ventilation_fans_kitchen], false)
-    arg.setDisplayName('Ventilation Fans: Kitchen')
-    arg.setDescription('The type of kitchen ventilation fans.')
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_kitchen', choices[:ventilation_kitchen], false)
+    arg.setDisplayName('Ventilation Fans: Kitchen Exhaust Fan')
+    arg.setDescription('The type of kitchen exhaust fan used for local ventilation.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_fans_bathroom', choices[:ventilation_fans_bathroom], false)
-    arg.setDisplayName('Ventilation Fans: Bathroom')
-    arg.setDescription('The type of bathroom ventilation fans.')
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_bathroom', choices[:ventilation_bathroom], false)
+    arg.setDisplayName('Ventilation Fans: Bathroom Exhaust Fans')
+    arg.setDescription('The type of bathroom exhaust fans used for local ventilation.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('whole_house_fan_present', true)
-    arg.setDisplayName('Whole House Fan: Present')
-    arg.setDescription('Whether there is a whole house fan.')
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('whole_house_fan_flow_rate', false)
-    arg.setDisplayName('Whole House Fan: Flow Rate')
-    arg.setDescription("The flow rate of the whole house fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-whole-house-fans'>HPXML Whole House Fans</a>) is used.")
-    arg.setUnits('CFM')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('whole_house_fan_power', false)
-    arg.setDisplayName('Whole House Fan: Fan Power')
-    arg.setDescription("The fan power of the whole house fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-whole-house-fans'>HPXML Whole House Fans</a>) is used.")
-    arg.setUnits('W')
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_whole_house_fan', choices[:ventilation_whole_house_fan], false)
+    arg.setDisplayName('Ventilation Fans: Whole House Fan')
+    arg.setDescription('The type of whole house fans used for seasonal cooling load reduction.')
+    arg.setDefaultValue('None')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_water_heater', choices[:dhw_water_heater], true)
@@ -830,12 +802,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('DHW: Water Heater Jacket R-value')
     arg.setDescription("The jacket R-value of water heater. Doesn't apply to #{HPXML::WaterHeaterTypeTankless} or #{HPXML::WaterHeaterTypeCombiTankless}. If not provided, defaults to no jacket insulation.")
     arg.setUnits('F-ft2-hr/Btu')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('dhw_water_heater_setpoint_temperature', false)
-    arg.setDisplayName('DHW: Water Heater Setpoint Temperature')
-    arg.setDescription("The setpoint temperature of water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.")
-    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('dhw_water_heater_uses_desuperheater', false)
@@ -2229,13 +2195,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       hpxml.header.sim_end_day = end_day
     end
 
-    if not args[:simulation_control_temperature_capacitance_multiplier].nil?
-      if (not hpxml.header.temperature_capacitance_multiplier.nil?) && (hpxml.header.temperature_capacitance_multiplier != Float(args[:simulation_control_temperature_capacitance_multiplier]))
-        errors << "'Simulation Control: Temperature Capacitance Multiplier' cannot vary across dwelling units."
-      end
-      hpxml.header.temperature_capacitance_multiplier = args[:simulation_control_temperature_capacitance_multiplier]
-    end
-
     if not args[:emissions_scenario_names].nil?
       emissions_scenario_names = args[:emissions_scenario_names].split(',').map(&:strip)
       emissions_types = args[:emissions_types].split(',').map(&:strip)
@@ -2673,7 +2632,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
     hpxml_bldg.building_construction.year_built = args[:year_built]
     hpxml_bldg.building_construction.number_of_units = args[:unit_multiplier]
-    hpxml_bldg.building_construction.unit_height_above_grade = args[:geometry_unit_height_above_grade]
   end
 
   # Sets the HPXML building header properties.
@@ -2750,8 +2708,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                                  infiltration_volume: infiltration_volume,
                                                  infiltration_type: air_leakage_type,
                                                  leakiness_description: leakiness_description)
-
-    hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space = args[:enclosure_has_flue_or_chimney_in_conditioned_space]
   end
 
   # Sets the HPXML roofs properties.
@@ -4309,16 +4265,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def set_ventilation_fans(hpxml_bldg, args)
-    if args[:ventilation_fans_mechanical] != 'None'
+    if args[:ventilation_mechanical] != 'None'
 
       distribution_system_idref = nil
 
-      case args[:ventilation_fans_mechanical_fan_type]
+      case args[:ventilation_mechanical_fan_type]
       when HPXML::MechVentTypeERV
-        total_recovery_efficiency = args[:ventilation_fans_mechanical_total_recovery_efficiency]
-        sensible_recovery_efficiency = args[:ventilation_fans_mechanical_sensible_recovery_efficiency]
+        total_recovery_efficiency = args[:ventilation_mechanical_total_recovery_efficiency]
+        sensible_recovery_efficiency = args[:ventilation_mechanical_sensible_recovery_efficiency]
       when HPXML::MechVentTypeHRV
-        sensible_recovery_efficiency = args[:ventilation_fans_mechanical_sensible_recovery_efficiency]
+        sensible_recovery_efficiency = args[:ventilation_mechanical_sensible_recovery_efficiency]
       when HPXML::MechVentTypeCFIS
         hpxml_bldg.hvac_distributions.each do |hvac_distribution|
           next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -4346,44 +4302,44 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
 
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                      fan_type: args[:ventilation_fans_mechanical_fan_type],
+                                      fan_type: args[:ventilation_mechanical_fan_type],
                                       cfis_addtl_runtime_operating_mode: cfis_addtl_runtime_operating_mode,
-                                      rated_flow_rate: args[:ventilation_fans_mechanical_flow_rate],
-                                      hours_in_operation: args[:ventilation_fans_mechanical_hours_in_operation],
+                                      rated_flow_rate: args[:ventilation_mechanical_flow_rate],
+                                      hours_in_operation: args[:ventilation_mechanical_hours_in_operation],
                                       used_for_whole_building_ventilation: true,
                                       total_recovery_efficiency: total_recovery_efficiency,
                                       sensible_recovery_efficiency: sensible_recovery_efficiency,
-                                      fan_power: args[:ventilation_fans_mechanical_fan_power],
+                                      fan_power: args[:ventilation_mechanical_fan_power],
                                       distribution_system_idref: distribution_system_idref)
     end
 
-    if args[:ventilation_fans_kitchen] != 'None'
+    if args[:ventilation_kitchen] != 'None'
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                      rated_flow_rate: args[:ventilation_fans_kitchen_flow_rate],
+                                      rated_flow_rate: args[:ventilation_kitchen_flow_rate],
                                       used_for_local_ventilation: true,
-                                      hours_in_operation: args[:ventilation_fans_kitchen_hours_in_operation],
+                                      hours_in_operation: args[:ventilation_kitchen_hours_in_operation],
                                       fan_location: HPXML::LocationKitchen,
-                                      fan_power: args[:ventilation_fans_kitchen_fan_power],
-                                      start_hour: args[:ventilation_fans_kitchen_start_hour],
-                                      count: args[:ventilation_fans_kitchen_count])
+                                      fan_power: args[:ventilation_kitchen_fan_power],
+                                      start_hour: args[:ventilation_kitchen_start_hour],
+                                      count: args[:ventilation_kitchen_count])
     end
 
-    if args[:ventilation_fans_bathroom] != 'None'
+    if args[:ventilation_bathroom] != 'None'
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                      rated_flow_rate: args[:ventilation_fans_bathroom_flow_rate],
+                                      rated_flow_rate: args[:ventilation_bathroom_flow_rate],
                                       used_for_local_ventilation: true,
-                                      hours_in_operation: args[:ventilation_fans_bathroom_hours_in_operation],
+                                      hours_in_operation: args[:ventilation_bathroom_hours_in_operation],
                                       fan_location: HPXML::LocationBath,
-                                      fan_power: args[:ventilation_fans_bathroom_fan_power],
-                                      start_hour: args[:ventilation_fans_bathroom_start_hour],
-                                      count: args[:ventilation_fans_bathroom_count])
+                                      fan_power: args[:ventilation_bathroom_fan_power],
+                                      start_hour: args[:ventilation_bathroom_start_hour],
+                                      count: args[:ventilation_bathroom_count])
     end
 
-    if args[:whole_house_fan_present]
+    if args[:ventilation_whole_house_fan] != 'None'
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                      rated_flow_rate: args[:whole_house_fan_flow_rate],
+                                      rated_flow_rate: args[:ventilation_whole_house_fan_rated_flow_rate],
                                       used_for_seasonal_cooling_load_reduction: true,
-                                      fan_power: args[:whole_house_fan_power])
+                                      fan_power: args[:ventilation_whole_house_fan_power])
     end
   end
 
@@ -4468,8 +4424,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                          recovery_efficiency: recovery_efficiency,
                                          uses_desuperheater: uses_desuperheater,
                                          related_hvac_idref: related_hvac_idref,
-                                         jacket_r_value: jacket_r_value,
-                                         temperature: args[:dhw_water_heater_setpoint_temperature])
+                                         jacket_r_value: jacket_r_value)
   end
 
   # Sets the HPXML hot water distribution properties.

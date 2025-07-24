@@ -349,7 +349,6 @@
             <Location>conditioned space</Location>
             <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
             <UniformEnergyFactor>0.94</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem2'/>

@@ -134,17 +134,6 @@ Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Simulation Control: Temperature Capacitance Multiplier**
-
-Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
-
-- **Name:** ``simulation_control_temperature_capacitance_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
 **Site: Type**
 
 The type of site. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
@@ -368,19 +357,6 @@ Average distance from the floor to the ceiling.
 - **Units:** ``ft``
 
 - **Required:** ``true``
-
-<br/>
-
-**Geometry: Unit Height Above Grade**
-
-Describes the above-grade height of apartment units on upper floors or homes above ambient or belly-and-wing foundations. It is defined as the height of the lowest conditioned floor above grade and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-building-construction'>HPXML Building Construction</a>) is used.
-
-- **Name:** ``geometry_unit_height_above_grade``
-- **Type:** ``Double``
-
-- **Units:** ``ft``
-
-- **Required:** ``false``
 
 <br/>
 
@@ -878,17 +854,6 @@ Type of air leakage if providing a numeric air leakage value. If 'unit total', r
 
 <br/>
 
-**Enclosure: Has Flue or Chimney in Conditioned Space**
-
-Presence of flue or chimney with combustion air from conditioned space; used for infiltration model. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#flue-or-chimney'>Flue or Chimney</a>) is used.
-
-- **Name:** ``enclosure_has_flue_or_chimney_in_conditioned_space``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
 **HVAC: Heating System**
 
 The type and efficiency of the heating system. Use 'None' if there is no heating system or if there is a heat pump serving a heating load.
@@ -1371,11 +1336,11 @@ The number of return registers of the ducts. Only used to calculate default retu
 
 <br/>
 
-**Ventilation Fans: Whole-Home Mechanical**
+**Ventilation Fans: Mechanical Ventilation**
 
-The type of whole-home mechanical ventilation system.
+The type of mechanical ventilation system used for whole building ventilation.
 
-- **Name:** ``ventilation_fans_mechanical``
+- **Name:** ``ventilation_mechanical``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1384,11 +1349,11 @@ The type of whole-home mechanical ventilation system.
 
 <br/>
 
-**Ventilation Fans: Kitchen**
+**Ventilation Fans: Kitchen Exhaust Fan**
 
-The type of kitchen ventilation fans.
+The type of kitchen exhaust fan used for local ventilation.
 
-- **Name:** ``ventilation_fans_kitchen``
+- **Name:** ``ventilation_kitchen``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1397,11 +1362,11 @@ The type of kitchen ventilation fans.
 
 <br/>
 
-**Ventilation Fans: Bathroom**
+**Ventilation Fans: Bathroom Exhaust Fans**
 
-The type of bathroom ventilation fans.
+The type of bathroom exhaust fans used for local ventilation.
 
-- **Name:** ``ventilation_fans_bathroom``
+- **Name:** ``ventilation_bathroom``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
@@ -1410,40 +1375,16 @@ The type of bathroom ventilation fans.
 
 <br/>
 
-**Whole House Fan: Present**
+**Ventilation Fans: Whole House Fan**
 
-Whether there is a whole house fan.
+The type of whole house fans used for seasonal cooling load reduction.
 
-- **Name:** ``whole_house_fan_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``true``
-
-<br/>
-
-**Whole House Fan: Flow Rate**
-
-The flow rate of the whole house fan. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-whole-house-fans'>HPXML Whole House Fans</a>) is used.
-
-- **Name:** ``whole_house_fan_flow_rate``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
+- **Name:** ``ventilation_whole_house_fan``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Whole House Fan: Fan Power**
-
-The fan power of the whole house fan. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-whole-house-fans'>HPXML Whole House Fans</a>) is used.
-
-- **Name:** ``whole_house_fan_power``
-- **Type:** ``Double``
-
-- **Units:** ``W``
-
-- **Required:** ``false``
+- **Choices:** `None`, `1000 cfm`, `1500 cfm`, `2000 cfm`, `2500 cfm`, `3000 cfm`, `3500 cfm`, `4000 cfm`, `4500 cfm`, `5000 cfm`, `5500 cfm`, `6000 cfm`, `Detailed Example: 4500 cfm, 300 W`
 
 <br/>
 
@@ -1481,19 +1422,6 @@ The jacket R-value of water heater. Doesn't apply to instantaneous water heater 
 - **Type:** ``Double``
 
 - **Units:** ``F-ft2-hr/Btu``
-
-- **Required:** ``false``
-
-<br/>
-
-**DHW: Water Heater Setpoint Temperature**
-
-The setpoint temperature of water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.
-
-- **Name:** ``dhw_water_heater_setpoint_temperature``
-- **Type:** ``Double``
-
-- **Units:** ``F``
 
 - **Required:** ``false``
 

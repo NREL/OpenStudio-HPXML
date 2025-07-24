@@ -410,7 +410,6 @@
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <EnergyFactor>0.59</EnergyFactor>
             <RecoveryEfficiency>0.76</RecoveryEfficiency>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
