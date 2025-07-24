@@ -54,8 +54,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-enclosure-garage-atticroof-conditioned.xml' => 'base-sfd.xml',
       'extra-enclosure-atticroof-conditioned-eaves-gable.xml' => 'base-sfd.xml',
       'extra-enclosure-atticroof-conditioned-eaves-hip.xml' => 'extra-enclosure-atticroof-conditioned-eaves-gable.xml',
-      'extra-gas-pool-heater-with-zero-kwh.xml' => 'base-sfd.xml',
-      'extra-gas-hot-tub-heater-with-zero-kwh.xml' => 'base-sfd.xml',
       'extra-emissions-fossil-fuel-factors.xml' => 'base-sfd.xml',
       'extra-bills-fossil-fuel-rates.xml' => 'base-sfd.xml',
       'extra-seasons-building-america.xml' => 'base-sfd.xml',
@@ -464,10 +462,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['misc_plug_loads'] = '100%'
       args['misc_television'] = '100%'
       args['misc_plug_loads_vehicle_present'] = false
-      args['pool_present'] = false
-      args['pool_heater_type'] = HPXML::HeaterTypeElectricResistance
-      args['permanent_spa_present'] = false
-      args['permanent_spa_heater_type'] = HPXML::HeaterTypeElectricResistance
+      args['misc_pool'] = 'None'
+      args['misc_permanent_spa'] = 'None'
     when 'base-sfd2.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
       args['whole_sfa_or_mf_building_sim'] = true
@@ -630,14 +626,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts_return_location'] = HPXML::LocationUnderSlab
     when 'extra-enclosure-atticroof-conditioned-eaves-hip.xml'
       args['geometry_attic_type'] = 'Attic, Conditioned, Hip'
-    when 'extra-gas-pool-heater-with-zero-kwh.xml'
-      args['pool_present'] = true
-      args['pool_heater_type'] = HPXML::HeaterTypeGas
-      args['pool_heater_annual_kwh'] = 0
-    when 'extra-gas-hot-tub-heater-with-zero-kwh.xml'
-      args['permanent_spa_present'] = true
-      args['permanent_spa_heater_type'] = HPXML::HeaterTypeGas
-      args['permanent_spa_heater_annual_kwh'] = 0
     when 'extra-emissions-fossil-fuel-factors.xml'
       args['emissions_scenario_names'] = 'Scenario1, Scenario2'
       args['emissions_types'] = 'CO2e, SO2'

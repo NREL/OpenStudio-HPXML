@@ -61,10 +61,8 @@
     "misc_plug_loads": "Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent",
     "misc_television": "None",
     "misc_plug_loads_vehicle_present": false,
-    "pool_present": false,
-    "pool_heater_type": "none",
-    "permanent_spa_present": false,
-    "permanent_spa_heater_type": "none",
+    "misc_pool": "None",
+    "misc_permanent_spa": "None",
     "combine_like_surfaces": false
   },
   "tests/ASHRAE_Standard_140/L110AC.xml": {
@@ -466,10 +464,8 @@
     "misc_plug_loads": "100%",
     "misc_television": "100%",
     "misc_plug_loads_vehicle_present": false,
-    "pool_present": false,
-    "pool_heater_type": "none",
-    "permanent_spa_present": false,
-    "permanent_spa_heater_type": "none",
+    "misc_pool": "None",
+    "misc_permanent_spa": "None",
     "utility_bill_scenario_names": "Bills",
     "combine_like_surfaces": true
   },
@@ -2550,20 +2546,13 @@
     "misc_grill": "Detailed Example: Propane, 25 therm/yr",
     "misc_lighting": "Detailed Example: Natural Gas, 28 therm/yr",
     "misc_fireplace": "Detailed Example: Wood, 55 therm/yr",
-    "pool_present": true,
-    "pool_pump_annual_kwh": 2700,
-    "pool_heater_type": "gas fired",
-    "pool_heater_annual_therm": 500,
-    "permanent_spa_present": true,
-    "permanent_spa_pump_annual_kwh": 1000,
-    "permanent_spa_heater_type": "electric resistance",
-    "permanent_spa_heater_annual_kwh": 1300
+    "misc_pool": "Detailed Example: Pool, 2700 kWh/yr Pump, 500 therms/yr Natural Gas Heater",
+    "misc_permanent_spa": "Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater"
   },
   "sample_files/base-misc-loads-large-uncommon2.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon.xml",
-    "pool_heater_type": "none",
-    "permanent_spa_heater_type": "heat pump",
-    "permanent_spa_heater_annual_kwh": 260
+    "misc_pool": "Detailed Example: Pool, 2700 kWh/yr Pump, Unheated",
+    "misc_permanent_spa": "Detailed Example: Spa, 1000 kWh/yr Pump, 260 kWh/yr Heat Pump Heater"
   },
   "sample_files/base-misc-loads-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2606,18 +2595,8 @@
     "misc_grill": "Propane, 90%",
     "misc_lighting": "Natural Gas, 90%",
     "misc_fireplace": "Wood, 90%",
-    "pool_present": true,
-    "pool_pump_annual_kwh": 2700,
-    "pool_pump_usage_multiplier": 0.9,
-    "pool_heater_type": "gas fired",
-    "pool_heater_annual_therm": 500,
-    "pool_heater_usage_multiplier": 0.9,
-    "permanent_spa_present": true,
-    "permanent_spa_pump_annual_kwh": 1000,
-    "permanent_spa_pump_usage_multiplier": 0.9,
-    "permanent_spa_heater_type": "electric resistance",
-    "permanent_spa_heater_annual_kwh": 1300,
-    "permanent_spa_heater_usage_multiplier": 0.9
+    "misc_pool": "Detailed Example: Pool, Natural Gas Heater, 90% Usage Multiplier",
+    "misc_permanent_spa": "Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater, 90% Usage Multiplier"
   },
   "sample_files/base-bldgtype-mf-whole-building.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2715,10 +2694,8 @@
     "misc_lighting": "Natural Gas, 100%",
     "misc_fireplace": "Wood, 100%",
     "misc_plug_loads_vehicle_annual_kwh": null,
-    "pool_pump_annual_kwh": null,
-    "pool_heater_annual_therm": null,
-    "permanent_spa_pump_annual_kwh": null,
-    "permanent_spa_heater_annual_kwh": null
+    "misc_pool": "Pool, Natural Gas Heater",
+    "misc_permanent_spa": "Spa, Electric Resistance Heater"
   },
   "sample_files/base-residents-1-misc-loads-large-uncommon2.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon2.xml",
@@ -2730,10 +2707,8 @@
     "misc_lighting": "Natural Gas, 100%",
     "misc_fireplace": "Wood, 100%",
     "misc_plug_loads_vehicle_annual_kwh": null,
-    "pool_pump_annual_kwh": null,
-    "pool_heater_annual_therm": null,
-    "permanent_spa_pump_annual_kwh": null,
-    "permanent_spa_heater_annual_kwh": null
+    "misc_pool": "Pool, Unheated",
+    "misc_permanent_spa": "Spa, Heat Pump Heater"
   },
   "sample_files/base-residents-5-5.xml": {
     "parent_hpxml": "sample_files/base-misc-defaults.xml",

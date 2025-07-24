@@ -2860,173 +2860,29 @@ The amount of fireplace usage, relative to the national average. Fireplaces can 
 
 <br/>
 
-**Pool: Present**
+**Misc: Pool**
 
-Whether there is a pool.
+The type of pool (pump & heater).
 
-- **Name:** ``pool_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Pool: Pump Annual kWh**
-
-The annual energy consumption of the pool pump. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#pool-pump'>Pool Pump</a>) is used.
-
-- **Name:** ``pool_pump_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Pool: Pump Usage Multiplier**
-
-Multiplier on the pool pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#pool-pump'>Pool Pump</a>) is used.
-
-- **Name:** ``pool_pump_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Pool: Heater Type**
-
-The type of pool heater. Use 'none' if there is no pool heater.
-
-- **Name:** ``pool_heater_type``
+- **Name:** ``misc_pool``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
-
-- **Choices:** `none`, `electric resistance`, `gas fired`, `heat pump`
-
-<br/>
-
-**Pool: Heater Annual kWh**
-
-The annual energy consumption of the electric resistance pool heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#pool-heater'>Pool Heater</a>) is used.
-
-- **Name:** ``pool_heater_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
 - **Required:** ``false``
 
-<br/>
-
-**Pool: Heater Annual therm**
-
-The annual energy consumption of the gas fired pool heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#pool-heater'>Pool Heater</a>) is used.
-
-- **Name:** ``pool_heater_annual_therm``
-- **Type:** ``Double``
-
-- **Units:** ``therm/yr``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Pool, Unheated`, `Pool, Electric Resistance Heater`, `Pool, Heat Pump Heater`, `Pool, Natural Gas Heater`, `Detailed Example: Pool, Natural Gas Heater, 90% Usage Multiplier`, `Detailed Example: Pool, 2700 kWh/yr Pump, Unheated`, `Detailed Example: Pool, 2700 kWh/yr Pump, 500 therms/yr Natural Gas Heater`
 
 <br/>
 
-**Pool: Heater Usage Multiplier**
+**Misc: Permanent Spa**
 
-Multiplier on the pool heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#pool-heater'>Pool Heater</a>) is used.
+The type of permanent spa (pump & heater).
 
-- **Name:** ``pool_heater_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Permanent Spa: Present**
-
-Whether there is a permanent spa.
-
-- **Name:** ``permanent_spa_present``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Permanent Spa: Pump Annual kWh**
-
-The annual energy consumption of the permanent spa pump. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#permanent-spa-pump'>Permanent Spa Pump</a>) is used.
-
-- **Name:** ``permanent_spa_pump_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Permanent Spa: Pump Usage Multiplier**
-
-Multiplier on the permanent spa pump energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#permanent-spa-pump'>Permanent Spa Pump</a>) is used.
-
-- **Name:** ``permanent_spa_pump_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Permanent Spa: Heater Type**
-
-The type of permanent spa heater. Use 'none' if there is no permanent spa heater.
-
-- **Name:** ``permanent_spa_heater_type``
+- **Name:** ``misc_permanent_spa``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
-
-- **Choices:** `none`, `electric resistance`, `gas fired`, `heat pump`
-
-<br/>
-
-**Permanent Spa: Heater Annual kWh**
-
-The annual energy consumption of the electric resistance permanent spa heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#permanent-spa-heater'>Permanent Spa Heater</a>) is used.
-
-- **Name:** ``permanent_spa_heater_annual_kwh``
-- **Type:** ``Double``
-
-- **Units:** ``kWh/yr``
-
 - **Required:** ``false``
 
-<br/>
-
-**Permanent Spa: Heater Annual therm**
-
-The annual energy consumption of the gas fired permanent spa heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#permanent-spa-heater'>Permanent Spa Heater</a>) is used.
-
-- **Name:** ``permanent_spa_heater_annual_therm``
-- **Type:** ``Double``
-
-- **Units:** ``therm/yr``
-
-- **Required:** ``false``
-
-<br/>
-
-**Permanent Spa: Heater Usage Multiplier**
-
-Multiplier on the permanent spa heater energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#permanent-spa-heater'>Permanent Spa Heater</a>) is used.
-
-- **Name:** ``permanent_spa_heater_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Spa, Unheated`, `Spa, Electric Resistance Heater`, `Spa, Heat Pump Heater`, `Spa, Natural Gas Heater`, `Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater`, `Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater, 90% Usage Multiplier`, `Detailed Example: Spa, 1000 kWh/yr Pump, 260 kWh/yr Heat Pump Heater`
 
 <br/>
 
