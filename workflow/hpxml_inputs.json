@@ -4046,7 +4046,7 @@
   },
   "sample_files/base-simcontrol-temperature-capacitance-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "simulation_control_temperature_capacitance_multiplier": 7
+    "simulation_control_temperature_capacitance_multiplier": 10
   },
   "sample_files/base-simcontrol-timestep-10-mins.xml": {
     "parent_hpxml": "sample_files/base.xml",

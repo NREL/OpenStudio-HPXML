@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
         <AdvancedResearchFeatures>
-          <TemperatureCapacitanceMultiplier>7.0</TemperatureCapacitanceMultiplier>
+          <TemperatureCapacitanceMultiplier>10.0</TemperatureCapacitanceMultiplier>
         </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
