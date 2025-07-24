@@ -532,6 +532,7 @@
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
             <SystemIdentifier id='EVCharger1'/>
+            <ChargingLevel>2</ChargingLevel>
             <ChargingPower>7000.0</ChargingPower>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>

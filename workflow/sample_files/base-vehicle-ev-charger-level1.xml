@@ -513,13 +513,12 @@
                 </Battery>
                 <FractionChargedLocation>
                   <Location>Home</Location>
-                  <Percentage>0.75</Percentage>
+                  <Percentage>0.7</Percentage>
                 </FractionChargedLocation>
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>
             <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
-            <HoursDrivenPerWeek>14.0</HoursDrivenPerWeek>
             <FuelEconomyCombined>
               <Units>kWh/mile</Units>
               <Value>0.25</Value>
@@ -530,6 +529,7 @@
           <ElectricVehicleCharger>
             <SystemIdentifier id='EVCharger1'/>
             <ChargingLevel>1</ChargingLevel>
+            <ChargingPower>1600.0</ChargingPower>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>

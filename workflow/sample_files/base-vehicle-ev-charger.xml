@@ -519,7 +519,6 @@
               </BatteryElectricVehicle>
             </VehicleType>
             <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
-            <HoursDrivenPerWeek>14.0</HoursDrivenPerWeek>
             <FuelEconomyCombined>
               <Units>kWh/mile</Units>
               <Value>0.25</Value>
@@ -529,6 +528,7 @@
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
             <SystemIdentifier id='EVCharger1'/>
+            <ChargingLevel>2</ChargingLevel>
             <ChargingPower>7000.0</ChargingPower>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>

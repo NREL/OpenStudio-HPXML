@@ -1017,28 +1017,31 @@
   },
   "sample_files/base-vehicle-ev-no-charger.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
-    "vehicle_type": "BatteryElectricVehicle"
-  },
-  "sample_files/base-ev-charger.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "ev_charger_present": true
-  },
-  "sample_files/base-vehicle-ev-charger.xml": {
-    "parent_hpxml": "sample_files/base-vehicle-ev-no-charger.xml",
+    "vehicle_type": "BatteryElectricVehicle",
     "vehicle_battery_capacity": 100,
     "vehicle_battery_usable_capacity": 80,
     "vehicle_miles_driven_per_year": 10000,
-    "vehicle_hours_driven_per_week": 14,
     "vehicle_fuel_economy_combined": 0.25,
-    "vehicle_fuel_economy_units": "kWh/mile",
-    "vehicle_fraction_charged_home": 0.75,
+    "vehicle_fuel_economy_units": "kWh/mile"
+  },
+  "sample_files/base-ev-charger.xml": {
+    "parent_hpxml": "sample_files/base.xml",
     "ev_charger_present": true,
+    "ev_charger_level": 2,
     "ev_charger_power": 7000
+  },
+  "sample_files/base-vehicle-ev-charger.xml": {
+    "parent_hpxml": "sample_files/base-vehicle-ev-no-charger.xml",
+    "ev_charger_present": true,
+    "ev_charger_level": 2,
+    "ev_charger_power": 7000,
+    "vehicle_fraction_charged_home": 0.75
   },
   "sample_files/base-vehicle-ev-charger-level1.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
     "ev_charger_level": 1,
-    "ev_charger_power": null
+    "ev_charger_power": 1600,
+    "vehicle_fraction_charged_home": 0.7
   },
   "sample_files/base-vehicle-ev-charger-miles-per-kwh.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
@@ -1068,12 +1071,21 @@
   },
   "sample_files/base-vehicle-ev-charger-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
+    "vehicle_hours_driven_per_week": 14,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-ev-charger.csv"
   },
   "sample_files/base-pv-battery-and-vehicle-ev.xml": {
     "parent_hpxml": "sample_files/base-pv-battery.xml",
     "vehicle_type": "BatteryElectricVehicle",
+    "vehicle_battery_capacity": 100,
+    "vehicle_battery_usable_capacity": 80,
+    "vehicle_miles_driven_per_year": 10000,
+    "vehicle_fuel_economy_combined": 0.25,
+    "vehicle_fuel_economy_units": "kWh/mile",
+    "vehicle_fraction_charged_home": 0.75,
     "ev_charger_present": true,
+    "ev_charger_level": 2,
+    "ev_charger_power": 7000,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/vehicle-ev.csv"
   },
   "sample_files/base-bldgtype-sfa-unit.xml": {
@@ -3904,7 +3916,15 @@
     "hot_water_distribution_system_type": "Recirculation",
     "hot_water_distribution_recirc_control_type": "no control",
     "vehicle_type": "BatteryElectricVehicle",
+    "vehicle_battery_capacity": 100,
+    "vehicle_battery_usable_capacity": 80,
+    "vehicle_miles_driven_per_year": 10000,
+    "vehicle_fuel_economy_combined": 0.25,
+    "vehicle_fuel_economy_units": "kWh/mile",
+    "vehicle_fraction_charged_home": 0.75,
     "ev_charger_present": true,
+    "ev_charger_level": 2,
+    "ev_charger_power": 7000,
     "misc_plug_loads_vehicle_present": false
   },
   "sample_files/base-schedules-simple-vacancy.xml": {

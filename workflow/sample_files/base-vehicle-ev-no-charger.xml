@@ -500,8 +500,24 @@
           <Vehicle>
             <SystemIdentifier id='Vehicle1'/>
             <VehicleType>
-              <BatteryElectricVehicle/>
+              <BatteryElectricVehicle>
+                <Battery>
+                  <NominalCapacity>
+                    <Units>kWh</Units>
+                    <Value>100.0</Value>
+                  </NominalCapacity>
+                  <UsableCapacity>
+                    <Units>kWh</Units>
+                    <Value>80.0</Value>
+                  </UsableCapacity>
+                </Battery>
+              </BatteryElectricVehicle>
             </VehicleType>
+            <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
+            <FuelEconomyCombined>
+              <Units>kWh/mile</Units>
+              <Value>0.25</Value>
+            </FuelEconomyCombined>
           </Vehicle>
         </Vehicles>
       </Systems>

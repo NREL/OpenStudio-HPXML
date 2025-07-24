@@ -474,14 +474,35 @@
             <SystemIdentifier id='Vehicle1'/>
             <VehicleType>
               <BatteryElectricVehicle>
+                <Battery>
+                  <NominalCapacity>
+                    <Units>kWh</Units>
+                    <Value>100.0</Value>
+                  </NominalCapacity>
+                  <UsableCapacity>
+                    <Units>kWh</Units>
+                    <Value>80.0</Value>
+                  </UsableCapacity>
+                </Battery>
+                <FractionChargedLocation>
+                  <Location>Home</Location>
+                  <Percentage>0.75</Percentage>
+                </FractionChargedLocation>
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>
+            <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
+            <FuelEconomyCombined>
+              <Units>kWh/mile</Units>
+              <Value>0.25</Value>
+            </FuelEconomyCombined>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
             <SystemIdentifier id='EVCharger1'/>
+            <ChargingLevel>2</ChargingLevel>
+            <ChargingPower>7000.0</ChargingPower>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>
