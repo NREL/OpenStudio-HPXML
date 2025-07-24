@@ -2357,9 +2357,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if hpxml_file.include? 'base-dhw-tank-model-type-stratified'
       hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
     end
-    if ['base-dhw-setpoint-temperature.xml'].include? hpxml_file
-      hpxml_bldg.water_heating_systems[0].temperature = 135
-    end
 
     # -------------------- #
     # HPXML VentilationFan #

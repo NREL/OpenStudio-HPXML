@@ -1103,7 +1103,8 @@
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },
   "sample_files/base-dhw-setpoint-temperature.xml": {
-    "parent_hpxml": "sample_files/base.xml"
+    "parent_hpxml": "sample_files/base.xml",
+    "dhw_water_heater": "Detailed Example: Electricity, Tank, UEF=0.94, Setpoint=135F"
   },
   "sample_files/base-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base.xml",

@@ -4424,7 +4424,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                          recovery_efficiency: recovery_efficiency,
                                          uses_desuperheater: uses_desuperheater,
                                          related_hvac_idref: related_hvac_idref,
-                                         jacket_r_value: jacket_r_value)
+                                         jacket_r_value: jacket_r_value,
+                                         temperature: args[:dhw_water_heater_temperature])
   end
 
   # Sets the HPXML hot water distribution properties.
