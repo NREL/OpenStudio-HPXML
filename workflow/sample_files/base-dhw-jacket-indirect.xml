@@ -352,7 +352,6 @@
                 <JacketRValue>10.0</JacketRValue>
               </Jacket>
             </WaterHeaterInsulation>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
             <RelatedHVACSystem idref='HeatingSystem1'/>
           </WaterHeatingSystem>
           <HotWaterDistribution>

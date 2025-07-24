@@ -764,7 +764,6 @@
     "water_heater_efficiency_type": "UniformEnergyFactor",
     "water_heater_efficiency": 0.94,
     "water_heater_jacket_rvalue": 0,
-    "water_heater_setpoint_temperature": 125,
     "water_heater_num_bedrooms_served": 3,
     "hot_water_distribution_system_type": "Standard",
     "hot_water_distribution_pipe_r": 0,
@@ -1431,7 +1430,6 @@
   },
   "sample_files/base-dhw-indirect-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-dhw-indirect.xml",
-    "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },
   "sample_files/base-dhw-indirect-dse.xml": {
@@ -1549,7 +1547,6 @@
   },
   "sample_files/base-dhw-tank-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },
   "sample_files/base-dhw-tank-elec-ef.xml": {
@@ -1619,7 +1616,6 @@
   },
   "sample_files/base-dhw-tank-heat-pump-detailed-schedules.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump-ef.xml",
-    "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-operating-modes.csv"
   },
   "sample_files/base-dhw-tank-model-type-stratified.xml": {
@@ -1685,8 +1681,11 @@
   },
   "sample_files/base-dhw-tankless-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
-    "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
+  },
+  "sample_files/base-dhw-setpoint-temperature.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "water_heater_setpoint_temperature": 135.0
   },
   "sample_files/base-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3568,7 +3567,6 @@
     "whole_house_fan_present": true,
     "water_heater_location": null,
     "water_heater_tank_volume": null,
-    "water_heater_setpoint_temperature": null,
     "hot_water_distribution_standard_piping_length": null,
     "hot_water_distribution_pipe_r": null,
     "solar_thermal_system_type": "hot water",
@@ -3958,7 +3956,6 @@
     "hvac_control_heating_weekend_setpoint": null,
     "hvac_control_cooling_weekday_setpoint": null,
     "hvac_control_cooling_weekend_setpoint": null,
-    "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps.xml": {
@@ -3967,7 +3964,6 @@
     "hvac_control_heating_weekend_setpoint": null,
     "hvac_control_cooling_weekday_setpoint": null,
     "hvac_control_cooling_weekend_setpoint": null,
-    "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-30-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps-power-outage.xml": {

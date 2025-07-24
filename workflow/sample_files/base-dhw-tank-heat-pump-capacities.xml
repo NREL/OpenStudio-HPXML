@@ -410,7 +410,6 @@
             <HeatingCapacity>3000.0</HeatingCapacity>
             <BackupHeatingCapacity>0.0</BackupHeatingCapacity>
             <UniformEnergyFactor>3.5</UniformEnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
