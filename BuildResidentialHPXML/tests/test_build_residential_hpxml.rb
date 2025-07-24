@@ -175,7 +175,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'base-sfd.xml',
       'error-zero-number-of-bedrooms.xml' => 'base-sfd.xml',
       'error-sfd-with-shared-system.xml' => 'base-sfd.xml',
-      'error-rim-joist-height-but-no-assembly-r.xml' => 'base-sfd.xml',
       'error-unavailable-period-args-not-all-specified' => 'base-sfd.xml',
       'error-unavailable-period-args-not-all-same-size.xml' => 'base-sfd.xml',
       'error-unavailable-period-window-natvent-invalid.xml' => 'base-sfd.xml',
@@ -219,7 +218,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-dhw-indirect-without-boiler.xml' => ['Must specify a boiler when modeling an indirect water heater type.'],
       'error-conditioned-attic-with-one-floor-above-grade.xml' => ['Units with a conditioned attic must have at least two above-grade floors.'],
       'error-sfd-with-shared-system.xml' => ['Specified a shared system for a single-family detached unit.'],
-      'error-rim-joist-height-but-no-assembly-r.xml' => ['Specified a rim joist height but no rim joist assembly R-value.'],
       'error-unavailable-period-args-not-all-specified' => ['Did not specify all required unavailable period arguments.'],
       'error-unavailable-period-args-not-all-same-size.xml' => ['One or more unavailable period arguments does not have enough comma-separated elements specified.'],
       'error-unavailable-period-window-natvent-invalid.xml' => ["Window natural ventilation availability 'invalid' during an unavailable period is invalid."],
@@ -403,7 +401,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_num_bedrooms'] = 3
       args['geometry_unit_num_bathrooms'] = 2
       args['geometry_unit_num_occupants'] = 3
-      args['enclosure_rim_joist_assembly_r'] = 23.0
+      args['enclosure_rim_joist'] = 'R-13'
       args['enclosure_air_leakage'] = '3 ACH50'
       args['enclosure_ceiling'] = 'R-38'
       args['enclosure_roof_material'] = 'Asphalt/Fiberglass Shingles, Medium'
@@ -742,7 +740,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_cfa'] = 450.0
       args['geometry_foundation_type'] = 'Ambient'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
-      args.delete('enclosure_rim_joist_assembly_r')
     when 'extra-mf-rear-units.xml'
       args['geometry_building_num_units'] = 18
     when 'extra-mf-exterior-corridor.xml'
@@ -861,8 +858,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_ceiling'] = 'Uninsulated'
     when 'error-sfd-with-shared-system.xml'
       args['hvac_heating_system'] = 'Shared Boiler w/ Baseboard, 92% AFUE'
-    when 'error-rim-joist-height-but-no-assembly-r.xml'
-      args.delete('enclosure_rim_joist_assembly_r')
     when 'error-unavailable-period-args-not-all-specified'
       args['schedules_unavailable_period_types'] = 'Vacancy'
     when 'error-unavailable-period-args-not-all-same-size.xml'
