@@ -9,7 +9,6 @@
   <SoftwareInfo>
     <extension>
       <SimulationControl>
-        <Timestep>60</Timestep>
         <BeginMonth>2</BeginMonth>
         <BeginDayOfMonth>15</BeginDayOfMonth>
         <EndMonth>3</EndMonth>
@@ -87,7 +86,6 @@
     <BuildingDetails>
       <BuildingSummary>
         <Site>
-          <SiteType>suburban</SiteType>
           <Surroundings>stand-alone</Surroundings>
           <VerticalSurroundings>no units above or below</VerticalSurroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>

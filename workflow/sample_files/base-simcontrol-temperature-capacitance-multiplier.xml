@@ -9,7 +9,6 @@
   <SoftwareInfo>
     <extension>
       <SimulationControl>
-        <Timestep>60</Timestep>
         <AdvancedResearchFeatures>
           <TemperatureCapacitanceMultiplier>10.0</TemperatureCapacitanceMultiplier>
         </AdvancedResearchFeatures>
@@ -35,7 +34,6 @@
     <BuildingDetails>
       <BuildingSummary>
         <Site>
-          <SiteType>suburban</SiteType>
           <Surroundings>stand-alone</Surroundings>
           <VerticalSurroundings>no units above or below</VerticalSurroundings>
           <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>

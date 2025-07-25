@@ -504,7 +504,7 @@
     "door_rvalue": 2.86,
     "window_shgc": 0.4,
     "window_ufactor": 0.35,
-    "window_interior_shading_type": null,
+    "window_interior_shading_type": "light curtains",
     "heating_system_type": "Furnace",
     "heating_system_fuel": "natural gas",
     "heating_system_heating_efficiency": 0.78,
@@ -620,8 +620,6 @@
     "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
   "sample_files/base.xml": {
-    "simulation_control_timestep": 60,
-    "site_type": "suburban",
     "site_iecc_zone": "5B",
     "site_state_code": "CO",
     "weather_station_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
@@ -2298,8 +2296,7 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv",
-    "simulation_control_timestep": 60
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -3236,6 +3233,9 @@
     "ducts_supply_leakage_to_outside_value": 40.5,
     "ducts_return_leakage_to_outside_value": 13.5
   },
+  "sample_files/base-hvac-undersized-allow-increased-fixed-capacities.xml": {
+    "parent_hpxml": "sample_files/base-hvac-undersized.xml"
+  },
   "sample_files/base-hvac-wall-furnace-elec-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "WallFurnace",
@@ -3538,7 +3538,6 @@
   "sample_files/base-misc-defaults.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "simulation_control_timestep": null,
-    "site_type": null,
     "site_iecc_zone": null,
     "site_state_code": null,
     "geometry_unit_num_bathrooms": null,
@@ -3701,9 +3700,10 @@
     "neighbor_right_distance": 25,
     "neighbor_right_height": 12
   },
-  "sample_files/base-misc-shielding-of-home.xml": {
+  "sample_files/base-misc-terrain-shielding.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "site_shielding_of_home": "well-shielded"
+    "site_type": "rural",
+    "site_shielding_of_home": "exposed"
   },
   "sample_files/base-misc-unit-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3904,6 +3904,7 @@
     "parent_hpxml": "sample_files/base-misc-defaults.xml",
     "roof_material_type": "asphalt or fiberglass shingles",
     "window_fraction_operable": 0.67,
+    "window_interior_shading_type": "light curtains",
     "wall_siding_type": "wood siding",
     "geometry_unit_num_occupants": 5.5,
     "hot_water_distribution_pipe_r": 0,
