@@ -3371,7 +3371,7 @@ Allowed combinations of CapacityDescription and OutdoorTemperature for a given d
   .. [#] Only two stage and variable speed equipment will use CapacityDescription="minimum".
   .. [#] Only variable speed equipment will use CapacityDescription="maximum".
   .. [#] For variable speed equipment, minimum/maximum datapoints must both be provided or both be omitted.
-  .. [#] Nominal datapoint at 82F is require for single/two stage equipment and optional for variable speed equipment.
+  .. [#] Nominal datapoint at 82F is required for single/two stage equipment and optional for variable speed equipment.
 
 Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
 

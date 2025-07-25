@@ -5519,13 +5519,16 @@ module HPXMLFile
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   # @return [nil]
   def self.set_floors(hpxml_bldg, args, sorted_surfaces)
+    uninsulated_floor_r = 5.3
+    uninsulated_ceiling_r = 2.1
+
     if [HPXML::FoundationTypeBasementConditioned,
-        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
-      args[:floor_over_foundation_assembly_r] = 2.1 # Uninsulated
+        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > uninsulated_floor_r)
+      args[:floor_over_foundation_assembly_r] = uninsulated_floor_r
     end
 
-    if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > 2.1)
-      args[:ceiling_assembly_r] = 2.1 # Uninsulated
+    if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > uninsulated_ceiling_r)
+      args[:ceiling_assembly_r] = uninsulated_ceiling_r
     end
 
     sorted_surfaces.each do |surface|
@@ -5578,7 +5581,11 @@ module HPXMLFile
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:floor_over_foundation_assembly_r]
         end
       else
-        hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+        if floor_or_ceiling == HPXML::FloorOrCeilingFloor
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = uninsulated_floor_r
+        else
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = uninsulated_ceiling_r
+        end
       end
 
       next unless args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticFloor
