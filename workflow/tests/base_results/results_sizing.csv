@@ -408,6 +408,7 @@ denver-hvac-autosize-setpoints.xml,41338.0,34448.0,0.0,827.0,1033.0
 denver-hvac-autosize-space-heater-gas-only.xml,23694.0,0.0,0.0,790.0,0.0
 denver-hvac-autosize-stove-oil-only.xml,23694.0,0.0,0.0,790.0,0.0
 denver-hvac-autosize-stove-wood-pellets-only.xml,23694.0,0.0,0.0,790.0,0.0
+denver-hvac-autosize-undersized-allow-increased-fixed-capacities.xml,39593.0,32939.0,0.0,792.0,988.0
 denver-hvac-autosize-undersized.xml,39593.0,32939.0,0.0,792.0,988.0
 denver-hvac-autosize-wall-furnace-elec-only.xml,23694.0,0.0,0.0,790.0,0.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-ACCA.xml,0.0,40853.0,0.0,0.0,1226.0
@@ -819,5 +820,6 @@ houston-hvac-autosize-setpoints.xml,26471.0,40853.0,0.0,529.0,1226.0
 houston-hvac-autosize-space-heater-gas-only.xml,14070.0,0.0,0.0,469.0,0.0
 houston-hvac-autosize-stove-oil-only.xml,14070.0,0.0,0.0,469.0,0.0
 houston-hvac-autosize-stove-wood-pellets-only.xml,14070.0,0.0,0.0,469.0,0.0
+houston-hvac-autosize-undersized-allow-increased-fixed-capacities.xml,24932.0,38381.0,0.0,499.0,1151.0
 houston-hvac-autosize-undersized.xml,24932.0,38381.0,0.0,499.0,1151.0
 houston-hvac-autosize-wall-furnace-elec-only.xml,14070.0,0.0,0.0,469.0,0.0
