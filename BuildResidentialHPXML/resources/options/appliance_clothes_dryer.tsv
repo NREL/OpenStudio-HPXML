@@ -1,0 +1,16 @@
+Option Name	Efficiency Type	Efficiency [lb/kWh]	Fuel Type	Drying Method
+None				
+"Electricity, Standard"	CombinedEnergyFactor	3.73	electricity	conventional
+"Electricity, Premium"	CombinedEnergyFactor	3.93	electricity	conventional
+"Electricity, Heat Pump"	CombinedEnergyFactor	5.2	electricity	heat pump
+"Natural Gas, Standard"	CombinedEnergyFactor	3.3	natural gas	conventional
+"Natural Gas, Premium"	CombinedEnergyFactor	3.48	natural gas	conventional
+"Propane, Standard"	CombinedEnergyFactor	3.3	propane	conventional
+"Detailed Example: Electricity, ERI Reference 2006"	CombinedEnergyFactor	3.01	electricity	conventional
+"Detailed Example: Natural Gas, ERI Reference 2006"	CombinedEnergyFactor	3.01	natural gas	conventional
+"Detailed Example: Electricity, EF=4.29"	EnergyFactor	4.29	electricity	condensing
+				
+Efficiency Type: The efficiency type of the clothes dryer.				
+Efficiency: The efficiency from the EnergyGuide label.				
+Fuel Type: Type of fuel used by the clothes dryer.				
+Drying Method: The method of drying used by the clothes dryer.				

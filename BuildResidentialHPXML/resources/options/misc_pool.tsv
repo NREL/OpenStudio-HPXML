@@ -1,0 +1,16 @@
+Option Name	Pump Annual Energy Use [kWh/yr]	Pump Usage Multiplier	Heater Type	Heater Annual Electricity Use [kWh/yr]	Heater Annual Natural Gas Use [kWh/yr]	Heater Usage Multiplier
+None	0			0	0	
+"Pool, Unheated"			none			
+"Pool, Electric Resistance Heater"			electric resistance			
+"Pool, Heat Pump Heater"			heat pump			
+"Pool, Natural Gas Heater"			gas fired			
+"Detailed Example: Pool, Natural Gas Heater, 90% Usage Multiplier"	2700	0.9	gas fired		500	0.9
+"Detailed Example: Pool, 2700 kWh/yr Pump, Unheated"	2700		none			
+"Detailed Example: Pool, 2700 kWh/yr Pump, 500 therms/yr Natural Gas Heater"	2700		gas fired		500	
+						
+Pump Annual Energy Use: The annual energy consumption of the pool pump.						
+"Pump Usage Multiplier: Multiplier on the pool pump energy usage that can reflect, e.g., high/low usage occupants."						
+Heater Type: The type of pool heater.						
+Heater Annual Electricity Use: The annual electricity consumption of the pool heater.						
+Heater Annual Natural Gas Use: The annual natural gas consumption of the pool heater.						
+"Heater Usage Multiplier: Multiplier on the pool heater energy usage that can reflect, e.g., high/low usage occupants."						
