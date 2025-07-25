@@ -1,6 +1,9 @@
 {
   "tests/ASHRAE_Standard_140/L100AC.xml": {
-    "weather_station_epw_filepath": "USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw",
+    "software_info_program_used": "",
+    "software_info_program_version": "",
+    "year_built": 0,
+    "location_epw_filepath": "USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw",
     "geometry_unit_type": "single-family detached",
     "geometry_unit_num_floors_above_grade": 1,
     "geometry_unit_cfa": 1539,
@@ -141,7 +144,7 @@
   },
   "tests/ASHRAE_Standard_140/L100AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "weather_station_epw_filepath": "USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw"
+    "location_epw_filepath": "USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw"
   },
   "tests/ASHRAE_Standard_140/L110AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -213,7 +216,7 @@
   },
   "tests/HERS_HVAC/HVAC2a.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC1a.xml",
-    "weather_station_epw_filepath": "USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw"
+    "location_epw_filepath": "USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw"
   },
   "tests/HERS_HVAC/HVAC2b.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC2a.xml",
@@ -296,7 +299,7 @@
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_unit_num_occupants": null,
     "enclosure_air_leakage": "Detailed Example: 79.8 sq. in. ELA",
-    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
+    "location_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "geometry_unit_num_bedrooms": 2,
     "enclosure_roof_material": "Detailed Example: 0.75 Solar Absorptance",
     "enclosure_wall_siding": "Detailed Example: 0.75 Solar Absorptance",
@@ -349,7 +352,7 @@
   },
   "tests/HERS_Hot_Water/L100AM-HW-01.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
-    "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw",
+    "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw",
     "enclosure_wall": "Wood Stud, IECC U-0.082",
     "enclosure_floor_over_foundation": "Wood Frame, IECC U-0.064",
     "enclosure_ceiling": "IECC U-0.035",
@@ -358,32 +361,34 @@
   },
   "tests/HERS_Hot_Water/L100AM-HW-02.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-02.xml",
-    "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
+    "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
   "tests/HERS_Hot_Water/L100AM-HW-03.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-03.xml",
-    "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
+    "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
   "tests/HERS_Hot_Water/L100AM-HW-04.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-04.xml",
-    "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
+    "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
   "tests/HERS_Hot_Water/L100AM-HW-05.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-05.xml",
-    "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
+    "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
   "tests/HERS_Hot_Water/L100AM-HW-06.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-06.xml",
-    "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
+    "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
   "tests/HERS_Hot_Water/L100AM-HW-07.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-07.xml",
-    "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
+    "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
   "sample_files/base.xml": {
+    "software_info_program_used": "",
+    "software_info_program_version": "",
     "simulation_control_timestep": 60,
-    "site_type": "suburban",
-    "weather_station_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
+    "year_built": 0,
+    "location_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
     "geometry_unit_type": "single-family detached",
     "geometry_unit_num_floors_above_grade": 1,
     "geometry_unit_cfa": 2700,
@@ -643,7 +648,6 @@
     "enclosure_window_area_or_wwr_back": 0.18,
     "enclosure_window_area_or_wwr_left": 0.18,
     "enclosure_window_area_or_wwr_right": 0.18,
-    "enclosure_air_leakage_type": "unit exterior only",
     "hvac_heating_system_capacity": "25 kBtu/hr"
   },
   "sample_files/base-bldgtype-sfa-unit-2stories.xml": {
@@ -663,8 +667,7 @@
   },
   "sample_files/base-bldgtype-sfa-unit-infil-compartmentalization-test.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-sfa-unit.xml",
-    "enclosure_air_leakage": "Detailed Example: 3.57 ACH50",
-    "enclosure_air_leakage_type": "unit total"
+    "enclosure_air_leakage": "Detailed Example: 3.57 ACH50"
   },
   "sample_files/base-bldgtype-mf-unit.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -680,7 +683,6 @@
     "enclosure_window_area_or_wwr_left": 0.18,
     "enclosure_window_area_or_wwr_right": 0.18,
     "enclosure_door_area": 20,
-    "enclosure_air_leakage_type": "unit exterior only",
     "hvac_heating_system_capacity": "10 kBtu/hr",
     "hvac_cooling_system_capacity": "1.0 tons",
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
@@ -716,14 +718,12 @@
   },
   "sample_files/base-bldgtype-mf-unit-infil-compartmentalization-test.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "enclosure_air_leakage": "Detailed Example: 12.16 ACH50",
-    "enclosure_air_leakage_type": "unit total"
+    "enclosure_air_leakage": "Detailed Example: 12.16 ACH50"
   },
   "sample_files/base-bldgtype-mf-unit-infil-leakiness-description.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "enclosure_air_leakage": "Tight",
-    "year_built": 1990,
-    "enclosure_air_leakage_type": null
+    "year_built": 1990
   },
   "sample_files/base-bldgtype-mf-unit-neighbor-shading.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
@@ -921,19 +921,19 @@
   },
   "sample_files/base-dhw-jacket-indirect.xml": {
     "parent_hpxml": "sample_files/base-dhw-indirect.xml",
-    "dhw_water_heater_jacket_rvalue": 10
+    "dhw_water_heater_jacket": "R-10"
   },
   "sample_files/base-dhw-jacket-electric.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "dhw_water_heater_jacket_rvalue": 10
+    "dhw_water_heater_jacket": "R-10"
   },
   "sample_files/base-dhw-jacket-gas.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-gas.xml",
-    "dhw_water_heater_jacket_rvalue": 10
+    "dhw_water_heater_jacket": "R-10"
   },
   "sample_files/base-dhw-jacket-hpwh.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
-    "dhw_water_heater_jacket_rvalue": 10
+    "dhw_water_heater_jacket": "R-10"
   },
   "sample_files/base-dhw-low-flow-fixtures.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1213,8 +1213,7 @@
   "sample_files/base-enclosure-infil-leakiness-description.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "enclosure_air_leakage": "Leaky",
-    "year_built": 1988,
-    "enclosure_air_leakage_type": null
+    "year_built": 1988
   },
   "sample_files/base-enclosure-orientations.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -1264,11 +1263,11 @@
   },
   "sample_files/base-enclosure-windows-insect-screens-exterior.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "enclosure_window_insect_screens": "exterior"
+    "enclosure_window_insect_screens": "Exterior"
   },
   "sample_files/base-enclosure-windows-insect-screens-interior.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "enclosure_window_insect_screens": "interior"
+    "enclosure_window_insect_screens": "Interior"
   },
   "sample_files/base-enclosure-windows-interior-shading-blinds.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1304,7 +1303,7 @@
   "sample_files/base-enclosure-windows-storms.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "enclosure_window": "Double, Clear, Thermal-Break, Air",
-    "enclosure_window_storm_type": "low-e"
+    "enclosure_window_storm": "Low-E"
   },
   "sample_files/base-enclosure-thermal-mass.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -1488,9 +1487,11 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml",
-    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
+    "location_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "simulation_control_timestep": 1,
-    "hvac_heat_pump_backup_capacity": "10 kW"
+    "hvac_heat_pump_backup_capacity": "10 kW",
+    "advanced_feature": "On/Off Thermostat Deadband, 2F",
+    "advanced_feature_2": "Heat Pump Backup Staging, 5 kW"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -1509,9 +1510,11 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
-    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
+    "location_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "simulation_control_timestep": 1,
-    "hvac_heat_pump_backup_capacity": "10 kW"
+    "hvac_heat_pump_backup_capacity": "10 kW",
+    "advanced_feature": "On/Off Thermostat Deadband, 2F",
+    "advanced_feature_2": "Heat Pump Backup Staging, 5 kW"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -1519,10 +1522,8 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "hvac_heat_pump_capacity": "Autosize",
-    "hvac_heat_pump_backup_capacity": "Autosize",
-    "heat_pump_sizing_methodology": "MaxLoad",
-    "heat_pump_backup_sizing_methodology": "supplemental"
+    "hvac_heat_pump_capacity": "Autosize (MaxLoad)",
+    "hvac_heat_pump_backup_capacity": "Autosize (Supplemental)"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -1888,21 +1889,24 @@
     "hvac_heat_pump_backup": "None"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-1-speed-experimental.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml"
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
+    "advanced_feature": "Experimental Ground-to-Air Heat Pump Model"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "hvac_heat_pump": "Geothermal HP, EER 20.5, COP 4.0"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml"
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed.xml",
+    "advanced_feature": "Experimental Ground-to-Air Heat Pump Model"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "hvac_heat_pump": "Geothermal HP, EER 30.9, COP 4.4"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml"
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed.xml",
+    "advanced_feature": "Experimental Ground-to-Air Heat Pump Model"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-backup-integrated.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -1919,7 +1923,7 @@
   "sample_files/base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "hvac_geothermal_loop": "Detailed Example: Lopsided U Configuration, 10 Boreholes",
-    "site_soil_type": "Detailed Example: Sand, Dry, 0.03 Diffusivity"
+    "location_soil_type": "Detailed Example: Sand, Dry, 0.03 Diffusivity"
   },
   "sample_files/base-hvac-ground-to-air-heat-pump-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
@@ -2186,7 +2190,8 @@
   },
   "sample_files/base-hvac-room-ac-only-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml",
-    "simulation_control_timestep": 1
+    "simulation_control_timestep": 1,
+    "advanced_feature": "On/Off Thermostat Deadband, 2F"
   },
   "sample_files/base-hvac-seasons.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2233,6 +2238,10 @@
     "hvac_cooling_system_capacity": "0.5 tons",
     "hvac_ducts": "2 CFM25 per 100ft2, R-4"
   },
+  "sample_files/base-hvac-undersized-allow-increased-fixed-capacities.xml": {
+    "parent_hpxml": "sample_files/base-hvac-undersized.xml",
+    "advanced_feature": "HVAC Allow Increased Fixed Capacities"
+  },
   "sample_files/base-hvac-wall-furnace-elec-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "hvac_heating_system_fuel": "electricity",
@@ -2268,55 +2277,55 @@
   },
   "sample_files/base-location-AMY-2012.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "weather_station_epw_filepath": "US_CO_Boulder_AMY_2012.epw"
+    "location_epw_filepath": "US_CO_Boulder_AMY_2012.epw"
   },
   "sample_files/base-location-baltimore-md.xml": {
     "parent_hpxml": "sample_files/base-foundation-unvented-crawlspace.xml",
-    "weather_station_epw_filepath": "USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw",
+    "location_epw_filepath": "USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw",
     "hvac_heating_system_capacity": "25 kBtu/hr"
   },
   "sample_files/base-location-capetown-zaf.xml": {
     "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
-    "weather_station_epw_filepath": "ZAF_Cape.Town.688160_IWEC.epw",
+    "location_epw_filepath": "ZAF_Cape.Town.688160_IWEC.epw",
     "hvac_heating_system_capacity": "25 kBtu/hr"
   },
   "sample_files/base-location-dallas-tx.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "weather_station_epw_filepath": "USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw",
+    "location_epw_filepath": "USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw",
     "hvac_heating_system_capacity": "25 kBtu/hr"
   },
   "sample_files/base-location-detailed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "site_zip_code": 80019,
-    "weather_station_epw_filepath": null
+    "location_zip_code": 80019,
+    "location_epw_filepath": null
   },
   "sample_files/base-location-duluth-mn.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
-    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw"
+    "location_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw"
   },
   "sample_files/base-location-helena-mt.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "weather_station_epw_filepath": "USA_MT_Helena.Rgnl.AP.727720_TMY3.epw",
+    "location_epw_filepath": "USA_MT_Helena.Rgnl.AP.727720_TMY3.epw",
     "hvac_heating_system_capacity": "50 kBtu/hr"
   },
   "sample_files/base-location-honolulu-hi.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "weather_station_epw_filepath": "USA_HI_Honolulu.Intl.AP.911820_TMY3.epw",
+    "location_epw_filepath": "USA_HI_Honolulu.Intl.AP.911820_TMY3.epw",
     "hvac_heating_system_capacity": "10 kBtu/hr"
   },
   "sample_files/base-location-miami-fl.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "weather_station_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw",
+    "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw",
     "hvac_heating_system_capacity": "10 kBtu/hr"
   },
   "sample_files/base-location-phoenix-az.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "weather_station_epw_filepath": "USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw",
+    "location_epw_filepath": "USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw",
     "hvac_heating_system_capacity": "25 kBtu/hr"
   },
   "sample_files/base-location-portland-or.xml": {
     "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
-    "weather_station_epw_filepath": "USA_OR_Portland.Intl.AP.726980_TMY3.epw",
+    "location_epw_filepath": "USA_OR_Portland.Intl.AP.726980_TMY3.epw",
     "hvac_heating_system_capacity": "25 kBtu/hr"
   },
   "sample_files/base-mechvent-balanced.xml": {
@@ -2448,7 +2457,6 @@
   "sample_files/base-misc-defaults.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "simulation_control_timestep": null,
-    "site_type": null,
     "geometry_unit_num_bathrooms": null,
     "enclosure_roof_material": null,
     "enclosure_wall_siding": null,
@@ -2502,7 +2510,7 @@
   },
   "sample_files/base-misc-ground-conductivity.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "site_soil_type": "0.8 Conductivity"
+    "location_soil_type": "0.8 Conductivity"
   },
   "sample_files/base-misc-loads-large-uncommon.xml": {
     "parent_hpxml": "sample_files/base-schedules-simple.xml",
@@ -2536,9 +2544,9 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_neighbor_buildings": "Detailed Example: Left/Right at 25ft, Front/Back at 80ft, 12ft Height"
   },
-  "sample_files/base-misc-shielding-of-home.xml": {
+  "sample_files/base-misc-terrain-shielding.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "site_shielding_of_home": "well-shielded"
+    "location_site_type": "Rural, Exposed"
   },
   "sample_files/base-misc-unit-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2580,7 +2588,6 @@
     "geometry_unit_aspect_ratio": 0.75,
     "geometry_building_num_units": 6,
     "enclosure_floor_over_foundation": "Wood Frame, R-19",
-    "enclosure_air_leakage_type": "unit exterior only",
     "enclosure_air_leakage": "Detailed Example: 0.375 nACH",
     "enclosure_window_area_or_wwr_front": 0.18,
     "enclosure_window_area_or_wwr_back": 0.18,
@@ -2795,7 +2802,7 @@
   },
   "sample_files/base-simcontrol-runperiod-1-month.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "weather_station_epw_filepath": "US_CO_Boulder_AMY_2012.epw",
+    "location_epw_filepath": "US_CO_Boulder_AMY_2012.epw",
     "simulation_control_run_period": "Feb 15 - Mar 15",
     "emissions_scenario_names": "Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA",
     "emissions_types": "CO2e, CO2e, CO2e, SO2, NOx",
@@ -2805,7 +2812,8 @@
     "emissions_electricity_column_numbers": "17, 17, , , "
   },
   "sample_files/base-simcontrol-temperature-capacitance-multiplier.xml": {
-    "parent_hpxml": "sample_files/base.xml"
+    "parent_hpxml": "sample_files/base.xml",
+    "advanced_feature": "Temperature Capacitance Multiplier = 10"
   },
   "sample_files/base-simcontrol-timestep-10-mins.xml": {
     "parent_hpxml": "sample_files/base.xml",

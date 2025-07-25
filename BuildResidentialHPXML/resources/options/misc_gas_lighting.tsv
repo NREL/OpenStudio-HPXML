@@ -14,5 +14,5 @@ None		0
 "Detailed Example: Natural Gas, 28 therm/yr"	natural gas	28	
 			
 Fuel Type: The fuel type of the misc lighting.			
-"Annual Energy Use: The annual energy consumption of the misc lighting. If not provided, the OS-HPXML default is used."			
+Annual Energy Use: The annual energy consumption of the misc lighting.			
 "Usage Multiplier: Multiplier on the energy usage that can reflect, e.g., high/low usage occupants."			

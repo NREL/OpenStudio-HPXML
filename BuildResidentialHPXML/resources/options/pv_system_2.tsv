@@ -28,7 +28,7 @@ None
 12.0 kW	12000				
 					
 Maximum Power Output: Peak power for the PV system.					
-"Module Type: The type of PV module (""standard"", ""premium"", or ""thin film""). If not provided, defaults to ""standard""."					
-"Location: The location of the PV system (""ground"" or ""roof"" mounted). If not provided, defaults to ""roof""."					
-"Tracking: The type of tracking (""fixed"", ""1-axis"", ""1-axis backtracked"", or ""2-axis""). If not provided, defaults to ""fixed""."					
-"System Losses Fraction: The total PV system losses including soiling, shading, snow, degradation, etc. If not provided, the OS-HPXML default is used."					
+Module Type: The type of PV module.					
+Location: The location of the PV system.					
+Tracking: The type of tracking.					
+"System Losses Fraction: The total PV system losses including soiling, shading, snow, degradation, etc."					

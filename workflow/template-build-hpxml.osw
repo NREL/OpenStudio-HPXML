@@ -43,7 +43,7 @@
         "hvac_control_cooling_weekend_setpoint": "78",
         "hvac_control_heating_weekday_setpoint": "68",
         "hvac_control_heating_weekend_setpoint": "68",
-        "weather_station_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
+        "location_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
         "utility_bill_scenario_names": "Bills"
       },
       "measure_dir_name": "BuildResidentialHPXML"

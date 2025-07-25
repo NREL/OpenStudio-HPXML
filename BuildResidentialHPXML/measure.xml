@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>9b5deec2-caca-4ca7-99a3-cc0b6be004a5</version_id>
-  <version_modified>2025-07-25T03:37:42Z</version_modified>
+  <version_id>66de1661-19b8-45e0-8095-fd8fa2c58b69</version_id>
+  <version_modified>2025-07-25T20:30:36Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -18,32 +18,7 @@
       <type>String</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>existing_hpxml_path</name>
-      <display_name>Existing HPXML File Path</display_name>
-      <description>Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).</description>
-      <type>String</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>whole_sfa_or_mf_building_sim</name>
-      <display_name>Whole SFA/MF Building Simulation?</display_name>
-      <description>If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.</description>
-      <type>Boolean</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
+      <default_value>hpxml.xml</default_value>
     </argument>
     <argument>
       <name>software_info_program_used</name>
@@ -52,6 +27,7 @@
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>BuildResidentialHPXML measure</default_value>
     </argument>
     <argument>
       <name>software_info_program_version</name>
@@ -60,103 +36,97 @@
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>schedules_filepaths</name>
-      <display_name>Schedules: CSV File Paths</display_name>
-      <description>Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.</description>
-      <type>String</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>schedules_unavailable_period_types</name>
-      <display_name>Schedules: Unavailable Period Types</display_name>
-      <description>Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: Vacancy, Power Outage, No Space Heating, No Space Cooling. If multiple periods, use a comma-separated list.</description>
-      <type>String</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>schedules_unavailable_period_dates</name>
-      <display_name>Schedules: Unavailable Period Dates</display_name>
-      <description>Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.</description>
-      <type>String</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>schedules_unavailable_period_window_natvent_availabilities</name>
-      <display_name>Schedules: Unavailable Period Window Natural Ventilation Availabilities</display_name>
-      <description>The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-unavailable-periods'&gt;HPXML Unavailable Periods&lt;/a&gt;) is used.</description>
-      <type>String</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
+      <default_value>1.11.0</default_value>
     </argument>
     <argument>
       <name>simulation_control_timestep</name>
       <display_name>Simulation Control: Timestep</display_name>
-      <description>Value must be a divisor of 60. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-simulation-control'&gt;HPXML Simulation Control&lt;/a&gt;) is used.</description>
+      <description>Value must be a divisor of 60.</description>
       <type>Integer</type>
       <units>min</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>60</default_value>
     </argument>
     <argument>
       <name>simulation_control_run_period</name>
       <display_name>Simulation Control: Run Period</display_name>
-      <description>Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-simulation-control'&gt;HPXML Simulation Control&lt;/a&gt;) is used.</description>
+      <description>Enter a date range like 'Mar 1 - May 31'. Defaults to the entire year.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Jan 1 - Dec 31</default_value>
+    </argument>
+    <argument>
+      <name>location_zip_code</name>
+      <display_name>Location: Zip Code</display_name>
+      <description>Zip code of the home address. Either this or the EnergyPlus Weather (EPW) Filepath input below must be provided.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>site_type</name>
-      <display_name>Site: Type</display_name>
-      <description>The type of site. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'&gt;HPXML Site&lt;/a&gt;) is used.</description>
+      <name>location_epw_filepath</name>
+      <display_name>Location: EnergyPlus Weather (EPW) Filepath</display_name>
+      <description>Path to the EPW file. Either this or the Zip Code input above must be provided.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>location_site_type</name>
+      <display_name>Location: Site Type</display_name>
+      <description>The terrain/shielding of the home, for the infiltration model. Defaults to 'Suburban, Normal' for single-family detached and manufactured home and 'Suburban, Well-Shielded' for single-family attached and apartment units.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Default</default_value>
       <choices>
         <choice>
-          <value>suburban</value>
-          <display_name>suburban</display_name>
+          <value>Default</value>
+          <display_name>Default</display_name>
         </choice>
         <choice>
-          <value>urban</value>
-          <display_name>urban</display_name>
+          <value>Suburban, Normal</value>
+          <display_name>Suburban, Normal</display_name>
         </choice>
         <choice>
-          <value>rural</value>
-          <display_name>rural</display_name>
+          <value>Suburban, Well-Shielded</value>
+          <display_name>Suburban, Well-Shielded</display_name>
+        </choice>
+        <choice>
+          <value>Suburban, Exposed</value>
+          <display_name>Suburban, Exposed</display_name>
+        </choice>
+        <choice>
+          <value>Urban, Normal</value>
+          <display_name>Urban, Normal</display_name>
+        </choice>
+        <choice>
+          <value>Urban, Well-Shielded</value>
+          <display_name>Urban, Well-Shielded</display_name>
+        </choice>
+        <choice>
+          <value>Urban, Exposed</value>
+          <display_name>Urban, Exposed</display_name>
+        </choice>
+        <choice>
+          <value>Rural, Normal</value>
+          <display_name>Rural, Normal</display_name>
+        </choice>
+        <choice>
+          <value>Rural, Well-Shielded</value>
+          <display_name>Rural, Well-Shielded</display_name>
+        </choice>
+        <choice>
+          <value>Rural, Exposed</value>
+          <display_name>Rural, Exposed</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
-      <name>site_shielding_of_home</name>
-      <display_name>Site: Shielding of Home</display_name>
-      <description>Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'&gt;HPXML Site&lt;/a&gt;) is used.</description>
-      <type>Choice</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
-        <choice>
-          <value>exposed</value>
-          <display_name>exposed</display_name>
-        </choice>
-        <choice>
-          <value>normal</value>
-          <display_name>normal</display_name>
-        </choice>
-        <choice>
-          <value>well-shielded</value>
-          <display_name>well-shielded</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>site_soil_type</name>
-      <display_name>Site: Soil Type</display_name>
+      <name>location_soil_type</name>
+      <display_name>Location: Soil Type</display_name>
       <description>The soil and moisture type.</description>
       <type>Choice</type>
       <required>false</required>
@@ -265,36 +235,22 @@
       </choices>
     </argument>
     <argument>
-      <name>site_zip_code</name>
-      <display_name>Site: Zip Code</display_name>
-      <description>Zip code of the home address. Either this or the Weather Station: EnergyPlus Weather (EPW) Filepath input below must be provided.</description>
-      <type>String</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>weather_station_epw_filepath</name>
-      <display_name>Weather Station: EnergyPlus Weather (EPW) Filepath</display_name>
-      <description>Path of the EPW file. Either this or the Site: Zip Code input above must be provided.</description>
-      <type>String</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>year_built</name>
       <display_name>Building Construction: Year Built</display_name>
       <description>The year the building was built.</description>
       <type>Integer</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>2025</default_value>
     </argument>
     <argument>
       <name>unit_multiplier</name>
       <display_name>Building Construction: Unit Multiplier</display_name>
-      <description>The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value. If not provided, defaults to 1.</description>
+      <description>The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value.</description>
       <type>Integer</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
     </argument>
     <argument>
       <name>geometry_unit_type</name>
@@ -447,7 +403,7 @@
     <argument>
       <name>geometry_unit_num_bathrooms</name>
       <display_name>Geometry: Unit Number of Bathrooms</display_name>
-      <description>The number of bathrooms in the unit. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-building-construction'&gt;HPXML Building Construction&lt;/a&gt;) is used.</description>
+      <description>The number of bathrooms in the unit. If not provided, defaults to NumberofBedrooms/2 + 0.5.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -575,6 +531,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Crawlspace, Vented</default_value>
       <choices>
         <choice>
           <value>Slab-on-Grade</value>
@@ -649,6 +606,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Attic, Vented, Gable</default_value>
       <choices>
         <choice>
           <value>Flat Roof</value>
@@ -1247,6 +1205,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>R-30</default_value>
       <choices>
         <choice>
           <value>Uninsulated</value>
@@ -1317,6 +1276,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Uninsulated</default_value>
       <choices>
         <choice>
           <value>Uninsulated</value>
@@ -1371,7 +1331,7 @@
     <argument>
       <name>enclosure_roof_material</name>
       <display_name>Enclosure: Roof Material</display_name>
-      <description>The material type and color of the roof. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-roofs'&gt;HPXML Roofs&lt;/a&gt;) is used.</description>
+      <description>The material type and color of the roof.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1593,6 +1553,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Wood Stud, R-13</default_value>
       <choices>
         <choice>
           <value>Wood Stud, Uninsulated</value>
@@ -2097,6 +2058,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Double, Clear, Metal, Air</default_value>
       <choices>
         <choice>
           <value>Single, Clear, Metal</value>
@@ -2276,6 +2238,7 @@
       <units>ft2 or frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>0.15</default_value>
     </argument>
     <argument>
       <name>enclosure_window_area_or_wwr_back</name>
@@ -2285,6 +2248,7 @@
       <units>ft2 or frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>0.15</default_value>
     </argument>
     <argument>
       <name>enclosure_window_area_or_wwr_left</name>
@@ -2294,6 +2258,7 @@
       <units>ft2 or frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>0.15</default_value>
     </argument>
     <argument>
       <name>enclosure_window_area_or_wwr_right</name>
@@ -2303,6 +2268,7 @@
       <units>ft2 or frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>0.15</default_value>
     </argument>
     <argument>
       <name>enclosure_window_natural_ventilation</name>
@@ -2341,10 +2307,11 @@
     <argument>
       <name>enclosure_window_interior_shading</name>
       <display_name>Enclosure: Window Interior Shading</display_name>
-      <description>The type of window interior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.</description>
+      <description>The type of window interior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction).</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Curtains, Light</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -2451,10 +2418,11 @@
     <argument>
       <name>enclosure_window_exterior_shading</name>
       <display_name>Enclosure: Window Exterior Shading</display_name>
-      <description>The type of window exterior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.</description>
+      <description>The type of window exterior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction).</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -2537,40 +2505,46 @@
     <argument>
       <name>enclosure_window_insect_screens</name>
       <display_name>Enclosure: Window Insect Screens</display_name>
-      <description>The type of window insect screens, if present. If not provided, assumes there are no insect screens.</description>
+      <description>The type of window insect screens.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
       <choices>
         <choice>
-          <value>none</value>
-          <display_name>none</display_name>
+          <value>None</value>
+          <display_name>None</display_name>
         </choice>
         <choice>
-          <value>exterior</value>
-          <display_name>exterior</display_name>
+          <value>Exterior</value>
+          <display_name>Exterior</display_name>
         </choice>
         <choice>
-          <value>interior</value>
-          <display_name>interior</display_name>
+          <value>Interior</value>
+          <display_name>Interior</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
-      <name>enclosure_window_storm_type</name>
-      <display_name>Enclosure: Window Storms</display_name>
-      <description>The type of window storm, if present. If not provided, assumes there is no storm.</description>
+      <name>enclosure_window_storm</name>
+      <display_name>Enclosure: Window Storm</display_name>
+      <description>The type of storm window.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
       <choices>
         <choice>
-          <value>clear</value>
-          <display_name>clear</display_name>
+          <value>None</value>
+          <display_name>None</display_name>
         </choice>
         <choice>
-          <value>low-e</value>
-          <display_name>low-e</display_name>
+          <value>Clear</value>
+          <display_name>Clear</display_name>
+        </choice>
+        <choice>
+          <value>Low-E</value>
+          <display_name>Low-E</display_name>
         </choice>
       </choices>
     </argument>
@@ -2819,7 +2793,7 @@
     <argument>
       <name>enclosure_skylight_area_front</name>
       <display_name>Enclosure: Skylight Front Area</display_name>
-      <description>The amount of skylight area on the unit's front conditioned roof.</description>
+      <description>The amount of skylight area on the unit's front-facing roof.</description>
       <type>Double</type>
       <units>ft2</units>
       <required>false</required>
@@ -2829,7 +2803,7 @@
     <argument>
       <name>enclosure_skylight_area_back</name>
       <display_name>Enclosure: Skylight Back Area</display_name>
-      <description>The amount of skylight area on the unit's back conditioned roof.</description>
+      <description>The amount of skylight area on the unit's back-facing roof.</description>
       <type>Double</type>
       <units>ft2</units>
       <required>false</required>
@@ -2839,7 +2813,7 @@
     <argument>
       <name>enclosure_skylight_area_left</name>
       <display_name>Enclosure: Skylight Left Area</display_name>
-      <description>The amount of skylight area on the unit's left conditioned roof (when viewed from the front).</description>
+      <description>The amount of skylight area on the unit's left-facing roof (when viewed from the front).</description>
       <type>Double</type>
       <units>ft2</units>
       <required>false</required>
@@ -2849,7 +2823,7 @@
     <argument>
       <name>enclosure_skylight_area_right</name>
       <display_name>Enclosure: Skylight Right Area</display_name>
-      <description>The amount of skylight area on the unit's right conditioned roof (when viewed from the front).</description>
+      <description>The amount of skylight area on the unit's right-facing roof (when viewed from the front).</description>
       <type>Double</type>
       <units>ft2</units>
       <required>false</required>
@@ -2944,10 +2918,11 @@
     <argument>
       <name>enclosure_air_leakage</name>
       <display_name>Enclosure: Air Leakage</display_name>
-      <description>The amount of air leakage. When a leakiness description is used, the Year Built of the home is also required.</description>
+      <description>The amount of air leakage coming from outside. If a qualitative leakiness description (e.g., 'Average') is selected, the Year Built of the home is also required.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Average</default_value>
       <choices>
         <choice>
           <value>Very Tight</value>
@@ -3124,24 +3099,6 @@
         <choice>
           <value>Detailed Example: 1010 CFM45</value>
           <display_name>Detailed Example: 1010 CFM45</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>enclosure_air_leakage_type</name>
-      <display_name>Enclosure: Air Leakage Type</display_name>
-      <description>Type of air leakage if providing a numeric air leakage value. If 'unit total', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if 'unit exterior only', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is single-family attached or apartment unit.</description>
-      <type>Choice</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
-        <choice>
-          <value>unit total</value>
-          <display_name>unit total</display_name>
-        </choice>
-        <choice>
-          <value>unit exterior only</value>
-          <display_name>unit exterior only</display_name>
         </choice>
       </choices>
     </argument>
@@ -4014,6 +3971,7 @@
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
     </argument>
     <argument>
       <name>hvac_heat_pump</name>
@@ -4252,6 +4210,14 @@
           <display_name>Autosize</display_name>
         </choice>
         <choice>
+          <value>Autosize (ACCA)</value>
+          <display_name>Autosize (ACCA)</display_name>
+        </choice>
+        <choice>
+          <value>Autosize (MaxLoad)</value>
+          <display_name>Autosize (MaxLoad)</display_name>
+        </choice>
+        <choice>
           <value>0.5 tons</value>
           <display_name>0.5 tons</display_name>
         </choice>
@@ -4346,28 +4312,6 @@
         <choice>
           <value>Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit</value>
           <display_name>Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>heat_pump_sizing_methodology</name>
-      <display_name>HVAC: Heat Pump Sizing Methodology</display_name>
-      <description>The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-sizing-control'&gt;HPXML HVAC Sizing Control&lt;/a&gt;) is used.</description>
-      <type>Choice</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
-        <choice>
-          <value>ACCA</value>
-          <display_name>ACCA</display_name>
-        </choice>
-        <choice>
-          <value>HERS</value>
-          <display_name>HERS</display_name>
-        </choice>
-        <choice>
-          <value>MaxLoad</value>
-          <display_name>MaxLoad</display_name>
         </choice>
       </choices>
     </argument>
@@ -4575,6 +4519,10 @@
           <display_name>Autosize</display_name>
         </choice>
         <choice>
+          <value>Autosize (Supplemental)</value>
+          <display_name>Autosize (Supplemental)</display_name>
+        </choice>
+        <choice>
           <value>5 kW</value>
           <display_name>5 kW</display_name>
         </choice>
@@ -4725,24 +4673,6 @@
         <choice>
           <value>Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit</value>
           <display_name>Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>heat_pump_backup_sizing_methodology</name>
-      <display_name>HVAC: Heat Pump Backup Sizing Methodology</display_name>
-      <description>The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-sizing-control'&gt;HPXML HVAC Sizing Control&lt;/a&gt;) is used.</description>
-      <type>Choice</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <choices>
-        <choice>
-          <value>emergency</value>
-          <display_name>emergency</display_name>
-        </choice>
-        <choice>
-          <value>supplemental</value>
-          <display_name>supplemental</display_name>
         </choice>
       </choices>
     </argument>
@@ -5251,18 +5181,20 @@
     <argument>
       <name>hvac_control_heating_season_period</name>
       <display_name>HVAC Control: Heating Season Period</display_name>
-      <description>Enter a date range like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-control'&gt;HPXML HVAC Control&lt;/a&gt;) is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols.</description>
+      <description>Enter a date range like 'Nov 1 - Jun 30'. Defaults to year-round heating availability.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Jan 1 - Dec 31</default_value>
     </argument>
     <argument>
       <name>hvac_control_cooling_season_period</name>
       <display_name>HVAC Control: Cooling Season Period</display_name>
-      <description>Enter a date range like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-control'&gt;HPXML HVAC Control&lt;/a&gt;) is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols.</description>
+      <description>Enter a date range like 'Jun 1 - Oct 31'. Defaults to year-round cooling availability.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Jan 1 - Dec 31</default_value>
     </argument>
     <argument>
       <name>hvac_blower_fan_watts_per_cfm</name>
@@ -5677,7 +5609,7 @@
     <argument>
       <name>hvac_ducts_supply_location</name>
       <display_name>HVAC Ducts: Supply Location</display_name>
-      <description>The location of the supply ducts. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'&gt;Air Distribution&lt;/a&gt;) is used.</description>
+      <description>The location of the supply ducts. If not provided, defaults based on the foundation/attic type and presence of garage.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -5767,7 +5699,7 @@
     <argument>
       <name>hvac_ducts_supply_surface_area_fraction</name>
       <display_name>HVAC Ducts: Supply Area Fraction</display_name>
-      <description>The fraction of supply ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'&gt;Air Distribution&lt;/a&gt;) is used.</description>
+      <description>The fraction of supply ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.</description>
       <type>Double</type>
       <units>frac</units>
       <required>false</required>
@@ -5776,7 +5708,7 @@
     <argument>
       <name>hvac_ducts_supply_leakage_fraction</name>
       <display_name>HVAC Ducts: Supply Leakage Fraction</display_name>
-      <description>The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts</description>
+      <description>The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts.</description>
       <type>Double</type>
       <units>frac</units>
       <required>false</required>
@@ -5786,7 +5718,7 @@
     <argument>
       <name>hvac_ducts_return_location</name>
       <display_name>HVAC Ducts: Return Location</display_name>
-      <description>The location of the return ducts. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'&gt;Air Distribution&lt;/a&gt;) is used.</description>
+      <description>The location of the return ducts. If not provided, defaults based on the foundation/attic type and presence of garage.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -5876,7 +5808,7 @@
     <argument>
       <name>hvac_ducts_return_surface_area_fraction</name>
       <display_name>HVAC Ducts: Return Area Fraction</display_name>
-      <description>The fraction of return ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'&gt;Air Distribution&lt;/a&gt;) is used.</description>
+      <description>The fraction of return ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.</description>
       <type>Double</type>
       <units>frac</units>
       <required>false</required>
@@ -5885,7 +5817,7 @@
     <argument>
       <name>hvac_ducts_number_of_return_registers</name>
       <display_name>HVAC Ducts: Number of Return Registers</display_name>
-      <description>The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'&gt;Air Distribution&lt;/a&gt;) is used.</description>
+      <description>The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, defaults to one return register per conditioned floor.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -6142,6 +6074,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Electricity, Tank, UEF=0.92</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -6308,7 +6241,7 @@
     <argument>
       <name>dhw_water_heater_location</name>
       <display_name>DHW: Water Heater Location</display_name>
-      <description>The location of water heater. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-heating-systems'&gt;HPXML Water Heating Systems&lt;/a&gt;) is used.</description>
+      <description>The location of water heater. If not provided, defaults based on the foundation type and presence of garage.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6380,21 +6313,52 @@
       </choices>
     </argument>
     <argument>
-      <name>dhw_water_heater_jacket_rvalue</name>
-      <display_name>DHW: Water Heater Jacket R-value</display_name>
-      <description>The jacket R-value of water heater. Doesn't apply to instantaneous water heater or space-heating boiler with tankless coil. If not provided, defaults to no jacket insulation.</description>
-      <type>Double</type>
-      <units>F-ft2-hr/Btu</units>
+      <name>dhw_water_heater_jacket</name>
+      <display_name>DHW: Water Heater Jacket Insulation</display_name>
+      <description>The type of water heater jacket/blanket insulation. Doesn't apply to tankless systems or space-heating boilers.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
+      <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
+        <choice>
+          <value>R-5</value>
+          <display_name>R-5</display_name>
+        </choice>
+        <choice>
+          <value>R-6</value>
+          <display_name>R-6</display_name>
+        </choice>
+        <choice>
+          <value>R-7</value>
+          <display_name>R-7</display_name>
+        </choice>
+        <choice>
+          <value>R-8</value>
+          <display_name>R-8</display_name>
+        </choice>
+        <choice>
+          <value>R-9</value>
+          <display_name>R-9</display_name>
+        </choice>
+        <choice>
+          <value>R-10</value>
+          <display_name>R-10</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>dhw_water_heater_uses_desuperheater</name>
       <display_name>DHW: Water Heater Uses Desuperheater</display_name>
-      <description>Requires that the dwelling unit has a air-to-air, mini-split, or ground-to-air heat pump or a central air conditioner or mini-split air conditioner. If not provided, assumes no desuperheater.</description>
+      <description>Whether the water heater uses a desuperheater. Requires that the dwelling unit has a air-to-air, mini-split, or ground-to-air heat pump or a central air conditioner or mini-split air conditioner.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -6578,7 +6542,7 @@
     <argument>
       <name>dhw_water_fixtures_usage_multiplier</name>
       <display_name>DHW: Hot Water Fixtures Usage Multiplier</display_name>
-      <description>Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-fixtures'&gt;HPXML Water Fixtures&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -7737,7 +7701,7 @@
     <argument>
       <name>electric_vehicle_miles_driven_per_year</name>
       <display_name>Electric Vehicle: Miles Driven Per Year</display_name>
-      <description>The annual miles the vehicle is driven. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'&gt;HPXML Vehicles&lt;/a&gt;) is used.</description>
+      <description>The annual miles the vehicle is driven. If not provided, defaults to 10900.</description>
       <type>Double</type>
       <units>miles</units>
       <required>false</required>
@@ -7856,7 +7820,7 @@
     <argument>
       <name>appliance_clothes_washer_location</name>
       <display_name>Appliances: Clothes Washer Location</display_name>
-      <description>The space type for the clothes washer location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'&gt;HPXML Clothes Washer&lt;/a&gt;) is used.</description>
+      <description>The space type for the clothes washer location. If not provided, defaults to conditioned space.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -7898,7 +7862,7 @@
     <argument>
       <name>appliance_clothes_washer_usage_multiplier</name>
       <display_name>Appliances: Clothes Washer Usage Multiplier</display_name>
-      <description>Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'&gt;HPXML Clothes Washer&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -7957,7 +7921,7 @@
     <argument>
       <name>appliance_clothes_dryer_location</name>
       <display_name>Appliances: Clothes Dryer Location</display_name>
-      <description>The space type for the clothes dryer location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'&gt;HPXML Clothes Dryer&lt;/a&gt;) is used.</description>
+      <description>The space type for the clothes dryer location. If not provided, defaults to conditioned space.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -7999,7 +7963,7 @@
     <argument>
       <name>appliance_clothes_dryer_usage_multiplier</name>
       <display_name>Appliances: Clothes Dryer Usage Multiplier</display_name>
-      <description>Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'&gt;HPXML Clothes Dryer&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8042,7 +8006,7 @@
     <argument>
       <name>appliance_dishwasher_location</name>
       <display_name>Appliances: Dishwasher Location</display_name>
-      <description>The space type for the dishwasher location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'&gt;HPXML Dishwasher&lt;/a&gt;) is used.</description>
+      <description>The space type for the dishwasher location. If not provided, defaults to conditioned space.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8084,7 +8048,7 @@
     <argument>
       <name>appliance_dishwasher_usage_multiplier</name>
       <display_name>Appliances: Dishwasher Usage Multiplier</display_name>
-      <description>Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'&gt;HPXML Dishwasher&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8159,7 +8123,7 @@
     <argument>
       <name>appliance_refrigerator_location</name>
       <display_name>Appliances: Refrigerator Location</display_name>
-      <description>The space type for the refrigerator location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'&gt;HPXML Refrigerators&lt;/a&gt;) is used.</description>
+      <description>The space type for the refrigerator location. If not provided, defaults to conditioned space.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8201,7 +8165,7 @@
     <argument>
       <name>appliance_refrigerator_usage_multiplier</name>
       <display_name>Appliances: Refrigerator Usage Multiplier</display_name>
-      <description>Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'&gt;HPXML Refrigerators&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8264,7 +8228,7 @@
     <argument>
       <name>appliance_extra_refrigerator_location</name>
       <display_name>Appliances: Extra Refrigerator Location</display_name>
-      <description>The space type for the extra refrigerator location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'&gt;HPXML Refrigerators&lt;/a&gt;) is used.</description>
+      <description>The space type for the extra refrigerator location. If not provided, defaults based on the foundation type and presence of garage.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8306,7 +8270,7 @@
     <argument>
       <name>appliance_extra_refrigerator_usage_multiplier</name>
       <display_name>Appliances: Extra Refrigerator Usage Multiplier</display_name>
-      <description>Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'&gt;HPXML Refrigerators&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8357,7 +8321,7 @@
     <argument>
       <name>appliance_freezer_location</name>
       <display_name>Appliances: Freezer Location</display_name>
-      <description>The space type for the freezer location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'&gt;HPXML Freezers&lt;/a&gt;) is used.</description>
+      <description>The space type for the freezer location. If not provided, defaults based on the foundation type and presence of garage.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8399,7 +8363,7 @@
     <argument>
       <name>appliance_freezer_usage_multiplier</name>
       <display_name>Appliances: Freezer Usage Multiplier</display_name>
-      <description>Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'&gt;HPXML Freezers&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8454,7 +8418,7 @@
     <argument>
       <name>appliance_cooking_range_oven_location</name>
       <display_name>Appliances: Cooking Range/Oven Location</display_name>
-      <description>The space type for the cooking range/oven location. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'&gt;HPXML Cooking Range/Oven&lt;/a&gt;) is used.</description>
+      <description>The space type for the cooking range/oven location. If not provided, defaults to conditioned space.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8496,7 +8460,7 @@
     <argument>
       <name>appliance_cooking_range_oven_usage_multiplier</name>
       <display_name>Appliances: Cooking Range/Oven Usage Multiplier</display_name>
-      <description>Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'&gt;HPXML Cooking Range/Oven&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8668,7 +8632,7 @@
     <argument>
       <name>lighting_interior_usage_multiplier</name>
       <display_name>Lighting: Interior Usage Multiplier</display_name>
-      <description>Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'&gt;HPXML Lighting&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8676,7 +8640,7 @@
     <argument>
       <name>lighting_exterior_usage_multiplier</name>
       <display_name>Lighting: Exterior Usage Multiplier</display_name>
-      <description>Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'&gt;HPXML Lighting&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8684,7 +8648,7 @@
     <argument>
       <name>lighting_garage_usage_multiplier</name>
       <display_name>Lighting: Garage Usage Multiplier</display_name>
-      <description>Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see &lt;a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'&gt;HPXML Lighting&lt;/a&gt;) is used.</description>
+      <description>Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -9484,6 +9448,156 @@
       </choices>
     </argument>
     <argument>
+      <name>schedules_filepaths</name>
+      <display_name>Schedules: CSV File Paths</display_name>
+      <description>Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_unavailable_period_types</name>
+      <display_name>Schedules: Unavailable Period Types</display_name>
+      <description>Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: Vacancy, Power Outage, No Space Heating, No Space Cooling. If multiple periods, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_unavailable_period_dates</name>
+      <display_name>Schedules: Unavailable Period Dates</display_name>
+      <description>Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>schedules_unavailable_period_window_natvent_availabilities</name>
+      <display_name>Schedules: Unavailable Period Window Natural Ventilation Availabilities</display_name>
+      <description>The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If not provided, defaults to 'regular schedule'.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>advanced_feature</name>
+      <display_name>Advanced Feature</display_name>
+      <description>Select an advanced research feature to use in the model, if desired.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
+      <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
+        <choice>
+          <value>Temperature Capacitance Multiplier = 1</value>
+          <display_name>Temperature Capacitance Multiplier = 1</display_name>
+        </choice>
+        <choice>
+          <value>Temperature Capacitance Multiplier = 4</value>
+          <display_name>Temperature Capacitance Multiplier = 4</display_name>
+        </choice>
+        <choice>
+          <value>Temperature Capacitance Multiplier = 10</value>
+          <display_name>Temperature Capacitance Multiplier = 10</display_name>
+        </choice>
+        <choice>
+          <value>Temperature Capacitance Multiplier = 15</value>
+          <display_name>Temperature Capacitance Multiplier = 15</display_name>
+        </choice>
+        <choice>
+          <value>On/Off Thermostat Deadband, 1F</value>
+          <display_name>On/Off Thermostat Deadband, 1F</display_name>
+        </choice>
+        <choice>
+          <value>On/Off Thermostat Deadband, 2F</value>
+          <display_name>On/Off Thermostat Deadband, 2F</display_name>
+        </choice>
+        <choice>
+          <value>On/Off Thermostat Deadband, 3F</value>
+          <display_name>On/Off Thermostat Deadband, 3F</display_name>
+        </choice>
+        <choice>
+          <value>Heat Pump Backup Staging, 5 kW</value>
+          <display_name>Heat Pump Backup Staging, 5 kW</display_name>
+        </choice>
+        <choice>
+          <value>Heat Pump Backup Staging, 10 kW</value>
+          <display_name>Heat Pump Backup Staging, 10 kW</display_name>
+        </choice>
+        <choice>
+          <value>Experimental Ground-to-Air Heat Pump Model</value>
+          <display_name>Experimental Ground-to-Air Heat Pump Model</display_name>
+        </choice>
+        <choice>
+          <value>HVAC Allow Increased Fixed Capacities</value>
+          <display_name>HVAC Allow Increased Fixed Capacities</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>advanced_feature_2</name>
+      <display_name>Advanced Feature 2</display_name>
+      <description>Select a second advanced research feature to use in the model, if desired.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>None</default_value>
+      <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
+        <choice>
+          <value>Temperature Capacitance Multiplier = 1</value>
+          <display_name>Temperature Capacitance Multiplier = 1</display_name>
+        </choice>
+        <choice>
+          <value>Temperature Capacitance Multiplier = 4</value>
+          <display_name>Temperature Capacitance Multiplier = 4</display_name>
+        </choice>
+        <choice>
+          <value>Temperature Capacitance Multiplier = 10</value>
+          <display_name>Temperature Capacitance Multiplier = 10</display_name>
+        </choice>
+        <choice>
+          <value>Temperature Capacitance Multiplier = 15</value>
+          <display_name>Temperature Capacitance Multiplier = 15</display_name>
+        </choice>
+        <choice>
+          <value>On/Off Thermostat Deadband, 1F</value>
+          <display_name>On/Off Thermostat Deadband, 1F</display_name>
+        </choice>
+        <choice>
+          <value>On/Off Thermostat Deadband, 2F</value>
+          <display_name>On/Off Thermostat Deadband, 2F</display_name>
+        </choice>
+        <choice>
+          <value>On/Off Thermostat Deadband, 3F</value>
+          <display_name>On/Off Thermostat Deadband, 3F</display_name>
+        </choice>
+        <choice>
+          <value>Heat Pump Backup Staging, 5 kW</value>
+          <display_name>Heat Pump Backup Staging, 5 kW</display_name>
+        </choice>
+        <choice>
+          <value>Heat Pump Backup Staging, 10 kW</value>
+          <display_name>Heat Pump Backup Staging, 10 kW</display_name>
+        </choice>
+        <choice>
+          <value>Experimental Ground-to-Air Heat Pump Model</value>
+          <display_name>Experimental Ground-to-Air Heat Pump Model</display_name>
+        </choice>
+        <choice>
+          <value>HVAC Allow Increased Fixed Capacities</value>
+          <display_name>HVAC Allow Increased Fixed Capacities</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
       <name>emissions_scenario_names</name>
       <display_name>Emissions: Scenario Names</display_name>
       <description>Names of emissions scenarios. If multiple scenarios, use a comma-separated list. If not provided, no emissions scenarios are calculated.</description>
@@ -9772,6 +9886,32 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
+      <name>whole_sfa_or_mf_building_sim</name>
+      <display_name>Whole SFA/MF Building Simulation?</display_name>
+      <description>If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>whole_sfa_or_mf_existing_hpxml_path</name>
+      <display_name>Whole SFA/MF Building Simulation: Existing HPXML File Path</display_name>
+      <description>Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>combine_like_surfaces</name>
       <display_name>Combine like surfaces?</display_name>
       <description>If true, combines like surfaces to simplify the HPXML file generated.</description>
@@ -9846,7 +9986,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>337F5B89</checksum>
+      <checksum>E1038629</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9863,19 +10003,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A1F5D981</checksum>
+      <checksum>2822F225</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>079FF429</checksum>
+      <checksum>03B6DCD5</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>25F0324C</checksum>
+    </file>
+    <file>
+      <filename>options/advanced_feature.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D11B1772</checksum>
+    </file>
+    <file>
+      <filename>options/advanced_feature_2.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D11B1772</checksum>
     </file>
     <file>
       <filename>options/appliance_clothes_dryer.tsv</filename>
@@ -9929,13 +10081,13 @@
       <filename>options/battery.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ADFC3F87</checksum>
+      <checksum>E8F057FE</checksum>
     </file>
     <file>
       <filename>options/ceiling_fans.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>161FFC63</checksum>
+      <checksum>63ED257F</checksum>
     </file>
     <file>
       <filename>options/dhw_distribution.tsv</filename>
@@ -9966,6 +10118,12 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>E1853EC6</checksum>
+    </file>
+    <file>
+      <filename>options/dhw_water_heater_jacket.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>90E8E3E7</checksum>
     </file>
     <file>
       <filename>options/electric_vehicle.tsv</filename>
@@ -10013,7 +10171,7 @@
       <filename>options/enclosure_foundation_wall.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>58B8E7EA</checksum>
+      <checksum>F1FE4A28</checksum>
     </file>
     <file>
       <filename>options/enclosure_overhangs.tsv</filename>
@@ -10055,7 +10213,7 @@
       <filename>options/enclosure_slab.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>817C7CAA</checksum>
+      <checksum>3B75D654</checksum>
     </file>
     <file>
       <filename>options/enclosure_wall.tsv</filename>
@@ -10088,6 +10246,12 @@
       <checksum>853591FA</checksum>
     </file>
     <file>
+      <filename>options/enclosure_window_insect_screens.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5F72FB38</checksum>
+    </file>
+    <file>
       <filename>options/enclosure_window_interior_shading.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -10098,6 +10262,12 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>E9451CFE</checksum>
+    </file>
+    <file>
+      <filename>options/enclosure_window_storm.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1CFB6F2C</checksum>
     </file>
     <file>
       <filename>options/geometry_attached_walls.tsv</filename>
@@ -10133,7 +10303,7 @@
       <filename>options/geometry_neighbor_buildings.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AE328677</checksum>
+      <checksum>EB417DE7</checksum>
     </file>
     <file>
       <filename>options/hvac_cooling_system.tsv</filename>
@@ -10181,13 +10351,13 @@
       <filename>options/hvac_heat_pump_backup_capacity.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DD62C7CA</checksum>
+      <checksum>48929A90</checksum>
     </file>
     <file>
       <filename>options/hvac_heat_pump_capacity.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2385005B</checksum>
+      <checksum>9823EF02</checksum>
     </file>
     <file>
       <filename>options/hvac_heat_pump_temperatures.tsv</filename>
@@ -10199,13 +10369,13 @@
       <filename>options/hvac_heating_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>762CE271</checksum>
+      <checksum>7457C47A</checksum>
     </file>
     <file>
       <filename>options/hvac_heating_system_2.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>762CE271</checksum>
+      <checksum>7457C47A</checksum>
     </file>
     <file>
       <filename>options/hvac_heating_system_2_capacity.tsv</filename>
@@ -10232,6 +10402,18 @@
       <checksum>ECCA188D</checksum>
     </file>
     <file>
+      <filename>options/location_site_type.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1B92BE07</checksum>
+    </file>
+    <file>
+      <filename>options/location_soil_type.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>05DAC28D</checksum>
+    </file>
+    <file>
       <filename>options/misc_electric_vehicle_charging.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -10241,19 +10423,19 @@
       <filename>options/misc_fireplace.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2F6F4C05</checksum>
+      <checksum>DD071E2C</checksum>
     </file>
     <file>
       <filename>options/misc_gas_lighting.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>82242674</checksum>
+      <checksum>D08CF220</checksum>
     </file>
     <file>
       <filename>options/misc_grill.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5610E8FC</checksum>
+      <checksum>121B2979</checksum>
     </file>
     <file>
       <filename>options/misc_permanent_spa.tsv</filename>
@@ -10265,7 +10447,7 @@
       <filename>options/misc_plug_loads.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>71618239</checksum>
+      <checksum>6CEA2369</checksum>
     </file>
     <file>
       <filename>options/misc_pool.tsv</filename>
@@ -10277,31 +10459,25 @@
       <filename>options/misc_television.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>127B2C2B</checksum>
+      <checksum>60E46896</checksum>
     </file>
     <file>
       <filename>options/misc_well_pump.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CFD2AC17</checksum>
+      <checksum>0B9956F7</checksum>
     </file>
     <file>
       <filename>options/pv_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>65431DEC</checksum>
+      <checksum>EBB5059B</checksum>
     </file>
     <file>
       <filename>options/pv_system_2.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>61C120ED</checksum>
-    </file>
-    <file>
-      <filename>options/site_soil_type.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>05DAC28D</checksum>
+      <checksum>00DC3487</checksum>
     </file>
     <file>
       <filename>options/ventilation_bathroom.tsv</filename>
@@ -10319,7 +10495,7 @@
       <filename>options/ventilation_mechanical.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>73C0AC95</checksum>
+      <checksum>F962C7C9</checksum>
     </file>
     <file>
       <filename>options/ventilation_whole_house_fan.tsv</filename>
@@ -10343,7 +10519,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>53D92342</checksum>
+      <checksum>EF97BB27</checksum>
     </file>
   </files>
 </measure>

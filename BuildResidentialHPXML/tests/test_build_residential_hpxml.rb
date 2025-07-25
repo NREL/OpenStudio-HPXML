@@ -232,7 +232,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-different-software-program.xml' => ["'Software Info: Program Used' cannot vary across dwelling units.",
                                                  "'Software Info: Program Version' cannot vary across dwelling units."],
       'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
-                                                   "'Simulation Control: Run Period' cannot vary across dwelling units."],
+                                                   "'Simulation Control: Run Period' cannot vary across dwelling units.",
+                                                   "Advanced feature 'Temperature Capacitance Multiplier' cannot vary across dwelling units."],
       'error-same-emissions-scenario-name.xml' => ["HPXML header already includes an emissions scenario named 'Emissions' with type 'CO2e'."],
       'error-same-utility-bill-scenario-name.xml' => ["HPXML header already includes a utility bill scenario named 'Bills'."],
       'error-could-not-find-epw-file.xml' => ['Could not find EPW file at']
@@ -385,8 +386,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
     case hpxml_file
     when 'base-sfd.xml'
       args['simulation_control_timestep'] = 60
-      args['weather_station_epw_filepath'] = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
-      args['site_type'] = HPXML::SiteTypeSuburban
+      args['location_epw_filepath'] = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
+      args['location_site_type'] = 'Suburban, Normal'
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFD
       args['geometry_unit_cfa'] = 2700.0
       args['geometry_unit_num_floors_above_grade'] = 1
@@ -461,7 +462,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['misc_pool'] = 'None'
       args['misc_permanent_spa'] = 'None'
     when 'base-sfd2.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
       args['whole_sfa_or_mf_building_sim'] = true
     when 'base-sfa.xml'
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFA
@@ -472,12 +473,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_window_area_or_wwr_back'] = 0.18
       args['enclosure_window_area_or_wwr_left'] = 0.18
       args['enclosure_window_area_or_wwr_right'] = 0.18
-      args['enclosure_air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     when 'base-sfa2.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
       args['whole_sfa_or_mf_building_sim'] = true
     when 'base-sfa3.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa2.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa2.xml')
       args['whole_sfa_or_mf_building_sim'] = true
     when 'base-mf.xml'
       args['geometry_unit_type'] = HPXML::ResidentialTypeApartment
@@ -495,15 +495,14 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts_return_location'] = HPXML::LocationConditionedSpace
       args['hvac_ducts_number_of_return_registers'] = 1
       args['enclosure_door_area'] = 20.0
-      args['enclosure_air_leakage_type'] = HPXML::InfiltrationTypeUnitTotal
     when 'base-mf2.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')
       args['whole_sfa_or_mf_building_sim'] = true
     when 'base-mf3.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf2.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf2.xml')
       args['whole_sfa_or_mf_building_sim'] = true
     when 'base-mf4.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf3.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf3.xml')
       args['whole_sfa_or_mf_building_sim'] = true
     when 'base-sfd-header.xml'
       args['software_info_program_used'] = 'Program'
@@ -519,8 +518,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['emissions_fossil_fuel_units'] = 'kg/MBtu'
       args['emissions_natural_gas_values'] = '2'
       args['utility_bill_scenario_names'] = 'Bills'
+      args['advanced_feature'] = 'Temperature Capacitance Multiplier = 1'
     when 'base-sfd-header-no-duplicates.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['whole_sfa_or_mf_building_sim'] = true
     end
 
@@ -890,25 +890,27 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
       args['geometry_foundation_type'] = 'Ambient'
     when 'error-different-software-program.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['software_info_program_used'] = 'Program2'
       args['software_info_program_version'] = '2'
       args['emissions_scenario_names'] = 'Emissions2'
       args['utility_bill_scenario_names'] = 'Bills2'
     when 'error-different-simulation-control.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['simulation_control_timestep'] = 10
       args['simulation_control_run_period'] = 'Jan 2 - Dec 30'
       args['emissions_scenario_names'] = 'Emissions2'
       args['utility_bill_scenario_names'] = 'Bills2'
+      args['advanced_feature'] = 'None'
+      args['advanced_feature_2'] = 'Temperature Capacitance Multiplier = 4'
     when 'error-same-emissions-scenario-name.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['emissions_electricity_values_or_filepaths'] = '2'
     when 'error-same-utility-bill-scenario-name.xml'
-      args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
+      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['utility_bill_electricity_fixed_charges'] = '13.0'
     when 'error-could-not-find-epw-file.xml'
-      args['weather_station_epw_filepath'] = 'foo.epw'
+      args['location_epw_filepath'] = 'foo.epw'
     end
 
     # Warning

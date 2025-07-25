@@ -22,6 +22,6 @@ CFIS	central fan integrated supply
 Fan Type: The type of the mechanical ventilation.						
 Sensible Recovery Efficiency: The sensible recovery efficiency for heating mode. Applies to HRVs and ERVs only.						
 Total Recovery Efficiency: The total recovery efficiency. Applies to ERVs only.						
-"Flow Rate: The flow rate of the mechanical ventilation. If not provided, the OS-HPXML default is used."						
-"Fan Power: The fan power of the mechanical ventilation. If not provided, the OS-HPXML default is used."						
-"Hours In Operation: The hours in operation of the mechanical ventilation. If not provided, the OS-HPXML default is used."						
+Flow Rate: The flow rate of the mechanical ventilation.						
+Fan Power: The fan power of the mechanical ventilation.						
+Hours In Operation: The hours in operation of the mechanical ventilation.						

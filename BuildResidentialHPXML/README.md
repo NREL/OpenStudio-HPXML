@@ -22,28 +22,6 @@ Absolute/relative path of the HPXML file.
 
 <br/>
 
-**Existing HPXML File Path**
-
-Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).
-
-- **Name:** ``existing_hpxml_path``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Whole SFA/MF Building Simulation?**
-
-If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.
-
-- **Name:** ``whole_sfa_or_mf_building_sim``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
 **Software Info: Program Used**
 
 The name of the software program used.
@@ -66,53 +44,9 @@ The version of the software program used.
 
 <br/>
 
-**Schedules: CSV File Paths**
-
-Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.
-
-- **Name:** ``schedules_filepaths``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Schedules: Unavailable Period Types**
-
-Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: Vacancy, Power Outage, No Space Heating, No Space Cooling. If multiple periods, use a comma-separated list.
-
-- **Name:** ``schedules_unavailable_period_types``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Schedules: Unavailable Period Dates**
-
-Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
-
-- **Name:** ``schedules_unavailable_period_dates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Schedules: Unavailable Period Window Natural Ventilation Availabilities**
-
-The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-unavailable-periods'>HPXML Unavailable Periods</a>) is used.
-
-- **Name:** ``schedules_unavailable_period_window_natvent_availabilities``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
 **Simulation Control: Timestep**
 
-Value must be a divisor of 60. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+Value must be a divisor of 60.
 
 - **Name:** ``simulation_control_timestep``
 - **Type:** ``Integer``
@@ -125,7 +59,7 @@ Value must be a divisor of 60. If not provided, the OS-HPXML default (see <a hre
 
 **Simulation Control: Run Period**
 
-Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+Enter a date range like 'Mar 1 - May 31'. Defaults to the entire year.
 
 - **Name:** ``simulation_control_run_period``
 - **Type:** ``String``
@@ -134,64 +68,51 @@ Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Site: Type**
+**Location: Zip Code**
 
-The type of site. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+Zip code of the home address. Either this or the EnergyPlus Weather (EPW) Filepath input below must be provided.
 
-- **Name:** ``site_type``
+- **Name:** ``location_zip_code``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Location: EnergyPlus Weather (EPW) Filepath**
+
+Path to the EPW file. Either this or the Zip Code input above must be provided.
+
+- **Name:** ``location_epw_filepath``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Location: Site Type**
+
+The terrain/shielding of the home, for the infiltration model. Defaults to 'Suburban, Normal' for single-family detached and manufactured home and 'Suburban, Well-Shielded' for single-family attached and apartment units.
+
+- **Name:** ``location_site_type``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `suburban`, `urban`, `rural`
+- **Choices:** `Default`, `Suburban, Normal`, `Suburban, Well-Shielded`, `Suburban, Exposed`, `Urban, Normal`, `Urban, Well-Shielded`, `Urban, Exposed`, `Rural, Normal`, `Rural, Well-Shielded`, `Rural, Exposed`
 
 <br/>
 
-**Site: Shielding of Home**
-
-Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
-
-- **Name:** ``site_shielding_of_home``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `exposed`, `normal`, `well-shielded`
-
-<br/>
-
-**Site: Soil Type**
+**Location: Soil Type**
 
 The soil and moisture type.
 
-- **Name:** ``site_soil_type``
+- **Name:** ``location_soil_type``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
 - **Choices:** `Unknown`, `Clay, Dry`, `Clay, Mixed`, `Clay, Wet`, `Gravel, Dry`, `Gravel, Mixed`, `Gravel, Wet`, `Loam, Dry`, `Loam, Mixed`, `Loam, Wet`, `Sand, Dry`, `Sand, Mixed`, `Sand, Wet`, `Silt, Dry`, `Silt, Mixed`, `Silt, Wet`, `0.5 Conductivity`, `0.8 Conductivity`, `1.1 Conductivity`, `1.4 Conductivity`, `1.7 Conductivity`, `2.0 Conductivity`, `2.3 Conductivity`, `2.6 Conductivity`, `Detailed Example: Sand, Dry, 0.03 Diffusivity`
-
-<br/>
-
-**Site: Zip Code**
-
-Zip code of the home address. Either this or the Weather Station: EnergyPlus Weather (EPW) Filepath input below must be provided.
-
-- **Name:** ``site_zip_code``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Weather Station: EnergyPlus Weather (EPW) Filepath**
-
-Path of the EPW file. Either this or the Site: Zip Code input above must be provided.
-
-- **Name:** ``weather_station_epw_filepath``
-- **Type:** ``String``
-
-- **Required:** ``false``
 
 <br/>
 
@@ -208,7 +129,7 @@ The year the building was built.
 
 **Building Construction: Unit Multiplier**
 
-The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value. If not provided, defaults to 1.
+The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value.
 
 - **Name:** ``unit_multiplier``
 - **Type:** ``Integer``
@@ -310,7 +231,7 @@ The number of bedrooms in the unit.
 
 **Geometry: Unit Number of Bathrooms**
 
-The number of bathrooms in the unit. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-building-construction'>HPXML Building Construction</a>) is used.
+The number of bathrooms in the unit. If not provided, defaults to NumberofBedrooms/2 + 0.5.
 
 - **Name:** ``geometry_unit_num_bathrooms``
 - **Type:** ``Integer``
@@ -531,7 +452,7 @@ The type and insulation level of the roof.
 
 **Enclosure: Roof Material**
 
-The material type and color of the roof. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-roofs'>HPXML Roofs</a>) is used.
+The material type and color of the roof.
 
 - **Name:** ``enclosure_roof_material``
 - **Type:** ``Choice``
@@ -674,7 +595,7 @@ The amount of natural ventilation from occupants opening operable windows when o
 
 **Enclosure: Window Interior Shading**
 
-The type of window interior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.
+The type of window interior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction).
 
 - **Name:** ``enclosure_window_interior_shading``
 - **Type:** ``Choice``
@@ -687,7 +608,7 @@ The type of window interior shading. If shading coefficients are selected, note 
 
 **Enclosure: Window Exterior Shading**
 
-The type of window exterior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction). If not provided, the OS-HPXML default is used.
+The type of window exterior shading. If shading coefficients are selected, note they indicate the reduction in solar gain (e.g., 0.7 indicates 30% reduction).
 
 - **Name:** ``enclosure_window_exterior_shading``
 - **Type:** ``Choice``
@@ -700,27 +621,27 @@ The type of window exterior shading. If shading coefficients are selected, note 
 
 **Enclosure: Window Insect Screens**
 
-The type of window insect screens, if present. If not provided, assumes there are no insect screens.
+The type of window insect screens.
 
 - **Name:** ``enclosure_window_insect_screens``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `none`, `exterior`, `interior`
+- **Choices:** `None`, `Exterior`, `Interior`
 
 <br/>
 
-**Enclosure: Window Storms**
+**Enclosure: Window Storm**
 
-The type of window storm, if present. If not provided, assumes there is no storm.
+The type of storm window.
 
-- **Name:** ``enclosure_window_storm_type``
+- **Name:** ``enclosure_window_storm``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `clear`, `low-e`
+- **Choices:** `None`, `Clear`, `Low-E`
 
 <br/>
 
@@ -752,7 +673,7 @@ The type of skylights.
 
 **Enclosure: Skylight Front Area**
 
-The amount of skylight area on the unit's front conditioned roof.
+The amount of skylight area on the unit's front-facing roof.
 
 - **Name:** ``enclosure_skylight_area_front``
 - **Type:** ``Double``
@@ -765,7 +686,7 @@ The amount of skylight area on the unit's front conditioned roof.
 
 **Enclosure: Skylight Back Area**
 
-The amount of skylight area on the unit's back conditioned roof.
+The amount of skylight area on the unit's back-facing roof.
 
 - **Name:** ``enclosure_skylight_area_back``
 - **Type:** ``Double``
@@ -778,7 +699,7 @@ The amount of skylight area on the unit's back conditioned roof.
 
 **Enclosure: Skylight Left Area**
 
-The amount of skylight area on the unit's left conditioned roof (when viewed from the front).
+The amount of skylight area on the unit's left-facing roof (when viewed from the front).
 
 - **Name:** ``enclosure_skylight_area_left``
 - **Type:** ``Double``
@@ -791,7 +712,7 @@ The amount of skylight area on the unit's left conditioned roof (when viewed fro
 
 **Enclosure: Skylight Right Area**
 
-The amount of skylight area on the unit's right conditioned roof (when viewed from the front).
+The amount of skylight area on the unit's right-facing roof (when viewed from the front).
 
 - **Name:** ``enclosure_skylight_area_right``
 - **Type:** ``Double``
@@ -830,7 +751,7 @@ The area of the opaque door(s).
 
 **Enclosure: Air Leakage**
 
-The amount of air leakage. When a leakiness description is used, the Year Built of the home is also required.
+The amount of air leakage coming from outside. If a qualitative leakiness description (e.g., 'Average') is selected, the Year Built of the home is also required.
 
 - **Name:** ``enclosure_air_leakage``
 - **Type:** ``Choice``
@@ -838,19 +759,6 @@ The amount of air leakage. When a leakiness description is used, the Year Built 
 - **Required:** ``false``
 
 - **Choices:** `Very Tight`, `Tight`, `Average`, `Leaky`, `Very Leaky`, `0.25 ACH50`, `0.5 ACH50`, `0.75 ACH50`, `1 ACH50`, `1.5 ACH50`, `2 ACH50`, `2.25 ACH50`, `3 ACH50`, `3.75 ACH50`, `4 ACH50`, `4.5 ACH50`, `5 ACH50`, `5.25 ACH50`, `6 ACH50`, `7 ACH50`, `7.5 ACH50`, `8 ACH50`, `10 ACH50`, `11.25 ACH50`, `15 ACH50`, `18.5 ACH50`, `20 ACH50`, `25 ACH50`, `30 ACH50`, `40 ACH50`, `50 ACH50`, `2.8 ACH45`, `0.2 nACH`, `0.335 nACH`, `0.67 nACH`, `1.5 nACH`, `Detailed Example: 3.57 ACH50`, `Detailed Example: 12.16 ACH50`, `Detailed Example: 0.375 nACH`, `Detailed Example: 72 nCFM`, `Detailed Example: 79.8 sq. in. ELA`, `Detailed Example: 123 sq. in. ELA`, `Detailed Example: 1080 CFM50`, `Detailed Example: 1010 CFM45`
-
-<br/>
-
-**Enclosure: Air Leakage Type**
-
-Type of air leakage if providing a numeric air leakage value. If 'unit total', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if 'unit exterior only', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is single-family attached or apartment unit.
-
-- **Name:** ``enclosure_air_leakage_type``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `unit total`, `unit exterior only`
 
 <br/>
 
@@ -993,20 +901,7 @@ The output capacity of the heat pump.
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `0.5 tons`, `0.75 tons`, `1.0 tons`, `1.5 tons`, `2.0 tons`, `2.5 tons`, `3.0 tons`, `3.5 tons`, `4.0 tons`, `4.5 tons`, `5.0 tons`, `5.5 tons`, `6.0 tons`, `6.5 tons`, `7.0 tons`, `7.5 tons`, `8.0 tons`, `8.5 tons`, `9.0 tons`, `9.5 tons`, `10.0 tons`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit`
-
-<br/>
-
-**HVAC: Heat Pump Sizing Methodology**
-
-The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.
-
-- **Name:** ``heat_pump_sizing_methodology``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `ACCA`, `HERS`, `MaxLoad`
+- **Choices:** `Autosize`, `Autosize (ACCA)`, `Autosize (MaxLoad)`, `0.5 tons`, `0.75 tons`, `1.0 tons`, `1.5 tons`, `2.0 tons`, `2.5 tons`, `3.0 tons`, `3.5 tons`, `4.0 tons`, `4.5 tons`, `5.0 tons`, `5.5 tons`, `6.0 tons`, `6.5 tons`, `7.0 tons`, `7.5 tons`, `8.0 tons`, `8.5 tons`, `9.0 tons`, `9.5 tons`, `10.0 tons`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 170% Multiplier, 3.0 tons Limit`
 
 <br/>
 
@@ -1071,20 +966,7 @@ The output capacity of the heat pump backup if there is integrated backup heatin
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `5 kW`, `10 kW`, `15 kW`, `20 kW`, `25 kW`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
-
-<br/>
-
-**HVAC: Heat Pump Backup Sizing Methodology**
-
-The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.
-
-- **Name:** ``heat_pump_backup_sizing_methodology``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `emergency`, `supplemental`
+- **Choices:** `Autosize`, `Autosize (Supplemental)`, `5 kW`, `10 kW`, `15 kW`, `20 kW`, `25 kW`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 
@@ -1199,7 +1081,7 @@ Specify the constant or 24-hour comma-separated weekend cooling setpoint schedul
 
 **HVAC Control: Heating Season Period**
 
-Enter a date range like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols.
+Enter a date range like 'Nov 1 - Jun 30'. Defaults to year-round heating availability.
 
 - **Name:** ``hvac_control_heating_season_period``
 - **Type:** ``String``
@@ -1210,7 +1092,7 @@ Enter a date range like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default 
 
 **HVAC Control: Cooling Season Period**
 
-Enter a date range like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols.
+Enter a date range like 'Jun 1 - Oct 31'. Defaults to year-round cooling availability.
 
 - **Name:** ``hvac_control_cooling_season_period``
 - **Type:** ``String``
@@ -1260,7 +1142,7 @@ The supply duct leakage to outside, nominal insulation r-value, buried insulatio
 
 **HVAC Ducts: Supply Location**
 
-The location of the supply ducts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
+The location of the supply ducts. If not provided, defaults based on the foundation/attic type and presence of garage.
 
 - **Name:** ``hvac_ducts_supply_location``
 - **Type:** ``Choice``
@@ -1273,7 +1155,7 @@ The location of the supply ducts. If not provided, the OS-HPXML default (see <a 
 
 **HVAC Ducts: Supply Area Fraction**
 
-The fraction of supply ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
+The fraction of supply ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.
 
 - **Name:** ``hvac_ducts_supply_surface_area_fraction``
 - **Type:** ``Double``
@@ -1286,7 +1168,7 @@ The fraction of supply ducts surface area in the given location. Only used if Su
 
 **HVAC Ducts: Supply Leakage Fraction**
 
-The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts
+The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts.
 
 - **Name:** ``hvac_ducts_supply_leakage_fraction``
 - **Type:** ``Double``
@@ -1299,7 +1181,7 @@ The fraction of duct leakage associated with the supply ducts; the remainder is 
 
 **HVAC Ducts: Return Location**
 
-The location of the return ducts. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
+The location of the return ducts. If not provided, defaults based on the foundation/attic type and presence of garage.
 
 - **Name:** ``hvac_ducts_return_location``
 - **Type:** ``Choice``
@@ -1312,7 +1194,7 @@ The location of the return ducts. If not provided, the OS-HPXML default (see <a 
 
 **HVAC Ducts: Return Area Fraction**
 
-The fraction of return ducts surface area in the given location. Only used if Surface Area is not provided. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If neither Surface Area nor Area Fraction provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
+The fraction of return ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.
 
 - **Name:** ``hvac_ducts_return_surface_area_fraction``
 - **Type:** ``Double``
@@ -1325,7 +1207,7 @@ The fraction of return ducts surface area in the given location. Only used if Su
 
 **HVAC Ducts: Number of Return Registers**
 
-The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-distribution'>Air Distribution</a>) is used.
+The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, defaults to one return register per conditioned floor.
 
 - **Name:** ``hvac_ducts_number_of_return_registers``
 - **Type:** ``Integer``
@@ -1403,7 +1285,7 @@ The type and efficiency of the water heater.
 
 **DHW: Water Heater Location**
 
-The location of water heater. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.
+The location of water heater. If not provided, defaults based on the foundation type and presence of garage.
 
 - **Name:** ``dhw_water_heater_location``
 - **Type:** ``Choice``
@@ -1414,22 +1296,22 @@ The location of water heater. If not provided, the OS-HPXML default (see <a href
 
 <br/>
 
-**DHW: Water Heater Jacket R-value**
+**DHW: Water Heater Jacket Insulation**
 
-The jacket R-value of water heater. Doesn't apply to instantaneous water heater or space-heating boiler with tankless coil. If not provided, defaults to no jacket insulation.
+The type of water heater jacket/blanket insulation. Doesn't apply to tankless systems or space-heating boilers.
 
-- **Name:** ``dhw_water_heater_jacket_rvalue``
-- **Type:** ``Double``
-
-- **Units:** ``F-ft2-hr/Btu``
+- **Name:** ``dhw_water_heater_jacket``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `None`, `R-5`, `R-6`, `R-7`, `R-8`, `R-9`, `R-10`
 
 <br/>
 
 **DHW: Water Heater Uses Desuperheater**
 
-Requires that the dwelling unit has a air-to-air, mini-split, or ground-to-air heat pump or a central air conditioner or mini-split air conditioner. If not provided, assumes no desuperheater.
+Whether the water heater uses a desuperheater. Requires that the dwelling unit has a air-to-air, mini-split, or ground-to-air heat pump or a central air conditioner or mini-split air conditioner.
 
 - **Name:** ``dhw_water_heater_uses_desuperheater``
 - **Type:** ``Boolean``
@@ -1479,7 +1361,7 @@ The type of drain water heater recovery.
 
 **DHW: Hot Water Fixtures Usage Multiplier**
 
-Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-water-fixtures'>HPXML Water Fixtures</a>) is used.
+Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``dhw_water_fixtures_usage_multiplier``
 - **Type:** ``Double``
@@ -2211,7 +2093,7 @@ The type of battery electric vehicle.
 
 **Electric Vehicle: Miles Driven Per Year**
 
-The annual miles the vehicle is driven. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-vehicles'>HPXML Vehicles</a>) is used.
+The annual miles the vehicle is driven. If not provided, defaults to 10900.
 
 - **Name:** ``electric_vehicle_miles_driven_per_year``
 - **Type:** ``Double``
@@ -2250,7 +2132,7 @@ The type of clothes washer.
 
 **Appliances: Clothes Washer Location**
 
-The space type for the clothes washer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+The space type for the clothes washer location. If not provided, defaults to conditioned space.
 
 - **Name:** ``appliance_clothes_washer_location``
 - **Type:** ``Choice``
@@ -2263,7 +2145,7 @@ The space type for the clothes washer location. If not provided, the OS-HPXML de
 
 **Appliances: Clothes Washer Usage Multiplier**
 
-Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-washer'>HPXML Clothes Washer</a>) is used.
+Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``appliance_clothes_washer_usage_multiplier``
 - **Type:** ``Double``
@@ -2287,7 +2169,7 @@ The type of clothes dryer.
 
 **Appliances: Clothes Dryer Location**
 
-The space type for the clothes dryer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
+The space type for the clothes dryer location. If not provided, defaults to conditioned space.
 
 - **Name:** ``appliance_clothes_dryer_location``
 - **Type:** ``Choice``
@@ -2300,7 +2182,7 @@ The space type for the clothes dryer location. If not provided, the OS-HPXML def
 
 **Appliances: Clothes Dryer Usage Multiplier**
 
-Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.
+Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``appliance_clothes_dryer_usage_multiplier``
 - **Type:** ``Double``
@@ -2324,7 +2206,7 @@ The type of dishwasher.
 
 **Appliances: Dishwasher Location**
 
-The space type for the dishwasher location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+The space type for the dishwasher location. If not provided, defaults to conditioned space.
 
 - **Name:** ``appliance_dishwasher_location``
 - **Type:** ``Choice``
@@ -2337,7 +2219,7 @@ The space type for the dishwasher location. If not provided, the OS-HPXML defaul
 
 **Appliances: Dishwasher Usage Multiplier**
 
-Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-dishwasher'>HPXML Dishwasher</a>) is used.
+Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``appliance_dishwasher_usage_multiplier``
 - **Type:** ``Double``
@@ -2361,7 +2243,7 @@ The type of refrigerator.
 
 **Appliances: Refrigerator Location**
 
-The space type for the refrigerator location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+The space type for the refrigerator location. If not provided, defaults to conditioned space.
 
 - **Name:** ``appliance_refrigerator_location``
 - **Type:** ``Choice``
@@ -2374,7 +2256,7 @@ The space type for the refrigerator location. If not provided, the OS-HPXML defa
 
 **Appliances: Refrigerator Usage Multiplier**
 
-Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``appliance_refrigerator_usage_multiplier``
 - **Type:** ``Double``
@@ -2398,7 +2280,7 @@ The type of extra refrigerator.
 
 **Appliances: Extra Refrigerator Location**
 
-The space type for the extra refrigerator location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+The space type for the extra refrigerator location. If not provided, defaults based on the foundation type and presence of garage.
 
 - **Name:** ``appliance_extra_refrigerator_location``
 - **Type:** ``Choice``
@@ -2411,7 +2293,7 @@ The space type for the extra refrigerator location. If not provided, the OS-HPXM
 
 **Appliances: Extra Refrigerator Usage Multiplier**
 
-Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``appliance_extra_refrigerator_usage_multiplier``
 - **Type:** ``Double``
@@ -2435,7 +2317,7 @@ The type of freezer.
 
 **Appliances: Freezer Location**
 
-The space type for the freezer location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
+The space type for the freezer location. If not provided, defaults based on the foundation type and presence of garage.
 
 - **Name:** ``appliance_freezer_location``
 - **Type:** ``Choice``
@@ -2448,7 +2330,7 @@ The space type for the freezer location. If not provided, the OS-HPXML default (
 
 **Appliances: Freezer Usage Multiplier**
 
-Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-freezers'>HPXML Freezers</a>) is used.
+Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``appliance_freezer_usage_multiplier``
 - **Type:** ``Double``
@@ -2472,7 +2354,7 @@ The type of cooking range/oven.
 
 **Appliances: Cooking Range/Oven Location**
 
-The space type for the cooking range/oven location. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
+The space type for the cooking range/oven location. If not provided, defaults to conditioned space.
 
 - **Name:** ``appliance_cooking_range_oven_location``
 - **Type:** ``Choice``
@@ -2485,7 +2367,7 @@ The space type for the cooking range/oven location. If not provided, the OS-HPXM
 
 **Appliances: Cooking Range/Oven Usage Multiplier**
 
-Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooking-range-oven'>HPXML Cooking Range/Oven</a>) is used.
+Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``appliance_cooking_range_oven_usage_multiplier``
 - **Type:** ``Double``
@@ -2535,7 +2417,7 @@ The type of lighting.
 
 **Lighting: Interior Usage Multiplier**
 
-Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
+Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``lighting_interior_usage_multiplier``
 - **Type:** ``Double``
@@ -2546,7 +2428,7 @@ Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/
 
 **Lighting: Exterior Usage Multiplier**
 
-Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
+Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``lighting_exterior_usage_multiplier``
 - **Type:** ``Double``
@@ -2557,7 +2439,7 @@ Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/
 
 **Lighting: Garage Usage Multiplier**
 
-Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
+Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants.
 
 - **Name:** ``lighting_garage_usage_multiplier``
 - **Type:** ``Double``
@@ -2693,6 +2575,76 @@ The type of permanent spa (pump & heater).
 - **Required:** ``false``
 
 - **Choices:** `None`, `Spa, Unheated`, `Spa, Electric Resistance Heater`, `Spa, Heat Pump Heater`, `Spa, Natural Gas Heater`, `Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater`, `Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater, 90% Usage Multiplier`, `Detailed Example: Spa, 1000 kWh/yr Pump, 260 kWh/yr Heat Pump Heater`
+
+<br/>
+
+**Schedules: CSV File Paths**
+
+Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.
+
+- **Name:** ``schedules_filepaths``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Schedules: Unavailable Period Types**
+
+Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: Vacancy, Power Outage, No Space Heating, No Space Cooling. If multiple periods, use a comma-separated list.
+
+- **Name:** ``schedules_unavailable_period_types``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Schedules: Unavailable Period Dates**
+
+Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
+
+- **Name:** ``schedules_unavailable_period_dates``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Schedules: Unavailable Period Window Natural Ventilation Availabilities**
+
+The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If not provided, defaults to 'regular schedule'.
+
+- **Name:** ``schedules_unavailable_period_window_natvent_availabilities``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Advanced Feature**
+
+Select an advanced research feature to use in the model, if desired.
+
+- **Name:** ``advanced_feature``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `None`, `Temperature Capacitance Multiplier = 1`, `Temperature Capacitance Multiplier = 4`, `Temperature Capacitance Multiplier = 10`, `Temperature Capacitance Multiplier = 15`, `On/Off Thermostat Deadband, 1F`, `On/Off Thermostat Deadband, 2F`, `On/Off Thermostat Deadband, 3F`, `Heat Pump Backup Staging, 5 kW`, `Heat Pump Backup Staging, 10 kW`, `Experimental Ground-to-Air Heat Pump Model`, `HVAC Allow Increased Fixed Capacities`
+
+<br/>
+
+**Advanced Feature 2**
+
+Select a second advanced research feature to use in the model, if desired.
+
+- **Name:** ``advanced_feature_2``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `None`, `Temperature Capacitance Multiplier = 1`, `Temperature Capacitance Multiplier = 4`, `Temperature Capacitance Multiplier = 10`, `Temperature Capacitance Multiplier = 15`, `On/Off Thermostat Deadband, 1F`, `On/Off Thermostat Deadband, 2F`, `On/Off Thermostat Deadband, 3F`, `Heat Pump Backup Staging, 5 kW`, `Heat Pump Backup Staging, 10 kW`, `Experimental Ground-to-Air Heat Pump Model`, `HVAC Allow Increased Fixed Capacities`
 
 <br/>
 
@@ -3086,6 +3038,28 @@ Utility bill PV monthly grid connection fees. If multiple scenarios, use a comma
 Additional properties specified as key-value pairs (i.e., key=value). If multiple additional properties, use a |-separated list. For example, 'LowIncome=false|Remodeled|Description=2-story home in Denver'. These properties will be stored in the HPXML file under /HPXML/SoftwareInfo/extension/AdditionalProperties.
 
 - **Name:** ``additional_properties``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Whole SFA/MF Building Simulation?**
+
+If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.
+
+- **Name:** ``whole_sfa_or_mf_building_sim``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
+**Whole SFA/MF Building Simulation: Existing HPXML File Path**
+
+Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).
+
+- **Name:** ``whole_sfa_or_mf_existing_hpxml_path``
 - **Type:** ``String``
 
 - **Required:** ``false``

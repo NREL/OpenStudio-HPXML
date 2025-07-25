@@ -74,7 +74,7 @@ def create_hpxmls
 
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
-      build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
+      build_residential_hpxml['whole_sfa_or_mf_existing_hpxml_path'] = hpxml_path if i > 1
       if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
@@ -349,21 +349,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   if ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
     hpxml.header.sim_calendar_year = 2010
   end
-  if ['base-hvac-air-to-air-heat-pump-1-speed-research-features.xml',
-      'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml',
-      'base-hvac-room-ac-only-research-features.xml'].include? hpxml_file
-    hpxml.header.hvac_onoff_thermostat_deadband = 2
-  end
-  if ['base-hvac-air-to-air-heat-pump-1-speed-research-features.xml',
-      'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml'].include? hpxml_file
-    hpxml.header.heat_pump_backup_heating_capacity_increment = 17060.71
-  end
-  if hpxml_file.include?('ground-to-air') && hpxml_file.include?('experimental')
-    hpxml.header.ground_to_air_heat_pump_model_type = HPXML::GroundToAirHeatPumpModelTypeExperimental
-  end
-  if ['base-simcontrol-temperature-capacitance-multiplier.xml'].include? hpxml_file
-    hpxml.header.temperature_capacitance_multiplier = 10
-  end
 
   hpxml.buildings.each_with_index do |hpxml_bldg, hpxml_bldg_index|
     # ------------ #
@@ -383,9 +368,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.dst_end_day = 6
     elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
       hpxml_bldg.dst_enabled = false
-    end
-    if ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
-      hpxml_bldg.header.allow_increased_fixed_capacities = true
     end
     if ['base-hvac-autosize-sizing-controls.xml'].include? hpxml_file
       hpxml_bldg.header.manualj_heating_design_temp = 0
@@ -462,6 +444,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.building_construction.average_ceiling_height = nil
       hpxml_bldg.building_construction.conditioned_building_volume = nil
+      hpxml_bldg.site.site_type = nil
+      hpxml_bldg.site.shielding_of_home = nil
     elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
       hpxml_bldg.building_construction.number_of_conditioned_floors = 2
       hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 1
@@ -483,13 +467,17 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served -= 400 * 2
       hpxml_bldg.building_construction.conditioned_building_volume -= 400 * 2 * 8
       hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
-    elsif ['base-bldgtype-mf-unit-infil-compartmentalization-test.xml'].include? hpxml_file
-      hpxml_bldg.air_infiltration_measurements[0].a_ext = 0.2
     end
     if hpxml_file.include? 'base-bldgtype-mf-unit'
       hpxml_bldg.building_construction.unit_height_above_grade = 10
     elsif hpxml_file.include? 'base-bldgtype-mf-whole-building'
       hpxml_bldg.building_construction.unit_height_above_grade = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[hpxml_bldg_index + 1]
+    end
+    if hpxml_file.include? 'compartmentalization-test'
+      hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitTotal
+      if ['base-bldgtype-mf-unit-infil-compartmentalization-test.xml'].include? hpxml_file
+        hpxml_bldg.air_infiltration_measurements[0].a_ext = 0.2
+      end
     end
 
     # ------------------ #
@@ -1140,6 +1128,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.doors[0].azimuth = nil
       hpxml_bldg.windows.each do |window|
         window.fraction_operable = nil
+        window.interior_shading_type = nil
+        window.exterior_shading_type = nil
       end
     elsif ['base-enclosure-2stories.xml',
            'base-enclosure-2stories-garage.xml'].include? hpxml_file

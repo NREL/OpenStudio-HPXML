@@ -60,4 +60,4 @@ Electric Resistance	ElectricResistance	1
 			
 Type: The type of system.			
 Heating Efficiency: The rated heating efficiency.			
-"Pilot Light: The fuel usage of the pilot light. Applies to Furnaces, Boilers, Stoves, and Fireplaces with non-electric fuel. If not provided, assumes no pilot light."			
+"Pilot Light: The fuel usage of the pilot light. Applies to Furnaces, Boilers, Stoves, and Fireplaces with non-electric fuel."			
