@@ -2176,6 +2176,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                 temperature_coefficients: '0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020')
       when 'schedule-file-and-setpoints'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.water_heating_systems[0].temperature = 125
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/setpoints.csv')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-setpoints.csv')
       when 'schedule-file-and-operating-mode'
