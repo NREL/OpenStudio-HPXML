@@ -1113,6 +1113,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
         rim_joist.exterior_adjacent_to = HPXML::LocationCrawlspaceUnvented
         rim_joist.siding = nil
+        rim_joist.insulation_assembly_r_value = 4.0
       end
       hpxml_bldg.rim_joists.add(id: "RimJoist#{hpxml_bldg.rim_joists.size + 1}",
                                 exterior_adjacent_to: HPXML::LocationOutside,
