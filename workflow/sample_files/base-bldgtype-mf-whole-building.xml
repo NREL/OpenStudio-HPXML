@@ -11,7 +11,7 @@
       <WholeSFAorMFBuildingSimulation>true</WholeSFAorMFBuildingSimulation>
       <UtilityBillScenarios>
         <UtilityBillScenario>
-          <Name>Bills</Name>
+          <Name>Default</Name>
         </UtilityBillScenario>
       </UtilityBillScenarios>
     </extension>

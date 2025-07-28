@@ -4866,6 +4866,8 @@ module HPXMLFile
           pv_net_metering_annual_excess_sellback_rate = nil
         end
 
+        pv_monthly_grid_connection_fee_dollars = nil
+        pv_monthly_grid_connection_fee_dollars_per_kw = nil
         if pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollarsPerkW
           pv_monthly_grid_connection_fee_dollars_per_kw = Float(pv_monthly_grid_connection_fee) rescue nil
         elsif pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollars
