@@ -5106,7 +5106,7 @@ module HPXMLFile
     hpxml_bldg.building_construction.conditioned_building_volume = args[:geometry_unit_cfa] * args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.average_ceiling_height = args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.residential_facility_type = args[:geometry_unit_type]
-    #hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
+    # hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
     hpxml_bldg.building_construction.year_built = args[:year_built]
     hpxml_bldg.building_construction.number_of_units = args[:unit_multiplier]
     hpxml_bldg.building_construction.unit_height_above_grade = args[:geometry_unit_height_above_grade]
@@ -7335,7 +7335,12 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_electric_panel(hpxml_bldg, args)
-    return if args[:electric_panel_service_feeders_load_calculation_types].nil?
+    return if (args[:electric_panel_service_voltage].nil? &&
+               args[:electric_panel_breaker_spaces_headroom].nil? &&
+               args[:electric_panel_breaker_spaces_rated_total].nil? &&
+               args[:electric_panel_load_heating_system_power_rating].nil? &&
+               args[:electric_panel_load_cooling_system_power_rating].nil? &&
+               args[:electric_panel_baseline_peak_power].nil?)
 
     hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
                                    voltage: args[:electric_panel_service_voltage],
