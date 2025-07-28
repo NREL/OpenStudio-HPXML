@@ -38,6 +38,9 @@ def create_hpxmls
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
+    # Uncomment following line to debug single file
+    # next unless hpxml_filename.include? 'base-bldgtype-mf-whole-building.xml'
+
     puts "[#{hpxml_i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
     abs_hpxml_files << File.absolute_path(hpxml_path)
@@ -153,11 +156,13 @@ def create_hpxmls
   puts "\n"
 
   # Print warnings about extra files
-  dirs.each do |dir|
-    Dir["#{workflow_dir}/#{dir}/*.xml"].each do |hpxml|
-      next if abs_hpxml_files.include? File.absolute_path(hpxml)
+  if abs_hpxml_files.size > 1 # Suppress warning if we're debugging a single file
+    dirs.each do |dir|
+      Dir["#{workflow_dir}/#{dir}/*.xml"].each do |hpxml|
+        next if abs_hpxml_files.include? File.absolute_path(hpxml)
 
-      puts "Warning: Extra HPXML file found at #{File.absolute_path(hpxml)}"
+        puts "Warning: Extra HPXML file found at #{File.absolute_path(hpxml)}"
+      end
     end
   end
 end

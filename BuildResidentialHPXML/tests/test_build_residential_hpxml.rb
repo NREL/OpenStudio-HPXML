@@ -55,7 +55,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-enclosure-atticroof-conditioned-eaves-gable.xml' => 'base-sfd.xml',
       'extra-enclosure-atticroof-conditioned-eaves-hip.xml' => 'extra-enclosure-atticroof-conditioned-eaves-gable.xml',
       'extra-emissions-fossil-fuel-factors.xml' => 'base-sfd.xml',
-      'extra-bills-fossil-fuel-rates.xml' => 'base-sfd.xml',
       'extra-seasons-building-america.xml' => 'base-sfd.xml',
       'extra-ducts-crawlspace.xml' => 'base-sfd.xml',
       'extra-ducts-attic.xml' => 'base-sfd.xml',
@@ -181,7 +180,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-emissions-args-not-all-specified.xml' => 'base-sfd.xml',
       'error-emissions-args-not-all-same-size.xml' => 'base-sfd.xml',
       'error-emissions-natural-gas-args-not-all-specified.xml' => 'base-sfd.xml',
-      'error-bills-args-not-all-same-size.xml' => 'base-sfd.xml',
       'error-too-many-floors.xml' => 'base-sfd.xml',
       'error-hip-roof-and-protruding-garage.xml' => 'base-sfd.xml',
       'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
@@ -189,7 +187,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-different-software-program.xml' => 'base-sfd-header.xml',
       'error-different-simulation-control.xml' => 'base-sfd-header.xml',
       'error-same-emissions-scenario-name.xml' => 'base-sfd-header.xml',
-      'error-same-utility-bill-scenario-name.xml' => 'base-sfd-header.xml',
       'error-could-not-find-epw-file.xml' => 'base-sfd.xml',
 
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
@@ -224,7 +221,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-emissions-args-not-all-specified.xml' => ['Did not specify all required emissions arguments.'],
       'error-emissions-args-not-all-same-size.xml' => ['One or more emissions arguments does not have enough comma-separated elements specified.'],
       'error-emissions-natural-gas-args-not-all-specified.xml' => ['Did not specify fossil fuel emissions units for natural gas emissions values.'],
-      'error-bills-args-not-all-same-size.xml' => ['One or more utility bill arguments does not have enough comma-separated elements specified.'],
       'error-too-many-floors.xml' => ['Number of above-grade floors must be six or less.'],
       'error-hip-roof-and-protruding-garage.xml' => ['Cannot handle protruding garage and hip roof.'],
       'error-protruding-garage-under-gable-roof.xml' => ['Cannot handle protruding garage and attic ridge running from front to back.'],
@@ -235,7 +231,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
                                                    "'Simulation Control: Run Period' cannot vary across dwelling units.",
                                                    "Advanced feature 'Temperature Capacitance Multiplier' cannot vary across dwelling units."],
       'error-same-emissions-scenario-name.xml' => ["HPXML header already includes an emissions scenario named 'Emissions' with type 'CO2e'."],
-      'error-same-utility-bill-scenario-name.xml' => ["HPXML header already includes a utility bill scenario named 'Bills'."],
       'error-could-not-find-epw-file.xml' => ['Could not find EPW file at']
     }
 
@@ -632,18 +627,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['emissions_fuel_oil_values'] = '161.0, 0.0015'
       args['emissions_coal_values'] = '211.1, 0.0020'
       args['emissions_wood_values'] = '200.0, 0.0025'
-    when 'extra-bills-fossil-fuel-rates.xml'
-      args['utility_bill_scenario_names'] = 'Scenario1, Scenario2'
-      args['utility_bill_propane_fixed_charges'] = '1, 2'
-      args['utility_bill_propane_marginal_rates'] = '3, 4'
-      args['utility_bill_fuel_oil_fixed_charges'] = '5, 6'
-      args['utility_bill_fuel_oil_marginal_rates'] = '6, 7'
-      args['utility_bill_coal_fixed_charges'] = '8, 9'
-      args['utility_bill_coal_marginal_rates'] = '10, 11'
-      args['utility_bill_wood_fixed_charges'] = '12, 13'
-      args['utility_bill_wood_marginal_rates'] = '14, 15'
-      args['utility_bill_wood_pellets_fixed_charges'] = '16, 17'
-      args['utility_bill_wood_pellets_marginal_rates'] = '18, 19'
     when 'extra-seasons-building-america.xml'
       args['hvac_control_heating_season_period'] = Constants::BuildingAmerica
       args['hvac_control_cooling_season_period'] = Constants::BuildingAmerica
@@ -874,10 +857,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv'
     when 'error-emissions-natural-gas-args-not-all-specified.xml'
       args['emissions_natural_gas_values'] = '117.6'
-    when 'error-bills-args-not-all-same-size.xml'
-      args['utility_bill_scenario_names'] = 'Scenario1'
-      args['utility_bill_electricity_fixed_charges'] = '1'
-      args['utility_bill_electricity_marginal_rates'] = '2,2'
     when 'error-too-many-floors.xml'
       args['geometry_unit_num_floors_above_grade'] = 7
     when 'error-hip-roof-and-protruding-garage.xml'
@@ -894,21 +873,16 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['software_info_program_used'] = 'Program2'
       args['software_info_program_version'] = '2'
       args['emissions_scenario_names'] = 'Emissions2'
-      args['utility_bill_scenario_names'] = 'Bills2'
     when 'error-different-simulation-control.xml'
       args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['simulation_control_timestep'] = 10
       args['simulation_control_run_period'] = 'Jan 2 - Dec 30'
       args['emissions_scenario_names'] = 'Emissions2'
-      args['utility_bill_scenario_names'] = 'Bills2'
       args['advanced_feature'] = 'None'
       args['advanced_feature_2'] = 'Temperature Capacitance Multiplier = 4'
     when 'error-same-emissions-scenario-name.xml'
       args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['emissions_electricity_values_or_filepaths'] = '2'
-    when 'error-same-utility-bill-scenario-name.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
-      args['utility_bill_electricity_fixed_charges'] = '13.0'
     when 'error-could-not-find-epw-file.xml'
       args['location_epw_filepath'] = 'foo.epw'
     end

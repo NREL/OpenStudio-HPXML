@@ -120,7 +120,7 @@ The soil and moisture type.
 
 The year the building was built.
 
-- **Name:** ``year_built``
+- **Name:** ``building_year_built``
 - **Type:** ``Integer``
 
 - **Required:** ``false``
@@ -131,7 +131,7 @@ The year the building was built.
 
 The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value.
 
-- **Name:** ``unit_multiplier``
+- **Name:** ``building_unit_multiplier``
 - **Type:** ``Integer``
 
 - **Required:** ``false``
@@ -797,7 +797,7 @@ The output capacity of the heating system.
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit`
+- **Choices:** `Autosize`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`, `Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 
@@ -1018,7 +1018,7 @@ The output capacity of the second heating system.
 
 - **Required:** ``false``
 
-- **Choices:** `Autosize`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`
+- **Choices:** `Autosize`, `5 kBtu/hr`, `10 kBtu/hr`, `15 kBtu/hr`, `20 kBtu/hr`, `25 kBtu/hr`, `30 kBtu/hr`, `35 kBtu/hr`, `40 kBtu/hr`, `45 kBtu/hr`, `50 kBtu/hr`, `55 kBtu/hr`, `60 kBtu/hr`, `65 kBtu/hr`, `70 kBtu/hr`, `75 kBtu/hr`, `80 kBtu/hr`, `85 kBtu/hr`, `90 kBtu/hr`, `95 kBtu/hr`, `100 kBtu/hr`, `105 kBtu/hr`, `110 kBtu/hr`, `115 kBtu/hr`, `120 kBtu/hr`, `125 kBtu/hr`, `130 kBtu/hr`, `135 kBtu/hr`, `140 kBtu/hr`, `145 kBtu/hr`, `150 kBtu/hr`, `Detailed Example: Autosize, 140% Multiplier`, `Detailed Example: Autosize, 170% Multiplier`, `Detailed Example: Autosize, 90% Multiplier, 45 kBtu/hr Limit`, `Detailed Example: Autosize, 140% Multiplier, 45 kBtu/hr Limit`
 
 <br/>
 
@@ -2791,245 +2791,42 @@ Wood pellets emissions factors values, specified as an annual factor. If multipl
 
 <br/>
 
-**Utility Bills: Scenario Names**
+**Utility Bill Secnario**
 
-Names of utility bill scenarios. If multiple scenarios, use a comma-separated list. If not provided, no utility bills scenarios are calculated.
+The type of utility bill calculations to perform.
 
-- **Name:** ``utility_bill_scenario_names``
-- **Type:** ``String``
+- **Name:** ``utility_bill_scenario``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `None`, `Default (EIA Average Rates)`, `Detailed Example: $0.12/kWh, $1.1/therm, $12/month`, `Detailed Example: Sample Tiered Rate`, `Detailed Example: Sample Time-of-Use Rate`, `Detailed Example: Sample Tiered and Time-of-Use Rate`, `Detailed Example: Sample Real-Time Pricing`, `Detailed Example: Net Metering w/ Wholesale Excess Rate`, `Detailed Example: Net Metering w/ Retail Excess Rate`, `Detailed Example: Feed-in Tariff`
 
 <br/>
 
-**Utility Bills: Electricity File Paths**
+**Utility Bill Secnario 2**
 
-Electricity tariff file specified as an absolute/relative path to a file with utility rate structure information. Tariff file must be formatted to OpenEI API version 7. If multiple scenarios, use a comma-separated list.
+The second type of utility bill calculations to perform, if desired.
 
-- **Name:** ``utility_bill_electricity_filepaths``
-- **Type:** ``String``
+- **Name:** ``utility_bill_scenario_2``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `None`, `Default (EIA Average Rates)`, `Detailed Example: $0.12/kWh, $1.1/therm, $12/month`, `Detailed Example: Sample Tiered Rate`, `Detailed Example: Sample Time-of-Use Rate`, `Detailed Example: Sample Tiered and Time-of-Use Rate`, `Detailed Example: Sample Real-Time Pricing`, `Detailed Example: Net Metering w/ Wholesale Excess Rate`, `Detailed Example: Net Metering w/ Retail Excess Rate`, `Detailed Example: Feed-in Tariff`
 
 <br/>
 
-**Utility Bills: Electricity Fixed Charges**
+**Utility Bill Secnario 3**
 
-Electricity utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
+The third type of utility bill calculations to perform, if desired.
 
-- **Name:** ``utility_bill_electricity_fixed_charges``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Natural Gas Fixed Charges**
-
-Natural gas utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_natural_gas_fixed_charges``
-- **Type:** ``String``
+- **Name:** ``utility_bill_scenario_3``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**Utility Bills: Propane Fixed Charges**
-
-Propane utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_propane_fixed_charges``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Fuel Oil Fixed Charges**
-
-Fuel oil utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_fuel_oil_fixed_charges``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Coal Fixed Charges**
-
-Coal utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_coal_fixed_charges``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Wood Fixed Charges**
-
-Wood utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_wood_fixed_charges``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Wood Pellets Fixed Charges**
-
-Wood pellets utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_wood_pellets_fixed_charges``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Electricity Marginal Rates**
-
-Electricity utility bill marginal rates. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_electricity_marginal_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Natural Gas Marginal Rates**
-
-Natural gas utility bill marginal rates. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_natural_gas_marginal_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Propane Marginal Rates**
-
-Propane utility bill marginal rates. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_propane_marginal_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Fuel Oil Marginal Rates**
-
-Fuel oil utility bill marginal rates. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_fuel_oil_marginal_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Coal Marginal Rates**
-
-Coal utility bill marginal rates. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_coal_marginal_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Wood Marginal Rates**
-
-Wood utility bill marginal rates. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_wood_marginal_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Wood Pellets Marginal Rates**
-
-Wood pellets utility bill marginal rates. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_wood_pellets_marginal_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: PV Compensation Types**
-
-Utility bill PV compensation types. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_pv_compensation_types``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: PV Net Metering Annual Excess Sellback Rate Types**
-
-Utility bill PV net metering annual excess sellback rate types. Only applies if the PV compensation type is 'NetMetering'. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_pv_net_metering_annual_excess_sellback_rate_types``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: PV Net Metering Annual Excess Sellback Rates**
-
-Utility bill PV net metering annual excess sellback rates. Only applies if the PV compensation type is 'NetMetering' and the PV annual excess sellback rate type is 'User-Specified'. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_pv_net_metering_annual_excess_sellback_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: PV Feed-In Tariff Rates**
-
-Utility bill PV annual full/gross feed-in tariff rates. Only applies if the PV compensation type is 'FeedInTariff'. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_pv_feed_in_tariff_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: PV Monthly Grid Connection Fee Units**
-
-Utility bill PV monthly grid connection fee units. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_pv_monthly_grid_connection_fee_units``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: PV Monthly Grid Connection Fees**
-
-Utility bill PV monthly grid connection fees. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_pv_monthly_grid_connection_fees``
-- **Type:** ``String``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Default (EIA Average Rates)`, `Detailed Example: $0.12/kWh, $1.1/therm, $12/month`, `Detailed Example: Sample Tiered Rate`, `Detailed Example: Sample Time-of-Use Rate`, `Detailed Example: Sample Tiered and Time-of-Use Rate`, `Detailed Example: Sample Real-Time Pricing`, `Detailed Example: Net Metering w/ Wholesale Excess Rate`, `Detailed Example: Net Metering w/ Retail Excess Rate`, `Detailed Example: Feed-in Tariff`
 
 <br/>
 

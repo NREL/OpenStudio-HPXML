@@ -7,7 +7,17 @@
     {
       "arguments": {
         "hpxml_path": "../built.xml",
-        "dhw_water_heater": "Electricity, Tank, UEF=0.94",
+        "location_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
+        "geometry_attic_type": "Attic, Unvented, Gable",
+        "geometry_average_ceiling_height": 8.0,
+        "geometry_foundation_type": "Basement, Conditioned",
+        "geometry_roof_pitch": "6:12",
+        "geometry_unit_aspect_ratio": 1.5,
+        "geometry_unit_cfa": 2700.0,
+        "geometry_unit_num_bedrooms": 3,
+        "geometry_unit_num_floors_above_grade": 1,
+        "geometry_unit_orientation": 180.0,
+        "geometry_unit_type": "single-family detached",
         "enclosure_air_leakage": "3 ACH50",
         "enclosure_ceiling": "R-38",
         "enclosure_door": "Solid Wood, R-3",
@@ -21,16 +31,6 @@
         "enclosure_window_area_or_wwr_front": 108.0,
         "enclosure_window_area_or_wwr_left": 72.0,
         "enclosure_window_area_or_wwr_right": 72.0,
-        "geometry_attic_type": "Attic, Unvented, Gable",
-        "geometry_average_ceiling_height": 8.0,
-        "geometry_foundation_type": "Basement, Conditioned",
-        "geometry_roof_pitch": "6:12",
-        "geometry_unit_aspect_ratio": 1.5,
-        "geometry_unit_cfa": 2700.0,
-        "geometry_unit_num_bedrooms": 3,
-        "geometry_unit_num_floors_above_grade": 1,
-        "geometry_unit_orientation": 180.0,
-        "geometry_unit_type": "single-family detached",
         "hvac_ducts": "4 CFM25 per 100ft2, Uninsulated",
         "hvac_ducts_return_location": "attic - unvented",
         "hvac_ducts_supply_location": "attic - unvented",
@@ -43,8 +43,8 @@
         "hvac_control_cooling_weekend_setpoint": "78",
         "hvac_control_heating_weekday_setpoint": "68",
         "hvac_control_heating_weekend_setpoint": "68",
-        "location_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
-        "utility_bill_scenario_names": "Bills"
+        "dhw_water_heater": "Electricity, Tank, UEF=0.94",
+        "utility_bills": "Default (EIA Average Rates)"
       },
       "measure_dir_name": "BuildResidentialHPXML"
     }

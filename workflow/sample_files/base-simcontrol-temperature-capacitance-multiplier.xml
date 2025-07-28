@@ -15,7 +15,7 @@
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
-          <Name>Bills</Name>
+          <Name>Default</Name>
         </UtilityBillScenario>
       </UtilityBillScenarios>
     </extension>

@@ -10,10 +10,10 @@
     <extension>
       <UtilityBillScenarios>
         <UtilityBillScenario>
-          <Name>Simple</Name>
+          <Name>Default</Name>
         </UtilityBillScenario>
         <UtilityBillScenario>
-          <Name>Detailed</Name>
+          <Name>Tiered</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
             <TariffFilePath>../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json</TariffFilePath>

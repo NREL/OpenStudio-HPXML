@@ -2,7 +2,7 @@
   "tests/ASHRAE_Standard_140/L100AC.xml": {
     "software_info_program_used": "",
     "software_info_program_version": "",
-    "year_built": 0,
+    "building_year_built": 0,
     "location_epw_filepath": "USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw",
     "geometry_unit_type": "single-family detached",
     "geometry_unit_num_floors_above_grade": 1,
@@ -61,6 +61,7 @@
     "appliance_dehumidifier": "None",
     "misc_plug_loads": "Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent",
     "misc_television": "None",
+    "utility_bill_scenario": "None",
     "combine_like_surfaces": false
   },
   "tests/ASHRAE_Standard_140/L110AC.xml": {
@@ -387,7 +388,7 @@
     "software_info_program_used": "",
     "software_info_program_version": "",
     "simulation_control_timestep": 60,
-    "year_built": 0,
+    "building_year_built": 0,
     "location_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
     "geometry_unit_type": "single-family detached",
     "geometry_unit_num_floors_above_grade": 1,
@@ -460,7 +461,7 @@
     "appliance_dehumidifier": "None",
     "misc_plug_loads": "100%",
     "misc_television": "100%",
-    "utility_bill_scenario_names": "Bills",
+    "utility_bill_scenario": "Default (EIA Average Rates)",
     "combine_like_surfaces": true
   },
   "sample_files/base-appliances-coal.xml": {
@@ -723,7 +724,7 @@
   "sample_files/base-bldgtype-mf-unit-infil-leakiness-description.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "enclosure_air_leakage": "Tight",
-    "year_built": 1990
+    "building_year_built": 1990
   },
   "sample_files/base-bldgtype-mf-unit-neighbor-shading.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
@@ -1213,7 +1214,7 @@
   "sample_files/base-enclosure-infil-leakiness-description.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "enclosure_air_leakage": "Leaky",
-    "year_built": 1988
+    "building_year_built": 1988
   },
   "sample_files/base-enclosure-orientations.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -2414,45 +2415,37 @@
   },
   "sample_files/base-misc-bills.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "utility_bill_electricity_fixed_charges": 12,
-    "utility_bill_natural_gas_fixed_charges": 12,
-    "utility_bill_electricity_marginal_rates": 0.12,
-    "utility_bill_natural_gas_marginal_rates": 1.1
+    "utility_bill_scenario": "Detailed Example: $0.12/kWh, $1.1/therm, $12/month"
   },
   "sample_files/base-misc-bills-detailed-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "utility_bill_scenario_names": "Tiered, TOU, Tiered and TOU, Real-Time Pricing",
-    "utility_bill_electricity_filepaths": "../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate High Peak.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json"
+    "utility_bill_scenario": "Detailed Example: Sample Tiered Rate",
+    "utility_bill_scenario_2": "Detailed Example: Sample Tiered and Time-of-Use Rate",
+    "utility_bill_scenario_3": "Detailed Example: Sample Real-Time Pricing"
   },
   "sample_files/base-misc-bills-battery-scheduled-detailed-only.xml": {
     "parent_hpxml": "sample_files/base-battery-scheduled.xml",
-    "utility_bill_scenario_names": "Tiered, TOU, Tiered and TOU, Real-Time Pricing",
-    "utility_bill_electricity_filepaths": "../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate High Peak.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json"
+    "utility_bill_scenario": "Detailed Example: Sample Tiered Rate",
+    "utility_bill_scenario_2": "Detailed Example: Sample Tiered and Time-of-Use Rate",
+    "utility_bill_scenario_3": "Detailed Example: Sample Real-Time Pricing"
   },
   "sample_files/base-misc-bills-pv.xml": {
     "parent_hpxml": "sample_files/base-pv.xml",
     "pv_system": "10.0 kW",
-    "utility_bill_scenario_names": "Net Metering w/ Wholesale Excess Rate, Net Metering w/ Retail Excess Rate, Feed-In Tariff",
-    "utility_bill_electricity_fixed_charges": "10, 10, 10",
-    "utility_bill_natural_gas_fixed_charges": "11, 11, 11",
-    "utility_bill_electricity_marginal_rates": "0.12, 0.12, 0.12",
-    "utility_bill_natural_gas_marginal_rates": "1.1, 1.1, 1.1",
-    "utility_bill_pv_compensation_types": "NetMetering, NetMetering, FeedInTariff",
-    "utility_bill_pv_net_metering_annual_excess_sellback_rate_types": "User-Specified, Retail Electricity Cost, NA",
-    "utility_bill_pv_net_metering_annual_excess_sellback_rates": "0.035, NA, NA",
-    "utility_bill_pv_feed_in_tariff_rates": "NA, NA, 0.13",
-    "utility_bill_pv_monthly_grid_connection_fee_units": "$/kW, $/kW, $",
-    "utility_bill_pv_monthly_grid_connection_fees": "2.5, 2.5, 7.5"
+    "utility_bill_scenario": "Detailed Example: Net Metering w/ Wholesale Excess Rate",
+    "utility_bill_scenario_2": "Detailed Example: Net Metering w/ Retail Excess Rate",
+    "utility_bill_scenario_3": "Detailed Example: Feed-in Tariff"
   },
   "sample_files/base-misc-bills-pv-detailed-only.xml": {
     "parent_hpxml": "sample_files/base-pv.xml",
-    "utility_bill_scenario_names": "Tiered, TOU, Tiered and TOU, Real-Time Pricing",
-    "utility_bill_electricity_filepaths": "../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json"
+    "utility_bill_scenario": "Detailed Example: Sample Tiered Rate",
+    "utility_bill_scenario_2": "Detailed Example: Sample Tiered and Time-of-Use Rate",
+    "utility_bill_scenario_3": "Detailed Example: Sample Real-Time Pricing"
   },
   "sample_files/base-misc-bills-pv-mixed.xml": {
     "parent_hpxml": "sample_files/base-pv.xml",
-    "utility_bill_scenario_names": "Simple, Detailed",
-    "utility_bill_electricity_filepaths": "NA, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json"
+    "utility_bill_scenario": "Default (EIA Average Rates)",
+    "utility_bill_scenario_2": "Detailed Example: Sample Tiered Rate"
   },
   "sample_files/base-misc-defaults.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2550,7 +2543,7 @@
   },
   "sample_files/base-misc-unit-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "unit_multiplier": "10"
+    "building_unit_multiplier": "10"
   },
   "sample_files/base-misc-unit-multiplier-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base-misc-unit-multiplier.xml",
