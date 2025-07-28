@@ -39,7 +39,7 @@ def create_hpxmls
 
   json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
     # Uncomment following line to debug single file
-    # next unless hpxml_filename.include? 'base-bldgtype-mf-unit-shared-boiler-only-fan-coil-fireplace-elec.xml'
+    # next unless hpxml_filename.include? 'base-detailed-electric-panel.xml'
 
     puts "[#{hpxml_i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
@@ -360,10 +360,37 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Header #
     # ------------ #
 
-    if ['base-misc-emissions.xml'].include? hpxml_file
-      hpxml_bldg.egrid_region = 'Western'
-      hpxml_bldg.egrid_subregion = 'RMPA'
-      hpxml_bldg.cambium_region_gea = 'RMPAc'
+    if ['base-misc-emissions.xml',
+        'base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
+      if ['base-misc-emissions.xml'].include? hpxml_file
+        hpxml_bldg.egrid_region = 'Western'
+        hpxml_bldg.egrid_subregion = 'RMPA'
+        hpxml_bldg.cambium_region_gea = 'RMPAc'
+      end
+      hpxml.header.emissions_scenarios.add(name: 'Cambium Hourly MidCase LRMER RMPA',
+                                           emissions_type: 'CO2e',
+                                           elec_units: 'kg/MWh',
+                                           elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv',
+                                           elec_schedule_number_of_header_rows: 1,
+                                           elec_schedule_column_number: 17)
+      hpxml.header.emissions_scenarios.add(name: 'Cambium Hourly LowRECosts LRMER RMPA',
+                                           emissions_type: 'CO2e',
+                                           elec_units: 'kg/MWh',
+                                           elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv',
+                                           elec_schedule_number_of_header_rows: 1,
+                                           elec_schedule_column_number: 17)
+      hpxml.header.emissions_scenarios.add(name: 'Cambium Annual MidCase AER National',
+                                           emissions_type: 'CO2e',
+                                           elec_units: 'kg/MWh',
+                                           elec_value: 392.6)
+      hpxml.header.emissions_scenarios.add(name: 'eGRID RMPA',
+                                           emissions_type: 'SO2',
+                                           elec_units: 'lb/MWh',
+                                           elec_value: 0.384)
+      hpxml.header.emissions_scenarios.add(name: 'eGRID RMPA',
+                                           emissions_type: 'NOx',
+                                           elec_units: 'lb/MWh',
+                                           elec_value: 0.67)
     end
     if ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
       hpxml_bldg.dst_enabled = true
@@ -2662,9 +2689,97 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # -------------------- #
     # HPXML Electric Panel #
     # -------------------- #
+    if hpxml_file.include? 'detailed-electric-panel'
+      if ['base-detailed-electric-panel-no-calculation-types.xml'].include? hpxml_file
+        hpxml.header.service_feeders_load_calculation_types = nil
+      else
+        hpxml.header.service_feeders_load_calculation_types = [HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased,
+                                                               HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased]
+      end
+      hpxml_bldg.header.electric_panel_baseline_peak_power = 4500
+
+      hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}")
+      electric_panel = hpxml_bldg.electric_panels[-1]
+
+      if not ['base-misc-unit-multiplier-detailed-electric-panel.xml',
+              'base-bldgtype-mf-whole-building-detailed-electric-panel.xml'].include? hpxml_file
+        electric_panel.voltage = HPXML::ElectricPanelVoltage240
+        electric_panel.max_current_rating = 100
+        electric_panel.headroom_spaces = 5
+
+        branch_circuits = electric_panel.branch_circuits
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            occupied_spaces: 1)
+      end
+
+      service_feeders = electric_panel.service_feeders
+      if hpxml_bldg.heating_systems.size > 0 && hpxml_bldg.cooling_systems.size > 0
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeHeating,
+                            component_idrefs: [hpxml_bldg.heating_systems[0].id])
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeCooling,
+                            component_idrefs: [hpxml_bldg.cooling_systems[0].id])
+      else
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeHeating,
+                            component_idrefs: [hpxml_bldg.heat_pumps[0].id])
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeCooling,
+                            component_idrefs: [hpxml_bldg.heat_pumps[0].id])
+      end
+      hpxml_bldg.ventilation_fans.each do |ventilation_fan|
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeMechVent,
+                            component_idrefs: [ventilation_fan.id])
+      end
+      hpxml_bldg.water_heating_systems.each do |water_heater|
+        next unless water_heater.fuel_type == HPXML::FuelTypeElectricity
+
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                            component_idrefs: [water_heater.id])
+      end
+      hpxml_bldg.clothes_dryers.each do |clothes_dryer|
+        next unless clothes_dryer.fuel_type == HPXML::FuelTypeElectricity
+
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                            component_idrefs: [clothes_dryer.id])
+      end
+      hpxml_bldg.dishwashers.each do |dishwasher|
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeDishwasher,
+                            component_idrefs: [dishwasher.id])
+      end
+      hpxml_bldg.cooking_ranges.each do |cooking_range|
+        next unless cooking_range.fuel_type == HPXML::FuelTypeElectricity
+
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeRangeOven,
+                            component_idrefs: [cooking_range.id])
+      end
+      if not ['base-misc-unit-multiplier-detailed-electric-panel.xml',
+              'base-bldgtype-mf-whole-building-detailed-electric-panel.xml'].include? hpxml_file
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeOther,
+                            power: 559)
+      end
+
+      if hpxml_bldg_index > 0
+        electric_panel.id += "_#{hpxml_bldg_index + 1}"
+        if not branch_circuits.nil?
+          branch_circuits.each do |branch_circuit|
+            branch_circuit.id += "_#{hpxml_bldg_index + 1}"
+          end
+        end
+        service_feeders.each do |service_feeder|
+          service_feeder.id += "_#{hpxml_bldg_index + 1}"
+        end
+      end
+    end
     if ['house051.xml'].include? hpxml_file
-      electric_panel = hpxml_bldg.electric_panels[0]
-      branch_circuits = electric_panel.branch_circuits
+      branch_circuits = hpxml_bldg.electric_panels[0].branch_circuits
       branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
                           occupied_spaces: 1,
                           component_idrefs: [hpxml_bldg.refrigerators[0].id,

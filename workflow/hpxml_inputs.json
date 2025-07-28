@@ -1110,17 +1110,10 @@
     "appliance_clothes_dryer": "Natural Gas, Standard",
     "appliance_dishwasher": "None",
     "ventilation_kitchen": "Default",
-    "ventilation_bathroom": "Default",
-    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
-    "electric_panel_baseline_peak_power": 4500,
-    "electric_panel_service_voltage": "240",
-    "electric_panel_service_max_current_rating": 100,
-    "electric_panel_breaker_spaces_headroom": 5,
-    "electric_panel_load_other_power_rating": 559
+    "ventilation_bathroom": "Default"
   },
   "sample_files/base-detailed-electric-panel-no-calculation-types.xml": {
-    "parent_hpxml": "sample_files/base-detailed-electric-panel.xml",
-    "electric_panel_service_feeders_load_calculation_types": null
+    "parent_hpxml": "sample_files/base-detailed-electric-panel.xml"
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1441,14 +1434,7 @@
     "hvac_heat_pump_backup_capacity": "10 kW"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-detailed-electric-panel.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
-    "electric_panel_baseline_peak_power": 4500,
-    "electric_panel_service_voltage": "240",
-    "electric_panel_service_max_current_rating": 100,
-    "electric_panel_breaker_spaces_headroom": 5,
-    "electric_panel_load_cooling_system_power_rating": 3542,
-    "electric_panel_load_other_power_rating": 559
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -2470,13 +2456,7 @@
     "ceiling_fans": "#Bedrooms+1 Fans, 45 W"
   },
   "sample_files/base-misc-emissions.xml": {
-    "parent_hpxml": "sample_files/base-pv-battery-and-vehicle-ev.xml",
-    "emissions_scenario_names": "Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA",
-    "emissions_types": "CO2e, CO2e, CO2e, SO2, NOx",
-    "emissions_electricity_units": "kg/MWh, kg/MWh, kg/MWh, lb/MWh, lb/MWh",
-    "emissions_electricity_values_or_filepaths": "../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv, 392.6, 0.384, 0.67",
-    "emissions_electricity_number_of_header_rows": "1, 1, , , ",
-    "emissions_electricity_column_numbers": "17, 17, , , "
+    "parent_hpxml": "sample_files/base-pv-battery-and-vehicle-ev.xml"
   },
   "sample_files/base-misc-generators.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -2533,9 +2513,7 @@
     "building_unit_multiplier": "10"
   },
   "sample_files/base-misc-unit-multiplier-detailed-electric-panel.xml": {
-    "parent_hpxml": "sample_files/base-misc-unit-multiplier.xml",
-    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
-    "electric_panel_baseline_peak_power": 4500
+    "parent_hpxml": "sample_files/base-misc-unit-multiplier.xml"
   },
   "sample_files/base-misc-usage-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2580,9 +2558,7 @@
     "appliance_clothes_dryer": "None"
   },
   "sample_files/base-bldgtype-mf-whole-building-detailed-electric-panel.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-whole-building.xml",
-    "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
-    "electric_panel_baseline_peak_power": 4500
+    "parent_hpxml": "sample_files/base-bldgtype-mf-whole-building.xml"
   },
   "sample_files/base-pv.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2781,13 +2757,7 @@
   "sample_files/base-simcontrol-runperiod-1-month.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "location_epw_filepath": "US_CO_Boulder_AMY_2012.epw",
-    "simulation_control_run_period": "Feb 15 - Mar 15",
-    "emissions_scenario_names": "Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA",
-    "emissions_types": "CO2e, CO2e, CO2e, SO2, NOx",
-    "emissions_electricity_units": "kg/MWh, kg/MWh, kg/MWh, lb/MWh, lb/MWh",
-    "emissions_electricity_values_or_filepaths": "../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv, 392.6, 0.384, 0.67",
-    "emissions_electricity_number_of_header_rows": "1, 1, , , ",
-    "emissions_electricity_column_numbers": "17, 17, , , "
+    "simulation_control_run_period": "Feb 15 - Mar 15"
   },
   "sample_files/base-simcontrol-temperature-capacitance-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",

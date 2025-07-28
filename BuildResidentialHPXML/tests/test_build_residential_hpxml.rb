@@ -53,7 +53,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-enclosure-garage-atticroof-conditioned.xml' => 'base-sfd.xml',
       'extra-enclosure-atticroof-conditioned-eaves-gable.xml' => 'base-sfd.xml',
       'extra-enclosure-atticroof-conditioned-eaves-hip.xml' => 'extra-enclosure-atticroof-conditioned-eaves-gable.xml',
-      'extra-emissions-fossil-fuel-factors.xml' => 'base-sfd.xml',
       'extra-seasons-building-america.xml' => 'base-sfd.xml',
       'extra-ducts-crawlspace.xml' => 'base-sfd.xml',
       'extra-ducts-attic.xml' => 'base-sfd.xml',
@@ -167,16 +166,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-unavailable-period-args-not-all-specified' => 'base-sfd.xml',
       'error-unavailable-period-args-not-all-same-size.xml' => 'base-sfd.xml',
       'error-unavailable-period-window-natvent-invalid.xml' => 'base-sfd.xml',
-      'error-emissions-args-not-all-specified.xml' => 'base-sfd.xml',
-      'error-emissions-args-not-all-same-size.xml' => 'base-sfd.xml',
-      'error-emissions-natural-gas-args-not-all-specified.xml' => 'base-sfd.xml',
       'error-too-many-floors.xml' => 'base-sfd.xml',
       'error-hip-roof-and-protruding-garage.xml' => 'base-sfd.xml',
       'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
       'error-different-software-program.xml' => 'base-sfd-header.xml',
       'error-different-simulation-control.xml' => 'base-sfd-header.xml',
-      'error-same-emissions-scenario-name.xml' => 'base-sfd-header.xml',
       'error-could-not-find-epw-file.xml' => 'base-sfd.xml',
 
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
@@ -205,9 +200,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-unavailable-period-args-not-all-specified' => ['Did not specify all required unavailable period arguments.'],
       'error-unavailable-period-args-not-all-same-size.xml' => ['One or more unavailable period arguments does not have enough comma-separated elements specified.'],
       'error-unavailable-period-window-natvent-invalid.xml' => ["Window natural ventilation availability 'invalid' during an unavailable period is invalid."],
-      'error-emissions-args-not-all-specified.xml' => ['Did not specify all required emissions arguments.'],
-      'error-emissions-args-not-all-same-size.xml' => ['One or more emissions arguments does not have enough comma-separated elements specified.'],
-      'error-emissions-natural-gas-args-not-all-specified.xml' => ['Did not specify fossil fuel emissions units for natural gas emissions values.'],
       'error-too-many-floors.xml' => ['Number of above-grade floors must be six or less.'],
       'error-hip-roof-and-protruding-garage.xml' => ['Cannot handle protruding garage and hip roof.'],
       'error-protruding-garage-under-gable-roof.xml' => ['Cannot handle protruding garage and attic ridge running from front to back.'],
@@ -217,7 +209,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
                                                    "'Simulation Control: Run Period' cannot vary across dwelling units.",
                                                    "Advanced feature 'Temperature Capacitance Multiplier' cannot vary across dwelling units."],
-      'error-same-emissions-scenario-name.xml' => ["HPXML header already includes an emissions scenario named 'Emissions' with type 'CO2e'."],
       'error-could-not-find-epw-file.xml' => ['Could not find EPW file at']
     }
 
@@ -486,12 +477,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['schedules_unavailable_period_dates'] = 'Jan 2 - Jan 5, Feb 10 - Feb 12'
       args['schedules_unavailable_period_window_natvent_availabilities'] = "#{HPXML::ScheduleUnavailable}, #{HPXML::ScheduleAvailable}"
       args['simulation_control_run_period'] = 'Jan 1 - Dec 31'
-      args['emissions_scenario_names'] = 'Emissions'
-      args['emissions_types'] = 'CO2e'
-      args['emissions_electricity_units'] = 'kg/MWh'
-      args['emissions_electricity_values_or_filepaths'] = '1'
-      args['emissions_fossil_fuel_units'] = 'kg/MBtu'
-      args['emissions_natural_gas_values'] = '2'
       args['utility_bill_scenario'] = 'Default (EIA Average Rates)'
       args['advanced_feature'] = 'Temperature Capacitance Multiplier = 1'
     when 'base-sfd-header-no-duplicates.xml'
@@ -593,17 +578,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts_return_location'] = HPXML::LocationUnderSlab
     when 'extra-enclosure-atticroof-conditioned-eaves-hip.xml'
       args['geometry_attic_type'] = 'Attic, Conditioned, Hip'
-    when 'extra-emissions-fossil-fuel-factors.xml'
-      args['emissions_scenario_names'] = 'Scenario1, Scenario2'
-      args['emissions_types'] = 'CO2e, SO2'
-      args['emissions_electricity_units'] = "#{HPXML::EmissionsScenario::UnitsKgPerMWh}, #{HPXML::EmissionsScenario::UnitsLbPerMWh}"
-      args['emissions_electricity_values_or_filepaths'] = '392.6, 0.384'
-      args['emissions_fossil_fuel_units'] = "#{HPXML::EmissionsScenario::UnitsLbPerMBtu}, #{HPXML::EmissionsScenario::UnitsLbPerMBtu}"
-      args['emissions_natural_gas_values'] = '117.6, 0.0006'
-      args['emissions_propane_values'] = '136.6, 0.0002'
-      args['emissions_fuel_oil_values'] = '161.0, 0.0015'
-      args['emissions_coal_values'] = '211.1, 0.0020'
-      args['emissions_wood_values'] = '200.0, 0.0025'
     when 'extra-seasons-building-america.xml'
       args['hvac_control_heating_season_period'] = Constants::BuildingAmerica
       args['hvac_control_cooling_season_period'] = Constants::BuildingAmerica
@@ -808,15 +782,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['schedules_unavailable_period_types'] = 'Power Outage'
       args['schedules_unavailable_period_dates'] = 'Jan 7 - Jan 9'
       args['schedules_unavailable_period_window_natvent_availabilities'] = 'invalid'
-    when 'error-emissions-args-not-all-specified.xml'
-      args['emissions_scenario_names'] = 'Scenario1'
-    when 'error-emissions-args-not-all-same-size.xml'
-      args['emissions_scenario_names'] = 'Scenario1'
-      args['emissions_types'] = 'CO2e,CO2e'
-      args['emissions_electricity_units'] = HPXML::EmissionsScenario::UnitsLbPerMWh
-      args['emissions_electricity_values_or_filepaths'] = '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv'
-    when 'error-emissions-natural-gas-args-not-all-specified.xml'
-      args['emissions_natural_gas_values'] = '117.6'
     when 'error-too-many-floors.xml'
       args['geometry_unit_num_floors_above_grade'] = 7
     when 'error-hip-roof-and-protruding-garage.xml'
@@ -832,17 +797,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['software_info_program_used'] = 'Program2'
       args['software_info_program_version'] = '2'
-      args['emissions_scenario_names'] = 'Emissions2'
     when 'error-different-simulation-control.xml'
       args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['simulation_control_timestep'] = 10
       args['simulation_control_run_period'] = 'Jan 2 - Dec 30'
-      args['emissions_scenario_names'] = 'Emissions2'
       args['advanced_feature'] = 'None'
       args['advanced_feature_2'] = 'Temperature Capacitance Multiplier = 4'
-    when 'error-same-emissions-scenario-name.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
-      args['emissions_electricity_values_or_filepaths'] = '2'
     when 'error-could-not-find-epw-file.xml'
       args['location_epw_filepath'] = 'foo.epw'
     end
