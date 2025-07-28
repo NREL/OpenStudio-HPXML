@@ -2315,6 +2315,16 @@
     "hvac_perf_data_cooling_nom_speed_capacities": "1.00",
     "hvac_perf_data_cooling_max_speed_capacities": "1.00, 1.13"
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities2.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml",
+    "hvac_perf_data_cooling_outdoor_temperatures": "125.0, 95.0, 82.0",
+    "hvac_perf_data_cooling_min_speed_capacities": "0.267, 0.333, 0.368",
+    "hvac_perf_data_cooling_nom_speed_capacities": ", 1.000",
+    "hvac_perf_data_cooling_max_speed_capacities": "0.847, 1.017, 1.090",
+    "hvac_perf_data_cooling_min_speed_cops": "1.918, 3.870, 5.860",
+    "hvac_perf_data_cooling_nom_speed_cops": ", 3.236",
+    "hvac_perf_data_cooling_max_speed_cops": "2.017, 3.220, 4.140"
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml",
     "heat_pump_heating_capacity": null,
