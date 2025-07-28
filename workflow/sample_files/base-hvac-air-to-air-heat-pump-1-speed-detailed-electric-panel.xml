@@ -449,11 +449,13 @@
               <ServiceFeeder>
                 <SystemIdentifier id='ServiceFeeder1'/>
                 <LoadType>heating</LoadType>
+                <PowerRating>3542.0</PowerRating>
                 <AttachedToComponent idref='HeatPump1'/>
               </ServiceFeeder>
               <ServiceFeeder>
                 <SystemIdentifier id='ServiceFeeder2'/>
                 <LoadType>cooling</LoadType>
+                <PowerRating>3542.0</PowerRating>
                 <AttachedToComponent idref='HeatPump1'/>
               </ServiceFeeder>
               <ServiceFeeder>

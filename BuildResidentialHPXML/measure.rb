@@ -38,8 +38,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [OpenStudio::Measure::OSArgumentVector] an OpenStudio::Measure::OSArgumentVector object
   def arguments(model) # rubocop:disable Lint/UnusedMethodArgument
-    docs_base_url = "https://openstudio-hpxml.readthedocs.io/en/v#{Version::OS_HPXML_Version}/workflow_inputs.html"
-
     args = OpenStudio::Measure::OSArgumentVector.new
 
     # Get Hash of all option name choices for all TSV files in the resources/options/ dir.
@@ -115,15 +113,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     unit_type_choices << HPXML::ResidentialTypeApartment
     unit_type_choices << HPXML::ResidentialTypeManufactured
 
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('building_unit_multiplier', false)
-    arg.setDisplayName('Building Construction: Unit Multiplier')
-    arg.setDescription('The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value.')
-    arg.setDefaultValue(1)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('geometry_unit_type', unit_type_choices, true)
     arg.setDisplayName('Geometry: Unit Type')
-    arg.setDescription("The type of dwelling unit. Use #{HPXML::ResidentialTypeSFA} for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use #{HPXML::ResidentialTypeApartment} for a dwelling unit with 1 story, attached units to one, two, or three sides, and units above and/or below.")
+    arg.setDescription("The type of dwelling unit. Use #{HPXML::ResidentialTypeSFA} for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use #{HPXML::ResidentialTypeApartment} for a dwelling unit with 1 story, attached units to one, two, or three sides, and possibly units above and/or below.")
     arg.setDefaultValue(HPXML::ResidentialTypeSFD)
     args << arg
 
@@ -143,7 +135,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_unit_cfa', true)
     arg.setDisplayName('Geometry: Unit Conditioned Floor Area')
     arg.setUnits('ft2')
-    arg.setDescription("The total floor area of the unit's conditioned space (including any conditioned basement floor area).")
+    arg.setDescription("The total floor area of the unit's conditioned space (including any conditioned basement/attic floor area).")
     arg.setDefaultValue(2000.0)
     args << arg
 
@@ -615,7 +607,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_blower_fan_watts_per_cfm', false)
     arg.setDisplayName('HVAC Blower: Fan Efficiency')
-    arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless #{HPXML::HVACTypeHeatPumpMiniSplit} systems). If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='#{docs_base_url}#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='#{docs_base_url}#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.")
+    arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless #{HPXML::HVACTypeHeatPumpMiniSplit} systems).")
     arg.setUnits('W/CFM')
     args << arg
 
@@ -1064,19 +1056,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('utility_bill_scenario', choices[:utility_bill_scenario], false)
-    arg.setDisplayName('Utility Bill Secnario')
+    arg.setDisplayName('Utility Bill Scenario')
     arg.setDescription('The type of utility bill calculations to perform.')
     arg.setDefaultValue('Default (EIA Average Rates)')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('utility_bill_scenario_2', choices[:utility_bill_scenario_2], false)
-    arg.setDisplayName('Utility Bill Secnario 2')
+    arg.setDisplayName('Utility Bill Scenario 2')
     arg.setDescription('The second type of utility bill calculations to perform, if desired.')
     arg.setDefaultValue('None')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('utility_bill_scenario_3', choices[:utility_bill_scenario_3], false)
-    arg.setDisplayName('Utility Bill Secnario 3')
+    arg.setDisplayName('Utility Bill Scenario 3')
     arg.setDescription('The third type of utility bill calculations to perform, if desired.')
     arg.setDefaultValue('None')
     args << arg
@@ -1962,9 +1954,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.building_construction.residential_facility_type = args[:geometry_unit_type]
     if args[:building_year_built] != 0
       hpxml_bldg.building_construction.year_built = args[:building_year_built]
-    end
-    if args[:building_unit_multiplier] != 1 # 1 is the OS-HPXML default, no need to write it
-      hpxml_bldg.building_construction.number_of_units = args[:building_unit_multiplier]
     end
   end
 

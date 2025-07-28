@@ -127,20 +127,9 @@ The year the building was built.
 
 <br/>
 
-**Building Construction: Unit Multiplier**
-
-The number of similar dwelling units. EnergyPlus simulation results will be multiplied this value.
-
-- **Name:** ``building_unit_multiplier``
-- **Type:** ``Integer``
-
-- **Required:** ``false``
-
-<br/>
-
 **Geometry: Unit Type**
 
-The type of dwelling unit. Use single-family attached for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use apartment unit for a dwelling unit with 1 story, attached units to one, two, or three sides, and units above and/or below.
+The type of dwelling unit. Use single-family attached for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use apartment unit for a dwelling unit with 1 story, attached units to one, two, or three sides, and possibly units above and/or below.
 
 - **Name:** ``geometry_unit_type``
 - **Type:** ``Choice``
@@ -179,7 +168,7 @@ The number of floors above grade in the unit. Attic type ConditionedAttic is inc
 
 **Geometry: Unit Conditioned Floor Area**
 
-The total floor area of the unit's conditioned space (including any conditioned basement floor area).
+The total floor area of the unit's conditioned space (including any conditioned basement/attic floor area).
 
 - **Name:** ``geometry_unit_cfa``
 - **Type:** ``Double``
@@ -1090,7 +1079,7 @@ Enter a date range like 'Jun 1 - Oct 31'. Defaults to year-round cooling availab
 
 **HVAC Blower: Fan Efficiency**
 
-The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless mini-split systems). If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.
+The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless mini-split systems).
 
 - **Name:** ``hvac_blower_fan_watts_per_cfm``
 - **Type:** ``Double``
@@ -1960,7 +1949,7 @@ Select a second advanced research feature to use in the model, if desired.
 
 <br/>
 
-**Utility Bill Secnario**
+**Utility Bill Scenario**
 
 The type of utility bill calculations to perform.
 
@@ -1973,7 +1962,7 @@ The type of utility bill calculations to perform.
 
 <br/>
 
-**Utility Bill Secnario 2**
+**Utility Bill Scenario 2**
 
 The second type of utility bill calculations to perform, if desired.
 
@@ -1986,7 +1975,7 @@ The second type of utility bill calculations to perform, if desired.
 
 <br/>
 
-**Utility Bill Secnario 3**
+**Utility Bill Scenario 3**
 
 The third type of utility bill calculations to perform, if desired.
 

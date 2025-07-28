@@ -2509,8 +2509,7 @@
     "location_site_type": "Rural, Exposed"
   },
   "sample_files/base-misc-unit-multiplier.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "building_unit_multiplier": "10"
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-misc-unit-multiplier-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base-misc-unit-multiplier.xml"

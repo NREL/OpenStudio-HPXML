@@ -511,6 +511,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.air_infiltration_measurements[0].a_ext = 0.2
       end
     end
+    if hpxml_file.include? 'unit-multiplier'
+      hpxml_bldg.building_construction.number_of_units = 10
+    end
 
     # ------------------ #
     # HPXML Zones/Spaces #
@@ -2723,9 +2726,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       else
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                             type: HPXML::ElectricPanelLoadTypeHeating,
+                            power: 3542,
                             component_idrefs: [hpxml_bldg.heat_pumps[0].id])
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                             type: HPXML::ElectricPanelLoadTypeCooling,
+                            power: 3542,
                             component_idrefs: [hpxml_bldg.heat_pumps[0].id])
       end
       hpxml_bldg.ventilation_fans.each do |ventilation_fan|
@@ -3169,13 +3174,6 @@ if ARGV[0].to_sym == :update_measures
   command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
   system(command)
-
-  # Update a BuildResidentialHPXML/resources file when the OS-HPXML version changes.
-  # This will ensure that the BuildResidentialHPXML measure.xml is appropriately updated.
-  # Without this, the BuildResidentialHPXML measure has no differences and so OpenStudio
-  # would skip updating it.
-  version_txt_path = File.join(File.dirname(__FILE__), 'BuildResidentialHPXML/resources/version.txt')
-  File.write(version_txt_path, Digest::MD5.hexdigest(Version::OS_HPXML_Version))
 
   # Update measures XMLs
   puts 'Updating measure.xmls...'
