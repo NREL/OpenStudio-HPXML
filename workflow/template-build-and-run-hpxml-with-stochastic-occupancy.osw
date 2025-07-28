@@ -44,7 +44,7 @@
         "hvac_control_heating_weekday_setpoint": "68",
         "hvac_control_heating_weekend_setpoint": "68",
         "dhw_water_heater": "Electricity, Tank, UEF=0.94",
-        "utility_bills": "Default (EIA Average Rates)"
+        "utility_bill_scenario": "Default (EIA Average Rates)"
       },
       "measure_dir_name": "BuildResidentialHPXML"
     },

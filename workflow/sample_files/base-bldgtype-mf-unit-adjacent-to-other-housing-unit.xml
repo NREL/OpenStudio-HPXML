@@ -40,7 +40,6 @@
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <UnitHeightAboveGrade>10.0</UnitHeightAboveGrade>
-          <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>

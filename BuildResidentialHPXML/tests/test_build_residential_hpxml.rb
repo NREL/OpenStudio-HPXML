@@ -42,7 +42,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-auto-duct-locations.xml' => 'extra-auto.xml',
       'extra-pv-roofpitch.xml' => 'base-sfd.xml',
       'extra-dhw-solar-latitude.xml' => 'base-sfd.xml',
-      'extra-second-refrigerator.xml' => 'base-sfd.xml',
       'extra-second-heating-system-portable-heater-to-heating-system.xml' => 'base-sfd.xml',
       'extra-second-heating-system-fireplace-to-heating-system.xml' => 'base-sfd.xml',
       'extra-second-heating-system-boiler-to-heating-system.xml' => 'base-sfd.xml',
@@ -77,9 +76,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-sfa-unconditioned-basement.xml' => 'base-sfa.xml',
       'extra-sfa-ambient.xml' => 'base-sfa.xml',
 
-      'extra-sfa-rear-units.xml' => 'base-sfa.xml',
-      'extra-sfa-exterior-corridor.xml' => 'base-sfa.xml',
-
       'extra-sfa-slab-middle.xml' => 'extra-sfa-slab.xml',
       'extra-sfa-slab-right.xml' => 'extra-sfa-slab.xml',
       'extra-sfa-vented-crawlspace-middle.xml' => 'extra-sfa-vented-crawlspace.xml',
@@ -96,9 +92,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-mf-vented-crawlspace.xml' => 'base-mf.xml',
       'extra-mf-unvented-crawlspace.xml' => 'base-mf.xml',
       'extra-mf-ambient.xml' => 'base-sfa.xml',
-
-      'extra-mf-rear-units.xml' => 'base-mf.xml',
-      'extra-mf-exterior-corridor.xml' => 'base-mf.xml',
 
       'extra-mf-slab-left-bottom.xml' => 'extra-mf-slab.xml',
       'extra-mf-slab-left-middle.xml' => 'extra-mf-slab.xml',
@@ -164,16 +157,13 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-sfd-adiabatic-walls.xml' => 'base-sfd.xml',
       'error-second-heating-system-but-no-primary-heating.xml' => 'base-sfd.xml',
       'error-second-heating-system-ducted-with-ducted-primary-heating.xml' => 'base-sfd.xml',
-      'error-sfa-no-building-num-units.xml' => 'base-sfa.xml',
       'error-sfa-above-apartment.xml' => 'base-sfa.xml',
       'error-sfa-below-apartment.xml' => 'base-sfa.xml',
-      'error-mf-no-building-num-units.xml' => 'base-mf.xml',
       'error-mf-two-stories.xml' => 'base-mf.xml',
       'error-mf-conditioned-attic.xml' => 'base-mf.xml',
       'error-dhw-indirect-without-boiler.xml' => 'base-sfd.xml',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'base-sfd.xml',
       'error-zero-number-of-bedrooms.xml' => 'base-sfd.xml',
-      'error-sfd-with-shared-system.xml' => 'base-sfd.xml',
       'error-unavailable-period-args-not-all-specified' => 'base-sfd.xml',
       'error-unavailable-period-args-not-all-same-size.xml' => 'base-sfd.xml',
       'error-unavailable-period-window-natvent-invalid.xml' => 'base-sfd.xml',
@@ -206,15 +196,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-mf-conditioned-crawlspace' => ['Conditioned basement/crawlspace foundation type for apartment units is not currently supported.'],
       'error-second-heating-system-but-no-primary-heating.xml' => ['A second heating system was specified without a primary heating system.'],
       'error-second-heating-system-ducted-with-ducted-primary-heating.xml' => ["A ducted heat pump with 'separate' ducted backup is not supported."],
-      'error-sfa-no-building-num-units.xml' => ['Did not specify the number of units in the building for single-family attached or apartment units.'],
       'error-sfa-above-apartment.xml' => ['Single-family attached units cannot be above another unit.'],
       'error-sfa-below-apartment.xml' => ['Single-family attached units cannot be below another unit.'],
-      'error-mf-no-building-num-units.xml' => ['Did not specify the number of units in the building for single-family attached or apartment units.'],
       'error-mf-two-stories.xml' => ['Apartment units can only have one above-grade floor.'],
       'error-mf-conditioned-attic.xml' => ['Conditioned attic type for apartment units is not currently supported.'],
       'error-dhw-indirect-without-boiler.xml' => ['Must specify a boiler when modeling an indirect water heater type.'],
       'error-conditioned-attic-with-one-floor-above-grade.xml' => ['Units with a conditioned attic must have at least two above-grade floors.'],
-      'error-sfd-with-shared-system.xml' => ['Specified a shared system for a single-family detached unit.'],
       'error-unavailable-period-args-not-all-specified' => ['Did not specify all required unavailable period arguments.'],
       'error-unavailable-period-args-not-all-same-size.xml' => ['One or more unavailable period arguments does not have enough comma-separated elements specified.'],
       'error-unavailable-period-window-natvent-invalid.xml' => ["Window natural ventilation availability 'invalid' during an unavailable period is invalid."],
@@ -439,17 +426,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['dhw_water_heater'] = 'Electricity, Tank, UEF=0.94'
       args['lighting'] = 'Detailed Example: 40% CFL, 10% LFL, 25% LED'
       args['appliance_clothes_washer'] = 'Standard, 2008-2017'
-      args['appliance_clothes_washer_location'] = HPXML::LocationConditionedSpace
       args['appliance_clothes_dryer'] = 'Electricity, Standard'
-      args['appliance_clothes_dryer_location'] = HPXML::LocationConditionedSpace
       args['appliance_dishwasher'] = 'Federal Minimum, Standard'
-      args['appliance_dishwasher_location'] = HPXML::LocationConditionedSpace
       args['appliance_refrigerator'] = '434 kWh/yr'
-      args['appliance_refrigerator_location'] = HPXML::LocationConditionedSpace
       args['appliance_extra_refrigerator'] = 'None'
       args['appliance_freezer'] = 'None'
-      args['appliance_cooking_range_oven'] = 'Electricity, Standard, Non-Convection Oven'
-      args['appliance_cooking_range_oven_location'] = HPXML::LocationConditionedSpace
+      args['appliance_cooking_range_oven'] = 'Electricity, Standard, Non-Convection'
       args['appliance_dehumidifier'] = 'None'
       args['misc_plug_loads'] = '100%'
       args['misc_television'] = '100%'
@@ -462,7 +444,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'base-sfa.xml'
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFA
       args['geometry_unit_cfa'] = 1800.0
-      args['geometry_building_num_units'] = 3
       args['geometry_attached_walls'] = '1 Side: Right'
       args['enclosure_window_area_or_wwr_front'] = 0.18
       args['enclosure_window_area_or_wwr_back'] = 0.18
@@ -480,7 +461,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_attic_type'] = 'Below Apartment'
       args['geometry_foundation_type'] = 'Above Apartment'
       args['geometry_attached_walls'] = '1 Side: Right'
-      args['geometry_building_num_units'] = 6
       args['enclosure_window_area_or_wwr_front'] = 0.18
       args['enclosure_window_area_or_wwr_back'] = 0.18
       args['enclosure_window_area_or_wwr_left'] = 0.18
@@ -512,7 +492,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['emissions_electricity_values_or_filepaths'] = '1'
       args['emissions_fossil_fuel_units'] = 'kg/MBtu'
       args['emissions_natural_gas_values'] = '2'
-      args['utility_bill_scenario_names'] = 'Bills'
+      args['utility_bill_scenario'] = 'Default (EIA Average Rates)'
       args['advanced_feature'] = 'Temperature Capacitance Multiplier = 1'
     when 'base-sfd-header-no-duplicates.xml'
       args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
@@ -529,7 +509,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('water_heater_tank_volume')
       args.delete('clothes_washer_location')
       args.delete('clothes_dryer_location')
-      args.delete('appliance_refrigerator_location')
       args['hvac_ducts'] = '4 CFM25 per 100ft2, R-4'
     when 'extra-auto-duct-locations.xml'
       args['hvac_ducts_supply_location'] = HPXML::LocationAtticUnvented
@@ -542,8 +521,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-dhw-solar-latitude.xml'
       args['dhw_solar_thermal'] = 'Indirect, Flat Plate, 40 sqft'
       args['dhw_solar_thermal_collector_tilt'] = 'Latitude-15'
-    when 'extra-second-refrigerator.xml'
-      args['appliance_extra_refrigerator_location'] = HPXML::LocationConditionedSpace
     when 'extra-second-heating-system-portable-heater-to-heating-system.xml'
       args['hvac_heating_system_fuel'] = HPXML::FuelTypeElectricity
       args['hvac_heating_system_capacity'] = '50 kBtu/hr'
@@ -691,10 +668,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_cfa'] = 900.0
       args['geometry_foundation_type'] = 'Ambient'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
-    when 'extra-sfa-rear-units.xml'
-      args['geometry_building_num_units'] = 4
-    when 'extra-sfa-exterior-corridor.xml'
-      args['geometry_building_num_units'] = 4
     when 'extra-sfa-slab-middle.xml', 'extra-sfa-vented-crawlspace-middle.xml',
          'extra-sfa-unvented-crawlspace-middle.xml', 'extra-sfa-unconditioned-basement-middle.xml'
       args['geometry_attached_walls'] = '2 Sides: Left, Right'
@@ -706,24 +679,17 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-mf-atticroof-vented.xml'
       args['geometry_attic_type'] = 'Attic, Vented, Gable'
     when 'extra-mf-slab.xml'
-      args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = 'Slab-on-Grade'
     when 'extra-mf-vented-crawlspace.xml'
-      args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = 'Crawlspace, Vented'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
     when 'extra-mf-unvented-crawlspace.xml'
-      args['geometry_building_num_units'] = 18
       args['geometry_foundation_type'] = 'Crawlspace, Unvented'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
     when 'extra-mf-ambient.xml'
       args['geometry_unit_cfa'] = 450.0
       args['geometry_foundation_type'] = 'Ambient'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
-    when 'extra-mf-rear-units.xml'
-      args['geometry_building_num_units'] = 18
-    when 'extra-mf-exterior-corridor.xml'
-      args['geometry_building_num_units'] = 18
     when 'extra-mf-slab-left-bottom.xml', 'extra-mf-vented-crawlspace-left-bottom.xml',
          'extra-mf-unvented-crawlspace-left-bottom.xml'
       args['geometry_attached_walls'] = '1 Side: Right'
@@ -819,14 +785,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_heat_pump'] = 'Mini-Split HP, SEER 14.5, 8.2 HSPF, Ducted'
       args['hvac_heat_pump_backup'] = 'Separate Heating System'
       args['hvac_heating_system_2'] = 'Central Furnace, 100% AFUE'
-    when 'error-sfa-no-building-num-units.xml'
-      args.delete('geometry_building_num_units')
     when 'error-sfa-above-apartment.xml'
       args['geometry_foundation_type'] = 'Above Apartment'
     when 'error-sfa-below-apartment.xml'
       args['geometry_attic_type'] = 'Below Apartment'
-    when 'error-mf-no-building-num-units.xml'
-      args.delete('geometry_building_num_units')
     when 'error-mf-two-stories.xml'
       args['geometry_unit_num_floors_above_grade'] = 2
     when 'error-mf-conditioned-attic.xml'
@@ -836,8 +798,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-conditioned-attic-with-one-floor-above-grade.xml'
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
       args['enclosure_ceiling'] = 'Uninsulated'
-    when 'error-sfd-with-shared-system.xml'
-      args['hvac_heating_system'] = 'Shared Boiler w/ Baseboard, 92% AFUE'
     when 'error-unavailable-period-args-not-all-specified'
       args['schedules_unavailable_period_types'] = 'Vacancy'
     when 'error-unavailable-period-args-not-all-same-size.xml'

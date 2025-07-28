@@ -255,19 +255,6 @@ The number of occupants in the unit. If not provided, an *asset* calculation is 
 
 <br/>
 
-**Geometry: Building Number of Units**
-
-The number of units in the building. Required for single-family attached and apartment units.
-
-- **Name:** ``geometry_building_num_units``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
-
-<br/>
-
 **Geometry: Average Ceiling Height**
 
 Average distance from the floor to the ceiling.
@@ -771,7 +758,7 @@ The type and efficiency of the heating system. Use 'None' if there is no heating
 
 - **Required:** ``true``
 
-- **Choices:** `None`, `Electric Resistance`, `Central Furnace, 60% AFUE`, `Central Furnace, 64% AFUE`, `Central Furnace, 68% AFUE`, `Central Furnace, 72% AFUE`, `Central Furnace, 76% AFUE`, `Central Furnace, 78% AFUE`, `Central Furnace, 80% AFUE`, `Central Furnace, 85% AFUE`, `Central Furnace, 90% AFUE`, `Central Furnace, 92% AFUE`, `Central Furnace, 92.5% AFUE`, `Central Furnace, 96% AFUE`, `Central Furnace, 98% AFUE`, `Central Furnace, 100% AFUE`, `Wall Furnace, 60% AFUE`, `Wall Furnace, 68% AFUE`, `Wall Furnace, 82% AFUE`, `Wall Furnace, 98% AFUE`, `Wall Furnace, 100% AFUE`, `Floor Furnace, 60% AFUE`, `Floor Furnace, 70% AFUE`, `Floor Furnace, 80% AFUE`, `Boiler, 60% AFUE`, `Boiler, 72% AFUE`, `Boiler, 76% AFUE`, `Boiler, 80% AFUE`, `Boiler, 82% AFUE`, `Boiler, 85% AFUE`, `Boiler, 90% AFUE`, `Boiler, 92% AFUE`, `Boiler, 92.5% AFUE`, `Boiler, 95% AFUE`, `Boiler, 96% AFUE`, `Boiler, 98% AFUE`, `Boiler, 100% AFUE`, `Shared Boiler w/ Baseboard, 78% AFUE`, `Shared Boiler w/ Baseboard, 92% AFUE`, `Shared Boiler w/ Baseboard, 100% AFUE`, `Shared Boiler w/ Fan Coil, 78% AFUE`, `Shared Boiler w/ Fan Coil, 92% AFUE`, `Shared Boiler w/ Fan Coil, 100% AFUE`, `Stove, 60% Efficiency`, `Stove, 70% Efficiency`, `Stove, 80% Efficiency`, `Space Heater, 60% Efficiency`, `Space Heater, 70% Efficiency`, `Space Heater, 80% Efficiency`, `Space Heater, 92% Efficiency`, `Space Heater, 100% Efficiency`, `Fireplace, 60% Efficiency`, `Fireplace, 70% Efficiency`, `Fireplace, 80% Efficiency`, `Fireplace, 100% Efficiency`, `Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light`, `Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light`, `Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light`
+- **Choices:** `None`, `Electric Resistance`, `Central Furnace, 60% AFUE`, `Central Furnace, 64% AFUE`, `Central Furnace, 68% AFUE`, `Central Furnace, 72% AFUE`, `Central Furnace, 76% AFUE`, `Central Furnace, 78% AFUE`, `Central Furnace, 80% AFUE`, `Central Furnace, 85% AFUE`, `Central Furnace, 90% AFUE`, `Central Furnace, 92% AFUE`, `Central Furnace, 92.5% AFUE`, `Central Furnace, 96% AFUE`, `Central Furnace, 98% AFUE`, `Central Furnace, 100% AFUE`, `Wall Furnace, 60% AFUE`, `Wall Furnace, 68% AFUE`, `Wall Furnace, 82% AFUE`, `Wall Furnace, 98% AFUE`, `Wall Furnace, 100% AFUE`, `Floor Furnace, 60% AFUE`, `Floor Furnace, 70% AFUE`, `Floor Furnace, 80% AFUE`, `Boiler, 60% AFUE`, `Boiler, 72% AFUE`, `Boiler, 76% AFUE`, `Boiler, 80% AFUE`, `Boiler, 82% AFUE`, `Boiler, 85% AFUE`, `Boiler, 90% AFUE`, `Boiler, 92% AFUE`, `Boiler, 92.5% AFUE`, `Boiler, 95% AFUE`, `Boiler, 96% AFUE`, `Boiler, 98% AFUE`, `Boiler, 100% AFUE`, `Stove, 60% Efficiency`, `Stove, 70% Efficiency`, `Stove, 80% Efficiency`, `Space Heater, 60% Efficiency`, `Space Heater, 70% Efficiency`, `Space Heater, 80% Efficiency`, `Space Heater, 92% Efficiency`, `Space Heater, 100% Efficiency`, `Fireplace, 60% Efficiency`, `Fireplace, 70% Efficiency`, `Fireplace, 80% Efficiency`, `Fireplace, 100% Efficiency`, `Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light`, `Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light`, `Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light`
 
 <br/>
 
@@ -992,7 +979,7 @@ The type and efficiency of the second heating system. If a heat pump is specifie
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Electric Resistance`, `Central Furnace, 60% AFUE`, `Central Furnace, 64% AFUE`, `Central Furnace, 68% AFUE`, `Central Furnace, 72% AFUE`, `Central Furnace, 76% AFUE`, `Central Furnace, 78% AFUE`, `Central Furnace, 80% AFUE`, `Central Furnace, 85% AFUE`, `Central Furnace, 90% AFUE`, `Central Furnace, 92% AFUE`, `Central Furnace, 92.5% AFUE`, `Central Furnace, 96% AFUE`, `Central Furnace, 98% AFUE`, `Central Furnace, 100% AFUE`, `Wall Furnace, 60% AFUE`, `Wall Furnace, 68% AFUE`, `Wall Furnace, 82% AFUE`, `Wall Furnace, 98% AFUE`, `Wall Furnace, 100% AFUE`, `Floor Furnace, 60% AFUE`, `Floor Furnace, 70% AFUE`, `Floor Furnace, 80% AFUE`, `Boiler, 60% AFUE`, `Boiler, 72% AFUE`, `Boiler, 76% AFUE`, `Boiler, 80% AFUE`, `Boiler, 82% AFUE`, `Boiler, 85% AFUE`, `Boiler, 90% AFUE`, `Boiler, 92% AFUE`, `Boiler, 92.5% AFUE`, `Boiler, 95% AFUE`, `Boiler, 96% AFUE`, `Boiler, 98% AFUE`, `Boiler, 100% AFUE`, `Shared Boiler w/ Baseboard, 78% AFUE`, `Shared Boiler w/ Baseboard, 92% AFUE`, `Shared Boiler w/ Baseboard, 100% AFUE`, `Shared Boiler w/ Fan Coil, 78% AFUE`, `Shared Boiler w/ Fan Coil, 92% AFUE`, `Shared Boiler w/ Fan Coil, 100% AFUE`, `Stove, 60% Efficiency`, `Stove, 70% Efficiency`, `Stove, 80% Efficiency`, `Space Heater, 60% Efficiency`, `Space Heater, 70% Efficiency`, `Space Heater, 80% Efficiency`, `Space Heater, 92% Efficiency`, `Space Heater, 100% Efficiency`, `Fireplace, 60% Efficiency`, `Fireplace, 70% Efficiency`, `Fireplace, 80% Efficiency`, `Fireplace, 100% Efficiency`, `Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light`, `Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light`, `Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light`
+- **Choices:** `None`, `Electric Resistance`, `Central Furnace, 60% AFUE`, `Central Furnace, 64% AFUE`, `Central Furnace, 68% AFUE`, `Central Furnace, 72% AFUE`, `Central Furnace, 76% AFUE`, `Central Furnace, 78% AFUE`, `Central Furnace, 80% AFUE`, `Central Furnace, 85% AFUE`, `Central Furnace, 90% AFUE`, `Central Furnace, 92% AFUE`, `Central Furnace, 92.5% AFUE`, `Central Furnace, 96% AFUE`, `Central Furnace, 98% AFUE`, `Central Furnace, 100% AFUE`, `Wall Furnace, 60% AFUE`, `Wall Furnace, 68% AFUE`, `Wall Furnace, 82% AFUE`, `Wall Furnace, 98% AFUE`, `Wall Furnace, 100% AFUE`, `Floor Furnace, 60% AFUE`, `Floor Furnace, 70% AFUE`, `Floor Furnace, 80% AFUE`, `Boiler, 60% AFUE`, `Boiler, 72% AFUE`, `Boiler, 76% AFUE`, `Boiler, 80% AFUE`, `Boiler, 82% AFUE`, `Boiler, 85% AFUE`, `Boiler, 90% AFUE`, `Boiler, 92% AFUE`, `Boiler, 92.5% AFUE`, `Boiler, 95% AFUE`, `Boiler, 96% AFUE`, `Boiler, 98% AFUE`, `Boiler, 100% AFUE`, `Stove, 60% Efficiency`, `Stove, 70% Efficiency`, `Stove, 80% Efficiency`, `Space Heater, 60% Efficiency`, `Space Heater, 70% Efficiency`, `Space Heater, 80% Efficiency`, `Space Heater, 92% Efficiency`, `Space Heater, 100% Efficiency`, `Fireplace, 60% Efficiency`, `Fireplace, 70% Efficiency`, `Fireplace, 80% Efficiency`, `Fireplace, 100% Efficiency`, `Detailed Example: Central Furnace, 92% AFUE, 600 Btu/hr Pilot Light`, `Detailed Example: Floor Furnace, 80% AFUE, 600 Btu/hr Pilot Light`, `Detailed Example: Boiler, 92% AFUE, 600 Btu/hr Pilot Light`
 
 <br/>
 
@@ -2126,20 +2113,7 @@ The type of clothes washer.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Standard, 2008-2017`, `Standard, 2018-present`, `EnergyStar, 2006-2017`, `EnergyStar, 2018-present`, `CEE Tier II 2018`, `Detailed Example: ERI Reference 2006`, `Detailed Example: MEF=1.65`
-
-<br/>
-
-**Appliances: Clothes Washer Location**
-
-The space type for the clothes washer location. If not provided, defaults to conditioned space.
-
-- **Name:** ``appliance_clothes_washer_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+- **Choices:** `None`, `Standard, 2008-2017`, `Standard, 2018-present`, `EnergyStar, 2006-2017`, `EnergyStar, 2018-present`, `CEE Tier II 2018`, `Detailed Example: ERI Reference 2006`, `Detailed Example: MEF=1.65`, `Detailed Example: Standard, 2008-2017, Conditioned Basement`, `Detailed Example: Standard, 2008-2017, Unconditioned Basement`, `Detailed Example: Standard, 2008-2017, Garage`
 
 <br/>
 
@@ -2163,20 +2137,7 @@ The type of clothes dryer.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Electricity, Standard`, `Electricity, Premium`, `Electricity, Heat Pump`, `Natural Gas, Standard`, `Natural Gas, Premium`, `Propane, Standard`, `Detailed Example: Electricity, ERI Reference 2006`, `Detailed Example: Natural Gas, ERI Reference 2006`, `Detailed Example: Electricity, EF=4.29`
-
-<br/>
-
-**Appliances: Clothes Dryer Location**
-
-The space type for the clothes dryer location. If not provided, defaults to conditioned space.
-
-- **Name:** ``appliance_clothes_dryer_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+- **Choices:** `None`, `Electricity, Standard`, `Electricity, Premium`, `Electricity, Heat Pump`, `Natural Gas, Standard`, `Natural Gas, Premium`, `Propane, Standard`, `Detailed Example: Electricity, ERI Reference 2006`, `Detailed Example: Natural Gas, ERI Reference 2006`, `Detailed Example: Electricity, EF=4.29`, `Detailed Example: Electricity, Standard, Conditioned Basement`, `Detailed Example: Electricity, Standard, Unconditioned Basement`, `Detailed Example: Electricity, Standard, Garage`
 
 <br/>
 
@@ -2200,20 +2161,7 @@ The type of dishwasher.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Federal Minimum, Standard`, `EnergyStar, Standard`, `EnergyStar, Compact`, `Detailed Example: ERI Reference 2006`, `Detailed Example: EF=0.7, Compact`
-
-<br/>
-
-**Appliances: Dishwasher Location**
-
-The space type for the dishwasher location. If not provided, defaults to conditioned space.
-
-- **Name:** ``appliance_dishwasher_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+- **Choices:** `None`, `Federal Minimum, Standard`, `EnergyStar, Standard`, `EnergyStar, Compact`, `Detailed Example: ERI Reference 2006`, `Detailed Example: EF=0.7, Compact`, `Detailed Example: Federal Minimum, Standard, Conditioned Basement`, `Detailed Example: Federal Minimum, Standard, Unconditioned Basement`, `Detailed Example: Federal Minimum, Standard, Garage`
 
 <br/>
 
@@ -2237,20 +2185,7 @@ The type of refrigerator.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `1139 kWh/yr`, `748 kWh/yr`, `650 kWh/yr`, `574 kWh/yr`, `547 kWh/yr`, `480 kWh/yr`, `458 kWh/yr`, `434 kWh/yr`, `384 kWh/yr`, `348 kWh/yr`, `Detailed Example: ERI Reference 2006, 2-Bedroom Home`, `Detailed Example: ERI Reference 2006, 3-Bedroom Home`, `Detailed Example: ERI Reference 2006, 4-Bedroom Home`
-
-<br/>
-
-**Appliances: Refrigerator Location**
-
-The space type for the refrigerator location. If not provided, defaults to conditioned space.
-
-- **Name:** ``appliance_refrigerator_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+- **Choices:** `None`, `1139 kWh/yr`, `748 kWh/yr`, `650 kWh/yr`, `574 kWh/yr`, `547 kWh/yr`, `480 kWh/yr`, `458 kWh/yr`, `434 kWh/yr`, `384 kWh/yr`, `348 kWh/yr`, `Detailed Example: ERI Reference 2006, 2-Bedroom Home`, `Detailed Example: ERI Reference 2006, 3-Bedroom Home`, `Detailed Example: ERI Reference 2006, 4-Bedroom Home`, `Detailed Example: 650 kWh/yr, Conditioned Basement`, `Detailed Example: 650 kWh/yr, Unconditioned Basement`, `Detailed Example: 650 kWh/yr, Garage`
 
 <br/>
 
@@ -2274,20 +2209,7 @@ The type of extra refrigerator.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `1139 kWh/yr`, `748 kWh/yr`, `650 kWh/yr`, `574 kWh/yr`, `547 kWh/yr`, `480 kWh/yr`, `458 kWh/yr`, `434 kWh/yr`, `384 kWh/yr`, `348 kWh/yr`
-
-<br/>
-
-**Appliances: Extra Refrigerator Location**
-
-The space type for the extra refrigerator location. If not provided, defaults based on the foundation type and presence of garage.
-
-- **Name:** ``appliance_extra_refrigerator_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+- **Choices:** `None`, `1139 kWh/yr`, `748 kWh/yr`, `650 kWh/yr`, `574 kWh/yr`, `547 kWh/yr`, `480 kWh/yr`, `458 kWh/yr`, `434 kWh/yr`, `384 kWh/yr`, `348 kWh/yr`, `Detailed Example: 748 kWh/yr, Conditioned Basement`, `Detailed Example: 748 kWh/yr, Unconditioned Basement`, `Detailed Example: 748 kWh/yr, Garage`
 
 <br/>
 
@@ -2311,20 +2233,7 @@ The type of freezer.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `935 kWh/yr`, `712 kWh/yr`, `641 kWh/yr`, `568 kWh/yr`, `417 kWh/yr`, `375 kWh/yr`, `354 kWh/yr`
-
-<br/>
-
-**Appliances: Freezer Location**
-
-The space type for the freezer location. If not provided, defaults based on the foundation type and presence of garage.
-
-- **Name:** ``appliance_freezer_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+- **Choices:** `None`, `935 kWh/yr`, `712 kWh/yr`, `641 kWh/yr`, `568 kWh/yr`, `417 kWh/yr`, `375 kWh/yr`, `354 kWh/yr`, `Detailed Example: 712 kWh/yr, Conditioned Basement`, `Detailed Example: 712 kWh/yr, Unconditioned Basement`, `Detailed Example: 712 kWh/yr, Garage`
 
 <br/>
 
@@ -2348,20 +2257,7 @@ The type of cooking range/oven.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Electricity, Standard, Non-Convection Oven`, `Electricity, Standard, Convection Oven`, `Electricity, Induction, Non-Convection Oven`, `Electricity, Induction, Convection Oven`, `Natural Gas, Non-Convection Oven`, `Natural Gas, Convection Oven`, `Propane, Non-Convection Oven`, `Propane, Convection Oven`
-
-<br/>
-
-**Appliances: Cooking Range/Oven Location**
-
-The space type for the cooking range/oven location. If not provided, defaults to conditioned space.
-
-- **Name:** ``appliance_cooking_range_oven_location``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+- **Choices:** `None`, `Electricity, Standard, Non-Convection`, `Electricity, Standard, Convection`, `Electricity, Induction, Non-Convection`, `Electricity, Induction, Convection`, `Natural Gas, Non-Convection`, `Natural Gas, Convection`, `Propane, Non-Convection`, `Propane, Convection`, `Detailed Example: Electricity, Standard, Non-Convection, Conditioned Basement`, `Detailed Example: Electricity, Standard, Non-Convection, Unconditioned Basement`, `Detailed Example: Electricity, Standard, Non-Convection, Garage`
 
 <br/>
 

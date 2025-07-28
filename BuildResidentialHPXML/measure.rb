@@ -180,12 +180,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The number of occupants in the unit. If not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on Number of Bedrooms and Conditioned Floor Area per ANSI/RESNET/ICC 301. If provided, an *operational* calculation is instead performed in which the end use defaults to reflect real-world data (where possible).')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('geometry_building_num_units', false)
-    arg.setDisplayName('Geometry: Building Number of Units')
-    arg.setUnits('#')
-    arg.setDescription("The number of units in the building. Required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment}s.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_average_ceiling_height', true)
     arg.setDisplayName('Geometry: Average Ceiling Height')
     arg.setUnits('ft')
@@ -1139,25 +1133,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('None')
     args << arg
 
-    appliance_location_choices = OpenStudio::StringVector.new
-    appliance_location_choices << HPXML::LocationConditionedSpace
-    appliance_location_choices << HPXML::LocationBasementConditioned
-    appliance_location_choices << HPXML::LocationBasementUnconditioned
-    appliance_location_choices << HPXML::LocationGarage
-    appliance_location_choices << HPXML::LocationOtherHousingUnit
-    appliance_location_choices << HPXML::LocationOtherHeatedSpace
-    appliance_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
-    appliance_location_choices << HPXML::LocationOtherNonFreezingSpace
-
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_washer', choices[:appliance_clothes_washer], false)
     arg.setDisplayName('Appliances: Clothes Washer')
     arg.setDescription('The type of clothes washer.')
     arg.setDefaultValue('Standard, 2008-2017')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_washer_location', appliance_location_choices, false)
-    arg.setDisplayName('Appliances: Clothes Washer Location')
-    arg.setDescription('The space type for the clothes washer location. If not provided, defaults to conditioned space.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_clothes_washer_usage_multiplier', false)
@@ -1171,11 +1150,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Electricity, Standard')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_dryer_location', appliance_location_choices, false)
-    arg.setDisplayName('Appliances: Clothes Dryer Location')
-    arg.setDescription('The space type for the clothes dryer location. If not provided, defaults to conditioned space.')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_clothes_dryer_usage_multiplier', false)
     arg.setDisplayName('Appliances: Clothes Dryer Usage Multiplier')
     arg.setDescription('Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.')
@@ -1185,11 +1159,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Appliances: Dishwasher')
     arg.setDescription('The type of dishwasher.')
     arg.setDefaultValue('Federal Minimum, Standard')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_dishwasher_location', appliance_location_choices, false)
-    arg.setDisplayName('Appliances: Dishwasher Location')
-    arg.setDescription('The space type for the dishwasher location. If not provided, defaults to conditioned space.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_dishwasher_usage_multiplier', false)
@@ -1203,11 +1172,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('434 kWh/yr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_refrigerator_location', appliance_location_choices, false)
-    arg.setDisplayName('Appliances: Refrigerator Location')
-    arg.setDescription('The space type for the refrigerator location. If not provided, defaults to conditioned space.')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_refrigerator_usage_multiplier', false)
     arg.setDisplayName('Appliances: Refrigerator Usage Multiplier')
     arg.setDescription('Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants.')
@@ -1217,11 +1181,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Appliances: Extra Refrigerator')
     arg.setDescription('The type of extra refrigerator.')
     arg.setDefaultValue('None')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_extra_refrigerator_location', appliance_location_choices, false)
-    arg.setDisplayName('Appliances: Extra Refrigerator Location')
-    arg.setDescription('The space type for the extra refrigerator location. If not provided, defaults based on the foundation type and presence of garage.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_extra_refrigerator_usage_multiplier', false)
@@ -1235,11 +1194,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_freezer_location', appliance_location_choices, false)
-    arg.setDisplayName('Appliances: Freezer Location')
-    arg.setDescription('The space type for the freezer location. If not provided, defaults based on the foundation type and presence of garage.')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_freezer_usage_multiplier', false)
     arg.setDisplayName('Appliances: Freezer Usage Multiplier')
     arg.setDescription('Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants.')
@@ -1248,12 +1202,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_cooking_range_oven', choices[:appliance_cooking_range_oven], false)
     arg.setDisplayName('Appliances: Cooking Range/Oven')
     arg.setDescription('The type of cooking range/oven.')
-    arg.setDefaultValue('Electricity, Standard, Non-Convection Oven')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_cooking_range_oven_location', appliance_location_choices, false)
-    arg.setDisplayName('Appliances: Cooking Range/Oven Location')
-    arg.setDescription('The space type for the cooking range/oven location. If not provided, defaults to conditioned space.')
+    arg.setDefaultValue('Electricity, Standard, Non-Convection')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_cooking_range_oven_usage_multiplier', false)
@@ -1633,9 +1582,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    error = [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include?(args[:geometry_unit_type]) && args[:geometry_building_num_units].nil?
-    errors << 'Did not specify the number of units in the building for single-family attached or apartment units.' if error
-
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_unit_num_floors_above_grade] > 1)
     errors << 'Apartment units can only have one above-grade floor.' if error
 
@@ -1650,9 +1596,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     error = [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include?(args[:dhw_water_heater_type]) && !args[:hvac_heating_system_type].include?(HPXML::HVACTypeBoiler)
     errors << 'Must specify a boiler when modeling an indirect water heater type.' if error
-
-    error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:hvac_heating_system_type].include?('Shared')
-    errors << 'Specified a shared system for a single-family detached unit.' if error
 
     error = args[:geometry_foundation_type_rim_joist_height].to_f > 0 && args[:enclosure_rim_joist_assembly_r_value].nil?
     errors << 'Specified a rim joist height but no rim joist assembly R-value.' if error
@@ -2492,7 +2435,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.building_construction.conditioned_building_volume = args[:geometry_unit_cfa] * args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.average_ceiling_height = args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.residential_facility_type = args[:geometry_unit_type]
-    hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
     if args[:building_year_built] != 0
       hpxml_bldg.building_construction.year_built = args[:building_year_built]
     end
@@ -3284,11 +3226,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     fraction_heat_load_served = args[:hvac_heating_system_fraction_heat_load_served]
 
-    if heating_system_type.include?('Shared')
-      is_shared_system = true
-      number_of_units_served = args[:geometry_building_num_units]
-      args[:hvac_heating_system_capacity_capacity] = nil
-    end
 
     if heating_system_type.include?(HPXML::HVACTypeBoiler)
       heating_system_type = HPXML::HVACTypeBoiler
@@ -3306,8 +3243,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    airflow_defect_ratio: airflow_defect_ratio,
                                    pilot_light: pilot_light,
                                    pilot_light_btuh: pilot_light_btuh,
-                                   is_shared_system: is_shared_system,
-                                   number_of_units_served: number_of_units_served,
                                    primary_system: true)
   end
 
@@ -3745,7 +3680,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # HydronicDistribution?
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless [heating_system.heating_system_type].include?(HPXML::HVACTypeBoiler)
-      next if args[:hvac_heating_system_type].include?('Fan Coil')
 
       hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                         distribution_system_type: HPXML::HVACDistributionTypeHydronic,
@@ -3778,17 +3712,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    # FanCoil?
-    fan_coil_distribution_systems = []
-    hpxml_bldg.heating_systems.each do |heating_system|
-      next unless heating_system.primary_system
-
-      if args[:hvac_heating_system_type].include?('Fan Coil')
-        fan_coil_distribution_systems << heating_system
-      end
-    end
-
-    return if air_distribution_systems.size == 0 && fan_coil_distribution_systems.size == 0
+    return if air_distribution_systems.size == 0
 
     if [HPXML::HVACTypeEvaporativeCooler].include?(args[:hvac_cooling_system_type]) && hpxml_bldg.heating_systems.size == 0 && hpxml_bldg.heat_pumps.size == 0
       args[:hvac_ducts_number_of_return_registers] = nil
@@ -3807,15 +3731,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
       set_duct_leakages(args, hpxml_bldg.hvac_distributions[-1])
       set_ducts(hpxml_bldg, args, hpxml_bldg.hvac_distributions[-1])
-    end
-
-    if fan_coil_distribution_systems.size > 0
-      hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
-                                        distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                        air_type: HPXML::AirTypeFanCoil)
-      fan_coil_distribution_systems.each do |hvac_system|
-        hvac_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-      end
     end
   end
 
@@ -4459,7 +4374,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     service_feeders = electric_panel.service_feeders
 
     hpxml_bldg.heating_systems.each do |heating_system|
-      next if heating_system.is_shared_system
       next if heating_system.fraction_heat_load_served == 0
 
       if heating_system.primary_system
@@ -4478,7 +4392,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
-      next if cooling_system.is_shared_system
       next if cooling_system.fraction_cool_load_served == 0
 
       service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
@@ -4489,8 +4402,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      next if heat_pump.is_shared_system
-
       if heat_pump.fraction_heat_load_served != 0
         service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
                             type: HPXML::ElectricPanelLoadTypeHeating,

@@ -371,7 +371,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
-          <Location>conditioned space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -382,14 +381,12 @@
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
-          <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
           <DryingMethod>conventional</DryingMethod>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -399,7 +396,6 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <Dehumidifier>
@@ -422,7 +418,6 @@
         </Dehumidifier>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>
-          <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>

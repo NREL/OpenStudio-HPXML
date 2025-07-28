@@ -36,12 +36,6 @@ Electric Resistance	ElectricResistance	1
 "Boiler, 96% AFUE"	Boiler	0.96	
 "Boiler, 98% AFUE"	Boiler	0.98	
 "Boiler, 100% AFUE"	Boiler	1	
-"Shared Boiler w/ Baseboard, 78% AFUE"	Shared Shared Boiler w/ Baseboard	0.78	
-"Shared Boiler w/ Baseboard, 92% AFUE"	Shared Shared Boiler w/ Baseboard	0.92	
-"Shared Boiler w/ Baseboard, 100% AFUE"	Shared Shared Boiler w/ Baseboard	1	
-"Shared Boiler w/ Fan Coil, 78% AFUE"	Shared Boiler w/ Ductless Fan Coil	0.78	
-"Shared Boiler w/ Fan Coil, 92% AFUE"	Shared Boiler w/ Ductless Fan Coil	0.92	
-"Shared Boiler w/ Fan Coil, 100% AFUE"	Shared Boiler w/ Ductless Fan Coil	1	
 "Stove, 60% Efficiency"	Stove	0.6	
 "Stove, 70% Efficiency"	Stove	0.7	
 "Stove, 80% Efficiency"	Stove	0.8	

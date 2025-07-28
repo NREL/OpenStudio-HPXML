@@ -1,14 +1,18 @@
-Option Name	Fuel Type	Is Induction	Is Convection
-None			
-"Electricity, Standard, Non-Convection Oven"	electricity	FALSE	FALSE
-"Electricity, Standard, Convection Oven"	electricity	FALSE	TRUE
-"Electricity, Induction, Non-Convection Oven"	electricity	TRUE	FALSE
-"Electricity, Induction, Convection Oven"	electricity	TRUE	TRUE
-"Natural Gas, Non-Convection Oven"	natural gas		FALSE
-"Natural Gas, Convection Oven"	natural gas		TRUE
-"Propane, Non-Convection Oven"	propane		FALSE
-"Propane, Convection Oven"	propane		TRUE
-			
-Fuel Type: Type of fuel used by the cooking range/oven			
-Is Induction: Whether the electric cooking range is induction.			
-Is Convection: Whether the oven is convection			
+Option Name	Fuel Type	Is Induction	Is Convection	Location
+None				
+"Electricity, Standard, Non-Convection"	electricity	FALSE	FALSE	
+"Electricity, Standard, Convection"	electricity	FALSE	TRUE	
+"Electricity, Induction, Non-Convection"	electricity	TRUE	FALSE	
+"Electricity, Induction, Convection"	electricity	TRUE	TRUE	
+"Natural Gas, Non-Convection"	natural gas		FALSE	
+"Natural Gas, Convection"	natural gas		TRUE	
+"Propane, Non-Convection"	propane		FALSE	
+"Propane, Convection"	propane		TRUE	
+"Detailed Example: Electricity, Standard, Non-Convection, Conditioned Basement"	electricity	FALSE	FALSE	basement - conditioned
+"Detailed Example: Electricity, Standard, Non-Convection, Unconditioned Basement"	electricity	FALSE	FALSE	basement - unconditioned
+"Detailed Example: Electricity, Standard, Non-Convection, Garage"	electricity	FALSE	FALSE	garage
+				
+Fuel Type: Type of fuel used by the cooking range/oven				
+Is Induction: Whether the electric cooking range is induction.				
+Is Convection: Whether the oven is convection				
+Location: The space type where the cooking range/oven is located.				

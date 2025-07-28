@@ -321,7 +321,7 @@
     "appliance_clothes_dryer": "Detailed Example: Electricity, ERI Reference 2006",
     "appliance_dishwasher": "Detailed Example: ERI Reference 2006",
     "appliance_refrigerator": "Detailed Example: ERI Reference 2006, 2-Bedroom Home",
-    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection Oven",
+    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection",
     "lighting": "10% CFL",
     "misc_plug_loads": "100%",
     "misc_television": "100%"
@@ -447,17 +447,12 @@
     "dhw_water_heater_location": "conditioned space",
     "lighting": "Detailed Example: 40% CFL, 10% LFL, 25% LED",
     "appliance_clothes_washer": "Standard, 2008-2017",
-    "appliance_clothes_washer_location": "conditioned space",
     "appliance_clothes_dryer": "Electricity, Standard",
-    "appliance_clothes_dryer_location": "conditioned space",
     "appliance_dishwasher": "Federal Minimum, Standard",
-    "appliance_dishwasher_location": "conditioned space",
     "appliance_refrigerator": "650 kWh/yr",
-    "appliance_refrigerator_location": "conditioned space",
     "appliance_extra_refrigerator": "None",
     "appliance_freezer": "None",
-    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection Oven",
-    "appliance_cooking_range_oven_location": "conditioned space",
+    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection",
     "appliance_dehumidifier": "None",
     "misc_plug_loads": "100%",
     "misc_television": "100%",
@@ -485,7 +480,7 @@
   "sample_files/base-appliances-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "appliance_clothes_dryer": "Natural Gas, Standard",
-    "appliance_cooking_range_oven": "Natural Gas, Non-Convection Oven"
+    "appliance_cooking_range_oven": "Natural Gas, Non-Convection"
   },
   "sample_files/base-appliances-oil.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml"
@@ -493,7 +488,7 @@
   "sample_files/base-appliances-propane.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
     "appliance_clothes_dryer": "Propane, Standard",
-    "appliance_cooking_range_oven": "Propane, Non-Convection Oven"
+    "appliance_cooking_range_oven": "Propane, Non-Convection"
   },
   "sample_files/base-appliances-wood.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml"
@@ -539,11 +534,11 @@
     "hvac_ducts_supply_location": "conditioned space",
     "hvac_ducts_return_location": "conditioned space",
     "dhw_water_heater_location": "basement - conditioned",
-    "appliance_clothes_washer_location": "basement - conditioned",
-    "appliance_clothes_dryer_location": "basement - conditioned",
-    "appliance_dishwasher_location": "basement - conditioned",
-    "appliance_refrigerator_location": "basement - conditioned",
-    "appliance_cooking_range_oven_location": "basement - conditioned"
+    "appliance_clothes_washer": "Detailed Example: Standard, 2008-2017, Conditioned Basement",
+    "appliance_clothes_dryer": "Detailed Example: Electricity, Standard, Conditioned Basement",
+    "appliance_dishwasher": "Detailed Example: Federal Minimum, Standard, Conditioned Basement",
+    "appliance_refrigerator": "Detailed Example: 650 kWh/yr, Conditioned Basement",
+    "appliance_cooking_range_oven": "Detailed Example: Electricity, Standard, Non-Convection, Conditioned Basement"
   },
   "sample_files/base-atticroof-flat.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -644,7 +639,6 @@
     "geometry_attached_walls": "1 Side: Right",
     "geometry_unit_cfa": 1800,
     "geometry_unit_aspect_ratio": 0.6667,
-    "geometry_building_num_units": 3,
     "enclosure_window_area_or_wwr_front": 0.18,
     "enclosure_window_area_or_wwr_back": 0.18,
     "enclosure_window_area_or_wwr_left": 0.18,
@@ -676,7 +670,6 @@
     "geometry_attached_walls": "1 Side: Right",
     "geometry_unit_cfa": 900,
     "geometry_unit_aspect_ratio": 0.6667,
-    "geometry_building_num_units": 6,
     "geometry_foundation_type": "Above Apartment",
     "geometry_attic_type": "Below Apartment",
     "enclosure_window_area_or_wwr_front": 0.18,
@@ -737,13 +730,13 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "hvac_heating_system": "Shared Boiler w/ Baseboard, 92% AFUE",
+    "hvac_heating_system": "Boiler, 92% AFUE",
     "hvac_cooling_system": "None",
     "hvac_cooling_system_fraction_cool_load_served": 0
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml",
-    "hvac_heating_system": "Shared Boiler w/ Fan Coil, 92% AFUE"
+    "hvac_heating_system": "Boiler, 92% AFUE"
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil-ducted.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil.xml"
@@ -756,7 +749,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "hvac_heating_system": "Shared Boiler w/ Baseboard, 92% AFUE",
+    "hvac_heating_system": "Boiler, 92% AFUE",
     "hvac_cooling_system": "None",
     "hvac_cooling_system_fraction_cool_load_served": 0
   },
@@ -766,7 +759,7 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml",
-    "hvac_heating_system": "Shared Boiler w/ Fan Coil, 92% AFUE"
+    "hvac_heating_system": "Boiler, 92% AFUE"
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil-fireplace-elec.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml",
@@ -1113,7 +1106,7 @@
     "hvac_heating_system_capacity": "50 kBtu/hr",
     "hvac_cooling_system_capacity": "1.5 tons",
     "dhw_water_heater": "Natural Gas, Tank, UEF=0.64",
-    "appliance_cooking_range_oven": "Natural Gas, Non-Convection Oven",
+    "appliance_cooking_range_oven": "Natural Gas, Non-Convection",
     "appliance_clothes_dryer": "Natural Gas, Standard",
     "appliance_dishwasher": "None",
     "ventilation_kitchen": "Default",
@@ -1178,11 +1171,11 @@
     "hvac_ducts_supply_location": "garage",
     "hvac_ducts_return_location": "garage",
     "dhw_water_heater_location": "garage",
-    "appliance_clothes_washer_location": "garage",
-    "appliance_clothes_dryer_location": "garage",
-    "appliance_dishwasher_location": "garage",
-    "appliance_refrigerator_location": "garage",
-    "appliance_cooking_range_oven_location": "garage"
+    "appliance_clothes_washer": "Detailed Example: Standard, 2008-2017, Garage",
+    "appliance_clothes_dryer": "Detailed Example: Electricity, Standard, Garage",
+    "appliance_dishwasher": "Detailed Example: Federal Minimum, Standard, Garage",
+    "appliance_refrigerator": "Detailed Example: 650 kWh/yr, Garage",
+    "appliance_cooking_range_oven": "Detailed Example: Electricity, Standard, Non-Convection, Garage"
   },
   "sample_files/base-enclosure-infil-ach-house-pressure.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1386,11 +1379,11 @@
     "hvac_ducts_supply_location": "basement - unconditioned",
     "hvac_ducts_return_location": "basement - unconditioned",
     "dhw_water_heater_location": "basement - unconditioned",
-    "appliance_clothes_washer_location": "basement - unconditioned",
-    "appliance_clothes_dryer_location": "basement - unconditioned",
-    "appliance_dishwasher_location": "basement - unconditioned",
-    "appliance_refrigerator_location": "basement - unconditioned",
-    "appliance_cooking_range_oven_location": "basement - unconditioned"
+    "appliance_clothes_washer": "Detailed Example: Standard, 2008-2017, Unconditioned Basement",
+    "appliance_clothes_dryer": "Detailed Example: Electricity, Standard, Unconditioned Basement",
+    "appliance_dishwasher": "Detailed Example: Federal Minimum, Standard, Unconditioned Basement",
+    "appliance_refrigerator": "Detailed Example: 650 kWh/yr, Unconditioned Basement",
+    "appliance_cooking_range_oven": "Detailed Example: Electricity, Standard, Non-Convection, Unconditioned Basement"
   },
   "sample_files/base-foundation-unconditioned-basement-above-grade.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
@@ -2474,11 +2467,6 @@
     "battery": "20.0 kWh",
     "electric_vehicle": "Midsize, 200 mile range",
     "electric_vehicle_charger": "Level 1, 50% Charging at Home",
-    "appliance_clothes_washer_location": null,
-    "appliance_clothes_dryer_location": null,
-    "appliance_dishwasher_location": null,
-    "appliance_refrigerator_location": null,
-    "appliance_cooking_range_oven_location": null,
     "ceiling_fans": "#Bedrooms+1 Fans, 45 W"
   },
   "sample_files/base-misc-emissions.xml": {
@@ -2512,7 +2500,6 @@
     "electric_vehicle_charger": "None",
     "appliance_extra_refrigerator": "748 kWh/yr",
     "appliance_freezer": "354 kWh/yr",
-    "appliance_freezer_location": "conditioned space",
     "misc_plug_loads": "Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent",
     "misc_television": "Detailed Example: 620 kWh/yr",
     "misc_well_pump": "Detailed Example: 475 kWh/yr",
@@ -2561,7 +2548,6 @@
     "appliance_dishwasher_usage_multiplier": 0.9,
     "appliance_refrigerator_usage_multiplier": 0.9,
     "appliance_freezer": "354 kWh/yr",
-    "appliance_freezer_location": "conditioned space",
     "appliance_freezer_usage_multiplier": 0.9,
     "appliance_cooking_range_oven_usage_multiplier": 0.9,
     "misc_plug_loads": "90%",
@@ -2579,7 +2565,6 @@
     "geometry_attached_walls": "1 Side: Right",
     "geometry_unit_cfa": 1200,
     "geometry_unit_aspect_ratio": 0.75,
-    "geometry_building_num_units": 6,
     "enclosure_floor_over_foundation": "Wood Frame, R-19",
     "enclosure_air_leakage": "Detailed Example: 0.375 nACH",
     "enclosure_window_area_or_wwr_front": 0.18,

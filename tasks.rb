@@ -39,7 +39,7 @@ def create_hpxmls
 
   json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
     # Uncomment following line to debug single file
-    # next unless hpxml_filename.include? 'base-bldgtype-mf-whole-building.xml'
+    # next unless hpxml_filename.include? 'base-bldgtype-mf-unit-shared-boiler-only-fan-coil-fireplace-elec.xml'
 
     puts "[#{hpxml_i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
@@ -1650,6 +1650,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         duct.duct_surface_area = nil # removes surface area from both supply and return
       end
     end
+    if hpxml_file.include? 'shared-boiler'
+      hpxml_bldg.heating_systems[0].is_shared_system = true
+      hpxml_bldg.heating_systems[0].number_of_units_served = 6
+      hpxml_bldg.heating_systems[0].heating_capacity = nil
+    end
     if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
       # Handle chiller/cooling tower
       if hpxml_file.include? 'chiller'
@@ -1686,7 +1691,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         end
       end
     end
-    if hpxml_file.include?('water-loop-heat-pump') || (hpxml_file.include?('fan-coil') && !hpxml_file.include?('fireplace-elec'))
+    if hpxml_file.include?('water-loop-heat-pump') || hpxml_file.include?('fan-coil')
       # Handle WLHP/ducted fan coil
       hpxml_bldg.hvac_distributions.reverse_each do |hvac_distribution|
         hvac_distribution.delete
@@ -1718,10 +1723,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                           air_type: HPXML::AirTypeFanCoil)
 
         if hpxml_file.include? 'boiler'
-          hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          shared_heating_system = hpxml_bldg.heating_systems.find { |h| h.is_shared_system }
+          shared_heating_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         end
         if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
-          hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          shared_cooling_system = hpxml_bldg.cooling_systems.find { |c| c.is_shared_system }
+          shared_cooling_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         end
       end
       if hpxml_file.include?('water-loop-heat-pump') || hpxml_file.include?('fan-coil-ducted')

@@ -41,7 +41,6 @@
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <UnitHeightAboveGrade>0.0</UnitHeightAboveGrade>
-          <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
@@ -398,7 +397,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
-          <Location>conditioned space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -409,7 +407,6 @@
         </ClothesWasher>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -419,12 +416,10 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>
-          <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
@@ -520,7 +515,6 @@
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <UnitHeightAboveGrade>0.0</UnitHeightAboveGrade>
-          <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
@@ -877,7 +871,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1_2'/>
-          <Location>conditioned space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -888,7 +881,6 @@
         </ClothesWasher>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1_2'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -898,12 +890,10 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1_2'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_2'/>
-          <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
@@ -999,7 +989,6 @@
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <UnitHeightAboveGrade>10.0</UnitHeightAboveGrade>
-          <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
@@ -1247,7 +1236,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1_3'/>
-          <Location>conditioned space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -1258,7 +1246,6 @@
         </ClothesWasher>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1_3'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -1268,12 +1255,10 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1_3'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_3'/>
-          <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
@@ -1369,7 +1354,6 @@
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <UnitHeightAboveGrade>10.0</UnitHeightAboveGrade>
-          <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
@@ -1617,7 +1601,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1_4'/>
-          <Location>conditioned space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -1628,7 +1611,6 @@
         </ClothesWasher>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1_4'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -1638,12 +1620,10 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1_4'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_4'/>
-          <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
@@ -1739,7 +1719,6 @@
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <UnitHeightAboveGrade>20.0</UnitHeightAboveGrade>
-          <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
@@ -2044,7 +2023,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1_5'/>
-          <Location>conditioned space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -2055,7 +2033,6 @@
         </ClothesWasher>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1_5'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -2065,12 +2042,10 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1_5'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_5'/>
-          <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
@@ -2166,7 +2141,6 @@
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <UnitHeightAboveGrade>20.0</UnitHeightAboveGrade>
-          <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
@@ -2471,7 +2445,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1_6'/>
-          <Location>conditioned space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -2482,7 +2455,6 @@
         </ClothesWasher>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1_6'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -2492,12 +2464,10 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1_6'/>
-          <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_6'/>
-          <Location>conditioned space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
