@@ -262,6 +262,10 @@ def apply_hpxml_modification_hers_hvac_dse(hpxml_path, hpxml)
   hpxml.header.eri_calculation_versions = ['2022CE']
   hpxml_bldg = hpxml.buildings[0]
 
+  hpxml_bldg.hvac_systems.each do |hvac_system|
+    hvac_system.fan_watts_per_cfm = 0.5
+  end
+
   if hpxml_path.include? 'HERS_HVAC'
     hpxml_bldg.hvac_distributions.clear
     hpxml_bldg.hvac_distributions.add(id: 'HVACDistribution1',
@@ -276,6 +280,7 @@ def apply_hpxml_modification_hers_hvac_dse(hpxml_path, hpxml)
       hpxml_bldg.heat_pumps[0].cooling_capacity = 56100
     end
   end
+
   if hpxml_path.include? 'HERS_DSE'
     if ['HVAC3a.xml', 'HVAC3e.xml'].include? File.basename(hpxml_path)
       hpxml_bldg.heating_systems[0].heating_capacity = 46600
@@ -2193,6 +2198,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     end
     if hpxml_file.include? 'base-hvac-install-quality'
       hpxml_bldg.hvac_systems.each do |hvac_system|
+        hvac_system.fan_watts_per_cfm = 0.365
+        hvac_system.airflow_defect_ratio = -0.25
+        if hvac_system.respond_to? :charge_defect_ratio
+          hvac_system.charge_defect_ratio = -0.25
+        end
         if hvac_system.respond_to? :heating_design_airflow_cfm
           if not hvac_system.heating_capacity.nil?
             heating_capacity_tons = UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')

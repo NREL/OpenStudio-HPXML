@@ -1,18 +1,18 @@
 Option Name	Annual Energy Use [kWh/yr]	Usage Multiplier
 None	0	
-25%		0.25
-33%		0.33
-50%		0.5
-75%		0.75
-80%		0.8
-90%		0.9
-100%		
-110%		1.1
-125%		1.25
-150%		1.5
-200%		2
-300%		3
-400%		4
+25% Usage		0.25
+33% Usage		0.33
+50% Usage		0.5
+75% Usage		0.75
+80% Usage		0.8
+90% Usage		0.9
+100% Usage		
+110% Usage		1.1
+125% Usage		1.25
+150% Usage		1.5
+200% Usage		2
+300% Usage		3
+400% Usage		4
 Detailed Example: 620 kWh/yr	620	
 		
 Annual Energy Use: The annual energy consumption of the televisions.		

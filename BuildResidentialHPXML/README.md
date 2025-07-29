@@ -1077,32 +1077,6 @@ Enter a date range like 'Jun 1 - Oct 31'. Defaults to year-round cooling availab
 
 <br/>
 
-**HVAC Blower: Fan Efficiency**
-
-The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless mini-split systems).
-
-- **Name:** ``hvac_blower_fan_watts_per_cfm``
-- **Type:** ``Double``
-
-- **Units:** ``W/CFM``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Installation Defects**
-
-Specifies whether the HVAC system has airflow and/or refrigerant charge installation defects. Applies to central furnaces and central/mini-split ACs and HPs.
-
-- **Name:** ``hvac_installation_defects``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `None`, `35% Airflow Defect`, `25% Airflow Defect`, `15% Airflow Defect`, `35% Under Charge`, `25% Under Charge`, `15% Under Charge`, `15% Over Charge`, `25% Over Charge`, `35% Over Charge`, `35% Airflow Defect, 35% Under Charge`, `35% Airflow Defect, 25% Under Charge`, `35% Airflow Defect, 15% Under Charge`, `35% Airflow Defect, 15% Over Charge`, `35% Airflow Defect, 25% Over Charge`, `35% Airflow Defect, 35% Over Charge`, `25% Airflow Defect, 35% Under Charge`, `25% Airflow Defect, 25% Under Charge`, `25% Airflow Defect, 15% Under Charge`, `25% Airflow Defect, 15% Over Charge`, `25% Airflow Defect, 25% Over Charge`, `25% Airflow Defect, 35% Over Charge`, `15% Airflow Defect, 35% Under Charge`, `15% Airflow Defect, 25% Under Charge`, `15% Airflow Defect, 15% Under Charge`, `15% Airflow Defect, 15% Over Charge`, `15% Airflow Defect, 25% Over Charge`, `15% Airflow Defect, 35% Over Charge`
-
-<br/>
-
 **HVAC Ducts**
 
 The leakage and insulation level of the ducts.
@@ -1259,14 +1233,14 @@ The type of domestic hot water distrubtion.
 
 **DHW: Hot Water Fixtures**
 
-The type of domestic hot water fixtures.
+The type and usage of domestic hot water fixtures.
 
 - **Name:** ``dhw_fixtures``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `Standard`, `Low Flow`
+- **Choices:** `Standard, 25% Usage`, `Standard, 50% Usage`, `Standard, 75% Usage`, `Standard, 100% Usage`, `Standard, 150% Usage`, `Standard, 200% Usage`, `Standard, 400% Usage`, `Low Flow, 25% Usage`, `Low Flow, 50% Usage`, `Low Flow, 75% Usage`, `Low Flow, 100% Usage`, `Low Flow, 150% Usage`, `Low Flow, 200% Usage`, `Low Flow, 400% Usage`
 
 <br/>
 
@@ -1280,17 +1254,6 @@ The type of drain water heater recovery.
 - **Required:** ``false``
 
 - **Choices:** `None`, `25% Efficient, Preheats Hot Only, All Showers`, `25% Efficient, Preheats Hot Only, 1 Shower`, `25% Efficient, Preheats Hot and Cold, All Showers`, `25% Efficient, Preheats Hot and Cold, 1 Shower`, `35% Efficient, Preheats Hot Only, All Showers`, `35% Efficient, Preheats Hot Only, 1 Shower`, `35% Efficient, Preheats Hot and Cold, All Showers`, `35% Efficient, Preheats Hot and Cold, 1 Shower`, `45% Efficient, Preheats Hot Only, All Showers`, `45% Efficient, Preheats Hot Only, 1 Shower`, `45% Efficient, Preheats Hot and Cold, All Showers`, `45% Efficient, Preheats Hot and Cold, 1 Shower`, `55% Efficient, Preheats Hot Only, All Showers`, `55% Efficient, Preheats Hot Only, 1 Shower`, `55% Efficient, Preheats Hot and Cold, All Showers`, `55% Efficient, Preheats Hot and Cold, 1 Shower`, `Detailed Example: 54% Efficient, Preheats Hot and Cold, All Showers`
-
-<br/>
-
-**DHW: Hot Water Fixtures Usage Multiplier**
-
-Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``dhw_water_fixtures_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
 
 <br/>
 
@@ -1427,20 +1390,7 @@ The type of battery electric vehicle.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Compact, 200 mile range`, `Compact, 300 mile range`, `Midsize, 200 mile range`, `Midsize, 300 mile range`, `Pickup, 200 mile range`, `Pickup, 300 mile range`, `SUV, 200 mile range`, `SUV, 300 mile range`, `Detailed Example: 100 kWh battery, 0.25 kWh/mile`, `Detailed Example: 100 kWh battery, 4.0 miles/kWh`, `Detailed Example: 100 kWh battery, 135.0 mpge`
-
-<br/>
-
-**Electric Vehicle: Miles Driven Per Year**
-
-The annual miles the vehicle is driven. If not provided, defaults to 10900.
-
-- **Name:** ``electric_vehicle_miles_driven_per_year``
-- **Type:** ``Double``
-
-- **Units:** ``miles``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Compact, 200 Mile Range, 25% Usage`, `Compact, 200 Mile Range, 50% Usage`, `Compact, 200 Mile Range, 75% Usage`, `Compact, 200 Mile Range, 100% Usage`, `Compact, 200 Mile Range, 150% Usage`, `Compact, 200 Mile Range, 200% Usage`, `Compact, 200 Mile Range, 400% Usage`, `Compact, 300 Mile Range, 25% Usage`, `Compact, 300 Mile Range, 50% Usage`, `Compact, 300 Mile Range, 75% Usage`, `Compact, 300 Mile Range, 100% Usage`, `Compact, 300 Mile Range, 150% Usage`, `Compact, 300 Mile Range, 200% Usage`, `Compact, 300 Mile Range, 400% Usage`, `Midsize, 200 Mile Range, 25% Usage`, `Midsize, 200 Mile Range, 50% Usage`, `Midsize, 200 Mile Range, 75% Usage`, `Midsize, 200 Mile Range, 100% Usage`, `Midsize, 200 Mile Range, 150% Usage`, `Midsize, 200 Mile Range, 200% Usage`, `Midsize, 200 Mile Range, 400% Usage`, `Midsize, 300 Mile Range, 25% Usage`, `Midsize, 300 Mile Range, 50% Usage`, `Midsize, 300 Mile Range, 75% Usage`, `Midsize, 300 Mile Range, 100% Usage`, `Midsize, 300 Mile Range, 150% Usage`, `Midsize, 300 Mile Range, 200% Usage`, `Midsize, 300 Mile Range, 400% Usage`, `Pickup, 200 Mile Range, 25% Usage`, `Pickup, 200 Mile Range, 50% Usage`, `Pickup, 200 Mile Range, 75% Usage`, `Pickup, 200 Mile Range, 100% Usage`, `Pickup, 200 Mile Range, 150% Usage`, `Pickup, 200 Mile Range, 200% Usage`, `Pickup, 200 Mile Range, 400% Usage`, `Pickup, 300 Mile Range, 25% Usage`, `Pickup, 300 Mile Range, 50% Usage`, `Pickup, 300 Mile Range, 75% Usage`, `Pickup, 300 Mile Range, 100% Usage`, `Pickup, 300 Mile Range, 150% Usage`, `Pickup, 300 Mile Range, 200% Usage`, `Pickup, 300 Mile Range, 400% Usage`, `SUV, 200 Mile Range, 25% Usage`, `SUV, 200 Mile Range, 50% Usage`, `SUV, 200 Mile Range, 75% Usage`, `SUV, 200 Mile Range, 100% Usage`, `SUV, 200 Mile Range, 150% Usage`, `SUV, 200 Mile Range, 200% Usage`, `SUV, 200 Mile Range, 400% Usage`, `SUV, 300 Mile Range, 25% Usage`, `SUV, 300 Mile Range, 50% Usage`, `SUV, 300 Mile Range, 75% Usage`, `SUV, 300 Mile Range, 100% Usage`, `SUV, 300 Mile Range, 150% Usage`, `SUV, 300 Mile Range, 200% Usage`, `SUV, 300 Mile Range, 400% Usage`, `Detailed Example: 100 kWh battery, 0.25 kWh/mile`, `Detailed Example: 100 kWh battery, 4.0 miles/kWh`, `Detailed Example: 100 kWh battery, 135.0 mpge`
 
 <br/>
 
@@ -1459,169 +1409,92 @@ The type and usage of electric vehicle charger.
 
 **Appliances: Clothes Washer**
 
-The type of clothes washer.
+The type and usage of clothes washer.
 
 - **Name:** ``appliance_clothes_washer``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Standard, 2008-2017`, `Standard, 2018-present`, `EnergyStar, 2006-2017`, `EnergyStar, 2018-present`, `CEE Tier II 2018`, `Detailed Example: ERI Reference 2006`, `Detailed Example: MEF=1.65`, `Detailed Example: Standard, 2008-2017, Conditioned Basement`, `Detailed Example: Standard, 2008-2017, Unconditioned Basement`, `Detailed Example: Standard, 2008-2017, Garage`
-
-<br/>
-
-**Appliances: Clothes Washer Usage Multiplier**
-
-Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``appliance_clothes_washer_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Standard, 2008-2017, 50% Usage`, `Standard, 2008-2017, 75% Usage`, `Standard, 2008-2017, 100% Usage`, `Standard, 2008-2017, 150% Usage`, `Standard, 2008-2017, 200% Usage`, `Standard, 2018-present, 50% Usage`, `Standard, 2018-present, 75% Usage`, `Standard, 2018-present, 100% Usage`, `Standard, 2018-present, 150% Usage`, `Standard, 2018-present, 200% Usage`, `EnergyStar, 2006-2017, 50% Usage`, `EnergyStar, 2006-2017, 75% Usage`, `EnergyStar, 2006-2017, 100% Usage`, `EnergyStar, 2006-2017, 150% Usage`, `EnergyStar, 2006-2017, 200% Usage`, `EnergyStar, 2018-present, 50% Usage`, `EnergyStar, 2018-present, 75% Usage`, `EnergyStar, 2018-present, 100% Usage`, `EnergyStar, 2018-present, 150% Usage`, `EnergyStar, 2018-present, 200% Usage`, `CEE Tier II, 2018, 50% Usage`, `CEE Tier II, 2018, 75% Usage`, `CEE Tier II, 2018, 100% Usage`, `CEE Tier II, 2018, 150% Usage`, `CEE Tier II, 2018, 200% Usage`, `Detailed Example: ERI Reference 2006`, `Detailed Example: MEF=1.65`, `Detailed Example: Standard, 2008-2017, Conditioned Basement`, `Detailed Example: Standard, 2008-2017, Unconditioned Basement`, `Detailed Example: Standard, 2008-2017, Garage`
 
 <br/>
 
 **Appliances: Clothes Dryer**
 
-The type of clothes dryer.
+The type and usage of clothes dryer.
 
 - **Name:** ``appliance_clothes_dryer``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Electricity, Standard`, `Electricity, Premium`, `Electricity, Heat Pump`, `Natural Gas, Standard`, `Natural Gas, Premium`, `Propane, Standard`, `Detailed Example: Electricity, ERI Reference 2006`, `Detailed Example: Natural Gas, ERI Reference 2006`, `Detailed Example: Electricity, EF=4.29`, `Detailed Example: Electricity, Standard, Conditioned Basement`, `Detailed Example: Electricity, Standard, Unconditioned Basement`, `Detailed Example: Electricity, Standard, Garage`
-
-<br/>
-
-**Appliances: Clothes Dryer Usage Multiplier**
-
-Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``appliance_clothes_dryer_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Electricity, Standard, 50% Usage`, `Electricity, Standard, 75% Usage`, `Electricity, Standard, 100% Usage`, `Electricity, Standard, 150% Usage`, `Electricity, Standard, 200% Usage`, `Electricity, Premium, 50% Usage`, `Electricity, Premium, 75% Usage`, `Electricity, Premium, 100% Usage`, `Electricity, Premium, 150% Usage`, `Electricity, Premium, 200% Usage`, `Electricity, Heat Pump, 50% Usage`, `Electricity, Heat Pump, 75% Usage`, `Electricity, Heat Pump, 100% Usage`, `Electricity, Heat Pump, 150% Usage`, `Electricity, Heat Pump, 200% Usage`, `Natural Gas, Standard, 50% Usage`, `Natural Gas, Standard, 75% Usage`, `Natural Gas, Standard, 100% Usage`, `Natural Gas, Standard, 150% Usage`, `Natural Gas, Standard, 200% Usage`, `Natural Gas, Premium, 50% Usage`, `Natural Gas, Premium, 75% Usage`, `Natural Gas, Premium, 100% Usage`, `Natural Gas, Premium, 150% Usage`, `Natural Gas, Premium, 200% Usage`, `Propane, Standard, 50% Usage`, `Propane, Standard, 75% Usage`, `Propane, Standard, 100% Usage`, `Propane, Standard, 150% Usage`, `Propane, Standard, 200% Usage`, `Detailed Example: Electricity, ERI Reference 2006`, `Detailed Example: Natural Gas, ERI Reference 2006`, `Detailed Example: Electricity, EF=4.29`, `Detailed Example: Electricity, Standard, Conditioned Basement`, `Detailed Example: Electricity, Standard, Unconditioned Basement`, `Detailed Example: Electricity, Standard, Garage`
 
 <br/>
 
 **Appliances: Dishwasher**
 
-The type of dishwasher.
+The type and usage of dishwasher.
 
 - **Name:** ``appliance_dishwasher``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Federal Minimum, Standard`, `EnergyStar, Standard`, `EnergyStar, Compact`, `Detailed Example: ERI Reference 2006`, `Detailed Example: EF=0.7, Compact`, `Detailed Example: Federal Minimum, Standard, Conditioned Basement`, `Detailed Example: Federal Minimum, Standard, Unconditioned Basement`, `Detailed Example: Federal Minimum, Standard, Garage`
-
-<br/>
-
-**Appliances: Dishwasher Usage Multiplier**
-
-Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``appliance_dishwasher_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Federal Minimum, Standard, 50% Usage`, `Federal Minimum, Standard, 75% Usage`, `Federal Minimum, Standard, 100% Usage`, `Federal Minimum, Standard, 150% Usage`, `Federal Minimum, Standard, 200% Usage`, `EnergyStar, Standard, 50% Usage`, `EnergyStar, Standard, 75% Usage`, `EnergyStar, Standard, 100% Usage`, `EnergyStar, Standard, 150% Usage`, `EnergyStar, Standard, 200% Usage`, `EnergyStar, Compact, 50% Usage`, `EnergyStar, Compact, 75% Usage`, `EnergyStar, Compact, 100% Usage`, `EnergyStar, Compact, 150% Usage`, `EnergyStar, Compact, 200% Usage`, `Detailed Example: ERI Reference 2006`, `Detailed Example: EF=0.7, Compact`, `Detailed Example: Federal Minimum, Standard, Conditioned Basement`, `Detailed Example: Federal Minimum, Standard, Unconditioned Basement`, `Detailed Example: Federal Minimum, Standard, Garage`
 
 <br/>
 
 **Appliances: Refrigerator**
 
-The type of refrigerator.
+The type and usage of refrigerator.
 
 - **Name:** ``appliance_refrigerator``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `1139 kWh/yr`, `748 kWh/yr`, `650 kWh/yr`, `574 kWh/yr`, `547 kWh/yr`, `480 kWh/yr`, `458 kWh/yr`, `434 kWh/yr`, `384 kWh/yr`, `348 kWh/yr`, `Detailed Example: ERI Reference 2006, 2-Bedroom Home`, `Detailed Example: ERI Reference 2006, 3-Bedroom Home`, `Detailed Example: ERI Reference 2006, 4-Bedroom Home`, `Detailed Example: 650 kWh/yr, Conditioned Basement`, `Detailed Example: 650 kWh/yr, Unconditioned Basement`, `Detailed Example: 650 kWh/yr, Garage`
-
-<br/>
-
-**Appliances: Refrigerator Usage Multiplier**
-
-Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``appliance_refrigerator_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `1139 kWh/yr, 90% Usage`, `1139 kWh/yr, 100% Usage`, `1139 kWh/yr, 110% Usage`, `748 kWh/yr, 90% Usage`, `748 kWh/yr, 100% Usage`, `748 kWh/yr, 110% Usage`, `650 kWh/yr, 90% Usage`, `650 kWh/yr, 100% Usage`, `650 kWh/yr, 110% Usage`, `574 kWh/yr, 90% Usage`, `574 kWh/yr, 100% Usage`, `574 kWh/yr, 110% Usage`, `547 kWh/yr, 90% Usage`, `547 kWh/yr, 100% Usage`, `547 kWh/yr, 110% Usage`, `480 kWh/yr, 90% Usage`, `480 kWh/yr, 100% Usage`, `480 kWh/yr, 110% Usage`, `458 kWh/yr, 90% Usage`, `458 kWh/yr, 100% Usage`, `458 kWh/yr, 110% Usage`, `434 kWh/yr, 90% Usage`, `434 kWh/yr, 100% Usage`, `434 kWh/yr, 110% Usage`, `384 kWh/yr, 90% Usage`, `384 kWh/yr, 100% Usage`, `384 kWh/yr, 110% Usage`, `348 kWh/yr, 90% Usage`, `348 kWh/yr, 100% Usage`, `348 kWh/yr, 110% Usage`, `Detailed Example: ERI Reference 2006, 2-Bedroom Home`, `Detailed Example: ERI Reference 2006, 3-Bedroom Home`, `Detailed Example: ERI Reference 2006, 4-Bedroom Home`, `Detailed Example: 650 kWh/yr, Conditioned Basement`, `Detailed Example: 650 kWh/yr, Unconditioned Basement`, `Detailed Example: 650 kWh/yr, Garage`
 
 <br/>
 
 **Appliances: Extra Refrigerator**
 
-The type of extra refrigerator.
+The type and usage of extra refrigerator.
 
 - **Name:** ``appliance_extra_refrigerator``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `1139 kWh/yr`, `748 kWh/yr`, `650 kWh/yr`, `574 kWh/yr`, `547 kWh/yr`, `480 kWh/yr`, `458 kWh/yr`, `434 kWh/yr`, `384 kWh/yr`, `348 kWh/yr`, `Detailed Example: 748 kWh/yr, Conditioned Basement`, `Detailed Example: 748 kWh/yr, Unconditioned Basement`, `Detailed Example: 748 kWh/yr, Garage`
-
-<br/>
-
-**Appliances: Extra Refrigerator Usage Multiplier**
-
-Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``appliance_extra_refrigerator_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `1139 kWh/yr, 90% Usage`, `1139 kWh/yr, 100% Usage`, `1139 kWh/yr, 110% Usage`, `748 kWh/yr, 90% Usage`, `748 kWh/yr, 100% Usage`, `748 kWh/yr, 110% Usage`, `650 kWh/yr, 90% Usage`, `650 kWh/yr, 100% Usage`, `650 kWh/yr, 110% Usage`, `574 kWh/yr, 90% Usage`, `574 kWh/yr, 100% Usage`, `574 kWh/yr, 110% Usage`, `547 kWh/yr, 90% Usage`, `547 kWh/yr, 100% Usage`, `547 kWh/yr, 110% Usage`, `480 kWh/yr, 90% Usage`, `480 kWh/yr, 100% Usage`, `480 kWh/yr, 110% Usage`, `458 kWh/yr, 90% Usage`, `458 kWh/yr, 100% Usage`, `458 kWh/yr, 110% Usage`, `434 kWh/yr, 90% Usage`, `434 kWh/yr, 100% Usage`, `434 kWh/yr, 110% Usage`, `384 kWh/yr, 90% Usage`, `384 kWh/yr, 100% Usage`, `384 kWh/yr, 110% Usage`, `348 kWh/yr, 90% Usage`, `348 kWh/yr, 100% Usage`, `348 kWh/yr, 110% Usage`, `Detailed Example: 748 kWh/yr, Conditioned Basement`, `Detailed Example: 748 kWh/yr, Unconditioned Basement`, `Detailed Example: 748 kWh/yr, Garage`
 
 <br/>
 
 **Appliances: Freezer**
 
-The type of freezer.
+The type and usage of freezer.
 
 - **Name:** ``appliance_freezer``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `935 kWh/yr`, `712 kWh/yr`, `641 kWh/yr`, `568 kWh/yr`, `417 kWh/yr`, `375 kWh/yr`, `354 kWh/yr`, `Detailed Example: 712 kWh/yr, Conditioned Basement`, `Detailed Example: 712 kWh/yr, Unconditioned Basement`, `Detailed Example: 712 kWh/yr, Garage`
-
-<br/>
-
-**Appliances: Freezer Usage Multiplier**
-
-Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``appliance_freezer_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `935 kWh/yr, 90% Usage`, `935 kWh/yr, 100% Usage`, `935 kWh/yr, 110% Usage`, `712 kWh/yr, 90% Usage`, `712 kWh/yr, 100% Usage`, `712 kWh/yr, 110% Usage`, `641 kWh/yr, 90% Usage`, `641 kWh/yr, 100% Usage`, `641 kWh/yr, 110% Usage`, `568 kWh/yr, 90% Usage`, `568 kWh/yr, 100% Usage`, `568 kWh/yr, 110% Usage`, `417 kWh/yr, 90% Usage`, `417 kWh/yr, 100% Usage`, `417 kWh/yr, 110% Usage`, `375 kWh/yr, 90% Usage`, `375 kWh/yr, 100% Usage`, `375 kWh/yr, 110% Usage`, `354 kWh/yr, 90% Usage`, `354 kWh/yr, 100% Usage`, `354 kWh/yr, 110% Usage`, `Detailed Example: 712 kWh/yr, Conditioned Basement`, `Detailed Example: 712 kWh/yr, Unconditioned Basement`, `Detailed Example: 712 kWh/yr, Garage`
 
 <br/>
 
 **Appliances: Cooking Range/Oven**
 
-The type of cooking range/oven.
+The type and usage of cooking range/oven.
 
 - **Name:** ``appliance_cooking_range_oven``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Electricity, Standard, Non-Convection`, `Electricity, Standard, Convection`, `Electricity, Induction, Non-Convection`, `Electricity, Induction, Convection`, `Natural Gas, Non-Convection`, `Natural Gas, Convection`, `Propane, Non-Convection`, `Propane, Convection`, `Detailed Example: Electricity, Standard, Non-Convection, Conditioned Basement`, `Detailed Example: Electricity, Standard, Non-Convection, Unconditioned Basement`, `Detailed Example: Electricity, Standard, Non-Convection, Garage`
-
-<br/>
-
-**Appliances: Cooking Range/Oven Usage Multiplier**
-
-Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``appliance_cooking_range_oven_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Electricity, Standard, Non-Convection, 50% Usage`, `Electricity, Standard, Non-Convection, 75% Usage`, `Electricity, Standard, Non-Convection, 100% Usage`, `Electricity, Standard, Non-Convection, 150% Usage`, `Electricity, Standard, Non-Convection, 200% Usage`, `Electricity, Standard, Convection, 50% Usage`, `Electricity, Standard, Convection, 75% Usage`, `Electricity, Standard, Convection, 100% Usage`, `Electricity, Standard, Convection, 150% Usage`, `Electricity, Standard, Convection, 200% Usage`, `Electricity, Induction, Non-Convection, 50% Usage`, `Electricity, Induction, Non-Convection, 75% Usage`, `Electricity, Induction, Non-Convection, 100% Usage`, `Electricity, Induction, Non-Convection, 150% Usage`, `Electricity, Induction, Non-Convection, 200% Usage`, `Electricity, Induction, Convection, 50% Usage`, `Electricity, Induction, Convection, 75% Usage`, `Electricity, Induction, Convection, 100% Usage`, `Electricity, Induction, Convection, 150% Usage`, `Electricity, Induction, Convection, 200% Usage`, `Natural Gas, Non-Convection, 50% Usage`, `Natural Gas, Non-Convection, 75% Usage`, `Natural Gas, Non-Convection, 100% Usage`, `Natural Gas, Non-Convection, 150% Usage`, `Natural Gas, Non-Convection, 200% Usage`, `Natural Gas, Convection, 50% Usage`, `Natural Gas, Convection, 75% Usage`, `Natural Gas, Convection, 100% Usage`, `Natural Gas, Convection, 150% Usage`, `Natural Gas, Convection, 200% Usage`, `Propane, Non-Convection, 50% Usage`, `Propane, Non-Convection, 75% Usage`, `Propane, Non-Convection, 100% Usage`, `Propane, Non-Convection, 150% Usage`, `Propane, Non-Convection, 200% Usage`, `Propane, Convection, 50% Usage`, `Propane, Convection, 75% Usage`, `Propane, Convection, 100% Usage`, `Propane, Convection, 150% Usage`, `Propane, Convection, 200% Usage`, `Detailed Example: Electricity, Standard, Non-Convection, Conditioned Basement`, `Detailed Example: Electricity, Standard, Non-Convection, Unconditioned Basement`, `Detailed Example: Electricity, Standard, Non-Convection, Garage`
 
 <br/>
 
@@ -1653,47 +1526,14 @@ The dehumidifier's relative humidity setpoint.
 
 **Lighting**
 
-The type of lighting.
+The type and usage of interior, exterior, and garage lighting.
 
 - **Name:** ``lighting``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `None`, `100% Incandescent`, `10% CFL`, `20% CFL`, `30% CFL`, `40% CFL`, `50% CFL`, `60% CFL`, `70% CFL`, `80% CFL`, `90% CFL`, `100% CFL`, `10% LED`, `20% LED`, `30% LED`, `40% LED`, `50% LED`, `60% LED`, `70% LED`, `80% LED`, `90% LED`, `100% LED`, `Detailed Example: 40% CFL, 10% LFL, 25% LED`
-
-<br/>
-
-**Lighting: Interior Usage Multiplier**
-
-Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``lighting_interior_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Lighting: Exterior Usage Multiplier**
-
-Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``lighting_exterior_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
-
-<br/>
-
-**Lighting: Garage Usage Multiplier**
-
-Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants.
-
-- **Name:** ``lighting_garage_usage_multiplier``
-- **Type:** ``Double``
-
-- **Required:** ``false``
+- **Choices:** `None`, `100% Incandescent, 50% Usage`, `100% Incandescent, 75% Usage`, `100% Incandescent, 100% Usage`, `100% Incandescent, 150% Usage`, `100% Incandescent, 200% Usage`, `25% LED, 50% Usage`, `25% LED, 75% Usage`, `25% LED, 100% Usage`, `25% LED, 150% Usage`, `25% LED, 200% Usage`, `50% LED, 50% Usage`, `50% LED, 75% Usage`, `50% LED, 100% Usage`, `50% LED, 150% Usage`, `50% LED, 200% Usage`, `75% LED, 50% Usage`, `75% LED, 75% Usage`, `75% LED, 100% Usage`, `75% LED, 150% Usage`, `75% LED, 200% Usage`, `100% LED, 50% Usage`, `100% LED, 75% Usage`, `100% LED, 100% Usage`, `100% LED, 150% Usage`, `100% LED, 200% Usage`, `25% CFL, 50% Usage`, `25% CFL, 75% Usage`, `25% CFL, 100% Usage`, `25% CFL, 150% Usage`, `25% CFL, 200% Usage`, `50% CFL, 50% Usage`, `50% CFL, 75% Usage`, `50% CFL, 100% Usage`, `50% CFL, 150% Usage`, `50% CFL, 200% Usage`, `75% CFL, 50% Usage`, `75% CFL, 75% Usage`, `75% CFL, 100% Usage`, `75% CFL, 150% Usage`, `75% CFL, 200% Usage`, `100% CFL, 50% Usage`, `100% CFL, 75% Usage`, `100% CFL, 100% Usage`, `100% CFL, 150% Usage`, `100% CFL, 200% Usage`, `Detailed Example: 10% CFL`, `Detailed Example: 40% CFL, 10% LFL, 25% LED`
 
 <br/>
 
@@ -1719,7 +1559,7 @@ The amount of television usage, relative to the national average.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `25%`, `33%`, `50%`, `75%`, `80%`, `90%`, `100%`, `110%`, `125%`, `150%`, `200%`, `300%`, `400%`, `Detailed Example: 620 kWh/yr`
+- **Choices:** `None`, `25% Usage`, `33% Usage`, `50% Usage`, `75% Usage`, `80% Usage`, `90% Usage`, `100% Usage`, `110% Usage`, `125% Usage`, `150% Usage`, `200% Usage`, `300% Usage`, `400% Usage`, `Detailed Example: 620 kWh/yr`
 
 <br/>
 
@@ -1732,7 +1572,7 @@ The amount of additional plug load usage, relative to the national average.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `25%`, `33%`, `50%`, `75%`, `80%`, `90%`, `100%`, `110%`, `125%`, `150%`, `200%`, `300%`, `400%`, `Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent`, `Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent`
+- **Choices:** `None`, `25% Usage`, `33% Usage`, `50% Usage`, `75% Usage`, `80% Usage`, `90% Usage`, `100% Usage`, `110% Usage`, `125% Usage`, `150% Usage`, `200% Usage`, `300% Usage`, `400% Usage`, `Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent`, `Detailed Example: 7302 kWh/yr, 82.2% Sensible, 17.8% Latent`
 
 <br/>
 
@@ -1758,7 +1598,7 @@ The amount of EV charging usage, relative to the national average. Only use this
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `25%`, `33%`, `50%`, `75%`, `80%`, `90%`, `100%`, `110%`, `125%`, `150%`, `200%`, `300%`, `400%`, `Detailed Example: 1500 kWh/yr`, `Detailed Example: 3000 kWh/yr`
+- **Choices:** `None`, `25% Usage`, `33% Usage`, `50% Usage`, `75% Usage`, `80% Usage`, `90% Usage`, `100% Usage`, `110% Usage`, `125% Usage`, `150% Usage`, `200% Usage`, `300% Usage`, `400% Usage`, `Detailed Example: 1500 kWh/yr`, `Detailed Example: 3000 kWh/yr`
 
 <br/>
 
@@ -1771,7 +1611,7 @@ The amount of outdoor gas grill usage, relative to the national average.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Natural Gas, 25%`, `Natural Gas, 33%`, `Natural Gas, 50%`, `Natural Gas, 67%`, `Natural Gas, 90%`, `Natural Gas, 100%`, `Natural Gas, 110%`, `Natural Gas, 150%`, `Natural Gas, 200%`, `Natural Gas, 300%`, `Natural Gas, 400%`, `Propane, 25%`, `Propane, 33%`, `Propane, 50%`, `Propane, 67%`, `Propane, 90%`, `Propane, 100%`, `Propane, 110%`, `Propane, 150%`, `Propane, 200%`, `Propane, 300%`, `Propane, 400%`, `Detailed Example: Propane, 25 therm/yr`
+- **Choices:** `None`, `Natural Gas, 25% Usage`, `Natural Gas, 50% Usage`, `Natural Gas, 75% Usage`, `Natural Gas, 100% Usage`, `Natural Gas, 150% Usage`, `Natural Gas, 200% Usage`, `Natural Gas, 400% Usage`, `Propane, 25% Usage`, `Propane, 50% Usage`, `Propane, 75% Usage`, `Propane, 100% Usage`, `Propane, 150% Usage`, `Propane, 200% Usage`, `Propane, 400% Usage`, `Detailed Example: Propane, 25 therm/yr`
 
 <br/>
 
@@ -1784,7 +1624,7 @@ The amount of gas lighting usage, relative to the national average.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Natural Gas, 25%`, `Natural Gas, 33%`, `Natural Gas, 50%`, `Natural Gas, 67%`, `Natural Gas, 90%`, `Natural Gas, 100%`, `Natural Gas, 110%`, `Natural Gas, 150%`, `Natural Gas, 200%`, `Natural Gas, 300%`, `Natural Gas, 400%`, `Detailed Example: Natural Gas, 28 therm/yr`
+- **Choices:** `None`, `Natural Gas, 25% Usage`, `Natural Gas, 50% Usage`, `Natural Gas, 75% Usage`, `Natural Gas, 100% Usage`, `Natural Gas, 150% Usage`, `Natural Gas, 200% Usage`, `Natural Gas, 400% Usage`, `Detailed Example: Natural Gas, 28 therm/yr`
 
 <br/>
 
@@ -1797,7 +1637,7 @@ The amount of fireplace usage, relative to the national average. Fireplaces can 
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Natural Gas, 25%`, `Natural Gas, 33%`, `Natural Gas, 50%`, `Natural Gas, 67%`, `Natural Gas, 90%`, `Natural Gas, 100%`, `Natural Gas, 110%`, `Natural Gas, 150%`, `Natural Gas, 200%`, `Natural Gas, 300%`, `Natural Gas, 400%`, `Propane, 25%`, `Propane, 33%`, `Propane, 50%`, `Propane, 67%`, `Propane, 90%`, `Propane, 100%`, `Propane, 110%`, `Propane, 150%`, `Propane, 200%`, `Propane, 300%`, `Propane, 400%`, `Wood, 25%`, `Wood, 33%`, `Wood, 50%`, `Wood, 67%`, `Wood, 90%`, `Wood, 100%`, `Wood, 110%`, `Wood, 150%`, `Wood, 200%`, `Wood, 300%`, `Wood, 400%`, `Electric, 25%`, `Electric, 33%`, `Electric, 50%`, `Electric, 67%`, `Electric, 90%`, `Electric, 100%`, `Electric, 110%`, `Electric, 150%`, `Electric, 200%`, `Electric, 300%`, `Electric, 400%`, `Detailed Example: Wood, 55 therm/yr`
+- **Choices:** `None`, `Natural Gas, 25% Usage`, `Natural Gas, 50% Usage`, `Natural Gas, 75% Usage`, `Natural Gas, 100% Usage`, `Natural Gas, 150% Usage`, `Natural Gas, 200% Usage`, `Natural Gas, 400% Usage`, `Propane, 25% Usage`, `Propane, 50% Usage`, `Propane, 75% Usage`, `Propane, 100% Usage`, `Propane, 150% Usage`, `Propane, 200% Usage`, `Propane, 400% Usage`, `Wood, 25% Usage`, `Wood, 50% Usage`, `Wood, 75% Usage`, `Wood, 100% Usage`, `Wood, 150% Usage`, `Wood, 200% Usage`, `Wood, 400% Usage`, `Electric, 25% Usage`, `Electric, 50% Usage`, `Electric, 75% Usage`, `Electric, 100% Usage`, `Electric, 150% Usage`, `Electric, 200% Usage`, `Electric, 400% Usage`, `Detailed Example: Wood, 55 therm/yr`
 
 <br/>
 
@@ -1810,7 +1650,7 @@ The type of pool (pump & heater).
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Pool, Unheated`, `Pool, Electric Resistance Heater`, `Pool, Heat Pump Heater`, `Pool, Natural Gas Heater`, `Detailed Example: Pool, Natural Gas Heater, 90% Usage Multiplier`, `Detailed Example: Pool, 2700 kWh/yr Pump, Unheated`, `Detailed Example: Pool, 2700 kWh/yr Pump, 500 therms/yr Natural Gas Heater`
+- **Choices:** `None`, `Pool, Unheated, 25% Usage`, `Pool, Unheated, 50% Usage`, `Pool, Unheated, 75% Usage`, `Pool, Unheated, 100% Usage`, `Pool, Unheated, 150% Usage`, `Pool, Unheated, 200% Usage`, `Pool, Unheated, 400% Usage`, `Pool, Electric Resistance Heater, 25% Usage`, `Pool, Electric Resistance Heater, 50% Usage`, `Pool, Electric Resistance Heater, 75% Usage`, `Pool, Electric Resistance Heater, 100% Usage`, `Pool, Electric Resistance Heater, 150% Usage`, `Pool, Electric Resistance Heater, 200% Usage`, `Pool, Electric Resistance Heater, 400% Usage`, `Pool, Heat Pump Heater, 25% Usage`, `Pool, Heat Pump Heater, 50% Usage`, `Pool, Heat Pump Heater, 75% Usage`, `Pool, Heat Pump Heater, 100% Usage`, `Pool, Heat Pump Heater, 150% Usage`, `Pool, Heat Pump Heater, 200% Usage`, `Pool, Heat Pump Heater, 400% Usage`, `Pool, Natural Gas Heater, 25% Usage`, `Pool, Natural Gas Heater, 50% Usage`, `Pool, Natural Gas Heater, 75% Usage`, `Pool, Natural Gas Heater, 100% Usage`, `Pool, Natural Gas Heater, 150% Usage`, `Pool, Natural Gas Heater, 200% Usage`, `Pool, Natural Gas Heater, 400% Usage`, `Detailed Example: Pool, 2700 kWh/yr Pump, Unheated`, `Detailed Example: Pool, 2700 kWh/yr Pump, 500 therms/yr Natural Gas Heater`
 
 <br/>
 
@@ -1823,7 +1663,7 @@ The type of permanent spa (pump & heater).
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Spa, Unheated`, `Spa, Electric Resistance Heater`, `Spa, Heat Pump Heater`, `Spa, Natural Gas Heater`, `Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater`, `Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater, 90% Usage Multiplier`, `Detailed Example: Spa, 1000 kWh/yr Pump, 260 kWh/yr Heat Pump Heater`
+- **Choices:** `None`, `Spa, Unheated, 25% Usage`, `Spa, Unheated, 50% Usage`, `Spa, Unheated, 75% Usage`, `Spa, Unheated, 100% Usage`, `Spa, Unheated, 150% Usage`, `Spa, Unheated, 200% Usage`, `Spa, Unheated, 400% Usage`, `Spa, Electric Resistance Heater, 25% Usage`, `Spa, Electric Resistance Heater, 50% Usage`, `Spa, Electric Resistance Heater, 75% Usage`, `Spa, Electric Resistance Heater, 100% Usage`, `Spa, Electric Resistance Heater, 150% Usage`, `Spa, Electric Resistance Heater, 200% Usage`, `Spa, Electric Resistance Heater, 400% Usage`, `Spa, Heat Pump Heater, 25% Usage`, `Spa, Heat Pump Heater, 50% Usage`, `Spa, Heat Pump Heater, 75% Usage`, `Spa, Heat Pump Heater, 100% Usage`, `Spa, Heat Pump Heater, 150% Usage`, `Spa, Heat Pump Heater, 200% Usage`, `Spa, Heat Pump Heater, 400% Usage`, `Spa, Natural Gas Heater, 25% Usage`, `Spa, Natural Gas Heater, 50% Usage`, `Spa, Natural Gas Heater, 75% Usage`, `Spa, Natural Gas Heater, 100% Usage`, `Spa, Natural Gas Heater, 150% Usage`, `Spa, Natural Gas Heater, 200% Usage`, `Spa, Natural Gas Heater, 400% Usage`, `Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater`, `Detailed Example: Spa, 1000 kWh/yr Pump, 260 kWh/yr Heat Pump Heater`
 
 <br/>
 

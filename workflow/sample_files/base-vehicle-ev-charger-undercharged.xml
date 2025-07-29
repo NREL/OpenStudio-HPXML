@@ -500,13 +500,9 @@
             <VehicleType>
               <BatteryElectricVehicle>
                 <Battery>
-                  <NominalCapacity>
-                    <Units>kWh</Units>
-                    <Value>100.0</Value>
-                  </NominalCapacity>
                   <UsableCapacity>
                     <Units>kWh</Units>
-                    <Value>80.0</Value>
+                    <Value>53.503</Value>
                   </UsableCapacity>
                 </Battery>
                 <FractionChargedLocation>
@@ -516,10 +512,10 @@
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>
-            <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
+            <MilesDrivenPerYear>21800.0</MilesDrivenPerYear>
             <FuelEconomyCombined>
               <Units>kWh/mile</Units>
-              <Value>0.25</Value>
+              <Value>0.267513</Value>
             </FuelEconomyCombined>
           </Vehicle>
         </Vehicles>

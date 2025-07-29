@@ -208,8 +208,7 @@
     "hvac_heating_system_fuel": "natural gas",
     "hvac_heating_system_fraction_heat_load_served": 1.0,
     "hvac_cooling_system": "Central AC, SEER 10",
-    "hvac_cooling_system_fraction_cool_load_served": 1,
-    "hvac_blower_fan_watts_per_cfm": 0.5
+    "hvac_cooling_system_fraction_cool_load_served": 1
   },
   "tests/HERS_HVAC/HVAC1b.xml": {
     "parent_hpxml": "tests/HERS_HVAC/HVAC1a.xml",
@@ -253,7 +252,6 @@
     "hvac_heating_system_fraction_heat_load_served": 1.0,
     "hvac_cooling_system": "Central AC, SEER 10",
     "hvac_cooling_system_fraction_cool_load_served": 1,
-    "hvac_blower_fan_watts_per_cfm": 0.5,
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
     "hvac_ducts_supply_location": "conditioned space",
     "hvac_ducts_return_location": "conditioned space"
@@ -278,7 +276,6 @@
     "hvac_heating_system_fraction_heat_load_served": 1.0,
     "hvac_cooling_system": "Central AC, SEER 10",
     "hvac_cooling_system_fraction_cool_load_served": 1,
-    "hvac_blower_fan_watts_per_cfm": 0.5,
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
     "hvac_ducts_supply_location": "conditioned space",
     "hvac_ducts_return_location": "conditioned space"
@@ -321,10 +318,10 @@
     "appliance_clothes_dryer": "Detailed Example: Electricity, ERI Reference 2006",
     "appliance_dishwasher": "Detailed Example: ERI Reference 2006",
     "appliance_refrigerator": "Detailed Example: ERI Reference 2006, 2-Bedroom Home",
-    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection",
-    "lighting": "10% CFL",
-    "misc_plug_loads": "100%",
-    "misc_television": "100%"
+    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection, 100% Usage",
+    "lighting": "Detailed Example: 10% CFL",
+    "misc_plug_loads": "100% Usage",
+    "misc_television": "100% Usage"
   },
   "tests/HERS_Hot_Water/L100AD-HW-02.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
@@ -337,7 +334,7 @@
   },
   "tests/HERS_Hot_Water/L100AD-HW-04.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-02.xml",
-    "dhw_fixtures": "Low Flow"
+    "dhw_fixtures": "Low Flow, 100% Usage"
   },
   "tests/HERS_Hot_Water/L100AD-HW-05.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-02.xml",
@@ -445,16 +442,16 @@
     "dhw_water_heater": "Electricity, Tank, UEF=0.94",
     "dhw_water_heater_location": "conditioned space",
     "lighting": "Detailed Example: 40% CFL, 10% LFL, 25% LED",
-    "appliance_clothes_washer": "Standard, 2008-2017",
-    "appliance_clothes_dryer": "Electricity, Standard",
-    "appliance_dishwasher": "Federal Minimum, Standard",
-    "appliance_refrigerator": "650 kWh/yr",
+    "appliance_clothes_washer": "Standard, 2008-2017, 100% Usage",
+    "appliance_clothes_dryer": "Electricity, Standard, 100% Usage",
+    "appliance_dishwasher": "Federal Minimum, Standard, 100% Usage",
+    "appliance_refrigerator": "650 kWh/yr, 100% Usage",
     "appliance_extra_refrigerator": "None",
     "appliance_freezer": "None",
-    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection",
+    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection, 100% Usage",
     "appliance_dehumidifier": "None",
-    "misc_plug_loads": "100%",
-    "misc_television": "100%",
+    "misc_plug_loads": "100% Usage",
+    "misc_television": "100% Usage",
     "utility_bill_scenario": "Default (EIA Average Rates)",
     "combine_like_surfaces": true
   },
@@ -478,16 +475,16 @@
   },
   "sample_files/base-appliances-gas.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "appliance_clothes_dryer": "Natural Gas, Standard",
-    "appliance_cooking_range_oven": "Natural Gas, Non-Convection"
+    "appliance_clothes_dryer": "Natural Gas, Standard, 100% Usage",
+    "appliance_cooking_range_oven": "Natural Gas, Non-Convection, 100% Usage"
   },
   "sample_files/base-appliances-oil.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml"
   },
   "sample_files/base-appliances-propane.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml",
-    "appliance_clothes_dryer": "Propane, Standard",
-    "appliance_cooking_range_oven": "Propane, Non-Convection"
+    "appliance_clothes_dryer": "Propane, Standard, 100% Usage",
+    "appliance_cooking_range_oven": "Propane, Non-Convection, 100% Usage"
   },
   "sample_files/base-appliances-wood.xml": {
     "parent_hpxml": "sample_files/base-appliances-gas.xml"
@@ -583,8 +580,7 @@
   },
   "sample_files/base-vehicle-ev-no-charger.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
-    "electric_vehicle": "Detailed Example: 100 kWh battery, 0.25 kWh/mile",
-    "electric_vehicle_miles_driven_per_year": 10000
+    "electric_vehicle": "Detailed Example: 100 kWh battery, 0.25 kWh/mile"
   },
   "sample_files/base-ev-charger.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -612,6 +608,7 @@
   },
   "sample_files/base-vehicle-ev-charger-undercharged.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
+    "electric_vehicle": "SUV, 200 Mile Range, 200% Usage",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/vehicle-ev-undercharged.csv"
   },
   "sample_files/base-vehicle-ev-charger-plug-load-ev.xml": {
@@ -628,7 +625,6 @@
   "sample_files/base-pv-battery-and-vehicle-ev.xml": {
     "parent_hpxml": "sample_files/base-pv-battery.xml",
     "electric_vehicle": "Detailed Example: 100 kWh battery, 0.25 kWh/mile",
-    "electric_vehicle_miles_driven_per_year": 10000,
     "electric_vehicle_charger": "Detailed Example: Level 2, 7000 W, 75% Charging at Home",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/vehicle-ev.csv"
   },
@@ -930,7 +926,7 @@
   },
   "sample_files/base-dhw-low-flow-fixtures.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "dhw_fixtures": "Low Flow"
+    "dhw_fixtures": "Low Flow, 100% Usage"
   },
   "sample_files/base-dhw-multiple.xml": {
     "parent_hpxml": "sample_files/base-hvac-boiler-gas-only.xml"
@@ -1105,8 +1101,8 @@
     "hvac_heating_system_capacity": "50 kBtu/hr",
     "hvac_cooling_system_capacity": "1.5 tons",
     "dhw_water_heater": "Natural Gas, Tank, UEF=0.64",
-    "appliance_cooking_range_oven": "Natural Gas, Non-Convection",
-    "appliance_clothes_dryer": "Natural Gas, Standard",
+    "appliance_cooking_range_oven": "Natural Gas, Non-Convection, 100% Usage",
+    "appliance_clothes_dryer": "Natural Gas, Standard, 100% Usage",
     "appliance_dishwasher": "None",
     "ventilation_kitchen": "Default",
     "ventilation_bathroom": "Default"
@@ -1907,69 +1903,43 @@
     "hvac_heat_pump_fraction_cool_load_served": 0
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml"
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml"
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml"
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-1-speed.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-2-speed.xml": {
-    "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-2-speed.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-2-speed.xml"
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml": {
-    "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-var-speed.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-var-speed.xml"
   },
   "sample_files/base-hvac-install-quality-furnace-gas-only.xml": {
-    "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
-    "hvac_installation_defects": "25% Airflow Defect",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml"
   },
   "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-1-speed.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml"
   },
   "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-2-speed-experimental.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-2-speed-experimental.xml"
   },
   "sample_files/base-hvac-install-quality-ground-to-air-heat-pump-var-speed-experimental.xml": {
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-var-speed-experimental.xml"
   },
   "sample_files/base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml"
   },
   "sample_files/base-hvac-install-quality-mini-split-heat-pump-ducted.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
-    "hvac_installation_defects": "25% Airflow Defect, 25% Under Charge",
-    "hvac_blower_fan_watts_per_cfm": 0.365
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml"
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2233,8 +2203,7 @@
     "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-lighting-kwh-per-year.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "lighting_interior_usage_multiplier": 1.5
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-lighting-mixed.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -2442,7 +2411,7 @@
     "pv_system_array_azimuth": 180,
     "pv_system_array_tilt": 20,
     "battery": "20.0 kWh",
-    "electric_vehicle": "Midsize, 200 mile range",
+    "electric_vehicle": "Midsize, 200 Mile Range, 100% Usage",
     "electric_vehicle_charger": "Level 1, 50% Charging at Home",
     "ceiling_fans": "#Bedrooms+1 Fans, 45 W"
   },
@@ -2469,8 +2438,8 @@
     "dhw_distribution": "Uninsulated, Standard",
     "electric_vehicle": "None",
     "electric_vehicle_charger": "None",
-    "appliance_extra_refrigerator": "748 kWh/yr",
-    "appliance_freezer": "354 kWh/yr",
+    "appliance_extra_refrigerator": "748 kWh/yr, 100% Usage",
+    "appliance_freezer": "354 kWh/yr, 100% Usage",
     "misc_plug_loads": "Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent",
     "misc_television": "Detailed Example: 620 kWh/yr",
     "misc_well_pump": "Detailed Example: 475 kWh/yr",
@@ -2507,24 +2476,23 @@
   },
   "sample_files/base-misc-usage-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "dhw_water_fixtures_usage_multiplier": 0.9,
-    "lighting_interior_usage_multiplier": 0.9,
-    "lighting_exterior_usage_multiplier": 0.9,
-    "lighting_garage_usage_multiplier": 0.9,
-    "appliance_clothes_washer_usage_multiplier": 0.9,
-    "appliance_clothes_dryer_usage_multiplier": 0.9,
-    "appliance_dishwasher_usage_multiplier": 0.9,
-    "appliance_refrigerator_usage_multiplier": 0.9,
-    "appliance_freezer": "354 kWh/yr",
-    "appliance_freezer_usage_multiplier": 0.9,
-    "appliance_cooking_range_oven_usage_multiplier": 0.9,
-    "misc_plug_loads": "90%",
-    "misc_television": "90%",
-    "misc_grill": "Propane, 90%",
-    "misc_gas_lighting": "Natural Gas, 90%",
-    "misc_fireplace": "Wood, 90%",
-    "misc_pool": "Detailed Example: Pool, Natural Gas Heater, 90% Usage Multiplier",
-    "misc_permanent_spa": "Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater, 90% Usage Multiplier"
+    "dhw_fixtures": "Standard, 75% Usage",
+    "lighting": "25% LED, 75% Usage",
+    "appliance_clothes_washer": "Standard, 2008-2017, 75% Usage",
+    "appliance_clothes_dryer": "Electricity, Standard, 75% Usage",
+    "appliance_dishwasher": "Federal Minimum, Standard, 75% Usage",
+    "appliance_refrigerator": "650 kWh/yr, 90% Usage",
+    "appliance_freezer": "354 kWh/yr, 90% Usage",
+    "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection, 75% Usage",
+    "misc_plug_loads": "75% Usage",
+    "misc_television": "75% Usage",
+    "misc_grill": "Propane, 75% Usage",
+    "misc_gas_lighting": "Natural Gas, 75% Usage",
+    "misc_fireplace": "Wood, 75% Usage",
+    "misc_pool": "Pool, Natural Gas Heater, 75% Usage",
+    "misc_permanent_spa": "Spa, Electric Resistance Heater, 75% Usage",
+    "electric_vehicle": "Midsize, 200 Mile Range, 75% Usage",
+    "electric_vehicle_charger": "Level 1, 50% Charging at Home"
   },
   "sample_files/base-bldgtype-mf-whole-building.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2611,28 +2579,28 @@
   "sample_files/base-residents-1-misc-loads-large-uncommon.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon.xml",
     "geometry_unit_num_occupants": 1,
-    "misc_plug_loads": "100%",
-    "misc_television": "100%",
+    "misc_plug_loads": "100% Usage",
+    "misc_television": "100% Usage",
     "misc_well_pump": "Typical Efficiency",
-    "misc_grill": "Propane, 100%",
-    "misc_gas_lighting": "Natural Gas, 100%",
-    "misc_fireplace": "Wood, 100%",
-    "misc_electric_vehicle_charging": "100%",
-    "misc_pool": "Pool, Natural Gas Heater",
-    "misc_permanent_spa": "Spa, Electric Resistance Heater"
+    "misc_grill": "Propane, 100% Usage",
+    "misc_gas_lighting": "Natural Gas, 100% Usage",
+    "misc_fireplace": "Wood, 100% Usage",
+    "misc_electric_vehicle_charging": "100% Usage",
+    "misc_pool": "Pool, Natural Gas Heater, 100% Usage",
+    "misc_permanent_spa": "Spa, Electric Resistance Heater, 100% Usage"
   },
   "sample_files/base-residents-1-misc-loads-large-uncommon2.xml": {
     "parent_hpxml": "sample_files/base-misc-loads-large-uncommon2.xml",
     "geometry_unit_num_occupants": 1,
-    "misc_plug_loads": "100%",
-    "misc_television": "100%",
+    "misc_plug_loads": "100% Usage",
+    "misc_television": "100% Usage",
     "misc_well_pump": "Typical Efficiency",
-    "misc_grill": "Propane, 100%",
-    "misc_gas_lighting": "Natural Gas, 100%",
-    "misc_fireplace": "Wood, 100%",
-    "misc_electric_vehicle_charging": "100%",
-    "misc_pool": "Pool, Unheated",
-    "misc_permanent_spa": "Spa, Heat Pump Heater"
+    "misc_grill": "Propane, 100% Usage",
+    "misc_gas_lighting": "Natural Gas, 100% Usage",
+    "misc_fireplace": "Wood, 100% Usage",
+    "misc_electric_vehicle_charging": "100% Usage",
+    "misc_pool": "Pool, Unheated, 100% Usage",
+    "misc_permanent_spa": "Spa, Heat Pump Heater, 100% Usage"
   },
   "sample_files/base-residents-5-5.xml": {
     "parent_hpxml": "sample_files/base-misc-defaults.xml",
@@ -2642,7 +2610,6 @@
     "parent_hpxml": "sample_files/base.xml",
     "dhw_distribution": "Uninsulated, Recirc, Uncontrolled",
     "electric_vehicle": "Detailed Example: 100 kWh battery, 0.25 kWh/mile",
-    "electric_vehicle_miles_driven_per_year": 10000,
     "electric_vehicle_charger": "Detailed Example: Level 2, 7000 W, 75% Charging at Home",
     "misc_electric_vehicle_charging": "None"
   },

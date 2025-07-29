@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>241edd2f-fab6-453c-9f67-3d85df89a84f</version_id>
-  <version_modified>2025-07-28T22:18:04Z</version_modified>
+  <version_id>62c5dd8d-4d98-45a3-b64b-de9edb22acb3</version_id>
+  <version_modified>2025-07-29T19:09:59Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -534,7 +534,7 @@
       <filename>schedule_files/occupancy-stochastic-ev-charger.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A5FC8755</checksum>
+      <checksum>249C648C</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-mf-unit.csv</filename>

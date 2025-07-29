@@ -516,7 +516,6 @@
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>
-            <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
             <HoursDrivenPerWeek>14.0</HoursDrivenPerWeek>
             <FuelEconomyCombined>
               <Units>kWh/mile</Units>

@@ -508,7 +508,6 @@
                 </Battery>
               </BatteryElectricVehicle>
             </VehicleType>
-            <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
             <FuelEconomyCombined>
               <Units>kWh/mile</Units>
               <Value>0.25</Value>

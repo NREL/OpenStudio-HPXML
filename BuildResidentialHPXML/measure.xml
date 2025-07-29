@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>f8f32ffe-61c4-4b1a-9b19-c7c0acb34909</version_id>
-  <version_modified>2025-07-29T04:25:08Z</version_modified>
+  <version_id>46eaf395-cf4e-4793-a086-474c8e5ebde3</version_id>
+  <version_modified>2025-07-29T19:10:26Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5139,138 +5139,6 @@
       <default_value>Jan 1 - Dec 31</default_value>
     </argument>
     <argument>
-      <name>hvac_blower_fan_watts_per_cfm</name>
-      <display_name>HVAC Blower: Fan Efficiency</display_name>
-      <description>The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless mini-split systems).</description>
-      <type>Double</type>
-      <units>W/CFM</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>hvac_installation_defects</name>
-      <display_name>HVAC Installation Defects</display_name>
-      <description>Specifies whether the HVAC system has airflow and/or refrigerant charge installation defects. Applies to central furnaces and central/mini-split ACs and HPs.</description>
-      <type>Choice</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>None</default_value>
-      <choices>
-        <choice>
-          <value>None</value>
-          <display_name>None</display_name>
-        </choice>
-        <choice>
-          <value>35% Airflow Defect</value>
-          <display_name>35% Airflow Defect</display_name>
-        </choice>
-        <choice>
-          <value>25% Airflow Defect</value>
-          <display_name>25% Airflow Defect</display_name>
-        </choice>
-        <choice>
-          <value>15% Airflow Defect</value>
-          <display_name>15% Airflow Defect</display_name>
-        </choice>
-        <choice>
-          <value>35% Under Charge</value>
-          <display_name>35% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>25% Under Charge</value>
-          <display_name>25% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>15% Under Charge</value>
-          <display_name>15% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>15% Over Charge</value>
-          <display_name>15% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>25% Over Charge</value>
-          <display_name>25% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>35% Over Charge</value>
-          <display_name>35% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>35% Airflow Defect, 35% Under Charge</value>
-          <display_name>35% Airflow Defect, 35% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>35% Airflow Defect, 25% Under Charge</value>
-          <display_name>35% Airflow Defect, 25% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>35% Airflow Defect, 15% Under Charge</value>
-          <display_name>35% Airflow Defect, 15% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>35% Airflow Defect, 15% Over Charge</value>
-          <display_name>35% Airflow Defect, 15% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>35% Airflow Defect, 25% Over Charge</value>
-          <display_name>35% Airflow Defect, 25% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>35% Airflow Defect, 35% Over Charge</value>
-          <display_name>35% Airflow Defect, 35% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>25% Airflow Defect, 35% Under Charge</value>
-          <display_name>25% Airflow Defect, 35% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>25% Airflow Defect, 25% Under Charge</value>
-          <display_name>25% Airflow Defect, 25% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>25% Airflow Defect, 15% Under Charge</value>
-          <display_name>25% Airflow Defect, 15% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>25% Airflow Defect, 15% Over Charge</value>
-          <display_name>25% Airflow Defect, 15% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>25% Airflow Defect, 25% Over Charge</value>
-          <display_name>25% Airflow Defect, 25% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>25% Airflow Defect, 35% Over Charge</value>
-          <display_name>25% Airflow Defect, 35% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>15% Airflow Defect, 35% Under Charge</value>
-          <display_name>15% Airflow Defect, 35% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>15% Airflow Defect, 25% Under Charge</value>
-          <display_name>15% Airflow Defect, 25% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>15% Airflow Defect, 15% Under Charge</value>
-          <display_name>15% Airflow Defect, 15% Under Charge</display_name>
-        </choice>
-        <choice>
-          <value>15% Airflow Defect, 15% Over Charge</value>
-          <display_name>15% Airflow Defect, 15% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>15% Airflow Defect, 25% Over Charge</value>
-          <display_name>15% Airflow Defect, 25% Over Charge</display_name>
-        </choice>
-        <choice>
-          <value>15% Airflow Defect, 35% Over Charge</value>
-          <display_name>15% Airflow Defect, 35% Over Charge</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
       <name>hvac_ducts</name>
       <display_name>HVAC Ducts</display_name>
       <description>The leakage and insulation level of the ducts.</description>
@@ -6289,19 +6157,67 @@
     <argument>
       <name>dhw_fixtures</name>
       <display_name>DHW: Hot Water Fixtures</display_name>
-      <description>The type of domestic hot water fixtures.</description>
+      <description>The type and usage of domestic hot water fixtures.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>Standard</default_value>
+      <default_value>Standard, 100% Usage</default_value>
       <choices>
         <choice>
-          <value>Standard</value>
-          <display_name>Standard</display_name>
+          <value>Standard, 25% Usage</value>
+          <display_name>Standard, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Low Flow</value>
-          <display_name>Low Flow</display_name>
+          <value>Standard, 50% Usage</value>
+          <display_name>Standard, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 75% Usage</value>
+          <display_name>Standard, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 100% Usage</value>
+          <display_name>Standard, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 150% Usage</value>
+          <display_name>Standard, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 200% Usage</value>
+          <display_name>Standard, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 400% Usage</value>
+          <display_name>Standard, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Low Flow, 25% Usage</value>
+          <display_name>Low Flow, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Low Flow, 50% Usage</value>
+          <display_name>Low Flow, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Low Flow, 75% Usage</value>
+          <display_name>Low Flow, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Low Flow, 100% Usage</value>
+          <display_name>Low Flow, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Low Flow, 150% Usage</value>
+          <display_name>Low Flow, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Low Flow, 200% Usage</value>
+          <display_name>Low Flow, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Low Flow, 400% Usage</value>
+          <display_name>Low Flow, 400% Usage</display_name>
         </choice>
       </choices>
     </argument>
@@ -6387,14 +6303,6 @@
           <display_name>Detailed Example: 54% Efficient, Preheats Hot and Cold, All Showers</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>dhw_water_fixtures_usage_multiplier</name>
-      <display_name>DHW: Hot Water Fixtures Usage Multiplier</display_name>
-      <description>Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>dhw_solar_thermal</name>
@@ -6850,36 +6758,228 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Compact, 200 mile range</value>
-          <display_name>Compact, 200 mile range</display_name>
+          <value>Compact, 200 Mile Range, 25% Usage</value>
+          <display_name>Compact, 200 Mile Range, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Compact, 300 mile range</value>
-          <display_name>Compact, 300 mile range</display_name>
+          <value>Compact, 200 Mile Range, 50% Usage</value>
+          <display_name>Compact, 200 Mile Range, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Midsize, 200 mile range</value>
-          <display_name>Midsize, 200 mile range</display_name>
+          <value>Compact, 200 Mile Range, 75% Usage</value>
+          <display_name>Compact, 200 Mile Range, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Midsize, 300 mile range</value>
-          <display_name>Midsize, 300 mile range</display_name>
+          <value>Compact, 200 Mile Range, 100% Usage</value>
+          <display_name>Compact, 200 Mile Range, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Pickup, 200 mile range</value>
-          <display_name>Pickup, 200 mile range</display_name>
+          <value>Compact, 200 Mile Range, 150% Usage</value>
+          <display_name>Compact, 200 Mile Range, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Pickup, 300 mile range</value>
-          <display_name>Pickup, 300 mile range</display_name>
+          <value>Compact, 200 Mile Range, 200% Usage</value>
+          <display_name>Compact, 200 Mile Range, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>SUV, 200 mile range</value>
-          <display_name>SUV, 200 mile range</display_name>
+          <value>Compact, 200 Mile Range, 400% Usage</value>
+          <display_name>Compact, 200 Mile Range, 400% Usage</display_name>
         </choice>
         <choice>
-          <value>SUV, 300 mile range</value>
-          <display_name>SUV, 300 mile range</display_name>
+          <value>Compact, 300 Mile Range, 25% Usage</value>
+          <display_name>Compact, 300 Mile Range, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Compact, 300 Mile Range, 50% Usage</value>
+          <display_name>Compact, 300 Mile Range, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Compact, 300 Mile Range, 75% Usage</value>
+          <display_name>Compact, 300 Mile Range, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Compact, 300 Mile Range, 100% Usage</value>
+          <display_name>Compact, 300 Mile Range, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Compact, 300 Mile Range, 150% Usage</value>
+          <display_name>Compact, 300 Mile Range, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Compact, 300 Mile Range, 200% Usage</value>
+          <display_name>Compact, 300 Mile Range, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Compact, 300 Mile Range, 400% Usage</value>
+          <display_name>Compact, 300 Mile Range, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 200 Mile Range, 25% Usage</value>
+          <display_name>Midsize, 200 Mile Range, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 200 Mile Range, 50% Usage</value>
+          <display_name>Midsize, 200 Mile Range, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 200 Mile Range, 75% Usage</value>
+          <display_name>Midsize, 200 Mile Range, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 200 Mile Range, 100% Usage</value>
+          <display_name>Midsize, 200 Mile Range, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 200 Mile Range, 150% Usage</value>
+          <display_name>Midsize, 200 Mile Range, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 200 Mile Range, 200% Usage</value>
+          <display_name>Midsize, 200 Mile Range, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 200 Mile Range, 400% Usage</value>
+          <display_name>Midsize, 200 Mile Range, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 300 Mile Range, 25% Usage</value>
+          <display_name>Midsize, 300 Mile Range, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 300 Mile Range, 50% Usage</value>
+          <display_name>Midsize, 300 Mile Range, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 300 Mile Range, 75% Usage</value>
+          <display_name>Midsize, 300 Mile Range, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 300 Mile Range, 100% Usage</value>
+          <display_name>Midsize, 300 Mile Range, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 300 Mile Range, 150% Usage</value>
+          <display_name>Midsize, 300 Mile Range, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 300 Mile Range, 200% Usage</value>
+          <display_name>Midsize, 300 Mile Range, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Midsize, 300 Mile Range, 400% Usage</value>
+          <display_name>Midsize, 300 Mile Range, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 200 Mile Range, 25% Usage</value>
+          <display_name>Pickup, 200 Mile Range, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 200 Mile Range, 50% Usage</value>
+          <display_name>Pickup, 200 Mile Range, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 200 Mile Range, 75% Usage</value>
+          <display_name>Pickup, 200 Mile Range, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 200 Mile Range, 100% Usage</value>
+          <display_name>Pickup, 200 Mile Range, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 200 Mile Range, 150% Usage</value>
+          <display_name>Pickup, 200 Mile Range, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 200 Mile Range, 200% Usage</value>
+          <display_name>Pickup, 200 Mile Range, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 200 Mile Range, 400% Usage</value>
+          <display_name>Pickup, 200 Mile Range, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 300 Mile Range, 25% Usage</value>
+          <display_name>Pickup, 300 Mile Range, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 300 Mile Range, 50% Usage</value>
+          <display_name>Pickup, 300 Mile Range, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 300 Mile Range, 75% Usage</value>
+          <display_name>Pickup, 300 Mile Range, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 300 Mile Range, 100% Usage</value>
+          <display_name>Pickup, 300 Mile Range, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 300 Mile Range, 150% Usage</value>
+          <display_name>Pickup, 300 Mile Range, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 300 Mile Range, 200% Usage</value>
+          <display_name>Pickup, 300 Mile Range, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pickup, 300 Mile Range, 400% Usage</value>
+          <display_name>Pickup, 300 Mile Range, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 200 Mile Range, 25% Usage</value>
+          <display_name>SUV, 200 Mile Range, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 200 Mile Range, 50% Usage</value>
+          <display_name>SUV, 200 Mile Range, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 200 Mile Range, 75% Usage</value>
+          <display_name>SUV, 200 Mile Range, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 200 Mile Range, 100% Usage</value>
+          <display_name>SUV, 200 Mile Range, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 200 Mile Range, 150% Usage</value>
+          <display_name>SUV, 200 Mile Range, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 200 Mile Range, 200% Usage</value>
+          <display_name>SUV, 200 Mile Range, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 200 Mile Range, 400% Usage</value>
+          <display_name>SUV, 200 Mile Range, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 300 Mile Range, 25% Usage</value>
+          <display_name>SUV, 300 Mile Range, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 300 Mile Range, 50% Usage</value>
+          <display_name>SUV, 300 Mile Range, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 300 Mile Range, 75% Usage</value>
+          <display_name>SUV, 300 Mile Range, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 300 Mile Range, 100% Usage</value>
+          <display_name>SUV, 300 Mile Range, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 300 Mile Range, 150% Usage</value>
+          <display_name>SUV, 300 Mile Range, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 300 Mile Range, 200% Usage</value>
+          <display_name>SUV, 300 Mile Range, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>SUV, 300 Mile Range, 400% Usage</value>
+          <display_name>SUV, 300 Mile Range, 400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: 100 kWh battery, 0.25 kWh/mile</value>
@@ -6894,15 +6994,6 @@
           <display_name>Detailed Example: 100 kWh battery, 135.0 mpge</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>electric_vehicle_miles_driven_per_year</name>
-      <display_name>Electric Vehicle: Miles Driven Per Year</display_name>
-      <description>The annual miles the vehicle is driven. If not provided, defaults to 10900.</description>
-      <type>Double</type>
-      <units>miles</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>electric_vehicle_charger</name>
@@ -6974,35 +7065,115 @@
     <argument>
       <name>appliance_clothes_washer</name>
       <display_name>Appliances: Clothes Washer</display_name>
-      <description>The type of clothes washer.</description>
+      <description>The type and usage of clothes washer.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>Standard, 2008-2017</default_value>
+      <default_value>Standard, 2008-2017, 100% Usage</default_value>
       <choices>
         <choice>
           <value>None</value>
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Standard, 2008-2017</value>
-          <display_name>Standard, 2008-2017</display_name>
+          <value>Standard, 2008-2017, 50% Usage</value>
+          <display_name>Standard, 2008-2017, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Standard, 2018-present</value>
-          <display_name>Standard, 2018-present</display_name>
+          <value>Standard, 2008-2017, 75% Usage</value>
+          <display_name>Standard, 2008-2017, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>EnergyStar, 2006-2017</value>
-          <display_name>EnergyStar, 2006-2017</display_name>
+          <value>Standard, 2008-2017, 100% Usage</value>
+          <display_name>Standard, 2008-2017, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>EnergyStar, 2018-present</value>
-          <display_name>EnergyStar, 2018-present</display_name>
+          <value>Standard, 2008-2017, 150% Usage</value>
+          <display_name>Standard, 2008-2017, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>CEE Tier II 2018</value>
-          <display_name>CEE Tier II 2018</display_name>
+          <value>Standard, 2008-2017, 200% Usage</value>
+          <display_name>Standard, 2008-2017, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 2018-present, 50% Usage</value>
+          <display_name>Standard, 2018-present, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 2018-present, 75% Usage</value>
+          <display_name>Standard, 2018-present, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 2018-present, 100% Usage</value>
+          <display_name>Standard, 2018-present, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 2018-present, 150% Usage</value>
+          <display_name>Standard, 2018-present, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Standard, 2018-present, 200% Usage</value>
+          <display_name>Standard, 2018-present, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2006-2017, 50% Usage</value>
+          <display_name>EnergyStar, 2006-2017, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2006-2017, 75% Usage</value>
+          <display_name>EnergyStar, 2006-2017, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2006-2017, 100% Usage</value>
+          <display_name>EnergyStar, 2006-2017, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2006-2017, 150% Usage</value>
+          <display_name>EnergyStar, 2006-2017, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2006-2017, 200% Usage</value>
+          <display_name>EnergyStar, 2006-2017, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2018-present, 50% Usage</value>
+          <display_name>EnergyStar, 2018-present, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2018-present, 75% Usage</value>
+          <display_name>EnergyStar, 2018-present, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2018-present, 100% Usage</value>
+          <display_name>EnergyStar, 2018-present, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2018-present, 150% Usage</value>
+          <display_name>EnergyStar, 2018-present, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, 2018-present, 200% Usage</value>
+          <display_name>EnergyStar, 2018-present, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>CEE Tier II, 2018, 50% Usage</value>
+          <display_name>CEE Tier II, 2018, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>CEE Tier II, 2018, 75% Usage</value>
+          <display_name>CEE Tier II, 2018, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>CEE Tier II, 2018, 100% Usage</value>
+          <display_name>CEE Tier II, 2018, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>CEE Tier II, 2018, 150% Usage</value>
+          <display_name>CEE Tier II, 2018, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>CEE Tier II, 2018, 200% Usage</value>
+          <display_name>CEE Tier II, 2018, 200% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: ERI Reference 2006</value>
@@ -7027,49 +7198,137 @@
       </choices>
     </argument>
     <argument>
-      <name>appliance_clothes_washer_usage_multiplier</name>
-      <display_name>Appliances: Clothes Washer Usage Multiplier</display_name>
-      <description>Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>appliance_clothes_dryer</name>
       <display_name>Appliances: Clothes Dryer</display_name>
-      <description>The type of clothes dryer.</description>
+      <description>The type and usage of clothes dryer.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>Electricity, Standard</default_value>
+      <default_value>Electricity, Standard, 100% Usage</default_value>
       <choices>
         <choice>
           <value>None</value>
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Electricity, Standard</value>
-          <display_name>Electricity, Standard</display_name>
+          <value>Electricity, Standard, 50% Usage</value>
+          <display_name>Electricity, Standard, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Electricity, Premium</value>
-          <display_name>Electricity, Premium</display_name>
+          <value>Electricity, Standard, 75% Usage</value>
+          <display_name>Electricity, Standard, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Electricity, Heat Pump</value>
-          <display_name>Electricity, Heat Pump</display_name>
+          <value>Electricity, Standard, 100% Usage</value>
+          <display_name>Electricity, Standard, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, Standard</value>
-          <display_name>Natural Gas, Standard</display_name>
+          <value>Electricity, Standard, 150% Usage</value>
+          <display_name>Electricity, Standard, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, Premium</value>
-          <display_name>Natural Gas, Premium</display_name>
+          <value>Electricity, Standard, 200% Usage</value>
+          <display_name>Electricity, Standard, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, Standard</value>
-          <display_name>Propane, Standard</display_name>
+          <value>Electricity, Premium, 50% Usage</value>
+          <display_name>Electricity, Premium, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Premium, 75% Usage</value>
+          <display_name>Electricity, Premium, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Premium, 100% Usage</value>
+          <display_name>Electricity, Premium, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Premium, 150% Usage</value>
+          <display_name>Electricity, Premium, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Premium, 200% Usage</value>
+          <display_name>Electricity, Premium, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Heat Pump, 50% Usage</value>
+          <display_name>Electricity, Heat Pump, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Heat Pump, 75% Usage</value>
+          <display_name>Electricity, Heat Pump, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Heat Pump, 100% Usage</value>
+          <display_name>Electricity, Heat Pump, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Heat Pump, 150% Usage</value>
+          <display_name>Electricity, Heat Pump, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Heat Pump, 200% Usage</value>
+          <display_name>Electricity, Heat Pump, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Standard, 50% Usage</value>
+          <display_name>Natural Gas, Standard, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Standard, 75% Usage</value>
+          <display_name>Natural Gas, Standard, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Standard, 100% Usage</value>
+          <display_name>Natural Gas, Standard, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Standard, 150% Usage</value>
+          <display_name>Natural Gas, Standard, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Standard, 200% Usage</value>
+          <display_name>Natural Gas, Standard, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Premium, 50% Usage</value>
+          <display_name>Natural Gas, Premium, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Premium, 75% Usage</value>
+          <display_name>Natural Gas, Premium, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Premium, 100% Usage</value>
+          <display_name>Natural Gas, Premium, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Premium, 150% Usage</value>
+          <display_name>Natural Gas, Premium, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Premium, 200% Usage</value>
+          <display_name>Natural Gas, Premium, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Standard, 50% Usage</value>
+          <display_name>Propane, Standard, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Standard, 75% Usage</value>
+          <display_name>Propane, Standard, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Standard, 100% Usage</value>
+          <display_name>Propane, Standard, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Standard, 150% Usage</value>
+          <display_name>Propane, Standard, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Standard, 200% Usage</value>
+          <display_name>Propane, Standard, 200% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: Electricity, ERI Reference 2006</value>
@@ -7098,37 +7357,77 @@
       </choices>
     </argument>
     <argument>
-      <name>appliance_clothes_dryer_usage_multiplier</name>
-      <display_name>Appliances: Clothes Dryer Usage Multiplier</display_name>
-      <description>Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>appliance_dishwasher</name>
       <display_name>Appliances: Dishwasher</display_name>
-      <description>The type of dishwasher.</description>
+      <description>The type and usage of dishwasher.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>Federal Minimum, Standard</default_value>
+      <default_value>Federal Minimum, Standard, 100% Usage</default_value>
       <choices>
         <choice>
           <value>None</value>
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Federal Minimum, Standard</value>
-          <display_name>Federal Minimum, Standard</display_name>
+          <value>Federal Minimum, Standard, 50% Usage</value>
+          <display_name>Federal Minimum, Standard, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>EnergyStar, Standard</value>
-          <display_name>EnergyStar, Standard</display_name>
+          <value>Federal Minimum, Standard, 75% Usage</value>
+          <display_name>Federal Minimum, Standard, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>EnergyStar, Compact</value>
-          <display_name>EnergyStar, Compact</display_name>
+          <value>Federal Minimum, Standard, 100% Usage</value>
+          <display_name>Federal Minimum, Standard, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Federal Minimum, Standard, 150% Usage</value>
+          <display_name>Federal Minimum, Standard, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Federal Minimum, Standard, 200% Usage</value>
+          <display_name>Federal Minimum, Standard, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Standard, 50% Usage</value>
+          <display_name>EnergyStar, Standard, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Standard, 75% Usage</value>
+          <display_name>EnergyStar, Standard, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Standard, 100% Usage</value>
+          <display_name>EnergyStar, Standard, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Standard, 150% Usage</value>
+          <display_name>EnergyStar, Standard, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Standard, 200% Usage</value>
+          <display_name>EnergyStar, Standard, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Compact, 50% Usage</value>
+          <display_name>EnergyStar, Compact, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Compact, 75% Usage</value>
+          <display_name>EnergyStar, Compact, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Compact, 100% Usage</value>
+          <display_name>EnergyStar, Compact, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Compact, 150% Usage</value>
+          <display_name>EnergyStar, Compact, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>EnergyStar, Compact, 200% Usage</value>
+          <display_name>EnergyStar, Compact, 200% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: ERI Reference 2006</value>
@@ -7153,65 +7452,137 @@
       </choices>
     </argument>
     <argument>
-      <name>appliance_dishwasher_usage_multiplier</name>
-      <display_name>Appliances: Dishwasher Usage Multiplier</display_name>
-      <description>Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>appliance_refrigerator</name>
       <display_name>Appliances: Refrigerator</display_name>
-      <description>The type of refrigerator.</description>
+      <description>The type and usage of refrigerator.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>434 kWh/yr</default_value>
+      <default_value>434 kWh/yr, 100% Usage</default_value>
       <choices>
         <choice>
           <value>None</value>
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>1139 kWh/yr</value>
-          <display_name>1139 kWh/yr</display_name>
+          <value>1139 kWh/yr, 90% Usage</value>
+          <display_name>1139 kWh/yr, 90% Usage</display_name>
         </choice>
         <choice>
-          <value>748 kWh/yr</value>
-          <display_name>748 kWh/yr</display_name>
+          <value>1139 kWh/yr, 100% Usage</value>
+          <display_name>1139 kWh/yr, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>650 kWh/yr</value>
-          <display_name>650 kWh/yr</display_name>
+          <value>1139 kWh/yr, 110% Usage</value>
+          <display_name>1139 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
-          <value>574 kWh/yr</value>
-          <display_name>574 kWh/yr</display_name>
+          <value>748 kWh/yr, 90% Usage</value>
+          <display_name>748 kWh/yr, 90% Usage</display_name>
         </choice>
         <choice>
-          <value>547 kWh/yr</value>
-          <display_name>547 kWh/yr</display_name>
+          <value>748 kWh/yr, 100% Usage</value>
+          <display_name>748 kWh/yr, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>480 kWh/yr</value>
-          <display_name>480 kWh/yr</display_name>
+          <value>748 kWh/yr, 110% Usage</value>
+          <display_name>748 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
-          <value>458 kWh/yr</value>
-          <display_name>458 kWh/yr</display_name>
+          <value>650 kWh/yr, 90% Usage</value>
+          <display_name>650 kWh/yr, 90% Usage</display_name>
         </choice>
         <choice>
-          <value>434 kWh/yr</value>
-          <display_name>434 kWh/yr</display_name>
+          <value>650 kWh/yr, 100% Usage</value>
+          <display_name>650 kWh/yr, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>384 kWh/yr</value>
-          <display_name>384 kWh/yr</display_name>
+          <value>650 kWh/yr, 110% Usage</value>
+          <display_name>650 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
-          <value>348 kWh/yr</value>
-          <display_name>348 kWh/yr</display_name>
+          <value>574 kWh/yr, 90% Usage</value>
+          <display_name>574 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>574 kWh/yr, 100% Usage</value>
+          <display_name>574 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>574 kWh/yr, 110% Usage</value>
+          <display_name>574 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>547 kWh/yr, 90% Usage</value>
+          <display_name>547 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>547 kWh/yr, 100% Usage</value>
+          <display_name>547 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>547 kWh/yr, 110% Usage</value>
+          <display_name>547 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>480 kWh/yr, 90% Usage</value>
+          <display_name>480 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>480 kWh/yr, 100% Usage</value>
+          <display_name>480 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>480 kWh/yr, 110% Usage</value>
+          <display_name>480 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>458 kWh/yr, 90% Usage</value>
+          <display_name>458 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>458 kWh/yr, 100% Usage</value>
+          <display_name>458 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>458 kWh/yr, 110% Usage</value>
+          <display_name>458 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>434 kWh/yr, 90% Usage</value>
+          <display_name>434 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>434 kWh/yr, 100% Usage</value>
+          <display_name>434 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>434 kWh/yr, 110% Usage</value>
+          <display_name>434 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>384 kWh/yr, 90% Usage</value>
+          <display_name>384 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>384 kWh/yr, 100% Usage</value>
+          <display_name>384 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>384 kWh/yr, 110% Usage</value>
+          <display_name>384 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>348 kWh/yr, 90% Usage</value>
+          <display_name>348 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>348 kWh/yr, 100% Usage</value>
+          <display_name>348 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>348 kWh/yr, 110% Usage</value>
+          <display_name>348 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: ERI Reference 2006, 2-Bedroom Home</value>
@@ -7240,17 +7611,9 @@
       </choices>
     </argument>
     <argument>
-      <name>appliance_refrigerator_usage_multiplier</name>
-      <display_name>Appliances: Refrigerator Usage Multiplier</display_name>
-      <description>Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>appliance_extra_refrigerator</name>
       <display_name>Appliances: Extra Refrigerator</display_name>
-      <description>The type of extra refrigerator.</description>
+      <description>The type and usage of extra refrigerator.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -7261,44 +7624,124 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>1139 kWh/yr</value>
-          <display_name>1139 kWh/yr</display_name>
+          <value>1139 kWh/yr, 90% Usage</value>
+          <display_name>1139 kWh/yr, 90% Usage</display_name>
         </choice>
         <choice>
-          <value>748 kWh/yr</value>
-          <display_name>748 kWh/yr</display_name>
+          <value>1139 kWh/yr, 100% Usage</value>
+          <display_name>1139 kWh/yr, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>650 kWh/yr</value>
-          <display_name>650 kWh/yr</display_name>
+          <value>1139 kWh/yr, 110% Usage</value>
+          <display_name>1139 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
-          <value>574 kWh/yr</value>
-          <display_name>574 kWh/yr</display_name>
+          <value>748 kWh/yr, 90% Usage</value>
+          <display_name>748 kWh/yr, 90% Usage</display_name>
         </choice>
         <choice>
-          <value>547 kWh/yr</value>
-          <display_name>547 kWh/yr</display_name>
+          <value>748 kWh/yr, 100% Usage</value>
+          <display_name>748 kWh/yr, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>480 kWh/yr</value>
-          <display_name>480 kWh/yr</display_name>
+          <value>748 kWh/yr, 110% Usage</value>
+          <display_name>748 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
-          <value>458 kWh/yr</value>
-          <display_name>458 kWh/yr</display_name>
+          <value>650 kWh/yr, 90% Usage</value>
+          <display_name>650 kWh/yr, 90% Usage</display_name>
         </choice>
         <choice>
-          <value>434 kWh/yr</value>
-          <display_name>434 kWh/yr</display_name>
+          <value>650 kWh/yr, 100% Usage</value>
+          <display_name>650 kWh/yr, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>384 kWh/yr</value>
-          <display_name>384 kWh/yr</display_name>
+          <value>650 kWh/yr, 110% Usage</value>
+          <display_name>650 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
-          <value>348 kWh/yr</value>
-          <display_name>348 kWh/yr</display_name>
+          <value>574 kWh/yr, 90% Usage</value>
+          <display_name>574 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>574 kWh/yr, 100% Usage</value>
+          <display_name>574 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>574 kWh/yr, 110% Usage</value>
+          <display_name>574 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>547 kWh/yr, 90% Usage</value>
+          <display_name>547 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>547 kWh/yr, 100% Usage</value>
+          <display_name>547 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>547 kWh/yr, 110% Usage</value>
+          <display_name>547 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>480 kWh/yr, 90% Usage</value>
+          <display_name>480 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>480 kWh/yr, 100% Usage</value>
+          <display_name>480 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>480 kWh/yr, 110% Usage</value>
+          <display_name>480 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>458 kWh/yr, 90% Usage</value>
+          <display_name>458 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>458 kWh/yr, 100% Usage</value>
+          <display_name>458 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>458 kWh/yr, 110% Usage</value>
+          <display_name>458 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>434 kWh/yr, 90% Usage</value>
+          <display_name>434 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>434 kWh/yr, 100% Usage</value>
+          <display_name>434 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>434 kWh/yr, 110% Usage</value>
+          <display_name>434 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>384 kWh/yr, 90% Usage</value>
+          <display_name>384 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>384 kWh/yr, 100% Usage</value>
+          <display_name>384 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>384 kWh/yr, 110% Usage</value>
+          <display_name>384 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>348 kWh/yr, 90% Usage</value>
+          <display_name>348 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>348 kWh/yr, 100% Usage</value>
+          <display_name>348 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>348 kWh/yr, 110% Usage</value>
+          <display_name>348 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: 748 kWh/yr, Conditioned Basement</value>
@@ -7315,17 +7758,9 @@
       </choices>
     </argument>
     <argument>
-      <name>appliance_extra_refrigerator_usage_multiplier</name>
-      <display_name>Appliances: Extra Refrigerator Usage Multiplier</display_name>
-      <description>Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>appliance_freezer</name>
       <display_name>Appliances: Freezer</display_name>
-      <description>The type of freezer.</description>
+      <description>The type and usage of freezer.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -7336,32 +7771,88 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>935 kWh/yr</value>
-          <display_name>935 kWh/yr</display_name>
+          <value>935 kWh/yr, 90% Usage</value>
+          <display_name>935 kWh/yr, 90% Usage</display_name>
         </choice>
         <choice>
-          <value>712 kWh/yr</value>
-          <display_name>712 kWh/yr</display_name>
+          <value>935 kWh/yr, 100% Usage</value>
+          <display_name>935 kWh/yr, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>641 kWh/yr</value>
-          <display_name>641 kWh/yr</display_name>
+          <value>935 kWh/yr, 110% Usage</value>
+          <display_name>935 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
-          <value>568 kWh/yr</value>
-          <display_name>568 kWh/yr</display_name>
+          <value>712 kWh/yr, 90% Usage</value>
+          <display_name>712 kWh/yr, 90% Usage</display_name>
         </choice>
         <choice>
-          <value>417 kWh/yr</value>
-          <display_name>417 kWh/yr</display_name>
+          <value>712 kWh/yr, 100% Usage</value>
+          <display_name>712 kWh/yr, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>375 kWh/yr</value>
-          <display_name>375 kWh/yr</display_name>
+          <value>712 kWh/yr, 110% Usage</value>
+          <display_name>712 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
-          <value>354 kWh/yr</value>
-          <display_name>354 kWh/yr</display_name>
+          <value>641 kWh/yr, 90% Usage</value>
+          <display_name>641 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>641 kWh/yr, 100% Usage</value>
+          <display_name>641 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>641 kWh/yr, 110% Usage</value>
+          <display_name>641 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>568 kWh/yr, 90% Usage</value>
+          <display_name>568 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>568 kWh/yr, 100% Usage</value>
+          <display_name>568 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>568 kWh/yr, 110% Usage</value>
+          <display_name>568 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>417 kWh/yr, 90% Usage</value>
+          <display_name>417 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>417 kWh/yr, 100% Usage</value>
+          <display_name>417 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>417 kWh/yr, 110% Usage</value>
+          <display_name>417 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>375 kWh/yr, 90% Usage</value>
+          <display_name>375 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>375 kWh/yr, 100% Usage</value>
+          <display_name>375 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>375 kWh/yr, 110% Usage</value>
+          <display_name>375 kWh/yr, 110% Usage</display_name>
+        </choice>
+        <choice>
+          <value>354 kWh/yr, 90% Usage</value>
+          <display_name>354 kWh/yr, 90% Usage</display_name>
+        </choice>
+        <choice>
+          <value>354 kWh/yr, 100% Usage</value>
+          <display_name>354 kWh/yr, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>354 kWh/yr, 110% Usage</value>
+          <display_name>354 kWh/yr, 110% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: 712 kWh/yr, Conditioned Basement</value>
@@ -7378,57 +7869,177 @@
       </choices>
     </argument>
     <argument>
-      <name>appliance_freezer_usage_multiplier</name>
-      <display_name>Appliances: Freezer Usage Multiplier</display_name>
-      <description>Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>appliance_cooking_range_oven</name>
       <display_name>Appliances: Cooking Range/Oven</display_name>
-      <description>The type of cooking range/oven.</description>
+      <description>The type and usage of cooking range/oven.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>Electricity, Standard, Non-Convection</default_value>
+      <default_value>Electricity, Standard, Non-Convection, 100% Usage</default_value>
       <choices>
         <choice>
           <value>None</value>
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Electricity, Standard, Non-Convection</value>
-          <display_name>Electricity, Standard, Non-Convection</display_name>
+          <value>Electricity, Standard, Non-Convection, 50% Usage</value>
+          <display_name>Electricity, Standard, Non-Convection, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Electricity, Standard, Convection</value>
-          <display_name>Electricity, Standard, Convection</display_name>
+          <value>Electricity, Standard, Non-Convection, 75% Usage</value>
+          <display_name>Electricity, Standard, Non-Convection, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Electricity, Induction, Non-Convection</value>
-          <display_name>Electricity, Induction, Non-Convection</display_name>
+          <value>Electricity, Standard, Non-Convection, 100% Usage</value>
+          <display_name>Electricity, Standard, Non-Convection, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Electricity, Induction, Convection</value>
-          <display_name>Electricity, Induction, Convection</display_name>
+          <value>Electricity, Standard, Non-Convection, 150% Usage</value>
+          <display_name>Electricity, Standard, Non-Convection, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, Non-Convection</value>
-          <display_name>Natural Gas, Non-Convection</display_name>
+          <value>Electricity, Standard, Non-Convection, 200% Usage</value>
+          <display_name>Electricity, Standard, Non-Convection, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, Convection</value>
-          <display_name>Natural Gas, Convection</display_name>
+          <value>Electricity, Standard, Convection, 50% Usage</value>
+          <display_name>Electricity, Standard, Convection, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, Non-Convection</value>
-          <display_name>Propane, Non-Convection</display_name>
+          <value>Electricity, Standard, Convection, 75% Usage</value>
+          <display_name>Electricity, Standard, Convection, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, Convection</value>
-          <display_name>Propane, Convection</display_name>
+          <value>Electricity, Standard, Convection, 100% Usage</value>
+          <display_name>Electricity, Standard, Convection, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Standard, Convection, 150% Usage</value>
+          <display_name>Electricity, Standard, Convection, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Standard, Convection, 200% Usage</value>
+          <display_name>Electricity, Standard, Convection, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Non-Convection, 50% Usage</value>
+          <display_name>Electricity, Induction, Non-Convection, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Non-Convection, 75% Usage</value>
+          <display_name>Electricity, Induction, Non-Convection, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Non-Convection, 100% Usage</value>
+          <display_name>Electricity, Induction, Non-Convection, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Non-Convection, 150% Usage</value>
+          <display_name>Electricity, Induction, Non-Convection, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Non-Convection, 200% Usage</value>
+          <display_name>Electricity, Induction, Non-Convection, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Convection, 50% Usage</value>
+          <display_name>Electricity, Induction, Convection, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Convection, 75% Usage</value>
+          <display_name>Electricity, Induction, Convection, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Convection, 100% Usage</value>
+          <display_name>Electricity, Induction, Convection, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Convection, 150% Usage</value>
+          <display_name>Electricity, Induction, Convection, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Electricity, Induction, Convection, 200% Usage</value>
+          <display_name>Electricity, Induction, Convection, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Non-Convection, 50% Usage</value>
+          <display_name>Natural Gas, Non-Convection, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Non-Convection, 75% Usage</value>
+          <display_name>Natural Gas, Non-Convection, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Non-Convection, 100% Usage</value>
+          <display_name>Natural Gas, Non-Convection, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Non-Convection, 150% Usage</value>
+          <display_name>Natural Gas, Non-Convection, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Non-Convection, 200% Usage</value>
+          <display_name>Natural Gas, Non-Convection, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Convection, 50% Usage</value>
+          <display_name>Natural Gas, Convection, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Convection, 75% Usage</value>
+          <display_name>Natural Gas, Convection, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Convection, 100% Usage</value>
+          <display_name>Natural Gas, Convection, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Convection, 150% Usage</value>
+          <display_name>Natural Gas, Convection, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Natural Gas, Convection, 200% Usage</value>
+          <display_name>Natural Gas, Convection, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Non-Convection, 50% Usage</value>
+          <display_name>Propane, Non-Convection, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Non-Convection, 75% Usage</value>
+          <display_name>Propane, Non-Convection, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Non-Convection, 100% Usage</value>
+          <display_name>Propane, Non-Convection, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Non-Convection, 150% Usage</value>
+          <display_name>Propane, Non-Convection, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Non-Convection, 200% Usage</value>
+          <display_name>Propane, Non-Convection, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Convection, 50% Usage</value>
+          <display_name>Propane, Convection, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Convection, 75% Usage</value>
+          <display_name>Propane, Convection, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Convection, 100% Usage</value>
+          <display_name>Propane, Convection, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Convection, 150% Usage</value>
+          <display_name>Propane, Convection, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Propane, Convection, 200% Usage</value>
+          <display_name>Propane, Convection, 200% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: Electricity, Standard, Non-Convection, Conditioned Basement</value>
@@ -7443,14 +8054,6 @@
           <display_name>Detailed Example: Electricity, Standard, Non-Convection, Garage</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>appliance_cooking_range_oven_usage_multiplier</name>
-      <display_name>Appliances: Cooking Range/Oven Usage Multiplier</display_name>
-      <description>Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>appliance_dehumidifier</name>
@@ -7516,129 +8119,205 @@
     <argument>
       <name>lighting</name>
       <display_name>Lighting</display_name>
-      <description>The type of lighting.</description>
+      <description>The type and usage of interior, exterior, and garage lighting.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>10% CFL</default_value>
+      <default_value>50% LED, 100% Usage</default_value>
       <choices>
         <choice>
           <value>None</value>
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>100% Incandescent</value>
-          <display_name>100% Incandescent</display_name>
+          <value>100% Incandescent, 50% Usage</value>
+          <display_name>100% Incandescent, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>10% CFL</value>
-          <display_name>10% CFL</display_name>
+          <value>100% Incandescent, 75% Usage</value>
+          <display_name>100% Incandescent, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>20% CFL</value>
-          <display_name>20% CFL</display_name>
+          <value>100% Incandescent, 100% Usage</value>
+          <display_name>100% Incandescent, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>30% CFL</value>
-          <display_name>30% CFL</display_name>
+          <value>100% Incandescent, 150% Usage</value>
+          <display_name>100% Incandescent, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>40% CFL</value>
-          <display_name>40% CFL</display_name>
+          <value>100% Incandescent, 200% Usage</value>
+          <display_name>100% Incandescent, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>50% CFL</value>
-          <display_name>50% CFL</display_name>
+          <value>25% LED, 50% Usage</value>
+          <display_name>25% LED, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>60% CFL</value>
-          <display_name>60% CFL</display_name>
+          <value>25% LED, 75% Usage</value>
+          <display_name>25% LED, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>70% CFL</value>
-          <display_name>70% CFL</display_name>
+          <value>25% LED, 100% Usage</value>
+          <display_name>25% LED, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>80% CFL</value>
-          <display_name>80% CFL</display_name>
+          <value>25% LED, 150% Usage</value>
+          <display_name>25% LED, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>90% CFL</value>
-          <display_name>90% CFL</display_name>
+          <value>25% LED, 200% Usage</value>
+          <display_name>25% LED, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>100% CFL</value>
-          <display_name>100% CFL</display_name>
+          <value>50% LED, 50% Usage</value>
+          <display_name>50% LED, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>10% LED</value>
-          <display_name>10% LED</display_name>
+          <value>50% LED, 75% Usage</value>
+          <display_name>50% LED, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>20% LED</value>
-          <display_name>20% LED</display_name>
+          <value>50% LED, 100% Usage</value>
+          <display_name>50% LED, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>30% LED</value>
-          <display_name>30% LED</display_name>
+          <value>50% LED, 150% Usage</value>
+          <display_name>50% LED, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>40% LED</value>
-          <display_name>40% LED</display_name>
+          <value>50% LED, 200% Usage</value>
+          <display_name>50% LED, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>50% LED</value>
-          <display_name>50% LED</display_name>
+          <value>75% LED, 50% Usage</value>
+          <display_name>75% LED, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>60% LED</value>
-          <display_name>60% LED</display_name>
+          <value>75% LED, 75% Usage</value>
+          <display_name>75% LED, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>70% LED</value>
-          <display_name>70% LED</display_name>
+          <value>75% LED, 100% Usage</value>
+          <display_name>75% LED, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>80% LED</value>
-          <display_name>80% LED</display_name>
+          <value>75% LED, 150% Usage</value>
+          <display_name>75% LED, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>90% LED</value>
-          <display_name>90% LED</display_name>
+          <value>75% LED, 200% Usage</value>
+          <display_name>75% LED, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>100% LED</value>
-          <display_name>100% LED</display_name>
+          <value>100% LED, 50% Usage</value>
+          <display_name>100% LED, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% LED, 75% Usage</value>
+          <display_name>100% LED, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% LED, 100% Usage</value>
+          <display_name>100% LED, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% LED, 150% Usage</value>
+          <display_name>100% LED, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% LED, 200% Usage</value>
+          <display_name>100% LED, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>25% CFL, 50% Usage</value>
+          <display_name>25% CFL, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>25% CFL, 75% Usage</value>
+          <display_name>25% CFL, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>25% CFL, 100% Usage</value>
+          <display_name>25% CFL, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>25% CFL, 150% Usage</value>
+          <display_name>25% CFL, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>25% CFL, 200% Usage</value>
+          <display_name>25% CFL, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>50% CFL, 50% Usage</value>
+          <display_name>50% CFL, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>50% CFL, 75% Usage</value>
+          <display_name>50% CFL, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>50% CFL, 100% Usage</value>
+          <display_name>50% CFL, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>50% CFL, 150% Usage</value>
+          <display_name>50% CFL, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>50% CFL, 200% Usage</value>
+          <display_name>50% CFL, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>75% CFL, 50% Usage</value>
+          <display_name>75% CFL, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>75% CFL, 75% Usage</value>
+          <display_name>75% CFL, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>75% CFL, 100% Usage</value>
+          <display_name>75% CFL, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>75% CFL, 150% Usage</value>
+          <display_name>75% CFL, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>75% CFL, 200% Usage</value>
+          <display_name>75% CFL, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% CFL, 50% Usage</value>
+          <display_name>100% CFL, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% CFL, 75% Usage</value>
+          <display_name>100% CFL, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% CFL, 100% Usage</value>
+          <display_name>100% CFL, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% CFL, 150% Usage</value>
+          <display_name>100% CFL, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>100% CFL, 200% Usage</value>
+          <display_name>100% CFL, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Detailed Example: 10% CFL</value>
+          <display_name>Detailed Example: 10% CFL</display_name>
         </choice>
         <choice>
           <value>Detailed Example: 40% CFL, 10% LFL, 25% LED</value>
           <display_name>Detailed Example: 40% CFL, 10% LFL, 25% LED</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>lighting_interior_usage_multiplier</name>
-      <display_name>Lighting: Interior Usage Multiplier</display_name>
-      <description>Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>lighting_exterior_usage_multiplier</name>
-      <display_name>Lighting: Exterior Usage Multiplier</display_name>
-      <description>Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>lighting_garage_usage_multiplier</name>
-      <display_name>Lighting: Garage Usage Multiplier</display_name>
-      <description>Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants.</description>
-      <type>Double</type>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>ceiling_fans</name>
@@ -7742,63 +8421,63 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>100%</default_value>
+      <default_value>100% Usage</default_value>
       <choices>
         <choice>
           <value>None</value>
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>25%</value>
-          <display_name>25%</display_name>
+          <value>25% Usage</value>
+          <display_name>25% Usage</display_name>
         </choice>
         <choice>
-          <value>33%</value>
-          <display_name>33%</display_name>
+          <value>33% Usage</value>
+          <display_name>33% Usage</display_name>
         </choice>
         <choice>
-          <value>50%</value>
-          <display_name>50%</display_name>
+          <value>50% Usage</value>
+          <display_name>50% Usage</display_name>
         </choice>
         <choice>
-          <value>75%</value>
-          <display_name>75%</display_name>
+          <value>75% Usage</value>
+          <display_name>75% Usage</display_name>
         </choice>
         <choice>
-          <value>80%</value>
-          <display_name>80%</display_name>
+          <value>80% Usage</value>
+          <display_name>80% Usage</display_name>
         </choice>
         <choice>
-          <value>90%</value>
-          <display_name>90%</display_name>
+          <value>90% Usage</value>
+          <display_name>90% Usage</display_name>
         </choice>
         <choice>
-          <value>100%</value>
-          <display_name>100%</display_name>
+          <value>100% Usage</value>
+          <display_name>100% Usage</display_name>
         </choice>
         <choice>
-          <value>110%</value>
-          <display_name>110%</display_name>
+          <value>110% Usage</value>
+          <display_name>110% Usage</display_name>
         </choice>
         <choice>
-          <value>125%</value>
-          <display_name>125%</display_name>
+          <value>125% Usage</value>
+          <display_name>125% Usage</display_name>
         </choice>
         <choice>
-          <value>150%</value>
-          <display_name>150%</display_name>
+          <value>150% Usage</value>
+          <display_name>150% Usage</display_name>
         </choice>
         <choice>
-          <value>200%</value>
-          <display_name>200%</display_name>
+          <value>200% Usage</value>
+          <display_name>200% Usage</display_name>
         </choice>
         <choice>
-          <value>300%</value>
-          <display_name>300%</display_name>
+          <value>300% Usage</value>
+          <display_name>300% Usage</display_name>
         </choice>
         <choice>
-          <value>400%</value>
-          <display_name>400%</display_name>
+          <value>400% Usage</value>
+          <display_name>400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: 620 kWh/yr</value>
@@ -7813,63 +8492,63 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>100%</default_value>
+      <default_value>100% Usage</default_value>
       <choices>
         <choice>
           <value>None</value>
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>25%</value>
-          <display_name>25%</display_name>
+          <value>25% Usage</value>
+          <display_name>25% Usage</display_name>
         </choice>
         <choice>
-          <value>33%</value>
-          <display_name>33%</display_name>
+          <value>33% Usage</value>
+          <display_name>33% Usage</display_name>
         </choice>
         <choice>
-          <value>50%</value>
-          <display_name>50%</display_name>
+          <value>50% Usage</value>
+          <display_name>50% Usage</display_name>
         </choice>
         <choice>
-          <value>75%</value>
-          <display_name>75%</display_name>
+          <value>75% Usage</value>
+          <display_name>75% Usage</display_name>
         </choice>
         <choice>
-          <value>80%</value>
-          <display_name>80%</display_name>
+          <value>80% Usage</value>
+          <display_name>80% Usage</display_name>
         </choice>
         <choice>
-          <value>90%</value>
-          <display_name>90%</display_name>
+          <value>90% Usage</value>
+          <display_name>90% Usage</display_name>
         </choice>
         <choice>
-          <value>100%</value>
-          <display_name>100%</display_name>
+          <value>100% Usage</value>
+          <display_name>100% Usage</display_name>
         </choice>
         <choice>
-          <value>110%</value>
-          <display_name>110%</display_name>
+          <value>110% Usage</value>
+          <display_name>110% Usage</display_name>
         </choice>
         <choice>
-          <value>125%</value>
-          <display_name>125%</display_name>
+          <value>125% Usage</value>
+          <display_name>125% Usage</display_name>
         </choice>
         <choice>
-          <value>150%</value>
-          <display_name>150%</display_name>
+          <value>150% Usage</value>
+          <display_name>150% Usage</display_name>
         </choice>
         <choice>
-          <value>200%</value>
-          <display_name>200%</display_name>
+          <value>200% Usage</value>
+          <display_name>200% Usage</display_name>
         </choice>
         <choice>
-          <value>300%</value>
-          <display_name>300%</display_name>
+          <value>300% Usage</value>
+          <display_name>300% Usage</display_name>
         </choice>
         <choice>
-          <value>400%</value>
-          <display_name>400%</display_name>
+          <value>400% Usage</value>
+          <display_name>400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: 2457 kWh/yr, 85.5% Sensible, 4.5% Latent</value>
@@ -7922,56 +8601,56 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>25%</value>
-          <display_name>25%</display_name>
+          <value>25% Usage</value>
+          <display_name>25% Usage</display_name>
         </choice>
         <choice>
-          <value>33%</value>
-          <display_name>33%</display_name>
+          <value>33% Usage</value>
+          <display_name>33% Usage</display_name>
         </choice>
         <choice>
-          <value>50%</value>
-          <display_name>50%</display_name>
+          <value>50% Usage</value>
+          <display_name>50% Usage</display_name>
         </choice>
         <choice>
-          <value>75%</value>
-          <display_name>75%</display_name>
+          <value>75% Usage</value>
+          <display_name>75% Usage</display_name>
         </choice>
         <choice>
-          <value>80%</value>
-          <display_name>80%</display_name>
+          <value>80% Usage</value>
+          <display_name>80% Usage</display_name>
         </choice>
         <choice>
-          <value>90%</value>
-          <display_name>90%</display_name>
+          <value>90% Usage</value>
+          <display_name>90% Usage</display_name>
         </choice>
         <choice>
-          <value>100%</value>
-          <display_name>100%</display_name>
+          <value>100% Usage</value>
+          <display_name>100% Usage</display_name>
         </choice>
         <choice>
-          <value>110%</value>
-          <display_name>110%</display_name>
+          <value>110% Usage</value>
+          <display_name>110% Usage</display_name>
         </choice>
         <choice>
-          <value>125%</value>
-          <display_name>125%</display_name>
+          <value>125% Usage</value>
+          <display_name>125% Usage</display_name>
         </choice>
         <choice>
-          <value>150%</value>
-          <display_name>150%</display_name>
+          <value>150% Usage</value>
+          <display_name>150% Usage</display_name>
         </choice>
         <choice>
-          <value>200%</value>
-          <display_name>200%</display_name>
+          <value>200% Usage</value>
+          <display_name>200% Usage</display_name>
         </choice>
         <choice>
-          <value>300%</value>
-          <display_name>300%</display_name>
+          <value>300% Usage</value>
+          <display_name>300% Usage</display_name>
         </choice>
         <choice>
-          <value>400%</value>
-          <display_name>400%</display_name>
+          <value>400% Usage</value>
+          <display_name>400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: 1500 kWh/yr</value>
@@ -7997,92 +8676,60 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 25%</value>
-          <display_name>Natural Gas, 25%</display_name>
+          <value>Natural Gas, 25% Usage</value>
+          <display_name>Natural Gas, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 33%</value>
-          <display_name>Natural Gas, 33%</display_name>
+          <value>Natural Gas, 50% Usage</value>
+          <display_name>Natural Gas, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 50%</value>
-          <display_name>Natural Gas, 50%</display_name>
+          <value>Natural Gas, 75% Usage</value>
+          <display_name>Natural Gas, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 67%</value>
-          <display_name>Natural Gas, 67%</display_name>
+          <value>Natural Gas, 100% Usage</value>
+          <display_name>Natural Gas, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 90%</value>
-          <display_name>Natural Gas, 90%</display_name>
+          <value>Natural Gas, 150% Usage</value>
+          <display_name>Natural Gas, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 100%</value>
-          <display_name>Natural Gas, 100%</display_name>
+          <value>Natural Gas, 200% Usage</value>
+          <display_name>Natural Gas, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 110%</value>
-          <display_name>Natural Gas, 110%</display_name>
+          <value>Natural Gas, 400% Usage</value>
+          <display_name>Natural Gas, 400% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 150%</value>
-          <display_name>Natural Gas, 150%</display_name>
+          <value>Propane, 25% Usage</value>
+          <display_name>Propane, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 200%</value>
-          <display_name>Natural Gas, 200%</display_name>
+          <value>Propane, 50% Usage</value>
+          <display_name>Propane, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 300%</value>
-          <display_name>Natural Gas, 300%</display_name>
+          <value>Propane, 75% Usage</value>
+          <display_name>Propane, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 400%</value>
-          <display_name>Natural Gas, 400%</display_name>
+          <value>Propane, 100% Usage</value>
+          <display_name>Propane, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 25%</value>
-          <display_name>Propane, 25%</display_name>
+          <value>Propane, 150% Usage</value>
+          <display_name>Propane, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 33%</value>
-          <display_name>Propane, 33%</display_name>
+          <value>Propane, 200% Usage</value>
+          <display_name>Propane, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 50%</value>
-          <display_name>Propane, 50%</display_name>
-        </choice>
-        <choice>
-          <value>Propane, 67%</value>
-          <display_name>Propane, 67%</display_name>
-        </choice>
-        <choice>
-          <value>Propane, 90%</value>
-          <display_name>Propane, 90%</display_name>
-        </choice>
-        <choice>
-          <value>Propane, 100%</value>
-          <display_name>Propane, 100%</display_name>
-        </choice>
-        <choice>
-          <value>Propane, 110%</value>
-          <display_name>Propane, 110%</display_name>
-        </choice>
-        <choice>
-          <value>Propane, 150%</value>
-          <display_name>Propane, 150%</display_name>
-        </choice>
-        <choice>
-          <value>Propane, 200%</value>
-          <display_name>Propane, 200%</display_name>
-        </choice>
-        <choice>
-          <value>Propane, 300%</value>
-          <display_name>Propane, 300%</display_name>
-        </choice>
-        <choice>
-          <value>Propane, 400%</value>
-          <display_name>Propane, 400%</display_name>
+          <value>Propane, 400% Usage</value>
+          <display_name>Propane, 400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: Propane, 25 therm/yr</value>
@@ -8104,48 +8751,32 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 25%</value>
-          <display_name>Natural Gas, 25%</display_name>
+          <value>Natural Gas, 25% Usage</value>
+          <display_name>Natural Gas, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 33%</value>
-          <display_name>Natural Gas, 33%</display_name>
+          <value>Natural Gas, 50% Usage</value>
+          <display_name>Natural Gas, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 50%</value>
-          <display_name>Natural Gas, 50%</display_name>
+          <value>Natural Gas, 75% Usage</value>
+          <display_name>Natural Gas, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 67%</value>
-          <display_name>Natural Gas, 67%</display_name>
+          <value>Natural Gas, 100% Usage</value>
+          <display_name>Natural Gas, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 90%</value>
-          <display_name>Natural Gas, 90%</display_name>
+          <value>Natural Gas, 150% Usage</value>
+          <display_name>Natural Gas, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 100%</value>
-          <display_name>Natural Gas, 100%</display_name>
+          <value>Natural Gas, 200% Usage</value>
+          <display_name>Natural Gas, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 110%</value>
-          <display_name>Natural Gas, 110%</display_name>
-        </choice>
-        <choice>
-          <value>Natural Gas, 150%</value>
-          <display_name>Natural Gas, 150%</display_name>
-        </choice>
-        <choice>
-          <value>Natural Gas, 200%</value>
-          <display_name>Natural Gas, 200%</display_name>
-        </choice>
-        <choice>
-          <value>Natural Gas, 300%</value>
-          <display_name>Natural Gas, 300%</display_name>
-        </choice>
-        <choice>
-          <value>Natural Gas, 400%</value>
-          <display_name>Natural Gas, 400%</display_name>
+          <value>Natural Gas, 400% Usage</value>
+          <display_name>Natural Gas, 400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: Natural Gas, 28 therm/yr</value>
@@ -8167,180 +8798,116 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 25%</value>
-          <display_name>Natural Gas, 25%</display_name>
+          <value>Natural Gas, 25% Usage</value>
+          <display_name>Natural Gas, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 33%</value>
-          <display_name>Natural Gas, 33%</display_name>
+          <value>Natural Gas, 50% Usage</value>
+          <display_name>Natural Gas, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 50%</value>
-          <display_name>Natural Gas, 50%</display_name>
+          <value>Natural Gas, 75% Usage</value>
+          <display_name>Natural Gas, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 67%</value>
-          <display_name>Natural Gas, 67%</display_name>
+          <value>Natural Gas, 100% Usage</value>
+          <display_name>Natural Gas, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 90%</value>
-          <display_name>Natural Gas, 90%</display_name>
+          <value>Natural Gas, 150% Usage</value>
+          <display_name>Natural Gas, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 100%</value>
-          <display_name>Natural Gas, 100%</display_name>
+          <value>Natural Gas, 200% Usage</value>
+          <display_name>Natural Gas, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 110%</value>
-          <display_name>Natural Gas, 110%</display_name>
+          <value>Natural Gas, 400% Usage</value>
+          <display_name>Natural Gas, 400% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 150%</value>
-          <display_name>Natural Gas, 150%</display_name>
+          <value>Propane, 25% Usage</value>
+          <display_name>Propane, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 200%</value>
-          <display_name>Natural Gas, 200%</display_name>
+          <value>Propane, 50% Usage</value>
+          <display_name>Propane, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 300%</value>
-          <display_name>Natural Gas, 300%</display_name>
+          <value>Propane, 75% Usage</value>
+          <display_name>Propane, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Natural Gas, 400%</value>
-          <display_name>Natural Gas, 400%</display_name>
+          <value>Propane, 100% Usage</value>
+          <display_name>Propane, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 25%</value>
-          <display_name>Propane, 25%</display_name>
+          <value>Propane, 150% Usage</value>
+          <display_name>Propane, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 33%</value>
-          <display_name>Propane, 33%</display_name>
+          <value>Propane, 200% Usage</value>
+          <display_name>Propane, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 50%</value>
-          <display_name>Propane, 50%</display_name>
+          <value>Propane, 400% Usage</value>
+          <display_name>Propane, 400% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 67%</value>
-          <display_name>Propane, 67%</display_name>
+          <value>Wood, 25% Usage</value>
+          <display_name>Wood, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 90%</value>
-          <display_name>Propane, 90%</display_name>
+          <value>Wood, 50% Usage</value>
+          <display_name>Wood, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 100%</value>
-          <display_name>Propane, 100%</display_name>
+          <value>Wood, 75% Usage</value>
+          <display_name>Wood, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 110%</value>
-          <display_name>Propane, 110%</display_name>
+          <value>Wood, 100% Usage</value>
+          <display_name>Wood, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 150%</value>
-          <display_name>Propane, 150%</display_name>
+          <value>Wood, 150% Usage</value>
+          <display_name>Wood, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 200%</value>
-          <display_name>Propane, 200%</display_name>
+          <value>Wood, 200% Usage</value>
+          <display_name>Wood, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 300%</value>
-          <display_name>Propane, 300%</display_name>
+          <value>Wood, 400% Usage</value>
+          <display_name>Wood, 400% Usage</display_name>
         </choice>
         <choice>
-          <value>Propane, 400%</value>
-          <display_name>Propane, 400%</display_name>
+          <value>Electric, 25% Usage</value>
+          <display_name>Electric, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Wood, 25%</value>
-          <display_name>Wood, 25%</display_name>
+          <value>Electric, 50% Usage</value>
+          <display_name>Electric, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Wood, 33%</value>
-          <display_name>Wood, 33%</display_name>
+          <value>Electric, 75% Usage</value>
+          <display_name>Electric, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Wood, 50%</value>
-          <display_name>Wood, 50%</display_name>
+          <value>Electric, 100% Usage</value>
+          <display_name>Electric, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Wood, 67%</value>
-          <display_name>Wood, 67%</display_name>
+          <value>Electric, 150% Usage</value>
+          <display_name>Electric, 150% Usage</display_name>
         </choice>
         <choice>
-          <value>Wood, 90%</value>
-          <display_name>Wood, 90%</display_name>
+          <value>Electric, 200% Usage</value>
+          <display_name>Electric, 200% Usage</display_name>
         </choice>
         <choice>
-          <value>Wood, 100%</value>
-          <display_name>Wood, 100%</display_name>
-        </choice>
-        <choice>
-          <value>Wood, 110%</value>
-          <display_name>Wood, 110%</display_name>
-        </choice>
-        <choice>
-          <value>Wood, 150%</value>
-          <display_name>Wood, 150%</display_name>
-        </choice>
-        <choice>
-          <value>Wood, 200%</value>
-          <display_name>Wood, 200%</display_name>
-        </choice>
-        <choice>
-          <value>Wood, 300%</value>
-          <display_name>Wood, 300%</display_name>
-        </choice>
-        <choice>
-          <value>Wood, 400%</value>
-          <display_name>Wood, 400%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 25%</value>
-          <display_name>Electric, 25%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 33%</value>
-          <display_name>Electric, 33%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 50%</value>
-          <display_name>Electric, 50%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 67%</value>
-          <display_name>Electric, 67%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 90%</value>
-          <display_name>Electric, 90%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 100%</value>
-          <display_name>Electric, 100%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 110%</value>
-          <display_name>Electric, 110%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 150%</value>
-          <display_name>Electric, 150%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 200%</value>
-          <display_name>Electric, 200%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 300%</value>
-          <display_name>Electric, 300%</display_name>
-        </choice>
-        <choice>
-          <value>Electric, 400%</value>
-          <display_name>Electric, 400%</display_name>
+          <value>Electric, 400% Usage</value>
+          <display_name>Electric, 400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: Wood, 55 therm/yr</value>
@@ -8362,24 +8929,116 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Pool, Unheated</value>
-          <display_name>Pool, Unheated</display_name>
+          <value>Pool, Unheated, 25% Usage</value>
+          <display_name>Pool, Unheated, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Pool, Electric Resistance Heater</value>
-          <display_name>Pool, Electric Resistance Heater</display_name>
+          <value>Pool, Unheated, 50% Usage</value>
+          <display_name>Pool, Unheated, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Pool, Heat Pump Heater</value>
-          <display_name>Pool, Heat Pump Heater</display_name>
+          <value>Pool, Unheated, 75% Usage</value>
+          <display_name>Pool, Unheated, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Pool, Natural Gas Heater</value>
-          <display_name>Pool, Natural Gas Heater</display_name>
+          <value>Pool, Unheated, 100% Usage</value>
+          <display_name>Pool, Unheated, 100% Usage</display_name>
         </choice>
         <choice>
-          <value>Detailed Example: Pool, Natural Gas Heater, 90% Usage Multiplier</value>
-          <display_name>Detailed Example: Pool, Natural Gas Heater, 90% Usage Multiplier</display_name>
+          <value>Pool, Unheated, 150% Usage</value>
+          <display_name>Pool, Unheated, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Unheated, 200% Usage</value>
+          <display_name>Pool, Unheated, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Unheated, 400% Usage</value>
+          <display_name>Pool, Unheated, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Electric Resistance Heater, 25% Usage</value>
+          <display_name>Pool, Electric Resistance Heater, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Electric Resistance Heater, 50% Usage</value>
+          <display_name>Pool, Electric Resistance Heater, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Electric Resistance Heater, 75% Usage</value>
+          <display_name>Pool, Electric Resistance Heater, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Electric Resistance Heater, 100% Usage</value>
+          <display_name>Pool, Electric Resistance Heater, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Electric Resistance Heater, 150% Usage</value>
+          <display_name>Pool, Electric Resistance Heater, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Electric Resistance Heater, 200% Usage</value>
+          <display_name>Pool, Electric Resistance Heater, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Electric Resistance Heater, 400% Usage</value>
+          <display_name>Pool, Electric Resistance Heater, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Heat Pump Heater, 25% Usage</value>
+          <display_name>Pool, Heat Pump Heater, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Heat Pump Heater, 50% Usage</value>
+          <display_name>Pool, Heat Pump Heater, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Heat Pump Heater, 75% Usage</value>
+          <display_name>Pool, Heat Pump Heater, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Heat Pump Heater, 100% Usage</value>
+          <display_name>Pool, Heat Pump Heater, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Heat Pump Heater, 150% Usage</value>
+          <display_name>Pool, Heat Pump Heater, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Heat Pump Heater, 200% Usage</value>
+          <display_name>Pool, Heat Pump Heater, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Heat Pump Heater, 400% Usage</value>
+          <display_name>Pool, Heat Pump Heater, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Natural Gas Heater, 25% Usage</value>
+          <display_name>Pool, Natural Gas Heater, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Natural Gas Heater, 50% Usage</value>
+          <display_name>Pool, Natural Gas Heater, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Natural Gas Heater, 75% Usage</value>
+          <display_name>Pool, Natural Gas Heater, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Natural Gas Heater, 100% Usage</value>
+          <display_name>Pool, Natural Gas Heater, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Natural Gas Heater, 150% Usage</value>
+          <display_name>Pool, Natural Gas Heater, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Natural Gas Heater, 200% Usage</value>
+          <display_name>Pool, Natural Gas Heater, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Pool, Natural Gas Heater, 400% Usage</value>
+          <display_name>Pool, Natural Gas Heater, 400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: Pool, 2700 kWh/yr Pump, Unheated</value>
@@ -8405,28 +9064,120 @@
           <display_name>None</display_name>
         </choice>
         <choice>
-          <value>Spa, Unheated</value>
-          <display_name>Spa, Unheated</display_name>
+          <value>Spa, Unheated, 25% Usage</value>
+          <display_name>Spa, Unheated, 25% Usage</display_name>
         </choice>
         <choice>
-          <value>Spa, Electric Resistance Heater</value>
-          <display_name>Spa, Electric Resistance Heater</display_name>
+          <value>Spa, Unheated, 50% Usage</value>
+          <display_name>Spa, Unheated, 50% Usage</display_name>
         </choice>
         <choice>
-          <value>Spa, Heat Pump Heater</value>
-          <display_name>Spa, Heat Pump Heater</display_name>
+          <value>Spa, Unheated, 75% Usage</value>
+          <display_name>Spa, Unheated, 75% Usage</display_name>
         </choice>
         <choice>
-          <value>Spa, Natural Gas Heater</value>
-          <display_name>Spa, Natural Gas Heater</display_name>
+          <value>Spa, Unheated, 100% Usage</value>
+          <display_name>Spa, Unheated, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Unheated, 150% Usage</value>
+          <display_name>Spa, Unheated, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Unheated, 200% Usage</value>
+          <display_name>Spa, Unheated, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Unheated, 400% Usage</value>
+          <display_name>Spa, Unheated, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Electric Resistance Heater, 25% Usage</value>
+          <display_name>Spa, Electric Resistance Heater, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Electric Resistance Heater, 50% Usage</value>
+          <display_name>Spa, Electric Resistance Heater, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Electric Resistance Heater, 75% Usage</value>
+          <display_name>Spa, Electric Resistance Heater, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Electric Resistance Heater, 100% Usage</value>
+          <display_name>Spa, Electric Resistance Heater, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Electric Resistance Heater, 150% Usage</value>
+          <display_name>Spa, Electric Resistance Heater, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Electric Resistance Heater, 200% Usage</value>
+          <display_name>Spa, Electric Resistance Heater, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Electric Resistance Heater, 400% Usage</value>
+          <display_name>Spa, Electric Resistance Heater, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Heat Pump Heater, 25% Usage</value>
+          <display_name>Spa, Heat Pump Heater, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Heat Pump Heater, 50% Usage</value>
+          <display_name>Spa, Heat Pump Heater, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Heat Pump Heater, 75% Usage</value>
+          <display_name>Spa, Heat Pump Heater, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Heat Pump Heater, 100% Usage</value>
+          <display_name>Spa, Heat Pump Heater, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Heat Pump Heater, 150% Usage</value>
+          <display_name>Spa, Heat Pump Heater, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Heat Pump Heater, 200% Usage</value>
+          <display_name>Spa, Heat Pump Heater, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Heat Pump Heater, 400% Usage</value>
+          <display_name>Spa, Heat Pump Heater, 400% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Natural Gas Heater, 25% Usage</value>
+          <display_name>Spa, Natural Gas Heater, 25% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Natural Gas Heater, 50% Usage</value>
+          <display_name>Spa, Natural Gas Heater, 50% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Natural Gas Heater, 75% Usage</value>
+          <display_name>Spa, Natural Gas Heater, 75% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Natural Gas Heater, 100% Usage</value>
+          <display_name>Spa, Natural Gas Heater, 100% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Natural Gas Heater, 150% Usage</value>
+          <display_name>Spa, Natural Gas Heater, 150% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Natural Gas Heater, 200% Usage</value>
+          <display_name>Spa, Natural Gas Heater, 200% Usage</display_name>
+        </choice>
+        <choice>
+          <value>Spa, Natural Gas Heater, 400% Usage</value>
+          <display_name>Spa, Natural Gas Heater, 400% Usage</display_name>
         </choice>
         <choice>
           <value>Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater</value>
           <display_name>Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater</display_name>
-        </choice>
-        <choice>
-          <value>Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater, 90% Usage Multiplier</value>
-          <display_name>Detailed Example: Spa, 1000 kWh/yr Pump, 1300 kWh/yr Electric Resistance Heater, 90% Usage Multiplier</display_name>
         </choice>
         <choice>
           <value>Detailed Example: Spa, 1000 kWh/yr Pump, 260 kWh/yr Heat Pump Heater</value>
@@ -8846,7 +9597,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>2AD02050</checksum>
+      <checksum>9E18B528</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -8863,7 +9614,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>34E0F7AE</checksum>
+      <checksum>0A5D2C3A</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -8893,19 +9644,19 @@
       <filename>options/appliance_clothes_dryer.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F40C7098</checksum>
+      <checksum>CC8E760F</checksum>
     </file>
     <file>
       <filename>options/appliance_clothes_washer.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F930D577</checksum>
+      <checksum>7C02528D</checksum>
     </file>
     <file>
       <filename>options/appliance_cooking_range_oven.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>614FD308</checksum>
+      <checksum>F9B34A35</checksum>
     </file>
     <file>
       <filename>options/appliance_dehumidifier.tsv</filename>
@@ -8917,25 +9668,25 @@
       <filename>options/appliance_dishwasher.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FCBFC7D0</checksum>
+      <checksum>E7231E90</checksum>
     </file>
     <file>
       <filename>options/appliance_extra_refrigerator.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CA3BD71E</checksum>
+      <checksum>D8F969A3</checksum>
     </file>
     <file>
       <filename>options/appliance_freezer.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>24C288E2</checksum>
+      <checksum>DE9916DC</checksum>
     </file>
     <file>
       <filename>options/appliance_refrigerator.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>22830556</checksum>
+      <checksum>431F4B68</checksum>
     </file>
     <file>
       <filename>options/battery.tsv</filename>
@@ -8965,7 +9716,7 @@
       <filename>options/dhw_fixtures.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D480A0B6</checksum>
+      <checksum>E1A9FB07</checksum>
     </file>
     <file>
       <filename>options/dhw_solar_thermal.tsv</filename>
@@ -8989,7 +9740,7 @@
       <filename>options/electric_vehicle.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9C54BA5D</checksum>
+      <checksum>70FC3C3F</checksum>
     </file>
     <file>
       <filename>options/electric_vehicle_charger.tsv</filename>
@@ -9250,16 +10001,10 @@
       <checksum>A4402A2D</checksum>
     </file>
     <file>
-      <filename>options/hvac_installation_defects.tsv</filename>
-      <filetype>tsv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B085D16C</checksum>
-    </file>
-    <file>
       <filename>options/lighting.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ECCA188D</checksum>
+      <checksum>5EDC3223</checksum>
     </file>
     <file>
       <filename>options/location_site_type.tsv</filename>
@@ -9277,49 +10022,49 @@
       <filename>options/misc_electric_vehicle_charging.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F4E00F00</checksum>
+      <checksum>19B9DA09</checksum>
     </file>
     <file>
       <filename>options/misc_fireplace.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DD071E2C</checksum>
+      <checksum>EB4C75C0</checksum>
     </file>
     <file>
       <filename>options/misc_gas_lighting.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D08CF220</checksum>
+      <checksum>E7D2970C</checksum>
     </file>
     <file>
       <filename>options/misc_grill.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>121B2979</checksum>
+      <checksum>49A5F909</checksum>
     </file>
     <file>
       <filename>options/misc_permanent_spa.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>45E01035</checksum>
+      <checksum>9A8AB493</checksum>
     </file>
     <file>
       <filename>options/misc_plug_loads.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6CEA2369</checksum>
+      <checksum>056DBB98</checksum>
     </file>
     <file>
       <filename>options/misc_pool.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D8F4CBEB</checksum>
+      <checksum>CBC4B724</checksum>
     </file>
     <file>
       <filename>options/misc_television.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>60E46896</checksum>
+      <checksum>087FDED4</checksum>
     </file>
     <file>
       <filename>options/misc_well_pump.tsv</filename>
@@ -9391,7 +10136,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>83DA3ADB</checksum>
+      <checksum>6653A395</checksum>
     </file>
   </files>
 </measure>

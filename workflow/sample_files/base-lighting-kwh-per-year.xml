@@ -491,9 +491,6 @@
             <Value>0.0</Value>
           </Load>
         </LightingGroup>
-        <extension>
-          <InteriorUsageMultiplier>1.5</InteriorUsageMultiplier>
-        </extension>
       </Lighting>
       <MiscLoads>
         <PlugLoad>

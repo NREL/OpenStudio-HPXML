@@ -605,18 +605,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Jan 1 - Dec 31')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_blower_fan_watts_per_cfm', false)
-    arg.setDisplayName('HVAC Blower: Fan Efficiency')
-    arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless #{HPXML::HVACTypeHeatPumpMiniSplit} systems).")
-    arg.setUnits('W/CFM')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_installation_defects', choices[:hvac_installation_defects], false)
-    arg.setDisplayName('HVAC Installation Defects')
-    arg.setDescription('Specifies whether the HVAC system has airflow and/or refrigerant charge installation defects. Applies to central furnaces and central/mini-split ACs and HPs.')
-    arg.setDefaultValue('None')
-    args << arg
-
     duct_location_choices = OpenStudio::StringVector.new
     duct_location_choices << HPXML::LocationConditionedSpace
     duct_location_choices << HPXML::LocationBasementConditioned
@@ -722,19 +710,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_fixtures', choices[:dhw_fixtures], false)
     arg.setDisplayName('DHW: Hot Water Fixtures')
-    arg.setDescription('The type of domestic hot water fixtures.')
-    arg.setDefaultValue('Standard')
+    arg.setDescription('The type and usage of domestic hot water fixtures.')
+    arg.setDefaultValue('Standard, 100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_drain_water_heat_recovery', choices[:dhw_drain_water_heat_recovery], false)
     arg.setDisplayName('DHW: Drain Water Heat Reovery')
     arg.setDescription('The type of drain water heater recovery.')
     arg.setDefaultValue('None')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('dhw_water_fixtures_usage_multiplier', false)
-    arg.setDisplayName('DHW: Hot Water Fixtures Usage Multiplier')
-    arg.setDescription('Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_solar_thermal', choices[:dhw_solar_thermal], false)
@@ -809,12 +792,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('electric_vehicle_miles_driven_per_year', false)
-    arg.setDisplayName('Electric Vehicle: Miles Driven Per Year')
-    arg.setDescription('The annual miles the vehicle is driven. If not provided, defaults to 10900.')
-    arg.setUnits('miles')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('electric_vehicle_charger', choices[:electric_vehicle_charger], false)
     arg.setDisplayName('Electric Vehicle: Charger')
     arg.setDescription('The type and usage of electric vehicle charger.')
@@ -823,79 +800,44 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_washer', choices[:appliance_clothes_washer], false)
     arg.setDisplayName('Appliances: Clothes Washer')
-    arg.setDescription('The type of clothes washer.')
-    arg.setDefaultValue('Standard, 2008-2017')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_clothes_washer_usage_multiplier', false)
-    arg.setDisplayName('Appliances: Clothes Washer Usage Multiplier')
-    arg.setDescription('Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('The type and usage of clothes washer.')
+    arg.setDefaultValue('Standard, 2008-2017, 100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_clothes_dryer', choices[:appliance_clothes_dryer], false)
     arg.setDisplayName('Appliances: Clothes Dryer')
-    arg.setDescription('The type of clothes dryer.')
-    arg.setDefaultValue('Electricity, Standard')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_clothes_dryer_usage_multiplier', false)
-    arg.setDisplayName('Appliances: Clothes Dryer Usage Multiplier')
-    arg.setDescription('Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('The type and usage of clothes dryer.')
+    arg.setDefaultValue('Electricity, Standard, 100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_dishwasher', choices[:appliance_dishwasher], false)
     arg.setDisplayName('Appliances: Dishwasher')
-    arg.setDescription('The type of dishwasher.')
-    arg.setDefaultValue('Federal Minimum, Standard')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_dishwasher_usage_multiplier', false)
-    arg.setDisplayName('Appliances: Dishwasher Usage Multiplier')
-    arg.setDescription('Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('The type and usage of dishwasher.')
+    arg.setDefaultValue('Federal Minimum, Standard, 100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_refrigerator', choices[:appliance_refrigerator], false)
     arg.setDisplayName('Appliances: Refrigerator')
-    arg.setDescription('The type of refrigerator.')
-    arg.setDefaultValue('434 kWh/yr')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_refrigerator_usage_multiplier', false)
-    arg.setDisplayName('Appliances: Refrigerator Usage Multiplier')
-    arg.setDescription('Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('The type and usage of refrigerator.')
+    arg.setDefaultValue('434 kWh/yr, 100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_extra_refrigerator', choices[:appliance_extra_refrigerator], false)
     arg.setDisplayName('Appliances: Extra Refrigerator')
-    arg.setDescription('The type of extra refrigerator.')
+    arg.setDescription('The type and usage of extra refrigerator.')
     arg.setDefaultValue('None')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_extra_refrigerator_usage_multiplier', false)
-    arg.setDisplayName('Appliances: Extra Refrigerator Usage Multiplier')
-    arg.setDescription('Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_freezer', choices[:appliance_freezer], false)
     arg.setDisplayName('Appliances: Freezer')
-    arg.setDescription('The type of freezer.')
+    arg.setDescription('The type and usage of freezer.')
     arg.setDefaultValue('None')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_freezer_usage_multiplier', false)
-    arg.setDisplayName('Appliances: Freezer Usage Multiplier')
-    arg.setDescription('Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_cooking_range_oven', choices[:appliance_cooking_range_oven], false)
     arg.setDisplayName('Appliances: Cooking Range/Oven')
-    arg.setDescription('The type of cooking range/oven.')
-    arg.setDefaultValue('Electricity, Standard, Non-Convection')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_cooking_range_oven_usage_multiplier', false)
-    arg.setDisplayName('Appliances: Cooking Range/Oven Usage Multiplier')
-    arg.setDescription('Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('The type and usage of cooking range/oven.')
+    arg.setDefaultValue('Electricity, Standard, Non-Convection, 100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_dehumidifier', choices[:appliance_dehumidifier], false)
@@ -913,23 +855,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('lighting', choices[:lighting], true)
     arg.setDisplayName('Lighting')
-    arg.setDescription('The type of lighting.')
-    arg.setDefaultValue('10% CFL')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('lighting_interior_usage_multiplier', false)
-    arg.setDisplayName('Lighting: Interior Usage Multiplier')
-    arg.setDescription('Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('lighting_exterior_usage_multiplier', false)
-    arg.setDisplayName('Lighting: Exterior Usage Multiplier')
-    arg.setDescription('Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('lighting_garage_usage_multiplier', false)
-    arg.setDisplayName('Lighting: Garage Usage Multiplier')
-    arg.setDescription('Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants.')
+    arg.setDescription('The type and usage of interior, exterior, and garage lighting.')
+    arg.setDefaultValue('50% LED, 100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ceiling_fans', choices[:ceiling_fans], false)
@@ -941,13 +868,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_television', choices[:misc_television], false)
     arg.setDisplayName('Misc: Television')
     arg.setDescription('The amount of television usage, relative to the national average.')
-    arg.setDefaultValue('100%')
+    arg.setDefaultValue('100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_plug_loads', choices[:misc_plug_loads], false)
     arg.setDisplayName('Misc: Plug Loads')
     arg.setDescription('The amount of additional plug load usage, relative to the national average.')
-    arg.setDefaultValue('100%')
+    arg.setDefaultValue('100% Usage')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('misc_well_pump', choices[:misc_well_pump], false)
@@ -1379,7 +1306,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     set_geothermal_loop(hpxml_bldg, args)
     set_secondary_heating_systems(hpxml_bldg, args)
     set_hvac_distribution(hpxml_bldg, args)
-    set_hvac_blower(hpxml_bldg, args)
     set_hvac_control(hpxml, hpxml_bldg, args, weather)
     set_ventilation_fans(hpxml_bldg, args)
     set_water_heating_systems(hpxml_bldg, args)
@@ -2692,22 +2618,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       heating_efficiency_percent = args[:hvac_heating_system_heating_efficiency]
     end
 
-    if [HPXML::HVACTypeFurnace].include? heating_system_type
-      airflow_defect_ratio = args[:hvac_installation_defects_airflow_defect_ratio]
-    end
-
     if args[:hvac_heating_system_fuel] != HPXML::FuelTypeElectricity
       pilot_light_btuh = args[:hvac_heating_system_pilot_light].to_f
       if pilot_light_btuh > 0
         pilot_light = true
       end
-    end
-
-    fraction_heat_load_served = args[:hvac_heating_system_fraction_heat_load_served]
-
-
-    if heating_system_type.include?(HPXML::HVACTypeBoiler)
-      heating_system_type = HPXML::HVACTypeBoiler
     end
 
     hpxml_bldg.heating_systems.add(id: "HeatingSystem#{hpxml_bldg.heating_systems.size + 1}",
@@ -2716,10 +2631,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    heating_capacity: args[:hvac_heating_system_capacity_capacity],
                                    heating_autosizing_factor: args[:hvac_heating_system_capacity_autosizing_factor],
                                    heating_autosizing_limit: args[:hvac_heating_system_capacity_autosizing_limit],
-                                   fraction_heat_load_served: fraction_heat_load_served,
+                                   fraction_heat_load_served: args[:hvac_heating_system_fraction_heat_load_served],
                                    heating_efficiency_afue: heating_efficiency_afue,
                                    heating_efficiency_percent: heating_efficiency_percent,
-                                   airflow_defect_ratio: airflow_defect_ratio,
                                    pilot_light: pilot_light,
                                    pilot_light_btuh: pilot_light_btuh,
                                    primary_system: true)
@@ -2752,14 +2666,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    if [HPXML::HVACTypeCentralAirConditioner].include?(cooling_system_type) || ([HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type) && (args[:hvac_cooling_system_is_ducted]))
-      airflow_defect_ratio = args[:hvac_installation_defects_airflow_defect_ratio]
-    end
-
-    if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type)
-      charge_defect_ratio = args[:hvac_installation_defects_charge_defect_ratio]
-    end
-
     if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include?(cooling_system_type)
       cooling_system_crankcase_heater_watts = args[:hvac_cooling_system_crankcase_heater_watts]
     end
@@ -2783,8 +2689,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    cooling_efficiency_seer2: cooling_efficiency_seer2,
                                    cooling_efficiency_eer: cooling_efficiency_eer,
                                    cooling_efficiency_ceer: cooling_efficiency_ceer,
-                                   airflow_defect_ratio: airflow_defect_ratio,
-                                   charge_defect_ratio: charge_defect_ratio,
                                    crankcase_heater_watts: cooling_system_crankcase_heater_watts,
                                    primary_system: true,
                                    integrated_heating_system_fuel: integrated_heating_system_fuel,
@@ -2911,10 +2815,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       cooling_efficiency_eer = args[:hvac_heat_pump_cooling_efficiency]
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type) || ([HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump_type) && (args[:hvac_heat_pump_is_ducted]))
-      airflow_defect_ratio = args[:hvac_installation_defects_airflow_defect_ratio]
-    end
-
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include?(heat_pump_type)
       heat_pump_crankcase_heater_watts = args[:hvac_heat_pump_crankcase_heater_watts]
     end
@@ -2949,8 +2849,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               cooling_efficiency_seer2: cooling_efficiency_seer2,
                               heating_efficiency_cop: heating_efficiency_cop,
                               cooling_efficiency_eer: cooling_efficiency_eer,
-                              airflow_defect_ratio: airflow_defect_ratio,
-                              charge_defect_ratio: args[:hvac_installation_defects_charge_defect_ratio],
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
                               primary_heating_system: args[:hvac_heat_pump_fraction_heat_load_served] > 0,
                               primary_cooling_system: args[:hvac_heat_pump_fraction_cool_load_served] > 0)
@@ -3202,38 +3100,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
       set_duct_leakages(args, hpxml_bldg.hvac_distributions[-1])
       set_ducts(hpxml_bldg, args, hpxml_bldg.hvac_distributions[-1])
-    end
-  end
-
-  # Sets the HPXML HVAC blower properties.
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Hash] Map of :argument_name => value
-  # @return [nil]
-  def set_hvac_blower(hpxml_bldg, args)
-    # Blower fan W/cfm
-    hpxml_bldg.hvac_systems.each do |hvac_system|
-      next unless (!hvac_system.distribution_system.nil? && hvac_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir) ||
-                  (hvac_system.is_a?(HPXML::HeatPump) && hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit)
-
-      fan_watts_per_cfm = args[:hvac_blower_fan_watts_per_cfm]
-
-      if hvac_system.is_a?(HPXML::HeatingSystem)
-        if [HPXML::HVACTypeFurnace].include?(hvac_system.heating_system_type)
-          hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
-        end
-      elsif hvac_system.is_a?(HPXML::CoolingSystem)
-        if [HPXML::HVACTypeCentralAirConditioner,
-            HPXML::HVACTypeMiniSplitAirConditioner].include?(hvac_system.cooling_system_type)
-          hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
-        end
-      elsif hvac_system.is_a?(HPXML::HeatPump)
-        if [HPXML::HVACTypeHeatPumpAirToAir,
-            HPXML::HVACTypeHeatPumpMiniSplit,
-            HPXML::HVACTypeHeatPumpGroundToAir].include?(hvac_system.heat_pump_type)
-          hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
-        end
-      end
     end
   end
 
@@ -3715,7 +3581,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                   water_fixture_type: HPXML::WaterFixtureTypeFaucet,
                                   low_flow: args[:dhw_fixtures_low_flow_sinks])
 
-    hpxml_bldg.water_heating.water_fixtures_usage_multiplier = args[:dhw_water_fixtures_usage_multiplier]
+    hpxml_bldg.water_heating.water_fixtures_usage_multiplier = args[:dhw_fixtures_usage_multiplier]
   end
 
   # Sets the HPXML solar thermal properties.
@@ -3831,6 +3697,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                  charging_power: args[:electric_vehicle_charger_power])
     end
 
+    if not args[:electric_vehicle_usage_multiplier].nil?
+      # TODO: Add a UsageMultiplier element in OS-HPXML so we don't need to do this
+      default_miles_per_year = Defaults.get_electric_vehicle_values()[:miles_per_year]
+      miles_per_year = default_miles_per_year * args[:electric_vehicle_usage_multiplier]
+    end
+
     if args[:electric_vehicle] != 'None'
       hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
                               vehicle_type: args[:electric_vehicle_type],
@@ -3838,7 +3710,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usable_capacity_kwh: args[:electric_vehicle_usable_battery_capacity],
                               fuel_economy_combined: args[:electric_vehicle_fuel_economy_combined],
                               fuel_economy_units: args[:electric_vehicle_fuel_economy_units],
-                              miles_per_year: args[:electric_vehicle_miles_driven_per_year],
+                              miles_per_year: miles_per_year,
                               fraction_charged_home: args[:electric_vehicle_charger_fraction_charged_at_home],
                               ev_charger_idref: charger_id)
     end
