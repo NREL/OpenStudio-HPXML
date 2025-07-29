@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>bf931d2c-5acf-4ac2-a34c-fa3e81547e78</version_id>
-  <version_modified>2025-07-29T21:09:54Z</version_modified>
+  <version_id>25d007e1-e454-4358-b228-b7e3173f834e</version_id>
+  <version_modified>2025-07-29T22:17:40Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -778,6 +778,36 @@
           <display_name>Detailed Example: Left/Right at 25ft, Front/Back at 80ft, 12ft Height</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>geometry_window_areas_or_wwrs</name>
+      <display_name>Geometry: Window Areas or WWRs</display_name>
+      <description>The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.</description>
+      <type>String</type>
+      <units>ft2 or frac</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.15, 0.15, 0.15, 0.15</default_value>
+    </argument>
+    <argument>
+      <name>geometry_skylight_areas</name>
+      <display_name>Geometry: Skylight Areas</display_name>
+      <description>The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.</description>
+      <type>String</type>
+      <units>ft2</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0, 0, 0, 0</default_value>
+    </argument>
+    <argument>
+      <name>geometry_door_area</name>
+      <display_name>Geometry: Doors Area</display_name>
+      <description>The area of the opaque door(s). Any door glazing (e.g., sliding glass doors) should be captured as window area.</description>
+      <type>Double</type>
+      <units>ft2</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>20</default_value>
     </argument>
     <argument>
       <name>enclosure_floor_over_foundation</name>
@@ -2195,16 +2225,6 @@
       </choices>
     </argument>
     <argument>
-      <name>enclosure_window_areas_or_wwrs</name>
-      <display_name>Enclosure: Window Areas or WWRs</display_name>
-      <description>The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.</description>
-      <type>String</type>
-      <units>ft2 or frac</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0.15, 0.15, 0.15, 0.15</default_value>
-    </argument>
-    <argument>
       <name>enclosure_window_natural_ventilation</name>
       <display_name>Enclosure: Window Natural Ventilation</display_name>
       <description>The amount of natural ventilation from occupants opening operable windows when outdoor conditions are favorable.</description>
@@ -2725,16 +2745,6 @@
       </choices>
     </argument>
     <argument>
-      <name>enclosure_skylight_areas</name>
-      <display_name>Enclosure: Skylight Areas</display_name>
-      <description>The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.</description>
-      <type>String</type>
-      <units>ft2</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0, 0, 0, 0</default_value>
-    </argument>
-    <argument>
       <name>enclosure_door</name>
       <display_name>Enclosure: Doors</display_name>
       <description>The type of doors.</description>
@@ -2808,16 +2818,6 @@
           <display_name>Detailed Example: Insulated Fiberglass/Steel, R-4.4</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>enclosure_door_area</name>
-      <display_name>Enclosure: Doors Area</display_name>
-      <description>The area of the opaque door(s).</description>
-      <type>Double</type>
-      <units>ft2</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>20</default_value>
     </argument>
     <argument>
       <name>enclosure_air_leakage</name>
@@ -3013,6 +3013,7 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>Central Furnace, 78% AFUE</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -5063,10 +5064,11 @@
     <argument>
       <name>hvac_ducts</name>
       <display_name>HVAC Ducts</display_name>
-      <description>The leakage and insulation level of the ducts.</description>
+      <description>The leakage to outside and insulation level of the ducts.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>15% Leakage, Uninsulated</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -6229,7 +6231,7 @@
     <argument>
       <name>dhw_solar_thermal</name>
       <display_name>DHW: Solar Thermal</display_name>
-      <description>The size and type of solar thermal system for domestic hot water.</description>
+      <description>The size and type of the solar thermal system for domestic hot water.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6314,29 +6316,248 @@
       </choices>
     </argument>
     <argument>
-      <name>dhw_solar_thermal_collector_azimuth</name>
-      <display_name>DHW: Solar Thermal Collector Azimuth</display_name>
-      <description>The azimuth of the solar thermal system collectors. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).</description>
-      <type>Double</type>
-      <units>degrees</units>
+      <name>dhw_solar_thermal_direction</name>
+      <display_name>DHW: Solar Thermal Direction</display_name>
+      <description>The azimuth and tilt of the solar thermal system collectors.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>180</default_value>
-    </argument>
-    <argument>
-      <name>dhw_solar_thermal_collector_tilt</name>
-      <display_name>DHW: Solar Thermal Collector Tilt</display_name>
-      <description>The tilt of the solar thermal system collectors. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.</description>
-      <type>String</type>
-      <units>degrees</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>RoofPitch</default_value>
+      <default_value>Roof Pitch, South</default_value>
+      <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, West</value>
+          <display_name>Roof Pitch, West</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, Southwest</value>
+          <display_name>Roof Pitch, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, South</value>
+          <display_name>Roof Pitch, South</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, Southeast</value>
+          <display_name>Roof Pitch, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, East</value>
+          <display_name>Roof Pitch, East</display_name>
+        </choice>
+        <choice>
+          <value>0 Degrees</value>
+          <display_name>0 Degrees</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, West</value>
+          <display_name>5 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, Southwest</value>
+          <display_name>5 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, South</value>
+          <display_name>5 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, Southeast</value>
+          <display_name>5 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, East</value>
+          <display_name>5 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, West</value>
+          <display_name>10 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, Southwest</value>
+          <display_name>10 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, South</value>
+          <display_name>10 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, Southeast</value>
+          <display_name>10 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, East</value>
+          <display_name>10 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, West</value>
+          <display_name>15 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, Southwest</value>
+          <display_name>15 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, South</value>
+          <display_name>15 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, Southeast</value>
+          <display_name>15 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, East</value>
+          <display_name>15 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, West</value>
+          <display_name>20 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, Southwest</value>
+          <display_name>20 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, South</value>
+          <display_name>20 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, Southeast</value>
+          <display_name>20 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, East</value>
+          <display_name>20 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, West</value>
+          <display_name>25 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, Southwest</value>
+          <display_name>25 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, South</value>
+          <display_name>25 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, Southeast</value>
+          <display_name>25 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, East</value>
+          <display_name>25 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, West</value>
+          <display_name>30 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, Southwest</value>
+          <display_name>30 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, South</value>
+          <display_name>30 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, Southeast</value>
+          <display_name>30 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, East</value>
+          <display_name>30 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, West</value>
+          <display_name>35 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, Southwest</value>
+          <display_name>35 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, South</value>
+          <display_name>35 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, Southeast</value>
+          <display_name>35 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, East</value>
+          <display_name>35 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, West</value>
+          <display_name>40 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, Southwest</value>
+          <display_name>40 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, South</value>
+          <display_name>40 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, Southeast</value>
+          <display_name>40 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, East</value>
+          <display_name>40 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, West</value>
+          <display_name>45 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, Southwest</value>
+          <display_name>45 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, South</value>
+          <display_name>45 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, Southeast</value>
+          <display_name>45 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, East</value>
+          <display_name>45 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, West</value>
+          <display_name>50 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, Southwest</value>
+          <display_name>50 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, South</value>
+          <display_name>50 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, Southeast</value>
+          <display_name>50 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, East</value>
+          <display_name>50 Degrees, East</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>pv_system</name>
-      <display_name>PV System</display_name>
-      <description>The size and type of PV system.</description>
+      <display_name>PV: System</display_name>
+      <description>The size and type of the PV system.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -6453,28 +6674,247 @@
       </choices>
     </argument>
     <argument>
-      <name>pv_system_array_azimuth</name>
-      <display_name>PV System: Array Azimuth</display_name>
-      <description>The azimuth of the PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).</description>
-      <type>Double</type>
-      <units>degrees</units>
+      <name>pv_system_direction</name>
+      <display_name>PV: System Direction</display_name>
+      <description>The azimuth and tilt of the PV system array.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>180</default_value>
-    </argument>
-    <argument>
-      <name>pv_system_array_tilt</name>
-      <display_name>PV System: Array Tilt</display_name>
-      <description>The tilt of the PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.</description>
-      <type>String</type>
-      <units>degrees</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>RoofPitch</default_value>
+      <default_value>Roof Pitch, South</default_value>
+      <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, West</value>
+          <display_name>Roof Pitch, West</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, Southwest</value>
+          <display_name>Roof Pitch, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, South</value>
+          <display_name>Roof Pitch, South</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, Southeast</value>
+          <display_name>Roof Pitch, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, East</value>
+          <display_name>Roof Pitch, East</display_name>
+        </choice>
+        <choice>
+          <value>0 Degrees</value>
+          <display_name>0 Degrees</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, West</value>
+          <display_name>5 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, Southwest</value>
+          <display_name>5 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, South</value>
+          <display_name>5 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, Southeast</value>
+          <display_name>5 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, East</value>
+          <display_name>5 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, West</value>
+          <display_name>10 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, Southwest</value>
+          <display_name>10 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, South</value>
+          <display_name>10 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, Southeast</value>
+          <display_name>10 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, East</value>
+          <display_name>10 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, West</value>
+          <display_name>15 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, Southwest</value>
+          <display_name>15 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, South</value>
+          <display_name>15 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, Southeast</value>
+          <display_name>15 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, East</value>
+          <display_name>15 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, West</value>
+          <display_name>20 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, Southwest</value>
+          <display_name>20 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, South</value>
+          <display_name>20 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, Southeast</value>
+          <display_name>20 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, East</value>
+          <display_name>20 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, West</value>
+          <display_name>25 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, Southwest</value>
+          <display_name>25 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, South</value>
+          <display_name>25 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, Southeast</value>
+          <display_name>25 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, East</value>
+          <display_name>25 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, West</value>
+          <display_name>30 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, Southwest</value>
+          <display_name>30 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, South</value>
+          <display_name>30 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, Southeast</value>
+          <display_name>30 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, East</value>
+          <display_name>30 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, West</value>
+          <display_name>35 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, Southwest</value>
+          <display_name>35 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, South</value>
+          <display_name>35 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, Southeast</value>
+          <display_name>35 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, East</value>
+          <display_name>35 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, West</value>
+          <display_name>40 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, Southwest</value>
+          <display_name>40 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, South</value>
+          <display_name>40 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, Southeast</value>
+          <display_name>40 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, East</value>
+          <display_name>40 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, West</value>
+          <display_name>45 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, Southwest</value>
+          <display_name>45 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, South</value>
+          <display_name>45 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, Southeast</value>
+          <display_name>45 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, East</value>
+          <display_name>45 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, West</value>
+          <display_name>50 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, Southwest</value>
+          <display_name>50 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, South</value>
+          <display_name>50 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, Southeast</value>
+          <display_name>50 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, East</value>
+          <display_name>50 Degrees, East</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>pv_system_2</name>
-      <display_name>PV System 2</display_name>
+      <display_name>PV: System 2</display_name>
       <description>The size and type of the second PV system.</description>
       <type>Choice</type>
       <required>false</required>
@@ -6592,24 +7032,243 @@
       </choices>
     </argument>
     <argument>
-      <name>pv_system_2_array_azimuth</name>
-      <display_name>PV System 2: Array Azimuth</display_name>
-      <description>The azimuth of the second PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).</description>
-      <type>Double</type>
-      <units>degrees</units>
+      <name>pv_system_2_direction</name>
+      <display_name>PV: System 2 Direction</display_name>
+      <description>The azimuth and tilt of the second PV system array.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>180</default_value>
-    </argument>
-    <argument>
-      <name>pv_system_2_array_tilt</name>
-      <display_name>PV System 2: Array Tilt</display_name>
-      <description>The tilt of the second PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.</description>
-      <type>String</type>
-      <units>degrees</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>RoofPitch</default_value>
+      <default_value>Roof Pitch, South</default_value>
+      <choices>
+        <choice>
+          <value>None</value>
+          <display_name>None</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, West</value>
+          <display_name>Roof Pitch, West</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, Southwest</value>
+          <display_name>Roof Pitch, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, South</value>
+          <display_name>Roof Pitch, South</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, Southeast</value>
+          <display_name>Roof Pitch, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>Roof Pitch, East</value>
+          <display_name>Roof Pitch, East</display_name>
+        </choice>
+        <choice>
+          <value>0 Degrees</value>
+          <display_name>0 Degrees</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, West</value>
+          <display_name>5 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, Southwest</value>
+          <display_name>5 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, South</value>
+          <display_name>5 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, Southeast</value>
+          <display_name>5 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>5 Degrees, East</value>
+          <display_name>5 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, West</value>
+          <display_name>10 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, Southwest</value>
+          <display_name>10 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, South</value>
+          <display_name>10 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, Southeast</value>
+          <display_name>10 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>10 Degrees, East</value>
+          <display_name>10 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, West</value>
+          <display_name>15 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, Southwest</value>
+          <display_name>15 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, South</value>
+          <display_name>15 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, Southeast</value>
+          <display_name>15 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>15 Degrees, East</value>
+          <display_name>15 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, West</value>
+          <display_name>20 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, Southwest</value>
+          <display_name>20 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, South</value>
+          <display_name>20 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, Southeast</value>
+          <display_name>20 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>20 Degrees, East</value>
+          <display_name>20 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, West</value>
+          <display_name>25 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, Southwest</value>
+          <display_name>25 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, South</value>
+          <display_name>25 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, Southeast</value>
+          <display_name>25 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>25 Degrees, East</value>
+          <display_name>25 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, West</value>
+          <display_name>30 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, Southwest</value>
+          <display_name>30 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, South</value>
+          <display_name>30 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, Southeast</value>
+          <display_name>30 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>30 Degrees, East</value>
+          <display_name>30 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, West</value>
+          <display_name>35 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, Southwest</value>
+          <display_name>35 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, South</value>
+          <display_name>35 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, Southeast</value>
+          <display_name>35 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>35 Degrees, East</value>
+          <display_name>35 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, West</value>
+          <display_name>40 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, Southwest</value>
+          <display_name>40 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, South</value>
+          <display_name>40 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, Southeast</value>
+          <display_name>40 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>40 Degrees, East</value>
+          <display_name>40 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, West</value>
+          <display_name>45 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, Southwest</value>
+          <display_name>45 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, South</value>
+          <display_name>45 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, Southeast</value>
+          <display_name>45 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>45 Degrees, East</value>
+          <display_name>45 Degrees, East</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, West</value>
+          <display_name>50 Degrees, West</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, Southwest</value>
+          <display_name>50 Degrees, Southwest</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, South</value>
+          <display_name>50 Degrees, South</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, Southeast</value>
+          <display_name>50 Degrees, Southeast</display_name>
+        </choice>
+        <choice>
+          <value>50 Degrees, East</value>
+          <display_name>50 Degrees, East</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>battery</name>
@@ -9488,7 +10147,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>D005A8C5</checksum>
+      <checksum>418E7A4A</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -9505,7 +10164,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C40897D1</checksum>
+      <checksum>733C31D4</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9517,7 +10176,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>603482A6</checksum>
+      <checksum>7D555252</checksum>
     </file>
     <file>
       <filename>options/advanced_feature.tsv</filename>
@@ -9614,6 +10273,12 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>9E66D7E7</checksum>
+    </file>
+    <file>
+      <filename>options/dhw_solar_thermal_direction.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F0AB0890</checksum>
     </file>
     <file>
       <filename>options/dhw_water_heater.tsv</filename>
@@ -9976,6 +10641,18 @@
       <checksum>00DC3487</checksum>
     </file>
     <file>
+      <filename>options/pv_system_2_direction.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>44C19491</checksum>
+    </file>
+    <file>
+      <filename>options/pv_system_direction.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>44C19491</checksum>
+    </file>
+    <file>
       <filename>options/utility_bill_scenario.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -10027,7 +10704,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>37A40FA8</checksum>
+      <checksum>FE397006</checksum>
     </file>
   </files>
 </measure>

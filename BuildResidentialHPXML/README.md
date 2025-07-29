@@ -313,6 +313,41 @@ The presence and geometry of neighboring buildings, for shading purposes.
 
 <br/>
 
+**Geometry: Window Areas or WWRs**
+
+The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.
+
+- **Name:** ``geometry_window_areas_or_wwrs``
+- **Type:** ``String``
+
+- **Required:** ``true``
+
+<br/>
+
+**Geometry: Skylight Areas**
+
+The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.
+
+- **Name:** ``geometry_skylight_areas``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Geometry: Doors Area**
+
+The area of the opaque door(s). Any door glazing (e.g., sliding glass doors) should be captured as window area.
+
+- **Name:** ``geometry_door_area``
+- **Type:** ``Double``
+
+- **Units:** ``ft2``
+
+- **Required:** ``true``
+
+<br/>
+
 **Enclosure: Floor Over Foundation**
 
 The type and insulation level of the floor over the foundation (e.g., crawlspace or basement).
@@ -482,17 +517,6 @@ The type of windows.
 
 <br/>
 
-**Enclosure: Window Areas or WWRs**
-
-The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.
-
-- **Name:** ``enclosure_window_areas_or_wwrs``
-- **Type:** ``String``
-
-- **Required:** ``true``
-
-<br/>
-
 **Enclosure: Window Natural Ventilation**
 
 The amount of natural ventilation from occupants opening operable windows when outdoor conditions are favorable.
@@ -584,17 +608,6 @@ The type of skylights.
 
 <br/>
 
-**Enclosure: Skylight Areas**
-
-The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.
-
-- **Name:** ``enclosure_skylight_areas``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
 **Enclosure: Doors**
 
 The type of doors.
@@ -605,19 +618,6 @@ The type of doors.
 - **Required:** ``false``
 
 - **Choices:** `Solid Wood, R-2`, `Solid Wood, R-3`, `Insulated Fiberglass/Steel, R-4`, `Insulated Fiberglass/Steel, R-5`, `Insulated Fiberglass/Steel, R-6`, `Insulated Fiberglass/Steel, R-7`, `IECC U-1.20`, `IECC U-0.75`, `IECC U-0.65`, `IECC U-0.50`, `IECC U-0.40`, `IECC U-0.35`, `IECC U-0.32`, `IECC U-0.30`, `Detailed Example: Solid Wood, R-3.04`, `Detailed Example: Insulated Fiberglass/Steel, R-4.4`
-
-<br/>
-
-**Enclosure: Doors Area**
-
-The area of the opaque door(s).
-
-- **Name:** ``enclosure_door_area``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``true``
 
 <br/>
 
@@ -975,7 +975,7 @@ Enter a date range like 'Jun 1 - Oct 31'. Defaults to year-round cooling availab
 
 **HVAC Ducts**
 
-The leakage and insulation level of the ducts.
+The leakage to outside and insulation level of the ducts.
 
 - **Name:** ``hvac_ducts``
 - **Type:** ``Choice``
@@ -1155,7 +1155,7 @@ The type of drain water heater recovery.
 
 **DHW: Solar Thermal**
 
-The size and type of solar thermal system for domestic hot water.
+The size and type of the solar thermal system for domestic hot water.
 
 - **Name:** ``dhw_solar_thermal``
 - **Type:** ``Choice``
@@ -1166,33 +1166,22 @@ The size and type of solar thermal system for domestic hot water.
 
 <br/>
 
-**DHW: Solar Thermal Collector Azimuth**
+**DHW: Solar Thermal Direction**
 
-The azimuth of the solar thermal system collectors. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
+The azimuth and tilt of the solar thermal system collectors.
 
-- **Name:** ``dhw_solar_thermal_collector_azimuth``
-- **Type:** ``Double``
-
-- **Units:** ``degrees``
+- **Name:** ``dhw_solar_thermal_direction``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**DHW: Solar Thermal Collector Tilt**
-
-The tilt of the solar thermal system collectors. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
-
-- **Name:** ``dhw_solar_thermal_collector_tilt``
-- **Type:** ``String``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Roof Pitch, West`, `Roof Pitch, Southwest`, `Roof Pitch, South`, `Roof Pitch, Southeast`, `Roof Pitch, East`, `0 Degrees`, `5 Degrees, West`, `5 Degrees, Southwest`, `5 Degrees, South`, `5 Degrees, Southeast`, `5 Degrees, East`, `10 Degrees, West`, `10 Degrees, Southwest`, `10 Degrees, South`, `10 Degrees, Southeast`, `10 Degrees, East`, `15 Degrees, West`, `15 Degrees, Southwest`, `15 Degrees, South`, `15 Degrees, Southeast`, `15 Degrees, East`, `20 Degrees, West`, `20 Degrees, Southwest`, `20 Degrees, South`, `20 Degrees, Southeast`, `20 Degrees, East`, `25 Degrees, West`, `25 Degrees, Southwest`, `25 Degrees, South`, `25 Degrees, Southeast`, `25 Degrees, East`, `30 Degrees, West`, `30 Degrees, Southwest`, `30 Degrees, South`, `30 Degrees, Southeast`, `30 Degrees, East`, `35 Degrees, West`, `35 Degrees, Southwest`, `35 Degrees, South`, `35 Degrees, Southeast`, `35 Degrees, East`, `40 Degrees, West`, `40 Degrees, Southwest`, `40 Degrees, South`, `40 Degrees, Southeast`, `40 Degrees, East`, `45 Degrees, West`, `45 Degrees, Southwest`, `45 Degrees, South`, `45 Degrees, Southeast`, `45 Degrees, East`, `50 Degrees, West`, `50 Degrees, Southwest`, `50 Degrees, South`, `50 Degrees, Southeast`, `50 Degrees, East`
 
 <br/>
 
-**PV System**
+**PV: System**
 
-The size and type of PV system.
+The size and type of the PV system.
 
 - **Name:** ``pv_system``
 - **Type:** ``Choice``
@@ -1203,31 +1192,20 @@ The size and type of PV system.
 
 <br/>
 
-**PV System: Array Azimuth**
+**PV: System Direction**
 
-The azimuth of the PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
+The azimuth and tilt of the PV system array.
 
-- **Name:** ``pv_system_array_azimuth``
-- **Type:** ``Double``
-
-- **Units:** ``degrees``
+- **Name:** ``pv_system_direction``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**PV System: Array Tilt**
-
-The tilt of the PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
-
-- **Name:** ``pv_system_array_tilt``
-- **Type:** ``String``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Roof Pitch, West`, `Roof Pitch, Southwest`, `Roof Pitch, South`, `Roof Pitch, Southeast`, `Roof Pitch, East`, `0 Degrees`, `5 Degrees, West`, `5 Degrees, Southwest`, `5 Degrees, South`, `5 Degrees, Southeast`, `5 Degrees, East`, `10 Degrees, West`, `10 Degrees, Southwest`, `10 Degrees, South`, `10 Degrees, Southeast`, `10 Degrees, East`, `15 Degrees, West`, `15 Degrees, Southwest`, `15 Degrees, South`, `15 Degrees, Southeast`, `15 Degrees, East`, `20 Degrees, West`, `20 Degrees, Southwest`, `20 Degrees, South`, `20 Degrees, Southeast`, `20 Degrees, East`, `25 Degrees, West`, `25 Degrees, Southwest`, `25 Degrees, South`, `25 Degrees, Southeast`, `25 Degrees, East`, `30 Degrees, West`, `30 Degrees, Southwest`, `30 Degrees, South`, `30 Degrees, Southeast`, `30 Degrees, East`, `35 Degrees, West`, `35 Degrees, Southwest`, `35 Degrees, South`, `35 Degrees, Southeast`, `35 Degrees, East`, `40 Degrees, West`, `40 Degrees, Southwest`, `40 Degrees, South`, `40 Degrees, Southeast`, `40 Degrees, East`, `45 Degrees, West`, `45 Degrees, Southwest`, `45 Degrees, South`, `45 Degrees, Southeast`, `45 Degrees, East`, `50 Degrees, West`, `50 Degrees, Southwest`, `50 Degrees, South`, `50 Degrees, Southeast`, `50 Degrees, East`
 
 <br/>
 
-**PV System 2**
+**PV: System 2**
 
 The size and type of the second PV system.
 
@@ -1240,27 +1218,16 @@ The size and type of the second PV system.
 
 <br/>
 
-**PV System 2: Array Azimuth**
+**PV: System 2 Direction**
 
-The azimuth of the second PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
+The azimuth and tilt of the second PV system array.
 
-- **Name:** ``pv_system_2_array_azimuth``
-- **Type:** ``Double``
-
-- **Units:** ``degrees``
+- **Name:** ``pv_system_2_direction``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
 
-<br/>
-
-**PV System 2: Array Tilt**
-
-The tilt of the second PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
-
-- **Name:** ``pv_system_2_array_tilt``
-- **Type:** ``String``
-
-- **Required:** ``false``
+- **Choices:** `None`, `Roof Pitch, West`, `Roof Pitch, Southwest`, `Roof Pitch, South`, `Roof Pitch, Southeast`, `Roof Pitch, East`, `0 Degrees`, `5 Degrees, West`, `5 Degrees, Southwest`, `5 Degrees, South`, `5 Degrees, Southeast`, `5 Degrees, East`, `10 Degrees, West`, `10 Degrees, Southwest`, `10 Degrees, South`, `10 Degrees, Southeast`, `10 Degrees, East`, `15 Degrees, West`, `15 Degrees, Southwest`, `15 Degrees, South`, `15 Degrees, Southeast`, `15 Degrees, East`, `20 Degrees, West`, `20 Degrees, Southwest`, `20 Degrees, South`, `20 Degrees, Southeast`, `20 Degrees, East`, `25 Degrees, West`, `25 Degrees, Southwest`, `25 Degrees, South`, `25 Degrees, Southeast`, `25 Degrees, East`, `30 Degrees, West`, `30 Degrees, Southwest`, `30 Degrees, South`, `30 Degrees, Southeast`, `30 Degrees, East`, `35 Degrees, West`, `35 Degrees, Southwest`, `35 Degrees, South`, `35 Degrees, Southeast`, `35 Degrees, East`, `40 Degrees, West`, `40 Degrees, Southwest`, `40 Degrees, South`, `40 Degrees, Southeast`, `40 Degrees, East`, `45 Degrees, West`, `45 Degrees, Southwest`, `45 Degrees, South`, `45 Degrees, Southeast`, `45 Degrees, East`, `50 Degrees, West`, `50 Degrees, Southwest`, `50 Degrees, South`, `50 Degrees, Southeast`, `50 Degrees, East`
 
 <br/>
 

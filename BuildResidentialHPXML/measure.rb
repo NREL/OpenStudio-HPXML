@@ -217,6 +217,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('None')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('geometry_window_areas_or_wwrs', true)
+    arg.setDisplayName('Geometry: Window Areas or WWRs')
+    arg.setUnits('ft2 or frac')
+    arg.setDescription("The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.")
+    arg.setDefaultValue('0.15, 0.15, 0.15, 0.15')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('geometry_skylight_areas', false)
+    arg.setDisplayName('Geometry: Skylight Areas')
+    arg.setUnits('ft2')
+    arg.setDescription("The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.")
+    arg.setDefaultValue('0, 0, 0, 0')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('geometry_door_area', true)
+    arg.setDisplayName('Geometry: Doors Area')
+    arg.setUnits('ft2')
+    arg.setDescription('The area of the opaque door(s). Any door glazing (e.g., sliding glass doors) should be captured as window area.')
+    arg.setDefaultValue(20)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_floor_over_foundation', choices[:enclosure_floor_over_foundation], false)
     arg.setDisplayName('Enclosure: Floor Over Foundation')
     arg.setDescription('The type and insulation level of the floor over the foundation (e.g., crawlspace or basement).')
@@ -295,13 +316,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Double, Clear, Metal, Air')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('enclosure_window_areas_or_wwrs', true)
-    arg.setDisplayName('Enclosure: Window Areas or WWRs')
-    arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.")
-    arg.setDefaultValue('0.15, 0.15, 0.15, 0.15')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_window_natural_ventilation', choices[:enclosure_window_natural_ventilation], false)
     arg.setDisplayName('Enclosure: Window Natural Ventilation')
     arg.setDescription('The amount of natural ventilation from occupants opening operable windows when outdoor conditions are favorable.')
@@ -344,24 +358,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Single, Clear, Metal')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('enclosure_skylight_areas', false)
-    arg.setDisplayName('Enclosure: Skylight Areas')
-    arg.setUnits('ft2')
-    arg.setDescription("The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.")
-    arg.setDefaultValue('0, 0, 0, 0')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_door', choices[:enclosure_door], false)
     arg.setDisplayName('Enclosure: Doors')
     arg.setDescription('The type of doors.')
     arg.setDefaultValue('Solid Wood, R-2')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_door_area', true)
-    arg.setDisplayName('Enclosure: Doors Area')
-    arg.setUnits('ft2')
-    arg.setDescription('The area of the opaque door(s).')
-    arg.setDefaultValue(20.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_air_leakage', choices[:enclosure_air_leakage], false)
@@ -382,7 +382,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system', choices[:hvac_heating_system], true)
     arg.setDisplayName('HVAC: Heating System')
     arg.setDescription("The type and efficiency of the heating system. Use 'None' if there is no heating system or if there is a heat pump serving a heating load.")
-    arg.setDefaultValue('Fuel Furnace, 78% AFUE')
+    arg.setDefaultValue('Central Furnace, 78% AFUE')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_fuel', heating_system_fuel_choices, true)
@@ -569,8 +569,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_ducts', choices[:hvac_ducts], true)
     arg.setDisplayName('HVAC Ducts')
-    arg.setDescription('The leakage and insulation level of the ducts.')
-    arg.setDefaultValue('15% Leakage to Outside, Uninsulated')
+    arg.setDescription('The leakage to outside and insulation level of the ducts.')
+    arg.setDefaultValue('15% Leakage, Uninsulated')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_ducts_supply_location', duct_location_choices, false)
@@ -668,62 +668,38 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_solar_thermal', choices[:dhw_solar_thermal], false)
     arg.setDisplayName('DHW: Solar Thermal')
-    arg.setDescription('The size and type of solar thermal system for domestic hot water.')
+    arg.setDescription('The size and type of the solar thermal system for domestic hot water.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('dhw_solar_thermal_collector_azimuth', false)
-    arg.setDisplayName('DHW: Solar Thermal Collector Azimuth')
-    arg.setUnits('degrees')
-    arg.setDescription('The azimuth of the solar thermal system collectors. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).')
-    arg.setDefaultValue(180)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('dhw_solar_thermal_collector_tilt', false)
-    arg.setDisplayName('DHW: Solar Thermal Collector Tilt')
-    arg.setUnits('degrees')
-    arg.setDescription('The tilt of the solar thermal system collectors. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
-    arg.setDefaultValue('RoofPitch')
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_solar_thermal_direction', choices[:dhw_solar_thermal_direction], false)
+    arg.setDisplayName('DHW: Solar Thermal Direction')
+    arg.setDescription('The azimuth and tilt of the solar thermal system collectors.')
+    arg.setDefaultValue('Roof Pitch, South')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('pv_system', choices[:pv_system], false)
-    arg.setDisplayName('PV System')
-    arg.setDescription('The size and type of PV system.')
+    arg.setDisplayName('PV: System')
+    arg.setDescription('The size and type of the PV system.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('pv_system_array_azimuth', false)
-    arg.setDisplayName('PV System: Array Azimuth')
-    arg.setUnits('degrees')
-    arg.setDescription('The azimuth of the PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).')
-    arg.setDefaultValue(180)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('pv_system_array_tilt', false)
-    arg.setDisplayName('PV System: Array Tilt')
-    arg.setUnits('degrees')
-    arg.setDescription('The tilt of the PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
-    arg.setDefaultValue('RoofPitch')
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('pv_system_direction', choices[:pv_system_direction], false)
+    arg.setDisplayName('PV: System Direction')
+    arg.setDescription('The azimuth and tilt of the PV system array.')
+    arg.setDefaultValue('Roof Pitch, South')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('pv_system_2', choices[:pv_system_2], false)
-    arg.setDisplayName('PV System 2')
+    arg.setDisplayName('PV: System 2')
     arg.setDescription('The size and type of the second PV system.')
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('pv_system_2_array_azimuth', false)
-    arg.setDisplayName('PV System 2: Array Azimuth')
-    arg.setUnits('degrees')
-    arg.setDescription('The azimuth of the second PV system array. Azimuth is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).')
-    arg.setDefaultValue(180)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('pv_system_2_array_tilt', false)
-    arg.setDisplayName('PV System 2: Array Tilt')
-    arg.setUnits('degrees')
-    arg.setDescription('The tilt of the second PV system array. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
-    arg.setDefaultValue('RoofPitch')
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('pv_system_2_direction', choices[:pv_system_2_direction], false)
+    arg.setDisplayName('PV: System 2 Direction')
+    arg.setDescription('The azimuth and tilt of the second PV system array.')
+    arg.setDefaultValue('Roof Pitch, South')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('battery', choices[:battery], false)
@@ -1207,8 +1183,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     set_water_heating_systems(hpxml_bldg, args)
     set_hot_water_distribution(hpxml_bldg, args)
     set_water_fixtures(hpxml_bldg, args)
-    set_solar_thermal(hpxml_bldg, args, weather)
-    set_pv_systems(hpxml_bldg, args, weather)
+    set_solar_thermal(hpxml_bldg, args)
+    set_pv_systems(hpxml_bldg, args)
     set_battery(hpxml_bldg, args)
     set_vehicle(hpxml_bldg, args)
     set_lighting(hpxml_bldg, args)
@@ -1267,9 +1243,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def get_weather_if_needed(runner, args)
     if (args[:hvac_control_heating_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:hvac_control_cooling_season_period].to_s == Constants::BuildingAmerica) ||
-       (args[:dhw_solar_thermal] != 'None' && args[:dhw_solar_thermal_collector_tilt].start_with?('latitude')) ||
-       (args[:pv_system_maximum_power_output].to_f > 0 && args[:pv_system_array_tilt].start_with?('latitude')) ||
-       (args[:pv_system_2_maximum_power_output].to_f > 0 && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
        (args[:apply_defaults])
       epw_path = args[:location_epw_filepath]
       if epw_path.nil?
@@ -3418,9 +3391,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [nil]
-  def set_solar_thermal(hpxml_bldg, args, weather)
+  def set_solar_thermal(hpxml_bldg, args)
     return if args[:dhw_solar_thermal] == 'None'
 
     if args[:dhw_solar_thermal_solar_fraction].to_f > 0
@@ -3429,9 +3401,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       collector_area = args[:dhw_solar_thermal_collector_area]
       collector_loop_type = args[:dhw_solar_thermal_collector_loop_type]
       collector_type = args[:dhw_solar_thermal_collector_type]
-      collector_azimuth = args[:dhw_solar_thermal_collector_azimuth]
-      latitude = Defaults.get_latitude(nil, weather) unless weather.nil?
-      collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:dhw_solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
+      collector_azimuth = args[:dhw_solar_thermal_direction_collector_azimuth]
+      collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:dhw_solar_thermal_direction_collector_tilt], roof_pitch: args[:geometry_roof_pitch])
       collector_rated_optical_efficiency = args[:dhw_solar_thermal_collector_rated_optical_efficiency]
       collector_rated_thermal_losses = args[:dhw_solar_thermal_collector_rated_thermal_losses]
       storage_volume = args[:dhw_solar_thermal_storage_volume]
@@ -3459,19 +3430,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [nil]
-  def set_pv_systems(hpxml_bldg, args, weather)
+  def set_pv_systems(hpxml_bldg, args)
     return if args[:pv_system] == 'None'
-
-    latitude = Defaults.get_latitude(nil, weather) unless weather.nil?
 
     hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                               location: args[:pv_system_location],
                               module_type: args[:pv_system_module_type],
                               tracking: args[:pv_system_tracking],
-                              array_azimuth: args[:pv_system_array_azimuth],
-                              array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_array_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
+                              array_azimuth: args[:pv_system_direction_array_azimuth],
+                              array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_direction_array_tilt], roof_pitch: args[:geometry_roof_pitch]),
                               max_power_output: args[:pv_system_maximum_power_output],
                               system_losses_fraction: args[:pv_system_system_losses_fraction])
 
@@ -3480,8 +3448,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                 location: args[:pv_system_2_location],
                                 module_type: args[:pv_system_2_module_type],
                                 tracking: args[:pv_system_2_tracking],
-                                array_azimuth: args[:pv_system_2_array_azimuth],
-                                array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_2_array_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude),
+                                array_azimuth: args[:pv_system_2_direction_array_azimuth],
+                                array_tilt: Geometry.get_absolute_tilt(tilt_str: args[:pv_system_2_direction_array_tilt], roof_pitch: args[:geometry_roof_pitch]),
                                 max_power_output: args[:pv_system_2_maximum_power_output],
                                 system_losses_fraction: args[:pv_system_2_system_losses_fraction])
     end

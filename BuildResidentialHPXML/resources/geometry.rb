@@ -1247,16 +1247,16 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param enclosure_door_area [Double] the area of the opaque door(s) (ft2)
+  # @param geometry_door_area [Double] the area of the opaque door(s) (ft2)
   # @return [Boolean] true if successful
-  def self.create_doors(runner, model, enclosure_door_area:, **)
+  def self.create_doors(runner, model, geometry_door_area:, **)
     # error checking
-    if enclosure_door_area == 0
+    if geometry_door_area == 0
       return true
     end
 
     door_height = 7.0 # ft
-    door_width = enclosure_door_area / door_height
+    door_width = geometry_door_area / door_height
     door_offset = 0.5 # ft
 
     # Get all exterior walls prioritized by front, then back, then left, then right
@@ -1305,7 +1305,7 @@ module Geometry
       wall_gross_area = UnitConversions.convert(min_story_avail_wall.grossArea, 'm^2', 'ft^2')
 
       # Try to place door on any surface with enough area
-      next if enclosure_door_area >= wall_gross_area
+      next if geometry_door_area >= wall_gross_area
 
       facade = get_surface_facade(min_story_avail_wall)
 
@@ -1380,23 +1380,23 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param enclosure_window_areas_or_wwrs [String] comma-separated list of window areas or window-to-wall ratios for unit's front/back/left/right facades (ft2 or frac)
-  # @param enclosure_skylight_areas [String] comma-separated list of skylight areas for unit's front/back/left/right roofs (ft2)
+  # @param geometry_window_areas_or_wwrs [String] comma-separated list of window areas or window-to-wall ratios for unit's front/back/left/right facades (ft2 or frac)
+  # @param geometry_skylight_areas [String] comma-separated list of skylight areas for unit's front/back/left/right roofs (ft2)
   # @return [Boolean] true if successful
   def self.create_windows_and_skylights(runner, model,
-                                        enclosure_window_areas_or_wwrs:,
-                                        enclosure_skylight_areas:,
+                                        geometry_window_areas_or_wwrs:,
+                                        geometry_skylight_areas:,
                                         **)
     facades = [Constants::FacadeBack, Constants::FacadeRight, Constants::FacadeFront, Constants::FacadeLeft]
 
     wwrs = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
     window_areas = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
-    if enclosure_window_areas_or_wwrs.split(',').count != 4
+    if geometry_window_areas_or_wwrs.split(',').count != 4
       runner.registerError('Enclosure window areas must be a comma-separated list of 4 numbers.')
       return false
     end
     begin
-      w_front, w_back, w_left, w_right = enclosure_window_areas_or_wwrs.split(',').map(&:strip).map { |x| Float(x) }
+      w_front, w_back, w_left, w_right = geometry_window_areas_or_wwrs.split(',').map(&:strip).map { |x| Float(x) }
     rescue
       runner.registerError('Enclosure window areas must be a comma-separated list of 4 numbers.')
       return false
@@ -1423,12 +1423,12 @@ module Geometry
     end
 
     skylight_areas = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
-    if enclosure_skylight_areas.split(',').count != 4
+    if geometry_skylight_areas.split(',').count != 4
       runner.registerError('Enclosure skylight areas must be a comma-separated list of 4 numbers.')
       return false
     end
     begin
-      s_front, s_back, s_left, s_right = enclosure_skylight_areas.split(',').map(&:strip).map { |x| Float(x) }
+      s_front, s_back, s_left, s_right = geometry_skylight_areas.split(',').map(&:strip).map { |x| Float(x) }
     rescue
       runner.registerError('Enclosure skylight areas must be a comma-separated list of 4 numbers.')
       return false
@@ -1851,19 +1851,16 @@ module Geometry
     return
   end
 
-  # Get the absolute tilt based on tilt, roof pitch, and latitude.
+  # Get the absolute tilt based on tilt and roof pitch inputs.
   #
-  # @param tilt_str [Double, String] tilt in degrees or RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
+  # @param tilt_str [String] tilt in degrees or RoofPitch, RoofPitch+20, etc.
   # @param roof_pitch [Double] roof pitch in vertical rise inches for every 12 inches of horizontal run
-  # @param latitude [Double] latitude (degrees)
   # @return [Double] absolute tilt
-  def self.get_absolute_tilt(tilt_str:, roof_pitch:, latitude:)
+  def self.get_absolute_tilt(tilt_str:, roof_pitch:)
     tilt_str = tilt_str.downcase
     if tilt_str.start_with? 'roofpitch'
       roof_angle = (Math.atan(roof_pitch / 12.0) * 180.0 / Math::PI).round(2)
       return Float(eval(tilt_str.gsub('roofpitch', roof_angle.to_s)))
-    elsif tilt_str.start_with? 'latitude'
-      return Float(eval(tilt_str.gsub('latitude', latitude.to_s)))
     else
       return Float(tilt_str)
     end

@@ -26,7 +26,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'base-sfa.xml' => 'base-sfd.xml',
       'base-mf.xml' => 'base-sfd.xml',
       'base-sfd-header.xml' => 'base-sfd.xml',
-      'base-sfd-header-no-duplicates.xml' => 'base-sfd-header.xml',
 
       # Extra files to test
       'extra-auto.xml' => 'base-sfd.xml',
@@ -157,7 +156,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-hip-roof-and-protruding-garage.xml' => 'base-sfd.xml',
       'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
-      'error-different-simulation-control.xml' => 'base-sfd-header.xml',
       'error-could-not-find-epw-file.xml' => 'base-sfd.xml',
 
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
@@ -187,9 +185,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-hip-roof-and-protruding-garage.xml' => ['Cannot handle protruding garage and hip roof.'],
       'error-protruding-garage-under-gable-roof.xml' => ['Cannot handle protruding garage and attic ridge running from front to back.'],
       'error-ambient-with-garage.xml' => ['Cannot handle garages with an ambient foundation type.'],
-      'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
-                                                   "'Simulation Control: Run Period' cannot vary across dwelling units.",
-                                                   "Advanced feature 'Temperature Capacitance Multiplier' cannot vary across dwelling units."],
       'error-could-not-find-epw-file.xml' => ['Could not find EPW file at']
     }
 
@@ -364,10 +359,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['enclosure_wall_siding'] = 'Wood, Medium'
       args['enclosure_foundation_wall'] = 'Solid Concrete, Whole Wall, R-10'
       args['enclosure_window'] = 'Double, Low-E, Insulated, Air, Med Gain'
-      args['enclosure_window_areas_or_wwrs'] = '108, 108, 72, 72'
+      args['geometry_window_areas_or_wwrs'] = '108, 108, 72, 72'
       args['enclosure_window_natural_ventilation'] = '67% Operable Windows'
       args['enclosure_window_interior_shading'] = 'Summer=0.7, Winter=0.8'
-      args['enclosure_door_area'] = 40.0
+      args['geometry_door_area'] = 40.0
       args['enclosure_door'] = 'Solid Wood, R-2'
       args['hvac_heating_system_fuel'] = HPXML::FuelTypeNaturalGas
       args['hvac_heating_system'] = 'Central Furnace, 92% AFUE'
@@ -410,24 +405,22 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFA
       args['geometry_unit_cfa'] = 1800.0
       args['geometry_attached_walls'] = '1 Side: Right'
-      args['enclosure_window_areas_or_wwrs'] = '0.18, 0.18, 0.18, 0.18'
+      args['geometry_window_areas_or_wwrs'] = '0.18, 0.18, 0.18, 0.18'
     when 'base-mf.xml'
       args['geometry_unit_type'] = HPXML::ResidentialTypeApartment
       args['geometry_unit_cfa'] = 900.0
       args['geometry_attic_type'] = 'Below Apartment'
       args['geometry_foundation_type'] = 'Above Apartment'
       args['geometry_attached_walls'] = '1 Side: Right'
-      args['enclosure_window_areas_or_wwrs'] = '0.18, 0.18, 0.18, 0.18'
+      args['geometry_window_areas_or_wwrs'] = '0.18, 0.18, 0.18, 0.18'
       args['hvac_ducts'] = '0 CFM25 per 100ft2, Uninsulated'
       args['hvac_ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['hvac_ducts_return_location'] = HPXML::LocationConditionedSpace
-      args['enclosure_door_area'] = 20.0
+      args['geometry_door_area'] = 20.0
     when 'base-sfd-header.xml'
       args['simulation_control_run_period'] = 'Jan 1 - Dec 31'
       args['utility_bill_scenario'] = 'Default (EIA Average Rates)'
       args['advanced_feature'] = 'Temperature Capacitance Multiplier = 1'
-    when 'base-sfd-header-no-duplicates.xml'
-      args['whole_sfa_or_mf_building_sim'] = true
     end
 
     # Extras
@@ -446,12 +439,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts_return_location'] = HPXML::LocationAtticUnvented
     when 'extra-pv-roofpitch.xml'
       args['pv_system'] = '4.0 kW'
+      args['pv_system_direction'] = 'Roof Pitch, South'
       args['pv_system_2'] = '4.0 kW'
-      args['pv_system_array_tilt'] = 'roofpitch'
-      args['pv_system_2_array_tilt'] = 'roofpitch+15'
+      args['pv_system_2_direction'] = 'Roof Pitch, East'
     when 'extra-dhw-solar-latitude.xml'
       args['dhw_solar_thermal'] = 'Indirect, Flat Plate, 40 sqft'
-      args['dhw_solar_thermal_collector_tilt'] = 'Latitude-15'
+      args['dhw_solar_thermal_direction'] = 'Roof Pitch, South'
     when 'extra-second-heating-system-portable-heater-to-heating-system.xml'
       args['hvac_heating_system_fuel'] = HPXML::FuelTypeElectricity
       args['hvac_heating_system_capacity'] = '50 kBtu/hr'
@@ -507,7 +500,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
     when 'extra-enclosure-garage-atticroof-conditioned.xml'
       args['geometry_garage_type'] = '3 Car, Right, Half Protruding'
-      args['enclosure_window_areas_or_wwrs'] = '12, 108, 72, 72'
+      args['geometry_window_areas_or_wwrs'] = '12, 108, 72, 72'
       args['geometry_unit_cfa'] = 4500.0
       args['geometry_unit_num_floors_above_grade'] = 2
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
@@ -726,11 +719,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-ambient-with-garage.xml'
       args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
       args['geometry_foundation_type'] = 'Ambient'
-    when 'error-different-simulation-control.xml'
-      args['simulation_control_timestep'] = 10
-      args['simulation_control_run_period'] = 'Jan 2 - Dec 30'
-      args['advanced_feature'] = 'None'
-      args['advanced_feature_2'] = 'Temperature Capacitance Multiplier = 4'
     when 'error-could-not-find-epw-file.xml'
       args['location_epw_filepath'] = 'foo.epw'
     end

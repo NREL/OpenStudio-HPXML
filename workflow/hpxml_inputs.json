@@ -21,11 +21,11 @@
     "enclosure_radiant_barrier": "None",
     "enclosure_wall": "Detailed Example: Wood Stud, R-11, 2x4, 16 in o.c., 25% Framing",
     "enclosure_wall_siding": "Detailed Example: 0.6 Solar Absorptance",
-    "enclosure_window_areas_or_wwrs": "90, 90, 45, 45",
+    "geometry_window_areas_or_wwrs": "90, 90, 45, 45",
     "enclosure_window_natural_ventilation": "None",
     "enclosure_window": "Detailed Example: Single, Clear, Aluminum w/ Thermal Break",
     "enclosure_window_interior_shading": "None",
-    "enclosure_door_area": 40,
+    "geometry_door_area": 40,
     "enclosure_door": "Detailed Example: Solid Wood, R-3.04",
     "enclosure_air_leakage": "0.67 nACH",
     "hvac_heating_system": "None",
@@ -75,11 +75,11 @@
   },
   "tests/ASHRAE_Standard_140/L140AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "enclosure_window_areas_or_wwrs": "0, 0, 0, 0"
+    "geometry_window_areas_or_wwrs": "0, 0, 0, 0"
   },
   "tests/ASHRAE_Standard_140/L150AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "enclosure_window_areas_or_wwrs": "270, 0, 0, 0"
+    "geometry_window_areas_or_wwrs": "270, 0, 0, 0"
   },
   "tests/ASHRAE_Standard_140/L155AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L150AC.xml",
@@ -87,7 +87,7 @@
   },
   "tests/ASHRAE_Standard_140/L160AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "enclosure_window_areas_or_wwrs": "0, 0, 135, 135"
+    "geometry_window_areas_or_wwrs": "0, 0, 135, 135"
   },
   "tests/ASHRAE_Standard_140/L170AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -149,11 +149,11 @@
   },
   "tests/ASHRAE_Standard_140/L140AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "enclosure_window_areas_or_wwrs": "0, 0, 0, 0"
+    "geometry_window_areas_or_wwrs": "0, 0, 0, 0"
   },
   "tests/ASHRAE_Standard_140/L150AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "enclosure_window_areas_or_wwrs": "270, 0, 0, 0"
+    "geometry_window_areas_or_wwrs": "270, 0, 0, 0"
   },
   "tests/ASHRAE_Standard_140/L155AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L150AL.xml",
@@ -161,7 +161,7 @@
   },
   "tests/ASHRAE_Standard_140/L160AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "enclosure_window_areas_or_wwrs": "0, 0, 135, 135"
+    "geometry_window_areas_or_wwrs": "0, 0, 135, 135"
   },
   "tests/ASHRAE_Standard_140/L170AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -384,11 +384,11 @@
     "enclosure_wall": "Wood Stud, R-13",
     "enclosure_wall_continuous_insulation": "R-10",
     "enclosure_wall_siding": "Wood, Medium",
-    "enclosure_window_areas_or_wwrs": "108, 108, 72, 72",
+    "geometry_window_areas_or_wwrs": "108, 108, 72, 72",
     "enclosure_window_natural_ventilation": "67% Operable Windows",
     "enclosure_window": "Double, Low-E, Non-Metal, Gas, Med Gain",
     "enclosure_window_interior_shading": "Curtains, Light",
-    "enclosure_door_area": 40,
+    "geometry_door_area": 40,
     "enclosure_door": "Detailed Example: Insulated Fiberglass/Steel, R-4.4",
     "enclosure_air_leakage": "3 ACH50",
     "hvac_heating_system_fuel": "natural gas",
@@ -487,7 +487,7 @@
     "geometry_unit_cfa": 4050,
     "geometry_attic_type": "Attic, Conditioned, Gable",
     "enclosure_roof": "R-30",
-    "enclosure_window_areas_or_wwrs": "108, 108, 120, 120",
+    "geometry_window_areas_or_wwrs": "108, 108, 120, 120",
     "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "hvac_ducts_supply_location": "conditioned space",
     "hvac_ducts_return_location": "conditioned space"
@@ -603,7 +603,7 @@
     "geometry_attached_walls": "1 Side: Right",
     "geometry_unit_cfa": 1800,
     "geometry_unit_aspect_ratio": 0.6667,
-    "enclosure_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
+    "geometry_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
     "hvac_heating_system_capacity": "25 kBtu/hr"
   },
   "sample_files/base-bldgtype-sfa-unit-2stories.xml": {
@@ -633,8 +633,8 @@
     "geometry_unit_aspect_ratio": 0.6667,
     "geometry_foundation_type": "Above Apartment",
     "geometry_attic_type": "Below Apartment",
-    "enclosure_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
-    "enclosure_door_area": 20,
+    "geometry_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
+    "geometry_door_area": 20,
     "hvac_heating_system_capacity": "10 kBtu/hr",
     "hvac_cooling_system_capacity": "1.0 tons",
     "hvac_ducts": "0 CFM25 per 100ft2, Uninsulated",
@@ -787,8 +787,7 @@
   "sample_files/base-bldgtype-mf-unit-shared-pv.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "pv_system": "12.0 kW",
-    "pv_system_array_azimuth": 225,
-    "pv_system_array_tilt": 30
+    "pv_system_direction": "30 Degrees, Southwest"
   },
   "sample_files/base-bldgtype-mf-unit-shared-pv-battery.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-pv.xml",
@@ -940,7 +939,7 @@
   "sample_files/base-dhw-solar-indirect-flat-plate.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "dhw_solar_thermal": "Indirect, Flat Plate, 40 sqft",
-    "dhw_solar_thermal_collector_tilt": 20
+    "dhw_solar_thermal_direction": "20 Degrees, South"
   },
   "sample_files/base-dhw-solar-thermosyphon-flat-plate.xml": {
     "parent_hpxml": "sample_files/base-dhw-solar-indirect-flat-plate.xml",
@@ -990,7 +989,7 @@
   "sample_files/base-dhw-tank-heat-pump-with-solar.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
     "dhw_solar_thermal": "Indirect, Flat Plate, 40 sqft",
-    "dhw_solar_thermal_collector_tilt": 20
+    "dhw_solar_thermal_direction": "20 Degrees, South"
   },
   "sample_files/base-dhw-tank-heat-pump-with-solar-fraction.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
@@ -1040,7 +1039,7 @@
   "sample_files/base-dhw-tankless-gas-with-solar.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
     "dhw_solar_thermal": "Indirect, Flat Plate, 40 sqft",
-    "dhw_solar_thermal_collector_tilt": 20
+    "dhw_solar_thermal_direction": "20 Degrees, South"
   },
   "sample_files/base-dhw-tankless-gas-with-solar-fraction.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
@@ -1077,7 +1076,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_floors_above_grade": 2,
     "geometry_unit_cfa": 4050,
-    "enclosure_window_areas_or_wwrs": "216, 216, 144, 144",
+    "geometry_window_areas_or_wwrs": "216, 216, 144, 144",
     "hvac_heating_system_capacity": "50 kBtu/hr",
     "hvac_cooling_system_capacity": "3.0 tons"
   },
@@ -1115,7 +1114,7 @@
   "sample_files/base-enclosure-garage.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_garage_type": "3 Car, Right, Fully Protruding",
-    "enclosure_window_areas_or_wwrs": "12, 108, 72, 72",
+    "geometry_window_areas_or_wwrs": "12, 108, 72, 72",
     "hvac_ducts_supply_location": "garage",
     "hvac_ducts_return_location": "garage",
     "dhw_water_heater_location": "garage",
@@ -1170,12 +1169,12 @@
   "sample_files/base-enclosure-skylights.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "enclosure_skylight": "Double, Low-E, Metal, Med Gain",
-    "enclosure_skylight_areas": "15, 15, 0, 0"
+    "geometry_skylight_areas": "15, 15, 0, 0"
   },
   "sample_files/base-enclosure-skylights-cathedral.xml": {
     "parent_hpxml": "sample_files/base-atticroof-cathedral.xml",
     "enclosure_skylight": "Double, Low-E, Metal, Med Gain",
-    "enclosure_skylight_areas": "15, 15, 0, 0"
+    "geometry_skylight_areas": "15, 15, 0, 0"
   },
   "sample_files/base-enclosure-skylights-physical-properties.xml": {
     "parent_hpxml": "sample_files/base-enclosure-skylights.xml"
@@ -1223,7 +1222,7 @@
   },
   "sample_files/base-enclosure-windows-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "enclosure_window_areas_or_wwrs": "0, 0, 0, 0"
+    "geometry_window_areas_or_wwrs": "0, 0, 0, 0"
   },
   "sample_files/base-enclosure-windows-physical-properties.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -1260,7 +1259,7 @@
     "geometry_unit_aspect_ratio": 4.0,
     "geometry_foundation_type": "Belly and Wing, With Skirt",
     "geometry_roof_pitch": "3:12",
-    "enclosure_window_areas_or_wwrs": "140, 140, 20, 20",
+    "geometry_window_areas_or_wwrs": "140, 140, 20, 20",
     "hvac_ducts_supply_location": "manufactured home belly",
     "hvac_ducts": "20% Leakage, Uninsulated",
     "hvac_ducts_return_location": "manufactured home belly"
@@ -2358,10 +2357,9 @@
     "ventilation_whole_house_fan": "1000 cfm",
     "dhw_water_heater_location": null,
     "dhw_solar_thermal": "Direct, Flat Plate, 40 sqft",
-    "dhw_solar_thermal_collector_tilt": 20,
+    "dhw_solar_thermal_direction": "20 Degrees, South",
     "pv_system": "4.0 kW",
-    "pv_system_array_azimuth": 180,
-    "pv_system_array_tilt": 20,
+    "pv_system_direction": "20 Degrees, South",
     "battery": "20.0 kWh",
     "electric_vehicle": "Midsize, 200 Mile Range, 100% Usage",
     "electric_vehicle_charger": "Level 1, 50% Charging at Home",
@@ -2455,8 +2453,8 @@
     "geometry_unit_aspect_ratio": 0.75,
     "enclosure_floor_over_foundation": "Wood Frame, R-19",
     "enclosure_air_leakage": "Detailed Example: 0.375 nACH",
-    "enclosure_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
-    "enclosure_door_area": 20,
+    "geometry_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
+    "geometry_door_area": 20,
     "hvac_cooling_system": "Room AC, EER 8.5",
     "hvac_cooling_system_capacity": "1.0 tons",
     "hvac_heating_system_fuel": "electricity",
@@ -2470,20 +2468,16 @@
   "sample_files/base-pv.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "pv_system": "4.0 kW",
-    "pv_system_array_azimuth": 180,
-    "pv_system_array_tilt": 20,
+    "pv_system_direction": "20 Degrees, South",
     "pv_system_2": "1.5 kW, Premium Module",
-    "pv_system_2_array_azimuth": 90,
-    "pv_system_2_array_tilt": 20
+    "pv_system_2_direction": "20 Degrees, East"
   },
   "sample_files/base-pv-battery.xml": {
     "parent_hpxml": "sample_files/base-battery.xml",
     "pv_system": "4.0 kW",
-    "pv_system_array_azimuth": 180,
-    "pv_system_array_tilt": 20,
+    "pv_system_direction": "20 Degrees, South",
     "pv_system_2": "1.5 kW, Premium Module",
-    "pv_system_2_array_azimuth": 90,
-    "pv_system_2_array_tilt": 20
+    "pv_system_2_direction": "20 Degrees, East"
   },
   "sample_files/base-pv-battery-ah.xml": {
     "parent_hpxml": "sample_files/base-pv-battery.xml"
@@ -2491,11 +2485,9 @@
   "sample_files/base-pv-battery-garage.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
     "pv_system": "4.0 kW",
-    "pv_system_array_azimuth": 180,
-    "pv_system_array_tilt": 20,
+    "pv_system_direction": "20 Degrees, South",
     "pv_system_2": "1.5 kW, Premium Module",
-    "pv_system_2_array_azimuth": 90,
-    "pv_system_2_array_tilt": 20,
+    "pv_system_2_direction": "20 Degrees, East",
     "battery": "Detailed Example: 20.0 kWh, 6 kW, Garage"
   },
   "sample_files/base-pv-battery-round-trip-efficiency.xml": {
