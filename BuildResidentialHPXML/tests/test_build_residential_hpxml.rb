@@ -23,17 +23,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
     hpxmls_files = {
       # Base files to derive from
       'base-sfd.xml' => nil,
-      'base-sfd2.xml' => 'base-sfd.xml',
-
       'base-sfa.xml' => 'base-sfd.xml',
-      'base-sfa2.xml' => 'base-sfa.xml',
-      'base-sfa3.xml' => 'base-sfa.xml',
-
       'base-mf.xml' => 'base-sfd.xml',
-      'base-mf2.xml' => 'base-mf.xml',
-      'base-mf3.xml' => 'base-mf.xml',
-      'base-mf4.xml' => 'base-mf.xml',
-
       'base-sfd-header.xml' => 'base-sfd.xml',
       'base-sfd-header-no-duplicates.xml' => 'base-sfd-header.xml',
 
@@ -61,7 +52,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-vehicle-ev.xml' => 'extra-enclosure-garage-partially-protruded.xml',
       'extra-two-batteries.xml' => 'base-sfd.xml',
       'extra-detailed-performance-autosize.xml' => 'base-sfd.xml',
-      'extra-power-outage-periods.xml' => 'base-sfd.xml',
 
       'extra-sfa-atticroof-flat.xml' => 'base-sfa.xml',
       'extra-sfa-atticroof-conditioned-eaves-gable.xml' => 'extra-sfa-slab.xml',
@@ -163,14 +153,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-dhw-indirect-without-boiler.xml' => 'base-sfd.xml',
       'error-conditioned-attic-with-one-floor-above-grade.xml' => 'base-sfd.xml',
       'error-zero-number-of-bedrooms.xml' => 'base-sfd.xml',
-      'error-unavailable-period-args-not-all-specified' => 'base-sfd.xml',
-      'error-unavailable-period-args-not-all-same-size.xml' => 'base-sfd.xml',
-      'error-unavailable-period-window-natvent-invalid.xml' => 'base-sfd.xml',
       'error-too-many-floors.xml' => 'base-sfd.xml',
       'error-hip-roof-and-protruding-garage.xml' => 'base-sfd.xml',
       'error-protruding-garage-under-gable-roof.xml' => 'base-sfd.xml',
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
-      'error-different-software-program.xml' => 'base-sfd-header.xml',
       'error-different-simulation-control.xml' => 'base-sfd-header.xml',
       'error-could-not-find-epw-file.xml' => 'base-sfd.xml',
 
@@ -197,15 +183,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-mf-conditioned-attic.xml' => ['Conditioned attic type for apartment units is not currently supported.'],
       'error-dhw-indirect-without-boiler.xml' => ['Must specify a boiler when modeling an indirect water heater type.'],
       'error-conditioned-attic-with-one-floor-above-grade.xml' => ['Units with a conditioned attic must have at least two above-grade floors.'],
-      'error-unavailable-period-args-not-all-specified' => ['Did not specify all required unavailable period arguments.'],
-      'error-unavailable-period-args-not-all-same-size.xml' => ['One or more unavailable period arguments does not have enough comma-separated elements specified.'],
-      'error-unavailable-period-window-natvent-invalid.xml' => ["Window natural ventilation availability 'invalid' during an unavailable period is invalid."],
       'error-too-many-floors.xml' => ['Number of above-grade floors must be six or less.'],
       'error-hip-roof-and-protruding-garage.xml' => ['Cannot handle protruding garage and hip roof.'],
       'error-protruding-garage-under-gable-roof.xml' => ['Cannot handle protruding garage and attic ridge running from front to back.'],
       'error-ambient-with-garage.xml' => ['Cannot handle garages with an ambient foundation type.'],
-      'error-different-software-program.xml' => ["'Software Info: Program Used' cannot vary across dwelling units.",
-                                                 "'Software Info: Program Version' cannot vary across dwelling units."],
       'error-different-simulation-control.xml' => ["'Simulation Control: Timestep' cannot vary across dwelling units.",
                                                    "'Simulation Control: Run Period' cannot vary across dwelling units.",
                                                    "Advanced feature 'Temperature Capacitance Multiplier' cannot vary across dwelling units."],
@@ -425,20 +406,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['misc_electric_vehicle_charging'] = 'None'
       args['misc_pool'] = 'None'
       args['misc_permanent_spa'] = 'None'
-    when 'base-sfd2.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd.xml')
-      args['whole_sfa_or_mf_building_sim'] = true
     when 'base-sfa.xml'
       args['geometry_unit_type'] = HPXML::ResidentialTypeSFA
       args['geometry_unit_cfa'] = 1800.0
       args['geometry_attached_walls'] = '1 Side: Right'
       args['enclosure_window_areas_or_wwrs'] = '0.18, 0.18, 0.18, 0.18'
-    when 'base-sfa2.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa.xml')
-      args['whole_sfa_or_mf_building_sim'] = true
-    when 'base-sfa3.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfa2.xml')
-      args['whole_sfa_or_mf_building_sim'] = true
     when 'base-mf.xml'
       args['geometry_unit_type'] = HPXML::ResidentialTypeApartment
       args['geometry_unit_cfa'] = 900.0
@@ -450,26 +422,11 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['hvac_ducts_return_location'] = HPXML::LocationConditionedSpace
       args['enclosure_door_area'] = 20.0
-    when 'base-mf2.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')
-      args['whole_sfa_or_mf_building_sim'] = true
-    when 'base-mf3.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf2.xml')
-      args['whole_sfa_or_mf_building_sim'] = true
-    when 'base-mf4.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf3.xml')
-      args['whole_sfa_or_mf_building_sim'] = true
     when 'base-sfd-header.xml'
-      args['software_info_program_used'] = 'Program'
-      args['software_info_program_version'] = '1'
-      args['schedules_unavailable_period_types'] = 'Vacancy, Power Outage'
-      args['schedules_unavailable_period_dates'] = 'Jan 2 - Jan 5, Feb 10 - Feb 12'
-      args['schedules_unavailable_period_window_natvent_availabilities'] = "#{HPXML::ScheduleUnavailable}, #{HPXML::ScheduleAvailable}"
       args['simulation_control_run_period'] = 'Jan 1 - Dec 31'
       args['utility_bill_scenario'] = 'Default (EIA Average Rates)'
       args['advanced_feature'] = 'Temperature Capacitance Multiplier = 1'
     when 'base-sfd-header-no-duplicates.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['whole_sfa_or_mf_building_sim'] = true
     end
 
@@ -594,9 +551,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_heating_system'] = 'None'
       args['hvac_cooling_system'] = 'None'
       args['hvac_heat_pump'] = 'Detailed Example: Central HP, SEER 17.5, 9.5 HSPF, Normalized Detailed Performance'
-    when 'extra-power-outage-periods.xml'
-      args['schedules_unavailable_period_types'] = 'Power Outage, Power Outage'
-      args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'
     when 'extra-sfa-atticroof-flat.xml'
       args['geometry_attic_type'] = 'Flat Roof'
       args['hvac_ducts'] = '0 CFM25 per 100ft2, R-4'
@@ -761,16 +715,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-conditioned-attic-with-one-floor-above-grade.xml'
       args['geometry_attic_type'] = 'Attic, Conditioned, Gable'
       args['enclosure_ceiling'] = 'Uninsulated'
-    when 'error-unavailable-period-args-not-all-specified'
-      args['schedules_unavailable_period_types'] = 'Vacancy'
-    when 'error-unavailable-period-args-not-all-same-size.xml'
-      args['schedules_unavailable_period_types'] = 'Vacancy, Power Outage'
-      args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'
-      args['schedules_unavailable_period_window_natvent_availabilities'] = HPXML::ScheduleRegular
-    when 'error-unavailable-period-window-natvent-invalid.xml'
-      args['schedules_unavailable_period_types'] = 'Power Outage'
-      args['schedules_unavailable_period_dates'] = 'Jan 7 - Jan 9'
-      args['schedules_unavailable_period_window_natvent_availabilities'] = 'invalid'
     when 'error-too-many-floors.xml'
       args['geometry_unit_num_floors_above_grade'] = 7
     when 'error-hip-roof-and-protruding-garage.xml'
@@ -782,12 +726,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-ambient-with-garage.xml'
       args['geometry_garage_type'] = '1 Car, Right, Half Protruding'
       args['geometry_foundation_type'] = 'Ambient'
-    when 'error-different-software-program.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
-      args['software_info_program_used'] = 'Program2'
-      args['software_info_program_version'] = '2'
     when 'error-different-simulation-control.xml'
-      args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['simulation_control_timestep'] = 10
       args['simulation_control_run_period'] = 'Jan 2 - Dec 30'
       args['advanced_feature'] = 'None'

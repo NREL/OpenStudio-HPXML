@@ -1,7 +1,5 @@
 {
   "tests/ASHRAE_Standard_140/L100AC.xml": {
-    "software_info_program_used": "",
-    "software_info_program_version": "",
     "building_year_built": 0,
     "location_epw_filepath": "USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw",
     "geometry_unit_type": "single-family detached",
@@ -361,8 +359,6 @@
     "location_epw_filepath": "USA_FL_Miami.Intl.AP.722020_TMY3.epw"
   },
   "sample_files/base.xml": {
-    "software_info_program_used": "",
-    "software_info_program_version": "",
     "simulation_control_timestep": 60,
     "building_year_built": 0,
     "location_epw_filepath": "USA_CO_Denver.Intl.AP.725650_TMY3.epw",
@@ -549,9 +545,7 @@
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv"
   },
   "sample_files/base-battery-scheduled-power-outage.xml": {
-    "parent_hpxml": "sample_files/base-battery-scheduled.xml",
-    "schedules_unavailable_period_types": "Power Outage",
-    "schedules_unavailable_period_dates": "Jul 1 5 - Jul 31 14"
+    "parent_hpxml": "sample_files/base-battery-scheduled.xml"
   },
   "sample_files/base-vehicle-ev-no-charger.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
@@ -2570,26 +2564,17 @@
   },
   "sample_files/base-schedules-simple-vacancy.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "schedules_unavailable_period_types": "Vacancy",
-    "schedules_unavailable_period_dates": "Dec 1 - Jan 31",
-    "schedules_unavailable_period_window_natvent_availabilities": "always unavailable",
     "dhw_distribution": "Uninsulated, Recirc, Uncontrolled"
   },
   "sample_files/base-schedules-simple-power-outage.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "schedules_unavailable_period_types": "Power Outage",
-    "schedules_unavailable_period_dates": "Jul 1 5 - Jul 31 14",
     "dhw_distribution": "Uninsulated, Recirc, Uncontrolled"
   },
   "sample_files/base-schedules-simple-no-space-heating.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "schedules_unavailable_period_types": "No Space Heating",
-    "schedules_unavailable_period_dates": "Dec 5 0 - Dec 31 23"
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-schedules-simple-no-space-cooling.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "schedules_unavailable_period_types": "No Space Cooling",
-    "schedules_unavailable_period_dates": "Jul 1 22 - Aug 3 14"
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-schedules-detailed-all-10-mins.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
@@ -2608,34 +2593,23 @@
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-30-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps-power-outage.xml": {
-    "parent_hpxml": "sample_files/base-schedules-detailed-mixed-timesteps.xml",
-    "schedules_unavailable_period_types": "Power Outage",
-    "schedules_unavailable_period_dates": "Dec 1 5 - Jan 31 14"
+    "parent_hpxml": "sample_files/base-schedules-detailed-mixed-timesteps.xml"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-vacancy.xml": {
-    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
-    "schedules_unavailable_period_types": "Vacancy",
-    "schedules_unavailable_period_dates": "Dec 1 - Jan 31",
-    "schedules_unavailable_period_window_natvent_availabilities": "always unavailable"
+    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-power-outage.xml": {
-    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
-    "schedules_unavailable_period_types": "Power Outage",
-    "schedules_unavailable_period_dates": "Dec 1 5 - Jan 31 14"
+    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-no-space-heating.xml": {
-    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
-    "schedules_unavailable_period_types": "No Space Heating",
-    "schedules_unavailable_period_dates": "Dec 11 5 - Jan 2 14"
+    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-no-space-cooling.xml": {
-    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
-    "schedules_unavailable_period_types": "No Space Cooling",
-    "schedules_unavailable_period_dates": "Jun 15 5 - Jul 30 14"
+    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-10-mins.xml": {
     "parent_hpxml": "sample_files/base.xml",

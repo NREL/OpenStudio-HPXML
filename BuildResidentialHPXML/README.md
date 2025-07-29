@@ -22,28 +22,6 @@ Absolute/relative path of the HPXML file.
 
 <br/>
 
-**Software Info: Program Used**
-
-The name of the software program used.
-
-- **Name:** ``software_info_program_used``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Software Info: Program Version**
-
-The version of the software program used.
-
-- **Name:** ``software_info_program_version``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
 **Simulation Control: Timestep**
 
 Value must be a divisor of 60.
@@ -762,7 +740,7 @@ The output capacity of the cooling system's integrated heating system. Only used
 
 **HVAC: Cooling System Integrated Heating Fraction Heat Load Served**
 
-The heating load served by the heating system integrated into cooling system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.
+The heating load served by the cooling system's integrated heating system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.
 
 - **Name:** ``hvac_cooling_system_integrated_heating_fraction_heat_load_served``
 - **Type:** ``Double``
@@ -1587,42 +1565,9 @@ The type of permanent spa (pump & heater).
 
 **Schedules: CSV File Paths**
 
-Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.
+Absolute/relative paths of csv files containing user-specified detailed schedules, if desired. Use a comma-separated list for multiple files.
 
 - **Name:** ``schedules_filepaths``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Schedules: Unavailable Period Types**
-
-Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: Vacancy, Power Outage, No Space Heating, No Space Cooling. If multiple periods, use a comma-separated list.
-
-- **Name:** ``schedules_unavailable_period_types``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Schedules: Unavailable Period Dates**
-
-Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
-
-- **Name:** ``schedules_unavailable_period_dates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Schedules: Unavailable Period Window Natural Ventilation Availabilities**
-
-The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If not provided, defaults to 'regular schedule'.
-
-- **Name:** ``schedules_unavailable_period_window_natvent_availabilities``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -1707,21 +1652,10 @@ Additional properties specified as key-value pairs (i.e., key=value). If multipl
 
 **Whole SFA/MF Building Simulation?**
 
-If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.
+Set true if creating an HPXML file to simulate a whole single-family attached or multifamily building with multiple dwelling units within. If an HPXML file already exists at the specified HPXML File Path, a new HPXML Building element describing the current dwelling unit will be appended to this HPXML file.
 
 - **Name:** ``whole_sfa_or_mf_building_sim``
 - **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Whole SFA/MF Building Simulation: Existing HPXML File Path**
-
-Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).
-
-- **Name:** ``whole_sfa_or_mf_existing_hpxml_path``
-- **Type:** ``String``
 
 - **Required:** ``false``
 

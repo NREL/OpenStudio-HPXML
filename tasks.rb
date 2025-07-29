@@ -39,7 +39,7 @@ def create_hpxmls
 
   json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
     # Uncomment following line to debug single file
-    # next unless hpxml_filename.include? 'base-detailed-electric-panel.xml'
+    # next unless hpxml_filename.include? 'base-bldgtype-mf-whole-building.xml'
 
     puts "[#{hpxml_i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
@@ -63,6 +63,8 @@ def create_hpxmls
     json_input.merge!(json_inputs[hpxml_filename])
     json_input.delete('parent_hpxml')
 
+    File.delete(hpxml_path)
+
     measures = {}
     measures['BuildResidentialHPXML'] = [json_input]
 
@@ -77,7 +79,6 @@ def create_hpxmls
 
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
-      build_residential_hpxml['whole_sfa_or_mf_existing_hpxml_path'] = hpxml_path if i > 1
       if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
@@ -129,6 +130,8 @@ def create_hpxmls
     end
 
     hpxml = HPXML.new(hpxml_path: hpxml_path)
+    hpxml.header.software_program_used = nil
+    hpxml.header.software_program_version = nil
     if hpxml_path.include?('ASHRAE_Standard_140') || hpxml_path.include?('HERS_HVAC') || hpxml_path.include?('HERS_DSE')
       apply_hpxml_modification_ashrae_140(hpxml)
       if hpxml_path.include?('HERS_HVAC') || hpxml_path.include?('HERS_DSE')
@@ -359,43 +362,61 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   if ['base-simcontrol-calendar-year-custom.xml'].include? hpxml_file
     hpxml.header.sim_calendar_year = 2010
   end
+  if ['base-misc-emissions.xml',
+      'base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
+    hpxml.header.emissions_scenarios.add(name: 'Cambium Hourly MidCase LRMER RMPA',
+                                         emissions_type: 'CO2e',
+                                         elec_units: 'kg/MWh',
+                                         elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv',
+                                         elec_schedule_number_of_header_rows: 1,
+                                         elec_schedule_column_number: 17)
+    hpxml.header.emissions_scenarios.add(name: 'Cambium Hourly LowRECosts LRMER RMPA',
+                                         emissions_type: 'CO2e',
+                                         elec_units: 'kg/MWh',
+                                         elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv',
+                                         elec_schedule_number_of_header_rows: 1,
+                                         elec_schedule_column_number: 17)
+    hpxml.header.emissions_scenarios.add(name: 'Cambium Annual MidCase AER National',
+                                         emissions_type: 'CO2e',
+                                         elec_units: 'kg/MWh',
+                                         elec_value: 392.6)
+    hpxml.header.emissions_scenarios.add(name: 'eGRID RMPA',
+                                         emissions_type: 'SO2',
+                                         elec_units: 'lb/MWh',
+                                         elec_value: 0.384)
+    hpxml.header.emissions_scenarios.add(name: 'eGRID RMPA',
+                                         emissions_type: 'NOx',
+                                         elec_units: 'lb/MWh',
+                                         elec_value: 0.67)
+  end
+  if ['base-battery-scheduled-power-outage.xml',
+      'base-schedules-simple-power-outage.xml'].include? hpxml_file
+    hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: 7, begin_day: 1, begin_hour: 5, end_month: 7, end_day: 31, end_hour: 14)
+  elsif ['base-schedules-simple-vacancy.xml',
+         'base-schedules-detailed-occupancy-stochastic-vacancy.xml'].include? hpxml_file
+    hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: 12, begin_day: 1, end_month: 1, end_day: 31, natvent_availability: HPXML::ScheduleUnavailable)
+  elsif ['base-schedules-detailed-mixed-timesteps-power-outage.xml',
+         'base-schedules-detailed-occupancy-stochastic-power-outage.xml'].include? hpxml_file
+    hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: 12, begin_day: 1, begin_hour: 5, end_month: 1, end_day: 31, end_hour: 14)
+  elsif ['base-schedules-simple-no-space-heating.xml'].include? hpxml_file
+    hpxml.header.unavailable_periods.add(column_name: 'No Space Heating', begin_month: 12, begin_day: 5, begin_hour: 0, end_month: 12, end_day: 31, end_hour: 23)
+  elsif ['base-schedules-detailed-occupancy-stochastic-no-space-heating.xml'].include? hpxml_file
+    hpxml.header.unavailable_periods.add(column_name: 'No Space Heating', begin_month: 12, begin_day: 11, begin_hour: 5, end_month: 1, end_day: 2, end_hour: 14)
+  elsif ['base-schedules-simple-no-space-cooling.xml'].include? hpxml_file
+    hpxml.header.unavailable_periods.add(column_name: 'No Space Cooling', begin_month: 7, begin_day: 1, begin_hour: 22, end_month: 8, end_day: 3, end_hour: 14)
+  elsif ['base-schedules-detailed-occupancy-stochastic-no-space-cooling.xml'].include? hpxml_file
+    hpxml.header.unavailable_periods.add(column_name: 'No Space Cooling', begin_month: 6, begin_day: 15, begin_hour: 5, end_month: 7, end_day: 30, end_hour: 14)
+  end
 
   hpxml.buildings.each_with_index do |hpxml_bldg, hpxml_bldg_index|
     # ------------ #
     # HPXML Header #
     # ------------ #
 
-    if ['base-misc-emissions.xml',
-        'base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
-      if ['base-misc-emissions.xml'].include? hpxml_file
-        hpxml_bldg.egrid_region = 'Western'
-        hpxml_bldg.egrid_subregion = 'RMPA'
-        hpxml_bldg.cambium_region_gea = 'RMPAc'
-      end
-      hpxml.header.emissions_scenarios.add(name: 'Cambium Hourly MidCase LRMER RMPA',
-                                           emissions_type: 'CO2e',
-                                           elec_units: 'kg/MWh',
-                                           elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv',
-                                           elec_schedule_number_of_header_rows: 1,
-                                           elec_schedule_column_number: 17)
-      hpxml.header.emissions_scenarios.add(name: 'Cambium Hourly LowRECosts LRMER RMPA',
-                                           emissions_type: 'CO2e',
-                                           elec_units: 'kg/MWh',
-                                           elec_schedule_filepath: '../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv',
-                                           elec_schedule_number_of_header_rows: 1,
-                                           elec_schedule_column_number: 17)
-      hpxml.header.emissions_scenarios.add(name: 'Cambium Annual MidCase AER National',
-                                           emissions_type: 'CO2e',
-                                           elec_units: 'kg/MWh',
-                                           elec_value: 392.6)
-      hpxml.header.emissions_scenarios.add(name: 'eGRID RMPA',
-                                           emissions_type: 'SO2',
-                                           elec_units: 'lb/MWh',
-                                           elec_value: 0.384)
-      hpxml.header.emissions_scenarios.add(name: 'eGRID RMPA',
-                                           emissions_type: 'NOx',
-                                           elec_units: 'lb/MWh',
-                                           elec_value: 0.67)
+    if ['base-misc-emissions.xml'].include? hpxml_file
+      hpxml_bldg.egrid_region = 'Western'
+      hpxml_bldg.egrid_subregion = 'RMPA'
+      hpxml_bldg.cambium_region_gea = 'RMPAc'
     end
     if ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
       hpxml_bldg.dst_enabled = true

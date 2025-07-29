@@ -55,18 +55,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('hpxml.xml')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
-    arg.setDisplayName('Software Info: Program Used')
-    arg.setDescription('The name of the software program used.')
-    arg.setDefaultValue('BuildResidentialHPXML measure')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_version', false)
-    arg.setDisplayName('Software Info: Program Version')
-    arg.setDescription('The version of the software program used.')
-    arg.setDefaultValue(Version::OS_HPXML_Version)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('simulation_control_timestep', false)
     arg.setDisplayName('Simulation Control: Timestep')
     arg.setUnits('min')
@@ -443,7 +431,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_cooling_system_integrated_heating_fraction_heat_load_served', false)
     arg.setDisplayName('HVAC: Cooling System Integrated Heating Fraction Heat Load Served')
-    arg.setDescription("The heating load served by the heating system integrated into cooling system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner} systems with integrated heating.")
+    arg.setDescription("The heating load served by the cooling system's integrated heating system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner} systems with integrated heating.")
     arg.setUnits('Frac')
     arg.setDefaultValue(0)
     args << arg
@@ -879,22 +867,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_filepaths', false)
     arg.setDisplayName('Schedules: CSV File Paths')
-    arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_unavailable_period_types', false)
-    arg.setDisplayName('Schedules: Unavailable Period Types')
-    arg.setDescription("Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: #{Schedule.unavailable_period_types.join(', ')}. If multiple periods, use a comma-separated list.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_unavailable_period_dates', false)
-    arg.setDisplayName('Schedules: Unavailable Period Dates')
-    arg.setDescription('Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_unavailable_period_window_natvent_availabilities', false)
-    arg.setDisplayName('Schedules: Unavailable Period Window Natural Ventilation Availabilities')
-    arg.setDescription("The availability of the natural ventilation schedule during unavailable periods. Valid choices are: #{[HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].join(', ')}. If multiple periods, use a comma-separated list. If not provided, defaults to '#{HPXML::ScheduleRegular}'.")
+    arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules, if desired. Use a comma-separated list for multiple files.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('advanced_feature', choices[:advanced_feature], false)
@@ -934,12 +907,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('whole_sfa_or_mf_building_sim', false)
     arg.setDisplayName('Whole SFA/MF Building Simulation?')
-    arg.setDescription('If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('whole_sfa_or_mf_existing_hpxml_path', false)
-    arg.setDisplayName('Whole SFA/MF Building Simulation: Existing HPXML File Path')
-    arg.setDescription('Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).')
+    arg.setDescription('Set true if creating an HPXML file to simulate a whole single-family attached or multifamily building with multiple dwelling units within. If an HPXML file already exists at the specified HPXML File Path, a new HPXML Building element describing the current dwelling unit will be appended to this HPXML file.')
+    arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('combine_like_surfaces', false)
@@ -1016,16 +985,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(hpxml_path)
     end
-
-    # Existing HPXML File
-    existing_hpxml_path = args[:whole_sfa_or_mf_existing_hpxml_path]
-    if not existing_hpxml_path.nil?
-      unless (Pathname.new existing_hpxml_path).absolute?
-        existing_hpxml_path = File.expand_path(existing_hpxml_path)
-      end
-    end
-
-    hpxml_doc = create(runner, model, args, hpxml_path, existing_hpxml_path)
+    hpxml_doc = create(runner, model, args, hpxml_path)
     if not hpxml_doc
       runner.registerError('Unsuccessful creation of HPXML file.')
       return false
@@ -1127,33 +1087,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = args[:geometry_foundation_type_rim_joist_height].to_f > 0 && args[:enclosure_rim_joist_assembly_r_value].nil?
     errors << 'Specified a rim joist height but no rim joist assembly R-value.' if error
 
-    schedules_unavailable_period_args_initialized = [!args[:schedules_unavailable_period_types].nil?,
-                                                     !args[:schedules_unavailable_period_dates].nil?]
-    error = (schedules_unavailable_period_args_initialized.uniq.size != 1)
-    errors << 'Did not specify all required unavailable period arguments.' if error
-
-    if schedules_unavailable_period_args_initialized.uniq.size == 1 && schedules_unavailable_period_args_initialized.uniq[0]
-      schedules_unavailable_period_lengths = [args[:schedules_unavailable_period_types].count(','),
-                                              args[:schedules_unavailable_period_dates].count(',')]
-
-      if !args[:schedules_unavailable_period_window_natvent_availabilities].nil?
-        schedules_unavailable_period_lengths.concat([args[:schedules_unavailable_period_window_natvent_availabilities].count(',')])
-      end
-
-      error = (schedules_unavailable_period_lengths.uniq.size != 1)
-      errors << 'One or more unavailable period arguments does not have enough comma-separated elements specified.' if error
-    end
-
-    if !args[:schedules_unavailable_period_window_natvent_availabilities].nil?
-      natvent_availabilities = args[:schedules_unavailable_period_window_natvent_availabilities].split(',').map(&:strip)
-      natvent_availabilities.each do |natvent_availability|
-        next if natvent_availability.empty?
-
-        error = ![HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].include?(natvent_availability)
-        errors << "Window natural ventilation availability '#{natvent_availability}' during an unavailable period is invalid." if error
-      end
-    end
-
     if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include? args[:cooling_system_type]
       compressor_type = args[:cooling_system_compressor_type]
     elsif [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? args[:heat_pump_type]
@@ -1218,9 +1151,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param hpxml_path [String] Path to the created HPXML file
-  # @param existing_hpxml_path [String] Path to the existing HPXML file
   # @return [Oga::XML::Element] Root XML element of the updated HPXML document
-  def create(runner, model, args, hpxml_path, existing_hpxml_path)
+  def create(runner, model, args, hpxml_path)
     weather = get_weather_if_needed(runner, args)
     return false if !weather.nil? && !weather
 
@@ -1232,6 +1164,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # Sorting of objects to make the measure deterministic
     sorted_surfaces = model.getSurfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
     sorted_subsurfaces = model.getSubSurfaces.sort_by { |ss| ss.additionalProperties.getFeatureAsInteger('Index').get }
+
+    # Check if we need to append to an existing HPXML file for a whole SFA/MF building simulation
+    existing_hpxml_path = nil
+    if args[:whole_sfa_or_mf_building_sim] && File.exist?(hpxml_path)
+      existing_hpxml_path = hpxml_path
+    end
 
     hpxml = HPXML.new(hpxml_path: existing_hpxml_path)
 
@@ -1451,39 +1389,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  # Check if unavailable period already exists for given name and begin/end times.
-  #
-  # @param hpxml [HPXML] HPXML object
-  # @param column_name [String] Column name associated with unavailable_periods.csv
-  # @param begin_month [Integer] Unavailable period begin month
-  # @param begin_day [Integer] Unavailable period begin day
-  # @param begin_hour [Integer] Unavailable period begin hour
-  # @param end_month [Integer] Unavailable period end month
-  # @param end_day [Integer] Unavailable period end day
-  # @param end_hour [Integer] Unavailable period end hour
-  # @param natvent_availability [String] Natural ventilation availability (HXPML::ScheduleXXX)
-  # @return [Boolean] True if the unavailability period already exists
-  def unavailable_period_exists(hpxml, column_name, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability = nil)
-    natvent_availability = HPXML::ScheduleUnavailable if natvent_availability.nil?
-
-    hpxml.header.unavailable_periods.each do |unavailable_period|
-      begin_hour = 0 if begin_hour.nil?
-      end_hour = 24 if end_hour.nil?
-
-      next unless (unavailable_period.column_name == column_name) &&
-                  (unavailable_period.begin_month == begin_month) &&
-                  (unavailable_period.begin_day == begin_day) &&
-                  (unavailable_period.begin_hour == begin_hour) &&
-                  (unavailable_period.end_month == end_month) &&
-                  (unavailable_period.end_day == end_day) &&
-                  (unavailable_period.end_hour == end_hour) &&
-                  (unavailable_period.natvent_availability == natvent_availability)
-
-      return true
-    end
-    return false
-  end
-
   # Set header properties, including:
   # - vacancy periods
   # - power outage periods
@@ -1501,44 +1406,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     hpxml.header.xml_type = 'HPXML'
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
-    hpxml.header.whole_sfa_or_mf_building_sim = args[:whole_sfa_or_mf_building_sim]
-
-    if not args[:schedules_unavailable_period_types].nil?
-      unavailable_period_types = args[:schedules_unavailable_period_types].split(',').map(&:strip)
-      unavailable_period_dates = args[:schedules_unavailable_period_dates].split(',').map(&:strip)
-      if !args[:schedules_unavailable_period_window_natvent_availabilities].nil?
-        natvent_availabilities = args[:schedules_unavailable_period_window_natvent_availabilities].split(',').map(&:strip)
-      else
-        natvent_availabilities = [''] * unavailable_period_types.size
-      end
-
-      unavailable_periods = unavailable_period_types.zip(unavailable_period_dates,
-                                                         natvent_availabilities)
-
-      unavailable_periods.each do |unavailable_period|
-        column_name, date_time_range, natvent_availability = unavailable_period
-        natvent_availability = nil if natvent_availability.empty?
-
-        begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Calendar.parse_date_time_range(date_time_range)
-
-        if not unavailable_period_exists(hpxml, column_name, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
-          hpxml.header.unavailable_periods.add(column_name: column_name, begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
-        end
-      end
+    if args[:whole_sfa_or_mf_building_sim] # False is the OS-HPXML default, no need to write it
+      hpxml.header.whole_sfa_or_mf_building_sim = args[:whole_sfa_or_mf_building_sim]
     end
-
-    if not args[:software_info_program_used].to_s.empty?
-      if (not hpxml.header.software_program_used.nil?) && (hpxml.header.software_program_used != args[:software_info_program_used])
-        errors << "'Software Info: Program Used' cannot vary across dwelling units."
-      end
-      hpxml.header.software_program_used = args[:software_info_program_used]
-    end
-    if not args[:software_info_program_version].to_s.empty?
-      if (not hpxml.header.software_program_version.nil?) && (hpxml.header.software_program_version != args[:software_info_program_version])
-        errors << "'Software Info: Program Version' cannot vary across dwelling units."
-      end
-      hpxml.header.software_program_version = args[:software_info_program_version]
-    end
+    hpxml.header.software_program_used = 'BuildResidentialHPXML measure'
+    hpxml.header.software_program_version = Version::OS_HPXML_Version
 
     if args[:simulation_control_timestep] != 60 # 60 is the OS-HPXML default, no need to write it
       if (not hpxml.header.timestep.nil?) && (hpxml.header.timestep != args[:simulation_control_timestep])
