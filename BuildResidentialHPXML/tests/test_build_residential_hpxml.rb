@@ -582,17 +582,17 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-ducts-crawlspace.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Unvented'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
-      args['hvac_ducts_supply_location'] = HPXML::LocationCrawlspace
-      args['hvac_ducts_return_location'] = HPXML::LocationCrawlspace
+      args['hvac_ducts_supply_location'] = HPXML::LocationCrawlspaceUnvented
+      args['hvac_ducts_return_location'] = HPXML::LocationCrawlspaceUnvented
     when 'extra-ducts-attic.xml'
-      args['hvac_ducts_supply_location'] = HPXML::LocationAttic
-      args['hvac_ducts_return_location'] = HPXML::LocationAttic
+      args['hvac_ducts_supply_location'] = HPXML::LocationAtticUnvented
+      args['hvac_ducts_return_location'] = HPXML::LocationAtticUnvented
     when 'extra-water-heater-crawlspace.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Unvented'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-15'
-      args['dhw_water_heater_location'] = HPXML::LocationCrawlspace
+      args['dhw_water_heater_location'] = HPXML::LocationCrawlspaceUnvented
     when 'extra-water-heater-attic.xml'
-      args['dhw_water_heater_location'] = HPXML::LocationAttic
+      args['dhw_water_heater_location'] = HPXML::LocationAtticUnvented
     when 'extra-vehicle-ev.xml'
       args['electric_vehicle'] = 'Midsize, 200 mile range'
       args['electric_vehicle_charger'] = 'Level 2, 70% Charging at Home'
