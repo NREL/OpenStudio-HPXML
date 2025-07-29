@@ -6539,9 +6539,6 @@ module HPXMLFile
 
     if [HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && hpxml_bldg.heating_systems.size == 0 && hpxml_bldg.heat_pumps.size == 0
       args[:ducts_number_of_return_registers] = nil
-      if args[:cooling_system_is_ducted]
-        args[:ducts_number_of_return_registers] = 0
-      end
     end
 
     if air_distribution_systems.size > 0

@@ -947,8 +947,8 @@
     "geometry_unit_num_floors_above_grade": 2,
     "geometry_unit_cfa": 3600,
     "geometry_attic_type": "ConditionedAttic",
-    "ducts_supply_leakage_to_outside_value": 27,
-    "ducts_return_leakage_to_outside_value": 9,
+    "ducts_supply_leakage_to_outside_value": 18,
+    "ducts_return_leakage_to_outside_value": 18,
     "ducts_supply_insulation_r": 0,
     "ducts_return_insulation_r": 0,
     "ducts_supply_location": "conditioned space",
@@ -1948,10 +1948,10 @@
     "window_area_left": 20,
     "window_area_right": 20,
     "ducts_leakage_units": "Percent",
-    "ducts_supply_leakage_to_outside_value": 0.15,
+    "ducts_supply_leakage_to_outside_value": 0.1,
     "ducts_supply_location": "manufactured home belly",
     "ducts_supply_insulation_r": 0,
-    "ducts_return_leakage_to_outside_value": 0.05,
+    "ducts_return_leakage_to_outside_value": 0.1,
     "ducts_return_location": "manufactured home belly",
     "ducts_return_insulation_r": 0
   },
@@ -2260,8 +2260,8 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml",
-    "ducts_supply_leakage_to_outside_value": 40.5,
-    "ducts_return_leakage_to_outside_value": 13.5
+    "ducts_supply_leakage_to_outside_value": 27.0,
+    "ducts_return_leakage_to_outside_value": 27.0
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
@@ -2295,8 +2295,8 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "ducts_supply_leakage_to_outside_value": 40.5,
-    "ducts_return_leakage_to_outside_value": 13.5,
+    "ducts_supply_leakage_to_outside_value": 27.0,
+    "ducts_return_leakage_to_outside_value": 27.0,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml": {
@@ -2530,8 +2530,8 @@
   "sample_files/base-hvac-ducts-leakage-percent.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "ducts_leakage_units": "Percent",
-    "ducts_supply_leakage_to_outside_value": 0.112,
-    "ducts_return_leakage_to_outside_value": 0.038
+    "ducts_supply_leakage_to_outside_value": 0.075,
+    "ducts_return_leakage_to_outside_value": 0.075
   },
   "sample_files/base-hvac-ducts-areas.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3225,8 +3225,8 @@
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_heating_capacity": 5000,
     "cooling_system_cooling_capacity": 6000,
-    "ducts_supply_leakage_to_outside_value": 40.5,
-    "ducts_return_leakage_to_outside_value": 13.5
+    "ducts_supply_leakage_to_outside_value": 27.0,
+    "ducts_return_leakage_to_outside_value": 27.0
   },
   "sample_files/base-hvac-undersized-allow-increased-fixed-capacities.xml": {
     "parent_hpxml": "sample_files/base-hvac-undersized.xml"
@@ -3467,8 +3467,8 @@
   },
   "sample_files/base-mechvent-multiple.xml": {
     "parent_hpxml": "sample_files/base-mechvent-bath-kitchen-fans.xml",
-    "ducts_supply_leakage_to_outside_value": 40.5,
-    "ducts_return_leakage_to_outside_value": 13.5
+    "ducts_supply_leakage_to_outside_value": 27.0,
+    "ducts_return_leakage_to_outside_value": 27.0
   },
   "sample_files/base-mechvent-supply.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3552,7 +3552,6 @@
     "hvac_control_cooling_weekend_setpoint": null,
     "ducts_supply_location": null,
     "ducts_return_location": null,
-    "ducts_number_of_return_registers": 2,
     "mech_vent_fan_type": "exhaust only",
     "mech_vent_total_recovery_efficiency": 0,
     "mech_vent_sensible_recovery_efficiency": 0,

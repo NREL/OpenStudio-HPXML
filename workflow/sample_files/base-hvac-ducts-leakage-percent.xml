@@ -351,7 +351,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>Percent</Units>
-                    <Value>0.112</Value>
+                    <Value>0.075</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -359,7 +359,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>Percent</Units>
-                    <Value>0.038</Value>
+                    <Value>0.075</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
