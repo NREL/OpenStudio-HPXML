@@ -621,63 +621,32 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationConditionedSpace
     duct_location_choices << HPXML::LocationBasementConditioned
     duct_location_choices << HPXML::LocationBasementUnconditioned
-    duct_location_choices << HPXML::LocationCrawlspace
-    duct_location_choices << HPXML::LocationCrawlspaceVented
     duct_location_choices << HPXML::LocationCrawlspaceUnvented
+    duct_location_choices << HPXML::LocationCrawlspaceVented
     duct_location_choices << HPXML::LocationCrawlspaceConditioned
-    duct_location_choices << HPXML::LocationAttic
-    duct_location_choices << HPXML::LocationAtticVented
     duct_location_choices << HPXML::LocationAtticUnvented
+    duct_location_choices << HPXML::LocationAtticVented
     duct_location_choices << HPXML::LocationGarage
+    duct_location_choices << HPXML::LocationOutside
     duct_location_choices << HPXML::LocationExteriorWall
     duct_location_choices << HPXML::LocationUnderSlab
     duct_location_choices << HPXML::LocationRoofDeck
-    duct_location_choices << HPXML::LocationOutside
-    duct_location_choices << HPXML::LocationOtherHousingUnit
-    duct_location_choices << HPXML::LocationOtherHeatedSpace
-    duct_location_choices << HPXML::LocationOtherMultifamilyBufferSpace
-    duct_location_choices << HPXML::LocationOtherNonFreezingSpace
     duct_location_choices << HPXML::LocationManufacturedHomeBelly
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_ducts', choices[:hvac_ducts], true)
     arg.setDisplayName('HVAC Ducts')
-    arg.setDescription('The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.')
+    arg.setDescription('The leakage and insulation level of the ducts.')
     arg.setDefaultValue('15% Leakage to Outside, Uninsulated')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_ducts_supply_location', duct_location_choices, false)
     arg.setDisplayName('HVAC Ducts: Supply Location')
-    arg.setDescription('The location of the supply ducts. If not provided, defaults based on the foundation/attic type and presence of garage.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_ducts_supply_surface_area_fraction', false)
-    arg.setDisplayName('HVAC Ducts: Supply Area Fraction')
-    arg.setDescription('The fraction of supply ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.')
-    arg.setUnits('frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_ducts_supply_leakage_fraction', false)
-    arg.setDisplayName('HVAC Ducts: Supply Leakage Fraction')
-    arg.setDescription('The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts.')
-    arg.setUnits('frac')
-    arg.setDefaultValue(0.5)
+    arg.setDescription('The primary location of the supply ducts. If not provided, defaults based on the foundation/attic/garage type.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_ducts_return_location', duct_location_choices, false)
     arg.setDisplayName('HVAC Ducts: Return Location')
-    arg.setDescription('The location of the return ducts. If not provided, defaults based on the foundation/attic type and presence of garage.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_ducts_return_surface_area_fraction', false)
-    arg.setDisplayName('HVAC Ducts: Return Area Fraction')
-    arg.setDescription('The fraction of return ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.')
-    arg.setUnits('frac')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('hvac_ducts_number_of_return_registers', false)
-    arg.setDisplayName('HVAC Ducts: Number of Return Registers')
-    arg.setDescription('The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, defaults to one return register per conditioned floor.')
-    arg.setUnits('#')
+    arg.setDescription('The primary location of the return ducts. If not provided, defaults based on the foundation/attic/garage type.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('ventilation_mechanical', choices[:ventilation_mechanical], false)
@@ -730,7 +699,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_water_heater_location', water_heater_location_choices, false)
     arg.setDisplayName('DHW: Water Heater Location')
-    arg.setDescription('The location of water heater. If not provided, defaults based on the foundation type and presence of garage.')
+    arg.setDescription('The location of water heater. If not provided, defaults based on the foundation/garage type.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('dhw_water_heater_jacket', choices[:dhw_water_heater_jacket], false)
@@ -3224,18 +3193,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     return if air_distribution_systems.size == 0
 
-    if [HPXML::HVACTypeEvaporativeCooler].include?(args[:hvac_cooling_system_type]) && hpxml_bldg.heating_systems.size == 0 && hpxml_bldg.heat_pumps.size == 0
-      args[:hvac_ducts_number_of_return_registers] = nil
-      if args[:hvac_cooling_system_is_ducted]
-        args[:hvac_ducts_number_of_return_registers] = 0
-      end
-    end
-
     if air_distribution_systems.size > 0
       hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                         distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                        air_type: HPXML::AirTypeRegularVelocity,
-                                        number_of_return_registers: args[:hvac_ducts_number_of_return_registers])
+                                        air_type: HPXML::AirTypeRegularVelocity)
       air_distribution_systems.each do |hvac_system|
         hvac_system.distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
       end
@@ -3316,8 +3277,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       leakage_units = leakage_units.split(' ')[0]
       leakage_value = leakage_value * get_assumed_cfa_served_by_air_distribution(args, hvac_distribution) / 100.0
     end
-    supply_leakage_value = (leakage_value * args[:hvac_ducts_supply_leakage_fraction]).round(3)
-    return_leakage_value = (leakage_value * (1.0 - args[:hvac_ducts_supply_leakage_fraction])).round(3)
+    supply_leakage_fraction = args[:hvac_ducts_supply_leakage_fraction]
+    supply_leakage_fraction = 0.5 if supply_leakage_fraction.nil?
+    supply_leakage_value = (leakage_value * supply_leakage_fraction).round(3)
+    return_leakage_value = (leakage_value * (1.0 - supply_leakage_fraction)).round(3)
 
     if hvac_distribution.hvac_systems.any? { |hvac| hvac.is_a?(HPXML::CoolingSystem) && hvac.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }
       # Evaporative cooler, set no return duct leakage
@@ -3384,93 +3347,63 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     ducts_supply_location = get_location(args[:hvac_ducts_supply_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
     ducts_return_location = get_location(args[:hvac_ducts_return_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
 
-    if not args[:hvac_ducts_supply_fraction_rectangular].nil?
-      ducts_supply_fraction_rectangular = args[:hvac_ducts_supply_fraction_rectangular]
-      if ducts_supply_fraction_rectangular == 0
-        ducts_supply_fraction_rectangular = nil
-        ducts_supply_shape = HPXML::DuctShapeRound
-      elsif ducts_supply_fraction_rectangular == 1
-        ducts_supply_shape = HPXML::DuctShapeRectangular
-        ducts_supply_fraction_rectangular = nil
-      end
-    end
-
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
-    if (not ducts_supply_location.nil?) && args[:hvac_ducts_supply_supply_surface_area_fraction].nil?
-      # Supply duct location without any area inputs provided; set area fraction
+    supply_surface_area_fraction = nil
+    if not ducts_supply_location.nil?
       if ducts_supply_location == HPXML::LocationConditionedSpace
-        args[:hvac_ducts_supply_supply_surface_area_fraction] = 1.0
+        supply_surface_area_fraction = 1.0
       else
-        args[:hvac_ducts_supply_supply_surface_area_fraction] = Defaults.get_duct_primary_fraction(ducts_supply_location, ncfl, ncfl_ag)
+        supply_surface_area_fraction = Defaults.get_duct_primary_fraction(ducts_supply_location, ncfl, ncfl_ag)
       end
     end
 
-    if (not ducts_return_location.nil?) && args[:hvac_ducts_return_surface_area_fraction].nil?
-      # Return duct location without any area inputs provided; set area fraction
+    return_surface_area_fraction = nil
+    if not ducts_return_location.nil?
       if ducts_return_location == HPXML::LocationConditionedSpace
-        args[:hvac_ducts_return_surface_area_fraction] = 1.0
+        return_surface_area_fraction = 1.0
       else
-        args[:hvac_ducts_return_surface_area_fraction] = Defaults.get_duct_primary_fraction(ducts_return_location, ncfl, ncfl_ag)
-      end
-    end
-
-    if not args[:hvac_ducts_return_fraction_rectangular].nil?
-      ducts_return_fraction_rectangular = args[:hvac_ducts_return_fraction_rectangular]
-      if ducts_return_fraction_rectangular == 0
-        ducts_return_fraction_rectangular = nil
-        ducts_return_shape = HPXML::DuctShapeRound
-      elsif ducts_return_fraction_rectangular == 1
-        ducts_return_shape = HPXML::DuctShapeRectangular
-        ducts_return_fraction_rectangular = nil
+        return_surface_area_fraction = Defaults.get_duct_primary_fraction(ducts_return_location, ncfl, ncfl_ag)
       end
     end
 
     hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                 duct_type: HPXML::DuctTypeSupply,
                                 duct_insulation_r_value: args[:hvac_ducts_supply_insulation_r_value],
-                                duct_buried_insulation_level: args[:hvac_ducts_supply_buried_insulation_level],
                                 duct_location: ducts_supply_location,
-                                duct_fraction_area: args[:hvac_ducts_supply_supply_surface_area_fraction],
-                                duct_shape: ducts_supply_shape,
-                                duct_fraction_rectangular: ducts_supply_fraction_rectangular)
+                                duct_fraction_area: supply_surface_area_fraction)
 
     if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:hvac_cooling_system_type]) && args[:hvac_cooling_system_is_ducted])
       hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                   duct_type: HPXML::DuctTypeReturn,
                                   duct_insulation_r_value: args[:hvac_ducts_return_insulation_r_value],
-                                  duct_buried_insulation_level: args[:hvac_ducts_return_buried_insulation_level],
                                   duct_location: ducts_return_location,
-                                  duct_fraction_area: args[:hvac_ducts_return_surface_area_fraction],
-                                  duct_shape: ducts_return_shape,
-                                  duct_fraction_rectangular: ducts_return_fraction_rectangular)
+                                  duct_fraction_area: return_surface_area_fraction)
     end
 
-    if (not args[:hvac_ducts_supply_supply_surface_area_fraction].nil?) && (args[:hvac_ducts_supply_supply_surface_area_fraction] < 1)
+    if (not supply_surface_area_fraction.nil?) && (supply_surface_area_fraction < 1)
       # OS-HPXML needs duct fractions to sum to 1; add remaining ducts in conditioned space.
       hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                   duct_type: HPXML::DuctTypeSupply,
                                   duct_insulation_r_value: 0.0,
                                   duct_location: HPXML::LocationConditionedSpace,
-                                  duct_fraction_area: 1.0 - args[:hvac_ducts_supply_supply_surface_area_fraction])
+                                  duct_fraction_area: 1.0 - supply_surface_area_fraction)
     end
 
     if not hvac_distribution.ducts.find { |d| d.duct_type == HPXML::DuctTypeReturn }.nil?
-      if (not args[:hvac_ducts_return_surface_area_fraction].nil?) && (args[:hvac_ducts_return_surface_area_fraction] < 1)
+      if (not return_surface_area_fraction.nil?) && (return_surface_area_fraction < 1)
         # OS-HPXML needs duct fractions to sum to 1; add remaining ducts in conditioned space.
         hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
                                     duct_type: HPXML::DuctTypeReturn,
                                     duct_insulation_r_value: 0.0,
                                     duct_location: HPXML::LocationConditionedSpace,
-                                    duct_fraction_area: 1.0 - args[:hvac_ducts_return_surface_area_fraction])
+                                    duct_fraction_area: 1.0 - return_surface_area_fraction)
       end
     end
 
     # Set CFA served
-    if hvac_distribution.ducts.count { |d| d.duct_surface_area.nil? } > 0
-      hvac_distribution.conditioned_floor_area_served = get_assumed_cfa_served_by_air_distribution(args, hvac_distribution)
-    end
+    hvac_distribution.conditioned_floor_area_served = get_assumed_cfa_served_by_air_distribution(args, hvac_distribution)
   end
 
   # Sets the HPXML HVAC control properties.

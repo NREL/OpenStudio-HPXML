@@ -411,7 +411,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts'] = '4 CFM25 per 100ft2, R-4'
       args['hvac_ducts_supply_location'] = HPXML::LocationAtticUnvented
       args['hvac_ducts_return_location'] = HPXML::LocationAtticUnvented
-      args['hvac_ducts_number_of_return_registers'] = 2
       args['hvac_heating_system_2_fuel'] = HPXML::FuelTypeElectricity
       args['hvac_heating_system_2_fraction_heat_load_served'] = 0.25
       args['dhw_water_heater'] = 'Electricity, Tank, UEF=0.94'
@@ -459,7 +458,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_ducts'] = '0 CFM25 per 100ft2, Uninsulated'
       args['hvac_ducts_supply_location'] = HPXML::LocationConditionedSpace
       args['hvac_ducts_return_location'] = HPXML::LocationConditionedSpace
-      args['hvac_ducts_number_of_return_registers'] = 1
       args['enclosure_door_area'] = 20.0
     when 'base-mf2.xml'
       args['whole_sfa_or_mf_existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-mf.xml')

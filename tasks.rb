@@ -2243,6 +2243,26 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.heating_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
       hpxml_bldg.cooling_systems[0].fan_motor_type = HPXML::HVACFanMotorTypeBPM
     end
+    if ['base-hvac-ducts-shape-round.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        next if duct.duct_location == HPXML::LocationConditionedSpace
+
+        duct.duct_shape = HPXML::DuctShapeRound
+      end
+    elsif ['base-hvac-ducts-shape-rectangular.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        next if duct.duct_location == HPXML::LocationConditionedSpace
+
+        duct.duct_shape = HPXML::DuctShapeRectangular
+      end
+    end
+    if ['base-hvac-ducts-buried.xml'].include? hpxml_file
+      hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+        next if duct.duct_location == HPXML::LocationConditionedSpace
+
+        duct.duct_buried_insulation_level = HPXML::DuctBuriedInsulationDeep
+      end
+    end
 
     # ------------------ #
     # HPXML WaterHeating #

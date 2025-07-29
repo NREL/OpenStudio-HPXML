@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>d061dbbe-52d6-4eb3-93fc-eb4b822c308f</version_id>
-  <version_modified>2025-07-28T22:41:43Z</version_modified>
+  <version_id>2221d9e1-9316-459e-9039-577a2762d2ea</version_id>
+  <version_modified>2025-07-29T00:05:20Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5273,7 +5273,7 @@
     <argument>
       <name>hvac_ducts</name>
       <display_name>HVAC Ducts</display_name>
-      <description>The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.</description>
+      <description>The leakage and insulation level of the ducts.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -5523,35 +5523,27 @@
           <display_name>12 CFM25 per 100ft2, R-8</display_name>
         </choice>
         <choice>
-          <value>Detailed Example: 4 CFM25 per 100ft2, R-4, Deeply Buried</value>
-          <display_name>Detailed Example: 4 CFM25 per 100ft2, R-4, Deeply Buried</display_name>
+          <value>Detailed Example: 4 CFM25 per 100ft2 (75% Supply), R-4</value>
+          <display_name>Detailed Example: 4 CFM25 per 100ft2 (75% Supply), R-4</display_name>
         </choice>
         <choice>
-          <value>Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Round</value>
-          <display_name>Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Round</display_name>
-        </choice>
-        <choice>
-          <value>Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Rectangular</value>
-          <display_name>Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Rectangular</display_name>
-        </choice>
-        <choice>
-          <value>Detailed Example: 5 CFM50 per 100ft2, R-4</value>
-          <display_name>Detailed Example: 5 CFM50 per 100ft2, R-4</display_name>
+          <value>Detailed Example: 5 CFM50 per 100ft2 (75% Supply), R-4</value>
+          <display_name>Detailed Example: 5 CFM50 per 100ft2 (75% Supply), R-4</display_name>
         </choice>
         <choice>
           <value>Detailed Example: 250 CFM25, R-6</value>
           <display_name>Detailed Example: 250 CFM25, R-6</display_name>
         </choice>
         <choice>
-          <value>Detailed Example: 400 CFM50, R-6</value>
-          <display_name>Detailed Example: 400 CFM50, R-6</display_name>
+          <value>Detailed Example: 400 CFM50 (75% Supply), R-6</value>
+          <display_name>Detailed Example: 400 CFM50 (75% Supply), R-6</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
       <name>hvac_ducts_supply_location</name>
       <display_name>HVAC Ducts: Supply Location</display_name>
-      <description>The location of the supply ducts. If not provided, defaults based on the foundation/attic type and presence of garage.</description>
+      <description>The primary location of the supply ducts. If not provided, defaults based on the foundation/attic/garage type.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -5569,36 +5561,32 @@
           <display_name>basement - unconditioned</display_name>
         </choice>
         <choice>
-          <value>crawlspace</value>
-          <display_name>crawlspace</display_name>
+          <value>crawlspace - unvented</value>
+          <display_name>crawlspace - unvented</display_name>
         </choice>
         <choice>
           <value>crawlspace - vented</value>
           <display_name>crawlspace - vented</display_name>
         </choice>
         <choice>
-          <value>crawlspace - unvented</value>
-          <display_name>crawlspace - unvented</display_name>
-        </choice>
-        <choice>
           <value>crawlspace - conditioned</value>
           <display_name>crawlspace - conditioned</display_name>
-        </choice>
-        <choice>
-          <value>attic</value>
-          <display_name>attic</display_name>
-        </choice>
-        <choice>
-          <value>attic - vented</value>
-          <display_name>attic - vented</display_name>
         </choice>
         <choice>
           <value>attic - unvented</value>
           <display_name>attic - unvented</display_name>
         </choice>
         <choice>
+          <value>attic - vented</value>
+          <display_name>attic - vented</display_name>
+        </choice>
+        <choice>
           <value>garage</value>
           <display_name>garage</display_name>
+        </choice>
+        <choice>
+          <value>outside</value>
+          <display_name>outside</display_name>
         </choice>
         <choice>
           <value>exterior wall</value>
@@ -5613,54 +5601,15 @@
           <display_name>roof deck</display_name>
         </choice>
         <choice>
-          <value>outside</value>
-          <display_name>outside</display_name>
-        </choice>
-        <choice>
-          <value>other housing unit</value>
-          <display_name>other housing unit</display_name>
-        </choice>
-        <choice>
-          <value>other heated space</value>
-          <display_name>other heated space</display_name>
-        </choice>
-        <choice>
-          <value>other multifamily buffer space</value>
-          <display_name>other multifamily buffer space</display_name>
-        </choice>
-        <choice>
-          <value>other non-freezing space</value>
-          <display_name>other non-freezing space</display_name>
-        </choice>
-        <choice>
           <value>manufactured home belly</value>
           <display_name>manufactured home belly</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>hvac_ducts_supply_surface_area_fraction</name>
-      <display_name>HVAC Ducts: Supply Area Fraction</display_name>
-      <description>The fraction of supply ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.</description>
-      <type>Double</type>
-      <units>frac</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>hvac_ducts_supply_leakage_fraction</name>
-      <display_name>HVAC Ducts: Supply Leakage Fraction</display_name>
-      <description>The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts.</description>
-      <type>Double</type>
-      <units>frac</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-      <default_value>0.5</default_value>
     </argument>
     <argument>
       <name>hvac_ducts_return_location</name>
       <display_name>HVAC Ducts: Return Location</display_name>
-      <description>The location of the return ducts. If not provided, defaults based on the foundation/attic type and presence of garage.</description>
+      <description>The primary location of the return ducts. If not provided, defaults based on the foundation/attic/garage type.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -5678,36 +5627,32 @@
           <display_name>basement - unconditioned</display_name>
         </choice>
         <choice>
-          <value>crawlspace</value>
-          <display_name>crawlspace</display_name>
+          <value>crawlspace - unvented</value>
+          <display_name>crawlspace - unvented</display_name>
         </choice>
         <choice>
           <value>crawlspace - vented</value>
           <display_name>crawlspace - vented</display_name>
         </choice>
         <choice>
-          <value>crawlspace - unvented</value>
-          <display_name>crawlspace - unvented</display_name>
-        </choice>
-        <choice>
           <value>crawlspace - conditioned</value>
           <display_name>crawlspace - conditioned</display_name>
-        </choice>
-        <choice>
-          <value>attic</value>
-          <display_name>attic</display_name>
-        </choice>
-        <choice>
-          <value>attic - vented</value>
-          <display_name>attic - vented</display_name>
         </choice>
         <choice>
           <value>attic - unvented</value>
           <display_name>attic - unvented</display_name>
         </choice>
         <choice>
+          <value>attic - vented</value>
+          <display_name>attic - vented</display_name>
+        </choice>
+        <choice>
           <value>garage</value>
           <display_name>garage</display_name>
+        </choice>
+        <choice>
+          <value>outside</value>
+          <display_name>outside</display_name>
         </choice>
         <choice>
           <value>exterior wall</value>
@@ -5722,48 +5667,10 @@
           <display_name>roof deck</display_name>
         </choice>
         <choice>
-          <value>outside</value>
-          <display_name>outside</display_name>
-        </choice>
-        <choice>
-          <value>other housing unit</value>
-          <display_name>other housing unit</display_name>
-        </choice>
-        <choice>
-          <value>other heated space</value>
-          <display_name>other heated space</display_name>
-        </choice>
-        <choice>
-          <value>other multifamily buffer space</value>
-          <display_name>other multifamily buffer space</display_name>
-        </choice>
-        <choice>
-          <value>other non-freezing space</value>
-          <display_name>other non-freezing space</display_name>
-        </choice>
-        <choice>
           <value>manufactured home belly</value>
           <display_name>manufactured home belly</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>hvac_ducts_return_surface_area_fraction</name>
-      <display_name>HVAC Ducts: Return Area Fraction</display_name>
-      <description>The fraction of return ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.</description>
-      <type>Double</type>
-      <units>frac</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>hvac_ducts_number_of_return_registers</name>
-      <display_name>HVAC Ducts: Number of Return Registers</display_name>
-      <description>The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, defaults to one return register per conditioned floor.</description>
-      <type>Integer</type>
-      <units>#</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>ventilation_mechanical</name>
@@ -6183,7 +6090,7 @@
     <argument>
       <name>dhw_water_heater_location</name>
       <display_name>DHW: Water Heater Location</display_name>
-      <description>The location of water heater. If not provided, defaults based on the foundation type and presence of garage.</description>
+      <description>The location of water heater. If not provided, defaults based on the foundation/garage type.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -8939,7 +8846,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>419FD40D</checksum>
+      <checksum>2AD02050</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -8956,7 +8863,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>75CF99D7</checksum>
+      <checksum>34E0F7AE</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -9280,7 +9187,7 @@
       <filename>options/hvac_ducts.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>60C4C164</checksum>
+      <checksum>D654CFF9</checksum>
     </file>
     <file>
       <filename>options/hvac_geothermal_loop.tsv</filename>
@@ -9484,7 +9391,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F22C3DBD</checksum>
+      <checksum>5D618B52</checksum>
     </file>
   </files>
 </measure>

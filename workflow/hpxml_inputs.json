@@ -439,10 +439,9 @@
     "hvac_control_heating_weekend_setpoint": 68,
     "hvac_control_cooling_weekday_setpoint": 78,
     "hvac_control_cooling_weekend_setpoint": 78,
-    "hvac_ducts": "4 CFM25 per 100ft2, R-4",
+    "hvac_ducts": "Detailed Example: 4 CFM25 per 100ft2 (75% Supply), R-4",
     "hvac_ducts_supply_location": "attic - unvented",
     "hvac_ducts_return_location": "attic - unvented",
-    "hvac_ducts_supply_leakage_fraction": 0.75,
     "dhw_water_heater": "Electricity, Tank, UEF=0.94",
     "dhw_water_heater_location": "conditioned space",
     "lighting": "Detailed Example: 40% CFL, 10% LFL, 25% LED",
@@ -651,7 +650,7 @@
     "geometry_unit_cfa": 2700,
     "hvac_heating_system_capacity": "50 kBtu/hr",
     "hvac_cooling_system_capacity": "3.0 tons",
-    "hvac_ducts": "4 CFM25 per 100ft2, R-4"
+    "hvac_ducts": "Detailed Example: 4 CFM25 per 100ft2 (75% Supply), R-4"
   },
   "sample_files/base-bldgtype-sfa-unit-atticroof-cathedral.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-sfa-unit-2stories.xml",
@@ -1712,12 +1711,11 @@
   },
   "sample_files/base-hvac-ducts-leakage-cfm50.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hvac_ducts": "Detailed Example: 5 CFM50 per 100ft2, R-4"
+    "hvac_ducts": "Detailed Example: 5 CFM50 per 100ft2 (75% Supply), R-4"
   },
   "sample_files/base-hvac-ducts-leakage-percent.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hvac_ducts": "15% Leakage, R-4",
-    "hvac_ducts_supply_leakage_fraction": 0.75
+    "hvac_ducts": "15% Leakage, R-4"
   },
   "sample_files/base-hvac-ducts-areas.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -1726,9 +1724,7 @@
     "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-hvac-ducts-buried.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hvac_ducts": "Detailed Example: 4 CFM25 per 100ft2, R-4, Deeply Buried",
-    "hvac_ducts_supply_leakage_fraction": 0.75
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-hvac-ducts-defaults.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-room-ac.xml",
@@ -1742,14 +1738,10 @@
     "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-hvac-ducts-shape-round.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hvac_ducts": "Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Round",
-    "hvac_ducts_supply_leakage_fraction": 0.75
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-hvac-ducts-shape-rectangular.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hvac_ducts": "Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Rectangular",
-    "hvac_ducts_supply_leakage_fraction": 0.75
+    "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-hvac-elec-resistance-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2439,7 +2431,6 @@
     "hvac_control_cooling_weekend_setpoint": null,
     "hvac_ducts_supply_location": null,
     "hvac_ducts_return_location": null,
-    "hvac_ducts_number_of_return_registers": 2,
     "ventilation_mechanical": "Exhaust Only",
     "ventilation_kitchen": "Default",
     "ventilation_bathroom": "Default",
@@ -2787,6 +2778,6 @@
     "hvac_heating_system_fraction_heat_load_served": 0.5,
     "hvac_cooling_system_capacity": "1.0 tons",
     "hvac_cooling_system_fraction_cool_load_served": 0.5,
-    "hvac_ducts": "4 CFM25 per 100ft2, R-4"
+    "hvac_ducts": "Detailed Example: 4 CFM25 per 100ft2 (75% Supply), R-4"
   }
 }

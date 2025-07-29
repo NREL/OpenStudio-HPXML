@@ -1105,92 +1105,40 @@ Specifies whether the HVAC system has airflow and/or refrigerant charge installa
 
 **HVAC Ducts**
 
-The supply duct leakage to outside, nominal insulation r-value, buried insulation level, surface area, and fraction rectangular.
+The leakage and insulation level of the ducts.
 
 - **Name:** ``hvac_ducts``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `None`, `0% Leakage, Uninsulated`, `0% Leakage, R-4`, `0% Leakage, R-6`, `0% Leakage, R-8`, `5% Leakage, Uninsulated`, `5% Leakage, R-4`, `5% Leakage, R-6`, `5% Leakage, R-8`, `10% Leakage, Uninsulated`, `10% Leakage, R-4`, `10% Leakage, R-6`, `10% Leakage, R-8`, `15% Leakage, Uninsulated`, `15% Leakage, R-4`, `15% Leakage, R-6`, `15% Leakage, R-8`, `20% Leakage, Uninsulated`, `20% Leakage, R-4`, `20% Leakage, R-6`, `20% Leakage, R-8`, `25% Leakage, Uninsulated`, `25% Leakage, R-4`, `25% Leakage, R-6`, `25% Leakage, R-8`, `30% Leakage, Uninsulated`, `30% Leakage, R-4`, `30% Leakage, R-6`, `30% Leakage, R-8`, `35% Leakage, Uninsulated`, `35% Leakage, R-4`, `35% Leakage, R-6`, `35% Leakage, R-8`, `0 CFM25 per 100ft2, Uninsulated`, `0 CFM25 per 100ft2, R-4`, `0 CFM25 per 100ft2, R-6`, `0 CFM25 per 100ft2, R-8`, `1 CFM25 per 100ft2, Uninsulated`, `1 CFM25 per 100ft2, R-4`, `1 CFM25 per 100ft2, R-6`, `1 CFM25 per 100ft2, R-8`, `2 CFM25 per 100ft2, Uninsulated`, `2 CFM25 per 100ft2, R-4`, `2 CFM25 per 100ft2, R-6`, `2 CFM25 per 100ft2, R-8`, `4 CFM25 per 100ft2, Uninsulated`, `4 CFM25 per 100ft2, R-4`, `4 CFM25 per 100ft2, R-6`, `4 CFM25 per 100ft2, R-8`, `6 CFM25 per 100ft2, Uninsulated`, `6 CFM25 per 100ft2, R-4`, `6 CFM25 per 100ft2, R-6`, `6 CFM25 per 100ft2, R-8`, `8 CFM25 per 100ft2, Uninsulated`, `8 CFM25 per 100ft2, R-4`, `8 CFM25 per 100ft2, R-6`, `8 CFM25 per 100ft2, R-8`, `12 CFM25 per 100ft2, Uninsulated`, `12 CFM25 per 100ft2, R-4`, `12 CFM25 per 100ft2, R-6`, `12 CFM25 per 100ft2, R-8`, `Detailed Example: 4 CFM25 per 100ft2, R-4, Deeply Buried`, `Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Round`, `Detailed Example: 4 CFM25 per 100ft2, R-4, 100% Rectangular`, `Detailed Example: 5 CFM50 per 100ft2, R-4`, `Detailed Example: 250 CFM25, R-6`, `Detailed Example: 400 CFM50, R-6`
+- **Choices:** `None`, `0% Leakage, Uninsulated`, `0% Leakage, R-4`, `0% Leakage, R-6`, `0% Leakage, R-8`, `5% Leakage, Uninsulated`, `5% Leakage, R-4`, `5% Leakage, R-6`, `5% Leakage, R-8`, `10% Leakage, Uninsulated`, `10% Leakage, R-4`, `10% Leakage, R-6`, `10% Leakage, R-8`, `15% Leakage, Uninsulated`, `15% Leakage, R-4`, `15% Leakage, R-6`, `15% Leakage, R-8`, `20% Leakage, Uninsulated`, `20% Leakage, R-4`, `20% Leakage, R-6`, `20% Leakage, R-8`, `25% Leakage, Uninsulated`, `25% Leakage, R-4`, `25% Leakage, R-6`, `25% Leakage, R-8`, `30% Leakage, Uninsulated`, `30% Leakage, R-4`, `30% Leakage, R-6`, `30% Leakage, R-8`, `35% Leakage, Uninsulated`, `35% Leakage, R-4`, `35% Leakage, R-6`, `35% Leakage, R-8`, `0 CFM25 per 100ft2, Uninsulated`, `0 CFM25 per 100ft2, R-4`, `0 CFM25 per 100ft2, R-6`, `0 CFM25 per 100ft2, R-8`, `1 CFM25 per 100ft2, Uninsulated`, `1 CFM25 per 100ft2, R-4`, `1 CFM25 per 100ft2, R-6`, `1 CFM25 per 100ft2, R-8`, `2 CFM25 per 100ft2, Uninsulated`, `2 CFM25 per 100ft2, R-4`, `2 CFM25 per 100ft2, R-6`, `2 CFM25 per 100ft2, R-8`, `4 CFM25 per 100ft2, Uninsulated`, `4 CFM25 per 100ft2, R-4`, `4 CFM25 per 100ft2, R-6`, `4 CFM25 per 100ft2, R-8`, `6 CFM25 per 100ft2, Uninsulated`, `6 CFM25 per 100ft2, R-4`, `6 CFM25 per 100ft2, R-6`, `6 CFM25 per 100ft2, R-8`, `8 CFM25 per 100ft2, Uninsulated`, `8 CFM25 per 100ft2, R-4`, `8 CFM25 per 100ft2, R-6`, `8 CFM25 per 100ft2, R-8`, `12 CFM25 per 100ft2, Uninsulated`, `12 CFM25 per 100ft2, R-4`, `12 CFM25 per 100ft2, R-6`, `12 CFM25 per 100ft2, R-8`, `Detailed Example: 4 CFM25 per 100ft2 (75% Supply), R-4`, `Detailed Example: 5 CFM50 per 100ft2 (75% Supply), R-4`, `Detailed Example: 250 CFM25, R-6`, `Detailed Example: 400 CFM50 (75% Supply), R-6`
 
 <br/>
 
 **HVAC Ducts: Supply Location**
 
-The location of the supply ducts. If not provided, defaults based on the foundation/attic type and presence of garage.
+The primary location of the supply ducts. If not provided, defaults based on the foundation/attic/garage type.
 
 - **Name:** ``hvac_ducts_supply_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `crawlspace`, `crawlspace - vented`, `crawlspace - unvented`, `crawlspace - conditioned`, `attic`, `attic - vented`, `attic - unvented`, `garage`, `exterior wall`, `under slab`, `roof deck`, `outside`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`, `manufactured home belly`
-
-<br/>
-
-**HVAC Ducts: Supply Area Fraction**
-
-The fraction of supply ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.
-
-- **Name:** ``hvac_ducts_supply_surface_area_fraction``
-- **Type:** ``Double``
-
-- **Units:** ``frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Ducts: Supply Leakage Fraction**
-
-The fraction of duct leakage associated with the supply ducts; the remainder is associated with the return ducts.
-
-- **Name:** ``hvac_ducts_supply_leakage_fraction``
-- **Type:** ``Double``
-
-- **Units:** ``frac``
-
-- **Required:** ``false``
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `crawlspace - unvented`, `crawlspace - vented`, `crawlspace - conditioned`, `attic - unvented`, `attic - vented`, `garage`, `outside`, `exterior wall`, `under slab`, `roof deck`, `manufactured home belly`
 
 <br/>
 
 **HVAC Ducts: Return Location**
 
-The location of the return ducts. If not provided, defaults based on the foundation/attic type and presence of garage.
+The primary location of the return ducts. If not provided, defaults based on the foundation/attic/garage type.
 
 - **Name:** ``hvac_ducts_return_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `crawlspace`, `crawlspace - vented`, `crawlspace - unvented`, `crawlspace - conditioned`, `attic`, `attic - vented`, `attic - unvented`, `garage`, `exterior wall`, `under slab`, `roof deck`, `outside`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`, `manufactured home belly`
-
-<br/>
-
-**HVAC Ducts: Return Area Fraction**
-
-The fraction of return ducts surface area in the given location. If the fraction is less than 1, the remaining duct area is assumed to be in conditioned space. If not provided, defaults to 0.75 if number of conditioned floors above-grade is greater than 1, otherwise 1.
-
-- **Name:** ``hvac_ducts_return_surface_area_fraction``
-- **Type:** ``Double``
-
-- **Units:** ``frac``
-
-- **Required:** ``false``
-
-<br/>
-
-**HVAC Ducts: Number of Return Registers**
-
-The number of return registers of the ducts. Only used to calculate default return duct surface area. If not provided, defaults to one return register per conditioned floor.
-
-- **Name:** ``hvac_ducts_number_of_return_registers``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``false``
+- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `crawlspace - unvented`, `crawlspace - vented`, `crawlspace - conditioned`, `attic - unvented`, `attic - vented`, `garage`, `outside`, `exterior wall`, `under slab`, `roof deck`, `manufactured home belly`
 
 <br/>
 
@@ -1261,7 +1209,7 @@ The type and efficiency of the water heater.
 
 **DHW: Water Heater Location**
 
-The location of water heater. If not provided, defaults based on the foundation type and presence of garage.
+The location of water heater. If not provided, defaults based on the foundation/garage type.
 
 - **Name:** ``dhw_water_heater_location``
 - **Type:** ``Choice``
