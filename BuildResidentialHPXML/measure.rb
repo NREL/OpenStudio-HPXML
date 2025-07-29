@@ -3697,12 +3697,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                  charging_power: args[:electric_vehicle_charger_power])
     end
 
-    if not args[:electric_vehicle_usage_multiplier].nil?
-      # TODO: Add a UsageMultiplier element in OS-HPXML so we don't need to do this
-      default_miles_per_year = Defaults.get_electric_vehicle_values()[:miles_per_year]
-      miles_per_year = default_miles_per_year * args[:electric_vehicle_usage_multiplier]
-    end
-
     if args[:electric_vehicle] != 'None'
       hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
                               vehicle_type: args[:electric_vehicle_type],
@@ -3710,8 +3704,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               usable_capacity_kwh: args[:electric_vehicle_usable_battery_capacity],
                               fuel_economy_combined: args[:electric_vehicle_fuel_economy_combined],
                               fuel_economy_units: args[:electric_vehicle_fuel_economy_units],
-                              miles_per_year: miles_per_year,
                               fraction_charged_home: args[:electric_vehicle_charger_fraction_charged_at_home],
+                              ev_usage_multiplier: args[:electric_vehicle_usage_multiplier],
                               ev_charger_idref: charger_id)
     end
   end

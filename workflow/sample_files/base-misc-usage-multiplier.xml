@@ -449,9 +449,11 @@
                   <Percentage>0.5</Percentage>
                 </FractionChargedLocation>
                 <ConnectedCharger idref='EVCharger1'/>
+                <extension>
+                  <UsageMultiplier>0.75</UsageMultiplier>
+                </extension>
               </BatteryElectricVehicle>
             </VehicleType>
-            <MilesDrivenPerYear>8175.0</MilesDrivenPerYear>
             <FuelEconomyCombined>
               <Units>kWh/mile</Units>
               <Value>0.219174</Value>
