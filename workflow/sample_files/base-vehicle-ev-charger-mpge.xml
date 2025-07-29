@@ -513,7 +513,6 @@
                 <ConnectedCharger idref='EVCharger1'/>
               </BatteryElectricVehicle>
             </VehicleType>
-            <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
             <FuelEconomyCombined>
               <Units>mpge</Units>
               <Value>135.0</Value>
