@@ -1380,51 +1380,63 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param enclosure_window_area_or_wwr_front [Double] window area or window-to-wall ratio for unit's front facade (ft2 or frac)
-  # @param enclosure_window_area_or_wwr_back [Double] window area or window-to-wall ratio for unit's back facade (ft2 or frac)
-  # @param enclosure_window_area_or_wwr_left [Double] window area or window-to-wall ratio for unit's left facade (ft2 or frac)
-  # @param enclosure_window_area_or_wwr_right [Double] window area or window-to-wall ratio for unit's right facade (ft2 or frac)
-  # @param enclosure_skylight_area_front [Double] skylight area for unit's front conditioned roof facade (ft2)
-  # @param enclosure_skylight_area_back [Double] skylight area for unit's back conditioned roof facade (ft2)
-  # @param enclosure_skylight_area_left [Double] skylight area for unit's left conditioned roof facade (ft2)
-  # @param enclosure_skylight_area_right [Double] skylight area for unit's right conditioned roof facade (ft2)
+  # @param enclosure_window_areas_or_wwrs [String] comma-separated list of window areas or window-to-wall ratios for unit's front/back/left/right facades (ft2 or frac)
+  # @param enclosure_skylight_areas [String] comma-separated list of skylight areas for unit's front/back/left/right roofs (ft2)
   # @return [Boolean] true if successful
   def self.create_windows_and_skylights(runner, model,
-                                        enclosure_window_area_or_wwr_front:, enclosure_window_area_or_wwr_back:,
-                                        enclosure_window_area_or_wwr_left:, enclosure_window_area_or_wwr_right:,
-                                        enclosure_skylight_area_front:, enclosure_skylight_area_back:,
-                                        enclosure_skylight_area_left:, enclosure_skylight_area_right:,
+                                        enclosure_window_areas_or_wwrs:,
+                                        enclosure_skylight_areas:,
                                         **)
     facades = [Constants::FacadeBack, Constants::FacadeRight, Constants::FacadeFront, Constants::FacadeLeft]
 
     wwrs = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
     window_areas = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
-    if enclosure_window_area_or_wwr_front < 1
-      wwrs[Constants::FacadeFront] = enclosure_window_area_or_wwr_front
-    else
-      window_areas[Constants::FacadeFront] = enclosure_window_area_or_wwr_front
+    if enclosure_window_areas_or_wwrs.split(',').count != 4
+      runner.registerError('Enclosure window areas must be a comma-separated list of 4 numbers.')
+      return false
     end
-    if enclosure_window_area_or_wwr_back < 1
-      wwrs[Constants::FacadeBack] = enclosure_window_area_or_wwr_back
-    else
-      window_areas[Constants::FacadeBack] = enclosure_window_area_or_wwr_back
+    begin
+      w_front, w_back, w_left, w_right = enclosure_window_areas_or_wwrs.split(',').map(&:strip).map { |x| Float(x) }
+    rescue
+      runner.registerError('Enclosure window areas must be a comma-separated list of 4 numbers.')
+      return false
     end
-    if enclosure_window_area_or_wwr_left < 1
-      wwrs[Constants::FacadeLeft] = enclosure_window_area_or_wwr_left
+    if w_front < 1
+      wwrs[Constants::FacadeFront] = w_front
     else
-      window_areas[Constants::FacadeLeft] = enclosure_window_area_or_wwr_left
+      window_areas[Constants::FacadeFront] = w_front
     end
-    if enclosure_window_area_or_wwr_right < 1
-      wwrs[Constants::FacadeRight] = enclosure_window_area_or_wwr_right
+    if w_back < 1
+      wwrs[Constants::FacadeBack] = w_back
     else
-      window_areas[Constants::FacadeRight] = enclosure_window_area_or_wwr_right
+      window_areas[Constants::FacadeBack] = w_back
+    end
+    if w_left < 1
+      wwrs[Constants::FacadeLeft] = w_left
+    else
+      window_areas[Constants::FacadeLeft] = w_left
+    end
+    if w_right < 1
+      wwrs[Constants::FacadeRight] = w_right
+    else
+      window_areas[Constants::FacadeRight] = w_right
     end
 
-    skylight_areas = {}
-    skylight_areas[Constants::FacadeBack] = enclosure_skylight_area_back
-    skylight_areas[Constants::FacadeRight] = enclosure_skylight_area_right
-    skylight_areas[Constants::FacadeFront] = enclosure_skylight_area_front
-    skylight_areas[Constants::FacadeLeft] = enclosure_skylight_area_left
+    skylight_areas = { Constants::FacadeFront => 0, Constants::FacadeBack => 0, Constants::FacadeLeft => 0, Constants::FacadeRight => 0 }
+    if enclosure_skylight_areas.split(',').count != 4
+      runner.registerError('Enclosure skylight areas must be a comma-separated list of 4 numbers.')
+      return false
+    end
+    begin
+      s_front, s_back, s_left, s_right = enclosure_skylight_areas.split(',').map(&:strip).map { |x| Float(x) }
+    rescue
+      runner.registerError('Enclosure skylight areas must be a comma-separated list of 4 numbers.')
+      return false
+    end
+    skylight_areas[Constants::FacadeFront] = s_front
+    skylight_areas[Constants::FacadeBack] = s_back
+    skylight_areas[Constants::FacadeLeft] = s_left
+    skylight_areas[Constants::FacadeRight] = s_right
     skylight_areas[Constants::FacadeNone] = 0
 
     # Store surfaces that should get windows by facade

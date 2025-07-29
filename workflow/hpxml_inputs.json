@@ -23,10 +23,7 @@
     "enclosure_radiant_barrier": "None",
     "enclosure_wall": "Detailed Example: Wood Stud, R-11, 2x4, 16 in o.c., 25% Framing",
     "enclosure_wall_siding": "Detailed Example: 0.6 Solar Absorptance",
-    "enclosure_window_area_or_wwr_front": 90,
-    "enclosure_window_area_or_wwr_back": 90,
-    "enclosure_window_area_or_wwr_left": 45,
-    "enclosure_window_area_or_wwr_right": 45,
+    "enclosure_window_areas_or_wwrs": "90, 90, 45, 45",
     "enclosure_window_natural_ventilation": "None",
     "enclosure_window": "Detailed Example: Single, Clear, Aluminum w/ Thermal Break",
     "enclosure_window_interior_shading": "None",
@@ -80,17 +77,11 @@
   },
   "tests/ASHRAE_Standard_140/L140AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "enclosure_window_area_or_wwr_front": 0,
-    "enclosure_window_area_or_wwr_back": 0,
-    "enclosure_window_area_or_wwr_left": 0,
-    "enclosure_window_area_or_wwr_right": 0
+    "enclosure_window_areas_or_wwrs": "0, 0, 0, 0"
   },
   "tests/ASHRAE_Standard_140/L150AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "enclosure_window_area_or_wwr_front": 270,
-    "enclosure_window_area_or_wwr_back": 0,
-    "enclosure_window_area_or_wwr_left": 0,
-    "enclosure_window_area_or_wwr_right": 0
+    "enclosure_window_areas_or_wwrs": "270, 0, 0, 0"
   },
   "tests/ASHRAE_Standard_140/L155AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L150AC.xml",
@@ -98,10 +89,7 @@
   },
   "tests/ASHRAE_Standard_140/L160AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "enclosure_window_area_or_wwr_front": 0,
-    "enclosure_window_area_or_wwr_back": 0,
-    "enclosure_window_area_or_wwr_left": 135,
-    "enclosure_window_area_or_wwr_right": 135
+    "enclosure_window_areas_or_wwrs": "0, 0, 135, 135"
   },
   "tests/ASHRAE_Standard_140/L170AC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -163,17 +151,11 @@
   },
   "tests/ASHRAE_Standard_140/L140AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "enclosure_window_area_or_wwr_front": 0,
-    "enclosure_window_area_or_wwr_back": 0,
-    "enclosure_window_area_or_wwr_left": 0,
-    "enclosure_window_area_or_wwr_right": 0
+    "enclosure_window_areas_or_wwrs": "0, 0, 0, 0"
   },
   "tests/ASHRAE_Standard_140/L150AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "enclosure_window_area_or_wwr_front": 270,
-    "enclosure_window_area_or_wwr_back": 0,
-    "enclosure_window_area_or_wwr_left": 0,
-    "enclosure_window_area_or_wwr_right": 0
+    "enclosure_window_areas_or_wwrs": "270, 0, 0, 0"
   },
   "tests/ASHRAE_Standard_140/L155AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L150AL.xml",
@@ -181,10 +163,7 @@
   },
   "tests/ASHRAE_Standard_140/L160AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
-    "enclosure_window_area_or_wwr_front": 0,
-    "enclosure_window_area_or_wwr_back": 0,
-    "enclosure_window_area_or_wwr_left": 135,
-    "enclosure_window_area_or_wwr_right": 135
+    "enclosure_window_areas_or_wwrs": "0, 0, 135, 135"
   },
   "tests/ASHRAE_Standard_140/L170AL.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AL.xml",
@@ -409,10 +388,7 @@
     "enclosure_wall": "Wood Stud, R-13",
     "enclosure_wall_continuous_insulation": "R-10",
     "enclosure_wall_siding": "Wood, Medium",
-    "enclosure_window_area_or_wwr_front": 108,
-    "enclosure_window_area_or_wwr_back": 108,
-    "enclosure_window_area_or_wwr_left": 72,
-    "enclosure_window_area_or_wwr_right": 72,
+    "enclosure_window_areas_or_wwrs": "108, 108, 72, 72",
     "enclosure_window_natural_ventilation": "67% Operable Windows",
     "enclosure_window": "Double, Low-E, Non-Metal, Gas, Med Gain",
     "enclosure_window_interior_shading": "Curtains, Light",
@@ -515,8 +491,7 @@
     "geometry_unit_cfa": 4050,
     "geometry_attic_type": "Attic, Conditioned, Gable",
     "enclosure_roof": "R-30",
-    "enclosure_window_area_or_wwr_left": 120,
-    "enclosure_window_area_or_wwr_right": 120,
+    "enclosure_window_areas_or_wwrs": "108, 108, 120, 120",
     "hvac_ducts": "0 CFM25 per 100ft2, R-4",
     "hvac_ducts_supply_location": "conditioned space",
     "hvac_ducts_return_location": "conditioned space"
@@ -634,10 +609,7 @@
     "geometry_attached_walls": "1 Side: Right",
     "geometry_unit_cfa": 1800,
     "geometry_unit_aspect_ratio": 0.6667,
-    "enclosure_window_area_or_wwr_front": 0.18,
-    "enclosure_window_area_or_wwr_back": 0.18,
-    "enclosure_window_area_or_wwr_left": 0.18,
-    "enclosure_window_area_or_wwr_right": 0.18,
+    "enclosure_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
     "hvac_heating_system_capacity": "25 kBtu/hr"
   },
   "sample_files/base-bldgtype-sfa-unit-2stories.xml": {
@@ -667,10 +639,7 @@
     "geometry_unit_aspect_ratio": 0.6667,
     "geometry_foundation_type": "Above Apartment",
     "geometry_attic_type": "Below Apartment",
-    "enclosure_window_area_or_wwr_front": 0.18,
-    "enclosure_window_area_or_wwr_back": 0.18,
-    "enclosure_window_area_or_wwr_left": 0.18,
-    "enclosure_window_area_or_wwr_right": 0.18,
+    "enclosure_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
     "enclosure_door_area": 20,
     "hvac_heating_system_capacity": "10 kBtu/hr",
     "hvac_cooling_system_capacity": "1.0 tons",
@@ -1114,10 +1083,7 @@
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_floors_above_grade": 2,
     "geometry_unit_cfa": 4050,
-    "enclosure_window_area_or_wwr_front": 216,
-    "enclosure_window_area_or_wwr_back": 216,
-    "enclosure_window_area_or_wwr_left": 144,
-    "enclosure_window_area_or_wwr_right": 144,
+    "enclosure_window_areas_or_wwrs": "216, 216, 144, 144",
     "hvac_heating_system_capacity": "50 kBtu/hr",
     "hvac_cooling_system_capacity": "3.0 tons"
   },
@@ -1155,7 +1121,7 @@
   "sample_files/base-enclosure-garage.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_garage_type": "3 Car, Right, Fully Protruding",
-    "enclosure_window_area_or_wwr_front": 12,
+    "enclosure_window_areas_or_wwrs": "12, 108, 72, 72",
     "hvac_ducts_supply_location": "garage",
     "hvac_ducts_return_location": "garage",
     "dhw_water_heater_location": "garage",
@@ -1210,14 +1176,12 @@
   "sample_files/base-enclosure-skylights.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "enclosure_skylight": "Double, Low-E, Metal, Med Gain",
-    "enclosure_skylight_area_front": 15,
-    "enclosure_skylight_area_back": 15
+    "enclosure_skylight_areas": "15, 15, 0, 0"
   },
   "sample_files/base-enclosure-skylights-cathedral.xml": {
     "parent_hpxml": "sample_files/base-atticroof-cathedral.xml",
     "enclosure_skylight": "Double, Low-E, Metal, Med Gain",
-    "enclosure_skylight_area_front": 15,
-    "enclosure_skylight_area_back": 15
+    "enclosure_skylight_areas": "15, 15, 0, 0"
   },
   "sample_files/base-enclosure-skylights-physical-properties.xml": {
     "parent_hpxml": "sample_files/base-enclosure-skylights.xml"
@@ -1265,10 +1229,7 @@
   },
   "sample_files/base-enclosure-windows-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "enclosure_window_area_or_wwr_front": 0,
-    "enclosure_window_area_or_wwr_back": 0,
-    "enclosure_window_area_or_wwr_left": 0,
-    "enclosure_window_area_or_wwr_right": 0
+    "enclosure_window_areas_or_wwrs": "0, 0, 0, 0"
   },
   "sample_files/base-enclosure-windows-physical-properties.xml": {
     "parent_hpxml": "sample_files/base.xml"
@@ -1305,10 +1266,7 @@
     "geometry_unit_aspect_ratio": 4.0,
     "geometry_foundation_type": "Belly and Wing, With Skirt",
     "geometry_roof_pitch": "3:12",
-    "enclosure_window_area_or_wwr_front": 140,
-    "enclosure_window_area_or_wwr_back": 140,
-    "enclosure_window_area_or_wwr_left": 20,
-    "enclosure_window_area_or_wwr_right": 20,
+    "enclosure_window_areas_or_wwrs": "140, 140, 20, 20",
     "hvac_ducts_supply_location": "manufactured home belly",
     "hvac_ducts": "20% Leakage, Uninsulated",
     "hvac_ducts_return_location": "manufactured home belly"
@@ -2503,10 +2461,7 @@
     "geometry_unit_aspect_ratio": 0.75,
     "enclosure_floor_over_foundation": "Wood Frame, R-19",
     "enclosure_air_leakage": "Detailed Example: 0.375 nACH",
-    "enclosure_window_area_or_wwr_front": 0.18,
-    "enclosure_window_area_or_wwr_back": 0.18,
-    "enclosure_window_area_or_wwr_left": 0.18,
-    "enclosure_window_area_or_wwr_right": 0.18,
+    "enclosure_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
     "enclosure_door_area": 20,
     "hvac_cooling_system": "Room AC, EER 8.5",
     "hvac_cooling_system_capacity": "1.0 tons",

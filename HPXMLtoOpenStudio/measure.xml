@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>62c5dd8d-4d98-45a3-b64b-de9edb22acb3</version_id>
-  <version_modified>2025-07-29T19:09:59Z</version_modified>
+  <version_id>add44bff-0e96-4c5e-bb5c-e2cc4fba94c1</version_id>
+  <version_modified>2025-07-29T19:54:26Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -348,7 +348,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C43500EF</checksum>
+      <checksum>EC42D009</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
@@ -384,7 +384,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0262EE7C</checksum>
+      <checksum>2F7453F7</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -402,7 +402,7 @@
       <filename>hpxml_schematron/EPvalidator.sch</filename>
       <filetype>sch</filetype>
       <usage_type>resource</usage_type>
-      <checksum>21E0FE6E</checksum>
+      <checksum>68BF1099</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -684,7 +684,7 @@
       <filename>vehicle.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>547074C0</checksum>
+      <checksum>2F0FD377</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
@@ -732,7 +732,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1BF676EC</checksum>
+      <checksum>877CB933</checksum>
     </file>
     <file>
       <filename>test_electric_panel.rb</filename>
@@ -816,7 +816,7 @@
       <filename>test_vehicle.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>31A35FF4</checksum>
+      <checksum>E6FA0309</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>

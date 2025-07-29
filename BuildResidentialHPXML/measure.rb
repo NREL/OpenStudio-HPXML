@@ -307,32 +307,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Double, Clear, Metal, Air')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_window_area_or_wwr_front', true)
-    arg.setDisplayName('Enclosure: Window Front Area or WWR')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('enclosure_window_areas_or_wwrs', true)
+    arg.setDisplayName('Enclosure: Window Areas or WWRs')
     arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's front facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0.15)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_window_area_or_wwr_back', true)
-    arg.setDisplayName('Enclosure: Window Back Area or WWR')
-    arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's back facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0.15)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_window_area_or_wwr_left', true)
-    arg.setDisplayName('Enclosure: Window Left Area or WWR')
-    arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0.15)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_window_area_or_wwr_right', true)
-    arg.setDisplayName('Enclosure: Window Right Area or WWR')
-    arg.setUnits('ft2 or frac')
-    arg.setDescription("The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.")
-    arg.setDefaultValue(0.15)
+    arg.setDescription("The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.")
+    arg.setDefaultValue('0.15, 0.15, 0.15, 0.15')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_window_natural_ventilation', choices[:enclosure_window_natural_ventilation], false)
@@ -377,32 +356,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Single, Clear, Metal')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_skylight_area_front', false)
-    arg.setDisplayName('Enclosure: Skylight Front Area')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('enclosure_skylight_areas', false)
+    arg.setDisplayName('Enclosure: Skylight Areas')
     arg.setUnits('ft2')
-    arg.setDescription("The amount of skylight area on the unit's front-facing roof.")
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_skylight_area_back', false)
-    arg.setDisplayName('Enclosure: Skylight Back Area')
-    arg.setUnits('ft2')
-    arg.setDescription("The amount of skylight area on the unit's back-facing roof.")
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_skylight_area_left', false)
-    arg.setDisplayName('Enclosure: Skylight Left Area')
-    arg.setUnits('ft2')
-    arg.setDescription("The amount of skylight area on the unit's left-facing roof (when viewed from the front).")
-    arg.setDefaultValue(0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('enclosure_skylight_area_right', false)
-    arg.setDisplayName('Enclosure: Skylight Right Area')
-    arg.setUnits('ft2')
-    arg.setDescription("The amount of skylight area on the unit's right-facing roof (when viewed from the front).")
-    arg.setDefaultValue(0)
+    arg.setDescription("The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.")
+    arg.setDefaultValue('0, 0, 0, 0')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_door', choices[:enclosure_door], false)

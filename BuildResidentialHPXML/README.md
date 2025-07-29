@@ -504,53 +504,12 @@ The type of windows.
 
 <br/>
 
-**Enclosure: Window Front Area or WWR**
+**Enclosure: Window Areas or WWRs**
 
-The amount of window area on the unit's front facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the front wall is adiabatic, the value will be ignored.
+The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.
 
-- **Name:** ``enclosure_window_area_or_wwr_front``
-- **Type:** ``Double``
-
-- **Units:** ``ft2 or frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Enclosure: Window Back Area or WWR**
-
-The amount of window area on the unit's back facade. Enter a fraction to specify a Window-to-Wall Ratio instead. If the back wall is adiabatic, the value will be ignored.
-
-- **Name:** ``enclosure_window_area_or_wwr_back``
-- **Type:** ``Double``
-
-- **Units:** ``ft2 or frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Enclosure: Window Left Area or WWR**
-
-The amount of window area on the unit's left facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the left wall is adiabatic, the value will be ignored.
-
-- **Name:** ``enclosure_window_area_or_wwr_left``
-- **Type:** ``Double``
-
-- **Units:** ``ft2 or frac``
-
-- **Required:** ``true``
-
-<br/>
-
-**Enclosure: Window Right Area or WWR**
-
-The amount of window area on the unit's right facade (when viewed from the front). Enter a fraction to specify a Window-to-Wall Ratio instead. If the right wall is adiabatic, the value will be ignored.
-
-- **Name:** ``enclosure_window_area_or_wwr_right``
-- **Type:** ``Double``
-
-- **Units:** ``ft2 or frac``
+- **Name:** ``enclosure_window_areas_or_wwrs``
+- **Type:** ``String``
 
 - **Required:** ``true``
 
@@ -647,53 +606,12 @@ The type of skylights.
 
 <br/>
 
-**Enclosure: Skylight Front Area**
+**Enclosure: Skylight Areas**
 
-The amount of skylight area on the unit's front-facing roof.
+The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.
 
-- **Name:** ``enclosure_skylight_area_front``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``false``
-
-<br/>
-
-**Enclosure: Skylight Back Area**
-
-The amount of skylight area on the unit's back-facing roof.
-
-- **Name:** ``enclosure_skylight_area_back``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``false``
-
-<br/>
-
-**Enclosure: Skylight Left Area**
-
-The amount of skylight area on the unit's left-facing roof (when viewed from the front).
-
-- **Name:** ``enclosure_skylight_area_left``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
-
-- **Required:** ``false``
-
-<br/>
-
-**Enclosure: Skylight Right Area**
-
-The amount of skylight area on the unit's right-facing roof (when viewed from the front).
-
-- **Name:** ``enclosure_skylight_area_right``
-- **Type:** ``Double``
-
-- **Units:** ``ft2``
+- **Name:** ``enclosure_skylight_areas``
+- **Type:** ``String``
 
 - **Required:** ``false``
 
