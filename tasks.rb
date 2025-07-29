@@ -2435,6 +2435,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     end
     if ['base-vehicle-ev-charger-undercharged.xml'].include? hpxml_file
       hpxml_bldg.vehicles[0].ev_usage_multiplier = 2.0
+    elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+      hpxml_bldg.vehicles[0].ev_usage_multiplier = 0.75
     end
 
     # ---------------- #

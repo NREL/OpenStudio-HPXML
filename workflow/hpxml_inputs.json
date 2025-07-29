@@ -3754,7 +3754,6 @@
     "vehicle_fuel_economy_combined": 0.219174,
     "vehicle_fuel_economy_units": "kWh/mile",
     "vehicle_fraction_charged_home": 0.75,
-    "vehicle_miles_driven_per_year": 8175.0,
     "vehicle_fraction_charged_home": 0.5,
     "ev_charger_present": true,
     "ev_charger_level": 1,
