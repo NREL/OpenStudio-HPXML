@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>25d007e1-e454-4358-b228-b7e3173f834e</version_id>
-  <version_modified>2025-07-29T22:17:40Z</version_modified>
+  <version_id>cb754049-66df-48e7-9251-6e8af05c46e2</version_id>
+  <version_modified>2025-07-30T00:55:52Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -23,12 +23,62 @@
     <argument>
       <name>simulation_control_timestep</name>
       <display_name>Simulation Control: Timestep</display_name>
-      <description>Value must be a divisor of 60.</description>
-      <type>Integer</type>
+      <description>The timestep for the simulation; defaults to hourly calculations for fastest runtime.</description>
+      <type>Choice</type>
       <units>min</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>60</default_value>
+      <choices>
+        <choice>
+          <value>60</value>
+          <display_name>60</display_name>
+        </choice>
+        <choice>
+          <value>30</value>
+          <display_name>30</display_name>
+        </choice>
+        <choice>
+          <value>20</value>
+          <display_name>20</display_name>
+        </choice>
+        <choice>
+          <value>15</value>
+          <display_name>15</display_name>
+        </choice>
+        <choice>
+          <value>12</value>
+          <display_name>12</display_name>
+        </choice>
+        <choice>
+          <value>10</value>
+          <display_name>10</display_name>
+        </choice>
+        <choice>
+          <value>6</value>
+          <display_name>6</display_name>
+        </choice>
+        <choice>
+          <value>5</value>
+          <display_name>5</display_name>
+        </choice>
+        <choice>
+          <value>4</value>
+          <display_name>4</display_name>
+        </choice>
+        <choice>
+          <value>3</value>
+          <display_name>3</display_name>
+        </choice>
+        <choice>
+          <value>2</value>
+          <display_name>2</display_name>
+        </choice>
+        <choice>
+          <value>1</value>
+          <display_name>1</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>simulation_control_run_period</name>
@@ -42,14 +92,14 @@
     <argument>
       <name>location_zip_code</name>
       <display_name>Location: Zip Code</display_name>
-      <description>Zip code of the home address. Either this or the EnergyPlus Weather (EPW) Filepath input below must be provided.</description>
+      <description>Zip code of the home address. Either this or the EnergyPlus Weather (EPW) File Path input below must be provided.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>location_epw_filepath</name>
-      <display_name>Location: EnergyPlus Weather (EPW) Filepath</display_name>
+      <name>location_epw_path</name>
+      <display_name>Location: EnergyPlus Weather (EPW) File Path</display_name>
       <description>Path to the EPW file. Either this or the Zip Code input above must be provided.</description>
       <type>String</type>
       <required>false</required>
@@ -113,6 +163,7 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Unknown</default_value>
       <choices>
         <choice>
           <value>Unknown</value>
@@ -228,34 +279,70 @@
     <argument>
       <name>geometry_unit_type</name>
       <display_name>Geometry: Unit Type</display_name>
-      <description>The type of dwelling unit. Use single-family attached for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use apartment unit for a dwelling unit with 1 story, attached units to one, two, or three sides, and possibly units above and/or below.</description>
+      <description>The type of dwelling unit and number of stories. Includes conditioned attics and excludes conditioned basements.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>single-family detached</default_value>
+      <default_value>Single-Family Detached, 2 Stories</default_value>
       <choices>
         <choice>
-          <value>single-family detached</value>
-          <display_name>single-family detached</display_name>
+          <value>Single-Family Detached, 1 Story</value>
+          <display_name>Single-Family Detached, 1 Story</display_name>
         </choice>
         <choice>
-          <value>single-family attached</value>
-          <display_name>single-family attached</display_name>
+          <value>Single-Family Detached, 2 Stories</value>
+          <display_name>Single-Family Detached, 2 Stories</display_name>
         </choice>
         <choice>
-          <value>apartment unit</value>
-          <display_name>apartment unit</display_name>
+          <value>Single-Family Detached, 3 Stories</value>
+          <display_name>Single-Family Detached, 3 Stories</display_name>
         </choice>
         <choice>
-          <value>manufactured home</value>
-          <display_name>manufactured home</display_name>
+          <value>Single-Family Detached, 4 Stories</value>
+          <display_name>Single-Family Detached, 4 Stories</display_name>
+        </choice>
+        <choice>
+          <value>Single-Family Attached, 1 Story</value>
+          <display_name>Single-Family Attached, 1 Story</display_name>
+        </choice>
+        <choice>
+          <value>Single-Family Attached, 2 Stories</value>
+          <display_name>Single-Family Attached, 2 Stories</display_name>
+        </choice>
+        <choice>
+          <value>Single-Family Attached, 3 Stories</value>
+          <display_name>Single-Family Attached, 3 Stories</display_name>
+        </choice>
+        <choice>
+          <value>Single-Family Attached, 4 Stories</value>
+          <display_name>Single-Family Attached, 4 Stories</display_name>
+        </choice>
+        <choice>
+          <value>Apartment Unit, 1 Story</value>
+          <display_name>Apartment Unit, 1 Story</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home, 1 Story</value>
+          <display_name>Manufactured Home, 1 Story</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home, 2 Stories</value>
+          <display_name>Manufactured Home, 2 Stories</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home, 3 Stories</value>
+          <display_name>Manufactured Home, 3 Stories</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home, 4 Stories</value>
+          <display_name>Manufactured Home, 4 Stories</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
       <name>geometry_attached_walls</name>
       <display_name>Geometry: Unit Attached Walls</display_name>
-      <description>The location of the attached walls if a dwelling unit of type 'single-family attached' or 'apartment unit'.</description>
+      <description>For single-family attached and apartment units, the location(s) of the attached walls.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -324,17 +411,7 @@
       </choices>
     </argument>
     <argument>
-      <name>geometry_unit_num_floors_above_grade</name>
-      <display_name>Geometry: Unit Number of Floors Above Grade</display_name>
-      <description>The number of floors above grade in the unit. Attic type ConditionedAttic is included. Assumed to be 1 for apartment units.</description>
-      <type>Integer</type>
-      <units>#</units>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>2</default_value>
-    </argument>
-    <argument>
-      <name>geometry_unit_cfa</name>
+      <name>geometry_unit_conditioned_floor_area</name>
       <display_name>Geometry: Unit Conditioned Floor Area</display_name>
       <description>The total floor area of the unit's conditioned space (including any conditioned basement/attic floor area).</description>
       <type>Double</type>
@@ -354,52 +431,308 @@
       <default_value>2</default_value>
     </argument>
     <argument>
-      <name>geometry_unit_orientation</name>
-      <display_name>Geometry: Unit Orientation</display_name>
-      <description>The unit's orientation is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).</description>
-      <type>Double</type>
-      <units>degrees</units>
+      <name>geometry_unit_direction</name>
+      <display_name>Geometry: Unit Direction</display_name>
+      <description>Direction of the front of the unit.</description>
+      <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>180</default_value>
+      <default_value>South</default_value>
+      <choices>
+        <choice>
+          <value>North</value>
+          <display_name>North</display_name>
+        </choice>
+        <choice>
+          <value>Northeast</value>
+          <display_name>Northeast</display_name>
+        </choice>
+        <choice>
+          <value>East</value>
+          <display_name>East</display_name>
+        </choice>
+        <choice>
+          <value>Southeast</value>
+          <display_name>Southeast</display_name>
+        </choice>
+        <choice>
+          <value>South</value>
+          <display_name>South</display_name>
+        </choice>
+        <choice>
+          <value>Southwest</value>
+          <display_name>Southwest</display_name>
+        </choice>
+        <choice>
+          <value>West</value>
+          <display_name>West</display_name>
+        </choice>
+        <choice>
+          <value>Northwest</value>
+          <display_name>Northwest</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>geometry_unit_num_bedrooms</name>
       <display_name>Geometry: Unit Number of Bedrooms</display_name>
       <description>The number of bedrooms in the unit.</description>
-      <type>Integer</type>
-      <units>#</units>
+      <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>3</default_value>
+      <choices>
+        <choice>
+          <value>0</value>
+          <display_name>0</display_name>
+        </choice>
+        <choice>
+          <value>1</value>
+          <display_name>1</display_name>
+        </choice>
+        <choice>
+          <value>2</value>
+          <display_name>2</display_name>
+        </choice>
+        <choice>
+          <value>3</value>
+          <display_name>3</display_name>
+        </choice>
+        <choice>
+          <value>4</value>
+          <display_name>4</display_name>
+        </choice>
+        <choice>
+          <value>5</value>
+          <display_name>5</display_name>
+        </choice>
+        <choice>
+          <value>6</value>
+          <display_name>6</display_name>
+        </choice>
+        <choice>
+          <value>7</value>
+          <display_name>7</display_name>
+        </choice>
+        <choice>
+          <value>8</value>
+          <display_name>8</display_name>
+        </choice>
+        <choice>
+          <value>9</value>
+          <display_name>9</display_name>
+        </choice>
+        <choice>
+          <value>10</value>
+          <display_name>10</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>geometry_unit_num_bathrooms</name>
       <display_name>Geometry: Unit Number of Bathrooms</display_name>
-      <description>The number of bathrooms in the unit. If not provided, defaults to NumberofBedrooms/2 + 0.5.</description>
-      <type>Integer</type>
-      <units>#</units>
+      <description>The number of bathrooms in the unit. Defaults to NumberofBedrooms/2 + 0.5.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Default</default_value>
+      <choices>
+        <choice>
+          <value>Default</value>
+          <display_name>Default</display_name>
+        </choice>
+        <choice>
+          <value>0</value>
+          <display_name>0</display_name>
+        </choice>
+        <choice>
+          <value>1</value>
+          <display_name>1</display_name>
+        </choice>
+        <choice>
+          <value>2</value>
+          <display_name>2</display_name>
+        </choice>
+        <choice>
+          <value>3</value>
+          <display_name>3</display_name>
+        </choice>
+        <choice>
+          <value>4</value>
+          <display_name>4</display_name>
+        </choice>
+        <choice>
+          <value>5</value>
+          <display_name>5</display_name>
+        </choice>
+        <choice>
+          <value>6</value>
+          <display_name>6</display_name>
+        </choice>
+        <choice>
+          <value>7</value>
+          <display_name>7</display_name>
+        </choice>
+        <choice>
+          <value>8</value>
+          <display_name>8</display_name>
+        </choice>
+        <choice>
+          <value>9</value>
+          <display_name>9</display_name>
+        </choice>
+        <choice>
+          <value>10</value>
+          <display_name>10</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>geometry_unit_num_occupants</name>
       <display_name>Geometry: Unit Number of Occupants</display_name>
-      <description>The number of occupants in the unit. If not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on Number of Bedrooms and Conditioned Floor Area per ANSI/RESNET/ICC 301. If provided, an *operational* calculation is instead performed in which the end use defaults to reflect real-world data (where possible).</description>
-      <type>Double</type>
-      <units>#</units>
+      <description>The number of occupants in the unit. Defaults to an *asset* calculation assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on Number of Bedrooms and Conditioned Floor Area. If provided, an *operational* calculation is instead performed in which the end use defaults reflect real-world data (where possible).</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Default</default_value>
+      <choices>
+        <choice>
+          <value>Default</value>
+          <display_name>Default</display_name>
+        </choice>
+        <choice>
+          <value>0</value>
+          <display_name>0</display_name>
+        </choice>
+        <choice>
+          <value>1</value>
+          <display_name>1</display_name>
+        </choice>
+        <choice>
+          <value>2</value>
+          <display_name>2</display_name>
+        </choice>
+        <choice>
+          <value>3</value>
+          <display_name>3</display_name>
+        </choice>
+        <choice>
+          <value>4</value>
+          <display_name>4</display_name>
+        </choice>
+        <choice>
+          <value>5</value>
+          <display_name>5</display_name>
+        </choice>
+        <choice>
+          <value>6</value>
+          <display_name>6</display_name>
+        </choice>
+        <choice>
+          <value>7</value>
+          <display_name>7</display_name>
+        </choice>
+        <choice>
+          <value>8</value>
+          <display_name>8</display_name>
+        </choice>
+        <choice>
+          <value>9</value>
+          <display_name>9</display_name>
+        </choice>
+        <choice>
+          <value>10</value>
+          <display_name>10</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>geometry_average_ceiling_height</name>
       <display_name>Geometry: Average Ceiling Height</display_name>
       <description>Average distance from the floor to the ceiling.</description>
-      <type>Double</type>
+      <type>Choice</type>
       <units>ft</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>8</default_value>
+      <default_value>8.0</default_value>
+      <choices>
+        <choice>
+          <value>6.0</value>
+          <display_name>6.0</display_name>
+        </choice>
+        <choice>
+          <value>6.5</value>
+          <display_name>6.5</display_name>
+        </choice>
+        <choice>
+          <value>7.0</value>
+          <display_name>7.0</display_name>
+        </choice>
+        <choice>
+          <value>7.5</value>
+          <display_name>7.5</display_name>
+        </choice>
+        <choice>
+          <value>8.0</value>
+          <display_name>8.0</display_name>
+        </choice>
+        <choice>
+          <value>8.5</value>
+          <display_name>8.5</display_name>
+        </choice>
+        <choice>
+          <value>9.0</value>
+          <display_name>9.0</display_name>
+        </choice>
+        <choice>
+          <value>9.5</value>
+          <display_name>9.5</display_name>
+        </choice>
+        <choice>
+          <value>10.0</value>
+          <display_name>10.0</display_name>
+        </choice>
+        <choice>
+          <value>10.5</value>
+          <display_name>10.5</display_name>
+        </choice>
+        <choice>
+          <value>11.0</value>
+          <display_name>11.0</display_name>
+        </choice>
+        <choice>
+          <value>11.5</value>
+          <display_name>11.5</display_name>
+        </choice>
+        <choice>
+          <value>12.0</value>
+          <display_name>12.0</display_name>
+        </choice>
+        <choice>
+          <value>12.5</value>
+          <display_name>12.5</display_name>
+        </choice>
+        <choice>
+          <value>13.0</value>
+          <display_name>13.0</display_name>
+        </choice>
+        <choice>
+          <value>13.5</value>
+          <display_name>13.5</display_name>
+        </choice>
+        <choice>
+          <value>14.0</value>
+          <display_name>14.0</display_name>
+        </choice>
+        <choice>
+          <value>14.5</value>
+          <display_name>14.5</display_name>
+        </choice>
+        <choice>
+          <value>15.0</value>
+          <display_name>15.0</display_name>
+        </choice>
+      </choices>
     </argument>
     <argument>
       <name>geometry_garage_type</name>
@@ -611,7 +944,7 @@
       <display_name>Geometry: Roof Pitch</display_name>
       <description>The roof pitch of the attic. Ignored if the building has a flat roof.</description>
       <type>Choice</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>6:12</default_value>
       <choices>
@@ -662,6 +995,22 @@
         <choice>
           <value>12:12</value>
           <display_name>12:12</display_name>
+        </choice>
+        <choice>
+          <value>13:12</value>
+          <display_name>13:12</display_name>
+        </choice>
+        <choice>
+          <value>14:12</value>
+          <display_name>14:12</display_name>
+        </choice>
+        <choice>
+          <value>15:12</value>
+          <display_name>15:12</display_name>
+        </choice>
+        <choice>
+          <value>16:12</value>
+          <display_name>16:12</display_name>
         </choice>
       </choices>
     </argument>
@@ -785,7 +1134,7 @@
       <description>The amount of window area on the unit's front/back/left/right facades. Use a comma-separated list like '0.2, 0.2, 0.1, 0.1' to specify Window-to-Wall Ratios (WWR) or '108, 108, 72, 72' to specify absolute areas. If a facade is adiabatic, the value will be ignored.</description>
       <type>String</type>
       <units>ft2 or frac</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>0.15, 0.15, 0.15, 0.15</default_value>
     </argument>
@@ -805,7 +1154,7 @@
       <description>The area of the opaque door(s). Any door glazing (e.g., sliding glass doors) should be captured as window area.</description>
       <type>Double</type>
       <units>ft2</units>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>20</default_value>
     </argument>
@@ -2231,6 +2580,7 @@
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>67% Operable Windows</default_value>
       <choices>
         <choice>
           <value>None</value>
@@ -5335,132 +5685,350 @@
     <argument>
       <name>hvac_ducts_supply_location</name>
       <display_name>HVAC Ducts: Supply Location</display_name>
-      <description>The primary location of the supply ducts. If not provided, defaults based on the foundation/attic/garage type.</description>
+      <description>The primary location of the supply ducts. The remainder of the supply ducts are assumed to be in conditioned space. Defaults based on the foundation/attic/garage type.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Default</default_value>
       <choices>
         <choice>
-          <value>conditioned space</value>
-          <display_name>conditioned space</display_name>
+          <value>Default</value>
+          <display_name>Default</display_name>
         </choice>
         <choice>
-          <value>basement - conditioned</value>
-          <display_name>basement - conditioned</display_name>
+          <value>Conditioned Space, 100%</value>
+          <display_name>Conditioned Space, 100%</display_name>
         </choice>
         <choice>
-          <value>basement - unconditioned</value>
-          <display_name>basement - unconditioned</display_name>
+          <value>Basement, Unconditioned, 100%</value>
+          <display_name>Basement, Unconditioned, 100%</display_name>
         </choice>
         <choice>
-          <value>crawlspace - unvented</value>
-          <display_name>crawlspace - unvented</display_name>
+          <value>Basement, Unconditioned, 75%</value>
+          <display_name>Basement, Unconditioned, 75%</display_name>
         </choice>
         <choice>
-          <value>crawlspace - vented</value>
-          <display_name>crawlspace - vented</display_name>
+          <value>Basement, Unconditioned, 50%</value>
+          <display_name>Basement, Unconditioned, 50%</display_name>
         </choice>
         <choice>
-          <value>crawlspace - conditioned</value>
-          <display_name>crawlspace - conditioned</display_name>
+          <value>Basement, Conditioned, 100%</value>
+          <display_name>Basement, Conditioned, 100%</display_name>
         </choice>
         <choice>
-          <value>attic - unvented</value>
-          <display_name>attic - unvented</display_name>
+          <value>Basement, Conditioned, 75%</value>
+          <display_name>Basement, Conditioned, 75%</display_name>
         </choice>
         <choice>
-          <value>attic - vented</value>
-          <display_name>attic - vented</display_name>
+          <value>Basement, Conditioned, 50%</value>
+          <display_name>Basement, Conditioned, 50%</display_name>
         </choice>
         <choice>
-          <value>garage</value>
-          <display_name>garage</display_name>
+          <value>Crawlspace, Unvented, 100%</value>
+          <display_name>Crawlspace, Unvented, 100%</display_name>
         </choice>
         <choice>
-          <value>outside</value>
-          <display_name>outside</display_name>
+          <value>Crawlspace, Unvented, 75%</value>
+          <display_name>Crawlspace, Unvented, 75%</display_name>
         </choice>
         <choice>
-          <value>exterior wall</value>
-          <display_name>exterior wall</display_name>
+          <value>Crawlspace, Unvented, 50%</value>
+          <display_name>Crawlspace, Unvented, 50%</display_name>
         </choice>
         <choice>
-          <value>under slab</value>
-          <display_name>under slab</display_name>
+          <value>Crawlspace, Vented, 100%</value>
+          <display_name>Crawlspace, Vented, 100%</display_name>
         </choice>
         <choice>
-          <value>roof deck</value>
-          <display_name>roof deck</display_name>
+          <value>Crawlspace, Vented, 75%</value>
+          <display_name>Crawlspace, Vented, 75%</display_name>
         </choice>
         <choice>
-          <value>manufactured home belly</value>
-          <display_name>manufactured home belly</display_name>
+          <value>Crawlspace, Vented, 50%</value>
+          <display_name>Crawlspace, Vented, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Crawlspace, Conditioned, 100%</value>
+          <display_name>Crawlspace, Conditioned, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Crawlspace, Conditioned, 75%</value>
+          <display_name>Crawlspace, Conditioned, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Crawlspace, Conditioned, 50%</value>
+          <display_name>Crawlspace, Conditioned, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Unvented, 100%</value>
+          <display_name>Attic, Unvented, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Unvented, 75%</value>
+          <display_name>Attic, Unvented, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Unvented, 50%</value>
+          <display_name>Attic, Unvented, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Vented, 100%</value>
+          <display_name>Attic, Vented, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Vented, 75%</value>
+          <display_name>Attic, Vented, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Vented, 50%</value>
+          <display_name>Attic, Vented, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Garage, 100%</value>
+          <display_name>Garage, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Garage, 75%</value>
+          <display_name>Garage, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Garage, 50%</value>
+          <display_name>Garage, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Outside, 100%</value>
+          <display_name>Outside, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Outside, 75%</value>
+          <display_name>Outside, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Outside, 50%</value>
+          <display_name>Outside, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Exterior Wall, 100%</value>
+          <display_name>Exterior Wall, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Exterior Wall, 75%</value>
+          <display_name>Exterior Wall, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Exterior Wall, 50%</value>
+          <display_name>Exterior Wall, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 100%</value>
+          <display_name>Under Slab, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 75%</value>
+          <display_name>Under Slab, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 50%</value>
+          <display_name>Under Slab, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Roof Deck, 100%</value>
+          <display_name>Roof Deck, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Roof Deck, 75%</value>
+          <display_name>Roof Deck, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Roof Deck, 50%</value>
+          <display_name>Roof Deck, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home Belly, 100%</value>
+          <display_name>Manufactured Home Belly, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home Belly, 75%</value>
+          <display_name>Manufactured Home Belly, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home Belly, 50%</value>
+          <display_name>Manufactured Home Belly, 50%</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
       <name>hvac_ducts_return_location</name>
       <display_name>HVAC Ducts: Return Location</display_name>
-      <description>The primary location of the return ducts. If not provided, defaults based on the foundation/attic/garage type.</description>
+      <description>The primary location of the return ducts. The remainder of the return ducts are assumed to be in conditioned space. Defaults based on the foundation/attic/garage type.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Default</default_value>
       <choices>
         <choice>
-          <value>conditioned space</value>
-          <display_name>conditioned space</display_name>
+          <value>Default</value>
+          <display_name>Default</display_name>
         </choice>
         <choice>
-          <value>basement - conditioned</value>
-          <display_name>basement - conditioned</display_name>
+          <value>Conditioned Space, 100%</value>
+          <display_name>Conditioned Space, 100%</display_name>
         </choice>
         <choice>
-          <value>basement - unconditioned</value>
-          <display_name>basement - unconditioned</display_name>
+          <value>Basement, Unconditioned, 100%</value>
+          <display_name>Basement, Unconditioned, 100%</display_name>
         </choice>
         <choice>
-          <value>crawlspace - unvented</value>
-          <display_name>crawlspace - unvented</display_name>
+          <value>Basement, Unconditioned, 75%</value>
+          <display_name>Basement, Unconditioned, 75%</display_name>
         </choice>
         <choice>
-          <value>crawlspace - vented</value>
-          <display_name>crawlspace - vented</display_name>
+          <value>Basement, Unconditioned, 50%</value>
+          <display_name>Basement, Unconditioned, 50%</display_name>
         </choice>
         <choice>
-          <value>crawlspace - conditioned</value>
-          <display_name>crawlspace - conditioned</display_name>
+          <value>Basement, Conditioned, 100%</value>
+          <display_name>Basement, Conditioned, 100%</display_name>
         </choice>
         <choice>
-          <value>attic - unvented</value>
-          <display_name>attic - unvented</display_name>
+          <value>Basement, Conditioned, 75%</value>
+          <display_name>Basement, Conditioned, 75%</display_name>
         </choice>
         <choice>
-          <value>attic - vented</value>
-          <display_name>attic - vented</display_name>
+          <value>Basement, Conditioned, 50%</value>
+          <display_name>Basement, Conditioned, 50%</display_name>
         </choice>
         <choice>
-          <value>garage</value>
-          <display_name>garage</display_name>
+          <value>Crawlspace, Unvented, 100%</value>
+          <display_name>Crawlspace, Unvented, 100%</display_name>
         </choice>
         <choice>
-          <value>outside</value>
-          <display_name>outside</display_name>
+          <value>Crawlspace, Unvented, 75%</value>
+          <display_name>Crawlspace, Unvented, 75%</display_name>
         </choice>
         <choice>
-          <value>exterior wall</value>
-          <display_name>exterior wall</display_name>
+          <value>Crawlspace, Unvented, 50%</value>
+          <display_name>Crawlspace, Unvented, 50%</display_name>
         </choice>
         <choice>
-          <value>under slab</value>
-          <display_name>under slab</display_name>
+          <value>Crawlspace, Vented, 100%</value>
+          <display_name>Crawlspace, Vented, 100%</display_name>
         </choice>
         <choice>
-          <value>roof deck</value>
-          <display_name>roof deck</display_name>
+          <value>Crawlspace, Vented, 75%</value>
+          <display_name>Crawlspace, Vented, 75%</display_name>
         </choice>
         <choice>
-          <value>manufactured home belly</value>
-          <display_name>manufactured home belly</display_name>
+          <value>Crawlspace, Vented, 50%</value>
+          <display_name>Crawlspace, Vented, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Crawlspace, Conditioned, 100%</value>
+          <display_name>Crawlspace, Conditioned, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Crawlspace, Conditioned, 75%</value>
+          <display_name>Crawlspace, Conditioned, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Crawlspace, Conditioned, 50%</value>
+          <display_name>Crawlspace, Conditioned, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Unvented, 100%</value>
+          <display_name>Attic, Unvented, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Unvented, 75%</value>
+          <display_name>Attic, Unvented, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Unvented, 50%</value>
+          <display_name>Attic, Unvented, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Vented, 100%</value>
+          <display_name>Attic, Vented, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Vented, 75%</value>
+          <display_name>Attic, Vented, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Attic, Vented, 50%</value>
+          <display_name>Attic, Vented, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Garage, 100%</value>
+          <display_name>Garage, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Garage, 75%</value>
+          <display_name>Garage, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Garage, 50%</value>
+          <display_name>Garage, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Outside, 100%</value>
+          <display_name>Outside, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Outside, 75%</value>
+          <display_name>Outside, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Outside, 50%</value>
+          <display_name>Outside, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Exterior Wall, 100%</value>
+          <display_name>Exterior Wall, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Exterior Wall, 75%</value>
+          <display_name>Exterior Wall, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Exterior Wall, 50%</value>
+          <display_name>Exterior Wall, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 100%</value>
+          <display_name>Under Slab, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 75%</value>
+          <display_name>Under Slab, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Under Slab, 50%</value>
+          <display_name>Under Slab, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Roof Deck, 100%</value>
+          <display_name>Roof Deck, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Roof Deck, 75%</value>
+          <display_name>Roof Deck, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Roof Deck, 50%</value>
+          <display_name>Roof Deck, 50%</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home Belly, 100%</value>
+          <display_name>Manufactured Home Belly, 100%</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home Belly, 75%</value>
+          <display_name>Manufactured Home Belly, 75%</display_name>
+        </choice>
+        <choice>
+          <value>Manufactured Home Belly, 50%</value>
+          <display_name>Manufactured Home Belly, 50%</display_name>
         </choice>
       </choices>
     </argument>
@@ -5882,74 +6450,55 @@
     <argument>
       <name>dhw_water_heater_location</name>
       <display_name>DHW: Water Heater Location</display_name>
-      <description>The location of water heater. If not provided, defaults based on the foundation/garage type.</description>
+      <description>The location of the water heater. Defaults based on the foundation/garage type.</description>
       <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>Default</default_value>
       <choices>
         <choice>
-          <value>conditioned space</value>
-          <display_name>conditioned space</display_name>
+          <value>Default</value>
+          <display_name>Default</display_name>
         </choice>
         <choice>
-          <value>basement - conditioned</value>
-          <display_name>basement - conditioned</display_name>
+          <value>Conditioned Space</value>
+          <display_name>Conditioned Space</display_name>
         </choice>
         <choice>
-          <value>basement - unconditioned</value>
-          <display_name>basement - unconditioned</display_name>
+          <value>Basement, Unconditioned</value>
+          <display_name>Basement, Unconditioned</display_name>
         </choice>
         <choice>
-          <value>garage</value>
-          <display_name>garage</display_name>
+          <value>Basement, Conditioned</value>
+          <display_name>Basement, Conditioned</display_name>
         </choice>
         <choice>
-          <value>attic</value>
-          <display_name>attic</display_name>
+          <value>Garage</value>
+          <display_name>Garage</display_name>
         </choice>
         <choice>
-          <value>attic - vented</value>
-          <display_name>attic - vented</display_name>
+          <value>Crawlspace, Vented</value>
+          <display_name>Crawlspace, Vented</display_name>
         </choice>
         <choice>
-          <value>attic - unvented</value>
-          <display_name>attic - unvented</display_name>
+          <value>Crawlspace, Unvented</value>
+          <display_name>Crawlspace, Unvented</display_name>
         </choice>
         <choice>
-          <value>crawlspace</value>
-          <display_name>crawlspace</display_name>
+          <value>Crawlspace, Conditioned</value>
+          <display_name>Crawlspace, Conditioned</display_name>
         </choice>
         <choice>
-          <value>crawlspace - vented</value>
-          <display_name>crawlspace - vented</display_name>
+          <value>Attic, Vented</value>
+          <display_name>Attic, Vented</display_name>
         </choice>
         <choice>
-          <value>crawlspace - unvented</value>
-          <display_name>crawlspace - unvented</display_name>
+          <value>Attic, Unvented</value>
+          <display_name>Attic, Unvented</display_name>
         </choice>
         <choice>
-          <value>crawlspace - conditioned</value>
-          <display_name>crawlspace - conditioned</display_name>
-        </choice>
-        <choice>
-          <value>other exterior</value>
-          <display_name>other exterior</display_name>
-        </choice>
-        <choice>
-          <value>other housing unit</value>
-          <display_name>other housing unit</display_name>
-        </choice>
-        <choice>
-          <value>other heated space</value>
-          <display_name>other heated space</display_name>
-        </choice>
-        <choice>
-          <value>other multifamily buffer space</value>
-          <display_name>other multifamily buffer space</display_name>
-        </choice>
-        <choice>
-          <value>other non-freezing space</value>
-          <display_name>other non-freezing space</display_name>
+          <value>Outside</value>
+          <display_name>Outside</display_name>
         </choice>
       </choices>
     </argument>
@@ -9767,7 +10316,7 @@
       </choices>
     </argument>
     <argument>
-      <name>schedules_filepaths</name>
+      <name>schedules_paths</name>
       <display_name>Schedules: CSV File Paths</display_name>
       <description>Absolute/relative paths of csv files containing user-specified detailed schedules, if desired. Use a comma-separated list for multiple files.</description>
       <type>String</type>
@@ -10147,7 +10696,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>418E7A4A</checksum>
+      <checksum>75C13C2C</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -10164,7 +10713,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>733C31D4</checksum>
+      <checksum>F854EDCC</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -10176,7 +10725,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7D555252</checksum>
+      <checksum>B8B18FC4</checksum>
     </file>
     <file>
       <filename>options/advanced_feature.tsv</filename>
@@ -10278,7 +10827,7 @@
       <filename>options/dhw_solar_thermal_direction.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F0AB0890</checksum>
+      <checksum>85C6AB50</checksum>
     </file>
     <file>
       <filename>options/dhw_water_heater.tsv</filename>
@@ -10291,6 +10840,12 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>90E8E3E7</checksum>
+    </file>
+    <file>
+      <filename>options/dhw_water_heater_location.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B30BBB78</checksum>
     </file>
     <file>
       <filename>options/electric_vehicle.tsv</filename>
@@ -10473,6 +11028,18 @@
       <checksum>EB417DE7</checksum>
     </file>
     <file>
+      <filename>options/geometry_unit_direction.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8BF099CF</checksum>
+    </file>
+    <file>
+      <filename>options/geometry_unit_type.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>784B641B</checksum>
+    </file>
+    <file>
       <filename>options/hvac_cooling_system.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -10495,6 +11062,18 @@
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
       <checksum>D654CFF9</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_ducts_return_location.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6B403BBE</checksum>
+    </file>
+    <file>
+      <filename>options/hvac_ducts_supply_location.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6B403BBE</checksum>
     </file>
     <file>
       <filename>options/hvac_geothermal_loop.tsv</filename>
@@ -10644,13 +11223,13 @@
       <filename>options/pv_system_2_direction.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>44C19491</checksum>
+      <checksum>19A9FFCB</checksum>
     </file>
     <file>
       <filename>options/pv_system_direction.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>44C19491</checksum>
+      <checksum>19A9FFCB</checksum>
     </file>
     <file>
       <filename>options/utility_bill_scenario.tsv</filename>
@@ -10704,7 +11283,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>FE397006</checksum>
+      <checksum>346FA190</checksum>
     </file>
   </files>
 </measure>

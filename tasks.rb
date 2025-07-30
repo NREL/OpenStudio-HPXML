@@ -63,7 +63,7 @@ def create_hpxmls
     json_input.merge!(json_inputs[hpxml_filename])
     json_input.delete('parent_hpxml')
 
-    File.delete(hpxml_path)
+    File.delete(hpxml_path) if File.exist?(hpxml_path)
 
     measures = {}
     measures['BuildResidentialHPXML'] = [json_input]
@@ -81,14 +81,14 @@ def create_hpxmls
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
       if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
         suffix = "_#{i}" if i > 1
-        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
+        build_residential_hpxml['schedules_paths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'Attic, Vented, Gable' : 'Below Apartment')
       end
 
       # Re-generate stochastic schedule CSV?
       prev_csv_path = nil
-      csv_path = json_input['schedules_filepaths'].to_s.split(',').map(&:strip).find { |fp| fp.include? stochastic_sched_basename }
+      csv_path = json_input['schedules_paths'].to_s.split(',').map(&:strip).find { |fp| fp.include? stochastic_sched_basename }
       if (not csv_path.nil?) && !schedule_skip_list.include?(File.basename(hpxml_path))
         sch_args = { 'hpxml_path' => hpxml_path,
                      'output_csv_path' => csv_path,
@@ -525,6 +525,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served -= 400 * 2
       hpxml_bldg.building_construction.conditioned_building_volume -= 400 * 2 * 8
       hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
+    elsif ['base-residents-5-5.xml'].include? hpxml_file
+      hpxml_bldg.building_occupancy.number_of_residents = 5.5
     end
     if hpxml_file.include? 'base-bldgtype-mf-unit'
       hpxml_bldg.building_construction.unit_height_above_grade = 10

@@ -24,14 +24,14 @@ Absolute/relative path of the HPXML file.
 
 **Simulation Control: Timestep**
 
-Value must be a divisor of 60.
+The timestep for the simulation; defaults to hourly calculations for fastest runtime.
 
 - **Name:** ``simulation_control_timestep``
-- **Type:** ``Integer``
-
-- **Units:** ``min``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `60`, `30`, `20`, `15`, `12`, `10`, `6`, `5`, `4`, `3`, `2`, `1`
 
 <br/>
 
@@ -48,7 +48,7 @@ Enter a date range like 'Mar 1 - May 31'. Defaults to the entire year.
 
 **Location: Zip Code**
 
-Zip code of the home address. Either this or the EnergyPlus Weather (EPW) Filepath input below must be provided.
+Zip code of the home address. Either this or the EnergyPlus Weather (EPW) File Path input below must be provided.
 
 - **Name:** ``location_zip_code``
 - **Type:** ``String``
@@ -57,11 +57,11 @@ Zip code of the home address. Either this or the EnergyPlus Weather (EPW) Filepa
 
 <br/>
 
-**Location: EnergyPlus Weather (EPW) Filepath**
+**Location: EnergyPlus Weather (EPW) File Path**
 
 Path to the EPW file. Either this or the Zip Code input above must be provided.
 
-- **Name:** ``location_epw_filepath``
+- **Name:** ``location_epw_path``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -107,20 +107,20 @@ The year the building was built.
 
 **Geometry: Unit Type**
 
-The type of dwelling unit. Use single-family attached for a dwelling unit with 1 or more stories, attached units to one or both sides, and no units above/below. Use apartment unit for a dwelling unit with 1 story, attached units to one, two, or three sides, and possibly units above and/or below.
+The type of dwelling unit and number of stories. Includes conditioned attics and excludes conditioned basements.
 
 - **Name:** ``geometry_unit_type``
 - **Type:** ``Choice``
 
 - **Required:** ``true``
 
-- **Choices:** `single-family detached`, `single-family attached`, `apartment unit`, `manufactured home`
+- **Choices:** `Single-Family Detached, 1 Story`, `Single-Family Detached, 2 Stories`, `Single-Family Detached, 3 Stories`, `Single-Family Detached, 4 Stories`, `Single-Family Attached, 1 Story`, `Single-Family Attached, 2 Stories`, `Single-Family Attached, 3 Stories`, `Single-Family Attached, 4 Stories`, `Apartment Unit, 1 Story`, `Manufactured Home, 1 Story`, `Manufactured Home, 2 Stories`, `Manufactured Home, 3 Stories`, `Manufactured Home, 4 Stories`
 
 <br/>
 
 **Geometry: Unit Attached Walls**
 
-The location of the attached walls if a dwelling unit of type 'single-family attached' or 'apartment unit'.
+For single-family attached and apartment units, the location(s) of the attached walls.
 
 - **Name:** ``geometry_attached_walls``
 - **Type:** ``Choice``
@@ -131,24 +131,11 @@ The location of the attached walls if a dwelling unit of type 'single-family att
 
 <br/>
 
-**Geometry: Unit Number of Floors Above Grade**
-
-The number of floors above grade in the unit. Attic type ConditionedAttic is included. Assumed to be 1 for apartment units.
-
-- **Name:** ``geometry_unit_num_floors_above_grade``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
-
-- **Required:** ``true``
-
-<br/>
-
 **Geometry: Unit Conditioned Floor Area**
 
 The total floor area of the unit's conditioned space (including any conditioned basement/attic floor area).
 
-- **Name:** ``geometry_unit_cfa``
+- **Name:** ``geometry_unit_conditioned_floor_area``
 - **Type:** ``Double``
 
 - **Units:** ``ft2``
@@ -170,16 +157,16 @@ The ratio of front/back wall length to left/right wall length for the unit, excl
 
 <br/>
 
-**Geometry: Unit Orientation**
+**Geometry: Unit Direction**
 
-The unit's orientation is measured clockwise from north (e.g., North=0, East=90, South=180, West=270).
+Direction of the front of the unit.
 
-- **Name:** ``geometry_unit_orientation``
-- **Type:** ``Double``
-
-- **Units:** ``degrees``
+- **Name:** ``geometry_unit_direction``
+- **Type:** ``Choice``
 
 - **Required:** ``true``
+
+- **Choices:** `North`, `Northeast`, `East`, `Southeast`, `South`, `Southwest`, `West`, `Northwest`
 
 <br/>
 
@@ -188,37 +175,37 @@ The unit's orientation is measured clockwise from north (e.g., North=0, East=90,
 The number of bedrooms in the unit.
 
 - **Name:** ``geometry_unit_num_bedrooms``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
+- **Type:** ``Choice``
 
 - **Required:** ``true``
+
+- **Choices:** `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`
 
 <br/>
 
 **Geometry: Unit Number of Bathrooms**
 
-The number of bathrooms in the unit. If not provided, defaults to NumberofBedrooms/2 + 0.5.
+The number of bathrooms in the unit. Defaults to NumberofBedrooms/2 + 0.5.
 
 - **Name:** ``geometry_unit_num_bathrooms``
-- **Type:** ``Integer``
-
-- **Units:** ``#``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `Default`, `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`
 
 <br/>
 
 **Geometry: Unit Number of Occupants**
 
-The number of occupants in the unit. If not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on Number of Bedrooms and Conditioned Floor Area per ANSI/RESNET/ICC 301. If provided, an *operational* calculation is instead performed in which the end use defaults to reflect real-world data (where possible).
+The number of occupants in the unit. Defaults to an *asset* calculation assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on Number of Bedrooms and Conditioned Floor Area. If provided, an *operational* calculation is instead performed in which the end use defaults reflect real-world data (where possible).
 
 - **Name:** ``geometry_unit_num_occupants``
-- **Type:** ``Double``
-
-- **Units:** ``#``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `Default`, `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`
 
 <br/>
 
@@ -227,11 +214,11 @@ The number of occupants in the unit. If not provided, an *asset* calculation is 
 Average distance from the floor to the ceiling.
 
 - **Name:** ``geometry_average_ceiling_height``
-- **Type:** ``Double``
+- **Type:** ``Choice``
 
-- **Units:** ``ft``
+- **Required:** ``false``
 
-- **Required:** ``true``
+- **Choices:** `6.0`, `6.5`, `7.0`, `7.5`, `8.0`, `8.5`, `9.0`, `9.5`, `10.0`, `10.5`, `11.0`, `11.5`, `12.0`, `12.5`, `13.0`, `13.5`, `14.0`, `14.5`, `15.0`
 
 <br/>
 
@@ -281,9 +268,9 @@ The roof pitch of the attic. Ignored if the building has a flat roof.
 - **Name:** ``geometry_roof_pitch``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
-- **Choices:** `1:12`, `2:12`, `3:12`, `4:12`, `5:12`, `6:12`, `7:12`, `8:12`, `9:12`, `10:12`, `11:12`, `12:12`
+- **Choices:** `1:12`, `2:12`, `3:12`, `4:12`, `5:12`, `6:12`, `7:12`, `8:12`, `9:12`, `10:12`, `11:12`, `12:12`, `13:12`, `14:12`, `15:12`, `16:12`
 
 <br/>
 
@@ -320,7 +307,7 @@ The amount of window area on the unit's front/back/left/right facades. Use a com
 - **Name:** ``geometry_window_areas_or_wwrs``
 - **Type:** ``String``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -344,7 +331,7 @@ The area of the opaque door(s). Any door glazing (e.g., sliding glass doors) sho
 
 - **Units:** ``ft2``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -988,27 +975,27 @@ The leakage to outside and insulation level of the ducts.
 
 **HVAC Ducts: Supply Location**
 
-The primary location of the supply ducts. If not provided, defaults based on the foundation/attic/garage type.
+The primary location of the supply ducts. The remainder of the supply ducts are assumed to be in conditioned space. Defaults based on the foundation/attic/garage type.
 
 - **Name:** ``hvac_ducts_supply_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `crawlspace - unvented`, `crawlspace - vented`, `crawlspace - conditioned`, `attic - unvented`, `attic - vented`, `garage`, `outside`, `exterior wall`, `under slab`, `roof deck`, `manufactured home belly`
+- **Choices:** `Default`, `Conditioned Space, 100%`, `Basement, Unconditioned, 100%`, `Basement, Unconditioned, 75%`, `Basement, Unconditioned, 50%`, `Basement, Conditioned, 100%`, `Basement, Conditioned, 75%`, `Basement, Conditioned, 50%`, `Crawlspace, Unvented, 100%`, `Crawlspace, Unvented, 75%`, `Crawlspace, Unvented, 50%`, `Crawlspace, Vented, 100%`, `Crawlspace, Vented, 75%`, `Crawlspace, Vented, 50%`, `Crawlspace, Conditioned, 100%`, `Crawlspace, Conditioned, 75%`, `Crawlspace, Conditioned, 50%`, `Attic, Unvented, 100%`, `Attic, Unvented, 75%`, `Attic, Unvented, 50%`, `Attic, Vented, 100%`, `Attic, Vented, 75%`, `Attic, Vented, 50%`, `Garage, 100%`, `Garage, 75%`, `Garage, 50%`, `Outside, 100%`, `Outside, 75%`, `Outside, 50%`, `Exterior Wall, 100%`, `Exterior Wall, 75%`, `Exterior Wall, 50%`, `Under Slab, 100%`, `Under Slab, 75%`, `Under Slab, 50%`, `Roof Deck, 100%`, `Roof Deck, 75%`, `Roof Deck, 50%`, `Manufactured Home Belly, 100%`, `Manufactured Home Belly, 75%`, `Manufactured Home Belly, 50%`
 
 <br/>
 
 **HVAC Ducts: Return Location**
 
-The primary location of the return ducts. If not provided, defaults based on the foundation/attic/garage type.
+The primary location of the return ducts. The remainder of the return ducts are assumed to be in conditioned space. Defaults based on the foundation/attic/garage type.
 
 - **Name:** ``hvac_ducts_return_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `crawlspace - unvented`, `crawlspace - vented`, `crawlspace - conditioned`, `attic - unvented`, `attic - vented`, `garage`, `outside`, `exterior wall`, `under slab`, `roof deck`, `manufactured home belly`
+- **Choices:** `Default`, `Conditioned Space, 100%`, `Basement, Unconditioned, 100%`, `Basement, Unconditioned, 75%`, `Basement, Unconditioned, 50%`, `Basement, Conditioned, 100%`, `Basement, Conditioned, 75%`, `Basement, Conditioned, 50%`, `Crawlspace, Unvented, 100%`, `Crawlspace, Unvented, 75%`, `Crawlspace, Unvented, 50%`, `Crawlspace, Vented, 100%`, `Crawlspace, Vented, 75%`, `Crawlspace, Vented, 50%`, `Crawlspace, Conditioned, 100%`, `Crawlspace, Conditioned, 75%`, `Crawlspace, Conditioned, 50%`, `Attic, Unvented, 100%`, `Attic, Unvented, 75%`, `Attic, Unvented, 50%`, `Attic, Vented, 100%`, `Attic, Vented, 75%`, `Attic, Vented, 50%`, `Garage, 100%`, `Garage, 75%`, `Garage, 50%`, `Outside, 100%`, `Outside, 75%`, `Outside, 50%`, `Exterior Wall, 100%`, `Exterior Wall, 75%`, `Exterior Wall, 50%`, `Under Slab, 100%`, `Under Slab, 75%`, `Under Slab, 50%`, `Roof Deck, 100%`, `Roof Deck, 75%`, `Roof Deck, 50%`, `Manufactured Home Belly, 100%`, `Manufactured Home Belly, 75%`, `Manufactured Home Belly, 50%`
 
 <br/>
 
@@ -1079,14 +1066,14 @@ The type and efficiency of the water heater.
 
 **DHW: Water Heater Location**
 
-The location of water heater. If not provided, defaults based on the foundation/garage type.
+The location of the water heater. Defaults based on the foundation/garage type.
 
 - **Name:** ``dhw_water_heater_location``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `conditioned space`, `basement - conditioned`, `basement - unconditioned`, `garage`, `attic`, `attic - vented`, `attic - unvented`, `crawlspace`, `crawlspace - vented`, `crawlspace - unvented`, `crawlspace - conditioned`, `other exterior`, `other housing unit`, `other heated space`, `other multifamily buffer space`, `other non-freezing space`
+- **Choices:** `Default`, `Conditioned Space`, `Basement, Unconditioned`, `Basement, Conditioned`, `Garage`, `Crawlspace, Vented`, `Crawlspace, Unvented`, `Crawlspace, Conditioned`, `Attic, Vented`, `Attic, Unvented`, `Outside`
 
 <br/>
 
@@ -1534,7 +1521,7 @@ The type of permanent spa (pump & heater).
 
 Absolute/relative paths of csv files containing user-specified detailed schedules, if desired. Use a comma-separated list for multiple files.
 
-- **Name:** ``schedules_filepaths``
+- **Name:** ``schedules_paths``
 - **Type:** ``String``
 
 - **Required:** ``false``

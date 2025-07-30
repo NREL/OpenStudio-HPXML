@@ -6,9 +6,9 @@ module Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param geometry_unit_cfa [Double] conditioned floor area (ft2)
+  # @param geometry_unit_conditioned_floor_area [Double] conditioned floor area (ft2)
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
-  # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
+  # @param geometry_unit_type_number_of_stories [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
   # @param geometry_garage_type_width [Double] width of the garage (ft)
   # @param geometry_garage_type_depth [Double] depth of the garage (ft)
@@ -22,9 +22,9 @@ module Geometry
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
   # @return [Boolean] true if model is successfully updated with a single-family detached unit
   def self.create_single_family_detached(runner, model,
-                                         geometry_unit_cfa:,
+                                         geometry_unit_conditioned_floor_area:,
                                          geometry_average_ceiling_height:,
-                                         geometry_unit_num_floors_above_grade:,
+                                         geometry_unit_type_number_of_stories:,
                                          geometry_unit_aspect_ratio:,
                                          geometry_garage_type_width:,
                                          geometry_garage_type_depth:,
@@ -37,9 +37,9 @@ module Geometry
                                          geometry_attic_type_roof_type:,
                                          geometry_roof_pitch:,
                                          **)
-    cfa = geometry_unit_cfa
+    cfa = geometry_unit_conditioned_floor_area
     average_ceiling_height = geometry_average_ceiling_height
-    num_floors = geometry_unit_num_floors_above_grade
+    num_floors = geometry_unit_type_number_of_stories
     aspect_ratio = geometry_unit_aspect_ratio
     garage_width = geometry_garage_type_width
     garage_depth = geometry_garage_type_depth
@@ -654,9 +654,9 @@ module Geometry
   # Create a 3D representation of a single-family attached home using the following arguments.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param geometry_unit_cfa [Double] conditioned floor area (ft2)
+  # @param geometry_unit_conditioned_floor_area [Double] conditioned floor area (ft2)
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
-  # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
+  # @param geometry_unit_type_number_of_stories [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
   # @param geometry_foundation_type_type [String] foundation type of the building
   # @param geometry_foundation_type_height [Double] height of the foundation (ft)
@@ -670,9 +670,9 @@ module Geometry
   # @param geometry_attached_walls_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
   # @return [Boolean] true if model is successfully updated with a single-family attached unit
   def self.create_single_family_attached(model,
-                                         geometry_unit_cfa:,
+                                         geometry_unit_conditioned_floor_area:,
                                          geometry_average_ceiling_height:,
-                                         geometry_unit_num_floors_above_grade:,
+                                         geometry_unit_type_number_of_stories:,
                                          geometry_unit_aspect_ratio:,
                                          geometry_foundation_type_type:,
                                          geometry_foundation_type_height:,
@@ -686,9 +686,9 @@ module Geometry
                                          geometry_attached_walls_back_wall_is_adiabatic:,
                                          **)
 
-    cfa = geometry_unit_cfa
+    cfa = geometry_unit_conditioned_floor_area
     average_ceiling_height = geometry_average_ceiling_height
-    num_floors = geometry_unit_num_floors_above_grade
+    num_floors = geometry_unit_type_number_of_stories
     aspect_ratio = geometry_unit_aspect_ratio
     foundation_type = geometry_foundation_type_type
     foundation_height = geometry_foundation_type_height
@@ -956,9 +956,9 @@ module Geometry
   # Create a 3D representation of an apartment (dwelling unit in a multifamily building) home using the following arguments.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param geometry_unit_cfa [Double] conditioned floor area (ft2)
+  # @param geometry_unit_conditioned_floor_area [Double] conditioned floor area (ft2)
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
-  # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
+  # @param geometry_unit_type_number_of_stories [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
   # @param geometry_foundation_type_type [String] foundation type of the building
   # @param geometry_foundation_type_height [Double] height of the foundation (ft)
@@ -972,9 +972,9 @@ module Geometry
   # @param geometry_attached_walls_back_wall_is_adiabatic [Boolean] presence of an adiabatic back wall
   # @return [Boolean] true if model is successfully updated with an apartment unit
   def self.create_apartment(model,
-                            geometry_unit_cfa:,
+                            geometry_unit_conditioned_floor_area:,
                             geometry_average_ceiling_height:,
-                            geometry_unit_num_floors_above_grade:,
+                            geometry_unit_type_number_of_stories:,
                             geometry_unit_aspect_ratio:,
                             geometry_foundation_type_type:,
                             geometry_foundation_type_height:,
@@ -988,9 +988,9 @@ module Geometry
                             geometry_attached_walls_back_wall_is_adiabatic:,
                             **)
 
-    cfa = geometry_unit_cfa
+    cfa = geometry_unit_conditioned_floor_area
     average_ceiling_height = geometry_average_ceiling_height
-    num_floors = geometry_unit_num_floors_above_grade
+    num_floors = geometry_unit_type_number_of_stories
     aspect_ratio = geometry_unit_aspect_ratio
     foundation_type = geometry_foundation_type_type
     foundation_height = geometry_foundation_type_height
@@ -1853,16 +1853,15 @@ module Geometry
 
   # Get the absolute tilt based on tilt and roof pitch inputs.
   #
-  # @param tilt_str [String] tilt in degrees or RoofPitch, RoofPitch+20, etc.
+  # @param tilt [Double] tilt in degrees.
   # @param roof_pitch [Double] roof pitch in vertical rise inches for every 12 inches of horizontal run
   # @return [Double] absolute tilt
-  def self.get_absolute_tilt(tilt_str:, roof_pitch:)
-    tilt_str = tilt_str.downcase
-    if tilt_str.start_with? 'roofpitch'
-      roof_angle = (Math.atan(roof_pitch / 12.0) * 180.0 / Math::PI).round(2)
-      return Float(eval(tilt_str.gsub('roofpitch', roof_angle.to_s)))
+  def self.get_absolute_tilt(tilt:, roof_pitch:)
+    if tilt.nil?
+      # Roof pitch
+      return (Math.atan(roof_pitch / 12.0) * 180.0 / Math::PI).round(2)
     else
-      return Float(tilt_str)
+      return tilt
     end
   end
 
