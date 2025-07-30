@@ -641,7 +641,7 @@ The fuel type of the heating system. Ignored for ElectricResistance.
 - **Name:** ``hvac_heating_system_fuel``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`, `coal`
 
@@ -810,7 +810,7 @@ The type and efficiency of the heat pump backup. Use 'None' if there is no backu
 - **Name:** ``hvac_heat_pump_backup``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `None`, `Integrated, Electricity, 100% Efficiency`, `Integrated, Natural Gas, 60% AFUE`, `Integrated, Natural Gas, 76% AFUE`, `Integrated, Natural Gas, 80% AFUE`, `Integrated, Natural Gas, 92.5% AFUE`, `Integrated, Natural Gas, 95% AFUE`, `Integrated, Fuel Oil, 60% AFUE`, `Integrated, Fuel Oil, 76% AFUE`, `Integrated, Fuel Oil, 80% AFUE`, `Integrated, Fuel Oil, 92.5% AFUE`, `Integrated, Fuel Oil, 95% AFUE`, `Integrated, Propane, 60% AFUE`, `Integrated, Propane, 76% AFUE`, `Integrated, Propane, 80% AFUE`, `Integrated, Propane, 92.5% AFUE`, `Integrated, Propane, 95% AFUE`, `Separate Heating System`
 
@@ -862,7 +862,7 @@ The fuel type of the second heating system. Ignored for ElectricResistance.
 - **Name:** ``hvac_heating_system_2_fuel``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `electricity`, `natural gas`, `fuel oil`, `propane`, `wood`, `wood pellets`, `coal`
 
@@ -1381,7 +1381,7 @@ The type and usage of interior, exterior, and garage lighting.
 - **Name:** ``lighting``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `None`, `100% Incandescent, 50% Usage`, `100% Incandescent, 75% Usage`, `100% Incandescent, 100% Usage`, `100% Incandescent, 150% Usage`, `100% Incandescent, 200% Usage`, `25% LED, 50% Usage`, `25% LED, 75% Usage`, `25% LED, 100% Usage`, `25% LED, 150% Usage`, `25% LED, 200% Usage`, `50% LED, 50% Usage`, `50% LED, 75% Usage`, `50% LED, 100% Usage`, `50% LED, 150% Usage`, `50% LED, 200% Usage`, `75% LED, 50% Usage`, `75% LED, 75% Usage`, `75% LED, 100% Usage`, `75% LED, 150% Usage`, `75% LED, 200% Usage`, `100% LED, 50% Usage`, `100% LED, 75% Usage`, `100% LED, 100% Usage`, `100% LED, 150% Usage`, `100% LED, 200% Usage`, `25% CFL, 50% Usage`, `25% CFL, 75% Usage`, `25% CFL, 100% Usage`, `25% CFL, 150% Usage`, `25% CFL, 200% Usage`, `50% CFL, 50% Usage`, `50% CFL, 75% Usage`, `50% CFL, 100% Usage`, `50% CFL, 150% Usage`, `50% CFL, 200% Usage`, `75% CFL, 50% Usage`, `75% CFL, 75% Usage`, `75% CFL, 100% Usage`, `75% CFL, 150% Usage`, `75% CFL, 200% Usage`, `100% CFL, 50% Usage`, `100% CFL, 75% Usage`, `100% CFL, 100% Usage`, `100% CFL, 150% Usage`, `100% CFL, 200% Usage`, `Detailed Example: 10% CFL`, `Detailed Example: 40% CFL, 10% LFL, 25% LED`
 
