@@ -39,7 +39,7 @@ def create_hpxmls
 
   json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
     # Uncomment following line to debug single file
-    # next unless hpxml_filename.include? 'base-bldgtype-mf-whole-building.xml'
+    # next unless hpxml_filename.include? 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
 
     puts "[#{hpxml_i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)

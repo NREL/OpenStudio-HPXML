@@ -388,7 +388,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Central Furnace, 78% AFUE')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_fuel', heating_system_fuel_choices, true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_fuel', heating_system_fuel_choices, false)
     arg.setDisplayName('HVAC: Heating System Fuel Type')
     arg.setDescription("The fuel type of the heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
@@ -400,11 +400,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_heating_system_fraction_heat_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_heating_load_served', choices[:hvac_heating_system_heating_load_served], false)
     arg.setDisplayName('HVAC: Heating System Fraction Heat Load Served')
-    arg.setDescription('The heating load served by the heating system.')
-    arg.setUnits('Frac')
-    arg.setDefaultValue(1)
+    arg.setDescription('The fraction of the heating load served by the heating system.')
+    arg.setDefaultValue('100%')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system', choices[:hvac_cooling_system], true)
@@ -419,11 +418,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_cooling_system_fraction_cool_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system_cooling_load_served', choices[:hvac_cooling_system_cooling_load_served], false)
     arg.setDisplayName('HVAC: Cooling System Fraction Cool Load Served')
-    arg.setDescription('The cooling load served by the cooling system.')
-    arg.setUnits('Frac')
-    arg.setDefaultValue(1)
+    arg.setDescription('The fraction of the cooling load served by the cooling system.')
+    arg.setDefaultValue('100%')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system_integrated_heating_capacity', choices[:hvac_cooling_system_integrated_heating_capacity], false)
@@ -432,11 +430,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_cooling_system_integrated_heating_fraction_heat_load_served', false)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system_integrated_heating_load_served', choices[:hvac_cooling_system_integrated_heating_load_served], false)
     arg.setDisplayName('HVAC: Cooling System Integrated Heating Fraction Heat Load Served')
-    arg.setDescription("The heating load served by the cooling system's integrated heating system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner} systems with integrated heating.")
-    arg.setUnits('Frac')
-    arg.setDefaultValue(0)
+    arg.setDescription("The fraction of the heating load served by the cooling system's integrated heating system.")
+    arg.setDefaultValue('100%')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump', choices[:hvac_heat_pump], true)
@@ -451,18 +448,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_heat_pump_fraction_heat_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_heating_load_served', choices[:hvac_heat_pump_heating_load_served], false)
     arg.setDisplayName('HVAC: Heat Pump Fraction Heat Load Served')
-    arg.setDescription('The heating load served by the heat pump.')
-    arg.setUnits('Frac')
-    arg.setDefaultValue(1)
+    arg.setDescription('The fraction of the heating load served by the heat pump.')
+    arg.setDefaultValue('100%')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_heat_pump_fraction_cool_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_cooling_load_served', choices[:hvac_heat_pump_cooling_load_served], false)
     arg.setDisplayName('HVAC: Heat Pump Fraction Cool Load Served')
-    arg.setDescription('The cooling load served by the heat pump.')
-    arg.setUnits('Frac')
-    arg.setDefaultValue(1)
+    arg.setDescription('The fraction of the cooling load served by the heat pump.')
+    arg.setDefaultValue('100%')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_temperatures', choices[:hvac_heat_pump_temperatures], false)
@@ -471,7 +466,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Default')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_backup', choices[:hvac_heat_pump_backup], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump_backup', choices[:hvac_heat_pump_backup], false)
     arg.setDisplayName('HVAC: Heat Pump Backup Type')
     arg.setDescription("The type and efficiency of the heat pump backup. Use 'None' if there is no backup heating. If Backup Type is Separate Heating System, Heating System 2 is used to specify the backup.")
     arg.setDefaultValue('Integrated, Electricity, 100% Efficiency')
@@ -495,7 +490,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_2_fuel', heating_system_fuel_choices, true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_2_fuel', heating_system_fuel_choices, false)
     arg.setDisplayName('HVAC: Heating System 2 Fuel Type')
     arg.setDescription("The fuel type of the second heating system. Ignored for #{HPXML::HVACTypeElectricResistance}.")
     arg.setDefaultValue(HPXML::FuelTypeElectricity)
@@ -507,11 +502,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Autosize')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('hvac_heating_system_2_fraction_heat_load_served', true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heating_system_2_heating_load_served', choices[:hvac_heating_system_2_heating_load_served], false)
     arg.setDisplayName('HVAC: Heating System 2 Fraction Heat Load Served')
-    arg.setDescription('The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.')
-    arg.setUnits('Frac')
-    arg.setDefaultValue(0.25)
+    arg.setDescription('The fraction of the heating load served by the second heating system.')
+    arg.setDefaultValue('25%')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_heating_weekday_setpoint', false)
@@ -740,14 +734,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('None')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('appliance_dehumidifier_rh_setpoint', false)
-    arg.setDisplayName('Appliances: Dehumidifier Relative Humidity Setpoint')
-    arg.setDescription("The dehumidifier's relative humidity setpoint.")
-    arg.setUnits('Frac')
-    arg.setDefaultValue(0.5)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('appliance_dehumidifier_setpoint', choices[:appliance_dehumidifier_setpoint], false)
+    arg.setDisplayName('Appliances: Dehumidifier Setpoint')
+    arg.setDescription("The dehumidifier's relative humidity (RH) setpoint.")
+    arg.setDefaultValue('50% RH')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('lighting', choices[:lighting], true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('lighting', choices[:lighting], false)
     arg.setDisplayName('Lighting')
     arg.setDescription('The type and usage of interior, exterior, and garage lighting.')
     arg.setDefaultValue('50% LED, 100% Usage')
@@ -1010,10 +1003,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def argument_errors(args)
     errors = []
 
-    error = (args[:hvac_heating_system] != 'None') && (args[:hvac_heat_pump] != 'None') && (args[:hvac_heating_system_fraction_heat_load_served] > 0) && (args[:hvac_heat_pump_fraction_heat_load_served] > 0)
+    error = (args[:hvac_heating_system] != 'None') && (args[:hvac_heat_pump] != 'None') && (args[:hvac_heating_system_heating_load_served_fraction] > 0) && (args[:hvac_heat_pump_heating_load_served_fraction] > 0)
     errors << 'Multiple central heating systems are not currently supported.' if error
 
-    error = (args[:hvac_cooling_system] != 'None') && (args[:hvac_heat_pump] != 'None') && (args[:hvac_cooling_system_fraction_cool_load_served] > 0) && (args[:hvac_heat_pump_fraction_cool_load_served] > 0)
+    error = (args[:hvac_cooling_system] != 'None') && (args[:hvac_heat_pump] != 'None') && (args[:hvac_cooling_system_cooling_load_served_fraction] > 0) && (args[:hvac_heat_pump_cooling_load_served_fraction] > 0)
     errors << 'Multiple central cooling systems are not currently supported.' if error
 
     error = ![HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment].include?(args[:geometry_foundation_type_type]) && (args[:geometry_foundation_type_height] == 0)
@@ -2417,7 +2410,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    heating_capacity: args[:hvac_heating_system_capacity_capacity],
                                    heating_autosizing_factor: args[:hvac_heating_system_capacity_autosizing_factor],
                                    heating_autosizing_limit: args[:hvac_heating_system_capacity_autosizing_limit],
-                                   fraction_heat_load_served: args[:hvac_heating_system_fraction_heat_load_served],
+                                   fraction_heat_load_served: args[:hvac_heating_system_heating_load_served_fraction],
                                    heating_efficiency_afue: heating_efficiency_afue,
                                    heating_efficiency_percent: heating_efficiency_percent,
                                    pilot_light: pilot_light,
@@ -2456,9 +2449,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       cooling_system_crankcase_heater_watts = args[:hvac_cooling_system_crankcase_heater_watts]
     end
 
-    if [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(cooling_system_type) && args[:hvac_cooling_system_integrated_heating_fraction_heat_load_served].to_f > 0
+    if [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(cooling_system_type) && (not args[:hvac_cooling_system_integrated_heating_system_fuel].nil?)
       integrated_heating_system_fuel = args[:hvac_cooling_system_integrated_heating_system_fuel]
-      integrated_heating_system_fraction_heat_load_served = args[:hvac_cooling_system_integrated_heating_fraction_heat_load_served]
+      integrated_heating_system_fraction_heat_load_served = args[:hvac_cooling_system_integrated_heating_load_served_fraction]
       integrated_heating_system_capacity = args[:hvac_cooling_system_integrated_heating_capacity_capacity]
       integrated_heating_system_efficiency_percent = args[:hvac_cooling_system_integrated_heating_system_efficiency]
     end
@@ -2469,7 +2462,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    cooling_capacity: args[:hvac_cooling_system_capacity_capacity],
                                    cooling_autosizing_factor: args[:hvac_cooling_system_capacity_autosizing_factor],
                                    cooling_autosizing_limit: args[:hvac_cooling_system_capacity_autosizing_limit],
-                                   fraction_cool_load_served: args[:hvac_cooling_system_fraction_cool_load_served],
+                                   fraction_cool_load_served: args[:hvac_cooling_system_cooling_load_served_fraction],
                                    compressor_type: compressor_type,
                                    cooling_efficiency_seer: cooling_efficiency_seer,
                                    cooling_efficiency_seer2: cooling_efficiency_seer2,
@@ -2617,8 +2610,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               cooling_capacity: args[:hvac_heat_pump_capacity_capacity],
                               cooling_autosizing_factor: args[:hvac_heat_pump_capacity_autosizing_factor],
                               cooling_autosizing_limit: args[:hvac_heat_pump_capacity_autosizing_limit],
-                              fraction_heat_load_served: args[:hvac_heat_pump_fraction_heat_load_served],
-                              fraction_cool_load_served: args[:hvac_heat_pump_fraction_cool_load_served],
+                              fraction_heat_load_served: args[:hvac_heat_pump_heating_load_served_fraction],
+                              fraction_cool_load_served: args[:hvac_heat_pump_cooling_load_served_fraction],
                               backup_type: backup_type,
                               backup_system_idref: backup_system_idref,
                               backup_heating_fuel: backup_heating_fuel,
@@ -2636,15 +2629,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               heating_efficiency_cop: heating_efficiency_cop,
                               cooling_efficiency_eer: cooling_efficiency_eer,
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
-                              primary_heating_system: args[:hvac_heat_pump_fraction_heat_load_served] > 0,
-                              primary_cooling_system: args[:hvac_heat_pump_fraction_cool_load_served] > 0)
+                              primary_heating_system: args[:hvac_heat_pump_heating_load_served_fraction] > 0,
+                              primary_cooling_system: args[:hvac_heat_pump_cooling_load_served_fraction] > 0)
 
     # Detailed performance data
     if not [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
       return
     end
 
-    if (not args[:hvac_heat_pump_detailed_performance_data_heating_outdoor_temperatures].nil?) && (args[:hvac_heat_pump_fraction_heat_load_served] > 0)
+    if (not args[:hvac_heat_pump_detailed_performance_data_heating_outdoor_temperatures].nil?) && (args[:hvac_heat_pump_heating_load_served_fraction] > 0)
       heating_detailed_performance_data_points = args[:hvac_heat_pump_detailed_performance_data_heating_outdoor_temperatures].to_s.split(',').map(&:strip).zip(
         args[:hvac_heat_pump_detailed_performance_data_heating_min_speed_capacities].to_s.split(',').map(&:strip),
         args[:hvac_heat_pump_detailed_performance_data_heating_nom_speed_capacities].to_s.split(',').map(&:strip),
@@ -2696,7 +2689,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    if (not args[:hvac_heat_pump_detailed_performance_data_cooling_outdoor_temperatures].nil?) && (args[:hvac_heat_pump_fraction_cool_load_served] > 0)
+    if (not args[:hvac_heat_pump_detailed_performance_data_cooling_outdoor_temperatures].nil?) && (args[:hvac_heat_pump_cooling_load_served_fraction] > 0)
       hp_cooling_detailed_performance_data_points = args[:hvac_heat_pump_detailed_performance_data_cooling_outdoor_temperatures].to_s.split(',').map(&:strip).zip(
         args[:hvac_heat_pump_detailed_performance_data_cooling_min_speed_capacities].to_s.split(',').map(&:strip),
         args[:hvac_heat_pump_detailed_performance_data_cooling_nom_speed_capacities].to_s.split(',').map(&:strip),
@@ -2811,7 +2804,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     if not heating_system_is_heatpump_backup
-      fraction_heat_load_served = args[:hvac_heating_system_2_fraction_heat_load_served]
+      fraction_heat_load_served = args[:hvac_heating_system_2_heating_load_served_fraction]
     end
 
     if args[:hvac_heating_system_2_fuel] != HPXML::FuelTypeElectricity
@@ -3559,7 +3552,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                  capacity: args[:appliance_dehumidifier_capacity],
                                  energy_factor: energy_factor,
                                  integrated_energy_factor: integrated_energy_factor,
-                                 rh_setpoint: args[:appliance_dehumidifier_rh_setpoint],
+                                 rh_setpoint: args[:appliance_dehumidifier_setpoint_relative_humidity],
                                  fraction_served: 1.0,
                                  location: HPXML::LocationConditionedSpace)
   end

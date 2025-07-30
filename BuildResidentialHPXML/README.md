@@ -662,14 +662,14 @@ The output capacity of the heating system.
 
 **HVAC: Heating System Fraction Heat Load Served**
 
-The heating load served by the heating system.
+The fraction of the heating load served by the heating system.
 
-- **Name:** ``hvac_heating_system_fraction_heat_load_served``
-- **Type:** ``Double``
+- **Name:** ``hvac_heating_system_heating_load_served``
+- **Type:** ``Choice``
 
-- **Units:** ``Frac``
+- **Required:** ``false``
 
-- **Required:** ``true``
+- **Choices:** `100%`, `95%`, `90%`, `85%`, `80%`, `75%`, `70%`, `65%`, `60%`, `55%`, `50%`, `45%`, `40%`, `35%`, `30%`, `25%`, `20%`, `15%`, `10%`, `5%`, `0%`
 
 <br/>
 
@@ -701,14 +701,14 @@ The output capacity of the cooling system.
 
 **HVAC: Cooling System Fraction Cool Load Served**
 
-The cooling load served by the cooling system.
+The fraction of the cooling load served by the cooling system.
 
-- **Name:** ``hvac_cooling_system_fraction_cool_load_served``
-- **Type:** ``Double``
+- **Name:** ``hvac_cooling_system_cooling_load_served``
+- **Type:** ``Choice``
 
-- **Units:** ``Frac``
+- **Required:** ``false``
 
-- **Required:** ``true``
+- **Choices:** `100%`, `95%`, `90%`, `85%`, `80%`, `75%`, `70%`, `65%`, `60%`, `55%`, `50%`, `45%`, `40%`, `35%`, `30%`, `25%`, `20%`, `15%`, `10%`, `5%`, `0%`
 
 <br/>
 
@@ -727,14 +727,14 @@ The output capacity of the cooling system's integrated heating system. Only used
 
 **HVAC: Cooling System Integrated Heating Fraction Heat Load Served**
 
-The heating load served by the cooling system's integrated heating system. Only used for packaged terminal air conditioner and room air conditioner systems with integrated heating.
+The fraction of the heating load served by the cooling system's integrated heating system.
 
-- **Name:** ``hvac_cooling_system_integrated_heating_fraction_heat_load_served``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
+- **Name:** ``hvac_cooling_system_integrated_heating_load_served``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `100%`, `95%`, `90%`, `85%`, `80%`, `75%`, `70%`, `65%`, `60%`, `55%`, `50%`, `45%`, `40%`, `35%`, `30%`, `25%`, `20%`, `15%`, `10%`, `5%`, `0%`
 
 <br/>
 
@@ -766,27 +766,27 @@ The output capacity of the heat pump.
 
 **HVAC: Heat Pump Fraction Heat Load Served**
 
-The heating load served by the heat pump.
+The fraction of the heating load served by the heat pump.
 
-- **Name:** ``hvac_heat_pump_fraction_heat_load_served``
-- **Type:** ``Double``
+- **Name:** ``hvac_heat_pump_heating_load_served``
+- **Type:** ``Choice``
 
-- **Units:** ``Frac``
+- **Required:** ``false``
 
-- **Required:** ``true``
+- **Choices:** `100%`, `95%`, `90%`, `85%`, `80%`, `75%`, `70%`, `65%`, `60%`, `55%`, `50%`, `45%`, `40%`, `35%`, `30%`, `25%`, `20%`, `15%`, `10%`, `5%`, `0%`
 
 <br/>
 
 **HVAC: Heat Pump Fraction Cool Load Served**
 
-The cooling load served by the heat pump.
+The fraction of the cooling load served by the heat pump.
 
-- **Name:** ``hvac_heat_pump_fraction_cool_load_served``
-- **Type:** ``Double``
+- **Name:** ``hvac_heat_pump_cooling_load_served``
+- **Type:** ``Choice``
 
-- **Units:** ``Frac``
+- **Required:** ``false``
 
-- **Required:** ``true``
+- **Choices:** `100%`, `95%`, `90%`, `85%`, `80%`, `75%`, `70%`, `65%`, `60%`, `55%`, `50%`, `45%`, `40%`, `35%`, `30%`, `25%`, `20%`, `15%`, `10%`, `5%`, `0%`
 
 <br/>
 
@@ -883,14 +883,14 @@ The output capacity of the second heating system.
 
 **HVAC: Heating System 2 Fraction Heat Load Served**
 
-The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.
+The fraction of the heating load served by the second heating system.
 
-- **Name:** ``hvac_heating_system_2_fraction_heat_load_served``
-- **Type:** ``Double``
+- **Name:** ``hvac_heating_system_2_heating_load_served``
+- **Type:** ``Choice``
 
-- **Units:** ``Frac``
+- **Required:** ``false``
 
-- **Required:** ``true``
+- **Choices:** `100%`, `95%`, `90%`, `85%`, `80%`, `75%`, `70%`, `65%`, `60%`, `55%`, `50%`, `45%`, `40%`, `35%`, `30%`, `25%`, `20%`, `15%`, `10%`, `5%`, `0%`
 
 <br/>
 
@@ -1361,16 +1361,16 @@ The type of dehumidifier.
 
 <br/>
 
-**Appliances: Dehumidifier Relative Humidity Setpoint**
+**Appliances: Dehumidifier Setpoint**
 
-The dehumidifier's relative humidity setpoint.
+The dehumidifier's relative humidity (RH) setpoint.
 
-- **Name:** ``appliance_dehumidifier_rh_setpoint``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
+- **Name:** ``appliance_dehumidifier_setpoint``
+- **Type:** ``Choice``
 
 - **Required:** ``false``
+
+- **Choices:** `40% RH`, `45% RH`, `50% RH`, `55% RH`, `60% RH`, `65% RH`
 
 <br/>
 
