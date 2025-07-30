@@ -313,7 +313,7 @@
               <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>9000.0</CoolingCapacity>
-              <FractionCoolLoadServed>0.33</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.35</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
                 <Value>8.5</Value>
