@@ -6100,6 +6100,7 @@ module HPXMLFile
                                                                                       hvac_perf_data_cooling_nom_speed_cops,
                                                                                       hvac_perf_data_cooling_max_speed_cops)
       cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
+        cooling_perf_data_data_point = cooling_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
         outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
         case hvac_perf_data_capacity_type
@@ -6289,6 +6290,7 @@ module HPXMLFile
                                                                                         hvac_perf_data_heating_nom_speed_cops,
                                                                                         hvac_perf_data_heating_max_speed_cops)
         heating_perf_data_data_points.each do |heating_perf_data_data_point|
+          heating_perf_data_data_point = heating_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
           outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = heating_perf_data_data_point
 
           case hvac_perf_data_capacity_type
@@ -6354,6 +6356,7 @@ module HPXMLFile
                                                                                         hvac_perf_data_cooling_nom_speed_cops,
                                                                                         hvac_perf_data_cooling_max_speed_cops)
         cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
+          cooling_perf_data_data_point = cooling_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
           outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
           case hvac_perf_data_capacity_type
