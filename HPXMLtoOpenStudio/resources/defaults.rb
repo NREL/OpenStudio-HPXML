@@ -3988,10 +3988,10 @@ module Defaults
         vehicle.hours_per_week = default_values[:hours_per_week]
         vehicle.hours_per_week_isdefaulted = true
       elsif (not vehicle.hours_per_week.nil?) && vehicle.miles_per_year.nil?
-        vehicle.miles_per_year = vehicle.hours_per_week * miles_to_hrs_per_week
+        vehicle.miles_per_year = (vehicle.hours_per_week * miles_to_hrs_per_week).round
         vehicle.miles_per_year_isdefaulted = true
       elsif (not vehicle.miles_per_year.nil?) && vehicle.hours_per_week.nil?
-        vehicle.hours_per_week = vehicle.miles_per_year / miles_to_hrs_per_week
+        vehicle.hours_per_week = (vehicle.miles_per_year / miles_to_hrs_per_week).round(2)
         vehicle.hours_per_week_isdefaulted = true
       end
       if vehicle.fraction_charged_home.nil?
