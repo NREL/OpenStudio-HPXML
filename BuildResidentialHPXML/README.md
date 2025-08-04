@@ -296,7 +296,7 @@ The presence and geometry of neighboring buildings, for shading purposes.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `Left/Right at 2ft`, `Left/Right at 5ft`, `Left/Right at 10ft`, `Left/Right at 15ft`, `Left/Right at 20ft`, `Left/Right at 25ft`, `Left at 2ft`, `Left at 5ft`, `Left at 10ft`, `Left at 15ft`, `Left at 20ft`, `Left at 25ft`, `Right at 2ft`, `Right at 5ft`, `Right at 10ft`, `Right at 15ft`, `Right at 20ft`, `Right at 25ft`, `Detailed Example: Left/Right at 25ft, Front/Back at 80ft, 12ft Height`
+- **Choices:** `None`, `Left/Right at 2ft`, `Left/Right at 4ft`, `Left/Right at 5ft`, `Left/Right at 7ft`, `Left/Right at 10ft`, `Left/Right at 12ft`, `Left/Right at 15ft`, `Left/Right at 20ft`, `Left/Right at 25ft`, `Left/Right at 27ft`, `Left at 2ft`, `Left at 4ft`, `Left at 5ft`, `Left at 7ft`, `Left at 10ft`, `Left at 12ft`, `Left at 15ft`, `Left at 20ft`, `Left at 25ft`, `Left at 27ft`, `Right at 2ft`, `Right at 4ft`, `Right at 5ft`, `Right at 7ft`, `Right at 10ft`, `Right at 12ft`, `Right at 15ft`, `Right at 20ft`, `Right at 25ft`, `Right at 27ft`, `Detailed Example: Left/Right at 25ft, Front/Back at 80ft, 12ft Height`
 
 <br/>
 
