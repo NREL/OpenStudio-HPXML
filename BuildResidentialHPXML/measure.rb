@@ -6499,10 +6499,20 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_hvac_distribution(hpxml_bldg, args)
+    # FanCoil?
+    fan_coil_distribution_systems = []
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.primary_system
+
+      if args[:heating_system_type].include?('Fan Coil')
+        fan_coil_distribution_systems << heating_system
+      end
+    end
+
     # HydronicDistribution?
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless [heating_system.heating_system_type].include?(HPXML::HVACTypeBoiler)
-      next if args[:heating_system_type].include?('Fan Coil')
+      next if fan_coil_distribution_systems.include? heating_system
 
       hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                         distribution_system_type: HPXML::HVACDistributionTypeHydronic,
@@ -6532,16 +6542,6 @@ module HPXMLFile
         air_distribution_systems << heat_pump
       when HPXML::HVACTypeHeatPumpMiniSplit
         air_distribution_systems << heat_pump if args[:heat_pump_is_ducted]
-      end
-    end
-
-    # FanCoil?
-    fan_coil_distribution_systems = []
-    hpxml_bldg.heating_systems.each do |heating_system|
-      next unless heating_system.primary_system
-
-      if args[:heating_system_type].include?('Fan Coil')
-        fan_coil_distribution_systems << heating_system
       end
     end
 
