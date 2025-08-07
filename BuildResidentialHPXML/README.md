@@ -1372,7 +1372,7 @@ The type of ceiling fans.
 
 - **Required:** ``false``
 
-- **Choices:** `None`, `#Bedrooms+1 Fans, 45 W`, `#Bedrooms+1 Fans, 30 W`, `#Bedrooms+1 Fans, 15 W`, `1 Fan, 45 W`, `1 Fan, 30 W`, `1 Fan, 15 W`, `2 Fans, 45 W`, `2 Fans, 30 W`, `2 Fans, 15 W`, `3 Fans, 45 W`, `3 Fans, 30 W`, `3 Fans, 15 W`, `4 Fans, 45 W`, `4 Fans, 30 W`, `4 Fans, 15 W`, `5 Fans, 45 W`, `5 Fans, 30 W`, `5 Fans, 15 W`, `Detailed Example: 4 Fans, 39 W, 0.5 deg-F Setpoint Offset`, `Detailed Example: 4 Fans, 100 cfm/W, 0.5 deg-F Setpoint Offset`
+- **Choices:** `None`, `#Bedrooms+1 Fans, 45.0 W`, `#Bedrooms+1 Fans, 37.5 W`, `#Bedrooms+1 Fans, 30.0 W`, `#Bedrooms+1 Fans, 22.5 W`, `#Bedrooms+1 Fans, 15.0 W`, `1 Fan, 45.0 W`, `1 Fan, 37.5 W`, `1 Fan, 30.0 W`, `1 Fan, 22.5 W`, `1 Fan, 15.0 W`, `2 Fans, 45.0 W`, `2 Fans, 37.5 W`, `2 Fans, 30.0 W`, `2 Fans, 22.5 W`, `2 Fans, 15.0 W`, `3 Fans, 45.0 W`, `3 Fans, 37.5 W`, `3 Fans, 30.0 W`, `3 Fans, 22.5 W`, `3 Fans, 15.0 W`, `4 Fans, 45.0 W`, `4 Fans, 37.5 W`, `4 Fans, 30.0 W`, `4 Fans, 22.5 W`, `4 Fans, 15.0 W`, `5 Fans, 45.0 W`, `5 Fans, 37.5 W`, `5 Fans, 30.0 W`, `5 Fans, 22.5 W`, `5 Fans, 15.0 W`, `Detailed Example: 4 Fans, 39 W, 0.5 deg-F Setpoint Offset`, `Detailed Example: 4 Fans, 100 cfm/W, 0.5 deg-F Setpoint Offset`
 
 <br/>
 
