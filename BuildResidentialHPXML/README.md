@@ -1099,7 +1099,7 @@ The type and usage of domestic hot water fixtures.
 
 - **Required:** ``false``
 
-- **Choices:** `Standard, 25% Usage`, `Standard, 50% Usage`, `Standard, 75% Usage`, `Standard, 100% Usage`, `Standard, 150% Usage`, `Standard, 200% Usage`, `Standard, 400% Usage`, `Low Flow, 25% Usage`, `Low Flow, 50% Usage`, `Low Flow, 75% Usage`, `Low Flow, 100% Usage`, `Low Flow, 150% Usage`, `Low Flow, 200% Usage`, `Low Flow, 400% Usage`
+- **Choices:** `Standard, 25% Usage`, `Standard, 50% Usage`, `Standard, 75% Usage`, `Standard, 100% Usage`, `Standard, 125% Usage`, `Standard, 150% Usage`, `Standard, 175% Usage`, `Standard, 200% Usage`, `Standard, 400% Usage`, `Low Flow, 25% Usage`, `Low Flow, 50% Usage`, `Low Flow, 75% Usage`, `Low Flow, 100% Usage`, `Low Flow, 125% Usage`, `Low Flow, 150% Usage`, `Low Flow, 175% Usage`, `Low Flow, 200% Usage`, `Low Flow, 400% Usage`
 
 <br/>
 
