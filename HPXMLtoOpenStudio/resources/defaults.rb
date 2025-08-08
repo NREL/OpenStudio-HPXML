@@ -6160,7 +6160,7 @@ module Defaults
       else
         re = 0.252 * ef + 0.608
       end
-      return re
+      return re.round(3)
     end
   end
 
@@ -7290,8 +7290,8 @@ module Defaults
   def self.get_electric_vehicle_values()
     return { battery_type: HPXML::BatteryTypeLithiumIon,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
-             miles_per_year: 10900,
-             hours_per_week: 9.5,
+             miles_per_year: 11000,
+             hours_per_week: 9.6,
              nominal_capacity_kwh: 63,
              nominal_voltage: 50.0,
              fuel_economy_combined: 0.22,
