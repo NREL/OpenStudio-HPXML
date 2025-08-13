@@ -4969,7 +4969,7 @@ module HPXMLFile
                         elevation: args[:site_elevation],
                         latitude: args[:site_latitude],
                         longitude: args[:site_longitude],
-                        dst_enabled: args[:simulation_control_daylight_saving_enabled],
+                        dst_observed: args[:simulation_control_daylight_saving_enabled],
                         dst_begin_month: dst_begin_month,
                         dst_begin_day: dst_begin_day,
                         dst_end_month: dst_end_month,
