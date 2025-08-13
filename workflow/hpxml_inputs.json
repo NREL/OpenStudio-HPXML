@@ -367,7 +367,7 @@
     "geometry_eaves": "None",
     "enclosure_slab": "Detailed Example: Uninsulated, No Carpet",
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
-    "enclosure_rim_joist": "R-13",
+    "enclosure_rim_joist": "Exterior, R-10",
     "enclosure_ceiling": "R-38",
     "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
     "enclosure_roof": "Uninsulated",
