@@ -1617,12 +1617,10 @@ class HPXML < Object
           time_zone = XMLHelper.add_element(building_site, 'TimeZone')
           XMLHelper.add_element(time_zone, 'UTCOffset', @time_zone_utc_offset, :float, @time_zone_utc_offset_isdefaulted) unless @time_zone_utc_offset.nil?
           XMLHelper.add_element(time_zone, 'DSTObserved', @dst_observed, :boolean, @dst_observed_isdefaulted) unless @dst_observed.nil?
-          if @dst_observed
-            XMLHelper.add_extension(time_zone, 'DSTBeginMonth', @dst_begin_month, :integer, @dst_begin_month_isdefaulted) unless @dst_begin_month.nil?
-            XMLHelper.add_extension(time_zone, 'DSTBeginDayOfMonth', @dst_begin_day, :integer, @dst_begin_day_isdefaulted) unless @dst_begin_day.nil?
-            XMLHelper.add_extension(time_zone, 'DSTEndMonth', @dst_end_month, :integer, @dst_end_month_isdefaulted) unless @dst_end_month.nil?
-            XMLHelper.add_extension(time_zone, 'DSTEndDayOfMonth', @dst_end_day, :integer, @dst_end_day_isdefaulted) unless @dst_end_day.nil?
-          end
+          XMLHelper.add_extension(time_zone, 'DSTBeginMonth', @dst_begin_month, :integer, @dst_begin_month_isdefaulted) unless @dst_begin_month.nil?
+          XMLHelper.add_extension(time_zone, 'DSTBeginDayOfMonth', @dst_begin_day, :integer, @dst_begin_day_isdefaulted) unless @dst_begin_day.nil?
+          XMLHelper.add_extension(time_zone, 'DSTEndMonth', @dst_end_month, :integer, @dst_end_month_isdefaulted) unless @dst_end_month.nil?
+          XMLHelper.add_extension(time_zone, 'DSTEndDayOfMonth', @dst_end_day, :integer, @dst_end_day_isdefaulted) unless @dst_end_day.nil?
         end
       end
       project_status = XMLHelper.add_element(building, 'ProjectStatus')
