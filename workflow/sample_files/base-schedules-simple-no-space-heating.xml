@@ -137,7 +137,7 @@
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
-              <AssemblyEffectiveRValue>21.8</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>18.9</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
