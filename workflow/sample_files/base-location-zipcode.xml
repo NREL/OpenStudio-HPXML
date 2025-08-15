@@ -20,18 +20,8 @@
     <Site>
       <SiteID id='SiteID'/>
       <Address>
-        <CityMunicipality>Aurora</CityMunicipality>
-        <StateCode>CO</StateCode>
         <ZipCode>80019</ZipCode>
       </Address>
-      <GeoLocation>
-        <Latitude>39.77</Latitude>
-        <Longitude>-104.73</Longitude>
-      </GeoLocation>
-      <Elevation>5548.0</Elevation>
-      <TimeZone>
-        <UTCOffset>-6.0</UTCOffset>
-      </TimeZone>
     </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
