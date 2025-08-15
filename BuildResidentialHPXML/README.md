@@ -381,7 +381,7 @@ The amount of window area on the unit's front/back/left/right facades. Use a com
 
 **Geometry: Skylight Areas**
 
-The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.
+The amount of skylight area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.
 
 - **Name:** ``geometry_skylight_areas``
 - **Type:** ``String``

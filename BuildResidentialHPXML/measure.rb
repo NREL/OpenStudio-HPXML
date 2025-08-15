@@ -203,7 +203,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('geometry_skylight_areas', false)
     arg.setDisplayName('Geometry: Skylight Areas')
     arg.setUnits('ft2')
-    arg.setDescription("The amount of window area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.")
+    arg.setDescription("The amount of skylight area on the unit's front/back/left/right roofs. Use a comma-separated list like '50, 0, 0, 0'.")
     arg.setDefaultValue('0, 0, 0, 0')
     args << arg
 
