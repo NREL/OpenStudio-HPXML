@@ -1099,7 +1099,7 @@ The fraction of the heating load served by the second heating system.
 
 **HVAC Control: Heating Weekday Setpoint Schedule**
 
-Specify the constant or 24-hour comma-separated weekday heating setpoint schedule. Required unless a detailed CSV schedule is provided.
+Specify the constant or 24-hour comma-separated weekday heating setpoint schedule.
 
 - **Name:** ``hvac_control_heating_weekday_setpoint``
 - **Type:** ``String``
@@ -1107,11 +1107,13 @@ Specify the constant or 24-hour comma-separated weekday heating setpoint schedul
 - **Required:** ``false``
 
 
+- **Default:** `68`
+
 <br/>
 
 **HVAC Control: Heating Weekend Setpoint Schedule**
 
-Specify the constant or 24-hour comma-separated weekend heating setpoint schedule. Required unless a detailed CSV schedule is provided.
+Specify the constant or 24-hour comma-separated weekend heating setpoint schedule.
 
 - **Name:** ``hvac_control_heating_weekend_setpoint``
 - **Type:** ``String``
@@ -1119,11 +1121,13 @@ Specify the constant or 24-hour comma-separated weekend heating setpoint schedul
 - **Required:** ``false``
 
 
+- **Default:** `68`
+
 <br/>
 
 **HVAC Control: Cooling Weekday Setpoint Schedule**
 
-Specify the constant or 24-hour comma-separated weekday cooling setpoint schedule. Required unless a detailed CSV schedule is provided.
+Specify the constant or 24-hour comma-separated weekday cooling setpoint schedule.
 
 - **Name:** ``hvac_control_cooling_weekday_setpoint``
 - **Type:** ``String``
@@ -1131,17 +1135,21 @@ Specify the constant or 24-hour comma-separated weekday cooling setpoint schedul
 - **Required:** ``false``
 
 
+- **Default:** `78`
+
 <br/>
 
 **HVAC Control: Cooling Weekend Setpoint Schedule**
 
-Specify the constant or 24-hour comma-separated weekend cooling setpoint schedule. Required unless a detailed CSV schedule is provided.
+Specify the constant or 24-hour comma-separated weekend cooling setpoint schedule.
 
 - **Name:** ``hvac_control_cooling_weekend_setpoint``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
+
+- **Default:** `78`
 
 <br/>
 

@@ -474,30 +474,30 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_heating_weekday_setpoint', false)
     arg.setDisplayName('HVAC Control: Heating Weekday Setpoint Schedule')
-    arg.setDescription('Specify the constant or 24-hour comma-separated weekday heating setpoint schedule. Required unless a detailed CSV schedule is provided.')
+    arg.setDescription('Specify the constant or 24-hour comma-separated weekday heating setpoint schedule.')
     arg.setUnits('F')
-    arg.setDefaultValue(68)
+    arg.setDefaultValue('68')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_heating_weekend_setpoint', false)
     arg.setDisplayName('HVAC Control: Heating Weekend Setpoint Schedule')
-    arg.setDescription('Specify the constant or 24-hour comma-separated weekend heating setpoint schedule. Required unless a detailed CSV schedule is provided.')
+    arg.setDescription('Specify the constant or 24-hour comma-separated weekend heating setpoint schedule.')
     arg.setUnits('F')
-    arg.setDefaultValue(68)
+    arg.setDefaultValue('68')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_cooling_weekday_setpoint', false)
     arg.setDisplayName('HVAC Control: Cooling Weekday Setpoint Schedule')
-    arg.setDescription('Specify the constant or 24-hour comma-separated weekday cooling setpoint schedule. Required unless a detailed CSV schedule is provided.')
+    arg.setDescription('Specify the constant or 24-hour comma-separated weekday cooling setpoint schedule.')
     arg.setUnits('F')
-    arg.setDefaultValue(78)
+    arg.setDefaultValue('78')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_cooling_weekend_setpoint', false)
     arg.setDisplayName('HVAC Control: Cooling Weekend Setpoint Schedule')
-    arg.setDescription('Specify the constant or 24-hour comma-separated weekend cooling setpoint schedule. Required unless a detailed CSV schedule is provided.')
+    arg.setDescription('Specify the constant or 24-hour comma-separated weekend cooling setpoint schedule.')
     arg.setUnits('F')
-    arg.setDefaultValue(78)
+    arg.setDefaultValue('78')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_control_heating_season_period', false)
@@ -2994,7 +2994,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
 
-      if (not args[:hvac_control_heating_weekday_setpoint].nil?) && (not args[:hvac_control_heating_weekend_setpoint].nil?)
+      if (args[:hvac_control_heating_weekday_setpoint].to_f > 0) && (args[:hvac_control_heating_weekend_setpoint].to_f > 0)
         if args[:hvac_control_heating_weekday_setpoint] == args[:hvac_control_heating_weekend_setpoint] && !args[:hvac_control_heating_weekday_setpoint].include?(',')
           heating_setpoint_temp = Float(args[:hvac_control_heating_weekday_setpoint])
         else
@@ -3023,7 +3023,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # Cooling
     if hpxml_bldg.total_fraction_cool_load_served > 0
 
-      if (not args[:hvac_control_cooling_weekday_setpoint].nil?) && (not args[:hvac_control_cooling_weekend_setpoint].nil?)
+      if (args[:hvac_control_cooling_weekday_setpoint].to_f > 0) && (args[:hvac_control_cooling_weekend_setpoint].to_f > 0)
         if args[:hvac_control_cooling_weekday_setpoint] == args[:hvac_control_cooling_weekend_setpoint] && !args[:hvac_control_cooling_weekday_setpoint].include?(',')
           cooling_setpoint_temp = Float(args[:hvac_control_cooling_weekday_setpoint])
         else

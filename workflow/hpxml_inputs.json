@@ -1732,8 +1732,8 @@
   },
   "sample_files/base-hvac-furnace-gas-only-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
+    "hvac_control_heating_weekday_setpoint": "0",
+    "hvac_control_heating_weekend_setpoint": "0",
     "schedules_paths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-heating-only.csv"
   },
   "sample_files/base-hvac-furnace-gas-plus-air-to-air-heat-pump-cooling.xml": {
@@ -2035,8 +2035,8 @@
   },
   "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "hvac_control_cooling_weekday_setpoint": "0",
+    "hvac_control_cooling_weekend_setpoint": "0",
     "schedules_paths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-cooling-only.csv"
   },
   "sample_files/base-hvac-room-ac-only-research-features.xml": {
@@ -2303,10 +2303,10 @@
     "enclosure_roof_material": null,
     "enclosure_wall_siding": null,
     "enclosure_window_interior_shading": null,
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "hvac_control_heating_weekday_setpoint": "0",
+    "hvac_control_heating_weekend_setpoint": "0",
+    "hvac_control_cooling_weekday_setpoint": "0",
+    "hvac_control_cooling_weekend_setpoint": "0",
     "hvac_ducts_supply_location": "Default",
     "hvac_ducts_return_location": "Default",
     "ventilation_mechanical": "Exhaust Only",
@@ -2527,18 +2527,18 @@
   },
   "sample_files/base-schedules-detailed-all-10-mins.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "hvac_control_heating_weekday_setpoint": "0",
+    "hvac_control_heating_weekend_setpoint": "0",
+    "hvac_control_cooling_weekday_setpoint": "0",
+    "hvac_control_cooling_weekend_setpoint": "0",
     "schedules_paths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-10-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "hvac_control_heating_weekday_setpoint": "0",
+    "hvac_control_heating_weekend_setpoint": "0",
+    "hvac_control_cooling_weekday_setpoint": "0",
+    "hvac_control_cooling_weekend_setpoint": "0",
     "schedules_paths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints-10-mins.csv, ../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic-30-mins.csv"
   },
   "sample_files/base-schedules-detailed-mixed-timesteps-power-outage.xml": {
@@ -2566,10 +2566,10 @@
   },
   "sample_files/base-schedules-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "hvac_control_heating_weekday_setpoint": "0",
+    "hvac_control_heating_weekend_setpoint": "0",
+    "hvac_control_cooling_weekday_setpoint": "0",
+    "hvac_control_cooling_weekend_setpoint": "0",
     "schedules_paths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv"
   },
   "sample_files/base-schedules-detailed-setpoints-daily-schedules.xml": {
