@@ -754,7 +754,7 @@ The amount of air leakage coming from outside. If a qualitative leakiness descri
 
 - **Required:** ``false``
 
-- **Choices:** `Very Tight`, `Tight`, `Average`, `Leaky`, `Very Leaky`, `1 ACH50`, `2 ACH50`, `3 ACH50`, `4 ACH50`, `5 ACH50`, `6 ACH50`, `7 ACH50`, `8 ACH50`, `10 ACH50`, `15 ACH50`, `20 ACH50`, `25 ACH50`, `30 ACH50`, `40 ACH50`, `50 ACH50`, `0.2 nACH`, `0.3 nACH`, `0.335 nACH`, `0.5 nACH`, `0.67 nACH`, `1.0 nACH`, `1.5 nACH`, `Detailed Example: 3.57 ACH50`, `Detailed Example: 12.16 ACH50`, `Detailed Example: 2.8 ACH45`, `Detailed Example: 0.375 nACH`, `Detailed Example: 72 nCFM`, `Detailed Example: 79.8 sq. in. ELA`, `Detailed Example: 123 sq. in. ELA`, `Detailed Example: 1080 CFM50`, `Detailed Example: 1010 CFM45`
+- **Choices:** `Very Tight`, `Tight`, `Average`, `Leaky`, `Very Leaky`, `1 ACH50`, `2 ACH50`, `3 ACH50`, `4 ACH50`, `5 ACH50`, `6 ACH50`, `7 ACH50`, `8 ACH50`, `9 ACH50`, `10 ACH50`, `11 ACH50`, `12 ACH50`, `13 ACH50`, `14 ACH50`, `15 ACH50`, `16 ACH50`, `17 ACH50`, `18 ACH50`, `19 ACH50`, `20 ACH50`, `25 ACH50`, `30 ACH50`, `35 ACH50`, `40 ACH50`, `45 ACH50`, `50 ACH50`, `0.2 nACH`, `0.3 nACH`, `0.335 nACH`, `0.5 nACH`, `0.67 nACH`, `1.0 nACH`, `1.5 nACH`, `Detailed Example: 3.57 ACH50`, `Detailed Example: 12.16 ACH50`, `Detailed Example: 2.8 ACH45`, `Detailed Example: 0.375 nACH`, `Detailed Example: 72 nCFM`, `Detailed Example: 79.8 sq. in. ELA`, `Detailed Example: 123 sq. in. ELA`, `Detailed Example: 1080 CFM50`, `Detailed Example: 1010 CFM45`
 
 
 - **Default:** `Average`
