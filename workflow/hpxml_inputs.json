@@ -3304,7 +3304,8 @@
     "site_latitude": 39.77,
     "site_longitude": -104.73,
     "site_state_code": "CO",
-    "site_city": "Aurora"
+    "site_city": "Aurora",
+    "site_iecc_zone": "5B"
   },
   "sample_files/base-location-duluth-mn.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
