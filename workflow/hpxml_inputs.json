@@ -564,7 +564,7 @@
   },
   "sample_files/base-vehicle-ev-charger-undercharged.xml": {
     "parent_hpxml": "sample_files/base-vehicle-ev-charger.xml",
-    "electric_vehicle": "SUV, 200 Mile Range, 200% Usage",
+    "electric_vehicle": "SUV, 200 Mile Range, 22500 miles/yr",
     "schedules_paths": "../../HPXMLtoOpenStudio/resources/schedule_files/vehicle-ev-undercharged.csv"
   },
   "sample_files/base-vehicle-ev-charger-plug-load-ev.xml": {
@@ -2319,7 +2319,7 @@
     "pv_system": "4.0 kW",
     "pv_system_direction": "20 Degrees, South",
     "battery": "20.0 kWh",
-    "electric_vehicle": "Midsize, 200 Mile Range, 100% Usage",
+    "electric_vehicle": "Midsize, 200 Mile Range, 11000 miles/yr",
     "electric_vehicle_charger": "Level 1, 50% Charging at Home",
     "ceiling_fans": "#Bedrooms+1 Fans, 45.0 W"
   },
@@ -2399,7 +2399,7 @@
     "misc_fireplace": "Wood, 75% Usage",
     "misc_pool": "Natural Gas Heater, 75% Usage",
     "misc_permanent_spa": "Electric Resistance Heater, 75% Usage",
-    "electric_vehicle": "Midsize, 200 Mile Range, 75% Usage",
+    "electric_vehicle": "Midsize, 200 Mile Range, 11000 miles/yr",
     "electric_vehicle_charger": "Level 1, 50% Charging at Home"
   },
   "sample_files/base-bldgtype-mf-whole-building.xml": {

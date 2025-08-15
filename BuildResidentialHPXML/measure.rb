@@ -3375,7 +3375,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               fuel_economy_combined: args[:electric_vehicle_fuel_economy_combined],
                               fuel_economy_units: args[:electric_vehicle_fuel_economy_units],
                               fraction_charged_home: args[:electric_vehicle_charger_fraction_charged_at_home],
-                              ev_usage_multiplier: args[:electric_vehicle_usage_multiplier],
+                              miles_per_year: args[:electric_vehicle_miles_driven_per_year],
                               ev_charger_idref: charger_id)
     end
   end
