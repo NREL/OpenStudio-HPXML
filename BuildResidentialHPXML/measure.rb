@@ -4454,7 +4454,9 @@ module HPXMLFile
       args[:geometry_foundation_height] = 0.0
       args[:geometry_foundation_height_above_grade] = 0.0
       args[:geometry_rim_joist_height] = 0.0
-    elsif (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) || args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
+    elsif [HPXML::FoundationTypeAmbient, HPXML::FoundationTypeAboveApartment].include? args[:geometry_foundation_type]
+      args[:geometry_rim_joist_height] = 0.0
+    elsif args[:geometry_foundation_type].start_with? HPXML::FoundationTypeBellyAndWing
       args[:geometry_rim_joist_height] = 0.0
     end
 
@@ -4866,6 +4868,8 @@ module HPXMLFile
           pv_net_metering_annual_excess_sellback_rate = nil
         end
 
+        pv_monthly_grid_connection_fee_dollars = nil
+        pv_monthly_grid_connection_fee_dollars_per_kw = nil
         if pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollarsPerkW
           pv_monthly_grid_connection_fee_dollars_per_kw = Float(pv_monthly_grid_connection_fee) rescue nil
         elsif pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollars
@@ -4965,7 +4969,7 @@ module HPXMLFile
                         elevation: args[:site_elevation],
                         latitude: args[:site_latitude],
                         longitude: args[:site_longitude],
-                        dst_enabled: args[:simulation_control_daylight_saving_enabled],
+                        dst_observed: args[:simulation_control_daylight_saving_enabled],
                         dst_begin_month: dst_begin_month,
                         dst_begin_day: dst_begin_day,
                         dst_end_month: dst_end_month,
@@ -5104,7 +5108,7 @@ module HPXMLFile
     hpxml_bldg.building_construction.conditioned_building_volume = args[:geometry_unit_cfa] * args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.average_ceiling_height = args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.residential_facility_type = args[:geometry_unit_type]
-    hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
+    # hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
     hpxml_bldg.building_construction.year_built = args[:year_built]
     hpxml_bldg.building_construction.number_of_units = args[:unit_multiplier]
     hpxml_bldg.building_construction.unit_height_above_grade = args[:geometry_unit_height_above_grade]
@@ -5250,9 +5254,14 @@ module HPXMLFile
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            roof_type: args[:roof_material_type],
                            roof_color: args[:roof_color],
-                           pitch: args[:geometry_roof_pitch],
-                           insulation_assembly_r_value: args[:roof_assembly_r])
+                           pitch: args[:geometry_roof_pitch])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
+
+      if hpxml_bldg.roofs[-1].interior_adjacent_to != HPXML::LocationGarage
+        hpxml_bldg.roofs[-1].insulation_assembly_r_value = args[:roof_assembly_r]
+      else
+        hpxml_bldg.roofs[-1].insulation_assembly_r_value = 2.3 # Uninsulated
+      end
 
       next unless [HPXML::RadiantBarrierLocationAtticRoofOnly, HPXML::RadiantBarrierLocationAtticRoofAndGableWalls].include?(args[:radiant_barrier_attic_location].to_s)
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.roofs[-1].interior_adjacent_to)
@@ -5519,13 +5528,16 @@ module HPXMLFile
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   # @return [nil]
   def self.set_floors(hpxml_bldg, args, sorted_surfaces)
+    uninsulated_floor_r = 5.3
+    uninsulated_ceiling_r = 2.1
+
     if [HPXML::FoundationTypeBasementConditioned,
-        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
-      args[:floor_over_foundation_assembly_r] = 2.1 # Uninsulated
+        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > uninsulated_floor_r)
+      args[:floor_over_foundation_assembly_r] = uninsulated_floor_r
     end
 
-    if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > 2.1)
-      args[:ceiling_assembly_r] = 2.1 # Uninsulated
+    if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > uninsulated_ceiling_r)
+      args[:ceiling_assembly_r] = uninsulated_ceiling_r
     end
 
     sorted_surfaces.each do |surface|
@@ -5578,7 +5590,11 @@ module HPXMLFile
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:floor_over_foundation_assembly_r]
         end
       else
-        hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+        if floor_or_ceiling == HPXML::FloorOrCeilingFloor
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = uninsulated_floor_r
+        else
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = uninsulated_ceiling_r
+        end
       end
 
       next unless args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticFloor
@@ -5681,19 +5697,19 @@ module HPXMLFile
       sub_surface_height = Geometry.get_surface_height(sub_surface)
       sub_surface_facade = Geometry.get_surface_facade(sub_surface)
 
-      if (sub_surface_facade == Constants::FacadeFront) && ((args[:overhangs_front_depth] > 0) || args[:overhangs_front_distance_to_top_of_window] > 0)
+      if (sub_surface_facade == Constants::FacadeFront) && (args[:overhangs_front_depth] > 0)
         overhangs_depth = args[:overhangs_front_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_front_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_front_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeBack) && ((args[:overhangs_back_depth] > 0) || args[:overhangs_back_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeBack) && (args[:overhangs_back_depth] > 0)
         overhangs_depth = args[:overhangs_back_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_back_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_back_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeLeft) && ((args[:overhangs_left_depth] > 0) || args[:overhangs_left_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeLeft) && (args[:overhangs_left_depth] > 0)
         overhangs_depth = args[:overhangs_left_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_left_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_left_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeRight) && ((args[:overhangs_right_depth] > 0) || args[:overhangs_right_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeRight) && (args[:overhangs_right_depth] > 0)
         overhangs_depth = args[:overhangs_right_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_right_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_right_distance_to_bottom_of_window]
@@ -6091,6 +6107,7 @@ module HPXMLFile
                                                                                       hvac_perf_data_cooling_nom_speed_cops,
                                                                                       hvac_perf_data_cooling_max_speed_cops)
       cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
+        cooling_perf_data_data_point = cooling_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
         outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
         case hvac_perf_data_capacity_type
@@ -6280,6 +6297,7 @@ module HPXMLFile
                                                                                         hvac_perf_data_heating_nom_speed_cops,
                                                                                         hvac_perf_data_heating_max_speed_cops)
         heating_perf_data_data_points.each do |heating_perf_data_data_point|
+          heating_perf_data_data_point = heating_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
           outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = heating_perf_data_data_point
 
           case hvac_perf_data_capacity_type
@@ -6345,6 +6363,7 @@ module HPXMLFile
                                                                                         hvac_perf_data_cooling_nom_speed_cops,
                                                                                         hvac_perf_data_cooling_max_speed_cops)
         cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
+          cooling_perf_data_data_point = cooling_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
           outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
           case hvac_perf_data_capacity_type
@@ -6480,10 +6499,20 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_hvac_distribution(hpxml_bldg, args)
+    # FanCoil?
+    fan_coil_distribution_systems = []
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.primary_system
+
+      if args[:heating_system_type].include?('Fan Coil')
+        fan_coil_distribution_systems << heating_system
+      end
+    end
+
     # HydronicDistribution?
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless [heating_system.heating_system_type].include?(HPXML::HVACTypeBoiler)
-      next if args[:heating_system_type].include?('Fan Coil')
+      next if fan_coil_distribution_systems.include? heating_system
 
       hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                         distribution_system_type: HPXML::HVACDistributionTypeHydronic,
@@ -6516,23 +6545,10 @@ module HPXMLFile
       end
     end
 
-    # FanCoil?
-    fan_coil_distribution_systems = []
-    hpxml_bldg.heating_systems.each do |heating_system|
-      next unless heating_system.primary_system
-
-      if args[:heating_system_type].include?('Fan Coil')
-        fan_coil_distribution_systems << heating_system
-      end
-    end
-
     return if air_distribution_systems.size == 0 && fan_coil_distribution_systems.size == 0
 
     if [HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && hpxml_bldg.heating_systems.size == 0 && hpxml_bldg.heat_pumps.size == 0
       args[:ducts_number_of_return_registers] = nil
-      if args[:cooling_system_is_ducted]
-        args[:ducts_number_of_return_registers] = 0
-      end
     end
 
     if air_distribution_systems.size > 0
@@ -6778,7 +6794,7 @@ module HPXMLFile
   def self.set_hvac_control(hpxml, hpxml_bldg, args, weather)
     return if (args[:heating_system_type] == Constants::None) && (args[:cooling_system_type] == Constants::None) && (args[:heat_pump_type] == Constants::None)
 
-    latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+    latitude = Defaults.get_latitude(args[:site_latitude], weather, args[:site_zip_code]) unless weather.nil?
 
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
@@ -7232,7 +7248,7 @@ module HPXMLFile
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+      latitude = Defaults.get_latitude(args[:site_latitude], weather, args[:site_zip_code]) unless weather.nil?
       collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_rated_optical_efficiency = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_rated_thermal_losses = args[:solar_thermal_collector_rated_thermal_losses]
@@ -7282,7 +7298,7 @@ module HPXMLFile
       end
     end
 
-    latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+    latitude = Defaults.get_latitude(args[:site_latitude], weather, args[:site_zip_code]) unless weather.nil?
 
     hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                               location: args[:pv_system_location],
@@ -7326,7 +7342,12 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_electric_panel(hpxml_bldg, args)
-    return if args[:electric_panel_service_feeders_load_calculation_types].nil?
+    return if (args[:electric_panel_service_voltage].nil? &&
+               args[:electric_panel_breaker_spaces_headroom].nil? &&
+               args[:electric_panel_breaker_spaces_rated_total].nil? &&
+               args[:electric_panel_load_heating_system_power_rating].nil? &&
+               args[:electric_panel_load_cooling_system_power_rating].nil? &&
+               args[:electric_panel_baseline_peak_power].nil?)
 
     hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
                                    voltage: args[:electric_panel_service_voltage],
@@ -7634,7 +7655,7 @@ module HPXMLFile
     if args[:ev_charger_present]
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
-                                 charging_level: args[:ev_charger_level],
+                                 charging_level: (Integer(args[:ev_charger_level]) rescue nil),
                                  charging_power: args[:ev_charger_power])
     end
 

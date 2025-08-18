@@ -1940,7 +1940,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
         # Apply daylight savings
         if args[:timeseries_frequency] == EPlus::TimeseriesFrequencyTimestep || args[:timeseries_frequency] == EPlus::TimeseriesFrequencyHourly
-          if @hpxml_bldgs[0].dst_enabled
+          if @hpxml_bldgs[0].dst_observed
             dst_start_ix, dst_end_ix = get_dst_start_end_indexes()
             if !dst_start_ix.nil? && !dst_end_ix.nil?
               dst_end_ix.downto(dst_start_ix + 1) do |i|
@@ -1960,8 +1960,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       # Assemble data
       h = {}
       h['Time'] = data[2..-1]
-      h['TimeDST'] = timestamps2[2..-1] if @timestamps_dst
-      h['TimeUTC'] = timestamps3[2..-1] if @timestamps_utc
+      h['TimeDST'] = timestamps2[0][2..-1] unless @timestamps_dst.nil?
+      h['TimeUTC'] = timestamps3[0][2..-1] unless @timestamps_utc.nil?
 
       [total_energy_data, fuel_data, end_use_data, system_use_data, emissions_data, emission_fuel_data,
        emission_end_use_data, hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data,
