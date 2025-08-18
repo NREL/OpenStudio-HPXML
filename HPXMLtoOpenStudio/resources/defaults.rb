@@ -6894,7 +6894,7 @@ module Defaults
         end
 
         watts += HVAC.get_blower_fan_power_watts(heating_system.fan_watts_per_cfm, heating_system.additional_properties.heating_actual_airflow_cfm)
-        watts += HVAC.get_pump_power_watts(heating_system.electric_auxiliary_energy)
+        watts += HVAC.get_pump_power_watts(heating_system)
 
         if branch_circuit.occupied_spaces.nil?
           branch_circuit.occupied_spaces = get_breaker_spaces_from_power_watts_voltage_amps(watts, branch_circuit.voltage, branch_circuit.max_current_rating)
@@ -6910,6 +6910,7 @@ module Defaults
         branch_circuit_ahu = get_or_add_branch_circuit(electric_panel, heat_pump, unit_num, true)
 
         watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.additional_properties.heating_actual_airflow_cfm)
+        watts_ahu += HVAC.get_pump_power_watts(heat_pump)
         watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage)
 
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
@@ -6986,6 +6987,7 @@ module Defaults
         next if heat_pump.fraction_cool_load_served == 0
 
         watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.additional_properties.cooling_actual_airflow_cfm)
+        watts_ahu += HVAC.get_pump_power_watts(heat_pump)
         watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), HPXML::ElectricPanelVoltage240)
 
         if heat_pump.fraction_heat_load_served == 0
