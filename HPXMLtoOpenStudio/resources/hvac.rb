@@ -997,6 +997,7 @@ module HVAC
   # Get the boiler or GHP pump power (W).
   #
   # @param hvac_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
+  # @return [Double] Pump power [W]
   def self.get_pump_power_watts(hvac_system)
     if hvac_system.is_a?(HPXML::HeatingSystem) && (not hvac_system.electric_auxiliary_energy.nil?)
       return hvac_system.electric_auxiliary_energy / 2.08
