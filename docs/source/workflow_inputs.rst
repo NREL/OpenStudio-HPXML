@@ -4884,7 +4884,7 @@ Loads with power ratings of "auto" are calculated based on estimates for:
 
 - input capacities (using regressions involving rated output capacities and efficiencies if direct expansion)
 - blower fans (using fan W/cfm multiplied by airflow cfm)
-- hydronic pumps (using electric auxiliary energy kWh/yr divided by 2.08)
+- hydronic pumps (using either electric auxiliary energy kWh/yr divided by 2.08 for boilers, or pump power W/ton and cooling/heating capacity tons for ground-to-air heat pumps)
 
 Loads with occupied breaker spaces of "auto" vary based on calculated power ratings.
 Room air conditioners connected to a 120V branch circuit are assumed to occupy 0 breaker spaces.
