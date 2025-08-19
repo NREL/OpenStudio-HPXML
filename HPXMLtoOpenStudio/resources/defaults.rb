@@ -87,7 +87,7 @@ module Defaults
     apply_pools_and_permanent_spas(hpxml_bldg, schedules_file)
     apply_plug_loads(hpxml_bldg, schedules_file)
     apply_fuel_loads(hpxml_bldg, schedules_file)
-    apply_pv_systems(hpxml_bldg)
+    apply_pv_systems(hpxml_bldg, unit_num)
     apply_generators(hpxml_bldg)
     apply_batteries(hpxml_bldg)
     apply_vehicles(hpxml_bldg, schedules_file)
@@ -3503,8 +3503,9 @@ module Defaults
   # Assigns default values for omitted optional inputs in the HPXML::PVSystem objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param unit_num [Integer] Dwelling unit number
   # @return [nil]
-  def self.apply_pv_systems(hpxml_bldg)
+  def self.apply_pv_systems(hpxml_bldg, unit_num)
     hpxml_bldg.pv_systems.each do |pv_system|
       if pv_system.array_azimuth.nil?
         pv_system.array_azimuth = get_azimuth_from_orientation(pv_system.array_orientation)
@@ -3537,7 +3538,7 @@ module Defaults
       next unless pv_system.inverter_idref.nil?
 
       if hpxml_bldg.inverters.size == 0
-        hpxml_bldg.inverters.add(id: 'Inverter1')
+        hpxml_bldg.inverters.add(id: get_id('Inverter', hpxml_bldg.inverters, unit_num))
       end
       pv_system.inverter_idref = hpxml_bldg.inverters[0].id
     end
