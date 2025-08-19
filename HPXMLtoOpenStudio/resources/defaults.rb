@@ -3534,6 +3534,12 @@ module Defaults
         pv_system.system_losses_fraction = get_pv_system_losses(pv_system.year_modules_manufactured)
         pv_system.system_losses_fraction_isdefaulted = true
       end
+      next unless pv_system.inverter_idref.nil?
+
+      if hpxml_bldg.inverters.size == 0
+        hpxml_bldg.inverters.add(id: 'Inverter1')
+      end
+      pv_system.inverter_idref = hpxml_bldg.inverters[0].id
     end
     hpxml_bldg.inverters.each do |inverter|
       if inverter.inverter_efficiency.nil?
