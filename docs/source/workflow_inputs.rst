@@ -4651,7 +4651,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   ``ArrayTilt``                                            double             deg               >= 0, <= 90               Yes                  Tilt relative to horizontal
   ``MaxPowerOutput``                                       double             W                 >= 0                      Yes                  Peak power
   ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         >= 0, <= 1 or > 1600      No        0.14 [#]_  System losses [#]_
-  ``AttachedToInverter``                                   idref                                See [#]_                  Yes                  ID of attached inverter
+  ``AttachedToInverter``                                   idref                                See [#]_                  See [#]_             ID of attached inverter
   ``extension/NumberofBedroomsServed``                     integer                              > NumberofBedrooms        See [#]_             Number of bedrooms served
   =======================================================  =================  ================  ========================  ========  =========  ============================================
 
@@ -4688,22 +4688,23 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
 
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
   .. [#] AttachedToInverter must reference an ``Inverter``.
+  .. [#] AttachedToInverter only required if there are multiple ``Inverter`` elements.
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 HPXML Inverters
 ~~~~~~~~~~~~~~~
 
-In addition, the PVSystem must be connected to an inverter that is entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
+Each inverter for a PV system can be entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
 
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
-  Element                                                  Type               Units             Constraints          Required  Default   Notes
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
-  ``SystemIdentifier``                                     id                                                        Yes                 Unique identifier
-  ``InverterEfficiency``                                   double             frac              > 0, <= 1 [#]_       No        0.96      Inverter efficiency
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
+  =======================================================  =================  ================  ===========  ========  ========  ============================================
+  Element                                                  Type               Units             Constraints  Required  Default   Notes
+  =======================================================  =================  ================  ===========  ========  ========  ============================================
+  ``SystemIdentifier``                                     id                                                Yes                 Unique identifier
+  ``InverterEfficiency``                                   double             frac              > 0, <= 1    No        0.96      Inverter efficiency [#]_
+  =======================================================  =================  ================  ===========  ========  ========  ============================================
 
-  .. [#] For homes with multiple inverters, all InverterEfficiency elements must have the same value.
+  .. [#] If there are multiple inverters with different efficiencies, a PV size weighted-average efficiency will be used due to EnergyPlus limitations.
 
 .. _hpxml_electric_panels:
 
