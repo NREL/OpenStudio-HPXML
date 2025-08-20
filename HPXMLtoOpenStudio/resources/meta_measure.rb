@@ -13,7 +13,7 @@ require 'fileutils'
 #
 # @param rundir [String] The run directory containing all simulation output files
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
-# @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param debug [Boolean] If true, reports info statements from the runner results
 # @param run_measures_only [Boolean] True applies only OpenStudio Model measures, skipping IDF generation and the simulation
 # @param skip_simulation [Boolean] True applies the OpenStudio Model measures and generates the IDF, but skips the simulation
@@ -51,22 +51,8 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, run_measure
     return { success: success, runner: runner }
   end
 
-  # Remove unused objects automatically added by OpenStudio?
-  remove_objects = []
-  if model.alwaysOnContinuousSchedule.directUseCount == 0
-    remove_objects << ['Schedule:Constant', model.alwaysOnContinuousSchedule.name.to_s]
-  end
-  if model.alwaysOnDiscreteSchedule.directUseCount == 0
-    remove_objects << ['Schedule:Constant', model.alwaysOnDiscreteSchedule.name.to_s]
-  end
-  if model.alwaysOffDiscreteSchedule.directUseCount == 0
-    remove_objects << ['Schedule:Constant', model.alwaysOffDiscreteSchedule.name.to_s]
-  end
-  model.getScheduleConstants.each do |sch|
-    next unless sch.directUseCount == 0
-
-    remove_objects << ['Schedule:Constant', sch.name.to_s]
-  end
+  # Apply reporting measure output requests
+  apply_model_output_requests(measures_dir, measures, runner, model)
 
   # Translate model to workspace
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
@@ -74,9 +60,14 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, run_measure
   workspace = forward_translator.translateModel(model)
   success = report_ft_errors_warnings(forward_translator, rundir)
 
-  # Remove objects
-  remove_objects.uniq.each do |remove_object|
-    workspace.getObjectByTypeAndName(remove_object[0].to_IddObjectType, remove_object[1]).get.remove
+  # Remove unused objects automatically added by OpenStudio?
+  [model.alwaysOnContinuousSchedule,
+   model.alwaysOnDiscreteSchedule,
+   model.alwaysOffDiscreteSchedule].each do |sch|
+    # Don't know why we need to check for AdditionalProperties too, but it works
+    if sch.directUseCount == 0 || sch.sources.all? { |s| s.to_AdditionalProperties.is_initialized }
+      workspace.getObjectByTypeAndName('Schedule:Constant'.to_IddObjectType, sch.name.to_s).get.remove
+    end
   end
 
   if not success
@@ -171,13 +162,18 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false, run_measure
 
   print "Done.\n" unless suppress_print
 
+  # Clean up EnergyPlus output files
+  if not debug
+    FileUtils.rm Dir.glob(File.join(rundir, 'eplusout*.msgpack'))
+  end
+
   return { success: true, runner: runner, sim_time: sim_time }
 end
 
 # Apply OpenStudio measures and arguments (i.e., "run" method) corresponding to a provided Hash.
 # Optionally, save an OpenStudio Workflow based on the provided Hash.
 #
-# @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -211,8 +207,7 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
   # Call each measure in the specified order
   measures.keys.each do |measure_subdir|
     # Gather measure arguments and call measure
-    full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
-    check_file_exists(full_measure_path, runner)
+    full_measure_path = get_full_measure_path(measures_dir, measure_subdir, runner)
     measure = get_measure_instance(full_measure_path)
     measures[measure_subdir].each do |args|
       next unless measure_type == measure.class.superclass.name.to_s
@@ -231,9 +226,50 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
   return true
 end
 
-# Apply OpenStudio measures and arguments (i.e., "energyPlusOutputRequests" method) corresponding to a provided Hash.
+# Get the full path to a measure.rb file given the measure directory name(s).
 #
-# @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
+# @param measure_name [String] Name of the OpenStudio measure directory
+# @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+# @return [String] Full path to the measure.rb file
+def get_full_measure_path(measures_dir, measure_name, runner)
+  measures_dirs = measures_dir.is_a?(Array) ? measures_dir : [measures_dir]
+  measures_dirs.each do |dir|
+    full_measure_path = File.join(dir, measure_name, 'measure.rb')
+    return full_measure_path if File.exist?(full_measure_path)
+  end
+  register_error("Cannot find measure #{measure_name} in any of the measures_dirs: #{measures_dirs.join(', ')}.", runner)
+end
+
+# Apply reporting measure output requests (i.e., "modelOutputRequests" method).
+#
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
+# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
+# @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+# @param model [OpenStudio::Model::Model] OpenStudio Model object
+# @return [Boolean] True if EnergyPlus output requests have been applied successfully
+def apply_model_output_requests(measures_dir, measures, runner, model)
+  # Call each measure in the specified order
+  measures.keys.each do |measure_subdir|
+    # Gather measure arguments and call measure
+    full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
+    check_file_exists(full_measure_path, runner)
+    measure = get_measure_instance(full_measure_path)
+    measures[measure_subdir].each do |args|
+      next unless measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
+
+      argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
+      runner.setLastOpenStudioModel(model)
+      measure.modelOutputRequests(model, runner, argument_map)
+    end
+  end
+
+  return true
+end
+
+# Apply reporting measure output requests (i.e., "energyPlusOutputRequests" method).
+#
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -264,7 +300,7 @@ end
 # Register an info statement to the OpenStudio Runner about calling measures with arguments.
 #
 # @param measure_args [Hash] Map of provided measure arguments to values
-# @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
+# @param measures_dir [String or Array<String>] Parent directory path(s) of all OpenStudio-HPXML measures
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @return [nil]
 def print_measure_call(measure_args, measure_dir, runner)
@@ -465,7 +501,7 @@ def run_measure(model, measure, argument_map, runner)
   return true
 end
 
-# Convert contents of a Hash to single String using provided delimiter and seperator characters.
+# Convert contents of a Hash to single String using provided delimiter and separator characters.
 #
 # @param hash [Hash] Map of keys to values
 # @param delim [String] character between each key and value
@@ -579,6 +615,7 @@ def report_os_warnings(os_log, rundir)
       next if s.logMessage.include? 'xsltValidate'
       next if s.logLevel == 0 && s.logMessage.include?('not within the expected limits') # Ignore EpwFile warnings
       next if s.logMessage.include? 'Error removing temporary directory at /tmp/xmlvalidation'
+      next if s.logMessage.include? 'Appears there are no ground temperature depth fields in the EPW file'
 
       f << "OS Message: #{s.logMessage}\n"
     end

@@ -107,7 +107,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       hpxml_path = File.expand_path(hpxml_path)
     end
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
-      fail "'#{hpxml_path}' does not exist or is not an .xml file."
+      runner.registerError("'#{hpxml_path}' does not exist or is not an .xml file.")
+      return false
     end
 
     hpxml_output_path = args[:hpxml_output_path]
@@ -129,20 +130,32 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     output_csv_basename, _ = args[:output_csv_path].split('.csv')
 
-    doc = XMLHelper.parse_file(hpxml_path)
-    hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
-    doc_buildings = XMLHelper.get_elements(hpxml_doc, 'Building')
-    doc_buildings.each_with_index do |building, i|
-      doc_building_id = XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id')
+    hpxml = HPXML.new(hpxml_path: hpxml_path)
 
-      next if doc_buildings.size > 1 && args[:building_id] != 'ALL' && args[:building_id] != doc_building_id
+    create_backup = false
+    if hpxml_path == hpxml_output_path
+      # Check if HPXML data will be dropped when we write the new HPXML file.
+      # This can happen if the original HPXML file was not written by OS-HPXML.
+      # If this will occur, we will save a backup of the original HPXML file.
+      orig_hpxml_contents = hpxml.contents.delete("\r").gsub(" dataSource='software'", '')
+      new_hpxml_contents = XMLHelper.finalize_doc_string(hpxml.to_doc()).gsub(" dataSource='software'", '')
+      if orig_hpxml_contents != new_hpxml_contents
+        create_backup = true
+      end
+    end
 
-      hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: doc_building_id)
-      hpxml_bldg = hpxml.buildings[0]
+    # Since we modify the HPXML object (apply defaults), use a copy of the
+    # original HPXML object so that the HPXML object we write does not include
+    # any such modifications.
+    orig_hpxml = Marshal.load(Marshal.dump(hpxml))
 
+    hpxml.buildings.each_with_index do |hpxml_bldg, i|
+      next if hpxml.buildings.size > 1 && args[:building_id] != 'ALL' && args[:building_id] != hpxml_bldg.building_id
+
+      # Only need to do this once
       if epw_path.nil?
         epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
-        weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
+        weather = WeatherFile.new(epw_path: epw_path, runner: runner)
       end
 
       # deterministically vary schedules across building units
@@ -150,7 +163,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
       # exit if number of occupants is zero
       if hpxml_bldg.building_occupancy.number_of_residents == 0
-        runner.registerInfo("#{doc_building_id}: Number of occupants set to zero; skipping generation of stochastic schedules.")
+        runner.registerInfo("#{hpxml_bldg.building_id}: Number of occupants set to zero; skipping generation of stochastic schedules.")
         next
       end
 
@@ -160,34 +173,20 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
       # create the schedules
       success = create_schedules(runner, hpxml, hpxml_bldg, weather, args)
-      return false if not success
+      return false unless success
 
-      # modify the hpxml with the schedules path
-      extension = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'extension'])
-      schedules_filepaths = XMLHelper.get_values(extension, 'SchedulesFilePath', :string)
-      if !schedules_filepaths.include?(args[:output_csv_path])
-        XMLHelper.add_element(extension, 'SchedulesFilePath', args[:output_csv_path], :string)
-      end
-      write_modified_hpxml(runner, doc, hpxml_path, hpxml_output_path, schedules_filepaths, args)
+      update_hpxml_building(orig_hpxml.buildings[i], args)
     end
+
+    if create_backup
+      # Create a backup of the original HPXML file
+      runner.registerWarning('HPXML Output File Path is same as HPXML File Path, creating backup.')
+      File.rename(hpxml_path, hpxml_path.gsub('.xml', '_bak.xml'))
+    end
+
+    XMLHelper.write_file(orig_hpxml.to_doc(), hpxml_output_path)
 
     return true
-  end
-
-  # Write out the HPXML file with the output CSV path containing occupancy schedules.
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param doc [Oga::XML::Document] Oga XML Document object
-  # @param hpxml_path [String] Path to the HPXML file
-  # @param hpxml_output_path [String] Path to the output HPXML file
-  # @param schedules_filepaths [Array<String>] array of SchedulesFilePath strings in the input HPXML file
-  # @param args [Hash] Map of :argument_name => value
-  def write_modified_hpxml(runner, doc, hpxml_path, hpxml_output_path, schedules_filepaths, args)
-    # write out the modified hpxml
-    if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path])
-      XMLHelper.write_file(doc, hpxml_output_path)
-      runner.registerInfo("Wrote file: #{hpxml_output_path}")
-    end
   end
 
   # Create and export the occupancy schedules.
@@ -201,11 +200,13 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   def create_schedules(runner, hpxml, hpxml_bldg, weather, args)
     info_msgs = []
 
-    get_simulation_parameters(hpxml, weather, args)
-    get_generator_inputs(hpxml_bldg, weather, args)
+    Defaults.apply(runner, hpxml, hpxml_bldg, weather)
+
+    get_simulation_parameters(hpxml, args)
+    get_generator_inputs(hpxml_bldg, args)
 
     args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
-    schedule_generator = ScheduleGenerator.new(runner: runner, **args)
+    schedule_generator = ScheduleGenerator.new(runner: runner, hpxml_bldg: hpxml_bldg, **args)
 
     success = schedule_generator.create(args: args, weather: weather)
     return false if not success
@@ -236,48 +237,135 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # Get simulation parameters that are required for the stochastic schedule generator.
   #
   # @param hpxml [HPXML] HPXML object
-  # @param weather [WeatherFile] Weather object containing EPW information
   # @param args [Hash] Map of :argument_name => value
-  def get_simulation_parameters(hpxml, weather, args)
+  def get_simulation_parameters(hpxml, args)
     args[:minutes_per_step] = 60
     if !hpxml.header.timestep.nil?
       args[:minutes_per_step] = hpxml.header.timestep
     end
     args[:steps_in_day] = 24 * 60 / args[:minutes_per_step]
-    args[:mkc_ts_per_day] = 96
-    args[:mkc_ts_per_hour] = args[:mkc_ts_per_day] / 24
 
-    calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
-    args[:sim_year] = calendar_year
+    args[:sim_year] = hpxml.header.sim_calendar_year
     args[:sim_start_day] = DateTime.new(args[:sim_year], 1, 1)
-    args[:total_days_in_year] = Calendar.num_days_in_year(calendar_year)
+    args[:total_days_in_year] = Calendar.num_days_in_year(hpxml.header.sim_calendar_year)
   end
 
   # Get generator inputs that are required for the stochastic schedule generator.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object containing EPW information
   # @param args [Hash] Map of :argument_name => value
-  def get_generator_inputs(hpxml_bldg, weather, args)
-    state_code = Defaults.get_state_code(hpxml_bldg.state_code, weather)
-    if Constants::StateCodesMap.keys.include?(state_code)
-      args[:state] = state_code
+  def get_generator_inputs(hpxml_bldg, args)
+    if Constants::StateCodesMap.keys.include?(hpxml_bldg.state_code)
+      args[:state] = hpxml_bldg.state_code
     else
       # Unhandled state code, fallback to CO
       args[:state] = 'CO'
     end
-    args[:column_names] = args[:schedules_column_names].split(',').map(&:strip) if !args[:schedules_column_names].nil?
+
+    if !args[:schedules_column_names].nil?
+      args[:column_names] = args[:schedules_column_names].split(',').map(&:strip)
+    else
+      args[:column_names] = ScheduleGenerator.export_columns
+    end
 
     if hpxml_bldg.building_occupancy.number_of_residents.nil?
-      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(nbeds: hpxml_bldg.building_construction.number_of_bedrooms)
+      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(hpxml_bldg.building_construction.number_of_bedrooms)
     else
       args[:geometry_num_occupants] = hpxml_bldg.building_occupancy.number_of_residents
     end
     args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
 
-    args[:time_zone_utc_offset] = Defaults.get_time_zone(hpxml_bldg.time_zone_utc_offset, weather)
-    args[:latitude] = Defaults.get_latitude(hpxml_bldg.latitude, weather)
-    args[:longitude] = Defaults.get_longitude(hpxml_bldg.longitude, weather)
+    args[:time_zone_utc_offset] = hpxml_bldg.time_zone_utc_offset
+    args[:latitude] = hpxml_bldg.latitude
+    args[:longitude] = hpxml_bldg.longitude
+  end
+
+  # Updates the HPXML Building (that will be written to file) to include the new
+  # schedule filepath and remove simple schedules.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param args [Hash] Map of :argument_name => value
+  # @return [nil]
+  def update_hpxml_building(hpxml_bldg, args)
+    # Update the schedules path
+    if !hpxml_bldg.header.schedules_filepaths.include?(args[:output_csv_path])
+      hpxml_bldg.header.schedules_filepaths << args[:output_csv_path]
+    end
+
+    # Remove simple schedules (so that we don't have both detailed/stochastic schedules
+    # and simple schedules referenced by the HPXML).
+    args[:column_names].each do |column_name|
+      case column_name
+      when SchedulesFile::Columns[:Occupants].name
+        hpxml_bldg.building_occupancy.weekday_fractions = nil
+        hpxml_bldg.building_occupancy.weekend_fractions = nil
+        hpxml_bldg.building_occupancy.monthly_multipliers = nil
+      when SchedulesFile::Columns[:LightingInterior].name
+        hpxml_bldg.lighting.interior_weekday_fractions = nil
+        hpxml_bldg.lighting.interior_weekend_fractions = nil
+        hpxml_bldg.lighting.interior_monthly_multipliers = nil
+      when SchedulesFile::Columns[:LightingGarage].name
+        hpxml_bldg.lighting.garage_weekday_fractions = nil
+        hpxml_bldg.lighting.garage_weekend_fractions = nil
+        hpxml_bldg.lighting.garage_monthly_multipliers = nil
+      when SchedulesFile::Columns[:CookingRange].name
+        hpxml_bldg.cooking_ranges.each do |cooking_range|
+          cooking_range.weekday_fractions = nil
+          cooking_range.weekend_fractions = nil
+          cooking_range.monthly_multipliers = nil
+        end
+      when SchedulesFile::Columns[:Dishwasher].name,
+           SchedulesFile::Columns[:HotWaterDishwasher].name
+        hpxml_bldg.dishwashers.each do |dishwasher|
+          dishwasher.weekday_fractions = nil
+          dishwasher.weekend_fractions = nil
+          dishwasher.monthly_multipliers = nil
+        end
+      when SchedulesFile::Columns[:ClothesWasher].name,
+           SchedulesFile::Columns[:HotWaterClothesWasher].name
+        hpxml_bldg.clothes_washers.each do |clothes_washer|
+          clothes_washer.weekday_fractions = nil
+          clothes_washer.weekend_fractions = nil
+          clothes_washer.monthly_multipliers = nil
+        end
+      when SchedulesFile::Columns[:ClothesDryer].name
+        hpxml_bldg.clothes_dryers.each do |clothes_dryer|
+          clothes_dryer.weekday_fractions = nil
+          clothes_dryer.weekend_fractions = nil
+          clothes_dryer.monthly_multipliers = nil
+        end
+      when SchedulesFile::Columns[:CeilingFan].name
+        hpxml_bldg.ceiling_fans.each do |ceiling_fan|
+          ceiling_fan.weekday_fractions = nil
+          ceiling_fan.weekend_fractions = nil
+          ceiling_fan.monthly_multipliers = nil
+        end
+      when SchedulesFile::Columns[:HotWaterFixtures].name
+        hpxml_bldg.water_heating.water_fixtures_weekday_fractions = nil
+        hpxml_bldg.water_heating.water_fixtures_weekend_fractions = nil
+        hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = nil
+      when SchedulesFile::Columns[:PlugLoadsOther].name
+        hpxml_bldg.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }.each do |plug_load|
+          plug_load.weekday_fractions = nil
+          plug_load.weekend_fractions = nil
+          plug_load.monthly_multipliers = nil
+        end
+      when SchedulesFile::Columns[:PlugLoadsTV].name
+        hpxml_bldg.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }.each do |plug_load|
+          plug_load.weekday_fractions = nil
+          plug_load.weekend_fractions = nil
+          plug_load.monthly_multipliers = nil
+        end
+      when SchedulesFile::Columns[:ElectricVehicle].name
+        hpxml_bldg.vehicles.select { |v| v.vehicle_type == HPXML::VehicleTypeBEV }.each do |vehicle|
+          vehicle.ev_weekday_fractions = nil
+          vehicle.ev_weekend_fractions = nil
+          vehicle.ev_monthly_multipliers = nil
+        end
+      else
+        fail "Unexpected column name: #{column_name}"
+      end
+    end
   end
 end
 

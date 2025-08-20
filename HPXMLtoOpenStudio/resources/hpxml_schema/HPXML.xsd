@@ -1,4 +1,4 @@
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2023/09" targetNamespace="http://hpxmlonline.com/2023/09" elementFormDefault="qualified" version="4.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2023/09" targetNamespace="http://hpxmlonline.com/2023/09" elementFormDefault="qualified" version="4.2">
     <xs:element name="HPXML">
         <xs:complexType>
             <xs:sequence>
@@ -90,7 +90,7 @@
 		</xs:attribute>
 		<xs:attribute name="sameas" type="xs:IDREF">
 			<xs:annotation>
-				<xs:documentation>Use to reference the id of the same object on the base building where the object has not been replaced.</xs:documentation>
+				<xs:documentation>A reference to the id of the identical object on another Building element. For example, this could be used to indicate a building component like a water heater has not changed between the base Building and the post-upgrade Building, or that a building component like a central boiler is shared between two Buildings (dwelling units) in a multifamily building. Note that when a building component does change as part of an upgrade, the sameas attribute should be omitted and a Measure should be used to reference the relationship between components.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="dataSource" type="DataSource"/>
@@ -421,6 +421,7 @@
 					<xs:element minOccurs="0" name="Type" type="ClothesDryerType"/>
 					<xs:element minOccurs="0" name="Location" type="LaundryMachineLocation"/>
 					<xs:element name="FuelType" type="FuelType" minOccurs="0"/>
+					<xs:element name="DryingMethod" minOccurs="0" type="ClothesDryerDryingMethod"/>
 					<xs:element minOccurs="0" name="Usage" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>loads/week of actual usage by the occupants</xs:documentation>
@@ -1751,6 +1752,7 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="HPWHOperatingMode" type="HPWHOperatingMode"/>
+									<xs:element minOccurs="0" name="HPWHVoltage" type="HPWHVoltage"/>
 									<xs:element minOccurs="0" name="HPWHDucting">
 										<xs:complexType>
 											<xs:sequence>
@@ -1845,6 +1847,7 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="HasMixingValve" type="HPXMLBoolean"/>
+									<xs:element minOccurs="0" name="MixingValveSetpoint" type="TemperatureGreaterThanZero"/>
 									<xs:element minOccurs="0" name="UsesDesuperheater" type="HPXMLBoolean">
 										<xs:annotation>
 											<xs:documentation>Indicates whether this water heater uses a desuperheater. The attached heat pump or air conditioner can be referenced in the
@@ -2061,7 +2064,7 @@
 									</xs:element>
 									<xs:element minOccurs="0" name="CollectorRatedOpticalEfficiency" type="CollectorRatedOpticalEfficiency">
 										<xs:annotation>
-											<xs:documentation>[Btu/h-ft^2-F] Often referred to as Fr-tau-alpha (FRta), this describes the optical efficiency portion of the overall collector efficiency. 
+											<xs:documentation>[Btu/h-ft^2-F] Often referred to as Fr-tau-alpha (FRta), this describes the optical efficiency portion of the overall collector efficiency.
 												In the OG-100 SRCC Certified Solar Thermal Collector Directory, this is the y-intercept of the efficiency curve.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
@@ -2262,6 +2265,172 @@
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
+			<xs:element minOccurs="0" name="Vehicles">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="Vehicle">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" name="Manufacturer" type="Manufacturer"/>
+									<xs:element minOccurs="0" name="Model" type="Model"/>
+									<xs:element minOccurs="0" name="ModelTrim" type="Model"/>
+									<xs:element minOccurs="0" name="ModelYear" type="Year"/>
+									<xs:element minOccurs="0" name="VIN" type="HPXMLString"/>
+									<xs:element minOccurs="0" name="VehicleClass" type="VehicleClassType">
+										<xs:annotation>
+											<xs:documentation>The class as defined by the U.S. Federal Highway Administration.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="WeightRating" type="GrossVehicleWeightRating">
+										<xs:annotation>
+											<xs:documentation>The gross vehicle weight rating (GVWR) as defined by the U.S. Federal Highway Administration.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="VehicleWeight" type="HPXMLDoubleGreaterThanZero">
+										<xs:annotation>
+											<xs:documentation>[lbs] The weight of the vehicle.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Count" type="IntegerGreaterThanZero">
+										<xs:annotation>
+											<xs:documentation>Number of similar vehicles.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="VehicleType">
+										<xs:complexType>
+											<xs:choice>
+												<xs:element minOccurs="0" name="BatteryElectricVehicle">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
+															<xs:element minOccurs="0" name="FractionChargedLocation" maxOccurs="unbounded">
+																<xs:annotation>
+																	<xs:documentation>The percentage of charging energy provided at different locations.</xs:documentation>
+																</xs:annotation>
+																<xs:complexType>
+																	<xs:sequence>
+																		<xs:element minOccurs="0" name="Location" type="VehicleChargingLocation"/>
+																		<xs:element minOccurs="0" name="Percentage" type="Fraction">
+																			<xs:annotation>
+																				<xs:documentation>Percentage as a fraction (50% = 0.5)</xs:documentation>
+																			</xs:annotation>
+																		</xs:element>
+																	</xs:sequence>
+																	<xs:attribute name="dataSource" type="DataSource"/>
+																</xs:complexType>
+															</xs:element>
+															<xs:element minOccurs="0" name="ConnectedCharger" type="LocalReference"/>
+															<xs:element ref="extension" minOccurs="0"/>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+												<xs:element minOccurs="0" name="PlugInHybridElectricVehicle">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
+															<xs:element minOccurs="0" name="FractionChargedLocation" maxOccurs="unbounded">
+																<xs:annotation>
+																	<xs:documentation>The percentage of charging energy provided at different locations.</xs:documentation>
+																</xs:annotation>
+																<xs:complexType>
+																	<xs:sequence>
+																		<xs:element minOccurs="0" name="Location" type="VehicleChargingLocation"/>
+																		<xs:element minOccurs="0" name="Percentage" type="Fraction">
+																			<xs:annotation>
+																				<xs:documentation>Percentage as a fraction (50% = 0.5)</xs:documentation>
+																			</xs:annotation>
+																		</xs:element>
+																	</xs:sequence>
+																	<xs:attribute name="dataSource" type="DataSource"/>
+																</xs:complexType>
+															</xs:element>
+															<xs:element minOccurs="0" name="ConnectedCharger" type="LocalReference"/>
+															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType">
+																<xs:annotation>
+																	<xs:documentation>Fuel type of the combustion engine</xs:documentation>
+																</xs:annotation>
+															</xs:element>
+															<xs:element ref="extension" minOccurs="0"/>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+												<xs:element minOccurs="0" name="HybridElectricVehicle">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
+															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
+															<xs:element ref="extension" minOccurs="0"/>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+												<xs:element minOccurs="0" name="InternalCombustionEngine">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
+															<xs:element ref="extension" minOccurs="0"/>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+												<xs:element minOccurs="0" name="FuelCellElectricVehicle">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
+															<xs:element ref="extension" minOccurs="0"/>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+												<xs:element minOccurs="0" name="Other">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
+															<xs:element ref="extension" minOccurs="0"/>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+											</xs:choice>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="PrimaryLocation" type="VehicleLocation"/>
+									<xs:element minOccurs="0" name="Mileage" type="HPXMLDoubleGreaterThanZero"/>
+									<xs:element minOccurs="0" name="MilesDrivenPerYear" type="HPXMLDoubleGreaterThanOrEqualToZero"/>
+									<xs:element minOccurs="0" name="HoursDrivenPerWeek" type="HPXMLDoubleGreaterThanOrEqualToZero"/>
+									<xs:element minOccurs="0" name="FuelEconomyCombined">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element minOccurs="0" name="Units" type="FuelEconomyUnits"/>
+												<xs:element minOccurs="0" name="Value" type="HPXMLDoubleGreaterThanZero"/>
+											</xs:sequence>
+											<xs:attribute name="dataSource" type="DataSource"/>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="FuelEconomyCity">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element minOccurs="0" name="Units" type="FuelEconomyUnits"/>
+												<xs:element minOccurs="0" name="Value" type="HPXMLDoubleGreaterThanZero"/>
+											</xs:sequence>
+											<xs:attribute name="dataSource" type="DataSource"/>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="FuelEconomyHighway">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element minOccurs="0" name="Units" type="FuelEconomyUnits"/>
+												<xs:element minOccurs="0" name="Value" type="HPXMLDoubleGreaterThanZero"/>
+											</xs:sequence>
+											<xs:attribute name="dataSource" type="DataSource"/>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+								<xs:attribute name="dataSource" type="DataSource"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="dataSource" type="DataSource"/>
+				</xs:complexType>
+			</xs:element>
 			<xs:element minOccurs="0" name="ElectricVehicleChargers">
 				<xs:complexType>
 					<xs:sequence>
@@ -2273,6 +2442,7 @@
 									<xs:element minOccurs="0" name="Manufacturer" type="Manufacturer"/>
 									<xs:element maxOccurs="1" minOccurs="0" name="ModelNumber" type="Model"/>
 									<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
+									<xs:element minOccurs="0" name="Location" type="EVChargerLocation"/>
 									<xs:element minOccurs="0" ref="ConnectedDevice"/>
 									<xs:element minOccurs="0" name="ChargingLevel" type="EVChargingLevel"/>
 									<xs:element minOccurs="0" name="ChargingConnector" type="EVChargingConnector"/>
@@ -4725,6 +4895,94 @@
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
+			<xs:element minOccurs="0" name="MeasureType">
+				<xs:complexType>
+					<xs:choice>
+						<xs:element name="InstallReplace">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element ref="extension" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="AtticEncapsulation">
+							<xs:annotation>
+								<xs:documentation>AtticEncapsulation measures move the thermal boundary of the building from the floor of an attic space to the roof and gable walls, converting the attic from unconditioned to conditioned.</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element minOccurs="0" name="DuctsMovedToConditionedSpace" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>'true' indicates that the attic encapsulation measure brought existing ducts inside the conditioned envelope.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="FoundationEncapsulation">
+							<xs:annotation>
+								<xs:documentation>FoundationEncapsulation measures move the thermal boundary of the building from the floor above the foundation space to the slab and foundation walls, converting the foundation from unconditioned to conditioned.</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element minOccurs="0" name="DuctsMovedToConditionedSpace" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>'true' indicates that the foundation encapsulation measure brought existing ducts inside the conditioned envelope.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="HVACRedesign">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element minOccurs="0" name="DistributionTypeChange" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>'true' indicates that an HVAC replacement necessitates a change to the distribution type</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="PartialDisplacement" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>'true' indicates that the measure references and installed component that partially displaces the load met by an existing component that will remain installed, but meet a smaller load</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="HotWaterIntegrated">
+										<xs:annotation>
+											<xs:documentation>In an integrated system, the HVAC system also supplies domestic hot water, a separated system does not.</xs:documentation>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:string">
+												<xs:enumeration value="separated"/>
+												<xs:enumeration value="integrated"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="DuctImprovement">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element minOccurs="0" name="DuctInsulation" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>'true' indicates that the DuctImprovement measure includes changes to the DuctInsulationMaterial node.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="DuctSealing" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>'true' indicates that the DuctImprovement measure includes changes to the DuctLeakageMeasurement node.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:choice>
+				</xs:complexType>
+			</xs:element>
 			<xs:element minOccurs="0" name="ReplacedComponents">
 				<xs:annotation>
 					<xs:documentation>or removed component</xs:documentation>
@@ -4948,6 +5206,26 @@
 				<xs:annotation>
 					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. Percentage expressed as a fraction (ie 10% =
 						0.1)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="SimplifiedModelCalibrationHeatingAbsoluteError" nillable="true" type="HPXMLDouble">
+				<xs:annotation>
+					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. In either kWh for electricity or MBtu (million Btu) for all other fuels.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="SimplifiedModelCalibrationCoolingAbsoluteError" nillable="true" type="HPXMLDouble">
+				<xs:annotation>
+					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. In either kWh for electricity or MBtu (million Btu) for all other fuels.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="SimplifiedModelCalibrationBaseloadAbsoluteError" nillable="true" type="HPXMLDouble">
+				<xs:annotation>
+					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. In either kWh for electricity or MBtu (million Btu) for all other fuels.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="SimplifiedModelCalibrationTotalAbsoluteError" nillable="true" type="HPXMLDouble">
+				<xs:annotation>
+					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. In either kWh for electricity or MBtu (million Btu) for all other fuels.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
@@ -6249,6 +6527,14 @@
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
+			<xs:element name="BowstringRoof">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute name="dataSource" type="DataSource"/>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="Other">
 				<xs:complexType>
 					<xs:sequence>
@@ -6264,6 +6550,51 @@
 		<xs:sequence>
 			<xs:element name="UnitofMeasure" type="VentilationUnit" minOccurs="0"/>
 			<xs:element name="Value" type="BuildingAirLeakage" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute name="dataSource" type="DataSource"/>
+	</xs:complexType>
+	<xs:complexType name="VehicleBattery">
+		<xs:sequence>
+			<xs:element minOccurs="0" name="BatteryType" type="BatteryType"/>
+			<xs:element minOccurs="0" name="NominalCapacity" type="BatteryCapacityType" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>The total energy available when the battery is discharged starting from 100% state of charge until it reaches the cut-off voltage.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="UsableCapacity" type="BatteryCapacityType" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>The stored energy that can actually be used. In most cases usable capacity is less than the nominal capacity.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="CoolingStrategy" type="BatteryCoolingStrategy"/>
+			<xs:element minOccurs="0" name="RatedPowerOutput" type="Power">
+				<xs:annotation>
+					<xs:documentation>[W] The amount of power the battery typically generates under non-peak conditions.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="PeakPowerOutput" type="Power">
+				<xs:annotation>
+					<xs:documentation>[W] The peak power that the battery can generate for a short period of time.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="NominalVoltage" type="HPXMLDecimal">
+				<xs:annotation>
+					<xs:documentation>[V] The nominal voltage is the battery voltage when the state of charge is 0.5 (midway between being fully charged, and fully discharged)
+												with a 0.2C discharge current.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="RoundTripEfficiency" type="FractionExcludingZero">
+				<xs:annotation>
+					<xs:documentation>Not all the power that is used to charge the battery is available during discharge. Round trip efficiency is the ratio of the energy put
+												in to the energy retrieved from storage.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="MaximumChargingPower" type="Power">
+				<xs:annotation>
+					<xs:documentation>[W] The maximum charging power that can be accepted by the vehicle battery.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="extension" type="extensionType"/>
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
@@ -6403,7 +6734,83 @@
 					<xs:documentation>[A]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element minOccurs="0" name="HeadroomSpaces" type="IntegerGreaterThanOrEqualToZero">
+				<xs:annotation>
+					<xs:documentation>The number of open breaker spaces.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="RatedTotalSpaces" type="IntegerGreaterThanZero">
+				<xs:annotation>
+					<xs:documentation>The rated number of breaker spaces.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="BranchCircuits">
+				<xs:annotation>
+					<xs:documentation>Records the branch circuit layout and breaker usage of the electrical panel.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="1" name="BranchCircuit" type="BranchCircuitType">
+							<xs:annotation>
+								<xs:documentation>Each branch circuit is protected by an overcurrent protection device. However, a breaker can protect more than one branch circuit. For example, a tandem breaker takes up one breaker space but serves two branch circuits. Each BranchCircuit records the attributes of a branch circuit, including the voltage served, max current rating, number of breaker spaces occupied, and what system(s) it is connected to.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="ServiceFeeders">
+				<xs:annotation>
+					<xs:documentation>Records the electrical loads of major electric and other specific systems for sizing the service entrance conductors (wires going into the main electrical panel from the utility pole) or the feeder conductors (wires between electrical panels) according to the National Electrical Code. This calculation is known as the service load or feeder load calculation. The electrical load refers to the nominal or nameplate power rating of a device in Volt-Amps or Watts. It can be calculated as the product of voltage and full load amp (FLA) or rated load amp (RLA). Minimum circuit amp (MCA) or maximum overcurrent rating can be used but are more conservative than FLA or RLA.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="1" name="ServiceFeeder" type="ServiceFeederType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
+		</xs:sequence>
+		<xs:attribute name="dataSource" type="DataSource"/>
+	</xs:complexType>
+	<xs:complexType name="BranchCircuitType">
+		<xs:sequence>
+			<xs:group ref="SystemInfo"/>
+			<xs:element minOccurs="0" name="Voltage" type="ElectricPanelVoltage"/>
+			<xs:element minOccurs="0" name="MaxCurrentRating" type="Current">
+				<xs:annotation>
+					<xs:documentation>[A]</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="OccupiedSpaces" type="BranchCircuitOccupiedSpaces">
+				<xs:annotation>
+					<xs:documentation>Number of occupied breaker spaces.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="AttachedToComponent" type="LocalReference" maxOccurs="unbounded"/>
+			<xs:element minOccurs="0" name="AttachedToSubPanel" type="LocalReference">
+				<xs:annotation>
+					<xs:documentation>References the ElectricPanel that this BranchCircuit is attached to.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="dataSource" type="DataSource"/>
+	</xs:complexType>
+	<xs:complexType name="ServiceFeederType">
+		<xs:sequence>
+			<xs:group ref="SystemInfo"/>
+			<xs:element minOccurs="0" name="LoadType" type="ServiceFeederLoadType"/>
+			<xs:element minOccurs="0" name="PowerRating" type="HPXMLDoubleGreaterThanOrEqualToZero">
+				<xs:annotation>
+					<xs:documentation>[W]</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="IsNewLoad" type="HPXMLBoolean">
+				<xs:annotation>
+					<xs:documentation>In the context of an NEC calculation, whether the load is an addition or not.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="NumberofAppliances" type="IntegerGreaterThanOrEqualToZero"/>
+			<xs:element minOccurs="0" name="AttachedToComponent" type="LocalReference" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
@@ -6460,6 +6867,18 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="HPXMLDoubleGreaterThanOrEqualToZero_simple">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="HPXMLDoubleGreaterThanOrEqualToZero">
+		<xs:simpleContent>
+			<xs:extension base="HPXMLDoubleGreaterThanOrEqualToZero_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:complexType name="HPXMLDecimal">
 		<xs:simpleContent>
 			<xs:extension base="xs:decimal">
@@ -6477,6 +6896,8 @@
 	<xs:simpleType name="schemaVersionType">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="4.0"/>
+			<xs:enumeration value="4.1"/>
+			<xs:enumeration value="4.2"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<!--Address Information Below-->
@@ -9465,6 +9886,24 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="ClothesDryerDryingMethod_simple">
+		<xs:annotation>
+			<xs:documentation>The method of drying clothes in the clothes dryer.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="conventional"/>
+			<xs:enumeration value="condensing"/>
+			<xs:enumeration value="heat pump"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="ClothesDryerDryingMethod">
+		<xs:simpleContent>
+			<xs:extension base="ClothesDryerDryingMethod_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="FreezerStyle_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="uncategorized"/>
@@ -10119,6 +10558,119 @@
 	<xs:complexType name="EVChargingConnector">
 		<xs:simpleContent>
 			<xs:extension base="EVChargingConnector_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="VehicleChargingLocation_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Home"/>
+			<xs:enumeration value="Work"/>
+			<xs:enumeration value="Public"/>
+			<xs:enumeration value="Other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VehicleChargingLocation">
+		<xs:simpleContent>
+			<xs:extension base="VehicleChargingLocation_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="VehicleLocation_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="garage"/>
+			<xs:enumeration value="garage - conditioned"/>
+			<xs:enumeration value="garage - unconditioned"/>
+			<xs:enumeration value="outside"/>
+			<xs:enumeration value="outside - private"/>
+			<xs:enumeration value="outside - public"/>
+			<xs:enumeration value="unconditioned space"/>
+			<xs:enumeration value="other heated space"/>
+			<xs:enumeration value="other non-freezing space"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VehicleLocation">
+		<xs:simpleContent>
+			<xs:extension base="VehicleLocation_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="VehicleFuelType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="gasoline"/>
+			<xs:enumeration value="diesel"/>
+			<xs:enumeration value="biodiesel"/>
+			<xs:enumeration value="ethanol"/>
+			<xs:enumeration value="hydrogen"/>
+			<xs:enumeration value="natural gas"/>
+			<xs:enumeration value="propane"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VehicleFuelType">
+		<xs:simpleContent>
+			<xs:extension base="VehicleFuelType_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="VehicleClassType_simple">
+		<xs:annotation>
+			<xs:documentation>The class as defined by the U.S. Federal Highway Administration</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="motorcycle"/>
+			<xs:enumeration value="passenger car"/>
+			<xs:enumeration value="two-axle, four-tire single unit vehicle"/>
+			<xs:enumeration value="bus"/>
+			<xs:enumeration value="two-axle, six-tire, single-unit truck"/>
+			<xs:enumeration value="three-axle single-unit truck"/>
+			<xs:enumeration value="four or more axle single-unit truck"/>
+			<xs:enumeration value="four or fewer axle single-trailer truck"/>
+			<xs:enumeration value="five-axle single-trailer truck"/>
+			<xs:enumeration value="six or more axle single-trailer truck"/>
+			<xs:enumeration value="five or fewer axle multi-trailer truck"/>
+			<xs:enumeration value="six-axle multi-trailer truck"/>
+			<xs:enumeration value="seven or more axle multi-trailer truck"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VehicleClassType">
+		<xs:simpleContent>
+			<xs:extension base="VehicleClassType_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="GrossVehicleWeightRating_simple">
+		<xs:annotation>
+			<xs:documentation>The class as defined by the U.S. Federal Highway Administration</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="light duty"/>
+			<xs:enumeration value="medium duty"/>
+			<xs:enumeration value="heavy duty"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="GrossVehicleWeightRating">
+		<xs:simpleContent>
+			<xs:extension base="GrossVehicleWeightRating_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="FuelEconomyUnits_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="mpg"/>
+			<xs:enumeration value="mpge"/>
+			<xs:enumeration value="km/L"/>
+			<xs:enumeration value="mile/kWh"/>
+			<xs:enumeration value="kWh/mile"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="FuelEconomyUnits">
+		<xs:simpleContent>
+			<xs:extension base="FuelEconomyUnits_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -10956,6 +11508,22 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="EVChargerLocation_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="garage"/>
+			<xs:enumeration value="garage - conditioned"/>
+			<xs:enumeration value="garage - unconditioned"/>
+			<xs:enumeration value="outside"/>
+			<xs:enumeration value="unconditioned space"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="EVChargerLocation">
+		<xs:simpleContent>
+			<xs:extension base="EVChargerLocation_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="DiameterDimension_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="inner"/>
@@ -11460,6 +12028,22 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="HPWHVoltage_simple">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="240V"/>
+			<xs:pattern value="120V"/>
+			<xs:pattern value="120V dedicated circuit"/>
+			<xs:pattern value="120V shared circuit"/>
+			<xs:pattern value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="HPWHVoltage">
+		<xs:simpleContent>
+			<xs:extension base="HPWHVoltage_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="SoilType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="sand"/>
@@ -11514,6 +12098,50 @@
 	<xs:complexType name="ElectricPanelVoltage">
 		<xs:simpleContent>
 			<xs:extension base="ElectricPanelVoltage_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="BranchCircuitOccupiedSpaces_simple">
+		<xs:restriction base="xs:double">
+			<xs:enumeration value="0.0"/>
+			<xs:enumeration value="0.5"/>
+			<xs:enumeration value="1.0"/>
+			<xs:enumeration value="2.0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="BranchCircuitOccupiedSpaces">
+		<xs:simpleContent>
+			<xs:extension base="BranchCircuitOccupiedSpaces_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="ServiceFeederLoadType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="heating"/>
+			<xs:enumeration value="cooling"/>
+			<xs:enumeration value="hot water"/>
+			<xs:enumeration value="clothes dryer"/>
+			<xs:enumeration value="dishwasher"/>
+			<xs:enumeration value="range/oven"/>
+			<xs:enumeration value="refrigeration"/>
+			<xs:enumeration value="mech vent"/>
+			<xs:enumeration value="permanent spa heater"/>
+			<xs:enumeration value="permanent spa pump"/>
+			<xs:enumeration value="pool heater"/>
+			<xs:enumeration value="pool pump"/>
+			<xs:enumeration value="well pump"/>
+			<xs:enumeration value="electric vehicle charging"/>
+			<xs:enumeration value="lighting"/>
+			<xs:enumeration value="kitchen"/>
+			<xs:enumeration value="laundry"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="ServiceFeederLoadType">
+		<xs:simpleContent>
+			<xs:extension base="ServiceFeederLoadType_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>

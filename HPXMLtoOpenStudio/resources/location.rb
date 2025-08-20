@@ -9,10 +9,9 @@ module Location
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param epw_path [String] Path to the EPW weather file
   # @return [nil]
-  def self.apply(model, weather, hpxml_bldg, hpxml_header, epw_path)
-    apply_weather_file(model, epw_path)
+  def self.apply(model, weather, hpxml_bldg, hpxml_header)
+    apply_weather_file(model, weather)
     apply_year(model, hpxml_header, weather)
     apply_site(model, hpxml_bldg)
     apply_dst(model, hpxml_bldg)
@@ -22,10 +21,10 @@ module Location
   # Sets the OpenStudio WeatherFile object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param epw_path [String] Path to the EPW weather file
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [nil]
-  def self.apply_weather_file(model, epw_path)
-    OpenStudio::Model::WeatherFile.setWeatherFile(model, OpenStudio::EpwFile.new(epw_path))
+  def self.apply_weather_file(model, weather)
+    OpenStudio::Model::WeatherFile.setWeatherFile(model, weather.epw_file)
   end
 
   # Set latitude, longitude, time zone, and elevation on the OpenStudio Site object.
@@ -70,7 +69,7 @@ module Location
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_dst(model, hpxml_bldg)
-    return unless hpxml_bldg.dst_enabled
+    return unless hpxml_bldg.dst_observed
 
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     dst_start_date = "#{month_names[hpxml_bldg.dst_begin_month - 1]} #{hpxml_bldg.dst_begin_day}"
@@ -147,7 +146,7 @@ module Location
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [Integer] the simulation calendar year
   def self.get_sim_calendar_year(sim_calendar_year, weather)
-    if (not weather.nil?) && (not weather.header.ActualYear.nil?) # AMY
+    if not weather.header.ActualYear.nil? # AMY
       sim_calendar_year = weather.header.ActualYear
     end
     if sim_calendar_year.nil?

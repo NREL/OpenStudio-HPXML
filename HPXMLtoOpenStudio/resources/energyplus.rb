@@ -25,6 +25,10 @@ module EPlus
   EMSActuatorScheduleFileValue = 'Schedule:File', 'Schedule Value'
   EMSActuatorZoneInfiltrationFlowRate = 'Zone Infiltration', 'Air Exchange Flow Rate'
   EMSActuatorZoneMixingFlowRate = 'ZoneMixing', 'Air Exchange Flow Rate'
+  EMSActuatorFrostHeatingCapacityMultiplierSingleSpeedDX = 'Coil:Heating:DX:SingleSpeed', 'Frost Heating Capacity Multiplier'
+  EMSActuatorFrostHeatingCapacityMultiplierMultiSpeedDX = 'Coil:Heating:DX:MultiSpeed', 'Frost Heating Capacity Multiplier'
+  EMSActuatorFrostHeatingInputPowerMultiplierSingleSpeedDX = 'Coil:Heating:DX:SingleSpeed', 'Frost Heating Input Power Multiplier'
+  EMSActuatorFrostHeatingInputPowerMultiplierMultiSpeedDX = 'Coil:Heating:DX:MultiSpeed', 'Frost Heating Input Power Multiplier'
   EMSIntVarFanMFR = 'Fan Maximum Mass Flow Rate'
   EMSIntVarPumpMFR = 'Pump Maximum Mass Flow Rate'
   FluidPropyleneGlycol = 'PropyleneGlycol'
@@ -49,6 +53,12 @@ module EPlus
   SurfaceTypeWall = 'Wall'
   SurfaceWindExposureNo = 'NoWind'
   SurfaceWindExposureYes = 'WindExposed'
+  PumpControlTypeIntermittent = 'Intermittent'
+  TimeseriesFrequencyNone = 'none'
+  TimeseriesFrequencyTimestep = 'timestep'
+  TimeseriesFrequencyHourly = 'hourly'
+  TimeseriesFrequencyDaily = 'daily'
+  TimeseriesFrequencyMonthly = 'monthly'
 
   # Returns the fuel type used in the EnergyPlus simulation that the HPXML fuel type
   # maps to.
@@ -82,5 +92,16 @@ module EPlus
     else
       fail "Unexpected HPXML fuel '#{hpxml_fuel}'."
     end
+  end
+
+  # Map of reporting timeseries frequency choices to MessagePack timeseries names.
+  #
+  # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
+  # @return [String] MessagePack timeseries name
+  def self.get_msgpack_timeseries_name(timeseries_frequency)
+    return { EPlus::TimeseriesFrequencyTimestep => 'TimeStep',
+             EPlus::TimeseriesFrequencyHourly => 'Hourly',
+             EPlus::TimeseriesFrequencyDaily => 'Daily',
+             EPlus::TimeseriesFrequencyMonthly => 'Monthly' }[timeseries_frequency]
   end
 end

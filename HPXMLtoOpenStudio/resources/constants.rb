@@ -9,7 +9,8 @@ module Constants
 
   # Object types
   ObjectTypeAirSourceHeatPump = 'air source heat pump'
-  ObjectTypeBackupSuppHeat = 'back up supp heat'
+  ObjectTypeBEVDischargeProgram = 'bev discharge program'
+  ObjectTypeBattery = 'battery'
   ObjectTypeBatteryLossesAdjustment = 'battery losses adjustment'
   ObjectTypeBoiler = 'boiler'
   ObjectTypeCeilingFan = 'ceiling fan'
@@ -34,9 +35,12 @@ module Constants
   ObjectTypeGeneralWaterUse = 'general water use'
   ObjectTypeGeneralWaterUseLatent = 'general water use latent'
   ObjectTypeGeneralWaterUseSensible = 'general water use sensible'
+  ObjectTypeGenerator = 'generator'
   ObjectTypeGroundSourceHeatPump = 'ground source heat pump'
   ObjectTypeGSHPSharedPump = 'gshp shared loop pump'
   ObjectTypeHotWaterRecircPump = 'dhw recirc pump'
+  ObjectTypeHPDefrostSupplHeat = 'heat pump defrost suppl heat'
+  ObjectTypeHPDefrostHeatLoad = 'heat pump defrost heat load'
   ObjectTypeHVACAvailabilitySensor = 'hvac availability sensor'
   ObjectTypeIdealAirSystem = 'ideal air system'
   ObjectTypeInfiltration = 'infil'
@@ -68,6 +72,8 @@ module Constants
   ObjectTypeNaturalVentilation = 'natural vent'
   ObjectTypeNeighbors = 'neighbors'
   ObjectTypeOccupants = 'occupants'
+  ObjectTypePanHeater = 'pan heater'
+  ObjectTypePhotovoltaics = 'photovoltaics'
   ObjectTypePTAC = 'packaged terminal air conditioner'
   ObjectTypePTHP = 'packaged terminal heat pump'
   ObjectTypeRefrigerator = 'fridge'
@@ -78,6 +84,7 @@ module Constants
   ObjectTypeTotalLoadsProgram = 'total loads program'
   ObjectTypeUnitHeater = 'unit heater'
   ObjectTypeUnmetHoursProgram = 'unmet hours program'
+  ObjectTypeVehicle = 'vehicle'
   ObjectTypeWaterHeater = 'water heater'
   ObjectTypeWaterHeaterSetpoint = 'water heater setpoint'
   ObjectTypeWaterHeaterAdjustment = 'water heater energy adjustment'
@@ -86,7 +93,8 @@ module Constants
 
   # Arrays/Maps
   ERIVersions = ['2014', '2014A', '2014AE', '2014AEG', '2019', '2019A',
-                 '2019AB', '2019ABC', '2019ABCD', '2022', '2022C', '2022CE']
+                 '2019AB', '2019ABC', '2019ABCD', '2022', '2022C', '2022CE',
+                 'latest']
   IECCZones = ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C',
                '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8']
   StateCodesMap = { 'AK' => 'Alaska',
@@ -248,6 +256,7 @@ end
 module UHT
   Heating = 'Heating'
   Cooling = 'Cooling'
+  Driving = 'EV Driving'
 end
 
 # Resilience Types (Constants for output reporting)

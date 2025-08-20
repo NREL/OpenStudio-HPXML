@@ -1,12 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.0'>
+<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.2'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
     <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
-  <SoftwareInfo/>
+  <SoftwareInfo>
+    <extension>
+      <ERICalculation>
+        <Version>2022CE</Version>
+      </ERICalculation>
+    </extension>
+  </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
     <ProjectStatus>
@@ -76,7 +82,6 @@
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>811.1</Area>
             <Azimuth>0</Azimuth>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Pitch>4.0</Pitch>
@@ -90,7 +95,6 @@
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>811.1</Area>
             <Azimuth>180</Azimuth>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Pitch>4.0</Pitch>
@@ -110,7 +114,6 @@
             </WallType>
             <Area>456.0</Area>
             <Azimuth>0</Azimuth>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -127,7 +130,6 @@
             </WallType>
             <Area>216.0</Area>
             <Azimuth>90</Azimuth>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -144,7 +146,6 @@
             </WallType>
             <Area>456.0</Area>
             <Azimuth>180</Azimuth>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -161,7 +162,6 @@
             </WallType>
             <Area>216.0</Area>
             <Azimuth>270</Azimuth>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -179,7 +179,6 @@
             </WallType>
             <Area>60.8</Area>
             <Azimuth>90</Azimuth>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -197,7 +196,6 @@
             </WallType>
             <Area>60.8</Area>
             <Azimuth>270</Azimuth>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -243,6 +241,10 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.4</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window1InteriorShading'/>
+              <Type>light curtains</Type>
+            </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -252,6 +254,10 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.4</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window2InteriorShading'/>
+              <Type>light curtains</Type>
+            </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall2'/>
           </Window>
@@ -261,6 +267,10 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.4</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window3InteriorShading'/>
+              <Type>light curtains</Type>
+            </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall3'/>
           </Window>
@@ -270,6 +280,10 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.4</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='Window4InteriorShading'/>
+              <Type>light curtains</Type>
+            </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall4'/>
           </Window>
@@ -309,6 +323,7 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
@@ -346,6 +361,9 @@
             <SystemType>
               <Standard/>
             </SystemType>
+            <PipeInsulation>
+              <PipeRValue>0.0</PipeRValue>
+            </PipeInsulation>
             <DrainWaterHeatRecovery>
               <FacilitiesConnected>all</FacilitiesConnected>
               <EqualFlow>true</EqualFlow>
@@ -367,23 +385,41 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher1'/>
+          <IntegratedModifiedEnergyFactor>1.0</IntegratedModifiedEnergyFactor>
+          <RatedAnnualkWh>400.0</RatedAnnualkWh>
+          <LabelElectricRate>0.12</LabelElectricRate>
+          <LabelGasRate>1.09</LabelGasRate>
+          <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
+          <LabelUsage>6.0</LabelUsage>
+          <Capacity>3.0</Capacity>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
           <FuelType>electricity</FuelType>
+          <DryingMethod>conventional</DryingMethod>
+          <CombinedEnergyFactor>3.01</CombinedEnergyFactor>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
+          <RatedAnnualkWh>467.0</RatedAnnualkWh>
+          <PlaceSettingCapacity>12</PlaceSettingCapacity>
+          <LabelElectricRate>0.12</LabelElectricRate>
+          <LabelGasRate>1.09</LabelGasRate>
+          <LabelAnnualGasCost>33.12</LabelAnnualGasCost>
+          <LabelUsage>4.0</LabelUsage>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
+          <RatedAnnualkWh>709.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>
           <FuelType>electricity</FuelType>
+          <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven1'/>
+          <IsConvection>false</IsConvection>
         </Oven>
       </Appliances>
       <Lighting>
@@ -414,7 +450,7 @@
         <LightingGroup>
           <SystemIdentifier id='LightingGroup4'/>
           <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.0</FractionofUnitsInLocation>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
           <LightingType>
             <CompactFluorescent/>
           </LightingType>
