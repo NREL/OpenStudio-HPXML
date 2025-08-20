@@ -3023,7 +3023,26 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       elsif object.to_CoilCoolingDX.is_initialized
-        return { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy", "Cooling Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"] }
+        vars = { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
+        parent = @model.getAirLoopHVACUnitarySystems.select { |u| u.coolingCoil.is_initialized && u.coolingCoil.get.handle.to_s == object.handle.to_s }
+        if (not parent.empty?) && parent[0].heatingCoil.is_initialized
+          htg_coil = parent[0].heatingCoil.get
+        end
+        if parent.empty?
+          parent = model.getZoneHVACPackagedTerminalAirConditioners.select { |u| u.coolingCoil.handle.to_s == object.handle.to_s }
+          if not parent.empty?
+            htg_coil = parent[0].heatingCoil
+          end
+        end
+        if parent.empty?
+          fail 'Could not find parent object.'
+        end
+
+        if htg_coil.nil? || (not (htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized || htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized))
+          # Crankcase variable only available if no DX heating coil on parent
+          vars[[FT::Elec, EUT::Cooling]] << "Cooling Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy"
+        end
+        return vars
 
       elsif object.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized || object.to_CoilCoolingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
         return { [FT::Elec, EUT::Cooling] => ["Cooling Coil #{EPlus::FuelTypeElectricity} Energy"] }
