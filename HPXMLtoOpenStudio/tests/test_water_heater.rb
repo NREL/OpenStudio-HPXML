@@ -390,7 +390,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     assert_equal(1, model.getCoilWaterHeatingDesuperheaters.size)
     preheat_tank = model.getWaterHeaterMixeds.find { |wh| wh.name.get.include? 'storage tank' }
     dsh_coil = model.getCoilWaterHeatingDesuperheaters[0]
-    assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingDXSingleSpeed.is_initialized)
+    assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingDX.is_initialized)
     assert_equal(preheat_tank, dsh_coil.heatRejectionTarget.get.to_WaterHeaterMixed.get)
   end
 
@@ -428,7 +428,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     assert_equal(1, model.getCoilWaterHeatingDesuperheaters.size)
     preheat_tank = model.getWaterHeaterMixeds.find { |wh| wh.name.get.include? 'storage tank' }
     dsh_coil = model.getCoilWaterHeatingDesuperheaters[0]
-    assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingDXMultiSpeed.is_initialized)
+    assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingDX.is_initialized)
     assert_equal(preheat_tank, dsh_coil.heatRejectionTarget.get.to_WaterHeaterMixed.get)
   end
 

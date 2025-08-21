@@ -1516,9 +1516,7 @@ module Waterheater
 
     # Get the HVAC cooling coil for the desuperheater
     desuperheater_clg_coil = nil
-    (model.getCoilCoolingDXSingleSpeeds +
-     model.getCoilCoolingDXMultiSpeeds +
-     model.getCoilCoolingWaterToAirHeatPumpEquationFits).each do |clg_coil|
+    (model.getCoilCoolingDXs + model.getCoilCoolingWaterToAirHeatPumpEquationFits).each do |clg_coil|
       sys_id = clg_coil.additionalProperties.getFeatureAsString('HPXML_ID')
       if sys_id.is_initialized && sys_id.get == water_heating_system.related_hvac_idref
         desuperheater_clg_coil = clg_coil
