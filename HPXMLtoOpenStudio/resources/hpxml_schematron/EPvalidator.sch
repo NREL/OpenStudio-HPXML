@@ -2761,7 +2761,6 @@
       <sch:assert role='ERROR' test='count(h:ArrayTilt) = 1'>Expected 1 element(s) for xpath: ArrayTilt</sch:assert>
       <sch:assert role='ERROR' test='count(h:MaxPowerOutput) = 1'>Expected 1 element(s) for xpath: MaxPowerOutput</sch:assert>
       <sch:assert role='ERROR' test='count(h:SystemLossesFraction) + count(h:YearModulesManufactured) &gt;= 0'>Expected 0 or more element(s) for xpath: SystemLossesFraction | YearModulesManufactured</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AttachedToInverter) = 1'>Expected 1 element(s) for xpath: AttachedToInverter</sch:assert> <!-- See [Inverter] -->
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:MaxPowerOutput) &lt;= 500 and number(h:MaxPowerOutput) &gt; 0'>Max power output should typically be greater than or equal to 500 W.</sch:report>
     </sch:rule>
@@ -2773,6 +2772,13 @@
       <sch:assert role='ERROR' test='count(../../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:NumberofBedroomsServed) = 1'>Expected 1 element(s) for xpath: extension/NumberofBedroomsServed</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NumberofBedroomsServed) &gt; number(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms) or not(h:extension/h:NumberofBedroomsServed) or not(../../../h:BuildingSummary/h:BuildingConstruction/h:NumberofBedrooms)'>Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[PVSystemWithMultipleInverters]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:Photovoltaics/h:PVSystem[count(../h:Inverter) &gt; 1]'>
+      <sch:assert role='ERROR' test='count(h:AttachedToInverter) = 1'>Expected 1 element(s) for xpath: AttachedToInverter</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -2882,6 +2888,8 @@
       <sch:assert role='ERROR' test='h:Battery/h:extension/h:LifetimeModel[text()="None" or text()="KandlerSmith"] or not(h:Battery/h:extension/h:LifetimeModel)'>Expected Battery/extension/LifetimeModel to be 'None' or 'KandlerSmith'</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionChargedLocation[h:Location="Home"]/h:Percentage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FractionChargedLocation[Location="Home"]/Percentage</sch:assert>
       <sch:assert role='ERROR' test='count(h:ConnectedCharger) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ConnectedCharger</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:UsageMultiplier) &gt;= 0 or not(h:extension/h:UsageMultiplier)'>Expected extension/UsageMultiplier to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
