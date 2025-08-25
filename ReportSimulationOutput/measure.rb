@@ -370,15 +370,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     args = get_arguments(runner, arguments(model), user_arguments)
 
     setup_outputs(false, args)
-    args = setup_timeseries_includes(@emissions, args)
+    args = setup_timeseries_includes(args)
 
     has_electricity_production = false
-    if @end_uses.count { |key, end_use| ![EUT::Battery, EUT::Vehicle].include?(key[1]) && end_use.is_negative && end_use.variables.size > 0 } > 0
+    if @end_uses.count { |_key, end_use| end_use.is_negative && end_use.variables.size > 0 } > 0
       has_electricity_production = true
     end
 
     has_electricity_storage = false
-    if @end_uses.count { |key, end_use| [EUT::Battery, EUT::Vehicle].include?(key[1]) && end_use.variables.size > 0 } > 0
+    if @end_uses.count { |key, end_use| (end_use.is_storage && end_use.variables.size > 0) || (key == [FT::Elec, EUT::Vehicle] && end_use.variables.size > 0) } > 0
       has_electricity_storage = true
     end
 
@@ -782,7 +782,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def get_outputs(runner, args)
-    args = setup_timeseries_includes(@emissions, args)
+    args = setup_timeseries_includes(args)
 
     # Fuel Uses
     @fuels.each do |(_fuel_type, _total_or_net), fuel|
@@ -865,13 +865,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         keys = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
         vars = end_use.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
 
-        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: end_use.is_negative)
+        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars, is_negative: (end_use.is_negative || end_use.is_storage))
 
         if args[:include_timeseries_end_use_consumptions]
-          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, args[:timeseries_frequency], is_negative: end_use.is_negative)
+          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, args[:timeseries_frequency], is_negative: (end_use.is_negative || end_use.is_storage))
         end
         if args[:include_hourly_electric_end_use_consumptions] && fuel_type == FT::Elec
-          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, EPlus::TimeseriesFrequencyHourly, is_negative: end_use.is_negative)
+          end_use.hourly_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, EPlus::TimeseriesFrequencyHourly, is_negative: (end_use.is_negative || end_use.is_storage))
         end
       end
       end_use.meters.map { |v| v[0] }.uniq.each do |sys_id|
@@ -1115,7 +1115,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       resilience_timeseries = []
       n_timesteps = crit_load.size
       (0...n_timesteps).each do |init_time_step|
-        resilience_timeseries << get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
+        resilience_timeseries << get_resilience_timestep_value(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
       end
 
       resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
@@ -2035,18 +2035,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return val
   end
 
-  # TODO
+  # Calculates the resilience value for the given timestep.
   #
-  # @param init_time_step [TODO] TODO
-  # @param batt_kwh [TODO] TODO
-  # @param batt_kw [TODO] TODO
-  # @param batt_soc_kwh [TODO] TODO
-  # @param crit_load [TODO] TODO
-  # @param batt_roundtrip_eff [TODO] TODO
-  # @param n_timesteps [TODO] TODO
-  # @param ts_per_hr [TODO] TODO
-  # @return [TODO] TODO
-  def get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh, crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
+  # @param init_time_step [Integer] Timestep of year to perform the calculation
+  # @param batt_kwh [Double] Battery usable capacity (kWh)
+  # @param batt_kw [Double] Battery discharge power (kW)
+  # @param batt_soc_kwh [Double] Battery state of charge for the given timestep (kWh)
+  # @param crit_load [Array<Double>] Timeseries building electric load values (kWh)
+  # @param batt_roundtrip_eff [Double] Battery round-trip efficiency
+  # @param n_timesteps [Integer] Number of timesteps in the simulation
+  # @param ts_per_hr [Integer] Number of timesteps per hour
+  # @return [Double] Resilience value for the timestep.
+  def get_resilience_timestep_value(init_time_step, batt_kwh, batt_kw, batt_soc_kwh, crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
     for i in 0...n_timesteps
       t = (init_time_step + i) % n_timesteps # for wrapping around end of year
       load_kw = crit_load[t]
@@ -2135,7 +2135,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param unit_adder [Double] Adder value to apply to the EnergyPlus output
   # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
   # @param is_negative [Boolean] Whether the EnergyPlus outputs are negative and need to be multiplied by -1
-  # @param ems_shift [TODO] TODO
+  # @param ems_shift [Boolean] Whether to shift the EnergyPlus outputs by one timestep because they are EMS outputs and thus lagged
   # @return [Array<Double>] Sum of output variable timeseries outputs
   def get_report_variable_data_timeseries(key_values, variables, unit_conv, unit_adder, timeseries_frequency, is_negative: false, ems_shift: false)
     return [0.0] * @timestamps.size if variables.empty?
@@ -2183,12 +2183,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return vals
   end
 
-  # TODO
+  # Returns whether we should shift the EMS outputs or not. Only shift if we reporting timestep values
+  # (i.e., not daily, monthly, or hourly w/ a sub-hourly timestep).
   #
   # @param timeseries_frequency [String] Timeseries reporting frequency (TimeseriesFrequencyXXX)
-  # @return [TODO] TODO
+  # @return [Boolean] True if the output should be shifted
   def apply_ems_shift(timeseries_frequency)
-    # Only shift if we reporting timestep values (i.e., not daily, monthly, or hourly w/ a sub-hourly timestep)
     if (timeseries_frequency == EPlus::TimeseriesFrequencyTimestep)
       return true
     elsif (timeseries_frequency == EPlus::TimeseriesFrequencyHourly) && (@model.getTimestep.numberOfTimestepsPerHour == 1)
@@ -2267,13 +2267,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return vals.sum(0.0)
   end
 
-  # TODO
+  # Applies a specified multiplier value to all outputs stored in the output object(s).
+  # Used to, e.g., apply Distribution System Efficiency (DSE) losses to HVAC outputs.
   #
-  # @param obj [TODO] TODO
-  # @param sync_objs [TODO] TODO
-  # @param sys_id [TODO] TODO
-  # @param mult [TODO] TODO
-  # @return [TODO] TODO
+  # @param obj [EndUse or Load] The output object of interest
+  # @param sync_objs [Fuel or Load] Additional outputs that need to be kept in sync
+  # @param sys_id [String] The related HPXML object's System Identifier
+  # @param mult [Double] The multiplier value to apply
+  # @return [nil]
   def apply_multiplier_to_output(obj, sync_objs, sys_id, mult)
     # Annual
     orig_value = obj.annual_output_by_system[sys_id]
@@ -2376,18 +2377,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   class EndUse < BaseOutput
     # @param outputs [Array<Array<String, String, String>>] Sets of outputs with: HPXML ID, EnergyPlus output variable key, EnergyPlus output variable/meter name
     # @param is_negative [Boolean] Whether the EnergyPlus outputs are negative
-    def initialize(outputs:, is_negative: false)
+    # @param is_storage [Boolean] Whether the EnergyPlus outputs are associated with battery storage
+    def initialize(outputs:, is_negative: false, is_storage: false)
       super()
       @variables = outputs.select { |o| !o[2].include?(':') }
       @meters = outputs.select { |o| o[2].include?(':') }
       @is_negative = is_negative
+      @is_storage = is_storage
       @timeseries_output_by_system = {}
       @annual_output_by_system = {}
       # These outputs used to apply Cambium hourly electricity factors
       @hourly_output = []
       @hourly_output_by_system = {}
     end
-    attr_accessor(:variables, :meters, :is_negative, :annual_output_by_system, :timeseries_output_by_system,
+    attr_accessor(:variables, :meters, :is_negative, :is_storage, :annual_output_by_system, :timeseries_output_by_system,
                   :hourly_output, :hourly_output_by_system)
   end
 
@@ -2525,11 +2528,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   class OutputVariableOrMeter < BaseOutput
   end
 
-  # TODO
+  # Creates global hashes (e.g., @end_uses) to contain the output objects (e.g., EndUse); these output
+  # objects will be later populated by reading and processing EnergyPlus outputs. The output objects
+  # typically contain the relevant EnergyPlus output variables/meters.
   #
-  # @param called_from_outputs_method [TODO] TODO
+  # @param called_from_outputs_method [Boolean] Whether this method was called from the outputs method
   # @param args [Hash] Map of :argument_name => value
-  # @return [TODO] TODO
+  # @return [nil]
   def setup_outputs(called_from_outputs_method, args = {})
     # Returns the timeseries units associated with energy use
     # for the given fuel.
@@ -2578,7 +2583,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::PermanentSpaPump]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::PermanentSpaPump]))
     @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::PV]), is_negative: true)
     @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Generator]), is_negative: true)
-    @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Battery]), is_negative: true)
+    @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Battery]), is_storage: true)
     @end_uses[[FT::Elec, EUT::Vehicle]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Vehicle]))
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::Heating]))
     @end_uses[[FT::Gas, EUT::HeatingHeatPumpBackup]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::HeatingHeatPumpBackup]))
@@ -2875,18 +2880,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @output_meters_requests = args[:user_output_meters].to_s.split(',').map(&:strip)
   end
 
-  # TODO
+  # Sets timeseries output requests for EnergyPlus needed to support performing emissions calculations.
+  # To calculate timeseries emissions or timeseries fuel consumption, we also need to select timeseries
+  # end use consumption because EnergyPlus results may be post-processed due to HVAC DSE.
   #
-  # @param emissions [TODO] TODO
+  # NOTE: We might be able to avoid this if we could account for DSE inside EnergyPlus instead of
+  # applying the DSE impact during post-processing.
+  #
   # @param args [Hash] Map of :argument_name => value
-  # @return [TODO] TODO
-  def setup_timeseries_includes(emissions, args)
-    # To calculate timeseries emissions or timeseries fuel consumption, we also need to select timeseries
-    # end use consumption because EnergyPlus results may be post-processed due to HVAC DSE.
-    # TODO: This could be removed if we could account for DSE inside EnergyPlus.
+  # @return [Hash] New map of :argument_name => value
+  def setup_timeseries_includes(args)
     args = args.dup # We don't want to modify the original arguments
     args[:include_hourly_electric_end_use_consumptions] = false
-    if not emissions.empty?
+    if not @emissions.empty?
       args[:include_hourly_electric_end_use_consumptions] = true # Need hourly electricity values for Cambium
       if args[:include_timeseries_emissions] || args[:include_timeseries_emission_end_uses] || args[:include_timeseries_emission_fuels]
         args[:include_timeseries_fuel_consumptions] = true
@@ -2904,11 +2910,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
-  # TODO
+  # Returns a list of HPXML IDs corresponds to HVAC or water heating systems
   #
-  # @return [TODO] TODO
+  # @return [Array<String>] List of HPXML IDs
   def get_hpxml_system_ids
-    # Returns a list of HPXML IDs corresponds to HVAC or water heating systems
     return [] if @hpxml_bldgs.empty?
 
     system_ids = []
