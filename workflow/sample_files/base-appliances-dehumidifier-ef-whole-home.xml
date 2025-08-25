@@ -288,8 +288,8 @@
               <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Units>SEER2</Units>
+                <Value>12.4</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
@@ -403,7 +403,7 @@
           <Type>whole-home</Type>
           <Location>conditioned space</Location>
           <Capacity>60.0</Capacity>
-          <IntegratedEnergyFactor>2.1</IntegratedEnergyFactor>
+          <EnergyFactor>2.3</EnergyFactor>
           <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
           <FractionDehumidificationLoadServed>1.0</FractionDehumidificationLoadServed>
         </Dehumidifier>

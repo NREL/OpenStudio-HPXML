@@ -322,8 +322,8 @@
               <CompressorType>variable speed</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>17.5</Value>
+                <Units>SEER2</Units>
+                <Value>16.6</Value>
               </AnnualCoolingEfficiency>
               <CoolingDetailedPerformanceData>
                 <PerformanceDataPoint>

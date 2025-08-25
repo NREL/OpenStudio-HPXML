@@ -331,12 +331,12 @@
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>16.7</Value>
+                <Units>SEER2</Units>
+                <Value>15.9</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>11.3</Value>
+                <Units>HSPF2</Units>
+                <Value>9.6</Value>
               </AnnualHeatingEfficiency>
               <CoolingDetailedPerformanceData>
                 <PerformanceDataPoint>

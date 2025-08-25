@@ -453,7 +453,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_central_air_conditioner_1_speed
     ['base-hvac-central-ac-only-1-speed.xml',
-     'base-hvac-central-ac-only-1-speed-seer2.xml'].each do |hpxml_path|
+     'base-hvac-central-ac-only-1-speed-seer.xml'].each do |hpxml_path|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
       model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
@@ -553,7 +553,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_room_air_conditioner
     ['base-hvac-room-ac-only.xml',
-     'base-hvac-room-ac-only-ceer.xml',
+     'base-hvac-room-ac-only-eer.xml',
      'base-hvac-room-ac-with-heating.xml'].each do |hpxml_path|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
@@ -869,7 +869,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_air_to_air_heat_pump_1_speed
     ['base-hvac-air-to-air-heat-pump-1-speed.xml',
-     'base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml'].each do |hpxml_path|
+     'base-hvac-air-to-air-heat-pump-1-speed-seer-hspf.xml'].each do |hpxml_path|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
       model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -877,7 +877,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       # Values for rated speed
       expected_clg_cop_95 = 3.76
       expected_clg_capacity_95 = 11040
-      expected_htg_cop_47 = 3.02
+      expected_htg_cop_47 = 3.01
       expected_htg_capacity_47 = 10077
       expected_c_d = 0.08
 
