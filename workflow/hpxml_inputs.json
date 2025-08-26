@@ -712,7 +712,7 @@
     "heating_system_fraction_heat_load_served": 1,
     "cooling_system_type": "central air conditioner",
     "cooling_system_cooling_efficiency_type": "SEER2",
-    "cooling_system_cooling_efficiency": 12.4,
+    "cooling_system_cooling_efficiency": 13.4,
     "cooling_system_compressor_type": "single stage",
     "cooling_system_cooling_capacity": 24000,
     "cooling_system_fraction_cool_load_served": 1,
@@ -2103,8 +2103,8 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0,
     "heat_pump_type": "air-to-air",
-    "heat_pump_heating_efficiency": 6.5,
-    "heat_pump_cooling_efficiency": 12.4,
+    "heat_pump_heating_efficiency": 7.0,
+    "heat_pump_cooling_efficiency": 13.4,
     "heat_pump_compressor_type": "single stage",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
@@ -2192,14 +2192,16 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump_heating_efficiency": 7.9,
-    "heat_pump_cooling_efficiency": 17.1,
+    "heat_pump_heating_efficiency": 8.2,
+    "heat_pump_cooling_efficiency": 17.0,
     "heat_pump_compressor_type": "two stage"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-2-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
     "heat_pump_heating_capacity": null,
     "heat_pump_cooling_capacity": null,
+    "heat_pump_cooling_efficiency": 17.1,
+    "heat_pump_heating_efficiency": 7.9,
     "hvac_perf_data_capacity_type": "Absolute capacities",
     "hvac_perf_data_heating_outdoor_temperatures": "47.0, 17.0, 5.0",
     "hvac_perf_data_heating_min_speed_capacities": "24500, 14200, 9900",
@@ -2224,8 +2226,8 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "heat_pump_heating_efficiency": 8.5,
-    "heat_pump_cooling_efficiency": 20.9,
+    "heat_pump_heating_efficiency": 9.2,
+    "heat_pump_cooling_efficiency": 21.0,
     "heat_pump_compressor_type": "variable speed"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml": {
@@ -2309,8 +2311,10 @@
     "heat_pump_heating_capacity": null,
     "heat_pump_cooling_capacity": null,
     "heat_pump_heating_capacity_fraction_17_f": null,
-    "heat_pump_cooling_efficiency": 16.6,
-    "heat_pump_heating_efficiency": 8.1,
+    "heat_pump_cooling_efficiency_type": "SEER",
+    "heat_pump_heating_efficiency_type": "HSPF",
+    "heat_pump_cooling_efficiency": 17.5,
+    "heat_pump_heating_efficiency": 9.5,
     "hvac_perf_data_capacity_type": "Absolute capacities",
     "hvac_perf_data_heating_outdoor_temperatures": "47.0, 17.0, 5.0",
     "hvac_perf_data_heating_min_speed_capacities": "9900, 3600, 1100",
@@ -2428,12 +2432,13 @@
   },
   "sample_files/base-hvac-central-ac-only-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
-    "cooling_system_cooling_efficiency": 17.1,
+    "cooling_system_cooling_efficiency": 17.0,
     "cooling_system_compressor_type": "two stage"
   },
   "sample_files/base-hvac-central-ac-only-2-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
     "cooling_system_cooling_capacity": null,
+    "cooling_system_cooling_efficiency": 17.1,
     "hvac_perf_data_capacity_type": "Absolute capacities",
     "hvac_perf_data_cooling_outdoor_temperatures": "95.0, 82.0",
     "hvac_perf_data_cooling_min_speed_capacities": "16600, 18600",
@@ -2443,7 +2448,7 @@
   },
   "sample_files/base-hvac-central-ac-only-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
-    "cooling_system_cooling_efficiency": 22.8,
+    "cooling_system_cooling_efficiency": 23.0,
     "cooling_system_compressor_type": "variable speed"
   },
   "sample_files/base-hvac-central-ac-only-var-speed-max-power-ratio-schedule.xml": {
@@ -2453,7 +2458,8 @@
   "sample_files/base-hvac-central-ac-only-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-var-speed.xml",
     "cooling_system_compressor_type": "variable speed",
-    "cooling_system_cooling_efficiency": 16.6,
+    "cooling_system_cooling_efficiency_type": "SEER",
+    "cooling_system_cooling_efficiency": 17.5,
     "cooling_system_cooling_capacity": null,
     "hvac_perf_data_capacity_type": "Absolute capacities",
     "hvac_perf_data_cooling_outdoor_temperatures": "95.0, 82.0",
@@ -2475,8 +2481,8 @@
   "sample_files/base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "heat_pump_type": "air-to-air",
-    "heat_pump_heating_efficiency": 6.5,
-    "heat_pump_cooling_efficiency": 12.4,
+    "heat_pump_heating_efficiency": 7.0,
+    "heat_pump_cooling_efficiency": 13.4,
     "heat_pump_compressor_type": "single stage",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
@@ -2629,12 +2635,12 @@
   },
   "sample_files/base-hvac-furnace-gas-central-ac-2-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "cooling_system_cooling_efficiency": 17.1,
+    "cooling_system_cooling_efficiency": 17.0,
     "cooling_system_compressor_type": "two stage"
   },
   "sample_files/base-hvac-furnace-gas-central-ac-var-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "cooling_system_cooling_efficiency": 22.8,
+    "cooling_system_cooling_efficiency": 23.0,
     "cooling_system_compressor_type": "variable speed"
   },
   "sample_files/base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml": {
@@ -2666,8 +2672,8 @@
   "sample_files/base-hvac-furnace-gas-plus-air-to-air-heat-pump-cooling.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
     "heat_pump_type": "air-to-air",
-    "heat_pump_heating_efficiency": 6.5,
-    "heat_pump_cooling_efficiency": 12.4,
+    "heat_pump_heating_efficiency": 7.0,
+    "heat_pump_cooling_efficiency": 13.4,
     "heat_pump_compressor_type": "single stage",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
@@ -2866,7 +2872,7 @@
     "heating_system_fraction_heat_load_served": 0,
     "cooling_system_type": "mini-split",
     "cooling_system_compressor_type": "variable speed",
-    "cooling_system_cooling_efficiency": 18.1,
+    "cooling_system_cooling_efficiency": 18.0,
     "cooling_system_is_ducted": true,
     "ducts_supply_leakage_to_outside_value": 15,
     "ducts_return_leakage_to_outside_value": 5,
@@ -2884,7 +2890,7 @@
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ductless.xml",
     "cooling_system_cooling_capacity": null,
     "cooling_system_compressor_type": "variable speed",
-    "cooling_system_cooling_efficiency": 17.0,
+    "cooling_system_cooling_efficiency": 19.0,
     "hvac_perf_data_capacity_type": "Absolute capacities",
     "hvac_perf_data_cooling_outdoor_temperatures": "95.0, 82.0",
     "hvac_perf_data_cooling_min_speed_capacities": "9100, 9900",
@@ -2912,7 +2918,7 @@
     "cooling_system_fraction_cool_load_served": 0,
     "heat_pump_type": "mini-split",
     "heat_pump_heating_efficiency": 8.5,
-    "heat_pump_cooling_efficiency": 18.1,
+    "heat_pump_cooling_efficiency": 18.0,
     "heat_pump_compressor_type": "variable speed",
     "heat_pump_heating_capacity": 36000,
     "heat_pump_cooling_capacity": 36000,
@@ -2928,39 +2934,6 @@
     "ducts_return_insulation_r": 0,
     "ducts_supply_surface_area": 30,
     "ducts_return_surface_area": 10
-  },
-  "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
-    "heat_pump_heating_capacity": null,
-    "heat_pump_cooling_capacity": null,
-    "heat_pump_cooling_efficiency": 15.9,
-    "heat_pump_heating_efficiency": 9.6,
-    "hvac_perf_data_capacity_type": "Absolute capacities",
-    "hvac_perf_data_heating_outdoor_temperatures": "47.0, 17.0, 5.0, -5.0",
-    "hvac_perf_data_heating_min_speed_capacities": "9200, 7063, 6310, 5683",
-    "hvac_perf_data_heating_nom_speed_capacities": "36000, 23000",
-    "hvac_perf_data_heating_max_speed_capacities": "48000, 36800, 32920, 29640",
-    "hvac_perf_data_heating_min_speed_cops": "4.35, 2.92, 2.60, 2.49",
-    "hvac_perf_data_heating_nom_speed_cops": "3.66, 2.05",
-    "hvac_perf_data_heating_max_speed_cops": "3.21, 2.15, 1.93, 1.82",
-    "hvac_perf_data_cooling_outdoor_temperatures": "95.0, 82.0",
-    "hvac_perf_data_cooling_min_speed_capacities": "9600, 10224",
-    "hvac_perf_data_cooling_nom_speed_capacities": "36000",
-    "hvac_perf_data_cooling_max_speed_capacities": "39000, 41587",
-    "hvac_perf_data_cooling_min_speed_cops": "4.02, 4.61",
-    "hvac_perf_data_cooling_nom_speed_cops": "2.93",
-    "hvac_perf_data_cooling_max_speed_cops": "2.86, 3.29",
-    "additional_properties": "HeatPump=FUJITSU H-Series|HeatPumpAHRICert#=202537549"
-  },
-  "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance-autosize.xml": {
-    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml",
-    "hvac_perf_data_capacity_type": "Normalized capacity fractions",
-    "hvac_perf_data_heating_min_speed_capacities": "0.26, 0.20, 0.18, 0.16",
-    "hvac_perf_data_heating_nom_speed_capacities": "1.00, 0.80",
-    "hvac_perf_data_heating_max_speed_capacities": "1.33, 1.02, 0.91, 0.82",
-    "hvac_perf_data_cooling_min_speed_capacities": "0.27, 0.28",
-    "hvac_perf_data_cooling_nom_speed_capacities": "1.00",
-    "hvac_perf_data_cooling_max_speed_capacities": "1.08, 1.16"
   },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
@@ -3003,7 +2976,7 @@
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "heat_pump_cooling_capacity": null,
     "heat_pump_heating_capacity": null,
-    "heat_pump_cooling_efficiency": 17.0,
+    "heat_pump_cooling_efficiency": 19.0,
     "heat_pump_heating_efficiency": 9.0,
     "hvac_perf_data_capacity_type": "Absolute capacities",
     "hvac_perf_data_heating_outdoor_temperatures": "47.0, 17.0, 5.0, -13.0",
@@ -3096,8 +3069,8 @@
     "heating_system_heating_efficiency": 0,
     "heating_system_fraction_heat_load_served": 0,
     "cooling_system_type": "packaged terminal air conditioner",
-    "cooling_system_cooling_efficiency_type": "CEER",
-    "cooling_system_cooling_efficiency": 10.6
+    "cooling_system_cooling_efficiency_type": "EER",
+    "cooling_system_cooling_efficiency": 10.7
   },
   "sample_files/base-hvac-ptac-cfis.xml": {
     "parent_hpxml": "sample_files/base-hvac-ptac.xml",
@@ -3124,7 +3097,7 @@
   "sample_files/base-hvac-pthp.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump-1-speed.xml",
     "heat_pump_type": "packaged terminal heat pump",
-    "heat_pump_cooling_efficiency": 11.4,
+    "heat_pump_cooling_efficiency": 11.9,
     "heat_pump_backup_type": "integrated",
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 34121
@@ -3168,7 +3141,9 @@
   },
   "sample_files/base-hvac-room-ac-with-reverse-cycle.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml",
-    "heat_pump_type": "room air conditioner with reverse cycle"
+    "heat_pump_type": "room air conditioner with reverse cycle",
+    "heat_pump_cooling_efficiency_type": "CEER",
+    "heat_pump_cooling_efficiency": 11.8
   },
   "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",

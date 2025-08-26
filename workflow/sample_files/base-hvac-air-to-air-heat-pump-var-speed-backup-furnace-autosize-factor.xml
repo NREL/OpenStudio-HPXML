@@ -337,11 +337,11 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER2</Units>
-                <Value>20.9</Value>
+                <Value>21.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF2</Units>
-                <Value>8.5</Value>
+                <Value>9.2</Value>
               </AnnualHeatingEfficiency>
               <extension>
                 <CoolingAutosizingFactor>1.7</CoolingAutosizingFactor>

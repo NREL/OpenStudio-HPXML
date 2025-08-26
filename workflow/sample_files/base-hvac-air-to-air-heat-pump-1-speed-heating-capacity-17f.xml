@@ -329,11 +329,11 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER2</Units>
-                <Value>12.4</Value>
+                <Value>13.4</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF2</Units>
-                <Value>6.5</Value>
+                <Value>7.0</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
