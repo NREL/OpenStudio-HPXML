@@ -288,8 +288,8 @@
               <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Units>SEER2</Units>
+                <Value>13.4</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
@@ -400,10 +400,10 @@
         </Refrigerator>
         <Dehumidifier>
           <SystemIdentifier id='Dehumidifier1'/>
-          <Type>whole-home</Type>
+          <Type>portable</Type>
           <Location>conditioned space</Location>
-          <Capacity>60.0</Capacity>
-          <IntegratedEnergyFactor>2.1</IntegratedEnergyFactor>
+          <Capacity>40.0</Capacity>
+          <EnergyFactor>1.8</EnergyFactor>
           <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
           <FractionDehumidificationLoadServed>1.0</FractionDehumidificationLoadServed>
         </Dehumidifier>

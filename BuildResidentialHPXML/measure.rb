@@ -388,18 +388,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('100%')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system_integrated_heating_capacity', choices[:hvac_cooling_system_integrated_heating_capacity], false)
-    arg.setDisplayName('HVAC: Cooling System Integrated Heating Capacity')
-    arg.setDescription("The output capacity of the cooling system's integrated heating system. Only used for #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner} systems with integrated heating.")
-    arg.setDefaultValue('Autosize')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_cooling_system_integrated_heating_load_served', choices[:hvac_cooling_system_integrated_heating_load_served], false)
-    arg.setDisplayName('HVAC: Cooling System Integrated Heating Fraction Heat Load Served')
-    arg.setDescription("The fraction of the heating load served by the cooling system's integrated heating system.")
-    arg.setDefaultValue('100%')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_heat_pump', choices[:hvac_heat_pump], true)
     arg.setDisplayName('HVAC: Heat Pump')
     arg.setDescription('The type and efficiency of the heat pump.')
@@ -956,8 +944,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'A second heating system was specified without a primary heating system.' if error
 
     if ((args[:hvac_heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate) && (args[:hvac_heating_system_2_type] == HPXML::HVACTypeFurnace)) # separate ducted backup
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir].include?(args[:hvac_heat_pump_type]) ||
-         ((args[:hvac_heat_pump_type] == HPXML::HVACTypeHeatPumpMiniSplit) && args[:hvac_heat_pump_is_ducted]) # ducted heat pump
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir].include?(args[:hvac_heat_pump_type]) # ducted heat pump
         errors << "A ducted heat pump with '#{HPXML::HeatPumpBackupTypeSeparate}' ducted backup is not supported."
       end
     end
@@ -2350,57 +2337,33 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def set_cooling_systems(hpxml_bldg, args)
     return if args[:hvac_cooling_system] == 'None'
 
-    cooling_system_type = args[:hvac_cooling_system_type]
-
-    if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system_type
-      compressor_type = args[:hvac_cooling_system_cooling_compressor_type]
-    end
-
-    if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
-      case args[:hvac_cooling_system_cooling_efficiency_type]
-      when HPXML::UnitsSEER
-        cooling_efficiency_seer = args[:hvac_cooling_system_cooling_efficiency]
-      when HPXML::UnitsSEER2
-        cooling_efficiency_seer2 = args[:hvac_cooling_system_cooling_efficiency]
-      when HPXML::UnitsEER
-        cooling_efficiency_eer = args[:hvac_cooling_system_cooling_efficiency]
-      when HPXML::UnitsCEER
-        cooling_efficiency_ceer = args[:hvac_cooling_system_cooling_efficiency]
-      end
-    end
-
-    if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include?(cooling_system_type)
-      cooling_system_crankcase_heater_watts = args[:hvac_cooling_system_crankcase_heater_watts]
-    end
-
-    if [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(cooling_system_type) && (not args[:hvac_cooling_system_integrated_heating_system_fuel].nil?)
-      integrated_heating_system_fuel = args[:hvac_cooling_system_integrated_heating_system_fuel]
-      integrated_heating_system_fraction_heat_load_served = args[:hvac_cooling_system_integrated_heating_load_served_fraction]
-      integrated_heating_system_capacity = args[:hvac_cooling_system_integrated_heating_capacity_capacity]
-      integrated_heating_system_efficiency_percent = args[:hvac_cooling_system_integrated_heating_system_efficiency]
+    case args[:hvac_cooling_system_cooling_efficiency_type]
+    when HPXML::UnitsSEER
+      cooling_efficiency_seer = args[:hvac_cooling_system_cooling_efficiency]
+    when HPXML::UnitsSEER2
+      cooling_efficiency_seer2 = args[:hvac_cooling_system_cooling_efficiency]
+    when HPXML::UnitsEER
+      cooling_efficiency_eer = args[:hvac_cooling_system_cooling_efficiency]
+    when HPXML::UnitsCEER
+      cooling_efficiency_ceer = args[:hvac_cooling_system_cooling_efficiency]
     end
 
     hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
-                                   cooling_system_type: cooling_system_type,
+                                   cooling_system_type: args[:hvac_cooling_system_type],
                                    cooling_system_fuel: HPXML::FuelTypeElectricity,
                                    cooling_capacity: args[:hvac_cooling_system_capacity_capacity],
                                    cooling_autosizing_factor: args[:hvac_cooling_system_capacity_autosizing_factor],
                                    cooling_autosizing_limit: args[:hvac_cooling_system_capacity_autosizing_limit],
                                    fraction_cool_load_served: args[:hvac_cooling_system_cooling_load_served_fraction],
-                                   compressor_type: compressor_type,
+                                   compressor_type: args[:hvac_cooling_system_cooling_compressor_type],
                                    cooling_efficiency_seer: cooling_efficiency_seer,
                                    cooling_efficiency_seer2: cooling_efficiency_seer2,
                                    cooling_efficiency_eer: cooling_efficiency_eer,
                                    cooling_efficiency_ceer: cooling_efficiency_ceer,
-                                   crankcase_heater_watts: cooling_system_crankcase_heater_watts,
-                                   primary_system: true,
-                                   integrated_heating_system_fuel: integrated_heating_system_fuel,
-                                   integrated_heating_system_capacity: integrated_heating_system_capacity,
-                                   integrated_heating_system_efficiency_percent: integrated_heating_system_efficiency_percent,
-                                   integrated_heating_system_fraction_heat_load_served: integrated_heating_system_fraction_heat_load_served)
+                                   primary_system: true)
 
     # Detailed performance data
-    if not [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system_type
+    if not [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include? args[:hvac_cooling_system_type]
       return
     end
 
@@ -2465,8 +2428,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def set_heat_pumps(hpxml_bldg, args)
     return if args[:hvac_heat_pump] == 'None'
 
-    heat_pump_type = args[:hvac_heat_pump_type]
-
     case args[:hvac_heat_pump_backup_type]
     when HPXML::HeatPumpBackupTypeIntegrated
       backup_type = args[:hvac_heat_pump_backup_type]
@@ -2496,10 +2457,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
-      compressor_type = args[:hvac_heat_pump_cooling_compressor_type]
-    end
-
     case args[:hvac_heat_pump_heating_efficiency_type]
     when HPXML::UnitsHSPF
       heating_efficiency_hspf = args[:hvac_heat_pump_heating_efficiency]
@@ -2516,20 +2473,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       cooling_efficiency_seer2 = args[:hvac_heat_pump_cooling_efficiency]
     when HPXML::UnitsEER
       cooling_efficiency_eer = args[:hvac_heat_pump_cooling_efficiency]
-    end
-
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include?(heat_pump_type)
-      heat_pump_crankcase_heater_watts = args[:hvac_heat_pump_crankcase_heater_watts]
+    when HPXML::UnitsCEER
+      cooling_efficiency_ceer = args[:hvac_heat_pump_cooling_efficiency]
     end
 
     hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
-                              heat_pump_type: heat_pump_type,
+                              heat_pump_type: args[:hvac_heat_pump_type],
                               heat_pump_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: args[:hvac_heat_pump_capacity_capacity],
                               heating_autosizing_factor: args[:hvac_heat_pump_capacity_autosizing_factor],
                               heating_autosizing_limit: args[:hvac_heat_pump_capacity_autosizing_limit],
                               heating_capacity_fraction_17F: args[:hvac_heat_pump_heating_capacity_fraction_17_f],
-                              compressor_type: compressor_type,
+                              compressor_type: args[:hvac_heat_pump_cooling_compressor_type],
                               compressor_lockout_temp: args[:hvac_heat_pump_temperatures_compressor_lockout],
                               cooling_capacity: args[:hvac_heat_pump_capacity_capacity],
                               cooling_autosizing_factor: args[:hvac_heat_pump_capacity_autosizing_factor],
@@ -2552,12 +2507,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                               cooling_efficiency_seer2: cooling_efficiency_seer2,
                               heating_efficiency_cop: heating_efficiency_cop,
                               cooling_efficiency_eer: cooling_efficiency_eer,
-                              crankcase_heater_watts: heat_pump_crankcase_heater_watts,
+                              cooling_efficiency_ceer: cooling_efficiency_ceer,
                               primary_heating_system: args[:hvac_heat_pump_heating_load_served_fraction] > 0,
                               primary_cooling_system: args[:hvac_heat_pump_cooling_load_served_fraction] > 0)
 
     # Detailed performance data
-    if not [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+    if not [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? args[:hvac_heat_pump_type]
       return
     end
 
@@ -2779,16 +2734,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       case cooling_system.cooling_system_type
       when HPXML::HVACTypeCentralAirConditioner
         air_distribution_systems << cooling_system
-      when HPXML::HVACTypeEvaporativeCooler, HPXML::HVACTypeMiniSplitAirConditioner
-        air_distribution_systems << cooling_system if args[:hvac_cooling_system_is_ducted]
       end
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       case heat_pump.heat_pump_type
       when HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir
         air_distribution_systems << heat_pump
-      when HPXML::HVACTypeHeatPumpMiniSplit
-        air_distribution_systems << heat_pump if args[:hvac_heat_pump_is_ducted]
       end
     end
 
@@ -2945,13 +2896,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                 duct_location: ducts_supply_location,
                                 duct_fraction_area: args[:hvac_ducts_supply_location_location_fraction])
 
-    if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:hvac_cooling_system_type]) && args[:hvac_cooling_system_is_ducted])
-      hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
-                                  duct_type: HPXML::DuctTypeReturn,
-                                  duct_insulation_r_value: args[:hvac_ducts_return_insulation_r_value],
-                                  duct_location: ducts_return_location,
-                                  duct_fraction_area: args[:hvac_ducts_return_location_location_fraction])
-    end
+    hvac_distribution.ducts.add(id: "Ducts#{hvac_distribution.ducts.size + 1}",
+                                duct_type: HPXML::DuctTypeReturn,
+                                duct_insulation_r_value: args[:hvac_ducts_return_insulation_r_value],
+                                duct_location: ducts_return_location,
+                                duct_fraction_area: args[:hvac_ducts_return_location_location_fraction])
 
     if not hvac_distribution.ducts.find { |d| d.duct_type == HPXML::DuctTypeSupply }.nil?
       if (not args[:hvac_ducts_supply_location_location_fraction].nil?) && args[:hvac_ducts_supply_location_location_fraction] < 1

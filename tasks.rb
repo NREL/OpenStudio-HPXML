@@ -39,7 +39,7 @@ def create_hpxmls
 
   json_inputs.keys.each_with_index do |hpxml_filename, hpxml_i|
     # Uncomment following line to debug single file
-    # next unless hpxml_filename.include? 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
+    # next unless hpxml_filename.include? 'base-mechvent-cfis-evap-cooler-only-ducted.xml'
 
     puts "[#{hpxml_i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
@@ -2018,7 +2018,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                      cooling_system_fuel: HPXML::FuelTypeElectricity,
                                      cooling_capacity: 9600,
                                      fraction_cool_load_served: 0.1333,
-                                     cooling_efficiency_eer: 8.5)
+                                     cooling_efficiency_ceer: 8.4)
       hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
                                      cooling_system_type: HPXML::HVACTypePTAC,
                                      cooling_system_fuel: HPXML::FuelTypeElectricity,
@@ -2037,8 +2037,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 backup_heating_efficiency_percent: 1.0,
                                 fraction_heat_load_served: 0.1,
                                 fraction_cool_load_served: 0.2,
-                                heating_efficiency_hspf: 7.7,
-                                cooling_efficiency_seer: 13,
+                                heating_efficiency_hspf2: 7.0,
+                                cooling_efficiency_seer2: 13.4,
                                 heating_capacity_17F: 4800 * 0.6,
                                 compressor_type: HPXML::HVACCompressorTypeSingleStage)
       hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
@@ -2068,8 +2068,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 backup_heating_efficiency_percent: 1.0,
                                 fraction_heat_load_served: 0.1,
                                 fraction_cool_load_served: 0.2,
-                                heating_efficiency_hspf: 10,
-                                cooling_efficiency_seer: 19,
+                                heating_efficiency_hspf2: 9,
+                                cooling_efficiency_seer2: 19,
                                 heating_capacity_17F: 4800 * 0.6,
                                 compressor_type: HPXML::HVACCompressorTypeVariableSpeed,
                                 primary_cooling_system: true,
@@ -2141,7 +2141,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.dehumidifiers.add(id: 'Dehumidifier2',
                                    type: HPXML::DehumidifierTypePortable,
                                    capacity: 30,
-                                   energy_factor: 1.6,
+                                   integrated_energy_factor: 1.9,
                                    rh_setpoint: 0.5,
                                    fraction_served: 0.25,
                                    location: HPXML::LocationConditionedSpace)
@@ -2295,6 +2295,39 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
         duct.duct_buried_insulation_level = HPXML::DuctBuriedInsulationDeep
       end
+    end
+    if hpxml_file.include?('mini-split') && hpxml_file.include?('ducted')
+      hpxml_bldg.cooling_systems.each do |cooling_system|
+        cooling_system.cooling_system_type = HPXML::HVACTypeMiniSplitAirConditioner
+        cooling_system.compressor_type = HPXML::HVACCompressorTypeVariableSpeed
+      end
+      hpxml_bldg.heat_pumps.each do |heat_pump|
+        heat_pump.heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
+        heat_pump.compressor_type = HPXML::HVACCompressorTypeVariableSpeed
+      end
+    end
+    if ['base-hvac-ptac-with-heating-electricity.xml',
+        'base-hvac-ptac-with-heating-natural-gas.xml',
+        'base-hvac-room-ac-with-heating.xml'].include? hpxml_file
+      if hpxml_file == 'base-hvac-ptac-with-heating-natural-gas.xml'
+        hpxml_bldg.cooling_systems[0].integrated_heating_system_fuel = HPXML::FuelTypeNaturalGas
+        hpxml_bldg.cooling_systems[0].integrated_heating_system_efficiency_percent = 0.8
+      else
+        hpxml_bldg.cooling_systems[0].integrated_heating_system_fuel = HPXML::FuelTypeElectricity
+        hpxml_bldg.cooling_systems[0].integrated_heating_system_efficiency_percent = 1.0
+      end
+      hpxml_bldg.cooling_systems[0].integrated_heating_system_capacity = 40000.0
+      hpxml_bldg.cooling_systems[0].integrated_heating_system_fraction_heat_load_served = 1.0
+      hpxml_bldg.hvac_controls[0].heating_setpoint_temp = 68.0
+    end
+    if hpxml_file.include? 'evap-cooler-only-ducted'
+      hpxml_bldg.cooling_systems[0].cooling_system_type = HPXML::HVACTypeEvaporativeCooler
+      hpxml_bldg.cooling_systems[0].compressor_type = nil
+      hpxml_bldg.cooling_systems[0].cooling_efficiency_seer2 = nil
+      hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 0.0
+      hpxml_bldg.hvac_distributions[0].ducts[3].delete
+      hpxml_bldg.hvac_distributions[0].ducts[1].delete
+      hpxml_bldg.hvac_distributions[0].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size}"
     end
 
     # ------------------ #
@@ -2490,9 +2523,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency = nil
       end
     elsif hpxml_file.include? 'base-mechvent-cfis'
-      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 330.0
-      hpxml_bldg.ventilation_fans[0].hours_in_operation = 8
-      hpxml_bldg.ventilation_fans[0].fan_power = 300.0
+      if not hpxml_bldg.ventilation_fans.empty? # FIXME: Temporary
+        hpxml_bldg.ventilation_fans[0].rated_flow_rate = 330.0
+        hpxml_bldg.ventilation_fans[0].hours_in_operation = 8
+        hpxml_bldg.ventilation_fans[0].fan_power = 300.0
+      end
     elsif ['base-hvac-ptac-cfis.xml',
            'base-hvac-pthp-cfis.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].rated_flow_rate = 100.0
