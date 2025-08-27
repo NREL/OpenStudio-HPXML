@@ -2329,6 +2329,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.hvac_distributions[0].ducts[1].delete
       hpxml_bldg.hvac_distributions[0].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size}"
     end
+    if ['base-hvac-room-ac-only-eer.xml'].include? hpxml_file
+      hpxml_bldg.cooling_systems[0].cooling_efficiency_ceer = nil
+      hpxml_bldg.cooling_systems[0].cooling_efficiency_eer = 8.5
+    end
 
     # ------------------ #
     # HPXML WaterHeating #

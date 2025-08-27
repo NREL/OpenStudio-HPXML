@@ -2004,9 +2004,8 @@
     "hvac_cooling_system_capacity": "0.75 tons",
     "hvac_cooling_system_cooling_load_served": "35%"
   },
-  "sample_files/base-hvac-room-ac-only-ceer.xml": {
-    "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
-    "hvac_cooling_system": "Room AC, CEER 8.4"
+  "sample_files/base-hvac-room-ac-only-eer.xml": {
+    "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml"
   },
   "sample_files/base-hvac-room-ac-with-heating.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
