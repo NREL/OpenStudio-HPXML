@@ -7920,6 +7920,7 @@ module Defaults
         end
 
         set_ground_to_air_heat_pump_cops(cooling_system, cool_cop_ratios, :clg)
+        return
       elsif cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToWater
         # FIXME
 
@@ -7943,9 +7944,8 @@ module Defaults
         cool_cop_ratios = [1.0]
 
         set_ground_to_water_heat_pump_cops(cooling_system, cool_cop_ratios, :clg)
+        return
       end
-
-      return
     end
 
     # Based on RESNET HERS Addendum 82
@@ -8146,6 +8146,7 @@ module Defaults
         end
 
         set_ground_to_air_heat_pump_cops(heating_system, heat_cop_ratios, :htg)
+        return
       elsif heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToWater
         # Based on RESNET HERS Addendum 82
         htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
@@ -8163,9 +8164,8 @@ module Defaults
         heat_cop_ratios = [1.0]
 
         set_ground_to_water_heat_pump_cops(heating_system, heat_cop_ratios, :htg)
+        return
       end
-
-      return
     end
 
     htg_ap.heat_cap_fflow_spec = htg_ap.heat_cap_fflow_spec_iq

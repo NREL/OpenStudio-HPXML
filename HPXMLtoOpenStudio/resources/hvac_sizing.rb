@@ -2846,7 +2846,7 @@ module HVACSizing
       cool_cap_design = [cool_cap_design, oversize_limit * hvac_sizings.Cool_Load_Tot].min
       hvac_sizings.Cool_Capacity = cool_cap_design / total_cap_curve_value
       hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
-      hvac_sizings.Cool_Airflow = calc_airflow_rate(:clg, hvac_cooling, hvac_sizings.Cool_Capacity, hpxml_bldg)
+      hvac_sizings.Cool_Airflow = 0.0
 
     elsif HPXML::HVACTypeEvaporativeCooler == cooling_type
 
@@ -2953,10 +2953,10 @@ module HVACSizing
         # end
         hvac_sizings.Cool_Capacity = [hvac_sizings.Cool_Capacity, hvac_sizings.Heat_Capacity].max
         hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
-        hvac_sizings.Cool_Airflow = calc_airflow_rate(:clg, hvac_cooling, hvac_sizings.Cool_Capacity, hpxml_bldg)
+        hvac_sizings.Cool_Airflow = 0.0
         hvac_sizings.Heat_Capacity = hvac_sizings.Cool_Capacity
       end
-      hvac_sizings.Heat_Airflow = calc_airflow_rate(:htg, hvac_heating, hvac_sizings.Heat_Capacity, hpxml_bldg)
+      hvac_sizings.Heat_Airflow = 0.0
 
     elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heating_type
 
@@ -5282,9 +5282,11 @@ module HVACSizing
       end
 
       # Heating design airflow rate
-      if not (hvac_heating.is_a?(HPXML::HeatingSystem) &&
+      if not ((hvac_heating.is_a?(HPXML::HeatingSystem) &&
               [HPXML::HVACTypeBoiler,
-               HPXML::HVACTypeElectricResistance].include?(hvac_heating.heating_system_type))
+               HPXML::HVACTypeElectricResistance].include?(hvac_heating.heating_system_type))) ||
+             ((hvac_heating.is_a?(HPXML::HeatPump) &&
+              [HPXML::HVACTypeHeatPumpGroundToWater].include?(hvac_heating.heat_pump_type)))
         if hvac_heating.heating_design_airflow_cfm.nil? || ((hvac_heating.heating_design_airflow_cfm - hvac_sizings.Heat_Airflow).abs >= 1.0)
           hvac_heating.heating_design_airflow_cfm = Float(hvac_sizings.Heat_Airflow.round)
           hvac_heating.heating_design_airflow_cfm_isdefaulted = true
@@ -5358,9 +5360,12 @@ module HVACSizing
       end
 
       # Cooling design airflow rate
-      if hvac_cooling.cooling_design_airflow_cfm.nil? || ((hvac_cooling.cooling_design_airflow_cfm - hvac_sizings.Cool_Airflow).abs >= 1.0)
-        hvac_cooling.cooling_design_airflow_cfm = Float(hvac_sizings.Cool_Airflow.round)
-        hvac_cooling.cooling_design_airflow_cfm_isdefaulted = true
+      if not (hvac_cooling.is_a?(HPXML::HeatPump) &&
+              [HPXML::HVACTypeHeatPumpGroundToWater].include?(hvac_cooling.heat_pump_type))
+        if hvac_cooling.cooling_design_airflow_cfm.nil? || ((hvac_cooling.cooling_design_airflow_cfm - hvac_sizings.Cool_Airflow).abs >= 1.0)
+          hvac_cooling.cooling_design_airflow_cfm = Float(hvac_sizings.Cool_Airflow.round)
+          hvac_cooling.cooling_design_airflow_cfm_isdefaulted = true
+        end
       end
 
       # Cooling installed/actual airflow rate

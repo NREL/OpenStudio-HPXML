@@ -567,7 +567,7 @@ module HVAC
     geothermal_loop.loop_flow *= unit_multiplier
     geothermal_loop.num_bore_holes *= unit_multiplier
 
-    if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+    if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
 
       if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard].include? hpxml_header.ground_to_air_heat_pump_model_type
         # Cooling Coil
@@ -5183,11 +5183,11 @@ module HVAC
     hpxml_bldg.heat_pumps.each do |hp_sys|
       hp_ap = hp_sys.additional_properties
       hp_sys.cooling_capacity *= unit_multiplier
-      hp_sys.cooling_design_airflow_cfm *= unit_multiplier
-      hp_ap.cooling_actual_airflow_cfm *= unit_multiplier
+      hp_sys.cooling_design_airflow_cfm *= unit_multiplier unless hp_sys.cooling_design_airflow_cfm.nil?
+      hp_ap.cooling_actual_airflow_cfm *= unit_multiplier unless hp_ap.cooling_actual_airflow_cfm.nil?
       hp_sys.heating_capacity *= unit_multiplier
-      hp_sys.heating_design_airflow_cfm *= unit_multiplier
-      hp_ap.heating_actual_airflow_cfm *= unit_multiplier
+      hp_sys.heating_design_airflow_cfm *= unit_multiplier unless hp_sys.heating_design_airflow_cfm.nil?
+      hp_ap.heating_actual_airflow_cfm *= unit_multiplier unless hp_ap.heating_actual_airflow_cfm.nil?
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
       hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
       hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?
