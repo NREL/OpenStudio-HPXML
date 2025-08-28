@@ -5218,7 +5218,7 @@ module Defaults
     return latitude unless latitude.nil?
 
     if not zipcode.nil?
-      weather_data = lookup_weather_data_from_zipcode(zipcode)
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
       return Float(weather_data[:zipcode_latitude]) unless weather_data[:zipcode_latitude].nil?
     end
 
@@ -5236,7 +5236,7 @@ module Defaults
     return longitude unless longitude.nil?
 
     if not zipcode.nil?
-      weather_data = lookup_weather_data_from_zipcode(zipcode)
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
       return Float(weather_data[:zipcode_longitude]) unless weather_data[:zipcode_longitude].nil?
     end
 
@@ -5263,7 +5263,7 @@ module Defaults
     return time_zone unless time_zone.nil?
 
     if not zipcode.nil?
-      weather_data = lookup_weather_data_from_zipcode(zipcode)
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
       return Float(weather_data[:zipcode_utc_offset]) unless weather_data[:zipcode_utc_offset].nil?
     end
 
@@ -5281,7 +5281,7 @@ module Defaults
     return state_code unless state_code.nil?
 
     if not zipcode.nil?
-      weather_data = lookup_weather_data_from_zipcode(zipcode)
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
       return weather_data[:zipcode_state] unless weather_data[:zipcode_state].nil?
     end
 
@@ -5299,7 +5299,7 @@ module Defaults
     return city unless city.nil?
 
     if not zipcode.nil?
-      weather_data = lookup_weather_data_from_zipcode(zipcode)
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
       return weather_data[:zipcode_city] unless weather_data[:zipcode_city].nil?
     end
 
@@ -5348,8 +5348,9 @@ module Defaults
   # zipcode is not found, we find the closest zipcode that shares the first 3 digits.
   #
   # @param zipcode [String] Zipcode of interest
+  # @param raise_error [Boolean] True to raise an error if the zip code is not found
   # @return [Hash] Mapping with keys for every column name in zipcode_weather_stations.csv
-  def self.lookup_weather_data_from_zipcode(zipcode)
+  def self.lookup_weather_data_from_zipcode(zipcode, raise_error = true)
     if not $weather_lookup_cache["zipcode_#{zipcode}"].nil?
       # Use cache
       return $weather_lookup_cache["zipcode_#{zipcode}"]
@@ -5394,7 +5395,11 @@ module Defaults
     end
 
     if weather_station.empty?
-      fail "Zip code '#{zipcode}' could not be found in zipcode_weather_stations.csv"
+      if raise_error
+        fail "Zip code '#{zipcode}' could not be found in zipcode_weather_stations.csv"
+      else
+        return weather_station
+      end
     end
 
     $weather_lookup_cache["zipcode_#{zipcode}"] = weather_station
