@@ -537,9 +537,6 @@ module HVAC
   # @return [OpenStudio::Model::AirLoopHVAC] The newly created air loop hvac object
   def self.apply_ground_source_heat_pump(runner, model, weather, hpxml_bldg, hpxml_header, heat_pump,
                                          hvac_sequential_load_fracs, control_zone, hvac_unavailable_periods)
-    # ground_to_air = false # FIXME: this is the switch to try out ground-to-water
-    # equation_fit = false # FIXME: equation fit vs eir-formulated
-    # fan_coil = false # FIXME: fan coil vs baseboard/panel
 
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     if unit_multiplier > 1
@@ -1025,7 +1022,7 @@ module HVAC
       zone_hvac.setMaximumColdWaterFlowRate(max_water_flow)
       zone_hvac.setCoolingConvergenceTolerance(0.001)
       zone_hvac.setMaximumOutdoorAirFlowRate(0.0)
-      zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert([htg_cfm, clg_cfm].max, 'cfm', 'm^3/s'))
+      zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert(fan_cfms[0], 'cfm', 'm^3/s'))
       zone_hvac.setMaximumHotWaterFlowRate(max_water_flow)
       zone_hvac.addToThermalZone(control_zone)
     end
