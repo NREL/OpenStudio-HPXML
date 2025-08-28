@@ -2544,7 +2544,7 @@ The type of heat pump. Use 'none' if there is no heat pump.
 
 - **Required:** ``true``
 
-- **Choices:** `none`, `air-to-air`, `mini-split`, `ground-to-air`, `packaged terminal heat pump`, `room air conditioner with reverse cycle`
+- **Choices:** `none`, `air-to-air`, `mini-split`, `ground-to-air`, `ground-to-water w/ Ductless Fan Coil`, `packaged terminal heat pump`, `room air conditioner with reverse cycle`
 
 
 - **Default:** `none`
@@ -2567,7 +2567,7 @@ The compressor type of the heat pump. Required for air-to-air, mini-split and gr
 
 **Heat Pump: Heating Efficiency Type**
 
-The heating efficiency type of heat pump. System types air-to-air and mini-split use HSPF or HSPF2. System types ground-to-air, packaged terminal heat pump and room air conditioner with reverse cycle use COP.
+The heating efficiency type of heat pump. System types air-to-air and mini-split use HSPF or HSPF2. System types ground-to-air, ground-to-water, packaged terminal heat pump and room air conditioner with reverse cycle use COP.
 
 - **Name:** ``heat_pump_heating_efficiency_type``
 - **Type:** ``Choice``
@@ -2597,7 +2597,7 @@ The rated heating efficiency value of the heat pump.
 
 **Heat Pump: Cooling Efficiency Type**
 
-The cooling efficiency type of heat pump. System types air-to-air and mini-split use SEER or SEER2. System types ground-to-air, packaged terminal heat pump and room air conditioner with reverse cycle use EER.
+The cooling efficiency type of heat pump. System types air-to-air and mini-split use SEER or SEER2. System types ground-to-air, ground-to-water, packaged terminal heat pump and room air conditioner with reverse cycle use EER.
 
 - **Name:** ``heat_pump_cooling_efficiency_type``
 - **Type:** ``Choice``
@@ -2667,7 +2667,7 @@ The maximum capacity limit applied to the auto-sizing methodology. If not provid
 
 **Heat Pump: Heating Capacity Fraction at 17F**
 
-The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity at 47F. Applies to all heat pump types except ground-to-air. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
+The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity at 47F. Applies to all heat pump types except ground-to-air and ground-to-water. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
 
 - **Name:** ``heat_pump_heating_capacity_fraction_17_f``
 - **Type:** ``Double``
@@ -2753,7 +2753,7 @@ The cooling load served by the heat pump.
 
 **Heat Pump: Compressor Lockout Temperature**
 
-The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than ground-to-air. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
+The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than ground-to-air and ground-to-water. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
 
 - **Name:** ``heat_pump_compressor_lockout_temp``
 - **Type:** ``Double``
@@ -2895,7 +2895,7 @@ The auto-sizing methodology to use when the heat pump backup capacity is not pro
 
 **Heat Pump: Is Ducted**
 
-Whether the heat pump is ducted or not. Only used for mini-split. It's assumed that air-to-air and ground-to-air are ducted, and packaged terminal heat pump and room air conditioner with reverse cycle are not ducted. If not provided, assumes not ducted.
+Whether the heat pump is ducted or not. Only used for mini-split. It's assumed that air-to-air and ground-to-air are ducted, and packaged terminal heat pump, room air conditioner with reverse cycle, and ground-to-water are not ducted. If not provided, assumes not ducted.
 
 - **Name:** ``heat_pump_is_ducted``
 - **Type:** ``Boolean``
@@ -3159,7 +3159,7 @@ Maximum speed efficiency COP values of cooling detailed performance data if avai
 
 **Geothermal Loop: Configuration**
 
-Configuration of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.
+Configuration of the geothermal loop. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.
 
 - **Name:** ``geothermal_loop_configuration``
 - **Type:** ``Choice``
@@ -3173,7 +3173,7 @@ Configuration of the geothermal loop. Only applies to ground-to-air heat pump ty
 
 **Geothermal Loop: Borefield Configuration**
 
-Borefield configuration of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Borefield configuration of the geothermal loop. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_borefield_configuration``
 - **Type:** ``Choice``
@@ -3187,7 +3187,7 @@ Borefield configuration of the geothermal loop. Only applies to ground-to-air he
 
 **Geothermal Loop: Loop Flow**
 
-Water flow rate through the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Water flow rate through the geothermal loop. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_loop_flow``
 - **Type:** ``Double``
@@ -3201,7 +3201,7 @@ Water flow rate through the geothermal loop. Only applies to ground-to-air heat 
 
 **Geothermal Loop: Boreholes Count**
 
-Number of boreholes. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Number of boreholes. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_boreholes_count``
 - **Type:** ``Integer``
@@ -3215,7 +3215,7 @@ Number of boreholes. Only applies to ground-to-air heat pump type. If not provid
 
 **Geothermal Loop: Boreholes Length**
 
-Average length of each borehole (vertical). Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Average length of each borehole (vertical). Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_boreholes_length``
 - **Type:** ``Double``
@@ -3229,7 +3229,7 @@ Average length of each borehole (vertical). Only applies to ground-to-air heat p
 
 **Geothermal Loop: Boreholes Spacing**
 
-Distance between bores. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Distance between bores. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_boreholes_spacing``
 - **Type:** ``Double``
@@ -3243,7 +3243,7 @@ Distance between bores. Only applies to ground-to-air heat pump type. If not pro
 
 **Geothermal Loop: Boreholes Diameter**
 
-Diameter of bores. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Diameter of bores. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_boreholes_diameter``
 - **Type:** ``Double``
@@ -3257,7 +3257,7 @@ Diameter of bores. Only applies to ground-to-air heat pump type. If not provided
 
 **Geothermal Loop: Grout Type**
 
-Grout type of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Grout type of the geothermal loop. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_grout_type``
 - **Type:** ``Choice``
@@ -3271,7 +3271,7 @@ Grout type of the geothermal loop. Only applies to ground-to-air heat pump type.
 
 **Geothermal Loop: Pipe Type**
 
-Pipe type of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Pipe type of the geothermal loop. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_pipe_type``
 - **Type:** ``Choice``
@@ -3285,7 +3285,7 @@ Pipe type of the geothermal loop. Only applies to ground-to-air heat pump type. 
 
 **Geothermal Loop: Pipe Diameter**
 
-Pipe diameter of the geothermal loop. Only applies to ground-to-air heat pump type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
+Pipe diameter of the geothermal loop. Only applies to ground-to-air and ground-to-water heat pump types. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.11.0/workflow_inputs.html#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.
 
 - **Name:** ``geothermal_loop_pipe_diameter``
 - **Type:** ``Choice``
@@ -4433,7 +4433,7 @@ Number of bedrooms served (directly or indirectly) by the water heater. Only nee
 
 **Water Heater: Uses Desuperheater**
 
-Requires that the dwelling unit has a air-to-air, mini-split, or ground-to-air heat pump or a central air conditioner or mini-split air conditioner. If not provided, assumes no desuperheater.
+Requires that the dwelling unit has a air-to-air, mini-split, ground-to-air, or ground-to-water heat pump or a central air conditioner or mini-split air conditioner. If not provided, assumes no desuperheater.
 
 - **Name:** ``water_heater_uses_desuperheater``
 - **Type:** ``Boolean``
