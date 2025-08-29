@@ -244,6 +244,9 @@ denver-hvac-autosize-ground-to-air-heat-pump-var-speed-experimental-sizing-metho
 denver-hvac-autosize-ground-to-air-heat-pump-var-speed-sizing-methodology-ACCA.xml,43930.0,43930.0,0.0,1318.0,1318.0
 denver-hvac-autosize-ground-to-air-heat-pump-var-speed-sizing-methodology-HERS.xml,43930.0,43930.0,0.0,1318.0,1318.0
 denver-hvac-autosize-ground-to-air-heat-pump-var-speed-sizing-methodology-MaxLoad.xml,58384.0,58384.0,0.0,1752.0,1752.0
+denver-hvac-autosize-ground-to-water-heat-pump-sizing-methodology-ACCA.xml,26650.0,26650.0,0.0,0.0,0.0
+denver-hvac-autosize-ground-to-water-heat-pump-sizing-methodology-HERS.xml,26650.0,26650.0,0.0,0.0,0.0
+denver-hvac-autosize-ground-to-water-heat-pump-sizing-methodology-MaxLoad.xml,31331.0,31331.0,0.0,0.0,0.0
 denver-hvac-autosize-install-quality-air-to-air-heat-pump-1-speed-sizing-methodology-ACCA-backup-emergency.xml,39042.0,40904.0,39372.0,1171.0,1227.0
 denver-hvac-autosize-install-quality-air-to-air-heat-pump-1-speed-sizing-methodology-ACCA-backup-supplemental.xml,39042.0,40904.0,23805.0,1171.0,1227.0
 denver-hvac-autosize-install-quality-air-to-air-heat-pump-1-speed-sizing-methodology-HERS-backup-emergency.xml,44495.0,46618.0,39372.0,1334.0,1398.0
@@ -649,6 +652,9 @@ houston-hvac-autosize-ground-to-air-heat-pump-var-speed-experimental-sizing-meth
 houston-hvac-autosize-ground-to-air-heat-pump-var-speed-sizing-methodology-ACCA.xml,49352.0,49352.0,0.0,1481.0,1481.0
 houston-hvac-autosize-ground-to-air-heat-pump-var-speed-sizing-methodology-HERS.xml,49352.0,49352.0,0.0,1481.0,1481.0
 houston-hvac-autosize-ground-to-air-heat-pump-var-speed-sizing-methodology-MaxLoad.xml,49352.0,49352.0,0.0,1481.0,1481.0
+houston-hvac-autosize-ground-to-water-heat-pump-sizing-methodology-ACCA.xml,22707.0,22707.0,0.0,0.0,0.0
+houston-hvac-autosize-ground-to-water-heat-pump-sizing-methodology-HERS.xml,22707.0,22707.0,0.0,0.0,0.0
+houston-hvac-autosize-ground-to-water-heat-pump-sizing-methodology-MaxLoad.xml,22707.0,22707.0,0.0,0.0,0.0
 houston-hvac-autosize-install-quality-air-to-air-heat-pump-1-speed-sizing-methodology-ACCA-backup-emergency.xml,50396.0,48528.0,24742.0,1511.0,1455.0
 houston-hvac-autosize-install-quality-air-to-air-heat-pump-1-speed-sizing-methodology-ACCA-backup-supplemental.xml,50396.0,48528.0,0.0,1511.0,1455.0
 houston-hvac-autosize-install-quality-air-to-air-heat-pump-1-speed-sizing-methodology-HERS-backup-emergency.xml,50396.0,48528.0,24742.0,1511.0,1455.0

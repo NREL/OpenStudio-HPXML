@@ -92,7 +92,7 @@ module Location
     sgts.resetAllMonths
     sgts.setAllMonthlyTemperatures(weather.data.ShallowGroundMonthlyTemps.map { |t| UnitConversions.convert(t, 'F', 'C') })
 
-    if hpxml_bldg.heat_pumps.count { |h| h.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir } > 0
+    if hpxml_bldg.heat_pumps.count { |h| [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include?(h.heat_pump_type) } > 0
       # Deep ground temperatures used by GSHP setpoint manager
       dgts = model.getSiteGroundTemperatureDeep
       dgts.resetAllMonths

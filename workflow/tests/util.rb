@@ -43,7 +43,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
       if hpxml_bldg.dehumidifiers.size > 0
         # FUTURE: Dehumidifiers currently don't give desired results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-      elsif hpxml_bldg.heat_pumps.count { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir } > 0
+      elsif hpxml_bldg.heat_pumps.count { |hp| [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include?(hp.heat_pump_type) } > 0
         # FUTURE: GSHPs currently don't give desired results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
       elsif hpxml_bldg.batteries.size > 0
@@ -1041,7 +1041,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       assert_equal(0, energy_htg)
     end
     if htg_backup_fuels.include? fuel
-      has_ashp = hpxml_bldg.heat_pumps.count { |hp| hp.heat_pump_type != HPXML::HVACTypeHeatPumpGroundToAir } > 0
+      has_ashp = hpxml_bldg.heat_pumps.count { |hp| ![HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include?(hp.heat_pump_type) } > 0
       if (not hpxml_path.include? 'autosize') && (not is_warm_climate) && has_ashp
         assert_operator(energy_hp_backup, :>, 0)
       end

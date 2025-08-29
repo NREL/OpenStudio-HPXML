@@ -252,6 +252,7 @@ class HPXML < Object
   HVACTypeFurnace = 'Furnace'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
   HVACTypeHeatPumpGroundToAir = 'ground-to-air'
+  HVACTypeHeatPumpGroundToWater = 'ground-to-water'
   HVACTypeHeatPumpMiniSplit = 'mini-split'
   HVACTypeHeatPumpWaterLoopToAir = 'water-loop-to-air'
   HVACTypeHeatPumpPTHP = 'packaged terminal heat pump'

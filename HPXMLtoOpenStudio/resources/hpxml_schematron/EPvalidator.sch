@@ -1484,8 +1484,8 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump'>
       <sch:assert role='ERROR' test='count(h:AttachedToZone) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToZone</sch:assert>
       <sch:assert role='ERROR' test='count(../../h:HVACControl) = 1'>Expected 1 element(s) for xpath: ../../HVACControl</sch:assert> <!-- See [HVACControl=Heating] and/or [HVACControl=Cooling] -->
-      <sch:assert role='ERROR' test='count(h:HeatPumpType) = 1'>Expected 1 element(s) for xpath: HeatPumpType</sch:assert> <!-- See [HeatPumpType=AirSource] or [HeatPumpType=MiniSplit] or [HeatPumpType=GroundSource] or [HeatPumpType=WaterLoop] or [HeatPumpType=PTHPorRoomACwithReverseCycle] -->
-      <sch:assert role='ERROR' test='h:HeatPumpType[text()="air-to-air" or text()="mini-split" or text()="ground-to-air" or text()="water-loop-to-air" or text()="packaged terminal heat pump" or text()="room air conditioner with reverse cycle"] or not(h:HeatPumpType)'>Expected HeatPumpType to be 'air-to-air' or 'mini-split' or 'ground-to-air' or 'water-loop-to-air' or 'packaged terminal heat pump' or 'room air conditioner with reverse cycle'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeatPumpType) = 1'>Expected 1 element(s) for xpath: HeatPumpType</sch:assert> <!-- See [HeatPumpType=AirSource] or [HeatPumpType=MiniSplit] or [HeatPumpType=GroundSourceToAir] or [HeatPumpType=GroundSourceToWater] or [HeatPumpType=WaterLoop] or [HeatPumpType=PTHPorRoomACwithReverseCycle] -->
+      <sch:assert role='ERROR' test='h:HeatPumpType[text()="air-to-air" or text()="mini-split" or text()="ground-to-air" or text()="ground-to-water" or text()="water-loop-to-air" or text()="packaged terminal heat pump" or text()="room air conditioner with reverse cycle"] or not(h:HeatPumpType)'>Expected HeatPumpType to be 'air-to-air' or 'mini-split' or 'ground-to-air' or 'water-loop-to-air' or 'packaged terminal heat pump' or 'room air conditioner with reverse cycle'</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:CoolingAutosizingFactor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/CoolingAutosizingFactor</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HeatingAutosizingFactor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HeatingAutosizingFactor</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:CoolingAutosizingFactor) &gt; 0 or not (h:extension/h:CoolingAutosizingFactor)'>CoolingAutosizingFactor should be greater than 0.0</sch:assert>
@@ -1628,7 +1628,7 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[HeatPumpType=GroundSource]</sch:title>
+    <sch:title>[HeatPumpType=GroundSourceToAir]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:HeatPumpType="ground-to-air"]'>
       <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:AirDistributionType[text()="regular velocity"]) + count(../../h:HVACDistribution/h:DistributionSystemType/h:Other[text()="DSE"]) &gt;= 1'>Expected 1 or more element(s) for xpath: ../../HVACDistribution/DistributionSystemType/AirDistribution/AirDistributionType[text()="regular velocity"] | ../../HVACDistribution/DistributionSystemType/Other[text()="DSE"]</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert role='ERROR' test='count(h:UnitLocation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UnitLocation</sch:assert>
@@ -1670,6 +1670,13 @@
       <sch:report role='WARN' test='number(h:AnnualHeatingEfficiency[h:Units="COP"]/h:Value) &lt; 2'>COP should typically be greater than or equal to 2.</sch:report>
       <sch:report role='WARN' test='number(h:HeatingCapacity) &lt;= 1000 and number(h:HeatingCapacity) &gt; 0 and h:HeatingCapacity'>Heating capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
       <sch:report role='WARN' test='number(h:CoolingCapacity) &lt;= 1000 and number(h:CoolingCapacity) &gt; 0 and h:CoolingCapacity'>Cooling capacity should typically be greater than or equal to 1000 Btu/hr.</sch:report>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[HeatPumpType=GroundSourceToWater]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:HeatPumpType="ground-to-water"]'>
+      <sch:assert role='ERROR' test='count(../../h:HVACDistribution/h:DistributionSystemType/h:AirDistribution/h:AirDistributionType[text()="fan coil"]) = 1'>Expected 1 element(s) for xpath: ../../HVACDistribution/DistributionSystemType/AirDistribution/AirDistributionType[text()="fan coil"]</sch:assert> <!-- See [HVACDistribution] or [HeatingSystemType=SharedBoilerWthFanCoil] or [HeatingSystemType=SharedBoilerWithWLHP] -->
     </sch:rule>
   </sch:pattern>
 
