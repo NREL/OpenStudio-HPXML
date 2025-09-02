@@ -3218,6 +3218,75 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
 
+.. _hvac_hp_ground_to_water:
+
+Ground-to-Water Heat Pump
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each ground-to-water heat pump is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+
+  ===============================================  ========  ======  ===============  ========  ==============  ==============================================
+  Element                                          Type      Units   Constraints      Required  Default         Notes
+  ===============================================  ========  ======  ===============  ========  ==============  ==============================================
+  ``SystemIdentifier``                             id                                 Yes                       Unique identifier
+  ``AttachedToZone``                               idref             See [#]_         See [#]_                  ID of attached zone
+  ``UnitLocation``                                 string            See [#]_         No        See [#]_        Location of heat pump
+  ``DistributionSystem``                           idref             See [#]_         Yes                       ID of attached distribution system
+  ``IsSharedSystem``                               boolean                            No        false           Whether it has a shared hydronic circulation loop [#]_
+  ``HeatPumpType``                                 string            ground-to-water  Yes                       Type of heat pump
+  ``HeatPumpFuel``                                 string            electricity      Yes                       Fuel type
+  ``HeatingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
+  ``CoolingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Cooling output capacity
+  ``CompressorType``                               string            single stage     Yes                       Type of compressor
+  ``BackupType``                                   string            See [#]_         No        <none>          Type of backup heating
+  ``FractionHeatLoadServed``                       double    frac    >= 0, <= 1 [#]_  Yes                       Fraction of heating load served
+  ``FractionCoolLoadServed``                       double    frac    >= 0, <= 1 [#]_  Yes                       Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0              Yes                       Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0              Yes                       Rated heating efficiency
+  ``NumberofUnitsServed``                          integer           > 0              See [#]_                  Number of dwelling units served
+  ``AttachedToGeothermalLoop``                     idref             See [#]_         No [#]_                   ID of attached geothermal loop
+  ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0             No        See [#]_        Pump power [#]_
+  ``extension/SharedLoopWatts``                    double    W       >= 0             See [#]_                  Shared pump power [#]_
+  ``extension/FanCoilWatts``                       double    W       >= 0             No        150.0           Fan coil power
+  ``extension/ChargeDefectRatio``                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
+  ``extension/CoolingAutosizingFactor``            double    frac    > 0              No        1.0             Cooling autosizing capacity multiplier
+  ``extension/HeatingAutosizingFactor``            double    frac    > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``             double    Btu/hr  > 0              No        <none>          Cooling autosizing capacity limit
+  ``extension/HeatingAutosizingLimit``             double    Btu/hr  > 0              No        <none>          Heating autosizing capacity limit
+  ===============================================  ========  ======  ===============  ========  ==============  ==============================================
+
+  .. [#] If AttachedToZone provided, it must reference a conditioned ``Zone``.
+  .. [#] AttachedToZone only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
+  .. [#] If UnitLocation not provided, defaults based on the distribution system:
+
+         \- **Air**: same default logic as :ref:`waterheatingsystems`
+
+         \- **DSE**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
+
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_air` (type: "fan coil") or :ref:`hvac_distribution_dse`.
+  .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
+  .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
+  .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
+  .. [#] BackupType choices are "integrated" or "separate".
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
+         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
+         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
+         Additional backup inputs are described in :ref:`hvac_hp_backup`.
+  .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
+  .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
+  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
+  .. [#] AttachedToGeothermalLoop must reference a ``GeothermalLoop``.
+  .. [#] If AttachedToGeothermalLoop not provided, the ground-to-air heat pump will be automatically attached to a geothermal loop that is entirely defaulted.
+  .. [#] If PumpPowerWattsPerTon not provided, defaults to 80 W/ton for a closed loop system.
+  .. [#] Pump power is calculated using PumpPowerWattsPerTon and the cooling capacity in tons, unless the system only provides heating, in which case the heating capacity in tons is used instead.
+         Any pump power that is shared by multiple dwelling units should be included in SharedLoopWatts, *not* PumpPowerWattsPerTon, so that shared loop pump power attributed to the dwelling unit is calculated.
+  .. [#] SharedLoopWatts only required if IsSharedSystem is true.
+  .. [#] Shared loop pump power attributed to the dwelling unit is calculated as SharedLoopWatts / NumberofUnitsServed.
+  .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
+         A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
+         See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
+
 .. _hvac_hp_water_loop:
 
 Water-Loop-to-Air Heat Pump
