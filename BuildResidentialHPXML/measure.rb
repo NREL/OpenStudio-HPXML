@@ -6196,7 +6196,9 @@ module HPXMLFile
       end
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
+    if [HPXML::HVACTypeHeatPumpAirToAir,
+        HPXML::HVACTypeHeatPumpMiniSplit,
+        HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type) || heat_pump_type.include?(HPXML::HVACTypeHeatPumpGroundToWater)
       compressor_type = args[:heat_pump_compressor_type]
     end
 
