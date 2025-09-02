@@ -2087,6 +2087,15 @@ module Defaults
       heat_pump.pump_watts_per_ton_isdefaulted = true
     end
 
+    # GSHP fan coil power
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpGroundToWater].include?(heat_pump.heat_pump_type)
+      next unless heat_pump.fan_coil_watts.nil?
+
+      heat_pump.fan_coil_watts = get_gshp_fan_coil_power()
+      heat_pump.fan_coil_watts_isdefaulted = true
+    end
+
     # Charge defect ratio
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless [HPXML::HVACTypeCentralAirConditioner,
@@ -6557,6 +6566,13 @@ module Defaults
   # @return [Double] Pump power (W/ton)
   def self.get_gshp_pump_power()
     return 80.0 # Rough estimate based on a literature review of different studies/websites
+  end
+
+  # Gets the default fan coil power for a closed loop ground-source heat pump.
+  #
+  # @return [Double] Fan coil power (W)
+  def self.get_gshp_fan_coil_power()
+    return 150.0 # FIXME: default this, or require this?
   end
 
   # Gets the default Electric Auxiliary Energy (EAE) for a boiler.
