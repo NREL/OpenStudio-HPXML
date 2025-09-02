@@ -1154,9 +1154,9 @@ module HVAC
       return hvac_system.electric_auxiliary_energy / 2.08
     elsif hvac_system.is_a?(HPXML::HeatPump) && (not hvac_system.pump_watts_per_ton.nil?)
       if hvac_system.cooling_capacity > 1.0
-        pump_power_watts = hvac_system.pump_watts_per_ton * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton') + hvac_system.fan_coil_watts
+        pump_power_watts = hvac_system.pump_watts_per_ton * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
       else
-        pump_power_watts = hvac_system.pump_watts_per_ton * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton') + hvac_system.fan_coil_watts
+        pump_power_watts = hvac_system.pump_watts_per_ton * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
       end
       if (not hvac_system.fan_coil_watts.nil?)
         pump_power_watts += hvac_system.fan_coil_watts
