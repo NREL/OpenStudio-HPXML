@@ -534,7 +534,7 @@ module HVAC
   # @param hvac_sequential_load_fracs [Hash<Array<Double>>] Map of htg/clg => Array of daily fractions of remaining heating/cooling load to be met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
-  # @return [OpenStudio::Model::AirLoopHVAC] The newly created air loop hvac object
+  # @return [OpenStudio::Model::AirLoopHVAC or OpenStudio::Model::ZoneHVACFourPipeFanCoil] The newly created air loop or zone hvac object
   def self.apply_ground_source_heat_pump(runner, model, weather, hpxml_bldg, hpxml_header, heat_pump,
                                          hvac_sequential_load_fracs, control_zone, hvac_unavailable_periods)
 
@@ -777,22 +777,22 @@ module HVAC
       htg_coil = OpenStudio::Model::HeatPumpPlantLoopEIRHeating.new(model)
       htg_coil.setName(obj_name + ' htg coil')
       htg_coil.setReferenceCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
-      # htg_coil.setSourceSideReferenceFlowRate() # ComStock autosizes
+      htg_coil.setSourceSideReferenceFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s')) # ComStock autosizes
       # htg_coil.setLoadSideReferenceFlowRate() # ComStock autosizes
       # htg_coil.setCapacityModifierFunctionofTemperatureCurve() # ComStock uses TableLookup for Carrier_61WG_Glycol_90kW_htg.csv
       # htg_coil.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve() # ComStock uses TableLookup for Carrier_61WG_Glycol_90kW_htg.csv
       # htg_coil.setElectricInputtoOutputRatioModifierFunctionofPartLoadRatioCurve() # ComStock assumes a standard EIR vs. PLR line
-      # htg_coil.setReferenceCoefficientofPerformance() # ComStock uses 1 / rated_heating_eir
+      htg_coil.setReferenceCoefficientofPerformance(1 / 0.23419) # ComStock uses 1 / rated_heating_eir
 
       clg_coil = OpenStudio::Model::HeatPumpPlantLoopEIRCooling.new(model)
       clg_coil.setName(obj_name + ' clg coil')
       clg_coil.setReferenceCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
-      # clg_coil.setSourceSideReferenceFlowRate() # ComStock autosizes
+      clg_coil.setSourceSideReferenceFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s')) # ComStock autosizes
       # clg_coil.setLoadSideReferenceFlowRate() # ComStock autosizes
       # clg_coil.setCapacityModifierFunctionofTemperatureCurve() # ComStock uses TableLookup for Carrier_30WG_90kW_clg.csv
       # clg_coil.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve() # ComStock uses TableLookup for Carrier_30WG_90kW_clg.csv
       # clg_coil.setElectricInputtoOutputRatioModifierFunctionofPartLoadRatioCurve() # ComStock assumes a standard EIR vs. PLR line
-      # clg_coil.setReferenceCoefficientofPerformance() # ComStock uses 1 / rated_cooling_eir
+      clg_coil.setReferenceCoefficientofPerformance(1 / 0.21505) # ComStock uses 1 / rated_cooling_eir
 
       htg_coil.setCompanionCoolingHeatPump(clg_coil)
       clg_coil.setCompanionHeatingHeatPump(htg_coil)
@@ -927,7 +927,14 @@ module HVAC
     elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToWater
       add_pump_power_ems_program(model, pump, htg_coil, heat_pump)
 
-      max_water_flow = UnitConversions.convert([heat_pump.heating_capacity, heat_pump.cooling_capacity].max, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
+      htg_design_temp = 140.0 # F; ComStock uses this value
+      clg_design_temp = 44.0 # F; ComStock uses this value
+
+      htg_temp_diff = 20.0 # deltaF; ComStock uses this value
+      clg_temp_diff = 11.0 # deltaF; what does ComStock use?
+
+      htg_max_water_flow = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(htg_temp_diff, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
+      clg_max_water_flow = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W') / UnitConversions.convert(clg_temp_diff, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
 
       plant_loop.addDemandBranchForComponent(htg_coil)
       plant_loop.addDemandBranchForComponent(clg_coil)
@@ -948,7 +955,7 @@ module HVAC
       supply_setpoint = Model.add_schedule_constant(
         model,
         name: "#{obj_name} hot water supply setpoint",
-        value: 60.000,
+        value: UnitConversions.convert(htg_design_temp, 'F', 'C'),
         limits: EPlus::ScheduleTypeLimitsTemperature
       )
 
@@ -959,18 +966,8 @@ module HVAC
 
       loop_sizing = hw_loop.sizingPlant
       loop_sizing.setLoopType('Heating')
-      loop_sizing.setDesignLoopExitTemperature(60.000) # ComStock uses this value (140F)
-      loop_sizing.setLoopDesignTemperatureDifference(11.111)
-
-      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
-      htg_coil.setRatedCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
-      htg_coil.setPerformanceInputMethod('NominalCapacity')
-
-      bb_ua = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
-      htg_coil.setUFactorTimesAreaValue(bb_ua)
-      htg_coil.setMaximumWaterFlowRate(max_water_flow)
-      htg_coil.setName(obj_name + ' htg coil')
-      hw_loop.addDemandBranchForComponent(htg_coil)
+      loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(htg_design_temp, 'F', 'C'))
+      loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(htg_temp_diff, 'deltaF', 'deltaC'))
 
       pump = Model.add_pump_variable_speed(
         model,
@@ -978,11 +975,27 @@ module HVAC
         rated_power: pump_w
       )
       pump.addToNode(hw_loop.supplyInletNode)
+      add_fan_pump_disaggregation_ems_program(model, pump, htg_coil, nil, nil, heat_pump)
+      add_pump_power_ems_program(model, pump, htg_coil, heat_pump)
+
+      bb_ua = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
+
+      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
+      htg_coil.setName(obj_name + ' htg coil')
+      htg_coil.setRatedCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
+      htg_coil.setPerformanceInputMethod('NominalCapacity')
+      htg_coil.setUFactorTimesAreaValue(bb_ua)
+      htg_coil.setMaximumWaterFlowRate(htg_max_water_flow)
+      htg_coil.setRatedInletWaterTemperature(UnitConversions.convert(htg_design_temp, 'F', 'C'))
+      htg_coil.setRatedOutletWaterTemperature(UnitConversions.convert(htg_design_temp - htg_temp_diff, 'F', 'C'))
+      # htg_coil.setRatedInletAirTemperature()
+      # htg_coil.setRatedOutletAirTemperature()
+      hw_loop.addDemandBranchForComponent(htg_coil)
 
       supply_setpoint = Model.add_schedule_constant(
         model,
         name: "#{obj_name} chilled water supply setpoint",
-        value: 6.666,
+        value: UnitConversions.convert(clg_design_temp, 'F', 'C'),
         limits: EPlus::ScheduleTypeLimitsTemperature
       )
 
@@ -993,20 +1006,8 @@ module HVAC
 
       loop_sizing = chw_loop.sizingPlant
       loop_sizing.setLoopType('Cooling')
-      loop_sizing.setDesignLoopExitTemperature(6.666) # ComStock uses this value (44F)
-      loop_sizing.setLoopDesignTemperatureDifference(5.611)
-
-      clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, model.alwaysOnDiscreteSchedule)
-      clg_coil.setDesignWaterFlowRate(0.0022)
-      clg_coil.setDesignAirFlowRate(1.45)
-      clg_coil.setDesignInletWaterTemperature(6.1)
-      clg_coil.setDesignInletAirTemperature(25.0)
-      clg_coil.setDesignOutletAirTemperature(10.0)
-      clg_coil.setDesignInletAirHumidityRatio(0.012)
-      clg_coil.setDesignOutletAirHumidityRatio(0.008)
-
-      clg_coil.setName(obj_name + ' clg coil')
-      chw_loop.addDemandBranchForComponent(clg_coil)
+      loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(clg_design_temp, 'F', 'C'))
+      loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(clg_temp_diff, 'deltaF', 'deltaC'))
 
       pump = Model.add_pump_variable_speed(
         model,
@@ -1014,6 +1015,19 @@ module HVAC
         rated_power: pump_w
       )
       pump.addToNode(chw_loop.supplyInletNode)
+      add_fan_pump_disaggregation_ems_program(model, pump, nil, clg_coil, nil, heat_pump)
+      add_pump_power_ems_program(model, pump, clg_coil, heat_pump)
+
+      clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, model.alwaysOnDiscreteSchedule)
+      clg_coil.setName(obj_name + ' clg coil')
+      clg_coil.setDesignWaterFlowRate(clg_max_water_flow)
+      clg_coil.setDesignAirFlowRate(UnitConversions.convert(fan_cfms[0], 'cfm', 'm^3/s'))
+      clg_coil.setDesignInletWaterTemperature(UnitConversions.convert(clg_design_temp, 'F', 'C'))
+      clg_coil.setDesignInletAirTemperature(25.0)
+      clg_coil.setDesignOutletAirTemperature(10.0)
+      clg_coil.setDesignInletAirHumidityRatio(0.012)
+      clg_coil.setDesignOutletAirHumidityRatio(0.008)
+      chw_loop.addDemandBranchForComponent(clg_coil)
 
       zone_hvac = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, model.alwaysOnDiscreteSchedule, fan, clg_coil, htg_coil)
       zone_hvac.setCapacityControlMethod('CyclingFan')
@@ -1021,11 +1035,11 @@ module HVAC
       zone_hvac.setMaximumSupplyAirTemperatureInHeatingMode(UnitConversions.convert(120.0, 'F', 'C'))
       zone_hvac.setHeatingConvergenceTolerance(0.001)
       zone_hvac.setMinimumSupplyAirTemperatureInCoolingMode(UnitConversions.convert(55.0, 'F', 'C'))
-      zone_hvac.setMaximumColdWaterFlowRate(max_water_flow)
+      zone_hvac.setMaximumColdWaterFlowRate(clg_max_water_flow)
       zone_hvac.setCoolingConvergenceTolerance(0.001)
       zone_hvac.setMaximumOutdoorAirFlowRate(0.0)
       zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert(fan_cfms[0], 'cfm', 'm^3/s'))
-      zone_hvac.setMaximumHotWaterFlowRate(max_water_flow)
+      zone_hvac.setMaximumHotWaterFlowRate(htg_max_water_flow)
       zone_hvac.addToThermalZone(control_zone)
     end
 
@@ -2008,7 +2022,7 @@ module HVAC
     )
   end
 
-  # Create EMS program to correctly account for pump power consumption based on heating object part load ratio
+  # Create EMS program to correctly account for pump power consumption based on heating (or cooling) object part load ratio
   # Without EMS, the pump power will vary according to the plant loop part load ratio
   # (based on flow rate) rather than the component part load ratio (based on load).
   #
@@ -2017,18 +2031,18 @@ module HVAC
   # @param heating_object [OpenStudio::Model::AirLoopHVACUnitarySystem or OpenStudio::Model::BoilerHotWater or OpenStudio::Model::HeatPumpPlantLoopEIRHeating] OpenStudio unitary system object or boiler object or plant loop heat pump object
   # @param hvac_system [HPXML::HeatPump or HPXML::HeatingSystem] HPXML heat pump or heating system object
   # @return [nil]
-  def self.add_pump_power_ems_program(model, pump, heating_object, hvac_system)
+  def self.add_pump_power_ems_program(model, pump, heating_or_cooling_object, hvac_system)
     # Sensors
-    if heating_object.is_a? OpenStudio::Model::BoilerHotWater
+    if heating_or_cooling_object.is_a? OpenStudio::Model::BoilerHotWater
       heating_plr_sensor = Model.add_ems_sensor(
         model,
-        name: "#{heating_object.name} plr s",
+        name: "#{heating_or_cooling_object.name} plr s",
         output_var_or_meter_name: 'Boiler Part Load Ratio',
-        key_name: heating_object.name
+        key_name: heating_or_cooling_object.name
       )
-    elsif heating_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-      htg_coil = heating_object.heatingCoil.get
-      clg_coil = heating_object.coolingCoil.get
+    elsif heating_or_cooling_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
+      htg_coil = heating_or_cooling_object.heatingCoil.get
+      clg_coil = heating_or_cooling_object.coolingCoil.get
       # GHP model, variable speed coils
       if htg_coil.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.is_initialized
         htg_coil = htg_coil.to_CoilHeatingWaterToAirHeatPumpVariableSpeedEquationFit.get
@@ -2073,13 +2087,13 @@ module HVAC
       else
         heating_plr_sensor = Model.add_ems_sensor(
           model,
-          name: "#{heating_object.name} plr s",
+          name: "#{heating_or_cooling_object.name} plr s",
           output_var_or_meter_name: 'Unitary System Part Load Ratio',
-          key_name: heating_object.name
+          key_name: heating_or_cooling_object.name
         )
       end
-    elsif heating_object.is_a? OpenStudio::Model::HeatPumpPlantLoopEIRHeating
-      htg_coil = heating_object
+    elsif heating_or_cooling_object.is_a? OpenStudio::Model::HeatPumpPlantLoopEIRHeating
+      htg_coil = heating_or_cooling_object
       clg_coil = htg_coil.companionCoolingHeatPump.get
       heating_plr_sensor = Model.add_ems_sensor(
         model,
@@ -2092,6 +2106,21 @@ module HVAC
         name: "#{clg_coil.name} plr s",
         output_var_or_meter_name: 'Heat Pump Part Load Ratio',
         key_name: clg_coil.name
+      )
+    elsif heating_or_cooling_object.is_a? OpenStudio::Model::HeatPumpPlantLoopEIRCooling
+      clg_coil = heating_or_cooling_object
+      htg_coil = clg_coil.companionHeatingHeatPump.get
+      cooling_plr_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{clg_coil.name} plr s",
+        output_var_or_meter_name: 'Heat Pump Part Load Ratio',
+        key_name: clg_coil.name
+      )
+      heating_plr_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{htg_coil.name} plr s",
+        output_var_or_meter_name: 'Heat Pump Part Load Ratio',
+        key_name: htg_coil.name
       )
     end
 
