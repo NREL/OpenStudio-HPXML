@@ -550,11 +550,6 @@ module HVAC
     geothermal_loop = heat_pump.geothermal_loop
     hp_ap = heat_pump.additional_properties
 
-    htg_cfm = hp_ap.heating_actual_airflow_cfm
-    clg_cfm = hp_ap.cooling_actual_airflow_cfm
-    htg_air_flow_rated = calc_rated_airflow(heat_pump.heating_capacity, hp_ap.heat_rated_cfm_per_ton, 'm^3/s')
-    clg_air_flow_rated = calc_rated_airflow(heat_pump.cooling_capacity, hp_ap.cool_rated_cfm_per_ton, 'm^3/s')
-
     if hp_ap.frac_glycol == 0
       hp_ap.fluid_type = EPlus::FluidWater
       runner.registerWarning("Specified #{hp_ap.fluid_type} fluid type and 0 fraction of glycol, so assuming #{EPlus::FluidWater} fluid type.")
@@ -565,6 +560,11 @@ module HVAC
     geothermal_loop.num_bore_holes *= unit_multiplier
 
     if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+
+      htg_cfm = hp_ap.heating_actual_airflow_cfm
+      clg_cfm = hp_ap.cooling_actual_airflow_cfm
+      htg_air_flow_rated = calc_rated_airflow(heat_pump.heating_capacity, hp_ap.heat_rated_cfm_per_ton, 'm^3/s')
+      clg_air_flow_rated = calc_rated_airflow(heat_pump.cooling_capacity, hp_ap.cool_rated_cfm_per_ton, 'm^3/s')
 
       if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard].include? hpxml_header.ground_to_air_heat_pump_model_type
         # Cooling Coil
@@ -778,7 +778,7 @@ module HVAC
       htg_coil.setName(obj_name + ' htg coil')
       htg_coil.setReferenceCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
       htg_coil.setSourceSideReferenceFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s')) # ComStock autosizes
-      # htg_coil.setLoadSideReferenceFlowRate() # ComStock autosizes
+      # htg_coil.setLoadSideReferenceFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s')) # ComStock autosizes
       # htg_coil.setCapacityModifierFunctionofTemperatureCurve() # ComStock uses TableLookup for Carrier_61WG_Glycol_90kW_htg.csv
       # htg_coil.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve() # ComStock uses TableLookup for Carrier_61WG_Glycol_90kW_htg.csv
       # htg_coil.setElectricInputtoOutputRatioModifierFunctionofPartLoadRatioCurve() # ComStock assumes a standard EIR vs. PLR line
@@ -788,7 +788,7 @@ module HVAC
       clg_coil.setName(obj_name + ' clg coil')
       clg_coil.setReferenceCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
       clg_coil.setSourceSideReferenceFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s')) # ComStock autosizes
-      # clg_coil.setLoadSideReferenceFlowRate() # ComStock autosizes
+      # clg_coil.setLoadSideReferenceFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s')) # ComStock autosizes
       # clg_coil.setCapacityModifierFunctionofTemperatureCurve() # ComStock uses TableLookup for Carrier_30WG_90kW_clg.csv
       # clg_coil.setElectricInputtoOutputRatioModifierFunctionofTemperatureCurve() # ComStock uses TableLookup for Carrier_30WG_90kW_clg.csv
       # clg_coil.setElectricInputtoOutputRatioModifierFunctionofPartLoadRatioCurve() # ComStock assumes a standard EIR vs. PLR line
