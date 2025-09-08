@@ -252,6 +252,7 @@ class HPXML < Object
   HVACTypeFurnace = 'Furnace'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
   HVACTypeHeatPumpGroundToAir = 'ground-to-air'
+  HVACTypeHeatPumpGroundToWater = 'ground-to-water'
   HVACTypeHeatPumpMiniSplit = 'mini-split'
   HVACTypeHeatPumpWaterLoopToAir = 'water-loop-to-air'
   HVACTypeHeatPumpPTHP = 'packaged terminal heat pump'
@@ -7045,6 +7046,7 @@ class HPXML < Object
              :pump_watts_per_ton,                   # [Double] extension/PumpPowerWattsPerTon (W/ton)
              :shared_loop_watts,                    # [Double] extension/SharedLoopWatts (W)
              :shared_loop_motor_efficiency,         # [Double] extension/SharedLoopMotorEfficiency (frac)
+             :fan_coil_watts,                       # [Double] extension/FanCoilWatts (W)
              :crankcase_heater_watts,               # [Double] extension/CrankcaseHeaterPowerWatts (W)
              :pan_heater_watts,                     # [Double] extension/PanHeaterPowerWatts (W)
              :pan_heater_control_type,              # [String] extension/PanHeaterControlType (HPXML::HVACPanHeaterControlTypeXXX)
@@ -7306,6 +7308,7 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'PumpPowerWattsPerTon', @pump_watts_per_ton, :float, @pump_watts_per_ton_isdefaulted) unless @pump_watts_per_ton.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopWatts', @shared_loop_watts, :float) unless @shared_loop_watts.nil?
       XMLHelper.add_extension(heat_pump, 'SharedLoopMotorEfficiency', @shared_loop_motor_efficiency, :float) unless @shared_loop_motor_efficiency.nil?
+      XMLHelper.add_extension(heat_pump, 'FanCoilWatts', @fan_coil_watts, :float) unless @fan_coil_watts.nil?
       XMLHelper.add_extension(heat_pump, 'CrankcaseHeaterPowerWatts', @crankcase_heater_watts, :float, @crankcase_heater_watts_isdefaulted) unless @crankcase_heater_watts.nil?
       XMLHelper.add_extension(heat_pump, 'PanHeaterPowerWatts', @pan_heater_watts, :float, @pan_heater_watts_isdefaulted) unless @pan_heater_watts.nil?
       XMLHelper.add_extension(heat_pump, 'PanHeaterControlType', @pan_heater_control_type, :string, @pan_heater_control_type_isdefaulted) unless @pan_heater_control_type.nil?
@@ -7382,6 +7385,7 @@ class HPXML < Object
       @pump_watts_per_ton = XMLHelper.get_value(heat_pump, 'extension/PumpPowerWattsPerTon', :float)
       @shared_loop_watts = XMLHelper.get_value(heat_pump, 'extension/SharedLoopWatts', :float)
       @shared_loop_motor_efficiency = XMLHelper.get_value(heat_pump, 'extension/SharedLoopMotorEfficiency', :float)
+      @fan_coil_watts = XMLHelper.get_value(heat_pump, 'extension/FanCoilWatts', :float)
       @crankcase_heater_watts = XMLHelper.get_value(heat_pump, 'extension/CrankcaseHeaterPowerWatts', :float)
       @pan_heater_watts = XMLHelper.get_value(heat_pump, 'extension/PanHeaterPowerWatts', :float)
       @pan_heater_control_type = XMLHelper.get_value(heat_pump, 'extension/PanHeaterControlType', :string)

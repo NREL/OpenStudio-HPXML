@@ -2015,7 +2015,7 @@ module Defaults
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless heat_pump.compressor_lockout_temp.nil?
       next unless heat_pump.backup_heating_switchover_temp.nil?
-      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include?(heat_pump.heat_pump_type)
 
       if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
         hp_backup_fuel = heat_pump.backup_heating_fuel
@@ -2042,7 +2042,7 @@ module Defaults
       next if heat_pump.backup_type.nil?
       next unless heat_pump.backup_heating_lockout_temp.nil?
       next unless heat_pump.backup_heating_switchover_temp.nil?
-      next if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include?(heat_pump.heat_pump_type)
 
       if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
         hp_backup_fuel = heat_pump.backup_heating_fuel
@@ -2080,11 +2080,20 @@ module Defaults
 
     # GSHP pump power
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next unless [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater].include?(heat_pump.heat_pump_type)
       next unless heat_pump.pump_watts_per_ton.nil?
 
       heat_pump.pump_watts_per_ton = get_gshp_pump_power()
       heat_pump.pump_watts_per_ton_isdefaulted = true
+    end
+
+    # GSHP fan coil power
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpGroundToWater].include?(heat_pump.heat_pump_type)
+      next unless heat_pump.fan_coil_watts.nil?
+
+      heat_pump.fan_coil_watts = get_gshp_fan_coil_power()
+      heat_pump.fan_coil_watts_isdefaulted = true
     end
 
     # Charge defect ratio
@@ -2099,7 +2108,8 @@ module Defaults
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit,
-                   HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
+                   HPXML::HVACTypeHeatPumpGroundToAir,
+                   HPXML::HVACTypeHeatPumpGroundToWater].include? heat_pump.heat_pump_type
       next unless heat_pump.charge_defect_ratio.nil?
 
       heat_pump.charge_defect_ratio = 0.0
@@ -2343,7 +2353,7 @@ module Defaults
         set_hvac_cooling_performance(heat_pump, hpxml_header)
         set_hvac_heating_performance(heat_pump, hpxml_header)
 
-      when HPXML::HVACTypeHeatPumpGroundToAir
+      when HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpGroundToWater
         set_heat_pump_control_temperatures(heat_pump, runner)
         set_hvac_cooling_performance(heat_pump, hpxml_header)
         set_hvac_heating_performance(heat_pump, hpxml_header)
@@ -6558,6 +6568,13 @@ module Defaults
     return 80.0 # Rough estimate based on a literature review of different studies/websites
   end
 
+  # Gets the default fan coil power for a closed loop ground-source heat pump.
+  #
+  # @return [Double] Fan coil power (W)
+  def self.get_gshp_fan_coil_power()
+    return 150.0 # FIXME: default this, or require this?
+  end
+
   # Gets the default Electric Auxiliary Energy (EAE) for a boiler.
   #
   # @param heating_system [HPXML::HeatingSystem] The HPXML heating system of interest
@@ -7768,6 +7785,36 @@ module Defaults
     end
   end
 
+  # TODO
+  #
+  # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @param cop_ratios [Array<Double>] Heating or cooling COP ratios for each speed
+  # @param mode [Symbol] Heating or cooling
+  # @return [nil]
+  def self.set_ground_to_water_heat_pump_cops(heat_pump, cop_ratios, mode)
+    hp_ap = heat_pump.additional_properties
+    # Fan/pump adjustments calculations
+    # Fan power to overcome the static pressure adjustment
+    # rated_fan_watts_per_cfm = 0.5 * heat_pump.fan_watts_per_cfm # Calculate rated fan power by assuming the power to overcome the ductwork is approximately 50% of the total fan power (ANSI/RESNET/ICC 301 says 0.2 W/cfm is the fan power associated with ductwork, but we don't know if that was a PSC or BPM fan)
+    rated_fan_watts_per_cfm = 0.25 # FIXME
+    power_f = rated_fan_watts_per_cfm * HVAC::RatedCFMPerTon / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # W per Btu/hr of capacity
+    rated_pump_watts_per_ton = 30.0 # ANSI/RESNET/ICC 301, estimated pump power required to overcome the internal resistance of the ground-water heat exchanger under AHRI test conditions for a closed loop system
+    power_p = rated_pump_watts_per_ton / UnitConversions.convert(1.0, 'ton', 'Btu/hr') # result is in W per Btu/hr of capacity
+    if mode == :clg
+      eir_rated = UnitConversions.convert(((1 - UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.cooling_efficiency_eer - power_f - power_p), 'Wh', 'Btu')
+      hp_ap.cool_rated_cops = []
+      for i in 0..(cop_ratios.size - 1)
+        hp_ap.cool_rated_cops << 1.0 / eir_rated * cop_ratios[i]
+      end
+    elsif mode == :htg
+      eir_rated = (1 + UnitConversions.convert(power_f, 'Wh', 'Btu')) / heat_pump.heating_efficiency_cop - UnitConversions.convert(power_f + power_p, 'Wh', 'Btu')
+      hp_ap.heat_rated_cops = []
+      for i in 0..(cop_ratios.size - 1)
+        hp_ap.heat_rated_cops << 1.0 / eir_rated * cop_ratios[i]
+      end
+    end
+  end
+
   # Sets default HVAC cooling performance values.
   #
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] The HPXML cooling system or heat pump of interest
@@ -7804,14 +7851,105 @@ module Defaults
     clg_ap.cool_cap_fflow_spec_iq = [0.718664047, 0.41797409, -0.136638137]
     clg_ap.cool_eir_fflow_spec_iq = [1.143487507, -0.13943972, -0.004047787]
 
-    if cooling_system.is_a?(HPXML::HeatPump) && cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      # Based on RESNET HERS Addendum 82
-      clg_ap.cool_rated_shr_gross = 0.708
-      clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+    if cooling_system.is_a?(HPXML::HeatPump)
+      if cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+        # Based on RESNET HERS Addendum 82
+        clg_ap.cool_rated_shr_gross = 0.708
+        clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
 
-      case hpxml_header.ground_to_air_heat_pump_model_type
-      when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
-        clg_ap.cool_capacity_ratios = [1.0]
+        case hpxml_header.ground_to_air_heat_pump_model_type
+        when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
+          clg_ap.cool_capacity_ratios = [1.0]
+
+          # E+ equation fit coil coefficients generated following approach in Tang's thesis:
+          # See Appendix B of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
+          # Coefficients generated by catalog data: https://files.climatemaster.com/Genesis-GS-Series-Product-Catalog.pdf, p180
+          # Data point taken as rated condition:
+          # EWT: 80F EAT:80/67F, AFR: 1200cfm, WFR: 4.5gpm
+
+          # Cooling Curves
+          clg_ap.cool_cap_curve_spec = [[-5.45013866666657, 7.42301402824225, -1.43760846638838, 0.249103937703341, 0.0378875477019811]]
+          clg_ap.cool_power_curve_spec = [[-4.21572180554818, 0.322682268675807, 4.56870615863483, 0.154605773589744, -0.167531037948482]]
+          clg_ap.cool_sh_curve_spec = [[0.56143829895505, 18.7079597251858, -19.1482655264078, -0.138154731772664, 0.4823357726442, -0.00164644360129174]]
+
+          cool_cop_ratios = [1.0]
+
+        when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental
+          case cooling_system.compressor_type
+          when HPXML::HVACCompressorTypeSingleStage
+            clg_ap.cool_capacity_ratios = [1.0]
+            # Cooling Curves
+            # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
+            # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
+            # Catalog data from : https://files.climatemaster.com/Genesis-GS-Series-Product-Catalog.pdf, p180
+            # Using E+ rated conditions:
+            # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
+            clg_ap.cool_cap_ft_spec = [[0.3926140238, 0.0297981297, 0.0000000582, 0.0123906803, -0.0003014284, -0.0001113698]]
+            clg_ap.cool_eir_ft_spec = [[1.1828664909, -0.0450835550, 0.0009273315, 0.0056194113, 0.0006683467, -0.0007256237]]
+            clg_ap.cool_cap_fflow_spec = [[0.5068, 0.8099, -0.3165]]
+            clg_ap.cool_eir_fflow_spec = [[2.0184, -1.6182, 0.5789]]
+            clg_ap.cool_cap_fwf_spec = [[1.0, 0.0, 0.0]]
+            clg_ap.cool_eir_fwf_spec = [[1.0, 0.0, 0.0]]
+            cool_cop_ratios = [1.0]
+          when HPXML::HVACCompressorTypeTwoStage
+            clg_ap.cool_capacity_ratios = [0.7353, 1.0]
+            # Cooling Curves
+            # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
+            # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
+            # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+            # Using E+ rated conditions:
+            # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
+            clg_ap.cool_cap_ft_spec = [[0.4091067504, 0.0387481208, -0.0000003491, 0.0039166842, -0.0001299475, -0.0002883229],
+                                       [0.4423161030, 0.0346534683, 0.0000043691, 0.0046060534, -0.0001393465, -0.0002316000]]
+            clg_ap.cool_eir_ft_spec = [[1.0242580586, -0.0549907581, 0.0017735749, 0.0186562274, 0.0008900852, -0.0016973518],
+                                       [1.0763155558, -0.0396246303, 0.0010677382, 0.0074160145, 0.0006781567, -0.0009009811]]
+            clg_ap.cool_cap_fflow_spec = [[0.9064, 0.0793, 0.0143],
+                                          [0.8551, 0.1688, -0.0238]]
+            clg_ap.cool_eir_fflow_spec = [[0.7931, 0.2623, -0.0552],
+                                          [0.8241, 0.1523, 0.0234]]
+            clg_ap.cool_cap_fwf_spec = [[0.8387, 0.2903, -0.129],
+                                        [0.815, 0.325, -0.14]]
+            clg_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
+                                        [1.5872, -1.055, 0.4678]]
+
+            # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+            cool_cop_ratios = [1.102827763, 1.0]
+          when HPXML::HVACCompressorTypeVariableSpeed
+            clg_ap.cool_capacity_ratios = [0.4802, 1.0]
+            # Cooling Curves
+            # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
+            # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
+            # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
+            # Using E+ rated conditions:
+            # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
+            clg_ap.cool_cap_ft_spec = [[1.3397293008, -0.0474800765, 0.0021636831, 0.0055773535, -0.0002350114, -0.0002458509],
+                                       [1.2143128834, -0.0459226877, 0.0020331628, 0.0086998093, -0.0002669140, -0.0001763187]]
+            clg_ap.cool_eir_ft_spec = [[-0.0049682877, 0.0554193005, -0.0015790347, -0.0010670650, 0.0011493038, -0.0008236210],
+                                       [0.0569949694, 0.0527820535, -0.0015763180, 0.0077339260, 0.0008175629, -0.0007157989]]
+            clg_ap.cool_cap_fflow_spec = [[1.1092, -0.5299, 0.4312],
+                                          [0.9216, -0.1021, 0.1874]]
+            clg_ap.cool_eir_fflow_spec = [[2.2938, -2.2648, 0.9631],
+                                          [1.9175, -1.374, 0.4646]]
+            clg_ap.cool_cap_fwf_spec = [[1.0386, -0.2037, 0.1651],
+                                        [0.8606, 0.2687, -0.1293]]
+            clg_ap.cool_eir_fwf_spec = [[1.066, 0.052, -0.118],
+                                        [1.2961, -0.4762, 0.18]]
+
+            # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
+            cool_cop_ratios = [1.059467645, 1.0]
+          end
+        end
+
+        set_ground_to_air_heat_pump_cops(cooling_system, cool_cop_ratios, :clg)
+        return
+      elsif cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToWater
+        # FIXME
+
+        # Based on RESNET HERS Addendum 82
+        clg_ap.cool_rated_shr_gross = 0.708
+        # clg_ap.cool_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+
+        # clg_ap.cool_capacity_ratios = [1.0]
 
         # E+ equation fit coil coefficients generated following approach in Tang's thesis:
         # See Appendix B of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
@@ -7821,79 +7959,14 @@ module Defaults
 
         # Cooling Curves
         clg_ap.cool_cap_curve_spec = [[-5.45013866666657, 7.42301402824225, -1.43760846638838, 0.249103937703341, 0.0378875477019811]]
-        clg_ap.cool_power_curve_spec = [[-4.21572180554818, 0.322682268675807, 4.56870615863483, 0.154605773589744, -0.167531037948482]]
+        # clg_ap.cool_power_curve_spec = [[-4.21572180554818, 0.322682268675807, 4.56870615863483, 0.154605773589744, -0.167531037948482]]
         clg_ap.cool_sh_curve_spec = [[0.56143829895505, 18.7079597251858, -19.1482655264078, -0.138154731772664, 0.4823357726442, -0.00164644360129174]]
 
         cool_cop_ratios = [1.0]
 
-      when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental
-        case cooling_system.compressor_type
-        when HPXML::HVACCompressorTypeSingleStage
-          clg_ap.cool_capacity_ratios = [1.0]
-          # Cooling Curves
-          # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
-          # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-          # Catalog data from : https://files.climatemaster.com/Genesis-GS-Series-Product-Catalog.pdf, p180
-          # Using E+ rated conditions:
-          # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
-          clg_ap.cool_cap_ft_spec = [[0.3926140238, 0.0297981297, 0.0000000582, 0.0123906803, -0.0003014284, -0.0001113698]]
-          clg_ap.cool_eir_ft_spec = [[1.1828664909, -0.0450835550, 0.0009273315, 0.0056194113, 0.0006683467, -0.0007256237]]
-          clg_ap.cool_cap_fflow_spec = [[0.5068, 0.8099, -0.3165]]
-          clg_ap.cool_eir_fflow_spec = [[2.0184, -1.6182, 0.5789]]
-          clg_ap.cool_cap_fwf_spec = [[1.0, 0.0, 0.0]]
-          clg_ap.cool_eir_fwf_spec = [[1.0, 0.0, 0.0]]
-          cool_cop_ratios = [1.0]
-        when HPXML::HVACCompressorTypeTwoStage
-          clg_ap.cool_capacity_ratios = [0.7353, 1.0]
-          # Cooling Curves
-          # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
-          # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-          # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
-          # Using E+ rated conditions:
-          # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
-          clg_ap.cool_cap_ft_spec = [[0.4091067504, 0.0387481208, -0.0000003491, 0.0039166842, -0.0001299475, -0.0002883229],
-                                     [0.4423161030, 0.0346534683, 0.0000043691, 0.0046060534, -0.0001393465, -0.0002316000]]
-          clg_ap.cool_eir_ft_spec = [[1.0242580586, -0.0549907581, 0.0017735749, 0.0186562274, 0.0008900852, -0.0016973518],
-                                     [1.0763155558, -0.0396246303, 0.0010677382, 0.0074160145, 0.0006781567, -0.0009009811]]
-          clg_ap.cool_cap_fflow_spec = [[0.9064, 0.0793, 0.0143],
-                                        [0.8551, 0.1688, -0.0238]]
-          clg_ap.cool_eir_fflow_spec = [[0.7931, 0.2623, -0.0552],
-                                        [0.8241, 0.1523, 0.0234]]
-          clg_ap.cool_cap_fwf_spec = [[0.8387, 0.2903, -0.129],
-                                      [0.815, 0.325, -0.14]]
-          clg_ap.cool_eir_fwf_spec = [[1.7131, -1.3055, 0.5924],
-                                      [1.5872, -1.055, 0.4678]]
-
-          # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
-          cool_cop_ratios = [1.102827763, 1.0]
-        when HPXML::HVACCompressorTypeVariableSpeed
-          clg_ap.cool_capacity_ratios = [0.4802, 1.0]
-          # Cooling Curves
-          # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
-          # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-          # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
-          # Using E+ rated conditions:
-          # Cooling: Indoor air at 67F WB, 80F DB; Entering water temperature: 85F
-          clg_ap.cool_cap_ft_spec = [[1.3397293008, -0.0474800765, 0.0021636831, 0.0055773535, -0.0002350114, -0.0002458509],
-                                     [1.2143128834, -0.0459226877, 0.0020331628, 0.0086998093, -0.0002669140, -0.0001763187]]
-          clg_ap.cool_eir_ft_spec = [[-0.0049682877, 0.0554193005, -0.0015790347, -0.0010670650, 0.0011493038, -0.0008236210],
-                                     [0.0569949694, 0.0527820535, -0.0015763180, 0.0077339260, 0.0008175629, -0.0007157989]]
-          clg_ap.cool_cap_fflow_spec = [[1.1092, -0.5299, 0.4312],
-                                        [0.9216, -0.1021, 0.1874]]
-          clg_ap.cool_eir_fflow_spec = [[2.2938, -2.2648, 0.9631],
-                                        [1.9175, -1.374, 0.4646]]
-          clg_ap.cool_cap_fwf_spec = [[1.0386, -0.2037, 0.1651],
-                                      [0.8606, 0.2687, -0.1293]]
-          clg_ap.cool_eir_fwf_spec = [[1.066, 0.052, -0.118],
-                                      [1.2961, -0.4762, 0.18]]
-
-          # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
-          cool_cop_ratios = [1.059467645, 1.0]
-        end
+        set_ground_to_water_heat_pump_cops(cooling_system, cool_cop_ratios, :clg)
+        return
       end
-
-      set_ground_to_air_heat_pump_cops(cooling_system, cool_cop_ratios, :clg)
-      return
     end
 
     # Based on RESNET HERS Addendum 82
@@ -8011,13 +8084,95 @@ module Defaults
     htg_ap.heat_cap_fflow_spec_iq = [0.694045465, 0.474207981, -0.168253446]
     htg_ap.heat_eir_fflow_spec_iq = [2.185418751, -1.942827919, 0.757409168]
 
-    if heating_system.is_a?(HPXML::HeatPump) && heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      # Based on RESNET HERS Addendum 82
-      htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+    if heating_system.is_a?(HPXML::HeatPump)
+      if heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+        # Based on RESNET HERS Addendum 82
+        htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
 
-      case hpxml_header.ground_to_air_heat_pump_model_type
-      when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
-        htg_ap.heat_capacity_ratios = [1.0]
+        case hpxml_header.ground_to_air_heat_pump_model_type
+        when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
+          htg_ap.heat_capacity_ratios = [1.0]
+          # E+ equation fit coil coefficients following approach from Tang's thesis:
+          # See Appendix B Figure B.3 of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
+          # Coefficients generated by catalog data: https://www.climatemaster.com/download/18.274be999165850ccd5b5b73/1535543867815/lc377-climatemaster-commercial-tranquility-20-single-stage-ts-series-water-source-heat-pump-submittal-set.pdf
+          # Data point taken as rated condition:
+          # EWT: 60F EAT: 70F AFR: 1200 cfm, WFR: 4.5 gpm
+
+          # Heating Curves
+          htg_ap.heat_cap_curve_spec = [[-3.75031847962047, -2.18062040443483, 6.8363364819032, 0.188376814356582, 0.0869274802923634]]
+          htg_ap.heat_power_curve_spec = [[-8.4754723813072, 8.10952801956388, 1.38771494628738, -0.33766445915032, 0.0223085217874051]]
+          heat_cop_ratios = [1.0]
+        when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental
+          case heating_system.compressor_type
+          when HPXML::HVACCompressorTypeSingleStage
+            htg_ap.heat_capacity_ratios = [1.0]
+            # Heating Curves
+            # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
+            # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
+            # Catalog data from : https://files.climatemaster.com/Genesis-GS-Series-Product-Catalog.pdf, p180
+            # Using E+ rated conditions:
+            # Heating: Indoor air at 70F DB; Entering water temperature: 70F
+            htg_ap.heat_cap_ft_spec = [[0.7353127278, -0.0035056759, -0.0000439615, 0.0204411095, -0.0000320781, -0.0001322685]]
+            htg_ap.heat_eir_ft_spec = [[0.6273820540, 0.0124891750, 0.0012720188, -0.0151581268, 0.0004164343, -0.0007259611]]
+            htg_ap.heat_cap_fflow_spec = [[0.7594, 0.3642, -0.1234]]
+            htg_ap.heat_eir_fflow_spec = [[2.796, -3.0886, 1.3858]]
+            htg_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]]
+            htg_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]]
+            heat_cop_ratios = [1.0]
+          when HPXML::HVACCompressorTypeTwoStage
+            htg_ap.heat_capacity_ratios = [0.7374, 1.0]
+            # Heating Curves
+            # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
+            # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
+            # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+            # Using E+ rated conditions:
+            # Heating: Indoor air at 70F DB; Entering water temperature: 70F
+            htg_ap.heat_cap_ft_spec = [[0.6523957849, -0.0011387222, 0.0000000000, 0.0191295958, -0.0000411533, -0.0000311030],
+                                       [0.6668920089, -0.0015817909, 0.0000027692, 0.0189198107, -0.0000372655, -0.0000393615]]
+            htg_ap.heat_eir_ft_spec = [[0.8057698794, 0.0316014252, 0.0000380531, -0.0228123504, 0.0004336379, -0.0004522084],
+                                       [0.8046419585, 0.0233384227, 0.0000376912, -0.0170224134, 0.0003382804, -0.0002368130]]
+            htg_ap.heat_cap_fflow_spec = [[0.8649, 0.1112, 0.0238],
+                                          [0.8264, 0.1593, 0.0143]]
+            htg_ap.heat_eir_fflow_spec = [[1.2006, -0.1943, -0.0062],
+                                          [1.2568, -0.2856, 0.0288]]
+            htg_ap.heat_cap_fwf_spec = [[0.7112, 0.5027, -0.2139],
+                                        [0.769, 0.399, -0.168]]
+            htg_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
+                                        [1.1679, -0.3215, 0.1535]]
+            # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
+            heat_cop_ratios = [1.161791639, 1.0]
+          when HPXML::HVACCompressorTypeVariableSpeed
+            htg_ap.heat_capacity_ratios = [0.4473, 1.0]
+            # Heating Curves
+            # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
+            # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
+            # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
+            # Using E+ rated conditions:
+            # Heating: Indoor air at 70F DB; Entering water temperature: 70F
+            htg_ap.heat_cap_ft_spec = [[0.6955336002, -0.0028528869, -0.0000005012, 0.0201138223, -0.0000590002, -0.0000749701],
+                                       [0.6975737864, -0.0028810803, -0.0000005015, 0.0206468583, -0.0000891526, -0.0000733087]]
+            htg_ap.heat_eir_ft_spec = [[0.8755777079, 0.0309984461, 0.0001099592, -0.0174543325, 0.0001819203, -0.0004948405],
+                                       [0.7627294076, 0.0273612308, 0.0001023412, -0.0145638547, 0.0001886431, -0.0003647958]]
+            htg_ap.heat_cap_fflow_spec = [[0.8676, 0.1122, 0.0195],
+                                          [0.9498, -0.0298, 0.0812]]
+            htg_ap.heat_eir_fflow_spec = [[1.4426, -0.4465, 0.0064],
+                                          [1.1158, 0.282, -0.4071]]
+            htg_ap.heat_cap_fwf_spec = [[0.8364, 0.197, -0.0333],
+                                        [0.727, 0.55, -0.277]]
+            htg_ap.heat_eir_fwf_spec = [[1.3491, -0.7744, 0.4253],
+                                        [1.0833, -0.1351, 0.0517]]
+            # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
+            heat_cop_ratios = [1.15012987, 1.0]
+          end
+        end
+
+        set_ground_to_air_heat_pump_cops(heating_system, heat_cop_ratios, :htg)
+        return
+      elsif heating_system.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToWater
+        # Based on RESNET HERS Addendum 82
+        # htg_ap.heat_rated_cfm_per_ton = HVAC::RatedCFMPerTon
+
+        # htg_ap.heat_capacity_ratios = [1.0]
         # E+ equation fit coil coefficients following approach from Tang's thesis:
         # See Appendix B Figure B.3 of  https://shareok.org/bitstream/handle/11244/10075/Tang_okstate_0664M_1318.pdf?sequence=1&isAllowed=y
         # Coefficients generated by catalog data: https://www.climatemaster.com/download/18.274be999165850ccd5b5b73/1535543867815/lc377-climatemaster-commercial-tranquility-20-single-stage-ts-series-water-source-heat-pump-submittal-set.pdf
@@ -8026,74 +8181,12 @@ module Defaults
 
         # Heating Curves
         htg_ap.heat_cap_curve_spec = [[-3.75031847962047, -2.18062040443483, 6.8363364819032, 0.188376814356582, 0.0869274802923634]]
-        htg_ap.heat_power_curve_spec = [[-8.4754723813072, 8.10952801956388, 1.38771494628738, -0.33766445915032, 0.0223085217874051]]
+        # htg_ap.heat_power_curve_spec = [[-8.4754723813072, 8.10952801956388, 1.38771494628738, -0.33766445915032, 0.0223085217874051]]
         heat_cop_ratios = [1.0]
-      when HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental
-        case heating_system.compressor_type
-        when HPXML::HVACCompressorTypeSingleStage
-          htg_ap.heat_capacity_ratios = [1.0]
-          # Heating Curves
-          # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
-          # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-          # Catalog data from : https://files.climatemaster.com/Genesis-GS-Series-Product-Catalog.pdf, p180
-          # Using E+ rated conditions:
-          # Heating: Indoor air at 70F DB; Entering water temperature: 70F
-          htg_ap.heat_cap_ft_spec = [[0.7353127278, -0.0035056759, -0.0000439615, 0.0204411095, -0.0000320781, -0.0001322685]]
-          htg_ap.heat_eir_ft_spec = [[0.6273820540, 0.0124891750, 0.0012720188, -0.0151581268, 0.0004164343, -0.0007259611]]
-          htg_ap.heat_cap_fflow_spec = [[0.7594, 0.3642, -0.1234]]
-          htg_ap.heat_eir_fflow_spec = [[2.796, -3.0886, 1.3858]]
-          htg_ap.heat_cap_fwf_spec = [[1.0, 0.0, 0.0]]
-          htg_ap.heat_eir_fwf_spec = [[1.0, 0.0, 0.0]]
-          heat_cop_ratios = [1.0]
-        when HPXML::HVACCompressorTypeTwoStage
-          htg_ap.heat_capacity_ratios = [0.7374, 1.0]
-          # Heating Curves
-          # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
-          # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-          # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
-          # Using E+ rated conditions:
-          # Heating: Indoor air at 70F DB; Entering water temperature: 70F
-          htg_ap.heat_cap_ft_spec = [[0.6523957849, -0.0011387222, 0.0000000000, 0.0191295958, -0.0000411533, -0.0000311030],
-                                     [0.6668920089, -0.0015817909, 0.0000027692, 0.0189198107, -0.0000372655, -0.0000393615]]
-          htg_ap.heat_eir_ft_spec = [[0.8057698794, 0.0316014252, 0.0000380531, -0.0228123504, 0.0004336379, -0.0004522084],
-                                     [0.8046419585, 0.0233384227, 0.0000376912, -0.0170224134, 0.0003382804, -0.0002368130]]
-          htg_ap.heat_cap_fflow_spec = [[0.8649, 0.1112, 0.0238],
-                                        [0.8264, 0.1593, 0.0143]]
-          htg_ap.heat_eir_fflow_spec = [[1.2006, -0.1943, -0.0062],
-                                        [1.2568, -0.2856, 0.0288]]
-          htg_ap.heat_cap_fwf_spec = [[0.7112, 0.5027, -0.2139],
-                                      [0.769, 0.399, -0.168]]
-          htg_ap.heat_eir_fwf_spec = [[1.3457, -0.6658, 0.3201],
-                                      [1.1679, -0.3215, 0.1535]]
-          # Catalog data from ClimateMaster residential tranquility 30 premier two-stage series Model SE036: https://files.climatemaster.com/RP3001-Residential-SE-Product-Catalog.pdf
-          heat_cop_ratios = [1.161791639, 1.0]
-        when HPXML::HVACCompressorTypeVariableSpeed
-          htg_ap.heat_capacity_ratios = [0.4473, 1.0]
-          # Heating Curves
-          # E+ Capacity and EIR as function of temperature curves(bi-quadratic) generated using E+ HVACCurveFitTool
-          # See: https://bigladdersoftware.com/epx/docs/24-2/auxiliary-programs/hvac-performance-curve-fit-tool.html#hvac-performance-curve-fit-tool
-          # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
-          # Using E+ rated conditions:
-          # Heating: Indoor air at 70F DB; Entering water temperature: 70F
-          htg_ap.heat_cap_ft_spec = [[0.6955336002, -0.0028528869, -0.0000005012, 0.0201138223, -0.0000590002, -0.0000749701],
-                                     [0.6975737864, -0.0028810803, -0.0000005015, 0.0206468583, -0.0000891526, -0.0000733087]]
-          htg_ap.heat_eir_ft_spec = [[0.8755777079, 0.0309984461, 0.0001099592, -0.0174543325, 0.0001819203, -0.0004948405],
-                                     [0.7627294076, 0.0273612308, 0.0001023412, -0.0145638547, 0.0001886431, -0.0003647958]]
-          htg_ap.heat_cap_fflow_spec = [[0.8676, 0.1122, 0.0195],
-                                        [0.9498, -0.0298, 0.0812]]
-          htg_ap.heat_eir_fflow_spec = [[1.4426, -0.4465, 0.0064],
-                                        [1.1158, 0.282, -0.4071]]
-          htg_ap.heat_cap_fwf_spec = [[0.8364, 0.197, -0.0333],
-                                      [0.727, 0.55, -0.277]]
-          htg_ap.heat_eir_fwf_spec = [[1.3491, -0.7744, 0.4253],
-                                      [1.0833, -0.1351, 0.0517]]
-          # Catalog data from WaterFurnace 7 Series 700A11: https://www.waterfurnace.com/literature/7series/SDW7-0018W.pdf
-          heat_cop_ratios = [1.15012987, 1.0]
-        end
-      end
 
-      set_ground_to_air_heat_pump_cops(heating_system, heat_cop_ratios, :htg)
-      return
+        set_ground_to_water_heat_pump_cops(heating_system, heat_cop_ratios, :htg)
+        return
+      end
     end
 
     htg_ap.heat_cap_fflow_spec = htg_ap.heat_cap_fflow_spec_iq

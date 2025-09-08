@@ -1358,6 +1358,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpAirToAir
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpMiniSplit
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpGroundToAir
+    heat_pump_type_choices << "#{HPXML::HVACTypeHeatPumpGroundToWater} w/ Ductless Fan Coil"
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpPTHP
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpRoom
 
@@ -1399,7 +1400,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_heating_efficiency_type', heat_pump_heating_efficiency_type_choices, true)
     arg.setDisplayName('Heat Pump: Heating Efficiency Type')
-    arg.setDescription("The heating efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsHSPF} or #{HPXML::UnitsHSPF2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsCOP}.")
+    arg.setDescription("The heating efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsHSPF} or #{HPXML::UnitsHSPF2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpGroundToWater}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsCOP}.")
     arg.setDefaultValue(HPXML::UnitsHSPF)
     args << arg
 
@@ -1411,7 +1412,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_efficiency_type', cooling_efficiency_type_choices, true)
     arg.setDisplayName('Heat Pump: Cooling Efficiency Type')
-    arg.setDescription("The cooling efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsSEER} or #{HPXML::UnitsSEER2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsEER}.")
+    arg.setDescription("The cooling efficiency type of heat pump. System types #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit} use #{HPXML::UnitsSEER} or #{HPXML::UnitsSEER2}. System types #{HPXML::HVACTypeHeatPumpGroundToAir}, #{HPXML::HVACTypeHeatPumpGroundToWater}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} use #{HPXML::UnitsEER}.")
     arg.setDefaultValue(HPXML::UnitsSEER)
     args << arg
 
@@ -1440,7 +1441,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_fraction_17_f', false)
     arg.setDisplayName('Heat Pump: Heating Capacity Fraction at 17F')
-    arg.setDescription("The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity at 47F. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
+    arg.setDescription("The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity at 47F. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('Frac')
     args << arg
 
@@ -1477,7 +1478,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_compressor_lockout_temp', false)
     arg.setDisplayName('Heat Pump: Compressor Lockout Temperature')
-    arg.setDescription("The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
+    arg.setDescription("The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('F')
     args << arg
 
@@ -1534,7 +1535,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_is_ducted', false)
     arg.setDisplayName('Heat Pump: Is Ducted')
-    arg.setDescription("Whether the heat pump is ducted or not. Only used for #{HPXML::HVACTypeHeatPumpMiniSplit}. It's assumed that #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpGroundToAir} are ducted, and #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} are not ducted. If not provided, assumes not ducted.")
+    arg.setDescription("Whether the heat pump is ducted or not. Only used for #{HPXML::HVACTypeHeatPumpMiniSplit}. It's assumed that #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpGroundToAir} are ducted, and #{HPXML::HVACTypeHeatPumpPTHP}, #{HPXML::HVACTypeHeatPumpRoom}, and #{HPXML::HVACTypeHeatPumpGroundToWater} are not ducted. If not provided, assumes not ducted.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_airflow_defect_ratio', false)
@@ -1673,7 +1674,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_configuration', geothermal_loop_configuration_choices, false)
     arg.setDisplayName('Geothermal Loop: Configuration')
-    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
+    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
     args << arg
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
@@ -1684,36 +1685,36 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_borefield_configuration', geothermal_loop_borefield_configuration_choices, false)
     arg.setDisplayName('Geothermal Loop: Borefield Configuration')
-    arg.setDescription("Borefield configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Borefield configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_loop_flow', false)
     arg.setDisplayName('Geothermal Loop: Loop Flow')
-    arg.setDescription("Water flow rate through the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Water flow rate through the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     arg.setUnits('gpm')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geothermal_loop_boreholes_count', false)
     arg.setDisplayName('Geothermal Loop: Boreholes Count')
-    arg.setDescription("Number of boreholes. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Number of boreholes. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     arg.setUnits('#')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_length', false)
     arg.setDisplayName('Geothermal Loop: Boreholes Length')
-    arg.setDescription("Average length of each borehole (vertical). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Average length of each borehole (vertical). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     arg.setUnits('ft')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_spacing', false)
     arg.setDisplayName('Geothermal Loop: Boreholes Spacing')
-    arg.setDescription("Distance between bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Distance between bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     arg.setUnits('ft')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_diameter', false)
     arg.setDisplayName('Geothermal Loop: Boreholes Diameter')
-    arg.setDescription("Diameter of bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Diameter of bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     arg.setUnits('in')
     args << arg
 
@@ -1723,12 +1724,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_grout_type', geothermal_loop_grout_or_pipe_type_choices, false)
     arg.setDisplayName('Geothermal Loop: Grout Type')
-    arg.setDescription("Grout type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Grout type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_pipe_type', geothermal_loop_grout_or_pipe_type_choices, false)
     arg.setDisplayName('Geothermal Loop: Pipe Type')
-    arg.setDescription("Pipe type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Pipe type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     args << arg
 
     geothermal_loop_pipe_diameter_choices = OpenStudio::StringVector.new
@@ -1738,7 +1739,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_pipe_diameter', geothermal_loop_pipe_diameter_choices, false)
     arg.setDisplayName('Geothermal Loop: Pipe Diameter')
-    arg.setDescription("Pipe diameter of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setDescription("Pipe diameter of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} and #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump types. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
     arg.setUnits('in')
     args << arg
 
@@ -2331,7 +2332,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_uses_desuperheater', false)
     arg.setDisplayName('Water Heater: Uses Desuperheater')
-    arg.setDescription("Requires that the dwelling unit has a #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, or #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump or a #{HPXML::HVACTypeCentralAirConditioner} or #{HPXML::HVACTypeMiniSplitAirConditioner} air conditioner. If not provided, assumes no desuperheater.")
+    arg.setDescription("Requires that the dwelling unit has a #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpGroundToAir}, or #{HPXML::HVACTypeHeatPumpGroundToWater} heat pump or a #{HPXML::HVACTypeCentralAirConditioner} or #{HPXML::HVACTypeMiniSplitAirConditioner} air conditioner. If not provided, assumes no desuperheater.")
     args << arg
 
     water_heater_tank_model_type_choices = OpenStudio::StringVector.new
@@ -4028,7 +4029,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue)
     warnings << 'Home with conditioned attic has ceiling insulation.' if warning
 
-    warning = (args[:heat_pump_type] != HPXML::HVACTypeHeatPumpGroundToAir) && (!args[:geothermal_loop_configuration].nil? && args[:geothermal_loop_configuration] != Constants::None)
+    warning = (args[:heat_pump_type] != HPXML::HVACTypeHeatPumpGroundToAir) && (args[:heat_pump_type] != HPXML::HVACTypeHeatPumpGroundToWater) && (!args[:geothermal_loop_configuration].nil? && args[:geothermal_loop_configuration] != Constants::None)
     warnings << 'Specified an attached geothermal loop but home has no ground source heat pump.' if warning
 
     return warnings
@@ -6195,7 +6196,9 @@ module HPXMLFile
       end
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
+    if [HPXML::HVACTypeHeatPumpAirToAir,
+        HPXML::HVACTypeHeatPumpMiniSplit,
+        HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type) || heat_pump_type.include?(HPXML::HVACTypeHeatPumpGroundToWater)
       compressor_type = args[:heat_pump_compressor_type]
     end
 
@@ -6230,6 +6233,10 @@ module HPXMLFile
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump_type)
       heat_pump_pan_heater_watts = args[:heat_pump_pan_heater_watts]
       heat_pump_pan_heater_control_type = args[:heat_pump_pan_heater_control_type]
+    end
+
+    if heat_pump_type.include?(HPXML::HVACTypeHeatPumpGroundToWater)
+      heat_pump_type = HPXML::HVACTypeHeatPumpGroundToWater
     end
 
     hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
@@ -6509,6 +6516,13 @@ module HPXMLFile
 
       if args[:heating_system_type].include?('Fan Coil')
         fan_coil_distribution_systems << heating_system
+      end
+    end
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      next unless heat_pump.primary_system
+
+      if args[:heat_pump_type].include?('Fan Coil')
+        fan_coil_distribution_systems << heat_pump
       end
     end
 

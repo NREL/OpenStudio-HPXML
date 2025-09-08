@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c17fea11-5360-49b1-928e-22fe6122fd51</version_id>
-  <version_modified>2025-08-28T03:34:02Z</version_modified>
+  <version_id>01ac3d88-9b68-4c6d-a84c-2941565a4191</version_id>
+  <version_modified>2025-09-08T21:59:26Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -348,7 +348,7 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CCE4785C</checksum>
+      <checksum>B358A1CA</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
@@ -384,7 +384,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0F94A077</checksum>
+      <checksum>2F8A1285</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -402,7 +402,7 @@
       <filename>hpxml_schematron/EPvalidator.sch</filename>
       <filetype>sch</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4BBE1448</checksum>
+      <checksum>813783B0</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -414,13 +414,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1275B557</checksum>
+      <checksum>0E49877A</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>30537BFF</checksum>
+      <checksum>EEF8EC23</checksum>
     </file>
     <file>
       <filename>internal_gains.rb</filename>
@@ -438,7 +438,7 @@
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7DB56BD8</checksum>
+      <checksum>815CA656</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
