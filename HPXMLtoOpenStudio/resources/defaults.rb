@@ -3306,7 +3306,7 @@ module Defaults
 
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
         if water_heating_system.heating_capacity.nil?
-          water_heating_system.heating_capacity = (get_water_heater_heating_capacity(water_heating_system.fuel_type, nbeds, hpxml_bldg.water_heating_systems.size, nbaths) * 1000.0).round
+          water_heating_system.heating_capacity = get_water_heater_heating_capacity(water_heating_system.fuel_type, nbeds, hpxml_bldg.water_heating_systems.size, nbaths)
           water_heating_system.heating_capacity_isdefaulted = true
         end
 
@@ -6115,7 +6115,7 @@ module Defaults
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param num_water_heaters [Integer] Number of water heaters serving the dwelling unit
   # @param nbaths [Integer] Number of bathrooms in the dwelling unit
-  # @return [Double] Water heater heating capacity (kBtu/hr)
+  # @return [Double] Water heater heating capacity (Btu/hr)
   def self.get_water_heater_heating_capacity(fuel, nbeds, num_water_heaters, nbaths = nil)
     if nbaths.nil?
       nbaths = Defaults.get_num_bathrooms(nbeds)
@@ -6135,21 +6135,24 @@ module Defaults
       else
         cap_kw = 5.5
       end
-      return UnitConversions.convert(cap_kw, 'kW', 'kBtu/hr')
+      cap_btuh = UnitConversions.convert(cap_kw, 'kW', 'Btu/hr')
 
     else # Non-electric tank WHs
       # Source: Table 8. Benchmark DHW Storage and Burner Capacity in 2014 BA HSP
       if nbeds <= 3
-        return 36.0
+        cap_kbtuh = 36.0
       elsif nbeds <= 4
-        return 38.0
+        cap_kbtuh = 38.0
       elsif nbeds <= 5
-        return 48.0
+        cap_kbtuh = 48.0
       else
-        return 50.0
+        cap_kbtuh = 50.0
       end
+      cap_btuh = UnitConversions.convert(cap_kbtuh, 'kBtu/hr', 'Btu/hr')
 
     end
+
+    return cap_btuh.round
   end
 
   # Gets the default tank volume for a storage water heater based on fuel type and number of bedrooms
