@@ -825,10 +825,9 @@ module HVAC
     plant_loop.addDemandBranchForComponent(htg_coil)
     plant_loop.addDemandBranchForComponent(clg_coil)
 
-    # Set the fluid type again because plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert) resets it to Water:
-    # https://github.com/NREL/OpenStudio/blob/v3.10.0/src/model/GroundHeatExchangerVertical.cpp#L361
-    # I'm not sure why the above referenced line sets the fluid type to Water.
-    # FIXME: Remove the following line if the OpenStudio SDK is ever changed (https://github.com/NREL/OpenStudio/issues/5458) to not reset to Water:
+    # FIXME: Workaround for https://github.com/NREL/OpenStudio/issues/5458
+    # Set the fluid type again because plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert) resets it to Water
+    # Remove the following line if the above issue is addressed
     plant_loop.setFluidType(hp_ap.fluid_type)
 
     sizing_plant = plant_loop.sizingPlant
@@ -845,11 +844,7 @@ module HVAC
     setpoint_mgr_follow_ground_temp.addToNode(plant_loop.supplyOutletNode)
 
     # Pump
-    if heat_pump.cooling_capacity > 1.0
-      pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton')
-    else
-      pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
-    end
+    pump_w = get_pump_power_watts(heat_pump)
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump = Model.add_pump_variable_speed(
       model,
@@ -999,14 +994,22 @@ module HVAC
     return fan_watts_per_cfm * airflow_cfm
   end
 
-  # Get the boiler pump power (W).
+  # Get the boiler or GHP pump power (W).
   #
-  # @param electric_auxiliary_energy [Double] Boiler electric auxiliary energy [kWh/yr]
-  # @return [Double] Boiler pump power [W]
-  def self.get_pump_power_watts(electric_auxiliary_energy)
-    return 0.0 if electric_auxiliary_energy.nil?
+  # @param hvac_system [HPXML::HeatingSystem or HPXML::HeatPump] The HPXML HVAC system of interest
+  # @return [Double] Pump power [W]
+  def self.get_pump_power_watts(hvac_system)
+    if hvac_system.is_a?(HPXML::HeatingSystem) && (not hvac_system.electric_auxiliary_energy.nil?)
+      return hvac_system.electric_auxiliary_energy / 2.08
+    elsif hvac_system.is_a?(HPXML::HeatPump) && (not hvac_system.pump_watts_per_ton.nil?)
+      if hvac_system.cooling_capacity > 1.0
+        return hvac_system.pump_watts_per_ton * UnitConversions.convert(hvac_system.cooling_capacity, 'Btu/hr', 'ton')
+      else
+        return hvac_system.pump_watts_per_ton * UnitConversions.convert(hvac_system.heating_capacity, 'Btu/hr', 'ton')
+      end
+    end
 
-    return electric_auxiliary_energy / 2.08
+    return 0.0
   end
 
   # Returns the heating input capacity, calculated as the heating rated (output) capacity divided by the rated efficiency.
@@ -1063,7 +1066,7 @@ module HVAC
     loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
 
     # Pump
-    pump_w = get_pump_power_watts(heating_system.electric_auxiliary_energy)
+    pump_w = get_pump_power_watts(heating_system)
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump = Model.add_pump_variable_speed(
       model,
@@ -2054,6 +2057,7 @@ module HVAC
     )
     pump_program.addLine("If #{htg_load_sensor.name} > 0.0 && #{clg_load_sensor.name} > 0.0") # Heating loads
     pump_program.addLine("  Set estimated_plr = (@ABS #{htg_load_sensor.name}) / #{htg_coil.ratedHeatingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
+    pump_program.addLine('  Set estimated_plr = @Max estimated_plr 0.1') # Avoid small water flow rate, which causes E+ failures
     pump_program.addLine("  Set max_vfr_htg = #{htg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
     pump_program.addLine('  Set estimated_vfr = estimated_plr * max_vfr_htg')
     pump_program.addLine("  If estimated_vfr < #{htg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
@@ -2063,6 +2067,7 @@ module HVAC
     pump_program.addLine('  EndIf')
     pump_program.addLine("ElseIf #{htg_load_sensor.name} < 0.0 && #{clg_load_sensor.name} < 0.0") # Cooling loads
     pump_program.addLine("  Set estimated_plr = (@ABS #{clg_load_sensor.name}) / #{clg_coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
+    pump_program.addLine('  Set estimated_plr = @Max estimated_plr 0.1') # Avoid small water flow rate, which causes E+ failures
     pump_program.addLine("  Set max_vfr_clg = #{clg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
     pump_program.addLine('  Set estimated_vfr = estimated_plr * max_vfr_clg')
     pump_program.addLine("  If estimated_vfr < #{clg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
@@ -2097,9 +2102,9 @@ module HVAC
     sys_id = hpxml_object.id
 
     if fan_or_pump.is_a? OpenStudio::Model::FanSystemModel
-      var = "Fan #{EPlus::FuelTypeElectricity} Energy"
+      var = 'Fan Electricity Energy'
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
-      var = "Pump #{EPlus::FuelTypeElectricity} Energy"
+      var = 'Pump Electricity Energy'
     else
       fail "Unexpected fan/pump object '#{fan_or_pump.name}'."
     end
@@ -2260,7 +2265,7 @@ module HVAC
     dehumidifier_power = Model.add_ems_sensor(
       model,
       name: "#{dehumidifier.name} power htg",
-      output_var_or_meter_name: "Zone Dehumidifier #{EPlus::FuelTypeElectricity} Rate",
+      output_var_or_meter_name: 'Zone Dehumidifier Electricity Rate',
       key_name: dehumidifier.name
     )
 
@@ -4318,9 +4323,10 @@ module HVAC
       # Program
       temp_override_program = Model.add_ems_program(
         model,
-        name: "#{heating_sch.name} program"
+        name: "#{heating_sch.name} max heating temp program"
       )
-      temp_override_program.addLine("If #{tout_db_sensor.name} > #{UnitConversions.convert(max_heating_temp, 'F', 'C')}")
+      temp_override_program.addLine("Set max_heating_temp = #{UnitConversions.convert(max_heating_temp, 'F', 'C')}")
+      temp_override_program.addLine("If #{tout_db_sensor.name} > max_heating_temp")
       temp_override_program.addLine("  Set #{actuator.name} = 0")
       temp_override_program.addLine('Else')
       temp_override_program.addLine("  Set #{actuator.name} = NULL") # Allow normal operation

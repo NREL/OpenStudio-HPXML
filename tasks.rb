@@ -744,7 +744,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                             interior_adjacent_to: HPXML::LocationConditionedSpace,
                             floor_type: HPXML::FloorTypeWoodFrame,
                             area: 150,
-                            insulation_assembly_r_value: 2.1,
+                            insulation_assembly_r_value: 5.3,
                             floor_or_ceiling: HPXML::FloorOrCeilingFloor)
       wall = hpxml_bldg.walls.select { |w|
                w.interior_adjacent_to == HPXML::LocationConditionedSpace &&
@@ -1113,6 +1113,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
         rim_joist.exterior_adjacent_to = HPXML::LocationCrawlspaceUnvented
         rim_joist.siding = nil
+        rim_joist.insulation_assembly_r_value = 4.0
       end
       hpxml_bldg.rim_joists.add(id: "RimJoist#{hpxml_bldg.rim_joists.size + 1}",
                                 exterior_adjacent_to: HPXML::LocationOutside,
@@ -1831,7 +1832,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                      cooling_system_fuel: HPXML::FuelTypeElectricity,
                                      cooling_capacity: 9600,
                                      fraction_cool_load_served: 0.1333,
-                                     cooling_efficiency_eer: 8.5)
+                                     cooling_efficiency_ceer: 8.4)
       hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
                                      cooling_system_type: HPXML::HVACTypePTAC,
                                      cooling_system_fuel: HPXML::FuelTypeElectricity,
@@ -1850,8 +1851,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 backup_heating_efficiency_percent: 1.0,
                                 fraction_heat_load_served: 0.1,
                                 fraction_cool_load_served: 0.2,
-                                heating_efficiency_hspf: 7.7,
-                                cooling_efficiency_seer: 13,
+                                heating_efficiency_hspf2: 7.0,
+                                cooling_efficiency_seer2: 13.4,
                                 heating_capacity_17F: 4800 * 0.6,
                                 compressor_type: HPXML::HVACCompressorTypeSingleStage)
       hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
@@ -1881,8 +1882,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                 backup_heating_efficiency_percent: 1.0,
                                 fraction_heat_load_served: 0.1,
                                 fraction_cool_load_served: 0.2,
-                                heating_efficiency_hspf: 10,
-                                cooling_efficiency_seer: 19,
+                                heating_efficiency_hspf2: 9,
+                                cooling_efficiency_seer2: 19,
                                 heating_capacity_17F: 4800 * 0.6,
                                 compressor_type: HPXML::HVACCompressorTypeVariableSpeed,
                                 primary_cooling_system: true,
@@ -1954,7 +1955,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.dehumidifiers.add(id: 'Dehumidifier2',
                                    type: HPXML::DehumidifierTypePortable,
                                    capacity: 30,
-                                   energy_factor: 1.6,
+                                   integrated_energy_factor: 1.9,
                                    rh_setpoint: 0.5,
                                    fraction_served: 0.25,
                                    location: HPXML::LocationConditionedSpace)
@@ -2032,11 +2033,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hvac_system.cooling_design_airflow_cfm = (360 * cooling_capacity_tons).round
       end
     end
-    if hpxml_file.include? 'space-constrained'
-      (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
-        hvac_system.equipment_type = HPXML::HVACEquipmentTypeSpaceConstrained
-      end
-    end
     if hpxml_file.include? 'defrost-with-backup-heat-active'
       hpxml_bldg.heat_pumps.each do |heat_pump|
         heat_pump.backup_heating_active_during_defrost = true
@@ -2093,7 +2089,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.water_heating_systems << hpxml_bldg.water_heating_systems[0].dup
         hpxml_bldg.water_heating_systems[1].id = "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size}"
       end
-    elsif ['base-dhw-tank-gas-uef-fhr.xml'].include? hpxml_file
+    elsif ['base-dhw-tank-gas-fhr.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].first_hour_rating = 56.0
       hpxml_bldg.water_heating_systems[0].usage_bin = nil
     elsif ['base-dhw-tankless-electric-outside.xml'].include? hpxml_file
@@ -2365,6 +2361,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
     if ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.pv_systems[0].year_modules_manufactured = 2015
+    elsif ['base-pv-inverters.xml'].include? hpxml_file
+      hpxml_bldg.inverters.add(id: "Inverter#{hpxml_bldg.inverters.size + 1}",
+                               inverter_efficiency: 0.94)
+      hpxml_bldg.pv_systems[-1].inverter_idref = hpxml_bldg.inverters[-1].id
     elsif ['base-misc-generators.xml',
            'base-misc-generators-battery.xml',
            'base-misc-generators-battery-scheduled.xml',
@@ -2431,6 +2431,11 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.vehicles[0].ev_weekday_fractions = '0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, -0.3535, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.3221, -0.3244, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714, 0.0714'
       hpxml_bldg.vehicles[0].ev_weekend_fractions = '0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, -0.3334, 0, 0, 0, 0, -0.3293, -0.3372, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588, 0.0588'
       hpxml_bldg.vehicles[0].ev_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+    end
+    if ['base-vehicle-ev-charger-undercharged.xml'].include? hpxml_file
+      hpxml_bldg.vehicles[0].ev_usage_multiplier = 2.0
+    elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+      hpxml_bldg.vehicles[0].ev_usage_multiplier = 0.75
     end
 
     # ---------------- #

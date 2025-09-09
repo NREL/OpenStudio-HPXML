@@ -87,7 +87,7 @@ module Defaults
     apply_pools_and_permanent_spas(hpxml_bldg, schedules_file)
     apply_plug_loads(hpxml_bldg, schedules_file)
     apply_fuel_loads(hpxml_bldg, schedules_file)
-    apply_pv_systems(hpxml_bldg)
+    apply_pv_systems(hpxml_bldg, unit_num)
     apply_generators(hpxml_bldg)
     apply_batteries(hpxml_bldg)
     apply_vehicles(hpxml_bldg, schedules_file)
@@ -420,20 +420,18 @@ module Defaults
     end
 
     if hpxml_bldg.header.shading_summer_begin_month.nil? || hpxml_bldg.header.shading_summer_begin_day.nil? || hpxml_bldg.header.shading_summer_end_month.nil? || hpxml_bldg.header.shading_summer_end_day.nil?
-      if not weather.nil?
-        # Default based on Building America seasons
-        _, default_cooling_months = HVAC.get_building_america_hvac_seasons(weather, hpxml_bldg.latitude)
-        begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
-        if not begin_month.nil? # Check if no summer
-          hpxml_bldg.header.shading_summer_begin_month = begin_month
-          hpxml_bldg.header.shading_summer_begin_day = begin_day
-          hpxml_bldg.header.shading_summer_end_month = end_month
-          hpxml_bldg.header.shading_summer_end_day = end_day
-          hpxml_bldg.header.shading_summer_begin_month_isdefaulted = true
-          hpxml_bldg.header.shading_summer_begin_day_isdefaulted = true
-          hpxml_bldg.header.shading_summer_end_month_isdefaulted = true
-          hpxml_bldg.header.shading_summer_end_day_isdefaulted = true
-        end
+      # Default based on Building America seasons
+      _, default_cooling_months = HVAC.get_building_america_hvac_seasons(weather, hpxml_bldg.latitude)
+      begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
+      if not begin_month.nil? # Check if no summer
+        hpxml_bldg.header.shading_summer_begin_month = begin_month
+        hpxml_bldg.header.shading_summer_begin_day = begin_day
+        hpxml_bldg.header.shading_summer_end_month = end_month
+        hpxml_bldg.header.shading_summer_end_day = end_day
+        hpxml_bldg.header.shading_summer_begin_month_isdefaulted = true
+        hpxml_bldg.header.shading_summer_begin_day_isdefaulted = true
+        hpxml_bldg.header.shading_summer_end_month_isdefaulted = true
+        hpxml_bldg.header.shading_summer_end_day_isdefaulted = true
       end
     end
   end
@@ -719,66 +717,67 @@ module Defaults
       hpxml_bldg.site.ground_diffusivity_isdefaulted = true
     end
 
-    if hpxml_bldg.dst_enabled.nil?
-      hpxml_bldg.dst_enabled = true # Assume DST since it occurs in most US locations
-      hpxml_bldg.dst_enabled_isdefaulted = true
+    if hpxml_bldg.state_code.nil?
+      hpxml_bldg.state_code = get_state_code(hpxml_bldg.state_code, weather, hpxml_bldg.zip_code)
+      hpxml_bldg.state_code_isdefaulted = true
     end
 
-    if not weather.nil?
-
-      if hpxml_bldg.state_code.nil?
-        hpxml_bldg.state_code = get_state_code(hpxml_bldg.state_code, weather)
-        hpxml_bldg.state_code_isdefaulted = true
+    if hpxml_bldg.dst_observed.nil?
+      if ['AZ', 'HI'].include? hpxml_bldg.state_code
+        hpxml_bldg.dst_observed = false
+      else
+        hpxml_bldg.dst_observed = true
       end
+      hpxml_bldg.dst_observed_isdefaulted = true
+    end
 
-      if hpxml_bldg.city.nil?
-        hpxml_bldg.city = weather.header.City
-        hpxml_bldg.city_isdefaulted = true
-      end
+    if hpxml_bldg.city.nil?
+      hpxml_bldg.city = get_city(hpxml_bldg.city, weather, hpxml_bldg.zip_code)
+      hpxml_bldg.city_isdefaulted = true
+    end
 
-      if hpxml_bldg.time_zone_utc_offset.nil?
-        hpxml_bldg.time_zone_utc_offset = get_time_zone(hpxml_bldg.time_zone_utc_offset, weather)
-        hpxml_bldg.time_zone_utc_offset_isdefaulted = true
-      end
+    if hpxml_bldg.time_zone_utc_offset.nil?
+      hpxml_bldg.time_zone_utc_offset = get_time_zone(hpxml_bldg.time_zone_utc_offset, weather, hpxml_bldg.zip_code)
+      hpxml_bldg.time_zone_utc_offset_isdefaulted = true
+    end
 
-      if hpxml_bldg.dst_enabled
-        if hpxml_bldg.dst_begin_month.nil? || hpxml_bldg.dst_begin_day.nil? || hpxml_bldg.dst_end_month.nil? || hpxml_bldg.dst_end_day.nil?
-          if (not weather.header.DSTStartDate.nil?) && (not weather.header.DSTEndDate.nil?)
-            # Use weather file DST dates if available
-            dst_start_date = weather.header.DSTStartDate
-            dst_end_date = weather.header.DSTEndDate
-            hpxml_bldg.dst_begin_month = dst_start_date.monthOfYear.value
-            hpxml_bldg.dst_begin_day = dst_start_date.dayOfMonth
-            hpxml_bldg.dst_end_month = dst_end_date.monthOfYear.value
-            hpxml_bldg.dst_end_day = dst_end_date.dayOfMonth
-          else
-            # Roughly average US dates according to https://en.wikipedia.org/wiki/Daylight_saving_time_in_the_United_States
-            hpxml_bldg.dst_begin_month = 3
-            hpxml_bldg.dst_begin_day = 12
-            hpxml_bldg.dst_end_month = 11
-            hpxml_bldg.dst_end_day = 5
-          end
-          hpxml_bldg.dst_begin_month_isdefaulted = true
-          hpxml_bldg.dst_begin_day_isdefaulted = true
-          hpxml_bldg.dst_end_month_isdefaulted = true
-          hpxml_bldg.dst_end_day_isdefaulted = true
+    if hpxml_bldg.dst_observed
+      if hpxml_bldg.dst_begin_month.nil? || hpxml_bldg.dst_begin_day.nil? || hpxml_bldg.dst_end_month.nil? || hpxml_bldg.dst_end_day.nil?
+        if (not weather.header.DSTStartDate.nil?) && (not weather.header.DSTEndDate.nil?)
+          # Use weather file DST dates if available
+          dst_start_date = weather.header.DSTStartDate
+          dst_end_date = weather.header.DSTEndDate
+          hpxml_bldg.dst_begin_month = dst_start_date.monthOfYear.value
+          hpxml_bldg.dst_begin_day = dst_start_date.dayOfMonth
+          hpxml_bldg.dst_end_month = dst_end_date.monthOfYear.value
+          hpxml_bldg.dst_end_day = dst_end_date.dayOfMonth
+        else
+          # Roughly average US dates according to https://en.wikipedia.org/wiki/Daylight_saving_time_in_the_United_States
+          hpxml_bldg.dst_begin_month = 3
+          hpxml_bldg.dst_begin_day = 12
+          hpxml_bldg.dst_end_month = 11
+          hpxml_bldg.dst_end_day = 5
         end
+        hpxml_bldg.dst_begin_month_isdefaulted = true
+        hpxml_bldg.dst_begin_day_isdefaulted = true
+        hpxml_bldg.dst_end_month_isdefaulted = true
+        hpxml_bldg.dst_end_day_isdefaulted = true
       end
+    end
 
-      if hpxml_bldg.elevation.nil?
-        hpxml_bldg.elevation = weather.header.Elevation.round(1)
-        hpxml_bldg.elevation_isdefaulted = true
-      end
+    if hpxml_bldg.elevation.nil?
+      hpxml_bldg.elevation = get_elevation(weather)
+      hpxml_bldg.elevation_isdefaulted = true
+    end
 
-      if hpxml_bldg.latitude.nil?
-        hpxml_bldg.latitude = get_latitude(hpxml_bldg.latitude, weather)
-        hpxml_bldg.latitude_isdefaulted = true
-      end
+    if hpxml_bldg.latitude.nil?
+      hpxml_bldg.latitude = get_latitude(hpxml_bldg.latitude, weather, hpxml_bldg.zip_code)
+      hpxml_bldg.latitude_isdefaulted = true
+    end
 
-      if hpxml_bldg.longitude.nil?
-        hpxml_bldg.longitude = get_longitude(hpxml_bldg.longitude, weather)
-        hpxml_bldg.longitude_isdefaulted = true
-      end
+    if hpxml_bldg.longitude.nil?
+      hpxml_bldg.longitude = get_longitude(hpxml_bldg.longitude, weather, hpxml_bldg.zip_code)
+      hpxml_bldg.longitude_isdefaulted = true
     end
   end
 
@@ -945,7 +944,7 @@ module Defaults
   # @param unit_num [Integer] Dwelling unit number
   # @return [nil]
   def self.apply_climate_and_risk_zones(hpxml_bldg, weather, unit_num)
-    if (not weather.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
+    if hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
       weather_data = lookup_weather_data_from_wmo(weather.header.WMONumber)
       if not weather_data.empty?
         hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: weather_data[:zipcode_iecc_zone],
@@ -3504,8 +3503,9 @@ module Defaults
   # Assigns default values for omitted optional inputs in the HPXML::PVSystem objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param unit_num [Integer] Dwelling unit number
   # @return [nil]
-  def self.apply_pv_systems(hpxml_bldg)
+  def self.apply_pv_systems(hpxml_bldg, unit_num)
     hpxml_bldg.pv_systems.each do |pv_system|
       if pv_system.array_azimuth.nil?
         pv_system.array_azimuth = get_azimuth_from_orientation(pv_system.array_orientation)
@@ -3535,6 +3535,12 @@ module Defaults
         pv_system.system_losses_fraction = get_pv_system_losses(pv_system.year_modules_manufactured)
         pv_system.system_losses_fraction_isdefaulted = true
       end
+      next unless pv_system.inverter_idref.nil?
+
+      if hpxml_bldg.inverters.size == 0
+        hpxml_bldg.inverters.add(id: get_id('Inverter', hpxml_bldg.inverters, unit_num))
+      end
+      pv_system.inverter_idref = hpxml_bldg.inverters[0].id
     end
     hpxml_bldg.inverters.each do |inverter|
       if inverter.inverter_efficiency.nil?
@@ -3988,15 +3994,19 @@ module Defaults
         vehicle.hours_per_week = default_values[:hours_per_week]
         vehicle.hours_per_week_isdefaulted = true
       elsif (not vehicle.hours_per_week.nil?) && vehicle.miles_per_year.nil?
-        vehicle.miles_per_year = vehicle.hours_per_week * miles_to_hrs_per_week
+        vehicle.miles_per_year = (vehicle.hours_per_week * miles_to_hrs_per_week).round
         vehicle.miles_per_year_isdefaulted = true
       elsif (not vehicle.miles_per_year.nil?) && vehicle.hours_per_week.nil?
-        vehicle.hours_per_week = vehicle.miles_per_year / miles_to_hrs_per_week
+        vehicle.hours_per_week = (vehicle.miles_per_year / miles_to_hrs_per_week).round(1)
         vehicle.hours_per_week_isdefaulted = true
       end
       if vehicle.fraction_charged_home.nil?
         vehicle.fraction_charged_home = default_values[:fraction_charged_home]
         vehicle.fraction_charged_home_isdefaulted = true
+      end
+      if vehicle.ev_usage_multiplier.nil?
+        vehicle.ev_usage_multiplier = 1.0
+        vehicle.ev_usage_multiplier_isdefaulted = true
       end
       schedules_file_includes_ev = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:ElectricVehicleCharging].name) && schedules_file.includes_col_name(SchedulesFile::Columns[:ElectricVehicleDischarging].name))
       if vehicle.ev_weekday_fractions.nil? && !schedules_file_includes_ev
@@ -4539,7 +4549,7 @@ module Defaults
       ceiling_fan.label_energy_use_isdefaulted = true
     end
     if ceiling_fan.count.nil?
-      ceiling_fan.count = get_ceiling_fan_quantity(nbeds)
+      ceiling_fan.count = get_ceiling_fan_count(nbeds)
       ceiling_fan.count_isdefaulted = true
     end
     schedules_file_includes_ceiling_fan = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:CeilingFan].name))
@@ -5196,48 +5206,103 @@ module Defaults
     return shading_coverage * shading_factor + (1 - shading_coverage) * non_shading_factor
   end
 
-  # Gets the default latitude from the HPXML file or, as backup, weather file.
+  # Gets the default latitude from the HPXML file, or as backup from the
+  # zip code, or as backup from the weather file.
   #
   # @param latitude [Double] Latitude from the HPXML file (degrees)
   # @param weather [WeatherFile] Weather object containing EPW information
+  # @param zipcode [String] Zipcode of interest
   # @return [Double] Default value for latitude (degrees)
-  def self.get_latitude(latitude, weather)
+  def self.get_latitude(latitude, weather, zipcode)
     return latitude unless latitude.nil?
+
+    if not zipcode.nil?
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
+      return Float(weather_data[:zipcode_latitude]) unless weather_data[:zipcode_latitude].nil?
+    end
 
     return weather.header.Latitude
   end
 
-  # Gets the default longitude from the HPXML file or, as backup, weather file.
+  # Gets the default longitude from the HPXML file, or as backup from the
+  # zip code, or as backup from the weather file.
   #
   # @param longitude [Double] Longitude from the HPXML file (degrees)
   # @param weather [WeatherFile] Weather object containing EPW information
+  # @param zipcode [String] Zipcode of interest
   # @return [Double] Default value for longitude (degrees)
-  def self.get_longitude(longitude, weather)
+  def self.get_longitude(longitude, weather, zipcode)
     return longitude unless longitude.nil?
 
+    if not zipcode.nil?
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
+      return Float(weather_data[:zipcode_longitude]) unless weather_data[:zipcode_longitude].nil?
+    end
+
     return weather.header.Longitude
+  end
+
+  # Gets the default elevation from the HPXML file, or as backup from the
+  # weather file.
+  #
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [Double] Default value for elevation (ft)
+  def self.get_elevation(weather)
+    # FUTURE: Add elevation to zipcode_weather_stations.csv and use here first.
+    return weather.header.Elevation.round(1)
   end
 
   # Gets the default time zone from the HPXML file or, as backup, weather file.
   #
   # @param time_zone [Double] Time zone (UTC offset) from the HPXML file
   # @param weather [WeatherFile] Weather object containing EPW information
+  # @param zipcode [String] Zipcode of interest
   # @return [Double] Default value for time zone (UTC offset)
-  def self.get_time_zone(time_zone, weather)
+  def self.get_time_zone(time_zone, weather, zipcode)
     return time_zone unless time_zone.nil?
+
+    if not zipcode.nil?
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
+      return Float(weather_data[:zipcode_utc_offset]) unless weather_data[:zipcode_utc_offset].nil?
+    end
 
     return weather.header.TimeZone
   end
 
-  # Gets the default state code from the HPXML file or, as backup, weather file.
+  # Gets the default state code from the HPXML file, or as backup from the
+  # zip code, or as backup from the weather file.
   #
   # @param state_code [String] State code from the HPXML file
   # @param weather [WeatherFile] Weather object containing EPW information
+  # @param zipcode [String] Zipcode of interest
   # @return [String] Uppercase state code
-  def self.get_state_code(state_code, weather)
+  def self.get_state_code(state_code, weather, zipcode)
     return state_code unless state_code.nil?
 
+    if not zipcode.nil?
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
+      return weather_data[:zipcode_state] unless weather_data[:zipcode_state].nil?
+    end
+
     return weather.header.StateProvinceRegion.upcase
+  end
+
+  # Gets the default city from the HPXML file, or as backup from the
+  # zip code, or as backup from the weather file.
+  #
+  # @param city [String] city from the HPXML file
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param zipcode [String] Zipcode of interest
+  # @return [String] City
+  def self.get_city(city, weather, zipcode)
+    return city unless city.nil?
+
+    if not zipcode.nil?
+      weather_data = lookup_weather_data_from_zipcode(zipcode, false)
+      return weather_data[:zipcode_city] unless weather_data[:zipcode_city].nil?
+    end
+
+    return weather.header.City
   end
 
   # Gets the default weekday/weekend schedule fractions and monthly multipliers for each end use.
@@ -5282,8 +5347,9 @@ module Defaults
   # zipcode is not found, we find the closest zipcode that shares the first 3 digits.
   #
   # @param zipcode [String] Zipcode of interest
+  # @param raise_error [Boolean] True to raise an error if the zip code is not found
   # @return [Hash] Mapping with keys for every column name in zipcode_weather_stations.csv
-  def self.lookup_weather_data_from_zipcode(zipcode)
+  def self.lookup_weather_data_from_zipcode(zipcode, raise_error = true)
     if not $weather_lookup_cache["zipcode_#{zipcode}"].nil?
       # Use cache
       return $weather_lookup_cache["zipcode_#{zipcode}"]
@@ -5328,7 +5394,11 @@ module Defaults
     end
 
     if weather_station.empty?
-      fail "Zip code '#{zipcode}' could not be found in zipcode_weather_stations.csv"
+      if raise_error
+        fail "Zip code '#{zipcode}' could not be found in zipcode_weather_stations.csv"
+      else
+        return weather_station
+      end
     end
 
     $weather_lookup_cache["zipcode_#{zipcode}"] = weather_station
@@ -5494,7 +5564,7 @@ module Defaults
       bsmnt = 1
     end
 
-    return 2.0 * (cfa / ncfl)**0.5 + 10.0 * ncfl + 5.0 * bsmnt # PipeL in ANSI/RESNET/ICC 301
+    return (2.0 * (cfa / ncfl)**0.5 + 10.0 * ncfl + 5.0 * bsmnt).round(2) # PipeL in ANSI/RESNET/ICC 301
   end
 
   # Gets the default loop piping length for a recirculation hot water distribution system.
@@ -5513,7 +5583,7 @@ module Defaults
   # @return [Double] Piping length (ft)
   def self.get_recirc_loop_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
     std_pipe_length = get_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
-    return 2.0 * std_pipe_length - 20.0 # refLoopL in ANSI/RESNET/ICC 301
+    return (2.0 * std_pipe_length - 20.0).round(2) # refLoopL in ANSI/RESNET/ICC 301
   end
 
   # Gets the default branch piping length for a recirculation hot water distribution system.
@@ -6156,7 +6226,7 @@ module Defaults
       else
         re = 0.252 * ef + 0.608
       end
-      return re
+      return re.round(3)
     end
   end
 
@@ -6387,13 +6457,13 @@ module Defaults
     return 42.6
   end
 
-  # Gets the default quantity of ceiling fans.
+  # Gets the default number of ceiling fans.
   #
   # Source: ANSI/RESNET/ICC 301
   #
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [Integer] Number of ceiling fans
-  def self.get_ceiling_fan_quantity(nbeds)
+  def self.get_ceiling_fan_count(nbeds)
     return nbeds + 1
   end
 
@@ -6836,7 +6906,7 @@ module Defaults
         end
 
         watts += HVAC.get_blower_fan_power_watts(heating_system.fan_watts_per_cfm, heating_system.additional_properties.heating_actual_airflow_cfm)
-        watts += HVAC.get_pump_power_watts(heating_system.electric_auxiliary_energy)
+        watts += HVAC.get_pump_power_watts(heating_system)
 
         if branch_circuit.occupied_spaces.nil?
           branch_circuit.occupied_spaces = get_breaker_spaces_from_power_watts_voltage_amps(watts, branch_circuit.voltage, branch_circuit.max_current_rating)
@@ -6852,6 +6922,7 @@ module Defaults
         branch_circuit_ahu = get_or_add_branch_circuit(electric_panel, heat_pump, unit_num, true)
 
         watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.additional_properties.heating_actual_airflow_cfm)
+        watts_ahu += HVAC.get_pump_power_watts(heat_pump)
         watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.heating_capacity, 'btu/hr', 'kbtu/hr'), branch_circuit_odu.voltage)
 
         if heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated
@@ -6928,6 +6999,7 @@ module Defaults
         next if heat_pump.fraction_cool_load_served == 0
 
         watts_ahu = HVAC.get_blower_fan_power_watts(heat_pump.fan_watts_per_cfm, heat_pump.additional_properties.cooling_actual_airflow_cfm)
+        watts_ahu += HVAC.get_pump_power_watts(heat_pump)
         watts_odu = HVAC.get_dx_coil_power_watts_from_capacity(UnitConversions.convert(heat_pump.cooling_capacity, 'btu/hr', 'kbtu/hr'), HPXML::ElectricPanelVoltage240)
 
         if heat_pump.fraction_heat_load_served == 0
@@ -7286,8 +7358,8 @@ module Defaults
   def self.get_electric_vehicle_values()
     return { battery_type: HPXML::BatteryTypeLithiumIon,
              lifetime_model: HPXML::BatteryLifetimeModelNone,
-             miles_per_year: 10900,
-             hours_per_week: 8.88,
+             miles_per_year: 11000,
+             hours_per_week: 9.6,
              nominal_capacity_kwh: 63,
              nominal_voltage: 50.0,
              fuel_economy_combined: 0.22,

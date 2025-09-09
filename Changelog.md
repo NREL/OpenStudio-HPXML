@@ -2,7 +2,19 @@
 
 __New Features__
 - Updates to HPXML v4.2-rc3.
+- Allows optional `UsageMultiplier` for electric vehicles described using `Vehicles`.
 - Improves water heater tank losses when using `EnergyFactor` as the metric; now consistent with how `UniformEnergyFactor` is handled.
+- Updated site defaults:
+  - `Address/CityMunicipality`, `Address/StateCode`, `GeoLocation/Latitude`, `GeoLocation/Longitude`, and `TimeZone/UTCOffset` now default based on zip code if available.
+  - `TimeZone/DSTObserved` now defaults to false if `Address/StateCode` is 'AZ' or 'HI'.
+- Minor PV improvements:
+  - Allow `PVSystem/AttachedToInverter` to be omitted (unless there are multiple `Inverter` elements)
+  - Allow multiple inverters with different efficiencies and use a weighted-average efficiency in the model (previously threw an error)
+
+__Bugfixes__
+- Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
+- Fixes default hours driven per week for electric vehicles (8.88 -> 9.5).
+- Fixes empty TimeDST/TimeUTC columns in JSON timeseries data.
 
 ## OpenStudio-HPXML v1.10.0
 

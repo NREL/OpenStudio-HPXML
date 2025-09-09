@@ -255,7 +255,7 @@ For simple utility rate structures, inputs can be entered using a fixed charge a
   ================================  ========  =======  ===========  ========  ========  ====================
 
   .. [#] If running :ref:`bldg_type_whole_mf_buildings`, the fixed charge will apply to every dwelling unit in the building.
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
 
 **Detailed**
 
@@ -291,7 +291,7 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
   .. [#] FixedCharge defaults to $12/month for natural gas and $0/month for other fuels.
   .. [#] MarginalRate units are $/therm for natural gas, $/gallon for propane and fuel oil, and $/kBtu for other fuels.
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv`` (except for coal, which is based on 2007 EIA SEDS data as EIA assumes there is zero residential sector coal consumption in the United States for 2008 forward and  does not estimate a price).
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
 
 PV Compensation
 ~~~~~~~~~~~~~~~
@@ -333,7 +333,7 @@ If the PV compensation type is feed-in tariff, additional information can be ent
   ============================  ========  =======  ===========  ========  ==============  ========================
 
   .. [#] FeedInTariffRate applies to full (not excess) PV production.
-         Some utilities/regions may have a feed-in tariff policy where compensation occurs for excess PV production (i.e., PV-generated electricity sent to the grid that is not immediately consumed by the building), rather than full PV production.
+         Some utilities/regions may have a feed-in tariff policy where compensation occurs for *excess* PV production (i.e., PV-generated electricity sent to the grid that is not immediately consumed by the building), rather than *full* PV production.
          OpenStudio-HPXML is currently unable to calculate utility bills for such a feed-in tariff policy.
 
 HPXML Unavailable Periods
@@ -486,17 +486,18 @@ Building site information can be entered in ``/HPXML/Building/Site``.
   ``GeoLocation/Longitude``                double    deg    >= -180, <= 180  No        See [#]_  Site longitude (negative for western hemisphere)
   ``Elevation``                            double    ft                      No        See [#]_  Site elevation
   ``TimeZone/UTCOffset``                   double           >= -12, <= 14    No        See [#]_  Difference in decimal hours between the home's time zone and UTC
-  ``TimeZone/DSTObserved``                 boolean                           No        true      Daylight saving time observed?
+  ``TimeZone/DSTObserved``                 boolean                           No        See [#]_  Daylight saving time observed?
   =======================================  ========  =====  ===============  ========  ========  ===============
 
-  .. [#] If CityMunicipality not provided, defaults according to the EPW weather file header.
-  .. [#] If StateCode not provided, defaults according to the EPW weather file header.
+  .. [#] If CityMunicipality not provided, defaults to using the ZipCode mapping found at ``HPXMLtoOpenStudio/resources/data/zipcode_weather_stations.csv``, or defaults to the EPW weather file header.
+  .. [#] If StateCode not provided, defaults to using the ZipCode mapping found at ``HPXMLtoOpenStudio/resources/data/zipcode_weather_stations.csv``, or defaults to the EPW weather file header.
   .. [#] ZipCode can be defined as the standard 5 number postal code, or it can have the additional 4 number code separated by a hyphen.
   .. [#] Either ZipCode or WeatherStation/extension/EPWFilePath (see :ref:`weather_station`) must be provided.
-  .. [#] If Latitude not provided, defaults according to the EPW weather file header.
-  .. [#] If Longitude not provided, defaults according to the EPW weather file header.
+  .. [#] If Latitude not provided, defaults to using the ZipCode mapping found at ``HPXMLtoOpenStudio/resources/data/zipcode_weather_stations.csv``, or defaults to the EPW weather file header.
+  .. [#] If Longitude not provided, defaults to using the ZipCode mapping found at ``HPXMLtoOpenStudio/resources/data/zipcode_weather_stations.csv``, or defaults to the EPW weather file header.
   .. [#] If Elevation not provided, defaults according to the EPW weather file header.
-  .. [#] If UTCOffset not provided, defaults according to the EPW weather file header.
+  .. [#] If UTCOffset not provided, defaults to using the ZipCode mapping found at ``HPXMLtoOpenStudio/resources/data/zipcode_weather_stations.csv``, or defaults to the EPW weather file header.
+  .. [#] If DSTObserved not provided, defaults to false if StateCode is 'AZ' or 'HI', otherwise true.
 
 If daylight saving time is observed, additional information can be specified in ``/HPXML/Building/Site/TimeZone/extension``.
 
@@ -3371,7 +3372,7 @@ Allowed combinations of CapacityDescription and OutdoorTemperature for a given d
   .. [#] Only two stage and variable speed equipment will use CapacityDescription="minimum".
   .. [#] Only variable speed equipment will use CapacityDescription="maximum".
   .. [#] For variable speed equipment, minimum/maximum datapoints must both be provided or both be omitted.
-  .. [#] Nominal datapoint at 82F is require for single/two stage equipment and optional for variable speed equipment.
+  .. [#] Nominal datapoint at 82F is required for single/two stage equipment and optional for variable speed equipment.
 
 Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
 
@@ -4713,7 +4714,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   ``ArrayTilt``                                            double             deg               >= 0, <= 90               Yes                  Tilt relative to horizontal
   ``MaxPowerOutput``                                       double             W                 >= 0                      Yes                  Peak power
   ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         >= 0, <= 1 or > 1600      No        0.14 [#]_  System losses [#]_
-  ``AttachedToInverter``                                   idref                                See [#]_                  Yes                  ID of attached inverter
+  ``AttachedToInverter``                                   idref                                See [#]_                  See [#]_             ID of attached inverter
   ``extension/NumberofBedroomsServed``                     integer                              > NumberofBedrooms        See [#]_             Number of bedrooms served
   =======================================================  =================  ================  ========================  ========  =========  ============================================
 
@@ -4750,22 +4751,23 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
 
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
   .. [#] AttachedToInverter must reference an ``Inverter``.
+  .. [#] AttachedToInverter only required if there are multiple ``Inverter`` elements.
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 HPXML Inverters
 ~~~~~~~~~~~~~~~
 
-In addition, the PVSystem must be connected to an inverter that is entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
+Each inverter for a PV system can be entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
 
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
-  Element                                                  Type               Units             Constraints          Required  Default   Notes
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
-  ``SystemIdentifier``                                     id                                                        Yes                 Unique identifier
-  ``InverterEfficiency``                                   double             frac              > 0, <= 1 [#]_       No        0.96      Inverter efficiency
-  =======================================================  =================  ================  ===================  ========  ========  ============================================
+  =======================================================  =================  ================  ===========  ========  ========  ============================================
+  Element                                                  Type               Units             Constraints  Required  Default   Notes
+  =======================================================  =================  ================  ===========  ========  ========  ============================================
+  ``SystemIdentifier``                                     id                                                Yes                 Unique identifier
+  ``InverterEfficiency``                                   double             frac              > 0, <= 1    No        0.96      Inverter efficiency [#]_
+  =======================================================  =================  ================  ===========  ========  ========  ============================================
 
-  .. [#] For homes with multiple inverters, all InverterEfficiency elements must have the same value.
+  .. [#] If there are multiple inverters with different efficiencies, a PV size weighted-average efficiency will be used due to EnergyPlus limitations.
 
 .. _hpxml_electric_panels:
 
@@ -4946,7 +4948,7 @@ Loads with power ratings of "auto" are calculated based on estimates for:
 
 - input capacities (using regressions involving rated output capacities and efficiencies if direct expansion)
 - blower fans (using fan W/cfm multiplied by airflow cfm)
-- hydronic pumps (using electric auxiliary energy kWh/yr divided by 2.08)
+- hydronic pumps (using either electric auxiliary energy kWh/yr divided by 2.08 for boilers, or pump power W/ton and cooling/heating capacity tons for ground-to-air heat pumps)
 
 Loads with occupied breaker spaces of "auto" vary based on calculated power ratings.
 Room air conditioners connected to a 120V branch circuit are assumed to occupy 0 breaker spaces.
@@ -5016,6 +5018,7 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   ``VehicleType/BatteryElectricVehicle/Battery/NominalVoltage``                                    double  V          >= 0                     No                       Nominal voltage
   ``VehicleType/BatteryElectricVehicle/FractionChargedLocation[Location="Home"]/Percentage``       double  frac       >= 0                     No        See [#]_       Fraction of EV charging energy provided by home charger
   ``VehicleType/BatteryElectricVehicle/ConnectedCharger``                                          idref              See [#]_                 No                       ID of connected EV charger [#]_
+  ``VehicleType/BatteryElectricVehicle/extension/UsageMultiplier``                                 double             >= 0                     No        1.0            Multiplier on energy use
   ``VehicleType/BatteryElectricVehicle/extension/WeekdayScheduleFractions``                        array                                       No        See [#]_       24 comma-separated weekday fractions
   ``VehicleType/BatteryElectricVehicle/extension/WeekendScheduleFractions``                        array                                       No                       24 comma-separated weekday fractions
   ``VehicleType/BatteryElectricVehicle/extension/MonthlyScheduleMultipliers``                      array                                       No        See [#]_       12 comma-separated monthly multipliers
@@ -5032,8 +5035,8 @@ If not entered, the simulation will not include a detailed electric vehicle mode
   .. [#] If a connected charger is not provided, home electric vehicle charging will not be modeled.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers are not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
-  .. [#] If MilesDrivenPerYear not provided, defaults to HoursDrivenPerWeek * 1227.5, else 10900 miles per `2017 National Household Travel Survey data <https://nhts.ornl.gov/>`_.
-  .. [#] If HoursDrivenPerWeek not provided, defaults to MilesDrivenPerYear / 1227.5, else 8.88 hours/week per `2017 National Household Travel Survey data <https://nhts.ornl.gov/>`_.
+  .. [#] If MilesDrivenPerYear not provided, defaults to HoursDrivenPerWeek * 11000 / 9.6, else 11000 miles per `2017 National Household Travel Survey data <https://nhts.ornl.gov/>`_.
+  .. [#] If HoursDrivenPerWeek not provided, defaults to MilesDrivenPerYear * 9.6 / 11000, else 9.6 hours/week per `2017 National Household Travel Survey data <https://nhts.ornl.gov/>`_.
   .. [#] If FuelEconomyCombined not provided, defaults to 0.22 kWh/mile per `2022 Autonomie release <https://vms.taps.anl.gov/tools/autonomie/>`_.
 
  .. note::
@@ -5716,7 +5719,7 @@ If not entered, the simulation will not include that type of plug load.
 
          \- **well pump**: 50.8 / 0.127 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
 
-         \- **electric vehicle charging**: 2368.4 (calculated using AnnualMiles * kWhPerMile * FractionChargedAtHome / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=10900, kWhPerMile=0.22, FractionChargedAtHome=0.8, ChargerEfficiency=0.9, and BatteryEfficiency=0.9). If this plug load type is specified, it will take precedence over an EV specified in :ref:`hpxml_vehicles`.
+         \- **electric vehicle charging**: 2368.4 (calculated using AnnualMiles * kWhPerMile * FractionChargedAtHome / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=11000, kWhPerMile=0.22, FractionChargedAtHome=0.8, ChargerEfficiency=0.9, and BatteryEfficiency=0.9). If this plug load type is specified, it will take precedence over an EV specified in :ref:`hpxml_vehicles`.
 
          If NumberofResidents is provided, the following defaults are used instead:
 
