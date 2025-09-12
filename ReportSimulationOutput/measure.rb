@@ -1249,7 +1249,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @output_variables = {}
     @output_variables_requests.each do |output_variable_name|
       key_values, units = get_output_variable_key_values_and_units(output_variable_name)
-      if key_values.empty?
+      if units.nil?
         runner.registerWarning("Request for output variable '#{output_variable_name}' returned no results.")
         next
       end
@@ -1914,6 +1914,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         data.delete_at(1) # Remove units, added to header data above
         data.delete_at(0) # Remove series name, added to header data above
 
+        # DView requires a units string to display a variable, but some EnergyPlus output
+        # variables (like Runtime Fractions) don't have units. So we specify them as
+        # unitless for DView.
+        header_data[-1].map! { |units| units.empty? ? 'unitless' : units }
+
         # Apply daylight savings
         if args[:timeseries_frequency] == EPlus::TimeseriesFrequencyTimestep || args[:timeseries_frequency] == EPlus::TimeseriesFrequencyHourly
           if @hpxml_bldgs[0].dst_observed
@@ -2182,10 +2187,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param var_name [Name] Name of the EnergyPlus output variable
   # @return [Array<String, String>] The key value and units for the output variable
   def get_output_variable_key_values_and_units(var_name)
-    keys = []
-    units = ''
-    return keys, units if @msgpackDataTimeseries.nil?
+    return if @msgpackDataTimeseries.nil?
 
+    keys = []
+    units = nil
     @msgpackDataTimeseries['Cols'].each do |col|
       next unless col['Variable'].end_with? ":#{var_name}"
 
