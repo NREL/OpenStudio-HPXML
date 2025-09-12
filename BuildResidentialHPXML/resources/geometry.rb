@@ -63,42 +63,10 @@ module Geometry
     foundation_height = UnitConversions.convert(foundation_height, 'ft', 'm')
     rim_joist_height = UnitConversions.convert(rim_joist_height, 'ft', 'm')
 
-    def self.calculate_length_width(garage_width, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
-      garage_area = garage_width * garage_depth
-      has_garage = false
-      if garage_area > 0
-        has_garage = true
-      end
+    length, width = calculate_footprint_length_width(garage_width, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
 
-      # calculate the footprint of the building
-      garage_area_inside_footprint = 0
-      if has_garage
-        garage_area_inside_footprint = garage_area * (1.0 - garage_protrusion)
-      end
-      bonus_area_above_garage = garage_area * garage_protrusion
-      if (foundation_type == HPXML::FoundationTypeBasementConditioned) && (attic_type == HPXML::AtticTypeConditioned)
-        footprint = (cfa + 2 * garage_area_inside_footprint - num_floors * bonus_area_above_garage) / (num_floors + 2)
-      elsif foundation_type == HPXML::FoundationTypeBasementConditioned
-        footprint = (cfa + 2 * garage_area_inside_footprint - (num_floors - 1) * bonus_area_above_garage) / (num_floors + 1)
-      elsif attic_type == HPXML::AtticTypeConditioned
-        footprint = (cfa + garage_area_inside_footprint - num_floors * bonus_area_above_garage) / (num_floors + 1)
-      else
-        footprint = (cfa + garage_area_inside_footprint - (num_floors - 1) * bonus_area_above_garage) / num_floors
-      end
-
-      # calculate the dimensions of the building
-      # we have: (1) aspect_ratio = fb / lr, and (2) footprint = fb * lr
-      fb = Math.sqrt(footprint * aspect_ratio)
-      lr = footprint / fb
-      length = fb
-      width = lr
-
-      return length, width
-    end
-
-    length, width = calculate_length_width(garage_width, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
-
-    # adjust garage dimensions if too wide or deep relative the unit
+    # adjust garage width if too wide relative the living space dimensions
+    # e.g., this can happen if garage protrudes too much for a small dwelling unit
     gw = garage_width
     while ((gw >= length) && (garage_depth > 0))
       gw -= UnitConversions.convert(1, 'ft', 'm') # reduce garage width in 1 ft increments
@@ -109,6 +77,8 @@ module Geometry
     end
     garage_width = gw
 
+    # adjust garage depth if too deep relative the living space dimensions
+    # e.g., this can happen if garage doesn't protrude enough for a small dwelling unit
     gd = garage_depth
     while ((((1.0 - garage_protrusion) * gd) >= width) && (garage_width > 0))
       gd -= UnitConversions.convert(1, 'ft', 'm') # reduce garage depth in 1 ft increments
@@ -1258,6 +1228,51 @@ module Geometry
     apply_ambient_foundation_shift(model, foundation_type: foundation_type, foundation_height: foundation_height)
 
     return true
+  end
+
+  # Calculate the overall dimensions (length, width) of the dwelling unit based on garage presence/size/protrusion,
+  # foundation/attic type, conditioned floor area, number of floors, and aspect ratio.
+  #
+  # @param garage_width [Double] width of the garage (m)
+  # @param garage_depth [Double] depth of the garage (m)
+  # @param garage_protrusion [Double] fraction of garage that protrudes from conditioned space
+  # @param foundation_type [String] foundation type of the building
+  # @param attic_type [String] attic type of the building
+  # @param num_floors [Integer] number of floors above grade
+  # @param cfa [Double] conditioned floor area (m2)
+  # @param aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
+  # @return [Array<Double, Double>] length (m) and width (m) of the footprint
+  def self.calculate_footprint_length_width(garage_width, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
+    garage_area = garage_width * garage_depth
+    has_garage = false
+    if garage_area > 0
+      has_garage = true
+    end
+
+    # calculate the footprint of the building
+    garage_area_inside_footprint = 0
+    if has_garage
+      garage_area_inside_footprint = garage_area * (1.0 - garage_protrusion)
+    end
+    bonus_area_above_garage = garage_area * garage_protrusion
+    if (foundation_type == HPXML::FoundationTypeBasementConditioned) && (attic_type == HPXML::AtticTypeConditioned)
+      footprint = (cfa + 2 * garage_area_inside_footprint - num_floors * bonus_area_above_garage) / (num_floors + 2)
+    elsif foundation_type == HPXML::FoundationTypeBasementConditioned
+      footprint = (cfa + 2 * garage_area_inside_footprint - (num_floors - 1) * bonus_area_above_garage) / (num_floors + 1)
+    elsif attic_type == HPXML::AtticTypeConditioned
+      footprint = (cfa + garage_area_inside_footprint - num_floors * bonus_area_above_garage) / (num_floors + 1)
+    else
+      footprint = (cfa + garage_area_inside_footprint - (num_floors - 1) * bonus_area_above_garage) / num_floors
+    end
+
+    # calculate the dimensions of the building
+    # we have: (1) aspect_ratio = fb / lr, and (2) footprint = fb * lr
+    fb = Math.sqrt(footprint * aspect_ratio)
+    lr = footprint / fb
+    length = fb
+    width = lr
+
+    return length, width
   end
 
   # Place a door subsurface on an exterior wall surface (with enough area) prioritized by front, then back, then left, then right, and lowest story.
