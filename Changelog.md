@@ -12,6 +12,7 @@ __New Features__
 - Minor PV improvements:
   - Allow `PVSystem/AttachedToInverter` to be omitted (unless there are multiple `Inverter` elements)
   - Allow multiple inverters with different efficiencies and use a weighted-average efficiency in the model (previously threw an error)
+- Updates shared pump power for ground-source heat pumps on a shared recirculation loop to cycle with heating/cooling load rather than operate continuously per RESNET HERS Addendum 94.
 
 __Bugfixes__
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
