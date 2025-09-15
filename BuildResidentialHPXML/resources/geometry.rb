@@ -65,29 +65,29 @@ module Geometry
 
     length, width = calculate_footprint_length_width(garage_width, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
 
-    # adjust garage width if too wide relative the living space dimensions
+    # Error checking: adjust garage width if too wide relative the living space dimensions
     # e.g., this can happen if garage protrudes too much for a small dwelling unit
-    gw = garage_width
-    while ((gw >= length) && (garage_depth > 0))
-      gw -= UnitConversions.convert(1, 'ft', 'm') # reduce garage width in 1 ft increments
-      length, width = calculate_length_width(gw, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
+    garage_width_adjusted = false
+    while ((garage_width >= length) && (garage_depth > 0))
+      garage_width -= UnitConversions.convert(1, 'ft', 'm') # reduce garage width in 1 ft increments
+      length, width = calculate_footprint_length_width(garage_width, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
+      garage_width_adjusted = true
     end
-    if gw < garage_width
-      runner.registerWarning("Garage is as wide as the single-family detached unit; garage width reduced from #{UnitConversions.convert(garage_width, 'm', 'ft')} ft to #{UnitConversions.convert(gw, 'm', 'ft').round(1)} ft.")
+    if garage_width_adjusted
+      runner.registerWarning("Garage is as wide as the single-family detached unit; garage width reduced from #{geometry_garage_width} ft to #{UnitConversions.convert(garage_width, 'm', 'ft').round(1)} ft.")
     end
-    garage_width = gw
 
-    # adjust garage depth if too deep relative the living space dimensions
+    # Error checking: adjust garage depth if too deep relative the living space dimensions
     # e.g., this can happen if garage doesn't protrude enough for a small dwelling unit
-    gd = garage_depth
-    while ((((1.0 - garage_protrusion) * gd) >= width) && (garage_width > 0))
-      gd -= UnitConversions.convert(1, 'ft', 'm') # reduce garage depth in 1 ft increments
-      length, width = calculate_length_width(garage_width, gd, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
+    garage_depth_adjusted = false
+    while ((((1.0 - garage_protrusion) * garage_depth) >= width) && (garage_width > 0))
+      garage_depth -= UnitConversions.convert(1, 'ft', 'm') # reduce garage depth in 1 ft increments
+      length, width = calculate_footprint_length_width(garage_width, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
+      garage_depth_adjusted = true
     end
-    if gd < garage_depth
-      runner.registerWarning("Garage is as deep as the single-family detached unit; garage depth reduced from #{UnitConversions.convert(garage_depth, 'm', 'ft')} ft to #{UnitConversions.convert(gd, 'm', 'ft').round(1)} ft.")
+    if garage_depth_adjusted
+      runner.registerWarning("Garage is as deep as the single-family detached unit; garage depth reduced from #{geometry_garage_depth} ft to #{UnitConversions.convert(garage_depth, 'm', 'ft').round(1)} ft.")
     end
-    garage_depth = gd
 
     # create conditioned zone
     conditioned_zone = OpenStudio::Model::ThermalZone.new(model)
