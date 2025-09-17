@@ -1244,9 +1244,7 @@ module Geometry
   # @return [Array<Double, Double>] length (m) and width (m) of the footprint
   def self.calculate_footprint_length_width(garage_width, garage_depth, garage_protrusion, foundation_type, attic_type, num_floors, cfa, aspect_ratio)
     garage_area = garage_width * garage_depth
-    has_garage = false
-    if garage_area > 0
-      has_garage = true
+    has_garage = (garage_area > 0)
     end
 
     # calculate the footprint of the building
