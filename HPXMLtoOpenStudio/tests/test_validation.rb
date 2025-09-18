@@ -1337,7 +1337,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'solar-thermal-system-with-combi-tankless' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
                             'solar-thermal-system-with-dhw-indirect' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
-                            'storm-windows-unexpected-window-ufactor' => ['Storm windows are currently restricted to windows with U-factor >= 0.45, while base window U-Factor was 0.35.'],
+                            'storm-windows-unexpected-window-ufactor' => ['Storm windows are currently restricted to windows with U-factor >= 0.3, while base window U-Factor was 0.25.'],
                             'surface-attached-to-uncond-space' => ["Surface 'Wall2Space2' is attached to the space of an unconditioned zone."],
                             'surface-attached-to-uncond-space2' => ["Surface 'Slab2Space4' is attached to the space of an unconditioned zone."],
                             'unattached-cfis' => ["Attached HVAC distribution system 'foobar' not found for ventilation fan 'VentilationFan1'."],
@@ -1809,6 +1809,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                              water_heating_system_idref: 'WaterHeatingSystem1')
       when 'storm-windows-unexpected-window-ufactor'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.windows[0].ufactor = 0.25
         hpxml_bldg.windows[0].storm_type = 'clear'
       when 'surface-attached-to-uncond-space'
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
