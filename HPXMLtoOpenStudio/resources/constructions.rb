@@ -2758,7 +2758,7 @@ module Constructions
 
     # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
     # U-factor and SHGC adjustment based on the data obtained from the above reference
-    min_base_ufactor_for_storm = 0.45
+    min_base_ufactor_for_storm = 0.3
     if base_ufactor < min_base_ufactor_for_storm
       fail "Storm windows are currently restricted to windows with U-factor >= #{min_base_ufactor_for_storm}, while base window U-Factor was #{base_ufactor}."
     end
