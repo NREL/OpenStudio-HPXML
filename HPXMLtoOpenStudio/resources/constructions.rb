@@ -2758,17 +2758,16 @@ module Constructions
 
     # Ref: https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf
     # U-factor and SHGC adjustment based on the data obtained from the above reference
-    # Fixme: Should we remove the limit? It doesn't seem to only applicable to single-pane windows
-    min_base_ufactor_for_storm = 0.35
+    min_base_ufactor_for_storm = 0.3
     if base_ufactor < min_base_ufactor_for_storm
       fail "Storm windows are currently restricted to windows with U-factor >= #{min_base_ufactor_for_storm}, while base window U-Factor was #{base_ufactor}."
     end
 
     if storm_type == HPXML::WindowGlassTypeClear
-      ufactor_abs_reduction = [0.6435 * base_ufactor - 0.1533, 0.0].max
+      ufactor_abs_reduction = 0.6435 * base_ufactor - 0.1533
       shgc_corr = 0.9
     elsif storm_type == HPXML::WindowGlassTypeLowE
-      ufactor_abs_reduction = [0.766 * base_ufactor - 0.1532, 0.0].max
+      ufactor_abs_reduction = 0.766 * base_ufactor - 0.1532
       shgc_corr = 0.8
     else
       fail "Could not find adjustment factors for storm type '#{storm_type}'"

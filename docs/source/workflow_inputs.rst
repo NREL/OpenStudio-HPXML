@@ -1872,7 +1872,7 @@ If a storm window is specified, additional information is entered in ``StormWind
 
          \- **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
 
-         Note that a storm window is not allowed for a window with U-factor lower than 0.35.
+         Note that a storm window is not allowed for a window with U-factor lower than 0.3.
 
 .. _window_overhangs:
 
