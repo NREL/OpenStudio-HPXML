@@ -4825,12 +4825,14 @@ module HVAC
     program.addLine("  Set fraction_defrost = F_defrost * #{htg_coil_rtf_sensor.name}") # Defrost fraction with RTF
     program.addLine("  If #{htg_coil_rtf_sensor.name} > 0") # Heating rate from sensors has RTF applied already, use F_compressor
     program.addLine("    Set q_dot_defrost = (F_compressor * (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name}) - #{htg_coil_htg_rate_sensor.name}) / #{unit_multiplier} / fraction_defrost")
+    program.addLine("    Set reduced_cap = (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name} - #{htg_coil_htg_rate_sensor.name}) / #{unit_multiplier} / fraction_defrost")
     program.addLine('  Else')
     program.addLine('    Set q_dot_defrost = 0.0')
+    program.addLine('    Set reduced_cap = 0.0')
     program.addLine('  EndIf')
     program.addLine("  Set supp_capacity = #{supp_sys_capacity}")
     program.addLine("  Set supp_efficiency = #{supp_sys_efficiency}")
-    program.addLine('  Set supp_delivered_htg = @Min q_dot_defrost supp_capacity')
+    program.addLine('  Set supp_delivered_htg = @Min reduced_cap supp_capacity')
     program.addLine('  If supp_efficiency > 0.0')
     program.addLine('    Set supp_design_level = supp_delivered_htg / supp_efficiency') # Assume perfect tempering
     program.addLine('  Else')
