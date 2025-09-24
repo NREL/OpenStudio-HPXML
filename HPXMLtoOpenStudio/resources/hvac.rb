@@ -4821,12 +4821,10 @@ module HVAC
     program.addLine("Set #{frost_cap_multiplier_act.name} = 1.0 - 1.8 * F_defrost")
     program.addLine("Set #{frost_pow_multiplier_act.name} = 1.0 - 0.3 * F_defrost")
     program.addLine("If T_out <= #{max_oat_defrost}")
-    program.addLine('  Set fraction_compressor_htg = 1.0 - F_defrost')
-    # Steady state compressor runtime fraction including heating cycle and defrost cycle
-    program.addLine("  Set fraction_compressor_ss = #{htg_coil_rtf_sensor.name} * #{frost_cap_multiplier_act.name} / fraction_compressor_htg")
-    program.addLine('  Set fraction_defrost = F_defrost * fraction_compressor_ss')
-    program.addLine("  If #{htg_coil_rtf_sensor.name} > 0")
-    program.addLine("    Set q_dot_defrost = (fraction_compressor_htg * (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name}) - #{htg_coil_htg_rate_sensor.name}) / #{unit_multiplier} / fraction_defrost")
+    program.addLine('  Set F_compressor = 1.0 - F_defrost')
+    program.addLine("  Set fraction_defrost = F_defrost * #{htg_coil_rtf_sensor.name}") # Defrost fraction with RTF
+    program.addLine("  If #{htg_coil_rtf_sensor.name} > 0") # Heating rate from sensors has RTF applied already, use F_compressor
+    program.addLine("    Set q_dot_defrost = (F_compressor * (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name}) - #{htg_coil_htg_rate_sensor.name}) / #{unit_multiplier} / fraction_defrost")
     program.addLine('  Else')
     program.addLine('    Set q_dot_defrost = 0.0')
     program.addLine('  EndIf')
