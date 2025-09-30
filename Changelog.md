@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.11.0
 
 __New Features__
-- Updates to HPXML v4.2-rc3.
+- Updates to HPXML v4.2.
 - Allows optional `UsageMultiplier` for electric vehicles described using `Vehicles`.
 - Water heater improvements:
   - Improves tank losses when using `EnergyFactor` as the metric; now consistent with how `UniformEnergyFactor` is handled.
