@@ -10,10 +10,12 @@ __New Features__
   - `Address/CityMunicipality`, `Address/StateCode`, `GeoLocation/Latitude`, `GeoLocation/Longitude`, and `TimeZone/UTCOffset` now default based on zip code if available.
   - `TimeZone/DSTObserved` now defaults to false if `Address/StateCode` is 'AZ' or 'HI'.
 - Minor PV improvements:
-  - Allow `PVSystem/AttachedToInverter` to be omitted (unless there are multiple `Inverter` elements)
+  - Allow `PVSystem/AttachedToInverter` to be omitted (unless there are multiple `Inverter` elements).
   - Allow multiple inverters with different efficiencies and use a weighted-average efficiency in the model (previously threw an error)
 - Updates shared pump power for ground-source heat pumps on a shared recirculation loop to cycle with heating/cooling load rather than operate continuously per RESNET HERS Addendum 94.
 - Removes minimum window U-factor to apply storm windows, throw a warning instead if the window U-factor is below 0.3 with storm windows.
+- BuildResidentialHPXML measure:
+  - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
 
 __Bugfixes__
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
