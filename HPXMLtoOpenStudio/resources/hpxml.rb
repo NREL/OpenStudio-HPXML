@@ -8638,7 +8638,8 @@ class HPXML < Object
              :uses_desuperheater,        # [Boolean] UsesDesuperheater
              :related_hvac_idref,        # [String] RelatedHVACSystem/@idref
              :tank_model_type,           # [String] extension/TankModelType (HPXML::WaterHeaterTankModelTypeXXX)
-             :number_of_bedrooms_served] # [Integer] extension/NumberofBedroomsServed
+             :number_of_bedrooms_served, # [Integer] extension/NumberofBedroomsServed
+             :containment_volume]        # [Double] extension/ContainmentVolume
     attr_accessor(*ATTRS)
 
     # Returns any branch circuits that the component may be attached to.
@@ -8745,10 +8746,11 @@ class HPXML < Object
         related_hvac_idref_el = XMLHelper.add_element(water_heating_system, 'RelatedHVACSystem')
         XMLHelper.add_attribute(related_hvac_idref_el, 'idref', @related_hvac_idref)
       end
-      if (not @tank_model_type.nil?) || (not @number_of_bedrooms_served.nil?)
+      if (not @tank_model_type.nil?) || (not @number_of_bedrooms_served.nil?) || (not @containment_volume.nil?)
         extension = XMLHelper.create_elements_as_needed(water_heating_system, ['extension'])
         XMLHelper.add_element(extension, 'TankModelType', @tank_model_type, :string, @tank_model_type_isdefaulted) unless @tank_model_type.nil?
         XMLHelper.add_element(extension, 'NumberofBedroomsServed', @number_of_bedrooms_served, :integer, @number_of_bedrooms_served_isdefaulted) unless @number_of_bedrooms_served.nil?
+        XMLHelper.add_element(extension, 'ContainmentVolume', @containment_volume, :float, @containment_volume_isdefaulted) unless @containment_volume.nil?
       end
     end
 
@@ -8785,6 +8787,7 @@ class HPXML < Object
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
       @tank_model_type = XMLHelper.get_value(water_heating_system, 'extension/TankModelType', :string)
       @number_of_bedrooms_served = XMLHelper.get_value(water_heating_system, 'extension/NumberofBedroomsServed', :integer)
+      @containment_volume = XMLHelper.get_value(water_heating_system, 'extension/ContainmentVolume', :float)
     end
   end
 

@@ -975,6 +975,11 @@ module Waterheater
     twb_adj = Psychrometrics.Twb_fT_w_P(runner, rated_edb_F, w_adj, p_atm)
 
     cop = water_heating_system.additional_properties.cop
+    # FIXME: Add checks to determine whether to apply the adjustment?
+    if not water_heating_system.containment_volume.nil?
+      rv = [water_heating_system.containment_volume / 1500.0, 1.0].min
+      cop = (cop - 0.92) * (1 - (1.009 * Math.exp(-5.492 * rv))) + 0.92
+    end
 
     coil = OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped.new(model)
     coil.setName("#{obj_name} coil")
