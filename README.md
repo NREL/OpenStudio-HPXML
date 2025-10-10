@@ -34,6 +34,7 @@ OpenStudio-HPXML capabilities include:
 - Schematron and XSD Schema input validation
 - Can be used for [DOE HOMES program approval](https://www.energy.gov/scep/single-family-modeling-solutions-home-efficiency-rebates-program)
 - Can be used for [ACCA Manual J approval](https://www.acca.org/standards/approved-software)
+- Can be used for [automated calibration to utility bills](https://github.com/NREL/OpenStudio-HPXML-calibration)
 
 ## Measures
 
