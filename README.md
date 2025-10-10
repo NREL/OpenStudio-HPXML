@@ -52,6 +52,7 @@ OpenStudio-HPXML is used by a number of software products or organizations, incl
 - [Clarity Heat Pump Toolkit](https://psdconsulting.com/solutions/)
 - [Energy Rating Index (ERI)](https://github.com/NREL/OpenStudio-ERI)
 - [Home Energy Score](https://www.homeenergyscore.gov)
+- [ICF](https://www.icf.com/work/utilities/sightline-utility-customer-programs)
 - [OptiMiser](https://optimiserenergy.com)
 - [Radiant Labs](https://www.radiantlabs.co)
 - [ResStock](https://resstock.nrel.gov/)
