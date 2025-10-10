@@ -353,9 +353,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Geometry.apply_rim_joists(runner, model, spaces, hpxml_bldg)
     Geometry.apply_floors(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_foundation_walls_slabs(runner, model, spaces, weather, hpxml_bldg, hpxml.header, schedules_file)
-    Geometry.apply_windows(model, spaces, hpxml_bldg, hpxml.header)
+    Geometry.apply_windows(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_doors(model, spaces, hpxml_bldg)
-    Geometry.apply_skylights(model, spaces, hpxml_bldg, hpxml.header)
+    Geometry.apply_skylights(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_conditioned_floor_area(model, spaces, hpxml_bldg)
     Geometry.apply_thermal_mass(model, spaces, hpxml_bldg, hpxml.header)
     Geometry.set_zone_volumes(spaces, hpxml_bldg, hpxml.header)
@@ -386,7 +386,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Airflow.apply(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file, airloop_map)
 
     # Other
-    PV.apply(model, hpxml_bldg)
+    PV.apply(runner, model, hpxml_bldg)
     Generator.apply(model, hpxml_bldg)
     Battery.apply(runner, model, spaces, hpxml_bldg, schedules_file)
     Vehicle.apply(runner, model, spaces, hpxml_bldg, hpxml.header, schedules_file)
@@ -421,9 +421,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     if hpxml_header.eri_calculation_versions.empty?
       hpxml_header.eri_calculation_versions = ['latest']
-    end
-    if hpxml_header.eri_calculation_versions == ['latest']
-      hpxml_header.eri_calculation_versions = [Constants::ERIVersions[-1]]
     end
 
     # Hidden feature: Whether to override certain assumptions to better match the ASHRAE 140 specification
