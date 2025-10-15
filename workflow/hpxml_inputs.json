@@ -3771,9 +3771,6 @@
     "parent_hpxml": "sample_files/base-bldgtype-mf-whole-building.xml",
     "heating_system_heating_capacity": 24000
   },
-  "sample_files/base-bldgtype-mf-whole-building-common-spaces-reverse.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-whole-building-common-spaces.xml"
-  },
   "sample_files/base-bldgtype-mf-whole-building-detailed-electric-panel.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-whole-building.xml",
     "electric_panel_service_feeders_load_calculation_types": "2023 Existing Dwelling Load-Based, 2023 Existing Dwelling Meter-Based",
