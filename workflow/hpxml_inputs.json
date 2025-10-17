@@ -1573,6 +1573,9 @@
     "water_heater_type": "heat pump water heater",
     "water_heater_efficiency": 3.5
   },
+  "sample_files/base-dhw-tank-heat-pump-containment-volume.xml": {
+    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml"
+  },
   "sample_files/base-dhw-tank-heat-pump-capacities.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
     "water_heater_type": "heat pump water heater",
