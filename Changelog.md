@@ -16,6 +16,7 @@ __New Features__
 - Minor PV improvements:
   - Allow `PVSystem/AttachedToInverter` to be omitted (unless there are multiple `Inverter` elements).
   - Allow multiple inverters with different efficiencies and use a weighted-average efficiency in the model (previously threw an error)
+- For storm windows, removes minimum base window U-factor limit and throws a warning instead if the base window U-factor is below 0.3.
 - BuildResidentialHPXML measure:
   - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
 
@@ -26,6 +27,7 @@ __Bugfixes__
 - Fixes an EMS bug in heat pump defrost models that over-estimates defrost fractions.
 - Fixes zero mech vent fan energy when CFIS system w/ `AdditionalRuntimeOperatingMode="air handler fan"` has the airflow rate set to zero.
 - Fixes requested EnergyPlus timeseries output variables/meters not displayed in DView if they don't have units.
+- Fixes possible errors when small water flow rates for variable-speed experimental ground-source heat pump model.
 
 ## OpenStudio-HPXML v1.10.0
 
