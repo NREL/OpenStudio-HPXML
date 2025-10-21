@@ -68,7 +68,7 @@ def create_hpxmls
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     num_apply_measures = 1
-    if hpxml_path.include?('whole-building-common-spaces')
+    if hpxml_path.include?('whole-building-inter-unit-heat-transfer')
       num_apply_measures = 8
     elsif hpxml_path.include?('whole-building')
       num_apply_measures = 6
@@ -77,7 +77,7 @@ def create_hpxmls
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include?('whole-building-common-spaces')
+      if hpxml_path.include?('whole-building-inter-unit-heat-transfer')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
@@ -2638,7 +2638,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
   end
 
   # Logic to apply at whole building level, need to be outside hpxml_bldg loop
-  if ['base-bldgtype-mf-whole-building-common-spaces.xml'].include? hpxml_file
+  if ['base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml'].include? hpxml_file
     # basement floor, building0: conditioned, building1: unconditioned
     for i in 0..1
       hpxml.buildings[i].foundation_walls.each do |fnd_wall|
