@@ -456,11 +456,12 @@ Modeling a whole SFA/MF building is defined in ``/HPXML/SoftwareInfo/extension``
 
 For these simulations:
 
-- An HPXML file with multiple ``Building`` elements is used, where each ``Building`` represents an individual dwelling unit.
+- An HPXML file with multiple ``Building`` elements is used, where each ``Building`` represents an individual dwelling unit. See the ``base-bldgtype-mf-whole-building.xml`` sample file for an example.
 - Unit multipliers (using the ``NumberofUnits`` element; see :ref:`building_construction`) can be specified to model *unique* dwelling units, rather than *all* dwelling units, reducing simulation runtime.
-- Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones. (This may change in the future.)
-- Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit. (This may change in the future.)
-- Energy use for the entire building is calculated; you cannot get energy use for individual dwelling units. (This may change in the future.)
+- Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones. This may change in the future. (As a workaround, common spaces can be modeled as separate thermal zones by describing them as separate dwelling units -- i.e., ``Building`` elements -- and describing them as "conditioned space" or "basement - conditioned" with full detail (infiltration, plug loads, etc.) specified. If the common space is unconditioned, HVAC systems can be omitted. See the ``base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml`` sample file for an example.)
+- Inter-unit heat transfer can be modeled by using the ``SystemIdentifier/@sameas`` attribute on a wall, foundation wall, rim joist, or floor that points to the other corresponding surface. For example, the wall of the second dwelling unit may reference a wall of the first dwelling unit. When the ``@sameas`` attribute is used, no other properties should be specified for that surface. See the ``base-bldgtype-mf-whole-building-common-spaces.xml`` sample file for an example.
+- Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit. This may change in the future.
+- Energy use for the entire building is calculated; you cannot get energy use for individual dwelling units. This may change in the future.
 
 Notes/caveats about this approach:
 

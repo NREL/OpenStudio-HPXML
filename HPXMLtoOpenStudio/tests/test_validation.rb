@@ -861,13 +861,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
         hpxml_bldg.skylights[0].attached_to_floor_idref = nil
       when 'multifamily-common-space-extra-inputs'
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-common-spaces.xml')
         hpxml.buildings[1].foundation_walls[1].height = 8
         hpxml.buildings[1].floors[0].area = 20
         hpxml.buildings[1].rim_joists[1].area = 10
         hpxml.buildings[2].walls[1].area = 20
       when 'multifamily-common-space-whole-sfa-or-mf-building-sim-false'
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-common-spaces.xml')
         hpxml.header.whole_sfa_or_mf_building_sim = false
       when 'multifamily-reference-appliance'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -1709,7 +1709,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, _hpxml_bldg = _create_hpxml('base-simcontrol-calendar-year-custom.xml')
         hpxml.header.sim_calendar_year = 2008
       when 'multifamily-common-space-wrong-sameas'
-        hpxml, _hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-common-spaces.xml')
         hpxml.buildings[1].floors[0].sameas_id = 'Foo'
       when 'net-area-negative-roof-floor'
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
