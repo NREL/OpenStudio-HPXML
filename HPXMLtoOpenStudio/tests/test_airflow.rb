@@ -17,9 +17,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
   def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    File.delete(File.join(File.dirname(__FILE__), 'in.schedules.csv')) if File.exist? File.join(File.dirname(__FILE__), 'in.schedules.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+    cleanup_results_files
   end
 
   def get_eed_for_ventilation(model, ee_name)
@@ -154,7 +152,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants::ObjectTypeInfiltration} program")
-    assert_in_epsilon(0.1956, program_values['c'].sum, 0.01)
+    assert_in_epsilon(0.1863, program_values['c'].sum, 0.01)
     assert_in_epsilon(0.0573, program_values['Cs'].sum, 0.01)
     assert_in_epsilon(0.1446, program_values['Cw'].sum, 0.01)
   end
@@ -675,8 +673,8 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
       # Check ducts program
       program_values = get_ems_values(model.getEnergyManagementSystemSubroutines, 'duct subroutine')
-      assert_in_delta(34.2 * supply_area_multiplier, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
-      assert_in_delta(29.4 * return_area_multiplier, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
+      assert_in_delta(124.8 * supply_area_multiplier, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
+      assert_in_delta(40.5 * return_area_multiplier, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
     end
   end
 
@@ -687,20 +685,26 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
 
     # Check ducts program
     program_values = get_ems_values(model.getEnergyManagementSystemSubroutines, 'duct subroutine')
-    assert_in_delta(9.42, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
-    assert_in_delta(2.21, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
+    assert_in_delta(34.3, UnitConversions.convert(program_values['supply_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
+    assert_in_delta(8.9, UnitConversions.convert(program_values['return_ua'].sum, 'W/K', 'Btu/(hr*F)'), 0.1)
   end
 
   def test_infiltration_compartmentalization_area
-    # Base
+    # Test conditioned basement
     _hpxml, hpxml_bldg = _create_hpxml('base.xml')
-    total_area, exterior_area = hpxml_bldg.compartmentalization_boundary_areas
+    total_area, exterior_area = Defaults.get_compartmentalization_boundary_areas(hpxml_bldg)
     assert_in_delta(5216, exterior_area, 1.0)
     assert_in_delta(5216, total_area, 1.0)
 
+    # Test w/ conditioned basement not within infiltration volume
+    hpxml_bldg.foundations[0].within_infiltration_volume = false
+    total_area, exterior_area = Defaults.get_compartmentalization_boundary_areas(hpxml_bldg)
+    assert_in_delta(2550, exterior_area, 1.0)
+    assert_in_delta(2550, total_area, 1.0)
+
     # Test adjacent garage
     _hpxml, hpxml_bldg = _create_hpxml('base-enclosure-garage.xml')
-    total_area, exterior_area = hpxml_bldg.compartmentalization_boundary_areas
+    total_area, exterior_area = Defaults.get_compartmentalization_boundary_areas(hpxml_bldg)
     assert_in_delta(4976, exterior_area, 1.0)
     assert_in_delta(5216, total_area, 1.0)
 
@@ -712,7 +716,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     hpxml_bldg.foundations.each do |foundation|
       foundation.within_infiltration_volume = true
     end
-    total_area, exterior_area = hpxml_bldg.compartmentalization_boundary_areas
+    total_area, exterior_area = Defaults.get_compartmentalization_boundary_areas(hpxml_bldg)
     assert_in_delta(5000, exterior_area, 1.0)
     assert_in_delta(5000, total_area, 1.0)
 
@@ -724,47 +728,15 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     hpxml_bldg.foundations.each do |foundation|
       foundation.within_infiltration_volume = false
     end
-    total_area, exterior_area = hpxml_bldg.compartmentalization_boundary_areas
+    total_area, exterior_area = Defaults.get_compartmentalization_boundary_areas(hpxml_bldg)
     assert_in_delta(3900, exterior_area, 1.0)
     assert_in_delta(3900, total_area, 1.0)
 
     # Test multifamily
     _hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit.xml')
-    total_area, exterior_area = hpxml_bldg.compartmentalization_boundary_areas
+    total_area, exterior_area = Defaults.get_compartmentalization_boundary_areas(hpxml_bldg)
     assert_in_delta(686, exterior_area, 1.0)
     assert_in_delta(2780, total_area, 1.0)
-  end
-
-  def test_infiltration_assumed_height
-    # Base
-    _hpxml, hpxml_bldg = _create_hpxml('base.xml')
-    infil_volume = hpxml_bldg.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
-    infil_height = hpxml_bldg.inferred_infiltration_height(infil_volume)
-    assert_equal(9.75, infil_height)
-
-    # Test w/o conditioned basement
-    _hpxml, hpxml_bldg = _create_hpxml('base-foundation-unconditioned-basement.xml')
-    infil_volume = hpxml_bldg.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
-    infil_height = hpxml_bldg.inferred_infiltration_height(infil_volume)
-    assert_equal(8, infil_height)
-
-    # Test w/ walkout basement
-    _hpxml, hpxml_bldg = _create_hpxml('base-foundation-walkout-basement.xml')
-    infil_volume = hpxml_bldg.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
-    infil_height = hpxml_bldg.inferred_infiltration_height(infil_volume)
-    assert_equal(16, infil_height)
-
-    # Test 2 story building
-    _hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories.xml')
-    infil_volume = hpxml_bldg.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
-    infil_height = hpxml_bldg.inferred_infiltration_height(infil_volume)
-    assert_equal(17.75, infil_height)
-
-    # Test w/ cathedral ceiling
-    _hpxml, hpxml_bldg = _create_hpxml('base-atticroof-cathedral.xml')
-    infil_volume = hpxml_bldg.air_infiltration_measurements.find { |m| !m.infiltration_volume.nil? }.infiltration_volume
-    infil_height = hpxml_bldg.inferred_infiltration_height(infil_volume)
-    assert_equal(13.75, infil_height)
   end
 
   def test_infiltration_imbalance_induced_infiltration_fractions
@@ -988,7 +960,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), 'in.xml'))
 
     File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 

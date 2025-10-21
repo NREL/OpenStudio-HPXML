@@ -119,12 +119,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
-    defrost_model_type_choices = OpenStudio::StringVector.new
-    defrost_model_type_choices << HPXML::AdvancedResearchDefrostModelTypeStandard
-    defrost_model_type_choices << HPXML::AdvancedResearchDefrostModelTypeAdvanced
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('simulation_control_defrost_model_type', defrost_model_type_choices, false)
-    arg.setDisplayName('Simulation Control: Defrost Model Type')
-    arg.setDescription("Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for an improved model that better accounts for load and energy use during defrost; using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
+    ground_to_air_heat_pump_model_type_choices = OpenStudio::StringVector.new
+    ground_to_air_heat_pump_model_type_choices << HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard
+    ground_to_air_heat_pump_model_type_choices << HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('simulation_control_ground_to_air_heat_pump_model_type', ground_to_air_heat_pump_model_type_choices, false)
+    arg.setDisplayName('Simulation Control: Ground-to-Air Heat Pump Model Type')
+    arg.setDescription("Research feature to select the type of ground-to-air heat pump model. Use #{HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard} for standard ground-to-air heat pump modeling. Use #{HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental} for an improved model that better accounts for coil staging. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_onoff_thermostat_deadband', false)
@@ -1393,7 +1394,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_compressor_type', compressor_type_choices, false)
     arg.setDisplayName('Heat Pump: Cooling Compressor Type')
-    arg.setDescription("The compressor type of the heat pump. Required for #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpMiniSplit}.")
+    arg.setDescription("The compressor type of the heat pump. Required for #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit} and #{HPXML::HVACTypeHeatPumpGroundToAir}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_heating_efficiency_type', heat_pump_heating_efficiency_type_choices, true)
@@ -1437,7 +1438,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_fraction_17F', false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_fraction_17_f', false)
     arg.setDisplayName('Heat Pump: Heating Capacity Fraction at 17F')
     arg.setDescription("The output heating capacity of the heat pump at 17F divided by the above nominal heating capacity at 47F. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('Frac')
@@ -2648,6 +2649,290 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(4000)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_service_feeders_load_calculation_types', false)
+    arg.setDisplayName('Electric Panel: Service/Feeders Load Calculation Types')
+    arg.setDescription("Types of electric panel service/feeder load calculations. These calculations are experimental research features. Possible types are: #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased}, #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased}. If multiple types, use a comma-separated list. If not provided, no electric panel loads are calculated.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_baseline_peak_power', false)
+    arg.setDisplayName('Electric Panel: Baseline Peak Power')
+    arg.setDescription("Specifies the baseline peak power. Used for #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased}. If not provided, assumed to be zero.")
+    arg.setUnits('W')
+    args << arg
+
+    electric_panel_voltage_choices = OpenStudio::StringVector.new
+    electric_panel_voltage_choices << HPXML::ElectricPanelVoltage120
+    electric_panel_voltage_choices << HPXML::ElectricPanelVoltage240
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_service_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Service Voltage')
+    arg.setDescription("The service voltage of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_service_max_current_rating', false)
+    arg.setDisplayName('Electric Panel: Service Max Current Rating')
+    arg.setDescription("The service max current rating of the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('A')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_headroom', false)
+    arg.setDisplayName('Electric Panel: Breaker Spaces Headroom')
+    arg.setDescription("The unoccupied number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('#')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('electric_panel_breaker_spaces_rated_total', false)
+    arg.setDisplayName('Electric Panel: Breaker Spaces Rated Total')
+    arg.setDescription("The rated total number of breaker spaces on the electric panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-electric-panels'>HPXML Electric Panels</a>) is used.")
+    arg.setUnits('#')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heating_system_power_rating', false)
+    arg.setDisplayName('Electric Panel: Heating System Power Rating')
+    arg.setDescription("Specifies the panel load heating system power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heating_system_new_load', false)
+    arg.setDisplayName('Electric Panel: Heating System New Load')
+    arg.setDescription("Whether the heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_cooling_system_power_rating', false)
+    arg.setDisplayName('Electric Panel: Cooling System Power Rating')
+    arg.setDescription("Specifies the panel load cooling system power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_cooling_system_new_load', false)
+    arg.setDisplayName('Electric Panel: Cooling System New Load')
+    arg.setDescription("Whether the cooling system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heat_pump_power_rating', false)
+    arg.setDisplayName('Electric Panel: Heat Pump Power Rating')
+    arg.setDescription("Specifies the panel load heat pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heat_pump_new_load', false)
+    arg.setDisplayName('Electric Panel: Heat Pump New Load')
+    arg.setDescription("Whether the heat pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_heating_system_2_power_rating', false)
+    arg.setDisplayName('Electric Panel: Heating System 2 Power Rating')
+    arg.setDescription("Specifies the panel load second heating system power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_heating_system_2_new_load', false)
+    arg.setDisplayName('Electric Panel: Heating System 2 New Load')
+    arg.setDescription("Whether the second heating system is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_mech_vent_power_rating', false)
+    arg.setDisplayName('Electric Panel: Mechanical Ventilation Power Rating')
+    arg.setDescription("Specifies the panel load mechanical ventilation power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_mech_vent_fan_new_load', false)
+    arg.setDisplayName('Electric Panel: Mechanical Ventilation New Load')
+    arg.setDescription("Whether the mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_mech_vent_2_power_rating', false)
+    arg.setDisplayName('Electric Panel: Mechanical Ventilation 2 Power Rating')
+    arg.setDescription("Specifies the panel load second mechanical ventilation power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_mech_vent_2_new_load', false)
+    arg.setDisplayName('Electric Panel: Mechanical Ventilation 2 New Load')
+    arg.setDescription("Whether the second mechanical ventilation is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_whole_house_fan_power_rating', false)
+    arg.setDisplayName('Electric Panel: Whole House Fan Power Rating')
+    arg.setDescription("Specifies the panel load whole house fan power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_whole_house_fan_new_load', false)
+    arg.setDisplayName('Electric Panel: Whole House Fan New Load')
+    arg.setDescription("Whether the whole house fan is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_kitchen_fans_power_rating', false)
+    arg.setDisplayName('Electric Panel: Kitchen Fans Power Rating')
+    arg.setDescription("Specifies the panel load kitchen fans power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_kitchen_fans_new_load', false)
+    arg.setDisplayName('Electric Panel: Kitchen Fans New Load')
+    arg.setDescription("Whether the kitchen fans is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_bathroom_fans_power_rating', false)
+    arg.setDisplayName('Electric Panel: Bathroom Fans Power Rating')
+    arg.setDescription("Specifies the panel load bathroom fans power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_bathroom_fans_new_load', false)
+    arg.setDisplayName('Electric Panel: Bathroom Fans New Load')
+    arg.setDescription("Whether the bathroom fans is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_water_heater_power_rating', false)
+    arg.setDisplayName('Electric Panel: Electric Water Heater Power Rating')
+    arg.setDescription("Specifies the panel load water heater power rating. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_electric_water_heater_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Electric Water Heater Voltage')
+    arg.setDescription("Specifies the panel load water heater voltage. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_water_heater_new_load', false)
+    arg.setDisplayName('Electric Panel: Electric Water Heater New Load')
+    arg.setDescription("Whether the water heater is a new panel load addition to an existing service panel. Only applies to electric water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_clothes_dryer_power_rating', false)
+    arg.setDisplayName('Electric Panel: Electric Clothes Dryer Power Rating')
+    arg.setDescription("Specifies the panel load clothes dryer power rating. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_electric_clothes_dryer_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Electric Clothes Dryer Voltage')
+    arg.setDescription("Specifies the panel load clothes dryer voltage. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_clothes_dryer_new_load', false)
+    arg.setDisplayName('Electric Panel: Electric Clothes Dryer New Load')
+    arg.setDescription("Whether the clothes dryer is a new panel load addition to an existing service panel. Only applies to electric clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_dishwasher_power_rating', false)
+    arg.setDisplayName('Electric Panel: Dishwasher Power Rating')
+    arg.setDescription("Specifies the panel load dishwasher power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_dishwasher_new_load', false)
+    arg.setDisplayName('Electric Panel: Dishwasher New Load')
+    arg.setDescription("Whether the dishwasher is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_cooking_range_power_rating', false)
+    arg.setDisplayName('Electric Panel: Electric Cooking Range/Oven Power Rating')
+    arg.setDescription("Specifies the panel load cooking range/oven power rating. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_electric_cooking_range_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Electric Cooking Range/Oven Voltage')
+    arg.setDescription("Specifies the panel load cooking range/oven voltage. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_cooking_range_new_load', false)
+    arg.setDisplayName('Electric Panel: Electric Cooking Range/Oven New Load')
+    arg.setDescription("Whether the cooking range is a new panel load addition to an existing service panel. Only applies to electric cooking range/oven. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_misc_plug_loads_well_pump_power_rating', false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Well Pump Power Rating')
+    arg.setDescription("Specifies the panel load well pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_misc_plug_loads_well_pump_new_load', false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Well Pump New Load')
+    arg.setDescription("Whether the well pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_misc_plug_loads_vehicle_power_rating', false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle Power Rating')
+    arg.setDescription("Specifies the panel load electric vehicle power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_load_misc_plug_loads_vehicle_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle Voltage')
+    arg.setDescription("Specifies the panel load electric vehicle voltage. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_misc_plug_loads_vehicle_new_load', false)
+    arg.setDisplayName('Electric Panel: Misc Plug Loads Vehicle New Load')
+    arg.setDescription("Whether the electric vehicle is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_pool_pump_power_rating', false)
+    arg.setDisplayName('Electric Panel: Pool Pump Power Rating')
+    arg.setDescription("Specifies the panel load pool pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_pool_pump_new_load', false)
+    arg.setDisplayName('Electric Panel: Pool Pump New Load')
+    arg.setDescription("Whether the panel load pool pump is an addition. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setDescription("Whether the pool pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_pool_heater_power_rating', false)
+    arg.setDisplayName('Electric Panel: Electric Pool Heater Power Rating')
+    arg.setDescription("Specifies the panel load pool heater power rating. Only applies to electric pool heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_pool_heater_new_load', false)
+    arg.setDisplayName('Electric Panel: Electric Pool Heater New Load')
+    arg.setDescription("Whether the pool heater is a new panel load addition to an existing service panel. Only applies to electric pool heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_permanent_spa_pump_power_rating', false)
+    arg.setDisplayName('Electric Panel: Permanent Spa Pump Power Rating')
+    arg.setDescription("Specifies the panel load permanent spa pump power rating. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_permanent_spa_pump_new_load', false)
+    arg.setDisplayName('Electric Panel: Permanent Spa Pump New Load')
+    arg.setDescription("Whether the spa pump is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_electric_permanent_spa_heater_power_rating', false)
+    arg.setDisplayName('Electric Panel: Electric Permanent Spa Heater Power Rating')
+    arg.setDescription("Specifies the panel load permanent spa heater power rating. Only applies to electric permanent spa heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_electric_permanent_spa_heater_new_load', false)
+    arg.setDisplayName('Electric Panel: Electric Permanent Spa Heater New Load')
+    arg.setDescription("Whether the spa heater is a new panel load addition to an existing service panel. Only applies to electric permanent spa heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_load_other_power_rating', false)
+    arg.setDisplayName('Electric Panel: Other Power Rating')
+    arg.setDescription("Specifies the panel load other power rating. This represents the total of all other electric loads that are fastened in place, permanently connected, or located on a specific circuit. For example, garbage disposal, built-in microwave. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('electric_panel_load_other_new_load', false)
+    arg.setDisplayName('Electric Panel: Other New Load')
+    arg.setDescription("Whether the other load is a new panel load addition to an existing service panel. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#service-feeders'>Service Feeders</a>) is used.")
+    args << arg
+
     battery_location_choices = OpenStudio::StringVector.new
     battery_location_choices << HPXML::LocationConditionedSpace
     battery_location_choices << HPXML::LocationBasementConditioned
@@ -3018,10 +3303,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     clothes_dryer_efficiency_type_choices << 'EnergyFactor'
     clothes_dryer_efficiency_type_choices << 'CombinedEnergyFactor'
 
+    clothes_dryer_drying_method_choices = OpenStudio::StringVector.new
+    clothes_dryer_drying_method_choices << HPXML::DryingMethodConventional
+    clothes_dryer_drying_method_choices << HPXML::DryingMethodCondensing
+    clothes_dryer_drying_method_choices << HPXML::DryingMethodHeatPump
+    clothes_dryer_drying_method_choices << HPXML::DryingMethodOther
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_fuel_type', clothes_dryer_fuel_choices, true)
     arg.setDisplayName('Clothes Dryer: Fuel Type')
     arg.setDescription('Type of fuel used by the clothes dryer.')
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_drying_method', clothes_dryer_drying_method_choices, false)
+    arg.setDisplayName('Clothes Dryer: Drying Method')
+    arg.setDescription("The method of drying used by the clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('clothes_dryer_efficiency_type', clothes_dryer_efficiency_type_choices, true)
@@ -3034,12 +3330,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Clothes Dryer: Efficiency')
     arg.setUnits('lb/kWh')
     arg.setDescription("The efficiency of the clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_vented_flow_rate', false)
-    arg.setDisplayName('Clothes Dryer: Vented Flow Rate')
-    arg.setDescription("The exhaust flow rate of the vented clothes dryer. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-clothes-dryer'>HPXML Clothes Dryer</a>) is used.")
-    arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_usage_multiplier', false)
@@ -3962,7 +4252,8 @@ module HPXMLFile
   # @param existing_hpxml_path [String] Path to the existing HPXML file
   # @return [Oga::XML::Element] Root XML element of the updated HPXML document
   def self.create(runner, model, args, hpxml_path, existing_hpxml_path)
-    weather = get_weather_if_needed(args)
+    weather = get_weather_if_needed(runner, args)
+    return false if !weather.nil? && !weather
 
     success = create_geometry_envelope(runner, model, args)
     return false if not success
@@ -4033,6 +4324,7 @@ module HPXMLFile
     set_misc_fuel_loads_fireplace(hpxml_bldg, args)
     set_pool(hpxml_bldg, args)
     set_permanent_spa(hpxml_bldg, args)
+    set_electric_panel(hpxml_bldg, args)
     collapse_surfaces(hpxml_bldg, args)
     renumber_hpxml_ids(hpxml_bldg)
 
@@ -4064,9 +4356,10 @@ module HPXMLFile
 
   # Returns the WeatherFile object if we determine we need it for subsequent processing.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param args [Hash] Map of :argument_name => value
   # @return [WeatherFile] Weather object containing EPW information
-  def self.get_weather_if_needed(args)
+  def self.get_weather_if_needed(runner, args)
     if (args[:hvac_control_heating_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:hvac_control_cooling_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:solar_thermal_system_type] != Constants::None && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
@@ -4119,7 +4412,7 @@ module HPXMLFile
     xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
 
     # Validate input HPXML against schematron docs
-    schematron_path = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+    schematron_path = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.sch')
     schematron_validator = XMLValidator.get_xml_validator(schematron_path)
     sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_validator, hpxml_doc)
 
@@ -4161,7 +4454,9 @@ module HPXMLFile
       args[:geometry_foundation_height] = 0.0
       args[:geometry_foundation_height_above_grade] = 0.0
       args[:geometry_rim_joist_height] = 0.0
-    elsif (args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient) || args[:geometry_foundation_type].start_with?(HPXML::FoundationTypeBellyAndWing)
+    elsif [HPXML::FoundationTypeAmbient, HPXML::FoundationTypeAboveApartment].include? args[:geometry_foundation_type]
+      args[:geometry_rim_joist_height] = 0.0
+    elsif args[:geometry_foundation_type].start_with? HPXML::FoundationTypeBellyAndWing
       args[:geometry_rim_joist_height] = 0.0
     end
 
@@ -4316,11 +4611,11 @@ module HPXMLFile
       hpxml.header.temperature_capacitance_multiplier = args[:simulation_control_temperature_capacitance_multiplier]
     end
 
-    if not args[:simulation_control_defrost_model_type].nil?
-      if (not hpxml.header.defrost_model_type.nil?) && (hpxml.header.defrost_model_type != args[:simulation_control_defrost_model_type])
-        errors << "'Simulation Control: Defrost Model Type' cannot vary across dwelling units."
+    if not args[:simulation_control_ground_to_air_heat_pump_model_type].nil?
+      if (not hpxml.header.ground_to_air_heat_pump_model_type.nil?) && (hpxml.header.ground_to_air_heat_pump_model_type != args[:simulation_control_ground_to_air_heat_pump_model_type])
+        errors << "'Simulation Control: Ground-to-Air Heat Pump Model Type' cannot vary across dwelling units."
       end
-      hpxml.header.defrost_model_type = args[:simulation_control_defrost_model_type]
+      hpxml.header.ground_to_air_heat_pump_model_type = args[:simulation_control_ground_to_air_heat_pump_model_type]
     end
 
     if not args[:simulation_control_onoff_thermostat_deadband].nil?
@@ -4573,6 +4868,8 @@ module HPXMLFile
           pv_net_metering_annual_excess_sellback_rate = nil
         end
 
+        pv_monthly_grid_connection_fee_dollars = nil
+        pv_monthly_grid_connection_fee_dollars_per_kw = nil
         if pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollarsPerkW
           pv_monthly_grid_connection_fee_dollars_per_kw = Float(pv_monthly_grid_connection_fee) rescue nil
         elsif pv_monthly_grid_connection_fee_unit == HPXML::UnitsDollars
@@ -4637,6 +4934,10 @@ module HPXMLFile
       end
     end
 
+    if not args[:electric_panel_service_feeders_load_calculation_types].nil?
+      hpxml.header.service_feeders_load_calculation_types = args[:electric_panel_service_feeders_load_calculation_types].split(',').map(&:strip)
+    end
+
     errors.each do |error|
       runner.registerError(error)
     end
@@ -4668,7 +4969,7 @@ module HPXMLFile
                         elevation: args[:site_elevation],
                         latitude: args[:site_latitude],
                         longitude: args[:site_longitude],
-                        dst_enabled: args[:simulation_control_daylight_saving_enabled],
+                        dst_observed: args[:simulation_control_daylight_saving_enabled],
                         dst_begin_month: dst_begin_month,
                         dst_begin_day: dst_begin_day,
                         dst_end_month: dst_end_month,
@@ -4807,7 +5108,7 @@ module HPXMLFile
     hpxml_bldg.building_construction.conditioned_building_volume = args[:geometry_unit_cfa] * args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.average_ceiling_height = args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.residential_facility_type = args[:geometry_unit_type]
-    hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
+    # hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
     hpxml_bldg.building_construction.year_built = args[:year_built]
     hpxml_bldg.building_construction.number_of_units = args[:unit_multiplier]
     hpxml_bldg.building_construction.unit_height_above_grade = args[:geometry_unit_height_above_grade]
@@ -4846,6 +5147,10 @@ module HPXMLFile
         extension_properties[key] = value
       end
       hpxml_bldg.header.extension_properties = extension_properties
+    end
+
+    if not args[:electric_panel_baseline_peak_power].nil?
+      hpxml_bldg.header.electric_panel_baseline_peak_power = args[:electric_panel_baseline_peak_power]
     end
   end
 
@@ -4949,9 +5254,14 @@ module HPXMLFile
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            roof_type: args[:roof_material_type],
                            roof_color: args[:roof_color],
-                           pitch: args[:geometry_roof_pitch],
-                           insulation_assembly_r_value: args[:roof_assembly_r])
+                           pitch: args[:geometry_roof_pitch])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
+
+      if hpxml_bldg.roofs[-1].interior_adjacent_to != HPXML::LocationGarage
+        hpxml_bldg.roofs[-1].insulation_assembly_r_value = args[:roof_assembly_r]
+      else
+        hpxml_bldg.roofs[-1].insulation_assembly_r_value = 2.3 # Uninsulated
+      end
 
       next unless [HPXML::RadiantBarrierLocationAtticRoofOnly, HPXML::RadiantBarrierLocationAtticRoofAndGableWalls].include?(args[:radiant_barrier_attic_location].to_s)
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.roofs[-1].interior_adjacent_to)
@@ -5218,13 +5528,16 @@ module HPXMLFile
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   # @return [nil]
   def self.set_floors(hpxml_bldg, args, sorted_surfaces)
+    uninsulated_floor_r = 5.3
+    uninsulated_ceiling_r = 2.1
+
     if [HPXML::FoundationTypeBasementConditioned,
-        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
-      args[:floor_over_foundation_assembly_r] = 2.1 # Uninsulated
+        HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > uninsulated_floor_r)
+      args[:floor_over_foundation_assembly_r] = uninsulated_floor_r
     end
 
-    if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > 2.1)
-      args[:ceiling_assembly_r] = 2.1 # Uninsulated
+    if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type]) && (args[:ceiling_assembly_r] > uninsulated_ceiling_r)
+      args[:ceiling_assembly_r] = uninsulated_ceiling_r
     end
 
     sorted_surfaces.each do |surface|
@@ -5277,7 +5590,11 @@ module HPXMLFile
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:floor_over_foundation_assembly_r]
         end
       else
-        hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+        if floor_or_ceiling == HPXML::FloorOrCeilingFloor
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = uninsulated_floor_r
+        else
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = uninsulated_ceiling_r
+        end
       end
 
       next unless args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticFloor
@@ -5380,19 +5697,19 @@ module HPXMLFile
       sub_surface_height = Geometry.get_surface_height(sub_surface)
       sub_surface_facade = Geometry.get_surface_facade(sub_surface)
 
-      if (sub_surface_facade == Constants::FacadeFront) && ((args[:overhangs_front_depth] > 0) || args[:overhangs_front_distance_to_top_of_window] > 0)
+      if (sub_surface_facade == Constants::FacadeFront) && (args[:overhangs_front_depth] > 0)
         overhangs_depth = args[:overhangs_front_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_front_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_front_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeBack) && ((args[:overhangs_back_depth] > 0) || args[:overhangs_back_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeBack) && (args[:overhangs_back_depth] > 0)
         overhangs_depth = args[:overhangs_back_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_back_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_back_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeLeft) && ((args[:overhangs_left_depth] > 0) || args[:overhangs_left_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeLeft) && (args[:overhangs_left_depth] > 0)
         overhangs_depth = args[:overhangs_left_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_left_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_left_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants::FacadeRight) && ((args[:overhangs_right_depth] > 0) || args[:overhangs_right_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeRight) && (args[:overhangs_right_depth] > 0)
         overhangs_depth = args[:overhangs_right_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_right_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_right_distance_to_bottom_of_window]
@@ -5790,6 +6107,7 @@ module HPXMLFile
                                                                                       hvac_perf_data_cooling_nom_speed_cops,
                                                                                       hvac_perf_data_cooling_max_speed_cops)
       cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
+        cooling_perf_data_data_point = cooling_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
         outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
         case hvac_perf_data_capacity_type
@@ -5877,7 +6195,7 @@ module HPXMLFile
       end
     end
 
-    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
+    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
       compressor_type = args[:heat_pump_compressor_type]
     end
 
@@ -5897,6 +6215,8 @@ module HPXMLFile
       cooling_efficiency_seer2 = args[:heat_pump_cooling_efficiency]
     when HPXML::UnitsEER
       cooling_efficiency_eer = args[:heat_pump_cooling_efficiency]
+    when HPXML::UnitsCEER
+      cooling_efficiency_ceer = args[:heat_pump_cooling_efficiency]
     end
 
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type) || ([HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump_type) && (args[:heat_pump_is_ducted]))
@@ -5920,7 +6240,7 @@ module HPXMLFile
                               heating_autosizing_limit: args[:heat_pump_heating_autosizing_limit],
                               backup_heating_autosizing_factor: args[:heat_pump_backup_heating_autosizing_factor],
                               backup_heating_autosizing_limit: args[:heat_pump_backup_heating_autosizing_limit],
-                              heating_capacity_fraction_17F: args[:heat_pump_heating_capacity_fraction_17F],
+                              heating_capacity_fraction_17F: args[:heat_pump_heating_capacity_fraction_17_f],
                               compressor_type: compressor_type,
                               compressor_lockout_temp: args[:heat_pump_compressor_lockout_temp],
                               cooling_capacity: args[:heat_pump_cooling_capacity],
@@ -5942,6 +6262,7 @@ module HPXMLFile
                               cooling_efficiency_seer2: cooling_efficiency_seer2,
                               heating_efficiency_cop: heating_efficiency_cop,
                               cooling_efficiency_eer: cooling_efficiency_eer,
+                              cooling_efficiency_ceer: cooling_efficiency_ceer,
                               airflow_defect_ratio: airflow_defect_ratio,
                               charge_defect_ratio: args[:heat_pump_charge_defect_ratio],
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
@@ -5979,6 +6300,7 @@ module HPXMLFile
                                                                                         hvac_perf_data_heating_nom_speed_cops,
                                                                                         hvac_perf_data_heating_max_speed_cops)
         heating_perf_data_data_points.each do |heating_perf_data_data_point|
+          heating_perf_data_data_point = heating_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
           outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = heating_perf_data_data_point
 
           case hvac_perf_data_capacity_type
@@ -6044,6 +6366,7 @@ module HPXMLFile
                                                                                         hvac_perf_data_cooling_nom_speed_cops,
                                                                                         hvac_perf_data_cooling_max_speed_cops)
         cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
+          cooling_perf_data_data_point = cooling_perf_data_data_point.map { |v| v.nil? ? nil : (v.empty? ? nil : v) }
           outdoor_temperature, min_speed_cap_or_frac, nom_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, nom_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
           case hvac_perf_data_capacity_type
@@ -6179,10 +6502,20 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_hvac_distribution(hpxml_bldg, args)
+    # FanCoil?
+    fan_coil_distribution_systems = []
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.primary_system
+
+      if args[:heating_system_type].include?('Fan Coil')
+        fan_coil_distribution_systems << heating_system
+      end
+    end
+
     # HydronicDistribution?
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless [heating_system.heating_system_type].include?(HPXML::HVACTypeBoiler)
-      next if args[:heating_system_type].include?('Fan Coil')
+      next if fan_coil_distribution_systems.include? heating_system
 
       hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                         distribution_system_type: HPXML::HVACDistributionTypeHydronic,
@@ -6215,23 +6548,10 @@ module HPXMLFile
       end
     end
 
-    # FanCoil?
-    fan_coil_distribution_systems = []
-    hpxml_bldg.heating_systems.each do |heating_system|
-      next unless heating_system.primary_system
-
-      if args[:heating_system_type].include?('Fan Coil')
-        fan_coil_distribution_systems << heating_system
-      end
-    end
-
     return if air_distribution_systems.size == 0 && fan_coil_distribution_systems.size == 0
 
     if [HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && hpxml_bldg.heating_systems.size == 0 && hpxml_bldg.heat_pumps.size == 0
       args[:ducts_number_of_return_registers] = nil
-      if args[:cooling_system_is_ducted]
-        args[:ducts_number_of_return_registers] = 0
-      end
     end
 
     if air_distribution_systems.size > 0
@@ -6368,12 +6688,15 @@ module HPXMLFile
       end
     end
 
+    ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
+    ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+
     if (not ducts_supply_location.nil?) && args[:ducts_supply_surface_area].nil? && args[:ducts_supply_surface_area_fraction].nil?
       # Supply duct location without any area inputs provided; set area fraction
       if ducts_supply_location == HPXML::LocationConditionedSpace
         args[:ducts_supply_surface_area_fraction] = 1.0
       else
-        args[:ducts_supply_surface_area_fraction] = Defaults.get_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
+        args[:ducts_supply_surface_area_fraction] = Defaults.get_duct_primary_fraction(ducts_supply_location, ncfl, ncfl_ag)
       end
     end
 
@@ -6382,7 +6705,7 @@ module HPXMLFile
       if ducts_return_location == HPXML::LocationConditionedSpace
         args[:ducts_return_surface_area_fraction] = 1.0
       else
-        args[:ducts_return_surface_area_fraction] = Defaults.get_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
+        args[:ducts_return_surface_area_fraction] = Defaults.get_duct_primary_fraction(ducts_return_location, ncfl, ncfl_ag)
       end
     end
 
@@ -6474,7 +6797,7 @@ module HPXMLFile
   def self.set_hvac_control(hpxml, hpxml_bldg, args, weather)
     return if (args[:heating_system_type] == Constants::None) && (args[:cooling_system_type] == Constants::None) && (args[:heat_pump_type] == Constants::None)
 
-    latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+    latitude = Defaults.get_latitude(args[:site_latitude], weather, args[:site_zip_code]) unless weather.nil?
 
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
@@ -6928,7 +7251,7 @@ module HPXMLFile
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+      latitude = Defaults.get_latitude(args[:site_latitude], weather, args[:site_zip_code]) unless weather.nil?
       collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_rated_optical_efficiency = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_rated_thermal_losses = args[:solar_thermal_collector_rated_thermal_losses]
@@ -6978,7 +7301,7 @@ module HPXMLFile
       end
     end
 
-    latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
+    latitude = Defaults.get_latitude(args[:site_latitude], weather, args[:site_zip_code]) unless weather.nil?
 
     hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                               location: args[:pv_system_location],
@@ -7004,11 +7327,283 @@ module HPXMLFile
                                 number_of_bedrooms_served: number_of_bedrooms_served)
     end
 
-    # Add inverter efficiency; assume a single inverter even if multiple PV arrays
-    hpxml_bldg.inverters.add(id: "Inverter#{hpxml_bldg.inverters.size + 1}",
-                             inverter_efficiency: args[:pv_system_inverter_efficiency])
-    hpxml_bldg.pv_systems.each do |pv_system|
-      pv_system.inverter_idref = hpxml_bldg.inverters[-1].id
+    if not args[:pv_system_inverter_efficiency].nil?
+      # Add inverter efficiency; assume a single inverter even if multiple PV arrays
+      hpxml_bldg.inverters.add(id: "Inverter#{hpxml_bldg.inverters.size + 1}",
+                               inverter_efficiency: args[:pv_system_inverter_efficiency])
+      hpxml_bldg.pv_systems.each do |pv_system|
+        pv_system.inverter_idref = hpxml_bldg.inverters[-1].id
+      end
+    end
+  end
+
+  # Set the electric panel properties, including:
+  # - service voltage
+  # - max current service rating
+  # - individual branch circuits
+  # - individual service feeders
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param args [Hash] Map of :argument_name => value
+  # @return [nil]
+  def self.set_electric_panel(hpxml_bldg, args)
+    return if (args[:electric_panel_service_voltage].nil? &&
+               args[:electric_panel_breaker_spaces_headroom].nil? &&
+               args[:electric_panel_breaker_spaces_rated_total].nil? &&
+               args[:electric_panel_load_heating_system_power_rating].nil? &&
+               args[:electric_panel_load_cooling_system_power_rating].nil? &&
+               args[:electric_panel_baseline_peak_power].nil?)
+
+    hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
+                                   voltage: args[:electric_panel_service_voltage],
+                                   max_current_rating: args[:electric_panel_service_max_current_rating],
+                                   headroom_spaces: args[:electric_panel_breaker_spaces_headroom],
+                                   rated_total_spaces: args[:electric_panel_breaker_spaces_rated_total])
+
+    electric_panel = hpxml_bldg.electric_panels[0]
+    branch_circuits = electric_panel.branch_circuits
+    service_feeders = electric_panel.service_feeders
+
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next if heating_system.is_shared_system
+      next if heating_system.fraction_heat_load_served == 0
+
+      if heating_system.primary_system
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeHeating,
+                            power: args[:electric_panel_load_heating_system_power_rating],
+                            is_new_load: args[:electric_panel_load_heating_system_new_load],
+                            component_idrefs: [heating_system.id])
+      else
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeHeating,
+                            power: args[:electric_panel_load_heating_system_2_power_rating],
+                            is_new_load: args[:electric_panel_load_heating_system_2_new_load],
+                            component_idrefs: [heating_system.id])
+      end
+    end
+
+    hpxml_bldg.cooling_systems.each do |cooling_system|
+      next if cooling_system.is_shared_system
+      next if cooling_system.fraction_cool_load_served == 0
+
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeCooling,
+                          power: args[:electric_panel_load_cooling_system_power_rating],
+                          is_new_load: args[:electric_panel_load_cooling_system_new_load],
+                          component_idrefs: [cooling_system.id])
+    end
+
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      next if heat_pump.is_shared_system
+
+      if heat_pump.fraction_heat_load_served != 0
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeHeating,
+                            power: args[:electric_panel_load_heat_pump_power_rating],
+                            is_new_load: args[:electric_panel_load_heat_pump_new_load],
+                            component_idrefs: [heat_pump.id])
+      end
+      next unless heat_pump.fraction_cool_load_served != 0
+
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeCooling,
+                          power: args[:electric_panel_load_heat_pump_power_rating],
+                          is_new_load: args[:electric_panel_load_heat_pump_new_load],
+                          component_idrefs: [heat_pump.id])
+    end
+
+    hpxml_bldg.water_heating_systems.each do |water_heating_system|
+      next if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+
+      if not args[:electric_panel_load_electric_water_heater_voltage].nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: args[:electric_panel_load_electric_water_heater_voltage],
+                            component_idrefs: [water_heating_system.id])
+      end
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeWaterHeater,
+                          power: args[:electric_panel_load_electric_water_heater_power_rating],
+                          is_new_load: args[:electric_panel_load_electric_water_heater_new_load],
+                          component_idrefs: [water_heating_system.id])
+    end
+
+    hpxml_bldg.clothes_dryers.each do |clothes_dryer|
+      next if clothes_dryer.fuel_type != HPXML::FuelTypeElectricity
+
+      if not args[:electric_panel_load_electric_clothes_dryer_voltage].nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: args[:electric_panel_load_electric_clothes_dryer_voltage],
+                            component_idrefs: [clothes_dryer.id])
+      end
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeClothesDryer,
+                          power: args[:electric_panel_load_electric_clothes_dryer_power_rating],
+                          is_new_load: args[:electric_panel_load_electric_clothes_dryer_new_load],
+                          component_idrefs: [clothes_dryer.id])
+    end
+
+    hpxml_bldg.dishwashers.each do |dishwasher|
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeDishwasher,
+                          power: args[:electric_panel_load_dishwasher_power_rating],
+                          is_new_load: args[:electric_panel_load_dishwasher_new_load],
+                          component_idrefs: [dishwasher.id])
+    end
+
+    hpxml_bldg.cooking_ranges.each do |cooking_range|
+      next if cooking_range.fuel_type != HPXML::FuelTypeElectricity
+
+      if not args[:electric_panel_load_electric_cooking_range_voltage].nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: args[:electric_panel_load_electric_cooking_range_voltage],
+                            component_idrefs: [cooking_range.id])
+      end
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeRangeOven,
+                          power: args[:electric_panel_load_electric_cooking_range_power_rating],
+                          is_new_load: args[:electric_panel_load_electric_cooking_range_new_load],
+                          component_idrefs: [cooking_range.id])
+    end
+
+    ventilation_fans = hpxml_bldg.ventilation_fans
+    if args[:mech_vent_fan_type] != Constants::None # Mechanical Ventilation
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeMechVent,
+                          power: args[:electric_panel_load_mech_vent_power_rating],
+                          is_new_load: args[:electric_panel_load_mech_vent_fan_new_load],
+                          component_idrefs: [ventilation_fans[0].id])
+      if args[:mech_vent_2_fan_type] != Constants::None # Mechanical Ventilation 2
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeMechVent,
+                            power: args[:electric_panel_load_mech_vent_2_power_rating],
+                            is_new_load: args[:electric_panel_load_mech_vent_2_new_load],
+                            component_idrefs: [ventilation_fans[1].id])
+      end
+    elsif args[:mech_vent_2_fan_type] != Constants::None # Mechanical Ventilation 2
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeMechVent,
+                          power: args[:electric_panel_load_mech_vent_2_power_rating],
+                          is_new_load: args[:electric_panel_load_mech_vent_2_new_load],
+                          component_idrefs: [ventilation_fans[0].id])
+    end
+
+    ventilation_fans.each do |ventilation_fan|
+      if ventilation_fan.used_for_local_ventilation # Kitchen / Bathroom Fans
+        if ventilation_fan.fan_location == HPXML::LocationKitchen
+          service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                              type: HPXML::ElectricPanelLoadTypeMechVent,
+                              power: args[:electric_panel_load_kitchen_fans_power_rating],
+                              is_new_load: args[:electric_panel_load_kitchen_fans_new_load],
+                              component_idrefs: [ventilation_fan.id])
+        elsif ventilation_fan.fan_location == HPXML::LocationBath
+          service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                              type: HPXML::ElectricPanelLoadTypeMechVent,
+                              power: args[:electric_panel_load_bathroom_fans_power_rating],
+                              is_new_load: args[:electric_panel_load_bathroom_fans_new_load],
+                              component_idrefs: [ventilation_fan.id])
+        end
+      elsif ventilation_fan.used_for_seasonal_cooling_load_reduction # Whole House Fan
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeMechVent,
+                            power: args[:electric_panel_load_whole_house_fan_power_rating],
+                            is_new_load: args[:electric_panel_load_whole_house_fan_new_load],
+                            component_idrefs: [ventilation_fan.id])
+      end
+    end
+
+    hpxml_bldg.permanent_spas.each do |permanent_spa|
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypePermanentSpaPump,
+                          power: args[:electric_panel_load_permanent_spa_pump_power_rating],
+                          is_new_load: args[:electric_panel_load_permanent_spa_pump_new_load],
+                          component_idrefs: [permanent_spa.pump_id])
+
+      next unless [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(permanent_spa.heater_type)
+
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypePermanentSpaHeater,
+                          power: args[:electric_panel_load_electric_permanent_spa_heater_power_rating],
+                          is_new_load: args[:electric_panel_load_electric_permanent_spa_heater_new_load],
+                          component_idrefs: [permanent_spa.heater_id])
+    end
+
+    hpxml_bldg.pools.each do |pool|
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypePoolPump,
+                          power: args[:electric_panel_load_pool_pump_power_rating],
+                          is_new_load: args[:electric_panel_load_pool_pump_new_load],
+                          component_idrefs: [pool.pump_id])
+
+      next unless [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include?(pool.heater_type)
+
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypePoolHeater,
+                          power: args[:electric_panel_load_electric_pool_heater_power_rating],
+                          is_new_load: args[:electric_panel_load_electric_pool_heater_new_load],
+                          component_idrefs: [pool.heater_id])
+    end
+
+    hpxml_bldg.plug_loads.each do |plug_load|
+      if plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeWellPump,
+                            power: args[:electric_panel_load_misc_plug_loads_well_pump_power_rating],
+                            is_new_load: args[:electric_panel_load_misc_plug_loads_well_pump_new_load],
+                            component_idrefs: [plug_load.id])
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+        if not args[:electric_panel_load_misc_plug_loads_vehicle_voltage].nil?
+          branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                              voltage: args[:electric_panel_load_misc_plug_loads_vehicle_voltage],
+                              component_idrefs: [plug_load.id])
+        end
+        service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                            type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                            power: args[:electric_panel_load_misc_plug_loads_vehicle_power_rating],
+                            is_new_load: args[:electric_panel_load_misc_plug_loads_vehicle_new_load],
+                            component_idrefs: [plug_load.id])
+      end
+    end
+
+    hpxml_bldg.ev_chargers.each do |ev_charger|
+      # The electric panel EV voltage argument takes precedence over the EV charging level.
+      if not args[:electric_panel_load_misc_plug_loads_vehicle_voltage].nil?
+        voltage = args[:electric_panel_load_misc_plug_loads_vehicle_voltage]
+      elsif not ev_charger.charging_level.nil?
+        voltage = { 1 => HPXML::ElectricPanelVoltage120,
+                    2 => HPXML::ElectricPanelVoltage240,
+                    3 => HPXML::ElectricPanelVoltage240 }[ev_charger.charging_level]
+      end
+
+      # The electric panel EV power rating argument takes precedence over the EV charging power.
+      if not args[:electric_panel_load_misc_plug_loads_vehicle_power_rating].nil?
+        power = args[:electric_panel_load_misc_plug_loads_vehicle_power_rating]
+      elsif not ev_charger.charging_power.nil?
+        power = ev_charger.charging_power
+      end
+
+      if not voltage.nil?
+        branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                            voltage: voltage,
+                            component_idrefs: [ev_charger.id])
+      end
+
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+                          power: power,
+                          is_new_load: args[:electric_panel_load_misc_plug_loads_vehicle_new_load],
+                          component_idrefs: [ev_charger.id])
+    end
+
+    if !args[:electric_panel_load_other_power_rating].nil? || !args[:electric_panel_load_other_new_load].nil?
+      branch_circuits.add(id: "BranchCircuit#{branch_circuits.size + 1}",
+                          occupied_spaces: 1,
+                          component_idrefs: [])
+      service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                          type: HPXML::ElectricPanelLoadTypeOther,
+                          power: args[:electric_panel_load_other_power_rating],
+                          is_new_load: args[:electric_panel_load_other_new_load],
+                          component_idrefs: [])
     end
   end
 
@@ -7065,7 +7660,7 @@ module HPXMLFile
     if args[:ev_charger_present]
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
-                                 charging_level: args[:ev_charger_level],
+                                 charging_level: (Integer(args[:ev_charger_level]) rescue nil),
                                  charging_power: args[:ev_charger_power])
     end
 
@@ -7254,21 +7849,12 @@ module HPXMLFile
       combined_energy_factor = args[:clothes_dryer_efficiency]
     end
 
-    if not args[:clothes_dryer_vented_flow_rate].nil?
-      is_vented = false
-      if args[:clothes_dryer_vented_flow_rate] > 0
-        is_vented = true
-        vented_flow_rate = args[:clothes_dryer_vented_flow_rate]
-      end
-    end
-
     hpxml_bldg.clothes_dryers.add(id: "ClothesDryer#{hpxml_bldg.clothes_dryers.size + 1}",
                                   location: args[:clothes_dryer_location],
                                   fuel_type: args[:clothes_dryer_fuel_type],
+                                  drying_method: args[:clothes_dryer_drying_method],
                                   energy_factor: energy_factor,
                                   combined_energy_factor: combined_energy_factor,
-                                  is_vented: is_vented,
-                                  vented_flow_rate: vented_flow_rate,
                                   usage_multiplier: args[:clothes_dryer_usage_multiplier])
   end
 
@@ -7548,9 +8134,11 @@ module HPXMLFile
 
     hpxml_bldg.pools.add(id: "Pool#{hpxml_bldg.pools.size + 1}",
                          type: HPXML::TypeUnknown,
+                         pump_id: "Pool#{hpxml_bldg.pools.size + 1}Pump",
                          pump_type: HPXML::TypeUnknown,
                          pump_kwh_per_year: args[:pool_pump_annual_kwh],
                          pump_usage_multiplier: args[:pool_pump_usage_multiplier],
+                         heater_id: "Pool#{hpxml_bldg.pools.size + 1}Heater",
                          heater_type: args[:pool_heater_type],
                          heater_load_units: heater_load_units,
                          heater_load_value: heater_load_value,
@@ -7585,9 +8173,11 @@ module HPXMLFile
 
     hpxml_bldg.permanent_spas.add(id: "PermanentSpa#{hpxml_bldg.permanent_spas.size + 1}",
                                   type: HPXML::TypeUnknown,
+                                  pump_id: "PermanentSpa#{hpxml_bldg.permanent_spas.size + 1}Pump",
                                   pump_type: HPXML::TypeUnknown,
                                   pump_kwh_per_year: args[:permanent_spa_pump_annual_kwh],
                                   pump_usage_multiplier: args[:permanent_spa_pump_usage_multiplier],
+                                  heater_id: "PermanentSpa#{hpxml_bldg.permanent_spas.size + 1}Heater",
                                   heater_type: args[:permanent_spa_heater_type],
                                   heater_load_units: heater_load_units,
                                   heater_load_value: heater_load_value,

@@ -70,7 +70,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-battery-attic.xml' => 'base-sfd.xml',
       'extra-vehicle-ev.xml' => 'extra-enclosure-garage-partially-protruded.xml',
       'extra-two-batteries.xml' => 'base-sfd.xml',
-      'extra-detailed-performance-autosize.xml' => 'base-sfd.xml',
+      'extra-detailed-performance-autosize-cooling-system.xml' => 'base-sfd.xml',
+      'extra-detailed-performance-autosize-heat-pump.xml' => 'base-sfd.xml',
+      'extra-detailed-performance-autosize-heat-pump2.xml' => 'extra-detailed-performance-autosize-heat-pump.xml',
       'extra-power-outage-periods.xml' => 'base-sfd.xml',
 
       'extra-sfa-atticroof-flat.xml' => 'base-sfa.xml',
@@ -207,14 +209,15 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
       'error-invalid-door-area.xml' => 'base-sfd.xml',
       'error-invalid-window-aspect-ratio.xml' => 'base-sfd.xml',
-      'error-garage-too-wide.xml' => 'base-sfd.xml',
-      'error-garage-too-deep.xml' => 'base-sfd.xml',
       'error-vented-attic-with-zero-floor-insulation.xml' => 'base-sfd.xml',
       'error-different-software-program.xml' => 'base-sfd-header.xml',
       'error-different-simulation-control.xml' => 'base-sfd-header.xml',
       'error-same-emissions-scenario-name.xml' => 'base-sfd-header.xml',
       'error-same-utility-bill-scenario-name.xml' => 'base-sfd-header.xml',
+      'error-could-not-find-epw-file.xml' => 'base-sfd.xml',
 
+      'warning-tiny-home-wide-garage.xml' => 'base-sfd.xml',
+      'warning-tiny-home-deep-garage.xml' => 'base-sfd.xml',
       'warning-non-electric-heat-pump-water-heater.xml' => 'base-sfd.xml',
       'warning-sfd-slab-non-zero-foundation-height.xml' => 'base-sfd.xml',
       'warning-mf-bottom-slab-non-zero-foundation-height.xml' => 'base-mf.xml',
@@ -271,8 +274,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-ambient-with-garage.xml' => ['Cannot handle garages with an ambient foundation type.'],
       'error-invalid-door-area.xml' => ['Door area cannot be negative.'],
       'error-invalid-window-aspect-ratio.xml' => ['Window aspect ratio must be greater than zero.'],
-      'error-garage-too-wide.xml' => ['Garage is as wide as the single-family detached unit.'],
-      'error-garage-too-deep.xml' => ['Garage is as deep as the single-family detached unit.'],
       'error-vented-attic-with-zero-floor-insulation.xml' => ["Element 'AssemblyEffectiveRValue': [facet 'minExclusive'] The value '0.0' must be greater than '0'."],
       'error-different-software-program.xml' => ["'Software Info: Program Used' cannot vary across dwelling units.",
                                                  "'Software Info: Program Version' cannot vary across dwelling units."],
@@ -281,10 +282,15 @@ class BuildResidentialHPXMLTest < Minitest::Test
                                                    "'Simulation Control: Run Period Calendar Year' cannot vary across dwelling units.",
                                                    "'Simulation Control: Temperature Capacitance Multiplier' cannot vary across dwelling units."],
       'error-same-emissions-scenario-name.xml' => ["HPXML header already includes an emissions scenario named 'Emissions' with type 'CO2e'."],
-      'error-same-utility-bill-scenario-name.xml' => ["HPXML header already includes a utility bill scenario named 'Bills'."]
+      'error-same-utility-bill-scenario-name.xml' => ["HPXML header already includes a utility bill scenario named 'Bills'."],
+      'error-could-not-find-epw-file.xml' => ['Could not find EPW file at']
     }
 
     expected_warnings = {
+      'warning-tiny-home-wide-garage.xml' => ['Garage is as wide as the single-family detached unit; garage width reduced from 12.0 ft to 8.0 ft.',
+                                              'The garage pitch was changed to accommodate garage ridge >= house ridge (from 0.5 to 0.338).'],
+      'warning-tiny-home-deep-garage.xml' => ['Garage is as deep as the single-family detached unit; garage depth reduced from 20.0 ft to 19.0 ft.',
+                                              'The garage pitch was changed to accommodate garage ridge >= house ridge (from 0.5 to 0.393).'],
       'warning-non-electric-heat-pump-water-heater.xml' => ['Cannot model a heat pump water heater with non-electric fuel type.'],
       'warning-sfd-slab-non-zero-foundation-height.xml' => ["Foundation type of 'SlabOnGrade' cannot have a non-zero height. Assuming height is zero."],
       'warning-mf-bottom-slab-non-zero-foundation-height.xml' => ["Foundation type of 'SlabOnGrade' cannot have a non-zero height. Assuming height is zero."],
@@ -628,7 +634,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['clothes_dryer_fuel_type'] = HPXML::FuelTypeElectricity
       args['clothes_dryer_efficiency_type'] = 'CombinedEnergyFactor'
       args['clothes_dryer_efficiency'] = 3.73
-      args['clothes_dryer_vented_flow_rate'] = 150.0
       args['dishwasher_present'] = true
       args['dishwasher_location'] = HPXML::LocationConditionedSpace
       args['dishwasher_efficiency_type'] = 'RatedAnnualkWh'
@@ -942,7 +947,18 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['vehicle_type'] = HPXML::VehicleTypeBEV
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationAttic
-    when 'extra-detailed-performance-autosize.xml'
+    when 'extra-detailed-performance-autosize-cooling-system.xml'
+      args['cooling_system_compressor_type'] = HPXML::HVACCompressorTypeVariableSpeed
+      args.delete('cooling_system_cooling_capacity')
+      args['hvac_perf_data_capacity_type'] = 'Normalized capacity fractions'
+      args['hvac_perf_data_cooling_outdoor_temperatures'] = '125.0, 95.0, 82.0'
+      args['hvac_perf_data_cooling_min_speed_capacities'] = '0.267, 0.333, 0.368'
+      args['hvac_perf_data_cooling_nom_speed_capacities'] = ', 1.000'
+      args['hvac_perf_data_cooling_max_speed_capacities'] = '0.847, 1.017, 1.090'
+      args['hvac_perf_data_cooling_min_speed_cops'] = '1.918, 3.870, 5.860'
+      args['hvac_perf_data_cooling_nom_speed_cops'] = ', 3.236'
+      args['hvac_perf_data_cooling_max_speed_cops'] = '2.017, 3.220, 4.140'
+    when 'extra-detailed-performance-autosize-heat-pump.xml'
       args['heating_system_type'] = Constants::None
       args['cooling_system_type'] = Constants::None
       args['heat_pump_type'] = HPXML::HVACTypeHeatPumpAirToAir
@@ -966,6 +982,21 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_perf_data_cooling_min_speed_cops'] = '4.47, 6.34'
       args['hvac_perf_data_cooling_nom_speed_cops'] = '3.8, 5.0'
       args['hvac_perf_data_cooling_max_speed_cops'] = '2.71, 3.53'
+    when 'extra-detailed-performance-autosize-heat-pump2.xml'
+      args['hvac_perf_data_heating_outdoor_temperatures'] = '47.0, 17.0, 5.0, -15.0'
+      args['hvac_perf_data_heating_min_speed_capacities'] = '0.308, 0.353, 0.371, 0.331'
+      args['hvac_perf_data_heating_nom_speed_capacities'] = '1.000, 0.745'
+      args['hvac_perf_data_heating_max_speed_capacities'] = '1.028, 0.766, 0.688, 0.507'
+      args['hvac_perf_data_heating_min_speed_cops'] = '4.390, 2.550, 2.050, 1.660'
+      args['hvac_perf_data_heating_nom_speed_cops'] = '3.410, 2.341'
+      args['hvac_perf_data_heating_max_speed_cops'] = '3.370, 2.330, 1.980, 1.490'
+      args['hvac_perf_data_cooling_outdoor_temperatures'] = '125.0, 95.0, 82.0'
+      args['hvac_perf_data_cooling_min_speed_capacities'] = '0.267, 0.333, 0.368'
+      args['hvac_perf_data_cooling_nom_speed_capacities'] = ', 1.000'
+      args['hvac_perf_data_cooling_max_speed_capacities'] = '0.847, 1.017, 1.090'
+      args['hvac_perf_data_cooling_min_speed_cops'] = '1.918, 3.870, 5.860'
+      args['hvac_perf_data_cooling_nom_speed_cops'] = ', 3.236'
+      args['hvac_perf_data_cooling_max_speed_cops'] = '2.017, 3.220, 4.140'
     when 'extra-power-outage-periods.xml'
       args['schedules_unavailable_period_types'] = 'Power Outage, Power Outage'
       args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'
@@ -1256,11 +1287,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['door_area'] = -10
     when 'error-invalid-window-aspect-ratio.xml'
       args['window_aspect_ratio'] = 0
-    when 'error-garage-too-wide.xml'
-      args['geometry_garage_width'] = 72
-    when 'error-garage-too-deep.xml'
-      args['geometry_garage_width'] = 12
-      args['geometry_garage_depth'] = 40
     when 'error-vented-attic-with-zero-floor-insulation.xml'
       args['ceiling_assembly_r'] = 0
     when 'error-different-software-program.xml'
@@ -1283,10 +1309,26 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'error-same-utility-bill-scenario-name.xml'
       args['existing_hpxml_path'] = File.join(File.dirname(__FILE__), 'extra_files/base-sfd-header.xml')
       args['utility_bill_electricity_fixed_charges'] = '13.0'
+    when 'error-could-not-find-epw-file.xml'
+      args['weather_station_epw_filepath'] = 'foo.epw'
     end
 
     # Warning
     case hpxml_file
+    when 'warning-tiny-home-wide-garage.xml'
+      args['geometry_unit_cfa'] = 298
+      args['geometry_unit_num_floors_above_grade'] = 2
+      args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 20
+      args['geometry_garage_protrusion'] = 1.0
+      args['floor_over_garage_assembly_r'] = 28.1
+    when 'warning-tiny-home-deep-garage.xml'
+      args['geometry_unit_cfa'] = 298
+      args['geometry_unit_num_floors_above_grade'] = 2
+      args['geometry_garage_width'] = 12
+      args['geometry_garage_depth'] = 20
+      args['geometry_garage_protrusion'] = 0.5
+      args['floor_over_garage_assembly_r'] = 28.1
     when 'warning-non-electric-heat-pump-water-heater.xml'
       args['water_heater_type'] = HPXML::WaterHeaterTypeHeatPump
       args['water_heater_fuel_type'] = HPXML::FuelTypeNaturalGas
