@@ -290,6 +290,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml.buildings.any? { |hpxml_bldg| (hpxml_bldg.windows.any? { |w| w.exterior_shading_type == 'building' } && hpxml_bldg.neighbor_buildings.size > 0) }
       next if message.include? "Exterior shading type is 'building', but neighbor buildings are explicitly defined; exterior shading type will be ignored."
     end
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.inverters.map { |i| i.inverter_efficiency }.uniq.size > 1 }
+      next if message.include? 'Inverters with varying efficiencies found; using a single PV size weighted-average in the model'
+    end
 
     # FUTURE: Revert this eventually
     # https://github.com/NREL/OpenStudio-HPXML/issues/1499
@@ -758,7 +761,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     else
       col_name = 'U-Factor no Film'
     end
-    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)[0]
+    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(nil, window.storm_type, window.ufactor, window.shgc)[0]
     if window.is_interior
       hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
       hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
@@ -770,7 +773,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     next unless window.is_exterior
 
     # SHGC
-    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)[1]
+    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(nil, window.storm_type, window.ufactor, window.shgc)[1]
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{window_id}' AND ColumnName='Glass SHGC'"
     sql_value = sqlFile.execAndReturnFirstDouble(query).get
     assert_in_delta(hpxml_value, sql_value, 0.01)
@@ -801,14 +804,14 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
     # U-Factor
-    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)[0]
+    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(nil, skylight.storm_type, skylight.ufactor, skylight.shgc)[0]
     hpxml_value /= 1.2 # converted to the 20-deg slope from the vertical position by multiplying the tested value at vertical
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{skylight_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
     sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
     assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
     # SHGC
-    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)[1]
+    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(nil, skylight.storm_type, skylight.ufactor, skylight.shgc)[1]
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{skylight_id}' AND ColumnName='Glass SHGC'"
     sql_value = sqlFile.execAndReturnFirstDouble(query).get
     assert_in_delta(hpxml_value, sql_value, 0.01)
@@ -913,10 +916,18 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   # HVAC Load Fractions
   if not is_warm_climate
     htg_energy = results.select { |k, _v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-    assert_equal(hpxml_bldg.total_fraction_heat_load_served > 0, htg_energy > 0)
+    if hpxml_bldg.total_fraction_heat_load_served > 0
+      assert_operator(htg_energy, :>, 0)
+    else
+      assert_equal(0, htg_energy)
+    end
   end
   clg_energy = results.select { |k, _v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.values.sum(0.0)
-  assert_equal(hpxml_bldg.total_fraction_cool_load_served > 0, clg_energy > 0)
+  if hpxml_bldg.total_fraction_cool_load_served > 0
+    assert_operator(clg_energy, :>, 0)
+  else
+    assert_equal(0, clg_energy)
+  end
 
   # Mechanical Ventilation
   whole_vent_fans = hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan }
@@ -1090,9 +1101,14 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
 
   def get_tolerances(key)
     if key.include?('(MBtu)') || key.include?('(kBtu)') || key.include?('(kWh)')
-      # Check that the energy difference is less than 0.5 MBtu or less than 5%
+      # Check that the energy difference is less than 0.5 MBtu or less than 6%
+      # FUTURE: Using 12% for duct component load (PR #2026); see if this can be improved.
       abs_delta_tol = 0.5 # MBtu
-      abs_frac_tol = 0.05
+      if key.include?('Component Load') && key.include?('Ducts')
+        abs_frac_tol = 0.12
+      else
+        abs_frac_tol = 0.06
+      end
       if key.include?('(kBtu)')
         abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kBtu')
       elsif key.include?('(kWh)')

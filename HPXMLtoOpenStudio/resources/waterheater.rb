@@ -991,40 +991,6 @@ module Waterheater
     return coil
   end
 
-  # Get the HPWH compressor COP and set it as an additional property.
-  #
-  # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
-  # @return [nil]
-  def self.set_heat_pump_cop(water_heating_system)
-    cop = get_heat_pump_cop(water_heating_system)
-    water_heating_system.additional_properties.cop = cop
-  end
-
-  # Calculates the HPWH compressor COP based on UEF regressions.
-  #
-  # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
-  # return [Double] COP of the HPWH compressor
-  def self.get_heat_pump_cop(water_heating_system)
-    # Calculate the COP based on EF
-    if not water_heating_system.energy_factor.nil?
-      uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
-      cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
-    elsif not water_heating_system.uniform_energy_factor.nil?
-      uef = water_heating_system.uniform_energy_factor
-      case water_heating_system.usage_bin
-      when HPXML::WaterHeaterUsageBinVerySmall
-        fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
-      when HPXML::WaterHeaterUsageBinLow
-        cop = 1.0005 * uef - 0.0789
-      when HPXML::WaterHeaterUsageBinMedium
-        cop = 1.0909 * uef - 0.0868
-      when HPXML::WaterHeaterUsageBinHigh
-        cop = 1.1022 * uef - 0.0877
-      end
-    end
-    return cop
-  end
-
   # Returns the heating input capacity, calculated as the heating rated (output) capacity divided by the rated efficiency.
   #
   # @param heating_capacity [Double]
@@ -1287,7 +1253,7 @@ module Waterheater
     fan_power_sensor = Model.add_ems_sensor(
       model,
       name: "#{obj_name} fan pwr",
-      output_var_or_meter_name: "Fan #{EPlus::FuelTypeElectricity} Rate",
+      output_var_or_meter_name: 'Fan Electricity Rate',
       key_name: fan.name
     )
 
@@ -1725,13 +1691,13 @@ module Waterheater
         ec_adj_hp_sensor = Model.add_ems_sensor(
           model,
           name: "#{water_heater.dXCoil.name} energy",
-          output_var_or_meter_name: "Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Rate",
+          output_var_or_meter_name: 'Cooling Coil Water Heating Electricity Rate',
           key_name: water_heater.dXCoil.name
         )
         ec_adj_fan_sensor = Model.add_ems_sensor(
           model,
           name: "#{water_heater.fan.name} energy",
-          output_var_or_meter_name: "Fan #{EPlus::FuelTypeElectricity} Rate",
+          output_var_or_meter_name: 'Fan Electricity Rate',
           key_name: water_heater.fan.name
         )
       end
@@ -1740,13 +1706,13 @@ module Waterheater
     ec_adj_oncyc_sensor = Model.add_ems_sensor(
       model,
       name: "#{tank.name} on cycle parasitic",
-      output_var_or_meter_name: "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate",
+      output_var_or_meter_name: 'Water Heater On Cycle Parasitic Electricity Rate',
       key_name: tank.name
     )
     ec_adj_offcyc_sensor = Model.add_ems_sensor(
       model,
       name: "#{tank.name} off cycle parasitic",
-      output_var_or_meter_name: "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate",
+      output_var_or_meter_name: 'Water Heater Off Cycle Parasitic Electricity Rate',
       key_name: tank.name
     )
 
@@ -1819,12 +1785,12 @@ module Waterheater
 
   # Disaggregates the water heater's (uniform) energy factor into tank losses and burner efficiency.
   #
-  # If using EF:
-  #   Calculations based on the Energy Factor and Recovery Efficiency of the tank
-  #   Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
   # IF using UEF:
   #   Calculations based on the Uniform Energy Factor, First Hour Rating, and Recovery Efficiency of the tank
   #   Source: Maguire and Roberts 2020 - https://www.nrel.gov/docs/fy21osti/71633.pdf
+  # If using EF:
+  #   Calculations based on the Energy Factor and Recovery Efficiency of the tank
+  #   Using the same approach as in Maguire and Roberts 2020, but with EF specific load and temperatures
   #
   # @param act_vol [Double] Actual tank volume (gal)
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
@@ -1876,12 +1842,12 @@ module Waterheater
           eta_c = water_heating_system.recovery_efficiency + ((ua * (t - t_env)) / pow) # conversion efficiency is slightly larger than recovery efficiency
         end
       else # is Electric
+        f_low = 0.2 # Assumed fraction of water volume below lower element, assumed to be unheated
+        f_high = 1.0 - f_low # Fraction of water volume above lower element
         if not water_heating_system.energy_factor.nil?
-          ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
+          ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((24.0 * (t - t_env)) * (f_high + f_low * ((t_in - t_env) / (t - t_env)))) # Btu/hr-F
         elsif not water_heating_system.uniform_energy_factor.nil?
-          f_low = 0.2 # Assumed fraction of water volume below lower element, assumed to be unheated
-          f_high = 1.0 - f_low # Fraction of water volume above lower element
-          ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (f_high + f_low * ((t_in - t_env) / (t - t_env))))
+          ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (f_high + f_low * ((t_in - t_env) / (t - t_env)))) # Btu/hr-F
         end
         eta_c = 1.0
       end
