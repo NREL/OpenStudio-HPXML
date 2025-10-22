@@ -76,7 +76,7 @@ module Defaults
     apply_infiltration(hpxml_bldg)
     apply_hvac_location(hpxml_bldg)
     apply_ventilation_fans(hpxml_bldg, weather, eri_version)
-    apply_water_heaters(runner, hpxml_bldg, eri_version, schedules_file)
+    apply_water_heaters(hpxml_bldg, eri_version, schedules_file)
     apply_flue_or_chimney(hpxml_bldg)
     apply_hot_water_distribution(hpxml_bldg, schedules_file)
     apply_water_fixtures(hpxml_bldg, schedules_file)
@@ -3251,12 +3251,11 @@ module Defaults
 
   # Assigns default values for omitted optional inputs in the HPXML::WaterHeatingSystem objects
   #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_water_heaters(runner, hpxml_bldg, eri_version, schedules_file)
+  def self.apply_water_heaters(hpxml_bldg, eri_version, schedules_file)
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     nbaths = hpxml_bldg.building_construction.number_of_bathrooms
     n_occ = hpxml_bldg.building_occupancy.number_of_residents
@@ -3327,7 +3326,7 @@ module Defaults
         end
 
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-        water_heating_system.additional_properties.cop = get_water_heater_heat_pump_cop(runner, water_heating_system)
+        water_heating_system.additional_properties.cop = get_water_heater_heat_pump_cop(water_heating_system)
 
         if water_heating_system.heating_capacity.nil?
           water_heating_system.heating_capacity = (UnitConversions.convert(0.5, 'kW', 'Btu/hr') * water_heating_system.additional_properties.cop).round
@@ -6232,10 +6231,9 @@ module Defaults
 
   # Gets the assumed COP of the water heater's heat pump based on UEF regressions.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
   # @return [Double] COP of the heat pump (W/W)
-  def self.get_water_heater_heat_pump_cop(runner, water_heating_system)
+  def self.get_water_heater_heat_pump_cop(water_heating_system)
     # Based on simulations of the UEF test procedure at varying COPs
     if not water_heating_system.energy_factor.nil?
       uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
@@ -6251,15 +6249,6 @@ module Defaults
         cop = 1.0909 * uef - 0.0868
       when HPXML::WaterHeaterUsageBinHigh
         cop = 1.1022 * uef - 0.0877
-      end
-    end
-    # Adjust COP based on RESNET HERS Addendum 77
-    if not water_heating_system.hpwh_containment_volume.nil?
-      if water_heating_system.hpwh_installed_properly.nil? || (water_heating_system.hpwh_installed_properly == true)
-        runner.registerWarning("HPWHContainmentVolume provided in #{water_heating_system.id} is ignored because it is only used when HPWHInstalledProperly is 'false'.")
-      else
-        rv = [water_heating_system.hpwh_containment_volume / 1500.0, 1.0].min
-        cop = (cop - 0.92) * (1 - (1.009 * Math.exp(-5.492 * rv))) + 0.92
       end
     end
     return cop

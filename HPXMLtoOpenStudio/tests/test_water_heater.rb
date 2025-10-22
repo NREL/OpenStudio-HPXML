@@ -1054,6 +1054,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     # volumes and their corresponding expected cops are based on RESNET spreadsheet: ConstrainedHPWH_04xlsx.xlsx
     containment_volumes = [3000, 1500, 960, 707, 453, 200, 83.5]
     expected_cop = [3.720, 3.720, 3.647, 3.518, 3.191, 2.367, 1.642]
+    expected_cap = 500.0 * 3.73135 # not adjusted
     args_hash = {}
     args_hash['hpxml_path'] = @tmp_hpxml_path
     containment_volumes.each_with_index do |v, i|
@@ -1077,9 +1078,9 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       assert_in_epsilon(UnitConversions.convert(water_heating_system.backup_heating_capacity, 'Btu/hr', 'W'), wh.heater2Capacity, 0.01)
       assert_in_epsilon(0.926, wh.uniformSkinLossCoefficientperUnitAreatoAmbientTemperature.get, 0.01)
       assert_in_epsilon(1.0, wh.heaterThermalEfficiency, 0.01)
-      # Check heat pump cooling coil cop and capacity being adjusted accordingly
+      # Check heat pump cooling coil cop being adjusted
       assert_in_epsilon(expected_cop[i], coil.ratedCOP, 0.01)
-      assert_in_epsilon(500.0 * expected_cop[i], coil.ratedHeatingCapacity, 0.01)
+      assert_in_epsilon(expected_cap, coil.ratedHeatingCapacity, 0.01)
     end
   end
 

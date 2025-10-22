@@ -4278,6 +4278,8 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``HotWaterTemperature``                        double            F              > 0                     No        125             Water heater setpoint [#]_
   ``UsesDesuperheater``                          boolean                                                  No        false           Presence of desuperheater? [#]_
   ``extension/NumberofBedroomsServed``           integer                          > NumberofBedrooms      See [#]_                  Number of bedrooms served directly or indirectly
+  ``extension/HPWHInstalledProperly``            boolean                                                  No        true            Whether hpwh is installed properly [#]_
+  ``extension/HPWHContainmentVolume``            double            ft3                                    See [#]_                  Containment volume of the space where hpwh is installed [#]_
   =============================================  ================  =============  ======================  ========  ==============  =============================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
@@ -4309,6 +4311,11 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
          Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
+  .. [#] Use HPWHInstalledProperly to specify whether to apply the HPWH COP adjustment for confined space, refer to `RESNET HERS Addendum 77 <https://www.resnet.us/about/standards/minhers/draft-pds-01-minhers-addendum-77-integrated-heat-pump-water-heaters/>`_ for conditions where it applies.
+  .. [#] HPWHContainmentVolume only required if HPWHInstalledProperly is false.
+  .. [#] HPWHContainmentVolume is used to adjust HPWH COP per `RESNET HERS Addendum 77 <https://www.resnet.us/about/standards/minhers/draft-pds-01-minhers-addendum-77-integrated-heat-pump-water-heaters/>`_.
+         Note that the confined volume adjustment was based on measured data for a 240V HPWH operating in hybrid mode with the 4.5kw backup elements enabled.
+         For space volumes below 450ft3, the calculated effective COP may be different than what is seen in practice for HPWHs that do not have backup electric resistance elements, or if the elements are not of the same capacity.
 
 .. _water_heater_combi_storage:
 

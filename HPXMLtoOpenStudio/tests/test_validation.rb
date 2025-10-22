@@ -1930,6 +1930,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'floor-or-ceiling2' => ["Floor 'Floor1' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden."],
                               'hpwh-installed-properly' => ["HPWHContainmentVolume provided in WaterHeatingSystem1 is ignored because it is only used when HPWHInstalledProperly is 'false'."],
                               'hpwh-installed-properly-missing' => ["HPWHContainmentVolume provided in WaterHeatingSystem1 is ignored because it is only used when HPWHInstalledProperly is 'false'."],
+                              'hpwh-small-containment-volume-without-backup-element' => ['Heat pump water heater: WaterHeatingSystem1 has no backup electric resistance element, COP adjustment for confined space may not be accurate when the containment space volume is below 450 cubic feet.'],
                               'hvac-gshp-bore-depth-autosized-high' => ['Reached a maximum of 10 boreholes; setting bore depth to the maximum (500 ft).'],
                               'hvac-seasons' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.'],
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
@@ -2100,6 +2101,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'hpwh-installed-properly'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-containment-volume.xml')
         hpxml_bldg.water_heating_systems[0].hpwh_installed_properly = true
+      when 'hpwh-small-containment-volume-without-backup-element'
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-containment-volume.xml')
+        hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 0.0
+        hpxml_bldg.water_heating_systems[0].hpwh_containment_volume = 250.0
       when 'hpwh-installed-properly-missing'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-containment-volume.xml')
         hpxml_bldg.water_heating_systems[0].hpwh_installed_properly = nil
