@@ -1149,12 +1149,13 @@ module HVAC
       fan = create_supply_fan(model, obj_name, 0.0, [fan_cfm], heating_system) # fan energy included in above pump via Electric Auxiliary Energy (EAE)
 
       # Heating Coil
-      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
-      htg_coil.setRatedCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
-      htg_coil.setUFactorTimesAreaValue(bb_ua)
-      htg_coil.setMaximumWaterFlowRate(max_water_flow)
-      htg_coil.setPerformanceInputMethod('NominalCapacity')
-      htg_coil.setName(obj_name + ' htg coil')
+      htg_coil = Model.add_coil_heating_water(
+        model,
+        name: "#{obj_name} htg coil",
+        capacity: UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'),
+        ua_value: bb_ua,
+        max_flow_rate: max_water_flow
+      )
       plant_loop.addDemandBranchForComponent(htg_coil)
 
       # Cooling Coil (always off)
@@ -1185,13 +1186,13 @@ module HVAC
       add_fan_pump_disaggregation_ems_program(model, pump, zone_hvac, nil, nil, heating_system)
     else
       # Heating Coil
-      htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
-      htg_coil.setName(obj_name + ' htg coil')
-      htg_coil.setConvergenceTolerance(0.001)
-      htg_coil.setHeatingDesignCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
-      htg_coil.setUFactorTimesAreaValue(bb_ua)
-      htg_coil.setMaximumWaterFlowRate(max_water_flow)
-      htg_coil.setHeatingDesignCapacityMethod('HeatingDesignCapacity')
+      htg_coil = Model.add_coil_heating_water_baseboard(
+        model,
+        name: "#{obj_name} htg coil",
+        heating_capacity: UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'),
+        ua_value: bb_ua,
+        max_flow_rate: max_water_flow
+      )
       plant_loop.addDemandBranchForComponent(htg_coil)
 
       # Baseboard
@@ -4924,19 +4925,21 @@ module HVAC
 
     # Pump
     # FIXME
+    motor_efficiency = 0.9
     if distribution_system.hydronic_variable_speed_pump
-      pump_w = 1000.0
       pump = Model.add_pump_variable_speed(
         model,
         name: "#{obj_name} hydronic pump",
-        rated_power: pump_w
+        rated_power: nil,
+        motor_efficiency: motor_efficiency
       )
     else
       pump = Model.add_pump_constant_speed(
         model,
         name: "#{obj_name} hydronic pump",
-        rated_power: 0,
-        rated_flow_rate: 0
+        rated_power: nil,
+        rated_flow_rate: nil,
+        motor_efficiency: motor_efficiency
       )
     end
     pump.addToNode(plant_loop.supplyInletNode)
@@ -5007,13 +5010,13 @@ module HVAC
         max_water_flow = UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W') / loop_sizing.loopDesignTemperatureDifference / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
 
         # Heating Coil
-        htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
-        htg_coil.setName(obj_name + ' htg coil')
-        htg_coil.setConvergenceTolerance(0.001)
-        htg_coil.setHeatingDesignCapacity(UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W'))
-        htg_coil.setUFactorTimesAreaValue(bb_ua)
-        htg_coil.setMaximumWaterFlowRate(max_water_flow)
-        htg_coil.setHeatingDesignCapacityMethod('HeatingDesignCapacity')
+        htg_coil = Model.add_coil_heating_water_baseboard(
+          model,
+          name: "#{obj_name} htg coil",
+          heating_capacity: UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W'),
+          ua_value: bb_ua,
+          max_flow_rate: max_water_flow
+        )
         plant_loop.addDemandBranchForComponent(htg_coil)
 
         # Baseboard
