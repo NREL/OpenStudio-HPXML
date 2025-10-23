@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  OS_VERSION="3.11.0"
-  OS_SHA="ad4c7f897f"
+  OS_VERSION: "3.11.0"
+  OS_SHA: ad4c7f897f
 
 jobs:
   run-unit-tests:
