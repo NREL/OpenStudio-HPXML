@@ -15,23 +15,18 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  OS_VERSION: "3.11.0"
-  OS_SHA: ad4c7f897f
+  OS_VERSION: "3.10.0"
+  OS_SHA: 86d7e215a1
 
 jobs:
   run-unit-tests:
     runs-on: ubuntu-24.04
+    container:
+      image: docker://nrel/openstudio:3.10.0
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-
-      - name: Install OpenStudio
-        run: |
-          # wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
-          wget -q -O OpenStudio.deb http://openstudio-ci-builds.s3-website-us-west-2.amazonaws.com/PR-5507/OpenStudio-3.11.0-alpha%2Bad4c7f897f-Ubuntu-24.04-x86_64.deb
-          sudo dpkg -i OpenStudio.deb
-          rm OpenStudio.deb
 
       - name: Install software
         run: |
@@ -103,17 +98,12 @@ jobs:
 
   run-workflow1-tests:
     runs-on: ubuntu-24.04
+    container:
+      image: docker://nrel/openstudio:3.10.0
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-
-      - name: Install OpenStudio
-        run: |
-          # wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
-          wget -q -O OpenStudio.deb http://openstudio-ci-builds.s3-website-us-west-2.amazonaws.com/PR-5507/OpenStudio-3.11.0-alpha%2Bad4c7f897f-Ubuntu-24.04-x86_64.deb
-          sudo dpkg -i OpenStudio.deb
-          rm OpenStudio.deb
 
       - name: Install software
         run: |
@@ -131,17 +121,12 @@ jobs:
 
   run-workflow2-tests:
     runs-on: ubuntu-24.04
+    container:
+      image: docker://nrel/openstudio:3.10.0
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-
-      - name: Install OpenStudio
-        run: |
-          # wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
-          wget -q -O OpenStudio.deb http://openstudio-ci-builds.s3-website-us-west-2.amazonaws.com/PR-5507/OpenStudio-3.11.0-alpha%2Bad4c7f897f-Ubuntu-24.04-x86_64.deb
-          sudo dpkg -i OpenStudio.deb
-          rm OpenStudio.deb
 
       - name: Install software
         run: |
@@ -166,8 +151,7 @@ jobs:
       - name: Install software and run test
         shell: pwsh
         run: |
-          # Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
-          Invoke-WebRequest -OutFile Windows.tar.gz -URI "http://openstudio-ci-builds.s3-website-us-west-2.amazonaws.com/PR-5507/OpenStudio-3.11.0-alpha+ad4c7f897f-Windows.tar.gz"
+          Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
           tar -xzf Windows.tar.gz
           & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
 
