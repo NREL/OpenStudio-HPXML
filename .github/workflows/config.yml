@@ -14,15 +14,24 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  OS_VERSION="3.11.0"
+  OS_SHA="ad4c7f897f"
+
 jobs:
   run-unit-tests:
-    runs-on: ubuntu-22.04
-    container:
-      image: docker://nrel/openstudio:3.10.0
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+
+      - name: Install OpenStudio
+        run: |
+#          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          wget -q -O OpenStudio.deb http://openstudio-ci-builds.s3-website-us-west-2.amazonaws.com/PR-5507/OpenStudio-3.11.0-alpha%2Bad4c7f897f-Ubuntu-24.04-x86_64.deb
+          sudo dpkg -i OpenStudio.deb
+          rm OpenStudio.deb
 
       - name: Install software
         run: |
@@ -93,13 +102,18 @@ jobs:
           path: docs/_build/html/
 
   run-workflow1-tests:
-    runs-on: ubuntu-22.04
-    container:
-      image: docker://nrel/openstudio:3.10.0
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+
+      - name: Install OpenStudio
+        run: |
+#          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          wget -q -O OpenStudio.deb http://openstudio-ci-builds.s3-website-us-west-2.amazonaws.com/PR-5507/OpenStudio-3.11.0-alpha%2Bad4c7f897f-Ubuntu-24.04-x86_64.deb
+          sudo dpkg -i OpenStudio.deb
+          rm OpenStudio.deb
 
       - name: Install software
         run: |
@@ -116,13 +130,18 @@ jobs:
           name: results-workflow1-tests
 
   run-workflow2-tests:
-    runs-on: ubuntu-22.04
-    container:
-      image: docker://nrel/openstudio:3.10.0
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+
+      - name: Install OpenStudio
+        run: |
+#          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          wget -q -O OpenStudio.deb http://openstudio-ci-builds.s3-website-us-west-2.amazonaws.com/PR-5507/OpenStudio-3.11.0-alpha%2Bad4c7f897f-Ubuntu-24.04-x86_64.deb
+          sudo dpkg -i OpenStudio.deb
+          rm OpenStudio.deb
 
       - name: Install software
         run: |
@@ -147,14 +166,13 @@ jobs:
       - name: Install software and run test
         shell: pwsh
         run: |
-          $env:OS_VERSION="3.10.0"
-          $env:OS_SHA="86d7e215a1"
-          Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
+#          Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
+          Invoke-WebRequest -OutFile Windows.tar.gz -URI "http://openstudio-ci-builds.s3-website-us-west-2.amazonaws.com/PR-5507/OpenStudio-3.11.0-alpha+ad4c7f897f-Windows.tar.gz"
           tar -xzf Windows.tar.gz
           & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
 
   merge-results:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [run-workflow1-tests, run-workflow2-tests]
     steps:
       - uses: actions/checkout@v4
@@ -189,7 +207,7 @@ jobs:
 
   compare-results:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: merge-results
     steps:
       - uses: actions/checkout@v4
@@ -239,7 +257,7 @@ jobs:
           name: comparisons
 
   update-results:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: merge-results
     steps:
       - uses: actions/checkout@v4
