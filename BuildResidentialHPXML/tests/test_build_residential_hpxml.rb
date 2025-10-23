@@ -323,20 +323,20 @@ class BuildResidentialHPXMLTest < Minitest::Test
       end
 
       # Check that every property has a description at the end of the file
-      property_names = get_property_names(tsv_name).to_a
-      property_units = get_property_units(tsv_name).to_a
+      property_names = get_property_names(tsv_name)
+      property_units = get_property_units(tsv_name)
       assert(property_names.size == property_units.size)
-      comment_names = get_comment_rows(tsv_name).to_a
-      puts "  Number of comments: #{comment_names.size}"
+      property_descriptions = get_property_descriptions(tsv_name)
+      puts "  Number of property descriptions: #{property_descriptions.size}"
       assert_operator(property_names.size, :>, 0)
-      assert_operator(comment_names.size, :>, 0)
-      missing_comments = property_names - comment_names
-      extra_comments = comment_names - property_names
-      if missing_comments.size > 0
-        "Missing comment description(s) for #{tsv_name}: #{missing_comments.join(',')}."
+      assert_operator(property_descriptions.size, :>, 0)
+      missing_descriptions = property_names - property_descriptions.keys
+      extra_descriptions = property_descriptions.keys - property_names
+      if missing_descriptions.size > 0
+        flunk "Missing property description(s) for #{tsv_name}: #{missing_descriptions.join(',')}."
       end
-      if extra_comments.size > 0
-        "Extra comment description(s) for #{tsv_name}: #{extra_comments.join(',')}."
+      if extra_descriptions.size > 0
+        flunk "Extra property description(s) for #{tsv_name}: #{extra_descriptions.join(',')}."
       end
 
       num_tsvs += 1
