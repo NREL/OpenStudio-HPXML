@@ -405,7 +405,7 @@
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>3.5</UniformEnergyFactor>
             <extension>
-              <HPWHInstalledProperly>false</HPWHInstalledProperly>
+              <HPWHInConfinedSpaceWithoutMitigation>true</HPWHInConfinedSpaceWithoutMitigation>
               <HPWHContainmentVolume>453.0</HPWHContainmentVolume>
             </extension>
           </WaterHeatingSystem>

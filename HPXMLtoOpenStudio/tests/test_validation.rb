@@ -266,7 +266,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'missing-elements' => ['Expected 1 element(s) for xpath: NumberofConditionedFloors [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]',
                                                    'Expected 1 element(s) for xpath: ConditionedFloorArea [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]'],
                             'missing-epw-filepath-and-zipcode' => ['Expected 1 or more element(s) for xpath: Address/ZipCode | ../BuildingDetails/ClimateandRiskZones/WeatherStation/extension/EPWFilePath'],
-                            'missing-hpwh-containment-volume' => ['Expected 1 element(s) for xpath: HPWHContainmentVolume [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/extension[HPWHInstalledProperly="false"], id: "WaterHeatingSystem1"]'],
+                            'missing-hpwh-containment-volume' => ['Expected 1 element(s) for xpath: HPWHContainmentVolume [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/extension[HPWHInConfinedSpaceWithoutMitigation="true"], id: "WaterHeatingSystem1"]'],
                             'missing-inverter-idref' => ['Expected 1 element(s) for xpath: AttachedToInverter [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem[count(../Inverter) > 1], id: "PVSystem1"]',
                                                          'Expected 1 element(s) for xpath: AttachedToInverter [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem[count(../Inverter) > 1], id: "PVSystem2"]'],
                             'missing-skylight-floor' => ['Expected 1 element(s) for xpath: ../../AttachedToFloor'],
@@ -1928,8 +1928,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'duct-lto-percent-uncond-space' => ['Very high sum of supply + return duct leakage to the outside; double-check inputs.'],
                               'floor-or-ceiling1' => ["Floor 'Floor1' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden."],
                               'floor-or-ceiling2' => ["Floor 'Floor1' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden."],
-                              'hpwh-installed-properly' => ["HPWHContainmentVolume provided in WaterHeatingSystem1 is ignored because it is only used when HPWHInstalledProperly is 'false'."],
-                              'hpwh-installed-properly-missing' => ["HPWHContainmentVolume provided in WaterHeatingSystem1 is ignored because it is only used when HPWHInstalledProperly is 'false'."],
+                              'hpwh-confined-space-without-mitigation-false' => ["HPWHContainmentVolume provided in WaterHeatingSystem1 is ignored because it is only used when HPWHInConfinedSpaceWithoutMitigation is 'true'."],
+                              'hpwh-confined-space-without-mitigation-missing' => ["HPWHContainmentVolume provided in WaterHeatingSystem1 is ignored because it is only used when HPWHInConfinedSpaceWithoutMitigation is 'true'."],
                               'hpwh-small-containment-volume-without-backup-element' => ['Heat pump water heater: WaterHeatingSystem1 has no backup electric resistance element, COP adjustment for confined space may not be accurate when the containment space volume is below 450 cubic feet.'],
                               'hvac-gshp-bore-depth-autosized-high' => ['Reached a maximum of 10 boreholes; setting bore depth to the maximum (500 ft).'],
                               'hvac-seasons' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.'],
@@ -2098,16 +2098,16 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'floor-or-ceiling2'
         hpxml, hpxml_bldg = _create_hpxml('base-foundation-unvented-crawlspace.xml')
         hpxml_bldg.floors[0].floor_or_ceiling = HPXML::FloorOrCeilingCeiling
-      when 'hpwh-installed-properly'
+      when 'hpwh-confined-space-without-mitigation-false'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-containment-volume.xml')
-        hpxml_bldg.water_heating_systems[0].hpwh_installed_properly = true
+        hpxml_bldg.water_heating_systems[0].hpwh_confined_space_without_mitigation = false
+      when 'hpwh-confined-space-without-mitigation-missing'
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-containment-volume.xml')
+        hpxml_bldg.water_heating_systems[0].hpwh_confined_space_without_mitigation = nil
       when 'hpwh-small-containment-volume-without-backup-element'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-containment-volume.xml')
         hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 0.0
         hpxml_bldg.water_heating_systems[0].hpwh_containment_volume = 250.0
-      when 'hpwh-installed-properly-missing'
-        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-containment-volume.xml')
-        hpxml_bldg.water_heating_systems[0].hpwh_installed_properly = nil
       when 'hvac-gshp-bore-depth-autosized-high'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.site.ground_conductivity = 0.07

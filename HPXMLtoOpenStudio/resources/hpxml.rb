@@ -8639,7 +8639,7 @@ class HPXML < Object
              :related_hvac_idref,        # [String] RelatedHVACSystem/@idref
              :tank_model_type,           # [String] extension/TankModelType (HPXML::WaterHeaterTankModelTypeXXX)
              :number_of_bedrooms_served, # [Integer] extension/NumberofBedroomsServed
-             :hpwh_installed_properly,   # [Boolean] extension/HPWHInstalledProperly
+             :hpwh_confined_space_without_mitigation, # [Boolean] extension/HPWHInConfinedSpaceWithoutMitigation
              :hpwh_containment_volume] # [Double] extension/HPWHContainmentVolume
     attr_accessor(*ATTRS)
 
@@ -8747,11 +8747,11 @@ class HPXML < Object
         related_hvac_idref_el = XMLHelper.add_element(water_heating_system, 'RelatedHVACSystem')
         XMLHelper.add_attribute(related_hvac_idref_el, 'idref', @related_hvac_idref)
       end
-      if (not @tank_model_type.nil?) || (not @number_of_bedrooms_served.nil?) || (not @hpwh_installed_properly.nil?) || (not @hpwh_containment_volume.nil?)
+      if (not @tank_model_type.nil?) || (not @number_of_bedrooms_served.nil?) || (not @hpwh_confined_space_without_mitigation.nil?) || (not @hpwh_containment_volume.nil?)
         extension = XMLHelper.create_elements_as_needed(water_heating_system, ['extension'])
         XMLHelper.add_element(extension, 'TankModelType', @tank_model_type, :string, @tank_model_type_isdefaulted) unless @tank_model_type.nil?
         XMLHelper.add_element(extension, 'NumberofBedroomsServed', @number_of_bedrooms_served, :integer, @number_of_bedrooms_served_isdefaulted) unless @number_of_bedrooms_served.nil?
-        XMLHelper.add_element(extension, 'HPWHInstalledProperly', @hpwh_installed_properly, :boolean, @hpwh_installed_properly_isdefaulted) unless @hpwh_installed_properly.nil?
+        XMLHelper.add_element(extension, 'HPWHInConfinedSpaceWithoutMitigation', @hpwh_confined_space_without_mitigation, :boolean, @hpwh_confined_space_without_mitigation_isdefaulted) unless @hpwh_confined_space_without_mitigation.nil?
         XMLHelper.add_element(extension, 'HPWHContainmentVolume', @hpwh_containment_volume, :float, @hpwh_containment_volume_isdefaulted) unless @hpwh_containment_volume.nil?
       end
     end
@@ -8789,7 +8789,7 @@ class HPXML < Object
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
       @tank_model_type = XMLHelper.get_value(water_heating_system, 'extension/TankModelType', :string)
       @number_of_bedrooms_served = XMLHelper.get_value(water_heating_system, 'extension/NumberofBedroomsServed', :integer)
-      @hpwh_installed_properly = XMLHelper.get_value(water_heating_system, 'extension/HPWHInstalledProperly', :boolean)
+      @hpwh_confined_space_without_mitigation = XMLHelper.get_value(water_heating_system, 'extension/HPWHInConfinedSpaceWithoutMitigation', :boolean)
       @hpwh_containment_volume = XMLHelper.get_value(water_heating_system, 'extension/HPWHContainmentVolume', :float)
     end
   end

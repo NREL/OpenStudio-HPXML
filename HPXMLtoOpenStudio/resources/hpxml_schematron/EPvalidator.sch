@@ -2571,7 +2571,7 @@
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:HotWaterTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsesDesuperheater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UsesDesuperheater</sch:assert> <!-- See [Desuperheater] -->
-      <sch:assert role='ERROR' test='count(h:extension/h:HPWHInstalledProperly) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HPWHInstalledProperly</sch:assert> <!-- See [HPWHInstalledProperly] -->
+      <sch:assert role='ERROR' test='count(h:extension/h:HPWHInConfinedSpaceWithoutMitigation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HPWHInConfinedSpaceWithoutMitigation</sch:assert> <!-- See [HPWHInConfinedSpaceWithoutMitigation] -->
       <!-- Moved/deprecated extension/OperatingMode input; see https://github.com/NREL/OpenStudio-HPXML/pull/1289 -->
       <sch:assert role='ERROR' test='count(h:extension/h:OperatingMode) = 0'>extension/OperatingMode has been replaced by HPWHOperatingMode</sch:assert>
       <!-- Warnings -->
@@ -2580,8 +2580,8 @@
   </sch:pattern>
 
   <sch:pattern>
-    <sch:title>[HPWHInstalledProperly]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:extension[h:HPWHInstalledProperly="false"]'>
+    <sch:title>[HPWHInConfinedSpaceWithoutMitigation]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:extension[h:HPWHInConfinedSpaceWithoutMitigation="true"]'>
       <sch:assert role='ERROR' test='count(h:HPWHContainmentVolume) = 1'>Expected 1 element(s) for xpath: HPWHContainmentVolume</sch:assert>
     </sch:rule>
   </sch:pattern>

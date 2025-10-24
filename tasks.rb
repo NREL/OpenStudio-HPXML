@@ -2093,7 +2093,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.water_heating_systems[0].first_hour_rating = 56.0
       hpxml_bldg.water_heating_systems[0].usage_bin = nil
     elsif ['base-dhw-tank-heat-pump-containment-volume.xml'].include? hpxml_file
-      hpxml_bldg.water_heating_systems[0].hpwh_installed_properly = false
+      hpxml_bldg.water_heating_systems[0].hpwh_confined_space_without_mitigation = true
       hpxml_bldg.water_heating_systems[0].hpwh_containment_volume = 453
     elsif ['base-dhw-tankless-electric-outside.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].performance_adjustment = 0.92

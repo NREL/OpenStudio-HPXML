@@ -4259,28 +4259,28 @@ Heat Pump
 
 Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
-  Element                                        Type              Units          Constraints             Required  Default         Notes
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
-  ``SystemIdentifier``                           id                                                       Yes                       Unique identifier
-  ``FuelType``                                   string                           electricity             Yes                       Fuel type
-  ``WaterHeaterType``                            string                           heat pump water heater  Yes                       Type of water heater
-  ``Location``                                   string                           See [#]_                No        See [#]_        Water heater location
-  ``IsSharedSystem``                             boolean                                                  No        false           Whether it serves multiple dwelling units or shared laundry room
-  ``TankVolume``                                 double            gal            > 0                     No        See [#]_        Nominal tank volume
-  ``FractionDHWLoadServed``                      double            frac           >= 0, <= 1 [#]_         Yes                       Fraction of hot water load served [#]_
-  ``HeatingCapacity``                            double            Btu/hr         > 0                     No        See [#]_        Heating output capacity
-  ``BackupHeatingCapacity``                      double            Btu/hr         >= 0                    No        15355 (4.5 kW)  Heating capacity of the electric resistance backup
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5               Yes                       EnergyGuide label rated efficiency
-  ``HPWHOperatingMode``                          string                           See [#]_                No        hybrid/auto     Operating mode [#]_
-  ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_        EnergyGuide label usage bin/first hour rating
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0                    No        0               R-value of additional tank insulation wrap
-  ``HotWaterTemperature``                        double            F              > 0                     No        125             Water heater setpoint [#]_
-  ``UsesDesuperheater``                          boolean                                                  No        false           Presence of desuperheater? [#]_
-  ``extension/NumberofBedroomsServed``           integer                          > NumberofBedrooms      See [#]_                  Number of bedrooms served directly or indirectly
-  ``extension/HPWHInstalledProperly``            boolean                                                  No        true            Whether hpwh is installed properly [#]_
-  ``extension/HPWHContainmentVolume``            double            ft3                                    See [#]_                  Containment volume of the space where hpwh is installed [#]_
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
+  Element                                              Type              Units          Constraints             Required  Default         Notes
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
+  ``SystemIdentifier``                                 id                                                       Yes                       Unique identifier
+  ``FuelType``                                         string                           electricity             Yes                       Fuel type
+  ``WaterHeaterType``                                  string                           heat pump water heater  Yes                       Type of water heater
+  ``Location``                                         string                           See [#]_                No        See [#]_        Water heater location
+  ``IsSharedSystem``                                   boolean                                                  No        false           Whether it serves multiple dwelling units or shared laundry room
+  ``TankVolume``                                       double            gal            > 0                     No        See [#]_        Nominal tank volume
+  ``FractionDHWLoadServed``                            double            frac           >= 0, <= 1 [#]_         Yes                       Fraction of hot water load served [#]_
+  ``HeatingCapacity``                                  double            Btu/hr         > 0                     No        See [#]_        Heating output capacity
+  ``BackupHeatingCapacity``                            double            Btu/hr         >= 0                    No        15355 (4.5 kW)  Heating capacity of the electric resistance backup
+  ``UniformEnergyFactor`` or ``EnergyFactor``          double            frac           > 1, <= 5               Yes                       EnergyGuide label rated efficiency
+  ``HPWHOperatingMode``                                string                           See [#]_                No        hybrid/auto     Operating mode [#]_
+  ``UsageBin`` or ``FirstHourRating``                  string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_        EnergyGuide label usage bin/first hour rating
+  ``WaterHeaterInsulation/Jacket/JacketRValue``        double            F-ft2-hr/Btu   >= 0                    No        0               R-value of additional tank insulation wrap
+  ``HotWaterTemperature``                              double            F              > 0                     No        125             Water heater setpoint [#]_
+  ``UsesDesuperheater``                                boolean                                                  No        false           Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``                 integer                          > NumberofBedrooms      See [#]_                  Number of bedrooms served directly or indirectly
+  ``extension/HPWHInConfinedSpaceWithoutMitigation``   boolean                                                  No                        Whether hpwh is installed in confined space without mitigation [#]_
+  ``extension/HPWHContainmentVolume``                  double            ft3                                    See [#]_                  Containment volume of the space where hpwh is installed [#]_
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxml_locations` for descriptions.
@@ -4311,11 +4311,14 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
          Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
-  .. [#] Use HPWHInstalledProperly to specify whether to apply the HPWH COP adjustment for confined space, refer to `RESNET HERS Addendum 77 <https://www.resnet.us/about/standards/minhers/draft-pds-01-minhers-addendum-77-integrated-heat-pump-water-heaters/>`_ for conditions where it applies.
-  .. [#] HPWHContainmentVolume only required if HPWHInstalledProperly is false.
-  .. [#] HPWHContainmentVolume is used to adjust HPWH COP per `RESNET HERS Addendum 77 <https://www.resnet.us/about/standards/minhers/draft-pds-01-minhers-addendum-77-integrated-heat-pump-water-heaters/>`_.
-         Note that the confined volume adjustment was based on measured data for a 240V HPWH operating in hybrid mode with the 4.5kw backup elements enabled.
+  .. [#] Use HPWHInConfinedSpaceWithoutMitigation to specify whether a HPWH has been installed in a confined space with mitigation: with sufficient enclosed volume, or connected to conditioned space with ducting or free opening areas. Set HPWHInConfinedSpaceWithoutMitigation to be "true" to apply the HPWH COP adjustment for confined space,
+         refer to `RESNET HERS Addendum 77 <https://www.resnet.us/about/standards/hers/draft-pds-03-hers-addendum-77-integrated-heat-pump-water-heaters-ihpwh/>`_.
+  .. [#] HPWHContainmentVolume only required if HPWHInConfinedSpaceWithoutMitigation is true.
+  .. [#] HPWHContainmentVolume is used to adjust HPWH COP in accordance with `RESNET HERS Addendum 77 <https://www.resnet.us/about/standards/hers/draft-pds-03-hers-addendum-77-integrated-heat-pump-water-heaters-ihpwh/>`_.
+         See `Heat Pump Water Heaters in Small Spaces Lab Testing: “The Amazing Shrinking Room” <https://neea.org/wp-content/uploads/2025/03/Heat-Pump-Water-Heaters-in-Small-Spaces-Lab-Testing.pdf>`_ for more information on the impact of installing in confined spaces on HPWHs
+         Note that the confined volume adjustment was based on measured data for a 240V HPWH operating in hybrid mode with the 4.5kw backup elements enabled, with the confined volume in the conditioned space.
          For space volumes below 450ft3, the calculated effective COP may be different than what is seen in practice for HPWHs that do not have backup electric resistance elements, or if the elements are not of the same capacity.
+         For hpwh that is installed in confined space outside the conditioned space volume, this COP adjustment may not accurately account for the air temperature impact.
 
 .. _water_heater_combi_storage:
 

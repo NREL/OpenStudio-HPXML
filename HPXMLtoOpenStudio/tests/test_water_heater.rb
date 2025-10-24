@@ -1051,8 +1051,9 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
   end
 
   def test_tank_heat_pump_containment_volume_adjustment
-    # volumes and their corresponding expected cops are based on RESNET spreadsheet: ConstrainedHPWH_04xlsx.xlsx
+    # Volumes are based on RESNET spreadsheet: https://github.com/user-attachments/files/23135608/ConstrainedHPWH_04xlsx.xlsx,
     containment_volumes = [3000, 1500, 960, 707, 453, 200, 83.5]
+    # Replaced the COP in the spreadsheet to 3.73135, and the expected COP are calculated as below:
     expected_cop = [3.720, 3.720, 3.647, 3.518, 3.191, 2.367, 1.642]
     expected_cap = 500.0 * 3.73135 # not adjusted
     args_hash = {}
