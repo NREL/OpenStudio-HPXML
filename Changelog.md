@@ -10,7 +10,7 @@ __New Features__
 - Water heater improvements:
   - Improves electric water heater tank losses when using `EnergyFactor` as the metric; now consistent with how `UniformEnergyFactor` is handled.
   - Improves HPWH tank volume defaulting, particularly when `NumberofResidents` is provided.
-  - Account for HPWH COP adjustment for confined space per RESNET HERS Addendum 77. `extension/HPWHContainmentVolume` is used to calculate the adjustment when `extension/HPWHInConfinedSpaceWithoutMitigation` is set to "true".
+  - Allows HPWH performance adjustment when installed in confined space per RESNET HERS Addendum 77. When `extension/HPWHInConfinedSpaceWithoutMitigation` is "true", `extension/HPWHContainmentVolume` is used to calculate the adjustment.
 - Updated site defaults:
   - `Address/CityMunicipality`, `Address/StateCode`, `GeoLocation/Latitude`, `GeoLocation/Longitude`, and `TimeZone/UTCOffset` now default based on zip code if available.
   - `TimeZone/DSTObserved` now defaults to false if `Address/StateCode` is 'AZ' or 'HI'.
