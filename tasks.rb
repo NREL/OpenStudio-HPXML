@@ -77,7 +77,18 @@ def create_hpxmls
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
       build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include?('whole-building-common-spaces')
+      if hpxml_path.include?('whole-building')
+        suffix = "_#{i}" if i > 1
+        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
+        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
+        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? HPXML::AtticTypeVented : HPXML::AtticTypeBelowApartment)
+        build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
+        if hpxml_path.include?('inter-unit-heat-transfer')
+          # one unconditioned hallway + conditioned unit each floor
+          build_residential_hpxml['heating_system_type'] = ([1, 3, 5].include?(i) ? HPXML::HVACTypeElectricResistance : 'none')
+          build_residential_hpxml['cooling_system_type'] = ([1, 3, 5].include?(i) ? HPXML::HVACTypeRoomAirConditioner : 'none')
+        end
+      elsif hpxml_path.include?('whole-building-common-spaces')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_filepaths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
@@ -89,12 +100,6 @@ def create_hpxmls
         # Partially conditioned basement + one unconditioned hallway each floor + unconditioned attic
         build_residential_hpxml['heating_system_type'] = ([1, 4, 6].include?(i) ? HPXML::HVACTypeElectricResistance : 'none')
         build_residential_hpxml['cooling_system_type'] = ([1, 4, 6].include?(i) ? HPXML::HVACTypeRoomAirConditioner : 'none')
-      elsif hpxml_path.include?('whole-building')
-        suffix = "_#{i}" if i > 1
-        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
-        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? HPXML::FoundationTypeBasementUnconditioned : HPXML::FoundationTypeAboveApartment)
-        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? HPXML::AtticTypeVented : HPXML::AtticTypeBelowApartment)
-        build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
       end
 
       # Re-generate stochastic schedule CSV?
@@ -2658,6 +2663,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         wall.delete
       end
     end
+    hpxml.buildings[0].building_id = 'ConditionedBasement'
+    hpxml.buildings[1].building_id = 'UnconditionedBasement'
     hpxml.buildings[0].foundation_walls[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
     hpxml.buildings[1].foundation_walls[-1].delete
     hpxml.buildings[1].foundation_walls.add(id: "FoundationWall#{hpxml.buildings[1].foundation_walls.size + 1}_2", sameas_id: hpxml.buildings[0].foundation_walls[1].id)
@@ -2677,6 +2684,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml.buildings[i].floors.add(id: "Floor#{hpxml.buildings[i].floors.size + 1}_#{i + 1}", sameas_id: hpxml.buildings[i + 2].floors[0].id)
     end
     # Interior walls
+    hpxml.buildings[2].building_id = 'F1UnconditionedHall'
+    hpxml.buildings[3].building_id = 'F1ConditionedUnit'
     hpxml.buildings[2].walls[-1].delete
     hpxml.buildings[2].walls.add(id: "Wall#{hpxml.buildings[2].walls.size + 1}_3", sameas_id: hpxml.buildings[3].walls[-1].id)
     hpxml.buildings[3].walls[-1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
@@ -2689,11 +2698,15 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml.buildings[i].floors[-1].delete
       hpxml.buildings[i].floors.add(id: "Floor#{hpxml.buildings[i].floors.size + 1}_#{i + 1}", sameas_id: hpxml.buildings[i + 2].floors[0].id)
     end
-    hpxml.buildings[4].walls[-1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
-    hpxml.buildings[5].walls[-1].delete
-    hpxml.buildings[5].walls.add(id: "Wall#{hpxml.buildings[5].walls.size + 1}_6", sameas_id: hpxml.buildings[4].walls[-1].id)
+    hpxml.buildings[4].building_id = 'F2UnconditionedHall'
+    hpxml.buildings[5].building_id = 'F2ConditionedUnit'
+    hpxml.buildings[5].walls[-1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.buildings[4].walls[-1].delete
+    hpxml.buildings[4].walls.add(id: "Wall#{hpxml.buildings[5].walls.size + 1}_5", sameas_id: hpxml.buildings[5].walls[-1].id)
     # attic, building6: unconditioned, building7: unconditioned
     # First floor is floor, second floor is ceiling
+    hpxml.buildings[6].building_id = 'F3Attic1'
+    hpxml.buildings[7].building_id = 'F3Attic2'
     for i in 6..7
       # Attic element deleted here since the whole building element is an attic, not consistent with other Building element specification where attictype is BelowApartment
       hpxml.buildings[i].attics[0].delete
@@ -2729,6 +2742,51 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         plug_load.kwh_per_year = 0.0
       end
     end
+  end
+
+  # Logic to apply at whole building level, need to be outside hpxml_bldg loop
+  if ['base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml'].include? hpxml_file
+    hpxml.buildings[0].building_id = 'UnitWithUnonditionedBasement'
+    hpxml.buildings[1].building_id = 'HallWithUnconditionedBasement'
+    hpxml.buildings[0].foundation_walls[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.buildings[1].foundation_walls[-1].delete
+    hpxml.buildings[1].foundation_walls.add(id: "FoundationWall#{hpxml.buildings[1].foundation_walls.size + 1}_2", sameas_id: hpxml.buildings[0].foundation_walls[1].id)
+    hpxml.buildings[0].rim_joists[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.buildings[1].rim_joists[-1].delete
+    hpxml.buildings[1].rim_joists.add(id: "RimJoist#{hpxml.buildings[1].rim_joists.size + 1}_2", sameas_id: hpxml.buildings[0].rim_joists[1].id)
+    # Add two ceilings
+    hpxml.buildings[0].floors.add(id: "Floor#{hpxml.buildings[0].floors.size + 1}_1", sameas_id: hpxml.buildings[2].floors[0].id)
+    hpxml.buildings[1].floors.add(id: "Floor#{hpxml.buildings[1].floors.size + 1}_2", sameas_id: hpxml.buildings[3].floors[0].id)
+    # first floor, building2: unconditioned, building3: conditioned
+    # First floor is floor, second floor is ceiling
+    for i in 2..3
+      # Floor exterior adjacent to
+      hpxml.buildings[i].floors[0].exterior_adjacent_to = (i == 2) ? HPXML::LocationOtherHousingUnit : HPXML::LocationOtherMultifamilyBufferSpace
+      # Ceiling
+      hpxml.buildings[i].floors[-1].delete
+      hpxml.buildings[i].floors.add(id: "Floor#{hpxml.buildings[i].floors.size + 1}_#{i + 1}", sameas_id: hpxml.buildings[i + 2].floors[0].id)
+    end
+    # Interior walls
+    hpxml.buildings[2].building_id = 'F1ConditionedUnit'
+    hpxml.buildings[3].building_id = 'F1UnconditionedHall'
+    hpxml.buildings[2].walls[-1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.buildings[3].walls[-1].delete
+    hpxml.buildings[3].walls.add(id: "Wall#{hpxml.buildings[3].walls.size + 1}_4", sameas_id: hpxml.buildings[2].walls[-1].id)
+    # second floor, building4: conditioned with attic, building5: unconditioned with attic
+    # First floor is floor, second floor is ceiling
+    for i in 4..5
+      # Floor exterior adjacent to
+      hpxml.buildings[i].floors[0].exterior_adjacent_to = (i == 4) ? HPXML::LocationOtherHousingUnit : HPXML::LocationOtherMultifamilyBufferSpace
+    end
+    hpxml.buildings[4].building_id = 'F2ConditionedUnitWithAttic'
+    hpxml.buildings[5].building_id = 'F2UnconditionedHallWithAttic'
+    hpxml.buildings[4].walls[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.buildings[4].walls[3].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace # attic interior wall
+    hpxml.buildings[5].walls[3].delete
+    hpxml.buildings[5].walls[1].delete
+    hpxml.buildings[5].walls[1].id = "Wall#{hpxml.buildings[5].walls.size}_6"
+    hpxml.buildings[5].walls.add(id: "Wall#{hpxml.buildings[5].walls.size + 1}_6", sameas_id: hpxml.buildings[4].walls[1].id)
+    hpxml.buildings[5].walls.add(id: "Wall#{hpxml.buildings[5].walls.size + 1}_6", sameas_id: hpxml.buildings[4].walls[3].id)
   end
 end
 
