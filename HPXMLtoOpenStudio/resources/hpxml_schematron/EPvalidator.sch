@@ -2585,7 +2585,7 @@
       <sch:assert role='ERROR' test='count(h:HPWHContainmentVolume) = 1'>Expected 1 element(s) for xpath: HPWHContainmentVolume</sch:assert>
       <sch:assert role='ERROR' test='number(h:HPWHContainmentVolume) &gt; 0 or not(h:HPWHContainmentVolume)'>Expected HPWHContainmentVolume to be greater than 0.</sch:assert>
       <!-- Warnings -->
-      <sch:report role='WARN' test='number(h:HPWHContainmentVolume) &gt; 1500'>HPWHContainmentVolume should typically be less than 1500 cbft.</sch:report>
+      <sch:report role='WARN' test='number(h:HPWHContainmentVolume) &gt; 1500'>HPWHContainmentVolume should typically be less than 1500 cuft when the HPWH is in confined space.</sch:report>
     </sch:rule>
   </sch:pattern>
 

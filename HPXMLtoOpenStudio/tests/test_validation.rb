@@ -1036,7 +1036,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'hvac-setpoints-low' => ['Heating setpoint should typically be greater than or equal to 58 deg-F.',
                                                        'Cooling setpoint should typically be greater than or equal to 68 deg-F.'],
                               'integrated-heating-efficiency-low' => ['Percent efficiency should typically be greater than or equal to 0.5.'],
-                              'large-hpwh-containment-volume' => ['HPWHContainmentVolume should typically be less than 1500 cbft.'],
+                              'large-hpwh-containment-volume' => ['HPWHContainmentVolume should typically be less than 1500 cuft when the HPWH is in confined space'],
                               'lighting-groups-missing' => ['No interior lighting specified, the model will not include interior lighting energy use.',
                                                             'No exterior lighting specified, the model will not include exterior lighting energy use.',
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
