@@ -8613,34 +8613,34 @@ class HPXML < Object
 
   # Object for /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem.
   class WaterHeatingSystem < BaseElement
-    ATTRS = [:id,                        # [String] SystemIdentifier/@id
-             :fuel_type,                 # [String] FuelType (HPXML::FuelTypeXXX)
-             :water_heater_type,         # [String] WaterHeaterType (HPXML::WaterHeaterTypeXXX)
-             :location,                  # [String] Location (HPXML::LocationXXX)
-             :year_installed,            # [Integer] YearInstalled
-             :is_shared_system,          # [Boolean] IsSharedSystem
-             :performance_adjustment,    # [Double] PerformanceAdjustment (frac)
-             :third_party_certification, # [String] ThirdPartyCertification
-             :tank_volume,               # [Double] TankVolume (gal)
-             :fraction_dhw_load_served,  # [Double] FractionDHWLoadServed (frac)
-             :heating_capacity,          # [Double] HeatingCapacity (Btu/hr)
-             :backup_heating_capacity,   # [Double] BackupHeatingCapacity (Btu/hr)
-             :energy_factor,             # [Double] EnergyFactor (frac)
-             :uniform_energy_factor,     # [Double] UniformEnergyFactor (frac)
-             :operating_mode,            # [String] HPWHOperatingMode (HPXML::WaterHeaterOperatingModeXXX)
-             :first_hour_rating,         # [Double] FirstHourRating (gal/hr)
-             :usage_bin,                 # [String] UsageBin (HPXML::WaterHeaterUsageBinXXX)
-             :recovery_efficiency,       # [Double] RecoveryEfficiency (frac)
-             :jacket_r_value,            # [Double] WaterHeaterInsulation/Jacket/JacketRValue (F-ft2-hr/Btu)
-             :standby_loss_units,        # [String] StandbyLoss/Units (HPXML::UnitsXXX)
-             :standby_loss_value,        # [Double] StandbyLoss/Value
-             :temperature,               # [Double] HotWaterTemperature (F)
-             :uses_desuperheater,        # [Boolean] UsesDesuperheater
-             :related_hvac_idref,        # [String] RelatedHVACSystem/@idref
-             :tank_model_type,           # [String] extension/TankModelType (HPXML::WaterHeaterTankModelTypeXXX)
-             :number_of_bedrooms_served, # [Integer] extension/NumberofBedroomsServed
+    ATTRS = [:id,                                     # [String] SystemIdentifier/@id
+             :fuel_type,                              # [String] FuelType (HPXML::FuelTypeXXX)
+             :water_heater_type,                      # [String] WaterHeaterType (HPXML::WaterHeaterTypeXXX)
+             :location,                               # [String] Location (HPXML::LocationXXX)
+             :year_installed,                         # [Integer] YearInstalled
+             :is_shared_system,                       # [Boolean] IsSharedSystem
+             :performance_adjustment,                 # [Double] PerformanceAdjustment (frac)
+             :third_party_certification,              # [String] ThirdPartyCertification
+             :tank_volume,                            # [Double] TankVolume (gal)
+             :fraction_dhw_load_served,               # [Double] FractionDHWLoadServed (frac)
+             :heating_capacity,                       # [Double] HeatingCapacity (Btu/hr)
+             :backup_heating_capacity,                # [Double] BackupHeatingCapacity (Btu/hr)
+             :energy_factor,                          # [Double] EnergyFactor (frac)
+             :uniform_energy_factor,                  # [Double] UniformEnergyFactor (frac)
+             :operating_mode,                         # [String] HPWHOperatingMode (HPXML::WaterHeaterOperatingModeXXX)
+             :first_hour_rating,                      # [Double] FirstHourRating (gal/hr)
+             :usage_bin,                              # [String] UsageBin (HPXML::WaterHeaterUsageBinXXX)
+             :recovery_efficiency,                    # [Double] RecoveryEfficiency (frac)
+             :jacket_r_value,                         # [Double] WaterHeaterInsulation/Jacket/JacketRValue (F-ft2-hr/Btu)
+             :standby_loss_units,                     # [String] StandbyLoss/Units (HPXML::UnitsXXX)
+             :standby_loss_value,                     # [Double] StandbyLoss/Value
+             :temperature,                            # [Double] HotWaterTemperature (F)
+             :uses_desuperheater,                     # [Boolean] UsesDesuperheater
+             :related_hvac_idref,                     # [String] RelatedHVACSystem/@idref
+             :tank_model_type,                        # [String] extension/TankModelType (HPXML::WaterHeaterTankModelTypeXXX)
+             :number_of_bedrooms_served,              # [Integer] extension/NumberofBedroomsServed
              :hpwh_confined_space_without_mitigation, # [Boolean] extension/HPWHInConfinedSpaceWithoutMitigation
-             :hpwh_containment_volume] # [Double] extension/HPWHContainmentVolume
+             :hpwh_containment_volume]                # [Double] extension/HPWHContainmentVolume
     attr_accessor(*ATTRS)
 
     # Returns any branch circuits that the component may be attached to.
