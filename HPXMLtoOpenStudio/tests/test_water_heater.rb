@@ -1059,7 +1059,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = @tmp_hpxml_path
     containment_volumes.each_with_index do |v, i|
-      hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-containment-volume.xml')
+      hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-confined-space.xml')
       hpxml_bldg.water_heating_systems[0].hpwh_containment_volume = v
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       model, _hpxml, hpxml_bldg = _test_measure(args_hash)

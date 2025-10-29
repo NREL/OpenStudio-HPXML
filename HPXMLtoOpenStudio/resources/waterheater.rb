@@ -978,8 +978,10 @@ module Waterheater
 
     # Adjust COP based on RESNET HERS Addendum 77
     if not water_heating_system.hpwh_containment_volume.nil?
-      if water_heating_system.hpwh_confined_space_without_mitigation.nil? || (water_heating_system.hpwh_confined_space_without_mitigation == false)
-        runner.registerWarning("HPWHContainmentVolume provided in #{water_heating_system.id} is ignored because it is only used when HPWHInConfinedSpaceWithoutMitigation is 'true'.")
+      if water_heating_system.hpwh_confined_space_without_mitigation == false
+        if water_heating_system.hpwh_containment_volume < 1000.0
+          runner.registerWarning("HPWH COP adjustment based on HPWHContainmentVolume will not be applied to #{water_heating_system.id} because HPWHInConfinedSpaceWithoutMitigation is not 'true'.")
+        end
       else
         # FUTURE: apply for 120V HPWH and other system types that the correction may not be accurate for
         if water_heating_system.hpwh_containment_volume < 450.0 && (water_heating_system.backup_heating_capacity == 0.0)
