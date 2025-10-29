@@ -1291,7 +1291,11 @@ module Waterheater
     if not loc_space.nil?
       # COP adjustment combines impacts of: 1. Reduced capacity which results in more backup element heating; 2. Reduced heat pump efficiency caused by cooler ambient air temperature,
       # The sensible load being added to the zone should only be impacted by the second, the fraction below is to disaggregate these two impacts.
-      confined_space_fraction_load = [(0.0036 * water_heating_system.hpwh_containment_volume + 0.0259).round(4), 1.0].min
+      if (water_heating_system.hpwh_confined_space_without_mitigation == true)
+        confined_space_fraction_load = [(0.0036 * water_heating_system.hpwh_containment_volume + 0.0259).round(4), 1.0].min
+      else
+        confined_space_fraction_load = 1.0
+      end
       # Sensible/latent heat gain to the space
       # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
       hpwh_zone_heat_gain_program.addLine("Set confined_space_load_fraction = #{confined_space_fraction_load}")
