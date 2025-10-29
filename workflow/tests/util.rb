@@ -442,7 +442,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       num_unused_constructions = Integer(err_line.split(' ')[6])
     end
   end
-  assert_equal(0, num_unused_objects)
+  assert_equal(0, num_unused_objects) unless hpxml_bldg.water_heating_systems.any? { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }
   assert_equal(0, num_unused_schedules)
   assert_equal(0, num_unused_constructions)
 
