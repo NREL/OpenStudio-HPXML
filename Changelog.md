@@ -2,6 +2,9 @@
 
 __New Features__
 - Updates to HPXML v4.2.
+- BuildResidentialHPXML measure:
+  - **Breaking change**: New, simpler, easier to use option-based arguments (rather than detailed property arguments).
+  - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
 - Heat pump updates:
   - Updates default heating capacities at 17F per RESNET HERS Addendum 82 and NEEP database.
   - Updates supplemental heating energy use during defrost based on RESNET HERS Addendum 82.
@@ -21,8 +24,6 @@ __New Features__
   - Allows modeling inter-unit heat transfer using the `@sameas` attribute.
   - Documents a workaround for modeling common spaces (conditioned or unconditioned).
   - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
-- BuildResidentialHPXML measure:
-  - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
 
 __Bugfixes__
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
