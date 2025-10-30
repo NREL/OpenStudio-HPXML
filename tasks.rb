@@ -90,8 +90,8 @@ def create_hpxmls
         build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'Attic, Vented, Gable' : 'Below Apartment')
         if hpxml_path.include?('inter-unit-heat-transfer')
           # one unconditioned hallway + conditioned unit each floor
-          build_residential_hpxml['hvac_heating_system'] = ([1, 3, 5].include?(i) ? "Electric Resistance" : 'None')
-          build_residential_hpxml['hvac_cooling_system'] = ([1, 3, 5].include?(i) ? "Room AC, CEER 8.4" : 'None')
+          build_residential_hpxml['hvac_heating_system'] = ([1, 3, 5].include?(i) ? 'Electric Resistance' : 'None')
+          build_residential_hpxml['hvac_cooling_system'] = ([1, 3, 5].include?(i) ? 'Room AC, CEER 8.4' : 'None')
         end
       elsif hpxml_path.include?('whole-building-common-spaces')
         suffix = "_#{i}" if i > 1
@@ -101,8 +101,8 @@ def create_hpxmls
         build_residential_hpxml['geometry_unit_num_bedrooms'] = (i >= 7 ? '0' : '3')
         build_residential_hpxml['geometry_unit_num_bathrooms'] = (i >= 7 ? '1' : '2')
         # Partially conditioned basement + one unconditioned hallway each floor + unconditioned attic
-        build_residential_hpxml['hvac_heating_system'] = ([1, 4, 6].include?(i) ? "Electric Resistance" : 'None')
-        build_residential_hpxml['hvac_cooling_system'] = ([1, 4, 6].include?(i) ? "Room AC, CEER 8.4" : 'None')
+        build_residential_hpxml['hvac_heating_system'] = ([1, 4, 6].include?(i) ? 'Electric Resistance' : 'None')
+        build_residential_hpxml['hvac_cooling_system'] = ([1, 4, 6].include?(i) ? 'Room AC, CEER 8.4' : 'None')
       end
 
       # Re-generate stochastic schedule CSV?
@@ -3328,6 +3328,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     hpxml.buildings[0].foundation_walls[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
     hpxml.buildings[1].foundation_walls[-1].delete
     hpxml.buildings[1].foundation_walls.add(id: "FoundationWall#{hpxml.buildings[1].foundation_walls.size + 1}_2", sameas_id: hpxml.buildings[0].foundation_walls[1].id)
+    hpxml.buildings[0].walls[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.buildings[1].walls[1].delete
+    hpxml.buildings[1].walls.add(id: "Wall#{hpxml.buildings[1].walls.size + 1}_2", sameas_id: hpxml.buildings[0].walls[1].id)
     hpxml.buildings[0].rim_joists[1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
     hpxml.buildings[1].rim_joists[-1].delete
     hpxml.buildings[1].rim_joists.add(id: "RimJoist#{hpxml.buildings[1].rim_joists.size + 1}_2", sameas_id: hpxml.buildings[0].rim_joists[1].id)
