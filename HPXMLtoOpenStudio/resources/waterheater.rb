@@ -223,7 +223,7 @@ module Waterheater
 
     # Amb temp & RH sensors, temp sensor shared across programs
     amb_temp_sensor, amb_rh_sensors = apply_hpwh_loc_temp_rh_sensors(model, obj_name, loc_space, loc_schedule, spaces)
-    hpwh_zone_heat_gain_program = apply_hpwh_zone_heat_gain_program(model, obj_name, water_heating_system, loc_space, hpwh_tamb, hpwh_rhamb, tank, coil, fan, amb_temp_sensor, amb_rh_sensors, unit_multiplier)
+    hpwh_zone_heat_gain_program = apply_hpwh_zone_heat_gain_program(model, obj_name, loc_space, hpwh_tamb, hpwh_rhamb, tank, coil, fan, amb_temp_sensor, amb_rh_sensors, unit_multiplier)
 
     # EMS for the HPWH control logic
     hpwh_ctrl_program = apply_hpwh_control_program(runner, model, obj_name, water_heating_system, amb_temp_sensor, top_element_sp, bottom_element_sp, min_temp, max_temp, sensed_setpoint_schedule, control_setpoint_schedule, schedules_file)
@@ -978,7 +978,7 @@ module Waterheater
 
     # Adjust COP based on RESNET HERS Addendum 77
     if not water_heating_system.hpwh_containment_volume.nil?
-      if water_heating_system.hpwh_confined_space_without_mitigation == false
+      if not water_heating_system.hpwh_confined_space_without_mitigation
         if water_heating_system.hpwh_containment_volume < 1000.0
           runner.registerWarning("HPWH COP adjustment based on HPWHContainmentVolume will not be applied to #{water_heating_system.id} because HPWHInConfinedSpaceWithoutMitigation is not 'true'.")
         end
@@ -1185,7 +1185,6 @@ module Waterheater
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
-  # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
   # @param loc_space [OpenStudio::Model::Space] The space where the water heater is located
   # @param hpwh_tamb [OpenStudio::Model::ScheduleConstant] HPWH ambient temperature (C)
   # @param hpwh_rhamb [OpenStudio::Model::ScheduleConstant] HPWH ambient relative humidity
@@ -1196,7 +1195,7 @@ module Waterheater
   # @param amb_rh_sensors [Array<OpenStudio::Model::EnergyManagementSystemSensor>] One or more HPWH ambient RH sensors
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [OpenStudio::Model::EnergyManagementSystemProgram] The HPWH heat gain program
-  def self.apply_hpwh_zone_heat_gain_program(model, obj_name, water_heating_system, loc_space, hpwh_tamb, hpwh_rhamb, tank, coil, fan, amb_temp_sensor, amb_rh_sensors, unit_multiplier)
+  def self.apply_hpwh_zone_heat_gain_program(model, obj_name, loc_space, hpwh_tamb, hpwh_rhamb, tank, coil, fan, amb_temp_sensor, amb_rh_sensors, unit_multiplier)
     # EMS Actuators: Inlet T & RH, sensible and latent gains to the space
     tamb_act_actuator = Model.add_ems_actuator(
       name: "#{obj_name} Tamb act",
@@ -1289,18 +1288,10 @@ module Waterheater
       hpwh_zone_heat_gain_program.addLine("Set #{rhamb_act_actuator.name} = #{rhamb_act_actuator.name} + (#{amb_rh_sensor.name} / 100) / #{amb_rh_sensors.size}")
     end
     if not loc_space.nil?
-      # COP adjustment combines impacts of: 1. Reduced capacity which results in more backup element heating; 2. Reduced heat pump efficiency caused by cooler ambient air temperature,
-      # The sensible load being added to the zone should only be impacted by the second, the fraction below is to disaggregate these two impacts.
-      if (water_heating_system.hpwh_confined_space_without_mitigation == true)
-        confined_space_fraction_load = [(0.0036 * water_heating_system.hpwh_containment_volume + 0.0259).round(4), 1.0].min
-      else
-        confined_space_fraction_load = 1.0
-      end
       # Sensible/latent heat gain to the space
       # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
-      hpwh_zone_heat_gain_program.addLine("Set confined_space_load_fraction = #{confined_space_fraction_load}")
-      hpwh_zone_heat_gain_program.addLine("Set #{sens_act_actuator.name} = confined_space_load_fraction * ((0 - #{sens_cool_sensor.name} - (#{tl_sensor.name} + #{fan_power_sensor.name})) / #{unit_multiplier})")
-      hpwh_zone_heat_gain_program.addLine("Set #{lat_act_actuator.name} = confined_space_load_fraction * ((0 - #{lat_cool_sensor.name}) / #{unit_multiplier})")
+      hpwh_zone_heat_gain_program.addLine("Set #{sens_act_actuator.name} = (0 - #{sens_cool_sensor.name} - (#{tl_sensor.name} + #{fan_power_sensor.name})) / #{unit_multiplier}")
+      hpwh_zone_heat_gain_program.addLine("Set #{lat_act_actuator.name} = (0 - #{lat_cool_sensor.name}) / #{unit_multiplier}")
     end
     return hpwh_zone_heat_gain_program
   end

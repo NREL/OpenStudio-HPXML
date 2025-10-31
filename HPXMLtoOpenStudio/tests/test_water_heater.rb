@@ -1056,7 +1056,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     # Replaced the COP in the spreadsheet to 3.73135, and the expected COP are calculated as below:
     expected_cop = [3.720, 3.720, 3.647, 3.518, 3.191, 2.367, 1.642]
     expected_cap = 500.0 * 3.73135 # not adjusted
-    expected_fraction = [1.0, 1.0, 1.0, 1.0, 1.0, 0.7459, 0.3265]
     args_hash = {}
     args_hash['hpxml_path'] = @tmp_hpxml_path
     containment_volumes.each_with_index do |v, i|
@@ -1083,9 +1082,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       # Check heat pump cooling coil cop being adjusted
       assert_in_epsilon(expected_cop[i], coil.ratedCOP, 0.01)
       assert_in_epsilon(expected_cap, coil.ratedHeatingCapacity, 0.01)
-      # Check HPWH zone load EMS
-      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants::ObjectTypeWaterHeater} InletAir", true)
-      assert_in_epsilon(program_values['confined_space_load_fraction'].sum, expected_fraction[i], 0.01)
     end
   end
 
