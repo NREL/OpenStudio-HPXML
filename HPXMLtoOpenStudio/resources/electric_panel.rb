@@ -181,35 +181,26 @@ module ElectricPanel
     end
   end
 
-  # Calculate the number of panel breaker spaces corresponding to total, occupied, and headroom.
+  # Calculate the number of panel breaker spaces corresponding to rated total spaces, occupied spaces, and headroom spaces.
   #
   # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
-  # @param [Array<HPXML::ServiceFeeder>] List of service feeder objects
   # @return [nil]
   def self.calculate_breaker_spaces(electric_panel)
-    occupied = get_occupied_spaces(electric_panel)
+    occupied_spaces = electric_panel.occupied_spaces
 
     if not electric_panel.rated_total_spaces.nil?
-      total = electric_panel.rated_total_spaces
+      rated_total_spaces = electric_panel.rated_total_spaces
     else
-      total = occupied + electric_panel.headroom_spaces # headroom is either specified or 3
+      rated_total_spaces = occupied_spaces + electric_panel.headroom_spaces # headroom_spaces is either specified or 3
 
-      electric_panel.rated_total_spaces = total
+      electric_panel.rated_total_spaces = rated_total_spaces
       electric_panel.rated_total_spaces_isdefaulted = true
     end
 
-    if electric_panel.headroom_spaces.nil? # only nil if total is specified
-      electric_panel.headroom_spaces = total - occupied
+    if electric_panel.headroom_spaces.nil? # only nil if rated_total_spaces is specified
+      electric_panel.headroom_spaces = rated_total_spaces - occupied_spaces
       electric_panel.headroom_spaces_isdefaulted = true
     end
-  end
-
-  # Calculate the sum of OccupiedSpaces across BranchCircuits.
-  #
-  # @param electric_panel [HPXML::ElectricPanel] Object that defines a single electric panel
-  # @return [Double] Total occupied spaces
-  def self.get_occupied_spaces(electric_panel)
-    return electric_panel.branch_circuits.map { |branch_circuit| branch_circuit.occupied_spaces }.sum(0.0)
   end
 end
 

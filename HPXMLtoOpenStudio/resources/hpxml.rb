@@ -9702,14 +9702,21 @@ class HPXML < Object
     # @return [Array<HPXML::ElectricPanel>] The list of attached electric panels
     def sub_panels
       list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        next unless @id == electric_panel.id
-
-        electric_panel.branch_circuits.each do |branch_circuit|
-          list << branch_circuit.electric_panel
-        end
+      branch_circuits.each do |branch_circuit|
+        list << branch_circuit.electric_panel
       end
       return list
+    end
+
+    # Calculate the sum of OccupiedSpaces across BranchCircuits.
+    #
+    # @return [Double] Total occupied spaces
+    def occupied_spaces
+      occupied_spaces = 0.0
+      branch_circuits.each do |branch_circuit|
+        occupied_spaces += branch_circuit.occupied_spaces
+      end
+      return occupied_spaces
     end
 
     # Deletes the current object from the array.

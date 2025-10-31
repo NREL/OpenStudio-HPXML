@@ -29,7 +29,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     # Baseline
     assert_equal(16, electric_panel.rated_total_spaces)
-    assert_equal(11, ElectricPanel.get_occupied_spaces(electric_panel))
+    assert_equal(11, electric_panel.occupied_spaces)
     assert_equal(16 - 11, electric_panel.headroom_spaces)
     assert_in_epsilon(9656.6, electric_panel.capacity_total_watts[0], 0.01)
     assert_in_epsilon(9656.6 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)
@@ -87,7 +87,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     electric_panel = hpxml_bldg.electric_panels[0]
 
     assert_equal(16, electric_panel.rated_total_spaces)
-    assert_equal(17, ElectricPanel.get_occupied_spaces(electric_panel))
+    assert_equal(17, electric_panel.occupied_spaces)
     assert_equal(16 - 17, electric_panel.headroom_spaces)
 
     # Load-Based Part A
@@ -110,7 +110,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     electric_panel = hpxml_bldg.electric_panels[0]
 
     assert_equal(16, electric_panel.rated_total_spaces)
-    assert_equal(17, ElectricPanel.get_occupied_spaces(electric_panel))
+    assert_equal(17, electric_panel.occupied_spaces)
     assert_equal(16 - 17, electric_panel.headroom_spaces)
 
     # Load-Based Part B
@@ -152,7 +152,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     electric_panel = hpxml_bldg.electric_panels[0]
 
     assert_equal(7, electric_panel.rated_total_spaces)
-    assert_equal(4, ElectricPanel.get_occupied_spaces(electric_panel))
+    assert_equal(4, electric_panel.occupied_spaces)
     assert_equal(3, electric_panel.headroom_spaces)
     assert_in_epsilon(5000.0, electric_panel.capacity_total_watts[0], 0.001)
     assert_in_epsilon(5000.0 / Float(HPXML::ElectricPanelVoltage240), electric_panel.capacity_total_amps[0], 0.01)

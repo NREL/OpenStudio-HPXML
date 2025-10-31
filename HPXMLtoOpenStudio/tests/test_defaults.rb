@@ -6430,7 +6430,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(rated_total_spaces, electric_panel.rated_total_spaces)
     end
-    assert_equal(occupied_spaces, ElectricPanel.get_occupied_spaces(electric_panel))
+    assert_equal(occupied_spaces, electric_panel.occupied_spaces)
   end
 
   def _test_default_branch_circuit_values(branch_circuit, voltage, max_current_rating, occupied_spaces)
