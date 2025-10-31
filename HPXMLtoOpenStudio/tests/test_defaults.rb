@@ -3906,7 +3906,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     electric_panel = default_hpxml_bldg.electric_panels[0]
-    _test_default_electric_panel_values(electric_panel, nil, nil, nil, nil)
+    _test_default_electric_panel_values(electric_panel, nil, nil, nil, nil, 1.0)
 
     # Test electric panel inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-detailed-electric-panel.xml')
@@ -3985,7 +3985,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     electric_panel = default_hpxml_bldg.electric_panels[0]
     branch_circuits = electric_panel.branch_circuits
     service_feeders = electric_panel.service_feeders
-    _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage240, 200.0, 5, nil)
+    _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage240, 200.0, 5, 14, 9.0)
     _test_default_branch_circuit_values(branch_circuits[0], HPXML::ElectricPanelVoltage120, 20.0, 1)
     _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage240, 50.0, 2)
     _test_default_branch_circuit_values(branch_circuits[2], HPXML::ElectricPanelVoltage240, 50.0, 2)
@@ -4007,7 +4007,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     electric_panel = default_hpxml_bldg.electric_panels[0]
-    _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage240, 200.0, nil, 12)
+    _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage240, 200.0, 3, 12, 9.0)
 
     # Test defaults
     electric_panel = hpxml_bldg.electric_panels[0]
@@ -4029,7 +4029,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     electric_panel = default_hpxml_bldg.electric_panels[0]
     branch_circuits = electric_panel.branch_circuits
     service_feeders = electric_panel.service_feeders
-    _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage240, 200.0, 3, nil)
+    _test_default_electric_panel_values(electric_panel, HPXML::ElectricPanelVoltage240, 200.0, 3, 9, 6.0)
     _test_default_branch_circuit_values(branch_circuits[0], HPXML::ElectricPanelVoltage120, 15.0, 0)
     _test_default_branch_circuit_values(branch_circuits[1], HPXML::ElectricPanelVoltage120, 15.0, 0)
     _test_default_branch_circuit_values(branch_circuits[2], HPXML::ElectricPanelVoltage240, 50.0, 2)
@@ -6413,7 +6413,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_electric_panel_values(electric_panel, voltage, max_current_rating, headroom_spaces, rated_total_spaces)
+  def _test_default_electric_panel_values(electric_panel, voltage, max_current_rating, headroom_spaces, rated_total_spaces, occupied_spaces)
     if voltage.nil?
       assert_nil(electric_panel.voltage)
     else
@@ -6434,6 +6434,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(rated_total_spaces, electric_panel.rated_total_spaces)
     end
+    assert_equal(occupied_spaces, electric_panel.occupied_spaces)
   end
 
   def _test_default_branch_circuit_values(branch_circuit, voltage, max_current_rating, occupied_spaces)
