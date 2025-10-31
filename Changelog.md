@@ -30,6 +30,7 @@ __Bugfixes__
 - Fixes zero mech vent fan energy when CFIS system w/ `AdditionalRuntimeOperatingMode="air handler fan"` has the airflow rate set to zero.
 - Fixes requested EnergyPlus timeseries output variables/meters not displayed in DView if they don't have units.
 - Fixes possible errors when small water flow rates for variable-speed experimental ground-source heat pump model.
+- Fixes possible ground-source heat pump sizing error if the heating or cooling design temperature differences are zero.
 
 ## OpenStudio-HPXML v1.10.0
 
