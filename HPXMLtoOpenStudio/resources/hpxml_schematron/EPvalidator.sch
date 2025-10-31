@@ -2571,7 +2571,8 @@
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:HotWaterTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsesDesuperheater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UsesDesuperheater</sch:assert> <!-- See [Desuperheater] -->
-      <sch:assert role='ERROR' test='count(h:extension/h:HPWHInConfinedSpaceWithoutMitigation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HPWHInConfinedSpaceWithoutMitigation</sch:assert> <!-- See [HPWHInConfinedSpaceWithoutMitigation] -->
+      <sch:assert role='ERROR' test='count(h:extension/h:HPWHInConfinedSpaceWithoutMitigation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HPWHInConfinedSpaceWithoutMitigation</sch:assert> <!-- See [HPWHInConfinedSpaceWithoutMitigation] -->
+      <sch:assert role='ERROR' test='h:extension/h:HPWHInConfinedSpaceWithoutMitigation[text()="true" or text()="false"] or not(h:extension/h:HPWHInConfinedSpaceWithoutMitigation)'>Expected extension/HPWHInConfinedSpaceWithoutMitigation to be 'true' or 'false'</sch:assert>
       <!-- Moved/deprecated extension/OperatingMode input; see https://github.com/NREL/OpenStudio-HPXML/pull/1289 -->
       <sch:assert role='ERROR' test='count(h:extension/h:OperatingMode) = 0'>extension/OperatingMode has been replaced by HPWHOperatingMode</sch:assert>
       <!-- Warnings -->
