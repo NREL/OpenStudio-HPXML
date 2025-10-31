@@ -3635,32 +3635,35 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.water_heating_systems[0].operating_mode = HPXML::WaterHeaterOperatingModeHeatPumpOnly
     hpxml_bldg.water_heating_systems[0].heating_capacity = 4000.0
     hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 5000.0
+    hpxml_bldg.water_heating_systems[0].hpwh_confined_space_without_mitigation = true
+    hpxml_bldg.water_heating_systems[0].hpwh_containment_volume = 800.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_heat_pump_water_heater_values(default_hpxml_bldg, [44.0, HPXML::WaterHeaterOperatingModeHeatPumpOnly, 4000.0, 5000.0])
+    _test_default_heat_pump_water_heater_values(default_hpxml_bldg, [44.0, HPXML::WaterHeaterOperatingModeHeatPumpOnly, 4000.0, 5000.0, true])
 
     # Test defaults
     hpxml_bldg.water_heating_systems[0].tank_volume = nil
     hpxml_bldg.water_heating_systems[0].operating_mode = nil
     hpxml_bldg.water_heating_systems[0].heating_capacity = nil
     hpxml_bldg.water_heating_systems[0].backup_heating_capacity = nil
+    hpxml_bldg.water_heating_systems[0].hpwh_confined_space_without_mitigation = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_heat_pump_water_heater_values(default_hpxml_bldg, [66.0, HPXML::WaterHeaterOperatingModeHybridAuto, 6366.0, 15355.0])
+    _test_default_heat_pump_water_heater_values(default_hpxml_bldg, [66.0, HPXML::WaterHeaterOperatingModeHybridAuto, 6366.0, 15355.0, false])
 
     # Test defaults w/ num occupants = 1, num bedrooms = 1
     hpxml_bldg.building_construction.number_of_bedrooms = 1
     hpxml_bldg.building_occupancy.number_of_residents = 1
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_heat_pump_water_heater_values(default_hpxml_bldg, [50.0, HPXML::WaterHeaterOperatingModeHybridAuto, 6366.0, 15355.0])
+    _test_default_heat_pump_water_heater_values(default_hpxml_bldg, [50.0, HPXML::WaterHeaterOperatingModeHybridAuto, 6366.0, 15355.0, false])
 
     # Test defaults w/ num occupants = 10, num bedrooms = 1
     hpxml_bldg.building_construction.number_of_bedrooms = 1
     hpxml_bldg.building_occupancy.number_of_residents = 10
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_heat_pump_water_heater_values(default_hpxml_bldg, [80.0, HPXML::WaterHeaterOperatingModeHybridAuto, 6366.0, 15355.0])
+    _test_default_heat_pump_water_heater_values(default_hpxml_bldg, [80.0, HPXML::WaterHeaterOperatingModeHybridAuto, 6366.0, 15355.0, false])
   end
 
   def test_indirect_water_heaters
@@ -6302,12 +6305,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     heat_pump_water_heaters = hpxml_bldg.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeHeatPump }
     assert_equal(expected_wh_values.size, heat_pump_water_heaters.size)
     heat_pump_water_heaters.each_with_index do |wh_system, idx|
-      tank_volume, operating_mode, htg_cap, backup_htg_cap = expected_wh_values[idx]
+      tank_volume, operating_mode, htg_cap, backup_htg_cap, hpwh_confined_space_without_mitigation = expected_wh_values[idx]
 
       assert_equal(tank_volume, wh_system.tank_volume)
       assert_equal(operating_mode, wh_system.operating_mode)
       assert_in_epsilon(htg_cap, wh_system.heating_capacity, 0.01)
       assert_in_epsilon(backup_htg_cap, wh_system.backup_heating_capacity, 0.01)
+      assert_equal(hpwh_confined_space_without_mitigation, wh_system.hpwh_confined_space_without_mitigation)
     end
   end
 
