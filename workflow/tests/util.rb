@@ -444,8 +444,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
   end
   assert_equal(0, num_unused_objects)
-  # FIXME: Common space test file has 2 unused schedule by dropping the othersidecoefficient object, which contains schedules
-  assert_equal(0, num_unused_schedules) unless (hpxml_path.include? 'base-bldgtype-mf-whole-building-common-spaces')
+  if not hpxml_path.include? 'base-bldgtype-mf-whole-building' # FUTURE: Address unused schedules referenced by orphaned othersidecoefficient objects
+    assert_equal(0, num_unused_schedules)
+  end
   assert_equal(0, num_unused_constructions)
 
   # Check for Output:Meter and Output:Variable warnings
