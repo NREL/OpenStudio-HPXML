@@ -3,72 +3,7 @@
 Workflow Inputs
 ===============
 
-OpenStudio-HPXML requires a building description in an `HPXML file <https://hpxml.nrel.gov/>`_ format.
-HPXML is an open data standard for collecting and transferring home energy data.
-Using HPXML files reduces the complexity and effort for software developers to leverage the EnergyPlus simulation engine.
-
-Using HPXML
------------
-
-HPXML is an flexible and extensible format, where nearly all elements in the schema are optional and custom elements can be included.
-Because of this, a stricter set of requirements for the HPXML file have been developed for purposes of running EnergyPlus simulations.
-
-HPXML files submitted to OpenStudio-HPXML undergo a two step validation process:
-
-1. Validation against the HPXML Schema
-
-  The HPXML XSD Schema can be found at ``HPXMLtoOpenStudio/resources/hpxml_schema/HPXML.xsd``.
-  XSD Schemas are used to validate what elements/attributes/enumerations are available, data types for elements/attributes, the number/order of children elements, etc.
-
-2. Validation using `Schematron <http://schematron.com/>`_
-
-  The Schematron document for the EnergyPlus use case can be found at ``HPXMLtoOpenStudio/resources/hpxml_schematron/EPvalidator.sch``.
-  Schematron is a rule-based validation language, expressed in XML using XPath expressions, for validating the presence or absence of inputs in XML files.
-  As opposed to an XSD Schema, a Schematron document validates constraints and requirements based on conditionals and other logical statements.
-  For example, if an element is specified with a particular value, the applicable enumerations of another element may change.
-
-OpenStudio-HPXML **automatically validates** the HPXML file against both the XSD and Schematron documents and reports any validation errors, but software developers may find it beneficial to also integrate validation into their software.
-
-Input Defaults
-**************
-
-A large number of elements in the HPXML file are optional and can be defaulted.
-Default values, equations, and logic are described throughout this documentation.
-
-For example, suppose a HPXML file has a refrigerator defined as follows:
-
-.. code-block:: XML
-
-  <Refrigerator>
-    <SystemIdentifier id='Refrigerator1'/>
-  </Refrigerator>
-
-Default values would be used for the refrigerator energy use, location, and schedule:
-
-.. code-block:: XML
-
-  <Refrigerator>
-    <SystemIdentifier id='Refrigerator1'/>
-    <Location dataSource='software'>conditioned space</Location>
-    <RatedAnnualkWh dataSource='software'>691.0</RatedAnnualkWh>
-    <PrimaryIndicator dataSource='software'>true</PrimaryIndicator>
-    <extension>
-      <UsageMultiplier dataSource='software'>1.0</UsageMultiplier>
-      <WeekdayScheduleFractions dataSource='software'>0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041</WeekdayScheduleFractions>
-      <WeekendScheduleFractions dataSource='software'>0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041</WeekendScheduleFractions>
-      <MonthlyScheduleMultipliers dataSource='software'>0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837</MonthlyScheduleMultipliers>
-    </extension>
-  </Refrigerator>
-
-These defaults will be reflected in the EnergyPlus simulation results.
-
-.. note::
-
-  The OpenStudio-HPXML workflow generally treats missing *elements* differently than missing *values*.
-  For example, if there is no ``Refrigerator`` element defined, the simulation will proceed without refrigerator energy use.
-  On the other hand, if there is a ``Refrigerator`` element but with no values defined (i.e., no ``Location`` or ``RatedAnnualkWh``), it is assumed that a refrigerator exists but its properties are unknown, so they will be defaulted in the model.
-
-See :ref:`hpxml_defaults` for information on how default values can be inspected.
+OpenStudio-HPXML inputs are described below.
 
 HPXML Software Info
 -------------------
@@ -85,7 +20,7 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ====================================  ========  =======  ================  ========  ===========================  =====================================
   Element                               Type      Units    Constraints       Required  Default                      Notes
   ====================================  ========  =======  ================  ========  ===========================  =====================================
-  ``Timestep``                          integer   minutes  Divisor of 60     No        60 (1 hour)                  Timestep
+  ``Timestep``                          integer   minutes  See [#]_          No        60 (1 hour)                  Timestep
   ``BeginMonth``                        integer            >= 1, <= 12 [#]_  No        1 (January)                  Run period start date
   ``BeginDayOfMonth``                   integer            >= 1, <= 31       No        1                            Run period start date
   ``EndMonth``                          integer            >= 1, <= 12       No        12 (December)                Run period end date
@@ -94,6 +29,8 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``AdvancedResearchFeatures``          element                              No        <none>                       Features used for advanced research modeling
   ====================================  ========  =======  ================  ========  ===========================  =====================================
 
+  .. [#] Timestep choices are 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, and 1.
+         Choice of timestep can have a significant impact on the speed of the EnergyPlus simulation.
   .. [#] BeginMonth/BeginDayOfMonth date must occur before EndMonth/EndDayOfMonth date (e.g., a run period from 10/1 to 3/31 is invalid).
   .. [#] If a leap year is specified (e.g., 2008), the EPW weather file must contain 8784 hours.
   .. [#] CalendarYear only applies to TMY (Typical Meteorological Year) weather. For AMY (Actual Meteorological Year) weather, the AMY year will be used regardless of what is specified.
@@ -4259,26 +4196,28 @@ Heat Pump
 
 Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
-  Element                                        Type              Units          Constraints             Required  Default         Notes
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
-  ``SystemIdentifier``                           id                                                       Yes                       Unique identifier
-  ``FuelType``                                   string                           electricity             Yes                       Fuel type
-  ``WaterHeaterType``                            string                           heat pump water heater  Yes                       Type of water heater
-  ``Location``                                   string                           See [#]_                No        See [#]_        Water heater location
-  ``IsSharedSystem``                             boolean                                                  No        false           Whether it serves multiple dwelling units or shared laundry room
-  ``TankVolume``                                 double            gal            > 0                     No        See [#]_        Nominal tank volume
-  ``FractionDHWLoadServed``                      double            frac           >= 0, <= 1 [#]_         Yes                       Fraction of hot water load served [#]_
-  ``HeatingCapacity``                            double            Btu/hr         > 0                     No        See [#]_        Heating output capacity
-  ``BackupHeatingCapacity``                      double            Btu/hr         >= 0                    No        15355 (4.5 kW)  Heating capacity of the electric resistance backup
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5               Yes                       EnergyGuide label rated efficiency
-  ``HPWHOperatingMode``                          string                           See [#]_                No        hybrid/auto     Operating mode [#]_
-  ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_        EnergyGuide label usage bin/first hour rating
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0                    No        0               R-value of additional tank insulation wrap
-  ``HotWaterTemperature``                        double            F              > 0                     No        125             Water heater setpoint [#]_
-  ``UsesDesuperheater``                          boolean                                                  No        false           Presence of desuperheater? [#]_
-  ``extension/NumberofBedroomsServed``           integer                          > NumberofBedrooms      See [#]_                  Number of bedrooms served directly or indirectly
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
+  Element                                              Type              Units          Constraints             Required  Default         Notes
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
+  ``SystemIdentifier``                                 id                                                       Yes                       Unique identifier
+  ``FuelType``                                         string                           electricity             Yes                       Fuel type
+  ``WaterHeaterType``                                  string                           heat pump water heater  Yes                       Type of water heater
+  ``Location``                                         string                           See [#]_                No        See [#]_        Water heater location
+  ``IsSharedSystem``                                   boolean                                                  No        false           Whether it serves multiple dwelling units or shared laundry room
+  ``TankVolume``                                       double            gal            > 0                     No        See [#]_        Nominal tank volume
+  ``FractionDHWLoadServed``                            double            frac           >= 0, <= 1 [#]_         Yes                       Fraction of hot water load served [#]_
+  ``HeatingCapacity``                                  double            Btu/hr         > 0                     No        See [#]_        Heating output capacity
+  ``BackupHeatingCapacity``                            double            Btu/hr         >= 0                    No        15355 (4.5 kW)  Heating capacity of the electric resistance backup
+  ``UniformEnergyFactor`` or ``EnergyFactor``          double            frac           > 1, <= 5               Yes                       EnergyGuide label rated efficiency
+  ``HPWHOperatingMode``                                string                           See [#]_                No        hybrid/auto     Operating mode [#]_
+  ``UsageBin`` or ``FirstHourRating``                  string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_        EnergyGuide label usage bin/first hour rating
+  ``WaterHeaterInsulation/Jacket/JacketRValue``        double            F-ft2-hr/Btu   >= 0                    No        0               R-value of additional tank insulation wrap
+  ``HotWaterTemperature``                              double            F              > 0                     No        125             Water heater setpoint [#]_
+  ``UsesDesuperheater``                                boolean                                                  No        false           Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``                 integer                          > NumberofBedrooms      See [#]_                  Number of bedrooms served directly or indirectly
+  ``extension/HPWHInConfinedSpaceWithoutMitigation``   boolean                                                  No        false           Whether HPWH is installed in confined space without mitigation [#]_
+  ``extension/HPWHContainmentVolume``                  double            ft3            > 0                     See [#]_                  Containment volume of the space where HPWH is installed
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxml_locations` for descriptions.
@@ -4309,6 +4248,13 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
          Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
+  .. [#] Mitigation approaches include sufficient enclosed volume or connection to conditioned space with, e.g, ducting, grills, door undercuts, or louvers.
+         If true, a COP adjustment based on ``extension/HPWHContainmentVolume`` will be applied per `RESNET HERS Addendum 77 <https://www.resnet.us/about/standards/hers/draft-pds-03-hers-addendum-77-integrated-heat-pump-water-heaters-ihpwh/>`_.
+         The adjustment accounts for the reduced heat pump performance due to colder localized temperatures as well as the increased likelihood of electric resistance backup operation.
+         The adjustment is based on `Heat Pump Water Heaters in Small Spaces Lab Testing: “The Amazing Shrinking Room” <https://neea.org/wp-content/uploads/2025/03/Heat-Pump-Water-Heaters-in-Small-Spaces-Lab-Testing.pdf>`_, which measured data for a 240V HPWH operating in hybrid mode in conditioned space with a 4.5 kW backup element enabled.
+         For space volumes below 450 ft3, the calculated effective COP may be different than what is seen in practice for HPWHs that do not have backup electric resistance elements or have element capacities significantly different than 4.5 kW.
+         For HPWHs installed in unconditioned confined spaces (e.g., closet in an unconditioned basement), this COP adjustment may not accurately account for the air temperature impact.
+  .. [#] HPWHContainmentVolume only required if HPWHInConfinedSpaceWithoutMitigation is true.
 
 .. _water_heater_combi_storage:
 
@@ -5819,8 +5765,8 @@ If not entered, the simulation will not include that type of fuel load.
 
 .. _hpxml_locations:
 
-HPXML Locations
----------------
+Locations
+---------
 
 The various locations used in an HPXML file are defined as follows:
 
@@ -5858,26 +5804,56 @@ The various locations used in an HPXML file are defined as follows:
 
   All conditioned space in a dwelling unit (i.e., "conditioned space", "basement - conditioned", and "crawlspace - conditioned") is modeled as a single thermal zone, in which a single air temperature/humidity is calculated for each timestep.
 
-Validating & Debugging Errors
------------------------------
+Defaults
+--------
+
+A large number of elements in the HPXML file are optional and can be defaulted.
+Default values, equations, and logic are described throughout this documentation.
+
+For example, suppose a HPXML file has a refrigerator defined as follows:
+
+.. code-block:: XML
+
+  <Refrigerator>
+    <SystemIdentifier id='Refrigerator1'/>
+  </Refrigerator>
+
+Default values would be used for the refrigerator energy use, location, and schedule:
+
+.. code-block:: XML
+
+  <Refrigerator>
+    <SystemIdentifier id='Refrigerator1'/>
+    <Location dataSource='software'>conditioned space</Location>
+    <RatedAnnualkWh dataSource='software'>691.0</RatedAnnualkWh>
+    <PrimaryIndicator dataSource='software'>true</PrimaryIndicator>
+    <extension>
+      <UsageMultiplier dataSource='software'>1.0</UsageMultiplier>
+      <WeekdayScheduleFractions dataSource='software'>0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041</WeekdayScheduleFractions>
+      <WeekendScheduleFractions dataSource='software'>0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041</WeekendScheduleFractions>
+      <MonthlyScheduleMultipliers dataSource='software'>0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837</MonthlyScheduleMultipliers>
+    </extension>
+  </Refrigerator>
+
+These defaults will be reflected in the EnergyPlus simulation results.
+
+.. note::
+
+  The OpenStudio-HPXML workflow generally treats missing *elements* differently than missing *values*.
+  For example, if there is no ``Refrigerator`` element defined, the simulation will proceed without refrigerator energy use.
+  On the other hand, if there is a ``Refrigerator`` element but with no values defined (i.e., no ``Location`` or ``RatedAnnualkWh``), it is assumed that a refrigerator exists but its properties are unknown, so they will be defaulted in the model.
+
+See :ref:`hpxml_defaults` for information on how default values can be inspected.
+
+Validating & Debugging
+----------------------
 
 When running HPXML files, errors may occur because:
 
 #. An HPXML file provided is invalid (either relative to the HPXML schema or the EnergyPlus Use Case).
 #. An unexpected EnergyPlus simulation error occurred.
 
-If an error occurs, first look in the run.log for details.
-If there are no errors in that log file, then the error may be in the EnergyPlus simulation -- see eplusout.err.
+If an error occurs, first look in the ``run.log`` for details.
+If there are no errors in that log file, then the error may be in the EnergyPlus simulation -- see ``eplusout.err``.
 
 Contact us if you can't figure out the cause of an error.
-
-Sample Files
-------------
-
-Dozens of sample HPXML files are included in the workflow/sample_files directory.
-The sample files help to illustrate how different building components are described in HPXML.
-
-Each sample file generally makes one isolated change relative to the base HPXML (base.xml) building.
-For example, the base-dhw-dwhr.xml file adds a ``DrainWaterHeatRecovery`` element to the building.
-
-You may find it useful to search through the files for certain HPXML elements or compare (diff) a sample file to the base.xml file.
