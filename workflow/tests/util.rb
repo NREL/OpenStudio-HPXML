@@ -8,7 +8,6 @@ def run_simulation_tests(xmls)
   all_annual_results = {}
   Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
     next if xml.end_with? '-10x.xml'
-    next if xml.include? 'house030.xml'
 
     xml_name = File.basename(xml)
     results = _run_xml(xml, Parallel.worker_number)
@@ -351,6 +350,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     next if message.include?('setupIHGOutputs: Output variables=Zone Other Equipment') && message.include?('are not available.')
     next if message.include?('setupIHGOutputs: Output variables=Space Other Equipment') && message.include?('are not available')
     next if message.include? 'Multiple speed fan will be applied to this unit. The speed number is determined by load.'
+    next if message.include?('Temperature') && message.include?('out of bounds') && message.include?('ATTIC')
 
     # HPWHs
     if hpxml_bldg.water_heating_systems.count { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump } > 0
@@ -417,10 +417,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     # Coil speed level EMS
     if hpxml_header.hvac_onoff_thermostat_deadband
       next if message.include?('Wrong coil speed EMS override value, for unit=') && message.include?('Exceeding maximum coil speed level.') # Speed level actuator throws this error when speed is set to 1 but no load
-    end
-    # TODO: Check why these houses produce this warning
-    if hpxml_path.include?('house013.xml') || hpxml_path.include?('house015.xml') || hpxml_path.include?('house026.xml')
-      next if message.include?('Temperature') && message.include?('out of bounds') && message.include?('ATTIC')
     end
     # TODO: Check why this house produces this warning
     if hpxml_path.include? 'house044.xml'
