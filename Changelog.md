@@ -21,7 +21,6 @@ __New Features__
   - Allow `PVSystem/AttachedToInverter` to be omitted (unless there are multiple `Inverter` elements).
   - Allow multiple inverters with different efficiencies and use a weighted-average efficiency in the model (previously threw an error)
 - For storm windows, removes minimum base window U-factor limit and throws a warning instead if the base window U-factor is below 0.3.
-- **Breaking change**: Renames Zero Energy Ready Home (ZERH) to DOE Efficient New Home (DENH)
 
 __Bugfixes__
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
