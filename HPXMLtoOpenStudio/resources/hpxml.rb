@@ -936,7 +936,7 @@ class HPXML < Object
              :co2index_calculation_versions,               # [Array<String>] SoftwareInfo/extension/CO2IndexCalculation/Version
              :energystar_calculation_versions,             # [Array<String>] SoftwareInfo/extension/EnergyStarCalculation/Version
              :iecc_eri_calculation_versions,               # [Array<String>] SoftwareInfo/extension/IECCERICalculation/Version
-             :zerh_calculation_versions,                   # [Array<String>] SoftwareInfo/extension/ZERHCalculation/Version
+             :denh_calculation_versions,                   # [Array<String>] SoftwareInfo/extension/DENHCalculation/Version
              :timestep,                                    # [Integer] SoftwareInfo/extension/SimulationControl/Timestep (minutes)
              :sim_begin_month,                             # [Integer] SoftwareInfo/extension/SimulationControl/BeginMonth
              :sim_begin_day,                               # [Integer] SoftwareInfo/extension/SimulationControl/BeginDayOfMonth
@@ -1000,7 +1000,7 @@ class HPXML < Object
         'CO2IndexCalculation' => @co2index_calculation_versions,
         'EnergyStarCalculation' => @energystar_calculation_versions,
         'IECCERICalculation' => @iecc_eri_calculation_versions,
-        'ZERHCalculation' => @zerh_calculation_versions }.each do |element_name, calculation_versions|
+        'DENHCalculation' => @denh_calculation_versions }.each do |element_name, calculation_versions|
         calculation_versions = [] if calculation_versions.nil?
         if not calculation_versions.empty?
           extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
@@ -1057,7 +1057,7 @@ class HPXML < Object
       @co2index_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/CO2IndexCalculation/Version', :string)
       @iecc_eri_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/IECCERICalculation/Version', :string)
       @energystar_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/EnergyStarCalculation/Version', :string)
-      @zerh_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/ZERHCalculation/Version', :string)
+      @denh_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/DENHCalculation/Version', :string)
       @timestep = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/Timestep', :integer)
       @sim_begin_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginMonth', :integer)
       @sim_begin_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth', :integer)
