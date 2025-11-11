@@ -4209,7 +4209,10 @@ class HPXML < Object
     #
     # @return [<HPXML::RimJoist>] RimJoist object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      sameas_obj = HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return sameas_obj if sameas_obj.is_a? HPXML::RimJoist
+
+      fail "RimJoist: #{@id} has wrong sameas object: #{@sameas_id}"
     end
 
     # Returns the space that the rim joist is attached to.
@@ -4460,7 +4463,10 @@ class HPXML < Object
     #
     # @return [<HPXML::Wall>] Wall object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      sameas_obj = HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return sameas_obj if sameas_obj.is_a? HPXML::Wall
+
+      fail "Wall: #{@id} has wrong sameas object: #{@sameas_id}"
     end
 
     # Returns all windows for this wall.
@@ -4772,7 +4778,10 @@ class HPXML < Object
     #
     # @return [<HPXML::FoundationWall>] FoundationWall object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      sameas_obj = HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return sameas_obj if sameas_obj.is_a? HPXML::FoundationWall
+
+      fail "FoundationWall: #{@id} has wrong sameas object: #{@sameas_id}"
     end
 
     # Returns all windows for this foundation wall.
@@ -5114,7 +5123,10 @@ class HPXML < Object
     #
     # @return [<HPXML::Floor>] Floor object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      sameas_obj = HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return sameas_obj if sameas_obj.is_a? HPXML::Floor
+
+      fail "Floor: #{@id} has wrong sameas object: #{@sameas_id}"
     end
 
     # Returns all skylights for this floor.

@@ -1352,7 +1352,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-unavailable-period' => ['Unavailable Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-windows-physical-properties' => ["Could not lookup UFactor and SHGC for window 'Window3'."],
                             'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
-                            'multifamily-common-space-wrong-sameas' => ["Sameas object 'Foo' not found."],
+                            'multifamily-common-space-wrong-sameas-id' => ["Sameas object 'Foo' not found."],
+                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-floor' => ['Floor: Floor4_1 has wrong sameas object: Wall1_2'],
+                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-rim-joist' => ['RimJoist: RimJoist3 has wrong sameas object: Wall1_2'],
+                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-foundation-wall' => ['FoundationWall: FoundationWall3 has wrong sameas object: Wall1_2'],
+                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-wall' => ['Wall: Wall3 has wrong sameas object: Floor1_2'],
                             'net-area-negative-wall' => ["Calculated a negative net surface area for surface 'Wall1'."],
                             'net-area-negative-roof-floor' => ["Calculated a negative net surface area for surface 'Roof1'.",
                                                                "Calculated a negative net surface area for surface 'Floor1'."],
@@ -1720,7 +1724,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'leap-year-TMY'
         hpxml, _hpxml_bldg = _create_hpxml('base-simcontrol-calendar-year-custom.xml')
         hpxml.header.sim_calendar_year = 2008
-      when 'multifamily-common-space-wrong-sameas'
+      when 'multifamily-common-space-wrong-sameas-id'
         hpxml, _hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-common-spaces.xml')
         hpxml.buildings[1].floors[0].sameas_id = 'Foo'
       when 'net-area-negative-roof-floor'
@@ -1928,6 +1932,18 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'whole-mf-building-gshps-unit-multiplier'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.building_construction.number_of_units = 2
+      when 'multifamily-inter-unit-heat-transfer-wrong-sameas-object-floor'
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml_bldg.floors.add(id: 'Floor4_1', sameas_id: 'Wall1_2')
+      when 'multifamily-inter-unit-heat-transfer-wrong-sameas-object-rim-joist'
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml_bldg.rim_joists.add(id: 'RimJoist3', sameas_id: 'Wall1_2')
+      when 'multifamily-inter-unit-heat-transfer-wrong-sameas-object-foundation-wall'
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml_bldg.foundation_walls.add(id: 'FoundationWall3', sameas_id: 'Wall1_2')
+      when 'multifamily-inter-unit-heat-transfer-wrong-sameas-object-wall'
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml_bldg.walls.add(id: 'Wall3', sameas_id: 'Floor1_2')
       else
         fail "Unhandled case: #{error_case}."
       end
