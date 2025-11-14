@@ -1571,11 +1571,11 @@ module HVACSizing
 
       # Infiltration assignment by exterior wall area
       zone.spaces.each do |space|
-        space.additional_properties.wall_area_ratio = space.additional_properties.total_exposed_wall_area / bldg_exposed_wall_area
+        space.additional_properties.wall_area_ratio = (bldg_exposed_wall_area == 0.0) ? 0.0 : space.additional_properties.total_exposed_wall_area / bldg_exposed_wall_area
         all_space_loads[space].Heat_Infil = bldg_Heat_Infil * space.additional_properties.wall_area_ratio
         all_space_loads[space].Cool_Infil_Sens = bldg_Cool_Infil_Sens * space.additional_properties.wall_area_ratio
       end
-      zone_wall_area_ratio = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum / bldg_exposed_wall_area
+      zone_wall_area_ratio = (bldg_exposed_wall_area == 0.0) ? 0.0 : (zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum / bldg_exposed_wall_area)
       all_zone_loads[zone].Heat_Infil = bldg_Heat_Infil * zone_wall_area_ratio
       all_zone_loads[zone].Cool_Infil_Sens = bldg_Cool_Infil_Sens * zone_wall_area_ratio
       all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone_wall_area_ratio
