@@ -1469,17 +1469,17 @@ module Defaults
         end
       else
         floor_is_ceiling = HPXML::is_floor_a_ceiling(floor, false)
-        # if not floor_is_ceiling.nil?
-          # if (floor.floor_or_ceiling == HPXML::FloorOrCeilingCeiling) && !floor_is_ceiling
-            # runner.registerWarning("Floor '#{floor.id}' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden.")
-            # floor.floor_or_ceiling = HPXML::FloorOrCeilingFloor
-            # floor.floor_or_ceiling_isdefaulted = true
-          # elsif (floor.floor_or_ceiling == HPXML::FloorOrCeilingFloor) && floor_is_ceiling
-            # runner.registerWarning("Floor '#{floor.id}' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden.")
-            # floor.floor_or_ceiling = HPXML::FloorOrCeilingCeiling
-            # floor.floor_or_ceiling_isdefaulted = true
-          # end
-        # end
+        if not floor_is_ceiling.nil?
+          if (floor.floor_or_ceiling == HPXML::FloorOrCeilingCeiling) && !floor_is_ceiling
+            runner.registerWarning("Floor '#{floor.id}' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden.")
+            floor.floor_or_ceiling = HPXML::FloorOrCeilingFloor
+            floor.floor_or_ceiling_isdefaulted = true
+          elsif (floor.floor_or_ceiling == HPXML::FloorOrCeilingFloor) && floor_is_ceiling
+            runner.registerWarning("Floor '#{floor.id}' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden.")
+            floor.floor_or_ceiling = HPXML::FloorOrCeilingCeiling
+            floor.floor_or_ceiling_isdefaulted = true
+          end
+        end
       end
 
       if floor.interior_finish_type.nil?

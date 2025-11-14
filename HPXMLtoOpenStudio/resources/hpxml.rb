@@ -12447,8 +12447,6 @@ class HPXML < Object
                          LocationAtticUnvented]
     floor_locations = [LocationCrawlspaceVented,
                        LocationCrawlspaceUnvented,
-                       LocationCrawlspaceConditioned,
-                       LocationBasementConditioned,
                        LocationBasementUnconditioned,
                        LocationManufacturedHomeUnderBelly]
     if (ceiling_locations.include? hpxml_floor.interior_adjacent_to) || (ceiling_locations.include? hpxml_floor.exterior_adjacent_to)
