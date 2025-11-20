@@ -654,6 +654,7 @@ module Constructions
   # @param constr_name [TODO] TODO
   # @param cavity_r [TODO] TODO
   # @param install_grade [TODO] TODO
+  # @param joist_thick_in [TODO] TODO
   # @param framing_factor [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param osb_thick_in [TODO] TODO
@@ -664,25 +665,22 @@ module Constructions
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
   # @return [TODO] TODO
-  def self.apply_rim_joist(model, surfaces, constr_name, cavity_r, install_grade, framing_factor,
+  def self.apply_rim_joist(model, surfaces, constr_name, cavity_r, install_grade, joist_thick_in, framing_factor,
                            mat_int_finish, osb_thick_in, rigid_r, mat_ext_finish, inside_film,
                            outside_film, solar_absorptance = nil, emittance = nil)
 
     return if surfaces.empty?
 
     # Define materials
-    rim_joist_thick_in = 1.5
-    sill_plate_thick_in = 3.5
-    framing_thick_in = sill_plate_thick_in - rim_joist_thick_in # Extra non-continuous wood beyond rim joist thickness
     if cavity_r > 0
       # Insulation
-      mat_cavity = Material.new(thick_in: framing_thick_in, mat_base: BaseMaterial.InsulationGenericDensepack, k_in: framing_thick_in / cavity_r)
+      mat_cavity = Material.new(thick_in: joist_thick_in, mat_base: BaseMaterial.InsulationGenericDensepack, k_in: joist_thick_in / cavity_r)
     else
       # Empty cavity
-      mat_cavity = Material.AirCavityOpen(framing_thick_in)
+      mat_cavity = Material.AirCavityOpen(joist_thick_in)
     end
-    mat_framing = Material.new(thick_in: framing_thick_in, mat_base: BaseMaterial.Wood)
-    mat_gap = Material.AirCavityClosed(framing_thick_in)
+    mat_framing = Material.new(thick_in: joist_thick_in, mat_base: BaseMaterial.Wood)
+    mat_gap = Material.AirCavityClosed(joist_thick_in)
     mat_osb = nil
     if osb_thick_in > 0
       mat_osb = Material.OSBSheathing(osb_thick_in)

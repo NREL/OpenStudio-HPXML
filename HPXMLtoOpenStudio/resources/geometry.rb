@@ -272,8 +272,8 @@ module Geometry
       match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
       install_grade = 1
 
-      Constructions.apply_rim_joist(model, surfaces, "#{rim_joist.id} construction",
-                                    cavity_r, install_grade, constr_set.framing_factor,
+      Constructions.apply_rim_joist(model, surfaces, "#{rim_joist.id} construction", cavity_r,
+                                    install_grade, constr_set.stud.thick_in, constr_set.framing_factor,
                                     constr_set.mat_int_finish, constr_set.osb_thick_in,
                                     constr_set.rigid_r, constr_set.mat_ext_finish,
                                     inside_film, outside_film, rim_joist.solar_absorptance,
