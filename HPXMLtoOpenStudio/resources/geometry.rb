@@ -61,7 +61,7 @@ module Geometry
         radiant_barrier_grade = roof.radiant_barrier_grade
       end
       # FUTURE: Create Constructions.get_air_film(surface) method; use in measure.rb and hpxml_translator_test.rb
-      interior_film = Material.AirFilmRoof(UnitConversions.convert(surfaces[0].tilt, 'rad', 'deg'), hpxml_header.apply_ashrae140_assumptions)
+      interior_film = Material.AirFilmIndoorRoof(UnitConversions.convert(surfaces[0].tilt, 'rad', 'deg'), hpxml_header.apply_ashrae140_assumptions)
       exterior_film = Material.AirFilmOutside(false, hpxml_header.apply_ashrae140_assumptions)
       mat_roofing = Material.RoofMaterial(roof.roof_type)
       mat_int_finish = Material.InteriorFinishMaterial(roof.interior_finish_type, roof.interior_finish_thickness)
@@ -183,12 +183,12 @@ module Geometry
       if has_radiant_barrier
         radiant_barrier_grade = wall.radiant_barrier_grade
       end
-      interior_film = Material.AirFilmWall(hpxml_header.apply_ashrae140_assumptions)
+      interior_film = Material.AirFilmIndoorWall
       if wall.is_exterior
         exterior_film = Material.AirFilmOutside(false, hpxml_header.apply_ashrae140_assumptions)
         mat_ext_finish = Material.ExteriorFinishMaterial(wall.siding)
       else
-        exterior_film = Material.AirFilmWall
+        exterior_film = Material.AirFilmIndoorWall
         mat_ext_finish = nil
       end
       mat_int_finish = Material.InteriorFinishMaterial(wall.interior_finish_type, wall.interior_finish_thickness)
@@ -252,12 +252,12 @@ module Geometry
 
       # Apply construction
 
-      interior_film = Material.AirFilmWall
+      interior_film = Material.AirFilmIndoorWall
       if rim_joist.is_exterior
         exterior_film = Material.AirFilmOutside
         mat_ext_finish = Material.ExteriorFinishMaterial(rim_joist.siding)
       else
-        exterior_film = Material.AirFilmWall
+        exterior_film = Material.AirFilmIndoorWall
         mat_ext_finish = nil
       end
 
@@ -341,8 +341,8 @@ module Geometry
       # Apply construction
 
       if floor.is_ceiling
-        interior_film = Material.AirFilmFloorAverage
-        exterior_film = Material.AirFilmFloorAverage
+        interior_film = Material.AirFilmIndoorFloorAverage
+        exterior_film = Material.AirFilmIndoorFloorAverage
         mat_int_finish_or_covering = Material.InteriorFinishMaterial(floor.interior_finish_type, floor.interior_finish_thickness)
         has_radiant_barrier = floor.radiant_barrier
         if has_radiant_barrier
@@ -355,11 +355,11 @@ module Geometry
           mat_int_finish_or_covering = Material.CoveringBare(1.0)
         end
         if floor.is_exterior
-          interior_film = Material.AirFilmFloorAverage
+          interior_film = Material.AirFilmIndoorFloorAverage
           exterior_film = Material.AirFilmOutside(zero_wind)
         else
-          interior_film = Material.AirFilmFloorDown
-          exterior_film = Material.AirFilmFloorDown
+          interior_film = Material.AirFilmIndoorFloorDown
+          exterior_film = Material.AirFilmIndoorFloorDown
         end
       end
 
@@ -464,8 +464,8 @@ module Geometry
         # Apply construction
 
         wall_type = HPXML::WallTypeConcrete
-        interior_film = Material.AirFilmWall
-        exterior_film = Material.AirFilmWall
+        interior_film = Material.AirFilmIndoorWall
+        exterior_film = Material.AirFilmIndoorWall
         assembly_r = fnd_wall.insulation_assembly_r_value
         mat_int_finish = Material.InteriorFinishMaterial(fnd_wall.interior_finish_type, fnd_wall.interior_finish_thickness)
         if assembly_r.nil?
@@ -539,7 +539,7 @@ module Geometry
     if not assembly_r.nil?
       ext_rigid_height = height
       ext_rigid_offset = 0.0
-      interior_film = Material.AirFilmWall
+      interior_film = Material.AirFilmIndoorWall
 
       mat_int_finish_rvalue = mat_int_finish.nil? ? 0.0 : mat_int_finish.rvalue
       ext_rigid_r = assembly_r - mat_wall.rvalue - mat_int_finish_rvalue - interior_film.rvalue
@@ -767,8 +767,8 @@ module Geometry
         surfaces << surface
 
         # Apply construction
-        interior_film = Material.AirFilmWall
-        exterior_film = Material.AirFilmWall
+        interior_film = Material.AirFilmIndoorWall
+        exterior_film = Material.AirFilmIndoorWall
         Constructions.apply_door(model, [sub_surface], 'Window', ufactor, interior_film, exterior_film)
       end
     end
@@ -814,11 +814,11 @@ module Geometry
 
       # Apply construction
       ufactor = 1.0 / door.r_value
-      interior_film = Material.AirFilmWall
+      interior_film = Material.AirFilmIndoorWall
       if door.wall.is_exterior
         exterior_film = Material.AirFilmOutside
       else
-        exterior_film = Material.AirFilmWall
+        exterior_film = Material.AirFilmIndoorWall
       end
       Constructions.apply_door(model, [sub_surface], 'Door', ufactor, interior_film, exterior_film)
     end
@@ -864,7 +864,7 @@ module Geometry
         surface.additionalProperties.setFeature('Width', total_width)
 
         # Assign curb construction
-        curb_assembly_r = [skylight.curb_assembly_r_value - Material.AirFilmWall.rvalue - Material.AirFilmOutside.rvalue, 0.1].max
+        curb_assembly_r = [skylight.curb_assembly_r_value - Material.AirFilmIndoorWall.rvalue - Material.AirFilmOutside.rvalue, 0.1].max
         curb_mat = Model.add_massless_material(
           model,
           name: 'SkylightCurbMaterial',
@@ -928,7 +928,7 @@ module Geometry
       surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
       # Apply construction
-      shaft_assembly_r = [skylight.shaft_assembly_r_value - 2 * Material.AirFilmWall.rvalue, 0.1].max
+      shaft_assembly_r = [skylight.shaft_assembly_r_value - 2 * Material.AirFilmIndoorWall.rvalue, 0.1].max
       shaft_mat = Model.add_massless_material(
         model,
         name: 'SkylightShaftMaterial',
@@ -1732,7 +1732,7 @@ module Geometry
       # Create E+ other side coefficient object
       otherside_coeffs = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
       otherside_coeffs.setName(exterior_adjacent_to)
-      otherside_coeffs.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmWall.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
+      otherside_coeffs.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmIndoorWall.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
       # Schedule of space temperature, can be shared with water heater/ducts
       sch = get_space_temperature_schedule(model, exterior_adjacent_to, spaces)
       otherside_coeffs.setConstantTemperatureSchedule(sch)

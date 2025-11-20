@@ -95,31 +95,29 @@ class Material
 
   # Creates a material for the exterior air film of a surface exposed to outdoors.
   #
-  # @param zero_wind [Boolean] True if the surface experiences little or no wind
+  # @param no_wind_exposure [Boolean] True if the surface experiences little to no wind
   # @param apply_ashrae140_assumptions [Boolean] True if an ASHRAE 140 test case where we want to override our normal assumptions
   # @return [Material] The material object
-  def self.AirFilmOutside(zero_wind = false, apply_ashrae140_assumptions = false)
-    if zero_wind
+  def self.AirFilmOutside(no_wind_exposure = false, apply_ashrae140_assumptions = false)
+    if no_wind_exposure
       rvalue = 0.455 # hr-ft-F/Btu
-    elsif apply_ashrae140_assumptions
-      rvalue = 0.174 # hr-ft-F/Btu
     else
-      rvalue = 0.197 # hr-ft-F/Btu
+      if apply_ashrae140_assumptions
+        rvalue = 0.174 # hr-ft-F/Btu
+      else
+        rvalue_winter = 0.17 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
+        rvalue_summer = 0.25 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
+        rvalue = (rvalue_winter + rvalue_summer) / 2.0
+      end
     end
     return self.AirFilm(rvalue)
   end
 
   # Creates a material for the interior air film of a wall (vertical) surface.
   #
-  # @param apply_ashrae140_assumptions [Boolean] True if an ASHRAE 140 test case where we want to override our normal assumptions
   # @return [Material] The material object
-  def self.AirFilmWall(apply_ashrae140_assumptions = false)
-    if apply_ashrae140_assumptions
-      # FUTURE: So close to the ASHRAE value below, remove this condition?
-      rvalue = 0.685 # hr-ft-F/Btu
-    else
-      rvalue = 0.68 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
-    end
+  def self.AirFilmIndoorWall
+    rvalue = 0.68 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
     return self.AirFilm(rvalue)
   end
 
@@ -129,8 +127,8 @@ class Material
   # temperature on the other side may be either hotter or colder.
   #
   # @return [Material] The material object
-  def self.AirFilmFloorAverage
-    rvalue_down = self.AirFilmFloorDown.rvalue
+  def self.AirFilmIndoorFloorAverage
+    rvalue_down = self.AirFilmIndoorFloorDown.rvalue
     rvalue_up = 0.61 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
     rvalue = (rvalue_down + rvalue_up) / 2.0
     return self.AirFilm(rvalue)
@@ -141,7 +139,7 @@ class Material
   # be downward because the foundation space is generally colder than conditioned space.
   #
   # @return [Material] The material object
-  def self.AirFilmFloorDown
+  def self.AirFilmIndoorFloorDown
     rvalue = 0.92 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
     return self.AirFilm(rvalue)
   end
@@ -151,7 +149,7 @@ class Material
   # @param surface_angle [Double] The angle of the surface from horizontal (degrees)
   # @param apply_ashrae140_assumptions [Boolean] True if an ASHRAE 140 test case where we want to override our normal assumptions
   # @return [Material] The material object
-  def self.AirFilmRoof(surface_angle, apply_ashrae140_assumptions = false)
+  def self.AirFilmIndoorRoof(surface_angle, apply_ashrae140_assumptions = false)
     if apply_ashrae140_assumptions
       rvalue = 0.752 # hr-ft-F/Btu
     else
