@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>fe0462c6-35b5-4750-ab56-4b030818ac77</version_id>
-  <version_modified>2025-11-20T05:43:24Z</version_modified>
+  <version_id>5240637a-586d-4628-aa21-5dacf03ec809</version_id>
+  <version_modified>2025-11-20T06:02:50Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -222,7 +222,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D660B161</checksum>
+      <checksum>FE905BB1</checksum>
     </file>
     <file>
       <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
@@ -414,7 +414,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>01E3FE77</checksum>
+      <checksum>C2A35EFB</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -474,7 +474,7 @@
       <filename>model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E01BEB72</checksum>
+      <checksum>22C401F6</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
