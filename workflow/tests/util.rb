@@ -507,8 +507,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     hpxml_value = roof.insulation_assembly_r_value
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # Compare R-value w/o film
-      hpxml_value -= Material.AirFilmRoofASHRAE140.rvalue
-      hpxml_value -= Material.AirFilmOutsideASHRAE140.rvalue
+      hpxml_value -= Material.AirFilmRoof(nil, true).rvalue
+      hpxml_value -= Material.AirFilmOutside(false, true).rvalue
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
     else
       # Compare R-value w/ film
@@ -601,17 +601,17 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       hpxml_value = wall.insulation_assembly_r_value
       if hpxml_path.include? 'ASHRAE_Standard_140'
         # Compare R-value w/o film
-        hpxml_value -= Material.AirFilmVerticalASHRAE140.rvalue
+        hpxml_value -= Material.AirFilmWall(true).rvalue
         if wall.is_exterior
-          hpxml_value -= Material.AirFilmOutsideASHRAE140.rvalue
+          hpxml_value -= Material.AirFilmOutside(false, true).rvalue
         else
-          hpxml_value -= Material.AirFilmVerticalASHRAE140.rvalue
+          hpxml_value -= Material.AirFilmWall(true).rvalue
         end
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
       elsif wall.is_interior
         # Compare R-value w/o film
-        hpxml_value -= Material.AirFilmVertical.rvalue
-        hpxml_value -= Material.AirFilmVertical.rvalue
+        hpxml_value -= Material.AirFilmWall.rvalue
+        hpxml_value -= Material.AirFilmWall.rvalue
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
       else
         # Compare R-value w/ film
@@ -686,12 +686,11 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     hpxml_value = floor.insulation_assembly_r_value
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # Compare R-value w/o film
+      hpxml_value -= Material.AirFilmFloorAverage.rvalue
       if floor.is_exterior # Raised floor
-        hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
-        hpxml_value -= Material.AirFilmFloorZeroWindASHRAE140.rvalue
+        hpxml_value -= Material.AirFilmOutside(true).rvalue
       elsif floor.is_ceiling # Attic floor
-        hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
-        hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
+        hpxml_value -= Material.AirFilmFloorAverage.rvalue
       end
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{floor_id}' AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
     elsif floor.is_interior
@@ -700,8 +699,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
         hpxml_value -= Material.AirFilmFloorAverage.rvalue
         hpxml_value -= Material.AirFilmFloorAverage.rvalue
       else
-        hpxml_value -= Material.AirFilmFloorReduced.rvalue
-        hpxml_value -= Material.AirFilmFloorReduced.rvalue
+        hpxml_value -= Material.AirFilmFloorDown.rvalue
+        hpxml_value -= Material.AirFilmFloorDown.rvalue
       end
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{floor_id}' AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
     else
@@ -759,8 +758,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
     hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(nil, window.storm_type, window.ufactor, window.shgc)[0]
     if window.is_interior
-      hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
-      hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
+      hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmWall.rvalue)
+      hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmWall.rvalue)
     end
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{window_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
     sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
@@ -861,8 +860,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
 
     # Compare R-value w/o film
     hpxml_value = skylight.shaft_assembly_r_value
-    hpxml_value -= Material.AirFilmVertical.rvalue
-    hpxml_value -= Material.AirFilmVertical.rvalue
+    hpxml_value -= Material.AirFilmWall.rvalue
+    hpxml_value -= Material.AirFilmWall.rvalue
     query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{shaft_id}' AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
     sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
     assert_in_epsilon(hpxml_value, sql_value, 0.1)
@@ -895,7 +894,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       col_name = 'U-Factor with Film'
     else
       col_name = 'U-Factor no Film'
-      hpxml_value -= 2 * Material.AirFilmVertical.rvalue
+      hpxml_value -= 2 * Material.AirFilmWall.rvalue
     end
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{door_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
     sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')

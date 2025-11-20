@@ -56,7 +56,7 @@ module Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -144,7 +144,7 @@ module Constructions
 
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -248,7 +248,7 @@ module Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -337,7 +337,7 @@ module Constructions
 
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -421,7 +421,7 @@ module Constructions
 
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -516,7 +516,7 @@ module Constructions
 
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -611,7 +611,7 @@ module Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -778,7 +778,7 @@ module Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -867,7 +867,7 @@ module Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -972,7 +972,7 @@ module Constructions
       constr.add_layer(inside_film)
     else # floors
       # Define materials
-      mat_2x = Material.Stud2x(joist_height_in)
+      mat_2x = Material.Stud2x(joist_height_in.ceil)
       if cavity_r == 0
         mat_cavity = Material.AirCavityOpen(mat_2x.thick_in)
       else
@@ -1085,7 +1085,7 @@ module Constructions
       constr.add_layer(inside_film)
     else # floors
       # Define materials
-      mat_2x = Material.Stud2x(joist_height_in)
+      mat_2x = Material.Stud2x(joist_height_in.ceil)
       eR = cavity_r * correction_factor # The effective R-value of the cavity insulation with steel stud framing
       if eR == 0
         mat_cavity = Material.AirCavityOpen(mat_2x.thick_in)
@@ -1505,7 +1505,7 @@ module Constructions
     imdef = create_os_int_mass_and_def(model, obj_name, spaces[HPXML::LocationConditionedSpace], partition_wall_area)
 
     apply_wood_stud_wall(model, [imdef], constr_name, 0, 1, 3.5, false, 0.16, mat_int_finish, 0, 0, mat_int_finish,
-                         false, Material.AirFilmVertical, Material.AirFilmVertical, 1, nil, nil)
+                         false, Material.AirFilmWall, Material.AirFilmWall, 1, nil, nil)
   end
 
   # TODO
@@ -1989,8 +1989,8 @@ module Constructions
   # @param type [TODO] TODO
   # @param subsurface [TODO] TODO
   # @param constr_name [TODO] TODO
-  # @param ufactor [TODO] TODO
-  # @param shgc [TODO] TODO
+  # @param ufactor [Double] Full assembly window U-factor (Btu/F-ft2-hr)
+  # @param shgc [Double] Full assembly glazing solar heat gain coefficient (0-1)
   # @return [TODO] TODO
   def self.apply_window_skylight(model, type, subsurface, constr_name, ufactor, shgc)
     # Define materials
@@ -2177,11 +2177,11 @@ module Constructions
       cavity_filled = true
 
       constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 20.0, 0.5, mat_int_finish, mat_ext_finish),                  # 2x6, 24" o.c. + R20
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 10.0, 0.5, mat_int_finish, mat_ext_finish),                  # 2x6, 24" o.c. + R10
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # 2x6, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.20, 20.0, 0.5, mat_int_finish, mat_ext_finish),                  # 2x6, 24" o.c. + R20
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.20, 10.0, 0.5, mat_int_finish, mat_ext_finish),                  # 2x6, 24" o.c. + R10
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.20, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # 2x6, 24" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x(4), 0.23, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # 2x4, 16" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x(4), 0.01, 0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
@@ -2216,8 +2216,8 @@ module Constructions
       is_staggered = false
 
       constr_sets = [
-        DoubleStudConstructionSet.new(Material.Stud2x4, 0.23, 24.0, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # 2x4, 24" o.c.
-        DoubleStudConstructionSet.new(Material.Stud2x4, 0.01, 16.0, 0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
+        DoubleStudConstructionSet.new(Material.Stud2x(4), 0.23, 24.0, 0.0, 0.5, mat_int_finish, mat_ext_finish),                   # 2x4, 24" o.c.
+        DoubleStudConstructionSet.new(Material.Stud2x(4), 0.01, 16.0, 0.0, 0.0, fallback_mat_int_finish, fallback_mat_ext_finish), # Fallback
       ]
       match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
@@ -2365,14 +2365,14 @@ module Constructions
     when HPXML::FloorTypeWoodFrame
       install_grade = 1
       constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 50.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R50
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 40.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R40
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 30.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R30
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 20.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R20
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R10
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, osb_thick_in, mat_int_finish_or_covering, nil),  # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, fallback_mat_int_finish_or_covering, nil),  # Fallback
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.10, 50.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R50
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.10, 40.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R40
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.10, 30.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R30
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.10, 20.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R20
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.10, 10.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c. + R10
+        WoodStudConstructionSet.new(Material.Stud2x(6), 0.10, 0.0, osb_thick_in, mat_int_finish_or_covering, nil), # 2x6, 24" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x(4), 0.13, 0.0, osb_thick_in, mat_int_finish_or_covering, nil),  # 2x4, 16" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x(4), 0.01, 0.0, 0.0, fallback_mat_int_finish_or_covering, nil),  # Fallback
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
       constr_int_finish_or_covering = constr_set.mat_int_finish
@@ -2467,17 +2467,17 @@ module Constructions
       mat_ext_finish = Material.ExteriorFinishMaterial(HPXML::SidingTypeWood)
       apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
                            0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish, false,
-                           Material.AirFilmVertical, Material.AirFilmVertical, nil)
+                           Material.AirFilmWall, Material.AirFilmWall, nil)
     elsif type == 'floor'
       apply_wood_frame_floor_ceiling(model, surfaces, 'AdiabaticFloorConstruction', false,
                                      0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare, false,
-                                     Material.AirFilmFloorReduced, Material.AirFilmFloorReduced, nil)
+                                     Material.AirFilmFloorAverage, Material.AirFilmFloorAverage, nil)
     elsif type == 'roof'
       apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
                              0, 1, 7.25, 0.07, 7.25, 0.75, 99,
                              Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles),
                              false, Material.AirFilmOutside,
-                             Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), nil)
+                             Material.AirFilmRoof(UnitConversions.convert(surfaces[0].tilt, 'rad', 'deg')), nil)
     end
   end
 
