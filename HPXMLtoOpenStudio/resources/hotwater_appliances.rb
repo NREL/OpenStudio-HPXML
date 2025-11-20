@@ -1022,7 +1022,7 @@ module HotWaterAndAppliances
   # Source: ANSI/RESNET/ICC 301
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Array<Double, Double, Double, Double, Double>] Effectiveness (frac), fraction of water impacted by DWHR, piping loss coefficient, location factor, fixture factor
+  # @return [Array<Double, Double>] Aggregate factor and inlet temperature (F)
   def self.get_dwhr_values(hpxml_bldg)
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     n_occ = hpxml_bldg.building_occupancy.number_of_residents
