@@ -61,8 +61,8 @@ module Geometry
         radiant_barrier_grade = roof.radiant_barrier_grade
       end
       # FUTURE: Create Constructions.get_air_film(surface) method; use in measure.rb and hpxml_translator_test.rb
-      inside_film = Material.AirFilmRoof(UnitConversions.convert(surfaces[0].tilt, 'rad', 'deg'), hpxml_header.apply_ashrae140_assumptions)
-      outside_film = Material.AirFilmOutside(false, hpxml_header.apply_ashrae140_assumptions)
+      interior_film = Material.AirFilmRoof(UnitConversions.convert(surfaces[0].tilt, 'rad', 'deg'), hpxml_header.apply_ashrae140_assumptions)
+      exterior_film = Material.AirFilmOutside(false, hpxml_header.apply_ashrae140_assumptions)
       mat_roofing = Material.RoofMaterial(roof.roof_type)
       mat_int_finish = Material.InteriorFinishMaterial(roof.interior_finish_type, roof.interior_finish_thickness)
       if mat_int_finish.nil?
@@ -84,7 +84,7 @@ module Geometry
           WoodStudConstructionSet.new(Material.Stud2x(4), 0.07, 0.0, 0.5, mat_int_finish, mat_roofing),          # 2x4, 16" o.c.
           WoodStudConstructionSet.new(Material.Stud2x(4), 0.01, 0.0, 0.0, fallback_mat_int_finish, mat_roofing), # Fallback
         ]
-        match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
+        match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, interior_film, exterior_film)
 
         Constructions.apply_closed_cavity_roof(model, surfaces, "#{roof.id} construction",
                                                cavity_r, install_grade,
@@ -93,7 +93,7 @@ module Geometry
                                                constr_set.mat_int_finish,
                                                constr_set.osb_thick_in, constr_set.rigid_r,
                                                constr_set.mat_ext_finish, has_radiant_barrier,
-                                               inside_film, outside_film, radiant_barrier_grade,
+                                               interior_film, exterior_film, radiant_barrier_grade,
                                                roof.solar_absorptance, roof.emittance)
       else
         # Open cavity
@@ -102,7 +102,7 @@ module Geometry
           GenericConstructionSet.new(0.0, 0.5, nil, mat_roofing),  # Standard
           GenericConstructionSet.new(0.0, 0.0, nil, mat_roofing),  # Fallback
         ]
-        match, constr_set, layer_r = Constructions.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
+        match, constr_set, layer_r = Constructions.pick_generic_construction_set(assembly_r, constr_sets, interior_film, exterior_film)
 
         cavity_r = 0
         cavity_ins_thick_in = 0
@@ -114,10 +114,10 @@ module Geometry
                                              framing_factor, framing_thick_in,
                                              constr_set.osb_thick_in, layer_r + constr_set.rigid_r,
                                              constr_set.mat_ext_finish, has_radiant_barrier,
-                                             inside_film, outside_film, radiant_barrier_grade,
+                                             interior_film, exterior_film, radiant_barrier_grade,
                                              roof.solar_absorptance, roof.emittance)
       end
-      Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
+      Constructions.check_surface_assembly_rvalue(runner, surfaces, interior_film, exterior_film, assembly_r, match)
     end
   end
 
@@ -183,18 +183,18 @@ module Geometry
       if has_radiant_barrier
         radiant_barrier_grade = wall.radiant_barrier_grade
       end
-      inside_film = Material.AirFilmWall(hpxml_header.apply_ashrae140_assumptions)
+      interior_film = Material.AirFilmWall(hpxml_header.apply_ashrae140_assumptions)
       if wall.is_exterior
-        outside_film = Material.AirFilmOutside(false, hpxml_header.apply_ashrae140_assumptions)
+        exterior_film = Material.AirFilmOutside(false, hpxml_header.apply_ashrae140_assumptions)
         mat_ext_finish = Material.ExteriorFinishMaterial(wall.siding)
       else
-        outside_film = Material.AirFilmWall
+        exterior_film = Material.AirFilmWall
         mat_ext_finish = nil
       end
       mat_int_finish = Material.InteriorFinishMaterial(wall.interior_finish_type, wall.interior_finish_thickness)
 
       Constructions.apply_wall_construction(runner, model, surfaces, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
-                                            mat_int_finish, has_radiant_barrier, inside_film, outside_film,
+                                            mat_int_finish, has_radiant_barrier, interior_film, exterior_film,
                                             radiant_barrier_grade, mat_ext_finish, wall.solar_absorptance,
                                             wall.emittance)
     end
@@ -252,12 +252,12 @@ module Geometry
 
       # Apply construction
 
-      inside_film = Material.AirFilmWall
+      interior_film = Material.AirFilmWall
       if rim_joist.is_exterior
-        outside_film = Material.AirFilmOutside
+        exterior_film = Material.AirFilmOutside
         mat_ext_finish = Material.ExteriorFinishMaterial(rim_joist.siding)
       else
-        outside_film = Material.AirFilmWall
+        exterior_film = Material.AirFilmWall
         mat_ext_finish = nil
       end
 
@@ -269,16 +269,16 @@ module Geometry
         WoodStudConstructionSet.new(Material.Stud2x(2), 0.17, 0.0, 2.0, nil, mat_ext_finish),   # 2x4
         WoodStudConstructionSet.new(Material.Stud2x(2), 0.01, 0.0, 0.0, nil, mat_ext_finish),   # Fallback
       ]
-      match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
+      match, constr_set, cavity_r = Constructions.pick_wood_stud_construction_set(assembly_r, constr_sets, interior_film, exterior_film)
       install_grade = 1
 
       Constructions.apply_rim_joist(model, surfaces, "#{rim_joist.id} construction", cavity_r,
                                     install_grade, constr_set.stud.thick_in, constr_set.framing_factor,
                                     constr_set.mat_int_finish, constr_set.osb_thick_in,
                                     constr_set.rigid_r, constr_set.mat_ext_finish,
-                                    inside_film, outside_film, rim_joist.solar_absorptance,
+                                    interior_film, exterior_film, rim_joist.solar_absorptance,
                                     rim_joist.emittance)
-      Constructions.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
+      Constructions.check_surface_assembly_rvalue(runner, surfaces, interior_film, exterior_film, assembly_r, match)
     end
   end
 
@@ -341,8 +341,8 @@ module Geometry
       # Apply construction
 
       if floor.is_ceiling
-        inside_film = Material.AirFilmFloorAverage
-        outside_film = Material.AirFilmFloorAverage
+        interior_film = Material.AirFilmFloorAverage
+        exterior_film = Material.AirFilmFloorAverage
         mat_int_finish_or_covering = Material.InteriorFinishMaterial(floor.interior_finish_type, floor.interior_finish_thickness)
         has_radiant_barrier = floor.radiant_barrier
         if has_radiant_barrier
@@ -355,16 +355,16 @@ module Geometry
           mat_int_finish_or_covering = Material.CoveringBare(1.0)
         end
         if floor.is_exterior
-          inside_film = Material.AirFilmFloorAverage
-          outside_film = Material.AirFilmOutside(zero_wind)
+          interior_film = Material.AirFilmFloorAverage
+          exterior_film = Material.AirFilmOutside(zero_wind)
         else
-          inside_film = Material.AirFilmFloorDown
-          outside_film = Material.AirFilmFloorDown
+          interior_film = Material.AirFilmFloorDown
+          exterior_film = Material.AirFilmFloorDown
         end
       end
 
       Constructions.apply_floor_ceiling_construction(runner, model, [surface], floor.id, floor.floor_type, floor.is_ceiling, floor.insulation_assembly_r_value,
-                                                     mat_int_finish_or_covering, has_radiant_barrier, inside_film, outside_film, radiant_barrier_grade)
+                                                     mat_int_finish_or_covering, has_radiant_barrier, interior_film, exterior_film, radiant_barrier_grade)
     end
   end
 
@@ -464,8 +464,8 @@ module Geometry
         # Apply construction
 
         wall_type = HPXML::WallTypeConcrete
-        inside_film = Material.AirFilmWall
-        outside_film = Material.AirFilmWall
+        interior_film = Material.AirFilmWall
+        exterior_film = Material.AirFilmWall
         assembly_r = fnd_wall.insulation_assembly_r_value
         mat_int_finish = Material.InteriorFinishMaterial(fnd_wall.interior_finish_type, fnd_wall.interior_finish_thickness)
         if assembly_r.nil?
@@ -474,12 +474,12 @@ module Geometry
           ext_r = fnd_wall.insulation_exterior_r_value
           mat_concrete = Material.Concrete(concrete_thick_in)
           mat_int_finish_rvalue = mat_int_finish.nil? ? 0.0 : mat_int_finish.rvalue
-          assembly_r = int_r + ext_r + mat_concrete.rvalue + mat_int_finish_rvalue + inside_film.rvalue + outside_film.rvalue
+          assembly_r = int_r + ext_r + mat_concrete.rvalue + mat_int_finish_rvalue + interior_film.rvalue + exterior_film.rvalue
         end
         mat_ext_finish = nil
 
         Constructions.apply_wall_construction(runner, model, [surface], fnd_wall.id, wall_type, assembly_r, mat_int_finish,
-                                              false, inside_film, outside_film, nil, mat_ext_finish, nil, nil)
+                                              false, interior_film, exterior_film, nil, mat_ext_finish, nil, nil)
       end
     end
   end
@@ -539,14 +539,14 @@ module Geometry
     if not assembly_r.nil?
       ext_rigid_height = height
       ext_rigid_offset = 0.0
-      inside_film = Material.AirFilmWall
+      interior_film = Material.AirFilmWall
 
       mat_int_finish_rvalue = mat_int_finish.nil? ? 0.0 : mat_int_finish.rvalue
-      ext_rigid_r = assembly_r - mat_wall.rvalue - mat_int_finish_rvalue - inside_film.rvalue
+      ext_rigid_r = assembly_r - mat_wall.rvalue - mat_int_finish_rvalue - interior_film.rvalue
       int_rigid_r = 0.0
       if ext_rigid_r < 0 # Try without interior finish
         mat_int_finish = nil
-        ext_rigid_r = assembly_r - mat_wall.rvalue - inside_film.rvalue
+        ext_rigid_r = assembly_r - mat_wall.rvalue - interior_film.rvalue
       end
       if (ext_rigid_r > 0) && (ext_rigid_r < 0.1)
         ext_rigid_r = 0.0 # Prevent tiny strip of insulation
@@ -574,7 +574,7 @@ module Geometry
                                         soil_k_in)
 
     if not assembly_r.nil?
-      Constructions.check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)
+      Constructions.check_surface_assembly_rvalue(runner, [surface], interior_film, nil, assembly_r, match)
     end
 
     return surface.adjacentFoundation.get
@@ -767,9 +767,9 @@ module Geometry
         surfaces << surface
 
         # Apply construction
-        inside_film = Material.AirFilmWall
-        outside_film = Material.AirFilmWall
-        Constructions.apply_door(model, [sub_surface], 'Window', ufactor, inside_film, outside_film)
+        interior_film = Material.AirFilmWall
+        exterior_film = Material.AirFilmWall
+        Constructions.apply_door(model, [sub_surface], 'Window', ufactor, interior_film, exterior_film)
       end
     end
 
@@ -814,13 +814,13 @@ module Geometry
 
       # Apply construction
       ufactor = 1.0 / door.r_value
-      inside_film = Material.AirFilmWall
+      interior_film = Material.AirFilmWall
       if door.wall.is_exterior
-        outside_film = Material.AirFilmOutside
+        exterior_film = Material.AirFilmOutside
       else
-        outside_film = Material.AirFilmWall
+        exterior_film = Material.AirFilmWall
       end
-      Constructions.apply_door(model, [sub_surface], 'Door', ufactor, inside_film, outside_film)
+      Constructions.apply_door(model, [sub_surface], 'Door', ufactor, interior_film, exterior_film)
     end
 
     Constructions.apply_adiabatic_construction(model, surfaces, 'wall')
