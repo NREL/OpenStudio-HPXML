@@ -2,10 +2,10 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
+require_relative 'util.rb'
 
 class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
   def setup
@@ -16,9 +16,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
   def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    File.delete(File.join(File.dirname(__FILE__), 'in.schedules.csv')) if File.exist? File.join(File.dirname(__FILE__), 'in.schedules.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
-    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+    cleanup_results_files
   end
 
   def get_kwh_therm_per_year(model, name)
@@ -288,7 +286,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
     assert_equal(0, therm_yr)
   end
 
-  def test_operational_5_5_occupants
+  def test_operational_5point5_occupants
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-residents-5-5.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
@@ -366,7 +364,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     # Check vehicle
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscElectricVehicleCharging)
-    assert_in_delta(2368, kwh_yr, 1.0)
+    assert_in_delta(2389, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check well pump
@@ -427,7 +425,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     # Check vehicle
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants::ObjectTypeMiscElectricVehicleCharging)
-    assert_in_delta(2368, kwh_yr, 1.0)
+    assert_in_delta(2389, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check well pump
@@ -497,12 +495,12 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
     result = runner.result
 
     # show the output
-    show_output(result) unless result.value.valueName == 'Success'
+    result.showOutput() unless result.value.valueName == 'Success'
 
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
+    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), 'in.xml'))
 
     File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 

@@ -12,7 +12,7 @@ module Geometry
   # @return [nil]
   def self.apply_roofs(runner, model, spaces, hpxml_bldg, hpxml_header)
     default_azimuths = Defaults.get_azimuths(hpxml_bldg)
-    walls_top, _foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    walls_top = hpxml_bldg.building_construction.additional_properties.walls_height_above_grade
 
     hpxml_bldg.roofs.each do |roof|
       next if roof.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -102,9 +102,8 @@ module Geometry
       else
         # Open cavity
         constr_sets = [
-          GenericConstructionSet.new(10.0, 0.5, nil, mat_roofing), # w/R-10 rigid
-          GenericConstructionSet.new(0.0, 0.5, nil, mat_roofing),  # Standard
-          GenericConstructionSet.new(0.0, 0.0, nil, mat_roofing),  # Fallback
+          GenericConstructionSet.new(10.0, 0.75, nil, mat_roofing), # w/R-10 rigid
+          GenericConstructionSet.new(0.0, 0.75, nil, mat_roofing),  # Standard
         ]
         match, constr_set, layer_r = Constructions.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
@@ -135,7 +134,7 @@ module Geometry
   # @return [nil]
   def self.apply_walls(runner, model, spaces, hpxml_bldg, hpxml_header)
     default_azimuths = Defaults.get_azimuths(hpxml_bldg)
-    _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    foundation_top = hpxml_bldg.building_construction.additional_properties.foundation_height_above_grade
 
     hpxml_bldg.walls.each do |wall|
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -217,7 +216,7 @@ module Geometry
   # @return [nil]
   def self.apply_rim_joists(runner, model, spaces, hpxml_bldg)
     default_azimuths = Defaults.get_azimuths(hpxml_bldg)
-    _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    foundation_top = hpxml_bldg.building_construction.additional_properties.foundation_height_above_grade
 
     hpxml_bldg.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
@@ -300,7 +299,8 @@ module Geometry
   # @return [nil]
   def self.apply_floors(runner, model, spaces, hpxml_bldg, hpxml_header)
     default_azimuths = Defaults.get_azimuths(hpxml_bldg)
-    walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    walls_top = hpxml_bldg.building_construction.additional_properties.walls_height_above_grade
+    foundation_top = hpxml_bldg.building_construction.additional_properties.foundation_height_above_grade
 
     hpxml_bldg.floors.each do |floor|
       next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -683,12 +683,13 @@ module Geometry
 
   # Adds any HPXML Windows to the OpenStudio model.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
-  def self.apply_windows(model, spaces, hpxml_bldg, hpxml_header)
+  def self.apply_windows(runner, model, spaces, hpxml_bldg, hpxml_header)
     # We already stored @fraction_of_windows_operable, so lets remove the
     # fraction_operable properties from windows and re-collapse the enclosure
     # so as to prevent potentially modeling multiple identical windows in E+,
@@ -698,7 +699,7 @@ module Geometry
     end
     hpxml_bldg.collapse_enclosure_surfaces()
 
-    _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    foundation_top = hpxml_bldg.building_construction.additional_properties.foundation_height_above_grade
 
     shading_schedules = {}
 
@@ -717,7 +718,7 @@ module Geometry
       window_length = window.area / window_height
       z_origin = foundation_top
 
-      ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
+      ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(runner, window.storm_type, window.ufactor, window.shgc)
 
       if window.is_exterior
 
@@ -795,7 +796,7 @@ module Geometry
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_doors(model, spaces, hpxml_bldg)
-    _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    foundation_top = hpxml_bldg.building_construction.additional_properties.foundation_height_above_grade
 
     surfaces = []
     hpxml_bldg.doors.each do |door|
@@ -840,14 +841,15 @@ module Geometry
 
   # Adds any HPXML Skylights to the OpenStudio model.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
-  def self.apply_skylights(model, spaces, hpxml_bldg, hpxml_header)
+  def self.apply_skylights(runner, model, spaces, hpxml_bldg, hpxml_header)
     default_azimuths = Defaults.get_azimuths(hpxml_bldg)
-    walls_top, _foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    walls_top = hpxml_bldg.building_construction.additional_properties.walls_height_above_grade
 
     surfaces = []
     shading_schedules = {}
@@ -862,7 +864,7 @@ module Geometry
       length = skylight.area / width
       z_origin = walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
 
-      ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
+      ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(runner, skylight.storm_type, skylight.ufactor, skylight.shgc)
 
       if not skylight.curb_area.nil?
         # Create parent surface that includes curb heat transfer
@@ -966,7 +968,7 @@ module Geometry
   # @return [nil]
   def self.apply_conditioned_floor_area(model, spaces, hpxml_bldg)
     default_azimuths = Defaults.get_azimuths(hpxml_bldg)
-    _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    foundation_top = hpxml_bldg.building_construction.additional_properties.foundation_height_above_grade
 
     sum_cfa = 0.0
     hpxml_bldg.floors.each do |floor|
@@ -984,7 +986,7 @@ module Geometry
 
     addtl_cfa = hpxml_bldg.building_construction.conditioned_floor_area - sum_cfa
 
-    fail if addtl_cfa < -1.0 # Allow some rounding; EPvalidator.xml should prevent this
+    fail if addtl_cfa < -1.0 # Allow some rounding; EPvalidator.sch should prevent this
 
     return unless addtl_cfa > 1.0 # Allow some rounding
 
@@ -1044,11 +1046,11 @@ module Geometry
     end
   end
 
-  # Calculates the assumed above-grade height of the top of the dwelling unit's walls and foundation walls.
+  # Assigns the assumed above-grade height of the top of the dwelling unit's walls and foundation walls.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Array<Double, Double>] Top of the walls (ft), top of the foundation walls (ft)
-  def self.get_foundation_and_walls_top(hpxml_bldg)
+  # @return [nil]
+  def self.apply_foundation_and_walls_top(hpxml_bldg)
     foundation_top = [hpxml_bldg.building_construction.unit_height_above_grade, 0].max
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
@@ -1057,7 +1059,8 @@ module Geometry
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
     walls_top = foundation_top + hpxml_bldg.building_construction.average_ceiling_height * ncfl_ag
 
-    return walls_top, foundation_top
+    hpxml_bldg.building_construction.additional_properties.walls_height_above_grade = walls_top
+    hpxml_bldg.building_construction.additional_properties.foundation_height_above_grade = foundation_top
   end
 
   # Get the default number of occupants.
@@ -1507,7 +1510,7 @@ module Geometry
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.add_neighbor_shading(model, length, hpxml_bldg)
-    walls_top, _foundation_top = get_foundation_and_walls_top(hpxml_bldg)
+    walls_top = hpxml_bldg.building_construction.additional_properties.walls_height_above_grade
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -1538,19 +1541,20 @@ module Geometry
   # @param location [String] The location of interest (HPXML::LocationXXX)
   # @return [Double] The zone volume (ft^3)
   def self.calculate_zone_volume(hpxml_bldg, location)
-    if [HPXML::LocationBasementUnconditioned,
+    if [HPXML::LocationBasementConditioned,
+        HPXML::LocationBasementUnconditioned,
         HPXML::LocationCrawlspaceUnvented,
         HPXML::LocationCrawlspaceVented,
+        HPXML::LocationCrawlspaceConditioned,
         HPXML::LocationGarage].include? location
       floor_area = hpxml_bldg.slabs.select { |s| s.interior_adjacent_to == location }.map { |s| s.area }.sum(0.0)
       height = calculate_zone_height(hpxml_bldg, location)
       return floor_area * height
     elsif [HPXML::LocationAtticUnvented,
            HPXML::LocationAtticVented].include? location
-      floor_area = hpxml_bldg.floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? location }.map { |s| s.area }.sum(0.0)
+      footprint_area = calculate_height_and_footprint_of_roofs(hpxml_bldg, location)[1]
       height = calculate_zone_height(hpxml_bldg, location)
-      # Assume square hip roof
-      return [floor_area * height / 3.0, 0.01].max
+      return [footprint_area * height / 3.0, 0.01].max # Assume square hip roof
     end
   end
 
@@ -1559,34 +1563,61 @@ module Geometry
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param location [String] The location of interest (HPXML::LocationXXX)
+  # @param above_grade [Boolean] True to return the above-grade height (vs the total height) for a below-grade space
   # @return [Double] The zone height (ft)
-  def self.calculate_zone_height(hpxml_bldg, location)
-    if [HPXML::LocationBasementUnconditioned,
+  def self.calculate_zone_height(hpxml_bldg, location, above_grade: false)
+    if [HPXML::LocationBasementConditioned,
+        HPXML::LocationBasementUnconditioned,
         HPXML::LocationCrawlspaceUnvented,
         HPXML::LocationCrawlspaceVented,
+        HPXML::LocationCrawlspaceConditioned,
         HPXML::LocationGarage].include? location
-      height = hpxml_bldg.foundation_walls.select { |w| w.interior_adjacent_to == location }.map { |w| w.height }.max
+      if above_grade
+        height = hpxml_bldg.foundation_walls.select { |w| w.interior_adjacent_to == location }.map { |w| w.height - w.depth_below_grade }.max
+      else
+        height = hpxml_bldg.foundation_walls.select { |w| w.interior_adjacent_to == location }.map { |w| w.height }.max
+      end
       if height.nil? # No foundation walls, need to make assumption because HPXML Wall elements don't have a height
-        height = { HPXML::LocationBasementUnconditioned => 8,
+        height = { HPXML::LocationBasementConditioned => 8,
+                   HPXML::LocationBasementUnconditioned => 8,
                    HPXML::LocationCrawlspaceUnvented => 3,
                    HPXML::LocationCrawlspaceVented => 3,
+                   HPXML::LocationCrawlspaceConditioned => 3,
                    HPXML::LocationGarage => 8 }[location]
       end
     elsif [HPXML::LocationAtticUnvented,
            HPXML::LocationAtticVented].include? location
-      floor_area = hpxml_bldg.floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? location }.map { |s| s.area }.sum(0.0)
-      roofs = hpxml_bldg.roofs.select { |r| r.interior_adjacent_to == location }
-      avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
-      if avg_pitch > 0
-        # Assume square hip roof
-        length = floor_area**0.5
-        height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
-      else
-        # Flat roof w/ attic, assume height
-        height = 2.0
-      end
+      height = calculate_height_and_footprint_of_roofs(hpxml_bldg, location)[0]
     end
     return height
+  end
+
+  # Approximates the height (difference between top and bottom) for the roof surfaces
+  # adjacent to the specified location.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param location [String] The location of interest (HPXML::LocationXXX)
+  # @return [Double, Double] The height (ft) and footprint area (ft^2) of the roof
+  def self.calculate_height_and_footprint_of_roofs(hpxml_bldg, location)
+    roofs = hpxml_bldg.roofs.select { |r| r.interior_adjacent_to == location }
+    roof_area = roofs.map { |r| r.area }.sum(0.0)
+    avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
+    roof_pitch_multiplier = ((avg_pitch / 12.0)**2 + 1)**0.5
+    roof_footprint_area = roof_area / roof_pitch_multiplier
+    if avg_pitch > 0
+      # Assume square hip roof
+      length = roof_footprint_area**0.5
+      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
+    else
+      if [HPXML::LocationAtticUnvented,
+          HPXML::LocationAtticVented].include? location
+        # Flat roof w/ attic, assume height
+        height = 2.0
+      else
+        height = 0.0
+      end
+    end
+    return height, roof_footprint_area
   end
 
   # Get temperature scheduled space values for an HPXML location.

@@ -59,7 +59,7 @@ module Waterheater
     plant_loop = add_plant_loop(model, t_set_c, hpxml_header.eri_calculation_versions[0], unit_multiplier)
 
     act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, water_heating_system.fuel_type)
-    u, ua, eta_c = disaggregate_tank_losses_and_burner_efficiency(act_vol, water_heating_system, solar_fraction, hpxml_bldg.building_construction.number_of_bedrooms)
+    tank_u, tank_ua, tank_eta_c = disaggregate_tank_losses_and_burner_efficiency(act_vol, water_heating_system, solar_fraction, hpxml_bldg.building_construction.number_of_bedrooms)
     water_heater = apply_water_heater(runner, model,
                                       name: Constants::ObjectTypeWaterHeater,
                                       water_heating_system: water_heating_system,
@@ -67,9 +67,9 @@ module Waterheater
                                       t_set_c: t_set_c,
                                       loc_space: loc_space,
                                       loc_schedule: loc_schedule,
-                                      u: u,
-                                      ua: ua,
-                                      eta_c: eta_c,
+                                      tank_u: tank_u,
+                                      tank_ua: tank_ua,
+                                      tank_eta_c: tank_eta_c,
                                       schedules_file: schedules_file,
                                       unavailable_periods: unavailable_periods,
                                       unit_multiplier: unit_multiplier)
@@ -102,7 +102,7 @@ module Waterheater
     plant_loop = add_plant_loop(model, t_set_c, hpxml_header.eri_calculation_versions[0], unit_multiplier)
 
     act_vol = 1.0 * unit_multiplier
-    _u, ua, eta_c = disaggregate_tank_losses_and_burner_efficiency(act_vol, water_heating_system, solar_fraction, hpxml_bldg.building_construction.number_of_bedrooms)
+    _tank_u, tank_ua, tank_eta_c = disaggregate_tank_losses_and_burner_efficiency(act_vol, water_heating_system, solar_fraction, hpxml_bldg.building_construction.number_of_bedrooms)
     water_heater = apply_water_heater(runner, model,
                                       name: Constants::ObjectTypeWaterHeater,
                                       water_heating_system: water_heating_system,
@@ -110,8 +110,8 @@ module Waterheater
                                       t_set_c: t_set_c,
                                       loc_space: loc_space,
                                       loc_schedule: loc_schedule,
-                                      ua: ua,
-                                      eta_c: eta_c,
+                                      tank_ua: tank_ua,
+                                      tank_eta_c: tank_eta_c,
                                       schedules_file: schedules_file,
                                       unavailable_periods: unavailable_periods,
                                       unit_multiplier: unit_multiplier)
@@ -275,10 +275,10 @@ module Waterheater
       end
 
       act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
-      a_side = calc_tank_areas(act_vol)[1]
-      ua = calc_combi_tank_losses(act_vol, water_heating_system, a_side, solar_fraction, hpxml_bldg.building_construction.number_of_bedrooms)
+      _tank_a, side_a = calc_tank_areas(act_vol)
+      tank_ua = calc_combi_tank_losses(act_vol, water_heating_system, side_a, solar_fraction, hpxml_bldg.building_construction.number_of_bedrooms)
     else
-      ua = 0.0
+      tank_ua = 0.0
       act_vol = 1.0
     end
 
@@ -293,7 +293,7 @@ module Waterheater
                                       t_set_c: t_set_c,
                                       loc_space: loc_space,
                                       loc_schedule: loc_schedule,
-                                      ua: ua,
+                                      tank_ua: tank_ua,
                                       is_combi: true,
                                       schedules_file: schedules_file,
                                       unavailable_periods: unavailable_periods,
@@ -654,10 +654,10 @@ module Waterheater
     test_flow = 55.0 / UnitConversions.convert(1.0, 'lbm/min', 'kg/hr') / Liquid.H2O_l.rho * UnitConversions.convert(1.0, 'ft^2', 'm^2') # cfm/ft^2
     coll_flow = test_flow * collector_area # cfm
     if fluid_type == EPlus::FluidWater # Direct, make the storage tank a dummy tank with 0 tank losses
-      u_tank = 0.0
+      tank_u = 0.0
     else
-      r_tank = 10.0 # Btu/(hr-ft2-F)
-      u_tank = UnitConversions.convert(1.0 / r_tank, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)') # W/m2-K
+      tank_r = 10.0 # F-ft2-hr/Btu
+      tank_u = 1.0 / tank_r # Btu/hr-ft^2-F
     end
 
     # Get water heater and setpoint temperature schedules from loop
@@ -704,7 +704,7 @@ module Waterheater
     pump.setRatedPowerConsumption(pump_power)
     pump.setMotorEfficiency(0.3)
     pump.setFractionofMotorInefficienciestoFluidStream(0.2)
-    pump.setPumpControlType('Intermittent')
+    pump.setPumpControlType(EPlus::PumpControlTypeIntermittent)
     pump.setRatedFlowRate(UnitConversions.convert(coll_flow, 'cfm', 'm^3/s'))
     pump.addToNode(plant_loop.supplyInletNode)
     pump.additionalProperties.setFeature('HPXML_ID', solar_thermal_system.water_heating_system.id) # Used by reporting measure
@@ -833,7 +833,7 @@ module Waterheater
     storage_tank.setOnCycleParasiticFuelConsumptionRate(0)
     storage_tank.setOffCycleParasiticFuelConsumptionRate(0)
     storage_tank.setUseSideDesignFlowRate(UnitConversions.convert(storage_volume, 'gal', 'm^3') / 60.1) # Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
-    apply_stratified_tank_losses(storage_tank, u_tank, unit_multiplier)
+    apply_stratified_tank_losses(storage_tank, tank_u, unit_multiplier)
     storage_tank.additionalProperties.setFeature('HPXML_ID', solar_thermal_system.water_heating_system.id) # Used by reporting measure
     storage_tank.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeSolarHotWater) # Used by reporting measure
 
@@ -976,6 +976,22 @@ module Waterheater
 
     cop = water_heating_system.additional_properties.cop
 
+    # Adjust COP based on RESNET HERS Addendum 77
+    if not water_heating_system.hpwh_containment_volume.nil?
+      if not water_heating_system.hpwh_confined_space_without_mitigation
+        if water_heating_system.hpwh_containment_volume < 1000.0
+          runner.registerWarning("HPWH COP adjustment based on HPWHContainmentVolume will not be applied to #{water_heating_system.id} because HPWHInConfinedSpaceWithoutMitigation is not 'true'.")
+        end
+      else
+        # FUTURE: apply for 120V HPWH and other system types that the correction may not be accurate for
+        if water_heating_system.hpwh_containment_volume < 450.0 && (water_heating_system.backup_heating_capacity == 0.0)
+          runner.registerWarning("Heat pump water heater: #{water_heating_system.id} has no backup electric resistance element, COP adjustment for confined space may not be accurate when the containment space volume is below 450 cubic feet.")
+        end
+        rv = [water_heating_system.hpwh_containment_volume / 1500.0, 1.0].min
+        cop = (cop - 0.92) * (1 - (1.009 * Math.exp(-5.492 * rv))) + 0.92
+      end
+    end
+
     coil = OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped.new(model)
     coil.setName("#{obj_name} coil")
     coil.setRatedHeatingCapacity(cap)
@@ -995,29 +1011,13 @@ module Waterheater
     return coil
   end
 
-  # Calculates the HPWH compressor COP based on UEF regressions.
+  # Returns the heating input capacity, calculated as the heating rated (output) capacity divided by the rated efficiency.
   #
-  # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
-  # return [Double] COP of the HPWH compressor
-  def self.set_heat_pump_cop(water_heating_system)
-    # Calculate the COP based on EF
-    if not water_heating_system.energy_factor.nil?
-      uef = (0.60522 + water_heating_system.energy_factor) / 1.2101
-      cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
-    elsif not water_heating_system.uniform_energy_factor.nil?
-      uef = water_heating_system.uniform_energy_factor
-      case water_heating_system.usage_bin
-      when HPXML::WaterHeaterUsageBinVerySmall
-        fail 'It is unlikely that a heat pump water heater falls into the very small bin of the First Hour Rating (FHR) test. Double check input.'
-      when HPXML::WaterHeaterUsageBinLow
-        cop = 1.0005 * uef - 0.0789
-      when HPXML::WaterHeaterUsageBinMedium
-        cop = 1.0909 * uef - 0.0868
-      when HPXML::WaterHeaterUsageBinHigh
-        cop = 1.1022 * uef - 0.0877
-      end
-    end
-    water_heating_system.additional_properties.cop = cop
+  # @param heating_capacity [Double]
+  # @param heating_efficiency_cop [Double] Rated efficiency [COP]
+  # @return [Double] The heating input capacity [Btu/hr]
+  def self.get_heating_input_capacity(heating_capacity, heating_efficiency_cop)
+    return heating_capacity / UnitConversions.convert(heating_efficiency_cop, 'btu/hr', 'w')
   end
 
   # Adds a WaterHeaterStratified object for the HPWH to the OpenStudio model.
@@ -1037,21 +1037,25 @@ module Waterheater
 
     # Calculate some geometry parameters for UA, the location of sensors and heat sources in the tank
     v_actual = calc_storage_tank_actual_vol(water_heating_system.tank_volume, water_heating_system.fuel_type) # gal
-    a_tank, a_side = calc_tank_areas(v_actual, UnitConversions.convert(h_tank, 'm', 'ft')) # sqft
+    tank_a, side_a = calc_tank_areas(v_actual, UnitConversions.convert(h_tank, 'm', 'ft')) # sqft
 
     e_cap = UnitConversions.convert(water_heating_system.backup_heating_capacity, 'Btu/hr', 'W') # W
     parasitics = 3.0 # W
-    # Based on Ecotope lab testing of most recent AO Smith HPWHs (series HPTU)
+    # Based on Ecotope lab testing of AO Smith HPWHs (series HPTU), see 2015 report:
+    # https://neea.org/img/documents/hpwh-lab-report_ao-smith_hptu_12-09-2015.pdf.
+    # More recent products do not show much change to UA values, see 2021 report:
+    # https://neea.org/img/documents/Laboratory-Assessment-of-Rheem-Generation-5-Series-HPWH.pdf.
     if water_heating_system.tank_volume <= 58.0
-      tank_ua = 3.6 # Btu/h-R
+      tank_ua = 3.6 # Btu/hr-F
     elsif water_heating_system.tank_volume <= 73.0
-      tank_ua = 4.0 # Btu/h-R
+      tank_ua = 4.0 # Btu/hr-F
     else
-      tank_ua = 4.7 # Btu/h-R
+      tank_ua = 4.7 # Btu/hr-F
     end
-    tank_ua = apply_tank_jacket(water_heating_system, tank_ua, a_side)
+    tank_ua = apply_tank_jacket(water_heating_system, tank_ua, side_a)
     tank_ua = apply_shared_adjustment(water_heating_system, tank_ua, nbeds) # shared losses
-    u_tank = ((5.678 * tank_ua) / a_tank) * (1.0 - solar_fraction)
+    tank_u = tank_ua / tank_a # Btu/hr-ft^2-F
+    tank_u *= (1.0 - solar_fraction)
 
     v_actual *= unit_multiplier
     e_cap *= unit_multiplier
@@ -1091,7 +1095,7 @@ module Waterheater
     tank.setSourceSideOutletHeight(0)
     tank.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
     tank.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
-    apply_stratified_tank_losses(tank, u_tank, unit_multiplier)
+    apply_stratified_tank_losses(tank, tank_u, unit_multiplier)
     tank.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
     return tank
@@ -1269,7 +1273,7 @@ module Waterheater
     fan_power_sensor = Model.add_ems_sensor(
       model,
       name: "#{obj_name} fan pwr",
-      output_var_or_meter_name: "Fan #{EPlus::FuelTypeElectricity} Rate",
+      output_var_or_meter_name: 'Fan Electricity Rate',
       key_name: fan.name
     )
 
@@ -1403,13 +1407,13 @@ module Waterheater
   # Sets the tank losses for a stratified water heater tank.
   #
   # @param tank [OpenStudio::Model::WaterHeaterStratified] The stratified tank
-  # @param u_tank [Double] The heat loss U-factor (Btu/hr-ft^2-F)
+  # @param tank_u [Double] The heat loss U-factor (Btu/hr-ft^2-F)
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [nil]
-  def self.apply_stratified_tank_losses(tank, u_tank, unit_multiplier)
+  def self.apply_stratified_tank_losses(tank, tank_u, unit_multiplier)
     node_ua = [0] * 12 # Max number of nodes in E+ stratified tank model
     if unit_multiplier == 1
-      tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u_tank)
+      tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(UnitConversions.convert(tank_u, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
     else
       tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(0)
 
@@ -1419,18 +1423,18 @@ module Waterheater
       h_tank = UnitConversions.convert(tank.tankHeight.get, 'm', 'ft')
 
       # Calculate areas for tank w/o unit multiplier
-      a_tank, a_side = calc_tank_areas(vol_tank / unit_multiplier, h_tank)
-      a_top = (a_tank - a_side) / 2.0
+      tank_a, side_a = calc_tank_areas(vol_tank / unit_multiplier, h_tank)
+      top_a = (tank_a - side_a) / 2.0
       num_nodes = tank.numberofNodes
 
       # Calculate desired UA for each node
       for node_num in 0..num_nodes - 1
         # These node area calculations are based on the E+ WaterThermalTankData::SetupStratifiedNodes() method
-        a_node = a_side / num_nodes
+        node_a = side_a / num_nodes
         if (node_num == 0) || (node_num == num_nodes - 1) # Top or bottom node
-          a_node += a_top
+          node_a += top_a
         end
-        node_ua[node_num] = u_tank.to_f * UnitConversions.convert(a_node, 'ft^2', 'm^2') * unit_multiplier
+        node_ua[node_num] = UnitConversions.convert(tank_u.to_f, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)') * UnitConversions.convert(node_a, 'ft^2', 'm^2') * unit_multiplier
       end
     end
 
@@ -1512,7 +1516,7 @@ module Waterheater
     # create a storage tank
     vol = 50.0
     storage_vol_actual = calc_storage_tank_actual_vol(vol, nil)
-    assumed_ua = 6.0 # Btu/hr-F, tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
+    tank_ua = 6.0 # Btu/hr-F, tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
     storage_tank_name = "#{tank.name} storage tank"
 
     if water_heating_system.temperature.nil?
@@ -1528,7 +1532,7 @@ module Waterheater
                                       t_set_c: t_set_c,
                                       loc_space: loc_space,
                                       loc_schedule: loc_schedule,
-                                      ua: assumed_ua,
+                                      tank_ua: tank_ua,
                                       is_dsh_storage: true,
                                       unit_multiplier: unit_multiplier)
 
@@ -1597,22 +1601,22 @@ module Waterheater
       height = DefaultTankHeight
     end
     diameter = 2.0 * (UnitConversions.convert(act_vol, 'gal', 'ft^3') / (height * Math::PI))**0.5 # feet
-    a_top = Math::PI * diameter**2.0 / 4.0 # sqft
-    a_side = Math::PI * diameter * height # sqft
-    a_total = 2.0 * a_top + a_side # sqft
+    top_a = Math::PI * diameter**2.0 / 4.0 # sqft
+    side_a = Math::PI * diameter * height # sqft
+    tank_a = 2.0 * top_a + side_a # sqft
 
-    return a_total, a_side
+    return tank_a, side_a
   end
 
   # Calculates tank losses for the combination boiler given its standby loss value.
   #
   # @param act_vol [Double] Actual tank volume (gal)
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
-  # @param a_side [Double] Tank side surface area (ft^3)
+  # @param side_a [Double] Tank side surface area (ft^3)
   # @param solar_fraction [Double] Portion of hot water load served by an attached solar thermal system
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [Double] Tank loss UA factor (Btu/hr-F)
-  def self.calc_combi_tank_losses(act_vol, water_heating_system, a_side, solar_fraction, nbeds = nil)
+  def self.calc_combi_tank_losses(act_vol, water_heating_system, side_a, solar_fraction, nbeds = nil)
     standby_loss_units = water_heating_system.standby_loss_units
     standby_loss_value = water_heating_system.standby_loss_value
 
@@ -1631,7 +1635,7 @@ module Waterheater
     ua = q / (t_tank_avg - t_amb) # Btu/hr-F
 
     # jacket
-    ua = apply_tank_jacket(water_heating_system, ua, a_side)
+    ua = apply_tank_jacket(water_heating_system, ua, side_a)
 
     # shared losses
     ua = apply_shared_adjustment(water_heating_system, ua, nbeds) if !nbeds.nil?
@@ -1707,13 +1711,13 @@ module Waterheater
         ec_adj_hp_sensor = Model.add_ems_sensor(
           model,
           name: "#{water_heater.dXCoil.name} energy",
-          output_var_or_meter_name: "Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Rate",
+          output_var_or_meter_name: 'Cooling Coil Water Heating Electricity Rate',
           key_name: water_heater.dXCoil.name
         )
         ec_adj_fan_sensor = Model.add_ems_sensor(
           model,
           name: "#{water_heater.fan.name} energy",
-          output_var_or_meter_name: "Fan #{EPlus::FuelTypeElectricity} Rate",
+          output_var_or_meter_name: 'Fan Electricity Rate',
           key_name: water_heater.fan.name
         )
       end
@@ -1722,13 +1726,13 @@ module Waterheater
     ec_adj_oncyc_sensor = Model.add_ems_sensor(
       model,
       name: "#{tank.name} on cycle parasitic",
-      output_var_or_meter_name: "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate",
+      output_var_or_meter_name: 'Water Heater On Cycle Parasitic Electricity Rate',
       key_name: tank.name
     )
     ec_adj_offcyc_sensor = Model.add_ems_sensor(
       model,
       name: "#{tank.name} off cycle parasitic",
-      output_var_or_meter_name: "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate",
+      output_var_or_meter_name: 'Water Heater Off Cycle Parasitic Electricity Rate',
       key_name: tank.name
     )
 
@@ -1801,12 +1805,12 @@ module Waterheater
 
   # Disaggregates the water heater's (uniform) energy factor into tank losses and burner efficiency.
   #
-  # If using EF:
-  #   Calculations based on the Energy Factor and Recovery Efficiency of the tank
-  #   Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
   # IF using UEF:
   #   Calculations based on the Uniform Energy Factor, First Hour Rating, and Recovery Efficiency of the tank
-  #   Source: Maguire and Roberts 2020 - https://www.ashrae.org/file%20library/conferences/specialty%20conferences/2020%20building%20performance/papers/d-bsc20-c039.pdf
+  #   Source: Maguire and Roberts 2020 - https://www.nrel.gov/docs/fy21osti/71633.pdf
+  # If using EF:
+  #   Calculations based on the Energy Factor and Recovery Efficiency of the tank
+  #   Using the same approach as in Maguire and Roberts 2020, but with EF specific load and temperatures
   #
   # @param act_vol [Double] Actual tank volume (gal)
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
@@ -1821,7 +1825,7 @@ module Waterheater
         eta_c = water_heating_system.uniform_energy_factor * water_heating_system.performance_adjustment
       end
       ua = 0.0
-      surface_area = 1.0
+      tank_a = 1.0
     else
       density = 8.2938 # lb/gal
       cp = 1.0007 # Btu/lb-F
@@ -1848,7 +1852,7 @@ module Waterheater
       draw_mass = volume_drawn * density # lb
       q_load = draw_mass * cp * (t - t_in) # Btu/day
       pow = water_heating_system.heating_capacity # Btu/h
-      surface_area, a_side = calc_tank_areas(act_vol)
+      tank_a, side_a = calc_tank_areas(act_vol)
       if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
         if not water_heating_system.energy_factor.nil?
           ua = (water_heating_system.recovery_efficiency / water_heating_system.energy_factor - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (pow * water_heating_system.energy_factor))) # Btu/hr-F
@@ -1858,18 +1862,20 @@ module Waterheater
           eta_c = water_heating_system.recovery_efficiency + ((ua * (t - t_env)) / pow) # conversion efficiency is slightly larger than recovery efficiency
         end
       else # is Electric
+        f_low = 0.2 # Assumed fraction of water volume below lower element, assumed to be unheated
+        f_high = 1.0 - f_low # Fraction of water volume above lower element
         if not water_heating_system.energy_factor.nil?
-          ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
+          ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((24.0 * (t - t_env)) * (f_high + f_low * ((t_in - t_env) / (t - t_env)))) # Btu/hr-F
         elsif not water_heating_system.uniform_energy_factor.nil?
-          ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (0.8 + 0.2 * ((t_in - t_env) / (t - t_env))))
+          ua = q_load * (1.0 / water_heating_system.uniform_energy_factor - 1.0) / ((24.0 * (t - t_env)) * (f_high + f_low * ((t_in - t_env) / (t - t_env)))) # Btu/hr-F
         end
         eta_c = 1.0
       end
-      ua = apply_tank_jacket(water_heating_system, ua, a_side)
+      ua = apply_tank_jacket(water_heating_system, ua, side_a)
     end
     ua *= (1.0 - solar_fraction)
     ua = apply_shared_adjustment(water_heating_system, ua, nbeds) # shared losses
-    u = ua / surface_area # Btu/hr-ft^2-F
+    u = ua / tank_a # Btu/hr-ft^2-F
     if eta_c > 1.0
       fail 'A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.'
     end
@@ -1885,9 +1891,9 @@ module Waterheater
   #
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
   # @param ua [Double] Tank loss UA factor (Btu/hr-F)
-  # @param a_side [Double] Tank side surface area (ft^3)
+  # @param side_a [Double] Tank side surface area (ft^3)
   # @return [Double] Adjusted tank loss UA factor (Btu/hr-F)
-  def self.apply_tank_jacket(water_heating_system, ua, a_side)
+  def self.apply_tank_jacket(water_heating_system, ua, side_a)
     if not water_heating_system.jacket_r_value.nil?
       skin_insulation_R = 5.0 # R5
       if water_heating_system.fuel_type.nil? # indirect water heater, etc. Assume 2 inch skin insulation
@@ -1909,7 +1915,7 @@ module Waterheater
       # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
       # Authors:  Ben Polly and Jay Burch (NREL)
       u_pre_skin = 1.0 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
-      ua_adj = ua - water_heating_system.jacket_r_value / (1.0 / u_pre_skin + water_heating_system.jacket_r_value) * u_pre_skin * a_side
+      ua_adj = ua - water_heating_system.jacket_r_value / (1.0 / u_pre_skin + water_heating_system.jacket_r_value) * u_pre_skin * side_a
     else
       ua_adj = ua
     end
@@ -1941,16 +1947,16 @@ module Waterheater
   # @param t_set_c [Double] Water heater setpoint including deadband (C)
   # @param loc_space [OpenStudio::Model::Space] The space where the water heater is located
   # @param loc_schedule [OpenStudio::Model::ScheduleConstant] The temperature schedule, if not located in a space
-  # @param u [Double] Tank loss coefficient (FIXME)
-  # @param ua [Double] Tank loss UA factor (Btu/hr-F)
-  # @param eta_c [Double] Burner efficiency (frac)
+  # @param tank_u [Double] Tank loss coefficient (Btu/hr-ft^2-F)
+  # @param tank_ua [Double] Tank loss UA factor (Btu/hr-F)
+  # @param tank_eta_c [Double] Tank burner efficiency (frac)
   # @param is_dsh_storage [Boolean] True if this is a desuperheater storage tank
   # @param is_combi [Boolean] True if this is a combination boiler
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [OpenStudio::Model::WaterHeaterMixed or OpenStudio::Model::WaterHeaterStratified] Water heater object
-  def self.apply_water_heater(runner, model, name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, u: nil, ua:, eta_c: nil, is_dsh_storage: false, is_combi: false, schedules_file: nil, unavailable_periods: [], unit_multiplier: 1.0)
+  def self.apply_water_heater(runner, model, name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, tank_u: nil, tank_ua:, tank_eta_c: nil, is_dsh_storage: false, is_combi: false, schedules_file: nil, unavailable_periods: [], unit_multiplier: 1.0)
     # storage tank doesn't require water_heating_system class argument being passed
     if is_dsh_storage || is_combi
       fuel = nil
@@ -1967,7 +1973,7 @@ module Waterheater
       tank_model_type = water_heating_system.tank_model_type
     end
 
-    ua *= unit_multiplier
+    tank_ua *= unit_multiplier
     cap *= unit_multiplier
     act_vol *= unit_multiplier
 
@@ -1997,11 +2003,11 @@ module Waterheater
       water_heater.setSourceSideOutletHeight((1.0 - (15 - 0.5) / 15) * h_tank) # in the 15th node of a 15-node tank (counting from top)
       water_heater.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
       water_heater.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
-      apply_stratified_tank_losses(water_heater, u, unit_multiplier)
+      apply_stratified_tank_losses(water_heater, tank_u, unit_multiplier)
     else
       water_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
       water_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
-      water_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
+      water_heater.setHeaterThermalEfficiency(tank_eta_c) unless tank_eta_c.nil?
       water_heater.setMaximumTemperatureLimit(99.0)
       if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
         water_heater.setHeaterControlType('Modulate')
@@ -2036,9 +2042,8 @@ module Waterheater
       water_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
       water_heater.setOnCycleLossFractiontoThermalZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
 
-      ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
-      water_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
-      water_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
+      water_heater.setOnCycleLossCoefficienttoAmbientTemperature(UnitConversions.convert(tank_ua, 'Btu/(hr*F)', 'W/K'))
+      water_heater.setOffCycleLossCoefficienttoAmbientTemperature(UnitConversions.convert(tank_ua, 'Btu/(hr*F)', 'W/K'))
     end
 
     apply_setpoint(runner, model, water_heater, schedules_file, t_set_c, unavailable_periods)
