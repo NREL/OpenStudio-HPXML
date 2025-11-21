@@ -13,9 +13,9 @@ Option Name	Type	Assembly R-Value [F-ft2-hr/Btu]
 "Wood Frame, IECC U-0.047"	WoodFrame	21.28
 "Wood Frame, IECC U-0.033"	WoodFrame	30.3
 "Wood Frame, IECC U-0.028"	WoodFrame	35.71
-"ASHRAE 140, Wood Frame, Uninsulated"	WoodFrame	4.24
-"ASHRAE 140, Wood Frame, R-11"	WoodFrame	14.15
-"HERS, Wood Frame, R-11"	WoodFrame	13.85
-		
-# Type: The type of floor.		
-# Assembly R-Value: Assembly R-value for the floor.		
+"HERS DSE Tests: Wood Frame, R-11"	WoodFrame	13.85
+"ASHRAE 140 Tests: Wood Frame, Uninsulated"	WoodFrame	4.24
+"ASHRAE 140 Tests: Wood Frame, R-11"	WoodFrame	14.15
+
+# Type: The type of floor.
+# Assembly R-Value: Assembly R-value for the floor.

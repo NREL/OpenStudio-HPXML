@@ -50,12 +50,12 @@ None	none	medium			0
 "Masonite, Medium Dark"	masonite siding	medium dark			0.2
 "Masonite, Light"	masonite siding	light			0.2
 "Masonite, Reflective"	masonite siding	reflective			0.2
-"ASHRAE 140, Low Solar Absorptance"			0.2	0.9	0.67
-"ASHRAE 140, Typical Solar Absorptance"			0.6	0.9	0.67
+"ASHRAE 140 Tests: Low Solar Absorptance"			0.2	0.9	0.67
+"ASHRAE 140 Tests: Typical Solar Absorptance"			0.6	0.9	0.67
 "HERS Reference"			0.75	0.9	0.67
-					
-# Type: The type of wall siding.					
-# Color: The color of the walls.					
-# Solar Absorptance: The solar absorptance of the outermost wall material.					
-# Emittance: The emittance of the outermost wall material.					
-# R-Value: The R-value of the siding.					
+
+# Type: The type of wall siding.
+# Color: The color of the walls.
+# Solar Absorptance: The solar absorptance of the outermost wall material.
+# Emittance: The emittance of the outermost wall material.
+# R-Value: The R-value of the siding.

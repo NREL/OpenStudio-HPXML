@@ -81,7 +81,6 @@
                 <Vented>false</Vented>
               </Attic>
             </AtticType>
-            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToWall idref='Wall2'/>
             <AttachedToFloor idref='Floor1'/>
@@ -102,8 +101,7 @@
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1509.3</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
+            <RoofColor>medium</RoofColor>
             <Pitch>6.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
@@ -121,11 +119,7 @@
             </WallType>
             <Area>1200.0</Area>
             <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
+            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
@@ -141,8 +135,7 @@
             </WallType>
             <Area>225.0</Area>
             <Siding>wood siding</Siding>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
+            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -159,9 +152,6 @@
               <WoodFrame/>
             </FloorType>
             <Area>1350.0</Area>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
             <RadiantBarrier>true</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
@@ -189,10 +179,6 @@
                 <InsulationSpansEntireSlab>true</InsulationSpansEntireSlab>
               </Layer>
             </UnderSlabInsulation>
-            <extension>
-              <CarpetFraction>1.0</CarpetFraction>
-              <CarpetRValue>2.5</CarpetRValue>
-            </extension>
           </Slab>
         </Slabs>
         <Windows>

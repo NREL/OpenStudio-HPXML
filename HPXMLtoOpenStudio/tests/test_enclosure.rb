@@ -977,11 +977,12 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
             if i < 3
               surfaces[-1].ufactor += 0.01 * i
             elsif i < 6
-              surfaces[-1].interior_shading_factor_summer -= 0.02 * i
+              surfaces[-1].interior_shading_factor_summer = 1.0 - 0.02 * i
             else
-              surfaces[-1].interior_shading_factor_winter -= 0.01 * i
+              surfaces[-1].interior_shading_factor_winter = 1.0 - 0.01 * i
               if surf_class == HPXML::Window
                 surfaces[-1].fraction_operable = 1.0 - surfaces[-1].fraction_operable
+              else
               end
             end
           elsif [HPXML::Door].include? surf_class
