@@ -4186,6 +4186,7 @@ class HPXML < Object
   class RimJoist < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4209,10 +4210,7 @@ class HPXML < Object
     #
     # @return [<HPXML::RimJoist>] RimJoist object linked by sameas attribute
     def sameas
-      sameas_obj = HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
-      return sameas_obj if sameas_obj.is_a? HPXML::RimJoist
-
-      fail "RimJoist: #{@id} has wrong sameas object: #{@sameas_id}"
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::RimJoist, self)
     end
 
     # Returns the space that the rim joist is attached to.
@@ -4430,6 +4428,7 @@ class HPXML < Object
   class Wall < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4463,10 +4462,7 @@ class HPXML < Object
     #
     # @return [<HPXML::Wall>] Wall object linked by sameas attribute
     def sameas
-      sameas_obj = HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
-      return sameas_obj if sameas_obj.is_a? HPXML::Wall
-
-      fail "Wall: #{@id} has wrong sameas object: #{@sameas_id}"
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::Wall, self)
     end
 
     # Returns all windows for this wall.
@@ -4749,6 +4745,7 @@ class HPXML < Object
   class FoundationWall < BaseElement
     ATTRS = [:id,                                     # [String] SystemIdentifier/@id
              :sameas_id,                              # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,                   # [String] Sameas object id that references this object
              :attached_to_space_idref,                # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,                   # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,                   # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4778,10 +4775,7 @@ class HPXML < Object
     #
     # @return [<HPXML::FoundationWall>] FoundationWall object linked by sameas attribute
     def sameas
-      sameas_obj = HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
-      return sameas_obj if sameas_obj.is_a? HPXML::FoundationWall
-
-      fail "FoundationWall: #{@id} has wrong sameas object: #{@sameas_id}"
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::FoundationWall, self)
     end
 
     # Returns all windows for this foundation wall.
@@ -5097,6 +5091,7 @@ class HPXML < Object
   class Floor < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -5123,10 +5118,7 @@ class HPXML < Object
     #
     # @return [<HPXML::Floor>] Floor object linked by sameas attribute
     def sameas
-      sameas_obj = HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
-      return sameas_obj if sameas_obj.is_a? HPXML::Floor
-
-      fail "Floor: #{@id} has wrong sameas object: #{@sameas_id}"
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::Floor, self)
     end
 
     # Returns all skylights for this floor.
@@ -12500,24 +12492,39 @@ class HPXML < Object
 
   # Gets the sameas obj (from another Building) with the specified sameas_id.
   #
-  # @param parent [Oga::XML::Element] The parent HPXML element
-  # @param sameas_id [String]  The element sameas attribute
+  # @param hpxml [Oga::XML::Element] The parent HPXML element
+  # @param parent_building [Oga::XML::Element] The parent Building element
+  # @param object_type [Class]  HPXML object type of the element
+  # @param object [Oga::XML::Element]  The HPXML element
   # @return [Oga::XML::Element] The element that sameas attribute associated with
-  def self.get_sameas_obj(hpxml, sameas_id)
+  def self.get_sameas_obj(hpxml, parent_building, object_type, object)
     hpxml.buildings.each do |building|
       building.class::CLASS_ATTRS.each do |attr|
         building_child = building.send(attr)
         next unless building_child.is_a? HPXML::BaseArrayElement
 
         building_child.each do |obj|
-          next unless obj.id == sameas_id
+          next unless obj.id == object.sameas_id
+          if building.building_id == parent_building.building_id
+            fail "'#{object.id}' sameas references the object in the same building '#{parent_building.building_id}'."
+          end
 
-          return obj
+          if obj.is_a? object_type
+            # Assign referenced_by_sameas
+            if obj.referenced_by_sameas.nil?
+              obj.referenced_by_sameas = object.id
+            elsif obj.referenced_by_sameas != object.id
+              fail "'#{obj.id}' is referenced by multiple objects."
+            end
+            return obj
+          else
+            fail "'#{object.id}' reference the wrong object type with sameas id '#{object.sameas_id}'."
+          end
         end
       end
     end
-    if not sameas_id.nil?
-      fail "Sameas object '#{sameas_id}' not found."
+    if not object.sameas_id.nil?
+      fail "Sameas object '#{object.sameas_id}' not found."
     end
 
     return

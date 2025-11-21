@@ -1353,10 +1353,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-windows-physical-properties' => ["Could not lookup UFactor and SHGC for window 'Window3'."],
                             'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
                             'multifamily-common-space-wrong-sameas-id' => ["Sameas object 'Foo' not found."],
-                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-floor' => ['Floor: Floor4_1 has wrong sameas object: Wall1_2'],
-                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-rim-joist' => ['RimJoist: RimJoist3 has wrong sameas object: Wall1_2'],
-                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-foundation-wall' => ['FoundationWall: FoundationWall3 has wrong sameas object: Wall1_2'],
-                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-wall' => ['Wall: Wall3 has wrong sameas object: Floor1_2'],
+                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-floor' => ["'Floor4_1' reference the wrong object type with sameas id 'Wall1_2'."],
+                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-rim-joist' => ["'RimJoist3' reference the wrong object type with sameas id 'Wall1_2'."],
+                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-foundation-wall' => ["'FoundationWall3' reference the wrong object type with sameas id 'Wall1_2'."],
+                            'multifamily-inter-unit-heat-transfer-wrong-sameas-object-wall' => ["'Wall3' reference the wrong object type with sameas id 'Floor1_2'."],
+                            'multifamily-inter-unit-heat-transfer-same-building' => ["'Wall3' sameas references the object in the same building 'UnitWithUnonditionedBasement'."],
+                            'multifamily-inter-unit-heat-transfer-multiple-reference' => ["'Wall2_3' is referenced by multiple objects."],
                             'net-area-negative-wall' => ["Calculated a negative net surface area for surface 'Wall1'."],
                             'net-area-negative-roof-floor' => ["Calculated a negative net surface area for surface 'Roof1'.",
                                                                "Calculated a negative net surface area for surface 'Floor1'."],
@@ -1944,6 +1946,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'multifamily-inter-unit-heat-transfer-wrong-sameas-object-wall'
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
         hpxml_bldg.walls.add(id: 'Wall3', sameas_id: 'Floor1_2')
+      when 'multifamily-inter-unit-heat-transfer-same-building'
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml_bldg.walls.add(id: 'Wall3', sameas_id: 'Wall1')
+      when 'multifamily-inter-unit-heat-transfer-multiple-reference'
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
+        hpxml_bldg.walls.add(id: 'Wall3', sameas_id: 'Wall2_3')
       else
         fail "Unhandled case: #{error_case}."
       end
