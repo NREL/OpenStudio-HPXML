@@ -22,10 +22,10 @@ Uninsulated	0	0	0	0
 "Whole Slab, R-20"	20	999	0	0			
 "Whole Slab, R-30"	30	999	0	0			
 "Whole Slab, R-40"	40	999	0	0			
+"ASHRAE 140, Uninsulated, Carpet"	0	0	0	0		1	2.08
+"ASHRAE 140, Uninsulated, No Carpet"	0	0	0	0		0	0
+"ASHRAE 140, Perimeter, 2ft, R-5, Carpet"	0	0	5	2		1	2.08
 "Detailed Example: Uninsulated, No Carpet"	0	0	0	0		0	0
-"Detailed Example: Uninsulated, 100% R-2.08 Carpet"	0	0	0	0		1	2.08
-"Detailed Example: Uninsulated, 100% R-2.50 Carpet"	0	0	0	0		1	2.5
-"Detailed Example: Perimeter, 2ft, R-5, 100% R-2.08 Carpet"	0	0	5	2		1	2.08
 "Detailed Example: Whole Slab, R-5, 100% R-2.5 Carpet"	5	999	0	0		1	2.5
 							
 # Perimeter Insulation Nominal R-Value: Nominal R-value of the vertical slab perimeter insulation.							
