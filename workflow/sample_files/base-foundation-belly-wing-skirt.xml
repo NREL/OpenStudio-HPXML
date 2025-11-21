@@ -103,7 +103,7 @@
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1391.5</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>medium</RoofColor>
+            <RoofColor>light</RoofColor>
             <Pitch>3.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>

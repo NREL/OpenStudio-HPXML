@@ -101,7 +101,7 @@
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>medium</RoofColor>
+            <RoofColor>light</RoofColor>
             <Pitch>0.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>

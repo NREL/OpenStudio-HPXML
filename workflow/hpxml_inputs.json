@@ -369,7 +369,7 @@
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
     "enclosure_rim_joist": "Exterior, R-10",
     "enclosure_ceiling": "R-38",
-    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Medium",
+    "enclosure_roof_material": "Asphalt/Fiberglass Shingles, Light",
     "enclosure_roof": "Uninsulated",
     "enclosure_radiant_barrier": "None",
     "enclosure_wall": "Wood Stud, R-13",
