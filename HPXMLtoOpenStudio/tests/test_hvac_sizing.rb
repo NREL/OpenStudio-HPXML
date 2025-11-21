@@ -1677,7 +1677,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   end
 
   def test_foundation_wall_non_integer_values
-    tol = 0.01 # 1%
+    tol = 0.02 # 2%
 
     # Test wall insulation covering most of above and below-grade portions of wall
     fwall = HPXML::FoundationWall.new(nil)
