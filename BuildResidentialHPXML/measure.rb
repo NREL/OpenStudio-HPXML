@@ -2307,12 +2307,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       heating_efficiency_percent = args[:hvac_heating_system_heating_efficiency]
     end
 
-    if args[:hvac_heating_system_fuel_type] != HPXML::FuelTypeElectricity
-      pilot_light_btuh = args[:hvac_heating_system_pilot_light].to_f
-      if pilot_light_btuh > 0
-        pilot_light = true
-      end
+    if not args[:hvac_heating_system_pilot_light].nil?
+      pilot_light = (args[:hvac_heating_system_pilot_light].to_f > 0)
     end
+
     hpxml_bldg.heating_systems.add(id: "HeatingSystem#{hpxml_bldg.heating_systems.size + 1}",
                                    heating_system_type: heating_system_type,
                                    heating_system_fuel: args[:hvac_heating_system_fuel_type],
@@ -2323,7 +2321,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                    heating_efficiency_afue: heating_efficiency_afue,
                                    heating_efficiency_percent: heating_efficiency_percent,
                                    pilot_light: pilot_light,
-                                   pilot_light_btuh: pilot_light_btuh,
+                                   pilot_light_btuh: args[:hvac_heating_system_pilot_light],
                                    primary_system: true)
   end
 
@@ -2663,11 +2661,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       fraction_heat_load_served = args[:hvac_heating_system_2_heating_load_served_fraction]
     end
 
-    if args[:hvac_heating_system_2_fuel_type] != HPXML::FuelTypeElectricity
-      pilot_light_btuh = args[:hvac_heating_system_2_pilot_light].to_f
-      if pilot_light_btuh > 0
-        pilot_light = true
-      end
+    if not args[:hvac_heating_system_2_pilot_light].nil?
+      pilot_light = (args[:hvac_heating_system_2_pilot_light].to_f > 0)
     end
 
     hpxml_bldg.heating_systems.add(id: "HeatingSystem#{hpxml_bldg.heating_systems.size + 1}",

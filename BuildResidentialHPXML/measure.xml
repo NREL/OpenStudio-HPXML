@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>cbb5a2ea-e12f-4de0-a569-92460ee11867</version_id>
-  <version_modified>2025-11-21T20:23:07Z</version_modified>
+  <version_id>9102da9a-de2b-4d73-8303-09078dc947bb</version_id>
+  <version_modified>2025-11-21T20:50:20Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -11271,7 +11271,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>6CBE3D75</checksum>
+      <checksum>940DB3B7</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -11427,19 +11427,19 @@
       <filename>options/enclosure_ceiling.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>06506CD2</checksum>
+      <checksum>6C539FDE</checksum>
     </file>
     <file>
       <filename>options/enclosure_door.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6F67D1F3</checksum>
+      <checksum>331B34C8</checksum>
     </file>
     <file>
       <filename>options/enclosure_floor_over_foundation.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F58D5B42</checksum>
+      <checksum>43D38A7C</checksum>
     </file>
     <file>
       <filename>options/enclosure_floor_over_garage.tsv</filename>
@@ -11457,7 +11457,7 @@
       <filename>options/enclosure_overhangs.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9F03E08D</checksum>
+      <checksum>9E9DC7B6</checksum>
     </file>
     <file>
       <filename>options/enclosure_radiant_barrier.tsv</filename>
@@ -11469,19 +11469,19 @@
       <filename>options/enclosure_rim_joist.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>177C4FB8</checksum>
+      <checksum>12B279A9</checksum>
     </file>
     <file>
       <filename>options/enclosure_roof.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5C0D5ABD</checksum>
+      <checksum>0B2C78B1</checksum>
     </file>
     <file>
       <filename>options/enclosure_roof_material.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DA8A7215</checksum>
+      <checksum>53F44841</checksum>
     </file>
     <file>
       <filename>options/enclosure_skylight.tsv</filename>
@@ -11493,31 +11493,31 @@
       <filename>options/enclosure_slab.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CBF0603E</checksum>
+      <checksum>CAA63B38</checksum>
     </file>
     <file>
       <filename>options/enclosure_wall.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0604E08B</checksum>
+      <checksum>02ECF255</checksum>
     </file>
     <file>
       <filename>options/enclosure_wall_continuous_insulation.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>57F31F58</checksum>
+      <checksum>2E3A8497</checksum>
     </file>
     <file>
       <filename>options/enclosure_wall_siding.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4B2064F2</checksum>
+      <checksum>B7A74557</checksum>
     </file>
     <file>
       <filename>options/enclosure_window.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>365E5C05</checksum>
+      <checksum>7B896F3B</checksum>
     </file>
     <file>
       <filename>options/enclosure_window_exterior_shading.tsv</filename>
@@ -11577,7 +11577,7 @@
       <filename>options/geometry_foundation_type.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0AA6582A</checksum>
+      <checksum>A0ED3FC0</checksum>
     </file>
     <file>
       <filename>options/geometry_garage_type.tsv</filename>
@@ -11805,7 +11805,7 @@
       <filename>options/misc_plug_loads.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EC1BB646</checksum>
+      <checksum>35998CFA</checksum>
     </file>
     <file>
       <filename>options/misc_pool.tsv</filename>

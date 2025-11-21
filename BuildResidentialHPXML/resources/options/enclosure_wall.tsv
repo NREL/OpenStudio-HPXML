@@ -50,6 +50,6 @@ Option Name	Type	Assembly R-Value [F-ft2-hr/Btu]
 "ASHRAE 140 Tests: Wood Stud, Uninsulated"	WoodStud	4.17
 "ASHRAE 140 Tests: Wood Stud, R-11"	WoodStud	11.09
 "ASHRAE 140 Tests: Wood Stud, R-18"	WoodStud	15.71
-
-# Type: The type of wall.
-# Assembly R-Value: Assembly R-value for the wall excluding any siding and/or continuous insulation.
+		
+# Type: The type of wall.		
+# Assembly R-Value: Assembly R-value for the wall excluding any siding and/or continuous insulation.		
