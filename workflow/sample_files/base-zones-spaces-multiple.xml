@@ -422,6 +422,10 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
           <Slab>
             <SystemIdentifier id='Slab2Space3'/>
@@ -443,6 +447,10 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
           <Slab>
             <SystemIdentifier id='Slab2Space4'/>
@@ -464,6 +472,10 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
         </Slabs>
         <Windows>

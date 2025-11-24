@@ -232,6 +232,10 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
         </Slabs>
         <Windows>

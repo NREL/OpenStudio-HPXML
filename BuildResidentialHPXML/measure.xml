@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>9102da9a-de2b-4d73-8303-09078dc947bb</version_id>
-  <version_modified>2025-11-21T20:50:20Z</version_modified>
+  <version_id>ab6041bc-3808-4481-8a2b-ce4f9a63f300</version_id>
+  <version_modified>2025-11-24T16:49:08Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1634,17 +1634,44 @@
           <value>Whole Slab, R-40</value>
           <display_name>Whole Slab, R-40</display_name>
         </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>enclosure_carpet</name>
+      <display_name>Enclosure: Carpet</display_name>
+      <description>The amount of carpet covering the floor (slab-on-grade or floor over foundation/garage). The R-value of the carpet will be ignored if a floor option with an IECC U-factor is selected.</description>
+      <type>Choice</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>80% Carpet</default_value>
+      <choices>
         <choice>
-          <value>ASHRAE 140 Tests: Uninsulated, Carpet</value>
-          <display_name>ASHRAE 140 Tests: Uninsulated, Carpet</display_name>
+          <value>None</value>
+          <display_name>None</display_name>
         </choice>
         <choice>
-          <value>ASHRAE 140 Tests: Uninsulated, No Carpet</value>
-          <display_name>ASHRAE 140 Tests: Uninsulated, No Carpet</display_name>
+          <value>20% Carpet</value>
+          <display_name>20% Carpet</display_name>
         </choice>
         <choice>
-          <value>ASHRAE 140 Tests: Perimeter, 2ft, R-5, Carpet</value>
-          <display_name>ASHRAE 140 Tests: Perimeter, 2ft, R-5, Carpet</display_name>
+          <value>40% Carpet</value>
+          <display_name>40% Carpet</display_name>
+        </choice>
+        <choice>
+          <value>60% Carpet</value>
+          <display_name>60% Carpet</display_name>
+        </choice>
+        <choice>
+          <value>80% Carpet</value>
+          <display_name>80% Carpet</display_name>
+        </choice>
+        <choice>
+          <value>100% Carpet</value>
+          <display_name>100% Carpet</display_name>
+        </choice>
+        <choice>
+          <value>ASHRAE 140 Tests</value>
+          <display_name>ASHRAE 140 Tests</display_name>
         </choice>
       </choices>
     </argument>
@@ -11254,7 +11281,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>5B78AB97</checksum>
+      <checksum>953488F9</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -11271,7 +11298,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>940DB3B7</checksum>
+      <checksum>3000C244</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -11424,6 +11451,12 @@
       <checksum>EAFD32F8</checksum>
     </file>
     <file>
+      <filename>options/enclosure_carpet.tsv</filename>
+      <filetype>tsv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>765A5D9C</checksum>
+    </file>
+    <file>
       <filename>options/enclosure_ceiling.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
@@ -11439,13 +11472,13 @@
       <filename>options/enclosure_floor_over_foundation.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>43D38A7C</checksum>
+      <checksum>4B59ADBA</checksum>
     </file>
     <file>
       <filename>options/enclosure_floor_over_garage.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2F41B32F</checksum>
+      <checksum>764423E7</checksum>
     </file>
     <file>
       <filename>options/enclosure_foundation_wall.tsv</filename>
@@ -11493,7 +11526,7 @@
       <filename>options/enclosure_slab.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CAA63B38</checksum>
+      <checksum>89F31187</checksum>
     </file>
     <file>
       <filename>options/enclosure_wall.tsv</filename>

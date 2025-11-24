@@ -482,10 +482,26 @@ The type and insulation level of the slab. Applies to slab-on-grade as well as b
 
 - **Required:** ``false``
 
-- **Choices:** <br/>  - `Uninsulated`<br/>  - `Under Slab, 2ft, R-5`<br/>  - `Under Slab, 2ft, R-10`<br/>  - `Under Slab, 2ft, R-15`<br/>  - `Under Slab, 2ft, R-20`<br/>  - `Under Slab, 4ft, R-5`<br/>  - `Under Slab, 4ft, R-10`<br/>  - `Under Slab, 4ft, R-15`<br/>  - `Under Slab, 4ft, R-20`<br/>  - `Perimeter, 2ft, R-5`<br/>  - `Perimeter, 2ft, R-10`<br/>  - `Perimeter, 2ft, R-15`<br/>  - `Perimeter, 2ft, R-20`<br/>  - `Perimeter, 4ft, R-5`<br/>  - `Perimeter, 4ft, R-10`<br/>  - `Perimeter, 4ft, R-15`<br/>  - `Perimeter, 4ft, R-20`<br/>  - `Whole Slab, R-5`<br/>  - `Whole Slab, R-10`<br/>  - `Whole Slab, R-15`<br/>  - `Whole Slab, R-20`<br/>  - `Whole Slab, R-30`<br/>  - `Whole Slab, R-40`<br/>  - `ASHRAE 140 Tests: Uninsulated, Carpet`<br/>  - `ASHRAE 140 Tests: Uninsulated, No Carpet`<br/>  - `ASHRAE 140 Tests: Perimeter, 2ft, R-5, Carpet`
+- **Choices:** <br/>  - `Uninsulated`<br/>  - `Under Slab, 2ft, R-5`<br/>  - `Under Slab, 2ft, R-10`<br/>  - `Under Slab, 2ft, R-15`<br/>  - `Under Slab, 2ft, R-20`<br/>  - `Under Slab, 4ft, R-5`<br/>  - `Under Slab, 4ft, R-10`<br/>  - `Under Slab, 4ft, R-15`<br/>  - `Under Slab, 4ft, R-20`<br/>  - `Perimeter, 2ft, R-5`<br/>  - `Perimeter, 2ft, R-10`<br/>  - `Perimeter, 2ft, R-15`<br/>  - `Perimeter, 2ft, R-20`<br/>  - `Perimeter, 4ft, R-5`<br/>  - `Perimeter, 4ft, R-10`<br/>  - `Perimeter, 4ft, R-15`<br/>  - `Perimeter, 4ft, R-20`<br/>  - `Whole Slab, R-5`<br/>  - `Whole Slab, R-10`<br/>  - `Whole Slab, R-15`<br/>  - `Whole Slab, R-20`<br/>  - `Whole Slab, R-30`<br/>  - `Whole Slab, R-40`
 
 
 - **Default:** `Uninsulated`
+
+<br/>
+
+**Enclosure: Carpet**
+
+The amount of carpet covering the floor (slab-on-grade or floor over foundation/garage). The R-value of the carpet will be ignored if a floor option with an IECC U-factor is selected.
+
+- **Name:** ``enclosure_carpet``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** <br/>  - `None`<br/>  - `20% Carpet`<br/>  - `40% Carpet`<br/>  - `60% Carpet`<br/>  - `80% Carpet`<br/>  - `100% Carpet`<br/>  - `ASHRAE 140 Tests`
+
+
+- **Default:** `80% Carpet`
 
 <br/>
 

@@ -188,7 +188,7 @@
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
-              <AssemblyEffectiveRValue>19.4</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>17.8</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
@@ -226,6 +226,10 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
         </Slabs>
         <Windows>

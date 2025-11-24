@@ -14,6 +14,7 @@
     "geometry_roof_pitch": "4:12",
     "geometry_eaves": "None",
     "enclosure_floor_over_foundation": "ASHRAE 140 Tests: Wood Frame, R-11",
+    "enclosure_carpet": "ASHRAE 140 Tests",
     "enclosure_ceiling": "ASHRAE 140 Tests: R-19",
     "enclosure_roof_material": "ASHRAE 140 Tests: Typical Solar Absorptance",
     "enclosure_roof": "ASHRAE 140 Tests: Uninsulated",
@@ -99,26 +100,24 @@
   },
   "tests/ASHRAE_Standard_140/L302XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
-    "geometry_foundation_type": "Slab-on-Grade",
-    "enclosure_slab": "ASHRAE 140 Tests: Uninsulated, Carpet"
+    "geometry_foundation_type": "Slab-on-Grade"
   },
   "tests/ASHRAE_Standard_140/L304XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L302XC.xml",
-    "enclosure_slab": "ASHRAE 140 Tests: Perimeter, 2ft, R-5, Carpet"
+    "enclosure_slab": "Perimeter, 2ft, R-5"
   },
   "tests/ASHRAE_Standard_140/L322XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
     "geometry_unit_conditioned_floor_area": "3078",
     "geometry_foundation_type": "ASHRAE 140 Tests: Basement, Conditioned",
     "enclosure_foundation_wall": "Solid Concrete, Uninsulated",
-    "enclosure_slab": "ASHRAE 140 Tests: Uninsulated, No Carpet",
+    "enclosure_carpet": "None",
     "enclosure_rim_joist": "ASHRAE 140 Tests: Uninsulated",
     "enclosure_air_leakage": "0.335 nACH"
   },
   "tests/ASHRAE_Standard_140/L324XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L322XC.xml",
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10.2, Interior",
-    "enclosure_slab": "ASHRAE 140 Tests: Uninsulated, No Carpet",
     "enclosure_rim_joist": "ASHRAE 140 Tests: R-11"
   },
   "tests/ASHRAE_Standard_140/L100AL.xml": {
@@ -366,6 +365,7 @@
     "geometry_roof_pitch": "6:12",
     "geometry_eaves": "None",
     "enclosure_slab": "Uninsulated",
+    "enclosure_carpet": "None",
     "enclosure_foundation_wall": "Solid Concrete, Whole Wall, R-10",
     "enclosure_rim_joist": "Exterior, R-10",
     "enclosure_ceiling": "R-38",

@@ -218,6 +218,10 @@
                 <InsulationSpansEntireSlab>true</InsulationSpansEntireSlab>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
         </Slabs>
         <Windows>

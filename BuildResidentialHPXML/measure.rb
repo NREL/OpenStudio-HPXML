@@ -244,6 +244,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Uninsulated')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_carpet', choices[:enclosure_carpet], false)
+    arg.setDisplayName('Enclosure: Carpet')
+    arg.setDescription('The amount of carpet covering the floor (slab-on-grade or floor over foundation/garage). The R-value of the carpet will be ignored if a floor option with an IECC U-factor is selected.')
+    arg.setDefaultValue('80% Carpet')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_ceiling', choices[:enclosure_ceiling], true)
     arg.setDisplayName('Enclosure: Ceiling')
     arg.setDescription('The type and insulation level of the ceiling (attic floor).')
@@ -1956,20 +1962,28 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       end
       @surface_ids[surface.name.to_s] = hpxml_bldg.floors[-1].id
 
+      carpet_r = args[:enclosure_carpet_fraction] * args[:enclosure_carpet_r_value]
+
       if hpxml_bldg.floors[-1].is_thermal_boundary
         case exterior_adjacent_to
         when HPXML::LocationAtticUnvented, HPXML::LocationAtticVented
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_ceiling_assembly_r_value]
         when HPXML::LocationGarage
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_floor_over_garage_assembly_r_value]
+          if not args[:enclosure_floor_over_garage].include? 'IECC U-'
+            hpxml_bldg.floors[-1].insulation_assembly_r_value += carpet_r
+          end
           hpxml_bldg.floors[-1].floor_type = args[:enclosure_floor_over_garage_type]
         else
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_floor_over_foundation_assembly_r_value]
+          if not args[:enclosure_floor_over_foundation].include? 'IECC U-'
+            hpxml_bldg.floors[-1].insulation_assembly_r_value += carpet_r
+          end
           hpxml_bldg.floors[-1].floor_type = args[:enclosure_floor_over_foundation_type]
         end
       else
         if floor_or_ceiling == HPXML::FloorOrCeilingFloor
-          hpxml_bldg.floors[-1].insulation_assembly_r_value = 5.3 # Matches uninsulated option in enclosure_floor_over_foundation.tsv
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = 3.7 + carpet_r # Matches uninsulated option in enclosure_floor_over_foundation.tsv
         else
           hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Matches uninsulated option in enclosure_ceiling.tsv
         end
@@ -2031,8 +2045,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            under_slab_insulation_width: under_slab_insulation_width,
                            under_slab_insulation_r_value: args[:enclosure_slab_under_slab_insulation_nominal_r_value],
                            under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab,
-                           carpet_fraction: args[:enclosure_slab_carpet_fraction],
-                           carpet_r_value: args[:enclosure_slab_carpet_r_value])
+                           carpet_fraction: args[:enclosure_carpet_fraction],
+                           carpet_r_value: args[:enclosure_carpet_r_value])
       @surface_ids[surface.name.to_s] = hpxml_bldg.slabs[-1].id
 
       next unless interior_adjacent_to == HPXML::LocationCrawlspaceConditioned

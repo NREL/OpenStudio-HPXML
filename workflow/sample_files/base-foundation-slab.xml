@@ -180,6 +180,8 @@
             </UnderSlabInsulation>
             <extension>
               <GapInsulationRValue>0.0</GapInsulationRValue>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
             </extension>
           </Slab>
         </Slabs>

@@ -212,7 +212,7 @@
             <Area>1200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
-              <AssemblyEffectiveRValue>22.6</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>21.0</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
@@ -250,6 +250,10 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
         </Slabs>
         <Windows>
@@ -663,7 +667,7 @@
             <Area>1200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation_2'/>
-              <AssemblyEffectiveRValue>22.6</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>21.0</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
@@ -701,6 +705,10 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
         </Slabs>
         <Windows>
@@ -1039,7 +1047,7 @@
             <Area>1200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation_3'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.7</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
@@ -1393,7 +1401,7 @@
             <Area>1200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation_4'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.7</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
@@ -1797,7 +1805,7 @@
             <Area>1200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation_5'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.7</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
@@ -2201,7 +2209,7 @@
             <Area>1200.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation_6'/>
-              <AssemblyEffectiveRValue>5.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.7</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
