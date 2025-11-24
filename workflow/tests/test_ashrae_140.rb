@@ -8,6 +8,11 @@ require_relative '../../HPXMLtoOpenStudio/measure.rb'
 require_relative 'util.rb'
 
 class WorkflowASHRAE140Test < Minitest::Test
+  def setup
+    @schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
+    @schematron_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.sch'))
+  end
+
   def test_ashrae_140
     results_dir = File.join(File.dirname(__FILE__), 'test_results')
     FileUtils.mkdir_p results_dir
