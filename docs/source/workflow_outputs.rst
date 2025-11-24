@@ -766,10 +766,6 @@ End use categories (e.g., Heating, Cooling, Hot Water) report occupied spaces fo
   Electric Panel Breaker Spaces: Headroom Count                                     Total Count minus Occupied Count
   ================================================================================  ====================
 
-.. note::
-
-  Headroom is calculated as the panel's total rated breaker spaces minus occupied breaker spaces.
-
 Loads
 ~~~~~
 
