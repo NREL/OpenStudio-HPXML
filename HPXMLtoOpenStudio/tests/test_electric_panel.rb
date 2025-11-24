@@ -516,6 +516,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted.xml')
     hpxml_bldg.heat_pumps[0].backup_type = nil
+    hpxml_bldg.heat_pumps[0].backup_heating_fuel = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
