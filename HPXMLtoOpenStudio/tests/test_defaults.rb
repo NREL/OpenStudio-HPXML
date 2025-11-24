@@ -5149,7 +5149,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml_defaults_path = File.join(File.dirname(__FILE__), 'in.xml')
+    hpxml_defaults_path = File.join(@tmp_output_path, 'in.xml')
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: @schema_validator, schematron_validator: @schematron_validator)
     if not hpxml.errors.empty?
       puts 'ERRORS:'
