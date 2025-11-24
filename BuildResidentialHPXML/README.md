@@ -491,14 +491,14 @@ The type and insulation level of the slab. Applies to slab-on-grade as well as b
 
 **Enclosure: Carpet**
 
-The amount of carpet covering the floor (slab-on-grade or floor over foundation/garage). The R-value of the carpet will be ignored if a floor option with an IECC U-factor is selected.
+The amount of carpet. Applies to floors/slabs adjacent to conditioned space. The R-value of the carpet will be ignored if a floor option with an IECC U-factor is selected.
 
 - **Name:** ``enclosure_carpet``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** <br/>  - `None`<br/>  - `20% Carpet`<br/>  - `40% Carpet`<br/>  - `60% Carpet`<br/>  - `80% Carpet`<br/>  - `100% Carpet`<br/>  - `ASHRAE 140 Tests`
+- **Choices:** <br/>  - `None`<br/>  - `20% Carpet`<br/>  - `40% Carpet`<br/>  - `60% Carpet`<br/>  - `80% Carpet`<br/>  - `100% Carpet`<br/>  - `Detailed Example: 100% Carpet, R-2.5`<br/>  - `ASHRAE 140 Tests`
 
 
 - **Default:** `80% Carpet`
