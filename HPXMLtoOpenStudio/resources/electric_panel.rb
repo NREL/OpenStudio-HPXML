@@ -204,6 +204,7 @@ module ElectricPanel
       if headroom_spaces < 0
         runner.registerWarning("The sum of OccupiedSpaces (#{occupied_spaces}) exceeds RatedTotalSpaces (#{rated_total_spaces}); increasing RatedTotalSpaces by #{headroom_spaces.abs} and setting HeadroomSpaces=0.")
         electric_panel.rated_total_spaces -= headroom_spaces
+        electric_panel.rated_total_spaces_isdefaulted = true
         headroom_spaces = 0
       end
       electric_panel.headroom_spaces = headroom_spaces
