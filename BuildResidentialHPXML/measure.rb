@@ -246,7 +246,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('enclosure_carpet', choices[:enclosure_carpet], false)
     arg.setDisplayName('Enclosure: Carpet')
-    arg.setDescription('The amount of carpet covering the floor (slab-on-grade or floor over foundation/garage). The R-value of the carpet will be ignored if a floor option with an IECC U-factor is selected.')
+    arg.setDescription('The amount of carpet. Applies to floors/slabs adjacent to conditioned space. The R-value of the carpet will be ignored if a floor option with an IECC U-factor is selected.')
     arg.setDefaultValue('80% Carpet')
     args << arg
 
@@ -1969,21 +1969,23 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         when HPXML::LocationAtticUnvented, HPXML::LocationAtticVented
           hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_ceiling_assembly_r_value]
         when HPXML::LocationGarage
-          hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_floor_over_garage_assembly_r_value]
-          if not args[:enclosure_floor_over_garage].include? 'IECC U-'
-            hpxml_bldg.floors[-1].insulation_assembly_r_value += carpet_r
+          if args[:enclosure_floor_over_garage].include? 'IECC U-'
+            hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_floor_over_garage_assembly_r_value]
+          else
+            hpxml_bldg.floors[-1].insulation_assembly_r_value = (args[:enclosure_floor_over_garage_assembly_r_value] + carpet_r).round(2)
           end
           hpxml_bldg.floors[-1].floor_type = args[:enclosure_floor_over_garage_type]
         else
-          hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_floor_over_foundation_assembly_r_value]
-          if not args[:enclosure_floor_over_foundation].include? 'IECC U-'
-            hpxml_bldg.floors[-1].insulation_assembly_r_value += carpet_r
+          if args[:enclosure_floor_over_foundation].include? 'IECC U-'
+            hpxml_bldg.floors[-1].insulation_assembly_r_value = args[:enclosure_floor_over_foundation_assembly_r_value]
+          else
+            hpxml_bldg.floors[-1].insulation_assembly_r_value = (args[:enclosure_floor_over_foundation_assembly_r_value] + carpet_r).round(2)
           end
           hpxml_bldg.floors[-1].floor_type = args[:enclosure_floor_over_foundation_type]
         end
       else
         if floor_or_ceiling == HPXML::FloorOrCeilingFloor
-          hpxml_bldg.floors[-1].insulation_assembly_r_value = 3.7 + carpet_r # Matches uninsulated option in enclosure_floor_over_foundation.tsv
+          hpxml_bldg.floors[-1].insulation_assembly_r_value = (3.7 + carpet_r).round(2) # Matches uninsulated option in enclosure_floor_over_foundation.tsv
         else
           hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Matches uninsulated option in enclosure_ceiling.tsv
         end
@@ -2044,10 +2046,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            exterior_horizontal_insulation_depth_below_grade: args[:enclosure_slab_exterior_horizontal_insulation_depth_below_grade],
                            under_slab_insulation_width: under_slab_insulation_width,
                            under_slab_insulation_r_value: args[:enclosure_slab_under_slab_insulation_nominal_r_value],
-                           under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab,
-                           carpet_fraction: args[:enclosure_carpet_fraction],
-                           carpet_r_value: args[:enclosure_carpet_r_value])
+                           under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab)
       @surface_ids[surface.name.to_s] = hpxml_bldg.slabs[-1].id
+
+      if [HPXML::LocationConditionedSpace, HPXML::LocationBasementConditioned].include? interior_adjacent_to
+        hpxml_bldg.slabs[-1].carpet_fraction = args[:enclosure_carpet_fraction]
+        hpxml_bldg.slabs[-1].carpet_r_value = args[:enclosure_carpet_r_value]
+      end
 
       next unless interior_adjacent_to == HPXML::LocationCrawlspaceConditioned
 

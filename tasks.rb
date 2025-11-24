@@ -755,7 +755,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            attached_to_wall_idref: wall.id,
                            area: 20,
                            azimuth: 0,
-                           r_value: 4.4)
+                           r_value: hpxml_bldg.doors[0].r_value)
       hpxml_bldg.hvac_distributions[0].ducts[0].duct_location = adjacent_to
       hpxml_bldg.hvac_distributions[0].ducts[1].duct_location = adjacent_to
       hpxml_bldg.water_heating_systems[0].location = adjacent_to
@@ -826,9 +826,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 50,
                              azimuth: 270,
-                             ufactor: 0.33,
-                             shgc: 0.45,
-                             fraction_operable: 0.67,
+                             ufactor: hpxml_bldg.windows[0].ufactor,
+                             shgc: hpxml_bldg.windows[0].shgc,
+                             fraction_operable: hpxml_bldg.windows[0].fraction_operable,
                              attached_to_wall_idref: wall.id)
       wall = hpxml_bldg.walls.select { |w|
                w.interior_adjacent_to == HPXML::LocationConditionedSpace &&
@@ -838,7 +838,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            attached_to_wall_idref: wall.id,
                            area: 20,
                            azimuth: 0,
-                           r_value: 4.4)
+                           r_value: hpxml_bldg.doors[0].r_value)
       wall = hpxml_bldg.walls.select { |w|
                w.interior_adjacent_to == HPXML::LocationConditionedSpace &&
                  w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
@@ -847,23 +847,24 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            attached_to_wall_idref: wall.id,
                            area: 20,
                            azimuth: 0,
-                           r_value: 4.4)
+                           r_value: hpxml_bldg.doors[0].r_value)
     elsif ['base-enclosure-orientations.xml'].include? hpxml_file
       hpxml_bldg.windows.each do |window|
         window.orientation = { 0 => 'north', 90 => 'east', 180 => 'south', 270 => 'west' }[window.azimuth]
         window.azimuth = nil
       end
+      door_r_value = hpxml_bldg.doors[0].r_value
       hpxml_bldg.doors[0].delete
       hpxml_bldg.doors.add(id: "Door#{hpxml_bldg.doors.size + 1}",
                            attached_to_wall_idref: 'Wall1',
                            area: 20,
                            orientation: HPXML::OrientationNorth,
-                           r_value: 4.4)
+                           r_value: door_r_value)
       hpxml_bldg.doors.add(id: "Door#{hpxml_bldg.doors.size + 1}",
                            attached_to_wall_idref: 'Wall1',
                            area: 20,
                            orientation: HPXML::OrientationSouth,
-                           r_value: 4.4)
+                           r_value: door_r_value)
     elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
       hpxml_bldg.foundations[0].within_infiltration_volume = false
     elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -877,9 +878,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.roofs.add(id: "Roof#{hpxml_bldg.roofs.size + 1}",
                            interior_adjacent_to: HPXML::LocationAtticUnvented,
                            area: 504,
-                           roof_type: HPXML::RoofTypeAsphaltShingles,
-                           pitch: 6,
-                           radiant_barrier: false,
+                           roof_type: hpxml_bldg.roofs[0].roof_type,
+                           pitch: hpxml_bldg.roofs[0].pitch,
                            insulation_assembly_r_value: 2.3)
       hpxml_bldg.rim_joists.each do |rim_joist|
         rim_joist.area = 116.0 / hpxml_bldg.rim_joists.size
@@ -897,7 +897,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            exterior_adjacent_to: HPXML::LocationOutside,
                            interior_adjacent_to: HPXML::LocationConditionedSpace,
                            wall_type: HPXML::WallTypeWoodStud,
-                           siding: HPXML::SidingTypeWood,
+                           siding: hpxml_bldg.walls[0].siding,
+                           color: hpxml_bldg.walls[0].color,
                            area: 240,
                            insulation_assembly_r_value: 22.3)
       hpxml_bldg.walls.add(id: "Wall#{hpxml_bldg.walls.size + 1}",
@@ -905,7 +906,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            interior_adjacent_to: HPXML::LocationAtticUnvented,
                            attic_wall_type: HPXML::AtticWallTypeGable,
                            wall_type: HPXML::WallTypeWoodStud,
-                           siding: HPXML::SidingTypeWood,
+                           siding: hpxml_bldg.walls[0].siding,
+                           color: hpxml_bldg.walls[0].color,
                            area: 50,
                            insulation_assembly_r_value: 4.0)
       hpxml_bldg.foundation_walls.each do |foundation_wall|
@@ -940,29 +942,29 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 20,
                              azimuth: 0,
-                             ufactor: 0.33,
-                             shgc: 0.45,
+                             ufactor: hpxml_bldg.windows[0].ufactor,
+                             shgc: hpxml_bldg.windows[0].shgc,
                              fraction_operable: 0.0,
                              attached_to_wall_idref: hpxml_bldg.foundation_walls[0].id)
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 10,
                              azimuth: 90,
-                             ufactor: 0.33,
-                             shgc: 0.45,
+                             ufactor: hpxml_bldg.windows[0].ufactor,
+                             shgc: hpxml_bldg.windows[0].shgc,
                              fraction_operable: 0.0,
                              attached_to_wall_idref: hpxml_bldg.foundation_walls[0].id)
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 20,
                              azimuth: 180,
-                             ufactor: 0.33,
-                             shgc: 0.45,
+                             ufactor: hpxml_bldg.windows[0].ufactor,
+                             shgc: hpxml_bldg.windows[0].shgc,
                              fraction_operable: 0.0,
                              attached_to_wall_idref: hpxml_bldg.foundation_walls[0].id)
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 10,
                              azimuth: 270,
-                             ufactor: 0.33,
-                             shgc: 0.45,
+                             ufactor: hpxml_bldg.windows[0].ufactor,
+                             shgc: hpxml_bldg.windows[0].shgc,
                              fraction_operable: 0.0,
                              attached_to_wall_idref: hpxml_bldg.foundation_walls[0].id)
     elsif ['base-enclosure-skylights-cathedral.xml'].include? hpxml_file
@@ -1172,8 +1174,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 20,
                              azimuth: 0,
-                             ufactor: 0.33,
-                             shgc: 0.45,
+                             ufactor: hpxml_bldg.windows[0].ufactor,
+                             shgc: hpxml_bldg.windows[0].shgc,
                              fraction_operable: 0.0,
                              attached_to_wall_idref: hpxml_bldg.foundation_walls[-1].id)
     elsif ['base-foundation-multiple.xml'].include? hpxml_file
@@ -1342,12 +1344,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            attached_to_wall_idref: hpxml_bldg.walls[-3].id,
                            area: 70,
                            azimuth: 180,
-                           r_value: 4.4)
+                           r_value: hpxml_bldg.doors[0].r_value)
       hpxml_bldg.doors.add(id: "Door#{hpxml_bldg.doors.size + 1}",
                            attached_to_wall_idref: hpxml_bldg.walls[-2].id,
                            area: 4,
                            azimuth: 0,
-                           r_value: 4.4)
+                           r_value: hpxml_bldg.doors[0].r_value)
     elsif ['base-enclosure-ceilingtypes.xml'].include? hpxml_file
       exterior_adjacent_to = hpxml_bldg.floors[0].exterior_adjacent_to
       area = hpxml_bldg.floors[0].area
@@ -1389,6 +1391,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.floors[-1].id = "Floor#{hpxml_bldg.floors.size}"
       hpxml_bldg.floors[-1].insulation_id = "Floor#{hpxml_bldg.floors.size}Insulation"
     elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
+      window_ufactor = hpxml_bldg.windows[0].ufactor
+      window_shgc = hpxml_bldg.windows[0].shgc
+      window_fraction_operable = hpxml_bldg.windows[0].fraction_operable
+      door_r_value = hpxml_bldg.doors[0].r_value
       hpxml_bldg.rim_joists.reverse_each do |rim_joist|
         rim_joist.delete
       end
@@ -1469,30 +1475,30 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 108 / 8,
                              azimuth: 0,
-                             ufactor: 0.33,
-                             shgc: 0.45,
-                             fraction_operable: 0.67,
+                             ufactor: window_ufactor,
+                             shgc: window_shgc,
+                             fraction_operable: window_fraction_operable,
                              attached_to_wall_idref: 'Wall1')
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 72 / 8,
                              azimuth: 90,
-                             ufactor: 0.33,
-                             shgc: 0.45,
-                             fraction_operable: 0.67,
+                             ufactor: window_ufactor,
+                             shgc: window_shgc,
+                             fraction_operable: window_fraction_operable,
                              attached_to_wall_idref: 'Wall2')
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 108 / 8,
                              azimuth: 180,
-                             ufactor: 0.33,
-                             shgc: 0.45,
-                             fraction_operable: 0.67,
+                             ufactor: window_ufactor,
+                             shgc: window_shgc,
+                             fraction_operable: window_fraction_operable,
                              attached_to_wall_idref: 'Wall3')
       hpxml_bldg.windows.add(id: "Window#{hpxml_bldg.windows.size + 1}",
                              area: 72 / 8,
                              azimuth: 270,
-                             ufactor: 0.33,
-                             shgc: 0.45,
-                             fraction_operable: 0.67,
+                             ufactor: window_ufactor,
+                             shgc: window_shgc,
+                             fraction_operable: window_fraction_operable,
                              attached_to_wall_idref: 'Wall4')
       hpxml_bldg.doors.reverse_each do |door|
         door.delete
@@ -1501,12 +1507,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            attached_to_wall_idref: 'Wall9',
                            area: 20,
                            azimuth: 0,
-                           r_value: 4.4)
+                           r_value: door_r_value)
       hpxml_bldg.doors.add(id: "Door#{hpxml_bldg.doors.size + 1}",
                            attached_to_wall_idref: 'Wall10',
                            area: 20,
                            azimuth: 180,
-                           r_value: 4.4)
+                           r_value: door_r_value)
     elsif ['base-enclosure-rooftypes.xml'].include? hpxml_file
       hpxml_bldg.roofs.reverse_each do |roof|
         roof.delete

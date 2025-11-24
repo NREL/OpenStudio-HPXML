@@ -262,8 +262,8 @@
             <SystemIdentifier id='Window4'/>
             <Area>50.0</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall3'/>
           </Window>

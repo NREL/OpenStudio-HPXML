@@ -126,7 +126,6 @@
             <Area>504.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof2Insulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
@@ -185,6 +184,7 @@
             </WallType>
             <Area>240.0</Area>
             <Siding>wood siding</Siding>
+            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>22.3</AssemblyEffectiveRValue>
@@ -200,6 +200,7 @@
             </WallType>
             <Area>50.0</Area>
             <Siding>wood siding</Siding>
+            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>

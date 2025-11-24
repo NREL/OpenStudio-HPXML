@@ -195,7 +195,7 @@
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
-              <AssemblyEffectiveRValue>17.8</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>19.4</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
           <Floor>
@@ -233,10 +233,6 @@
                 <InsulationWidth>0.0</InsulationWidth>
               </Layer>
             </UnderSlabInsulation>
-            <extension>
-              <CarpetFraction>0.0</CarpetFraction>
-              <CarpetRValue>0.0</CarpetRValue>
-            </extension>
           </Slab>
         </Slabs>
         <Windows>
@@ -296,8 +292,8 @@
             <SystemIdentifier id='Window5'/>
             <Area>20.0</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='FoundationWall1'/>
           </Window>
@@ -305,8 +301,8 @@
             <SystemIdentifier id='Window6'/>
             <Area>10.0</Area>
             <Azimuth>90</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='FoundationWall1'/>
           </Window>
@@ -314,8 +310,8 @@
             <SystemIdentifier id='Window7'/>
             <Area>20.0</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='FoundationWall1'/>
           </Window>
@@ -323,8 +319,8 @@
             <SystemIdentifier id='Window8'/>
             <Area>10.0</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
+            <UFactor>0.35</UFactor>
+            <SHGC>0.44</SHGC>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='FoundationWall1'/>
           </Window>
