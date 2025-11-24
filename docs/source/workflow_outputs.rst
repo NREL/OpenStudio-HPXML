@@ -769,7 +769,6 @@ End use categories (e.g., Heating, Cooling, Hot Water) report occupied spaces fo
 .. note::
 
   Headroom is calculated as the panel's total rated breaker spaces minus occupied breaker spaces.
-  A positive value indicates panel availability whereas a negative value indicates panel constraint.
 
 Loads
 ~~~~~
