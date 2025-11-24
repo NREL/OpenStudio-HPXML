@@ -8,11 +8,6 @@ require_relative '../../HPXMLtoOpenStudio/measure.rb'
 require_relative 'util.rb'
 
 class WorkflowOtherTest < Minitest::Test
-  def setup
-    @schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
-    @schematron_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.sch'))
-  end
-
   def test_run_simulation_output_formats
     # Check that the simulation produces outputs in the appropriate format
     ['csv', 'json', 'msgpack', 'csv_dview'].each do |output_format|
