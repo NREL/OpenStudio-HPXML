@@ -410,6 +410,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
 
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
     hpxml_bldg.heat_pumps[0].backup_type = nil
+    hpxml_bldg.heat_pumps[0].backup_heating_fuel = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
@@ -890,7 +891,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                         voltage: HPXML::ElectricPanelVoltage240,
                         occupied_spaces: 0,
                         component_idrefs: [hpxml_bldg.cooling_systems[0].id])
-    service_feeders.add(type: HPXML::ElectricPanelLoadTypeWaterHeater,
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeWaterHeater,
                         power: 4500,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
@@ -898,7 +900,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                         voltage: HPXML::ElectricPanelVoltage240,
                         occupied_spaces: 2,
                         component_idrefs: [hpxml_bldg.water_heating_systems[0].id])
-    service_feeders.add(type: HPXML::ElectricPanelLoadTypeClothesDryer,
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeClothesDryer,
                         power: 5760,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
@@ -906,7 +909,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                         voltage: HPXML::ElectricPanelVoltage240,
                         occupied_spaces: 2,
                         component_idrefs: [hpxml_bldg.clothes_dryers[0].id])
-    service_feeders.add(type: HPXML::ElectricPanelLoadTypeRangeOven,
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeRangeOven,
                         power: 12000,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
@@ -916,7 +920,8 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                         component_idrefs: [hpxml_bldg.cooking_ranges[0].id])
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging)
-    service_feeders.add(type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
+    service_feeders.add(id: "ServiceFeeder#{service_feeders.size + 1}",
+                        type: HPXML::ElectricPanelLoadTypeElectricVehicleCharging,
                         power: 1650,
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.plug_loads[-1].id])
