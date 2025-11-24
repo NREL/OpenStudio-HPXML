@@ -158,7 +158,6 @@
               <WoodStud/>
             </WallType>
             <Area>320.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -642,7 +641,6 @@
               <WoodStud/>
             </WallType>
             <Area>320.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation_2'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -1093,7 +1091,6 @@
               <WoodStud/>
             </WallType>
             <Area>320.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation_3'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -1480,7 +1477,6 @@
               <WoodStud/>
             </WallType>
             <Area>320.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation_4'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -1887,7 +1883,6 @@
               <WoodStud/>
             </WallType>
             <Area>320.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation_5'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -1917,7 +1912,6 @@
               <WoodStud/>
             </WallType>
             <Area>200.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation_5'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -2324,7 +2318,6 @@
               <WoodStud/>
             </WallType>
             <Area>320.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation_6'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -2354,7 +2347,6 @@
               <WoodStud/>
             </WallType>
             <Area>200.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation_6'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>

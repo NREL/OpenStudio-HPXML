@@ -1790,6 +1790,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         end
       end
 
+      if exterior_adjacent_to == HPXML::LocationOutside
+        color = args[:enclosure_wall_siding_color]
+        solar_absorptance = args[:enclosure_wall_siding_solar_absorptance]
+        emittance = args[:enclosure_wall_siding_emittance]
+      else
+        color = nil
+        solar_absorptance = nil
+        emittance = nil
+      end
+
       azimuth = Geometry.get_surface_azimuth(surface, args[:geometry_unit_direction_azimuth])
 
       hpxml_bldg.walls.add(id: "Wall#{hpxml_bldg.walls.size + 1}",
@@ -1799,9 +1809,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            wall_type: wall_type,
                            attic_wall_type: attic_wall_type,
                            siding: siding,
-                           color: args[:enclosure_wall_siding_color],
-                           solar_absorptance: args[:enclosure_wall_siding_solar_absorptance],
-                           emittance: args[:enclosure_wall_siding_emittance],
+                           color: color,
+                           solar_absorptance: solar_absorptance,
+                           emittance: emittance,
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'))
       @surface_ids[surface.name.to_s] = hpxml_bldg.walls[-1].id
 

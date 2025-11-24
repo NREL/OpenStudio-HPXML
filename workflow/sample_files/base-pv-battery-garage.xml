@@ -167,7 +167,6 @@
               <WoodStud/>
             </WallType>
             <Area>240.0</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>

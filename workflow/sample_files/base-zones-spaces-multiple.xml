@@ -256,7 +256,6 @@
               <WoodStud/>
             </WallType>
             <Area>151.1</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall3InsulationSpace1'/>
               <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>
@@ -271,7 +270,6 @@
               <WoodStud/>
             </WallType>
             <Area>88.9</Area>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall3InsulationSpace2'/>
               <AssemblyEffectiveRValue>22.7</AssemblyEffectiveRValue>

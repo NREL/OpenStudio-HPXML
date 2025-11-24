@@ -880,6 +880,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            area: 504,
                            roof_type: hpxml_bldg.roofs[0].roof_type,
                            pitch: hpxml_bldg.roofs[0].pitch,
+                           roof_color: hpxml_bldg.roofs[0].roof_color,
                            insulation_assembly_r_value: 2.3)
       hpxml_bldg.rim_joists.each do |rim_joist|
         rim_joist.area = 116.0 / hpxml_bldg.rim_joists.size
@@ -1320,6 +1321,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            interior_adjacent_to: HPXML::LocationGarage,
                            wall_type: HPXML::WallTypeWoodStud,
                            siding: HPXML::SidingTypeWood,
+                           color: hpxml_bldg.walls[0].color,
                            area: 320,
                            insulation_assembly_r_value: 4)
       hpxml_bldg.floors.add(id: "Floor#{hpxml_bldg.floors.size + 1}",
