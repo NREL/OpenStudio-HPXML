@@ -248,7 +248,8 @@ module HVACSizing
 
     locations = []
     hpxml_bldg.surfaces.each do |surface|
-      surface = surface.sameas if surface.sameas_id
+      next unless surface.sameas_id.nil? && surface.referenced_by_sameas.nil?
+
       locations << surface.interior_adjacent_to
       locations << surface.exterior_adjacent_to
     end
@@ -1017,10 +1018,10 @@ module HVACSizing
     # Above-Grade Wall Area
     (hpxml_bldg.walls + hpxml_bldg.rim_joists + hpxml_bldg.foundation_walls).each do |wall|
       next unless wall.is_thermal_boundary
+      next unless wall.sameas_id.nil? && wall.referenced_by_sameas.nil?
 
       space = wall.space
       zone = space.zone
-      wall = wall.sameas if wall.sameas_id # use adjacent wall inputs instead
 
       # Get gross/net areas
       if wall.is_a?(HPXML::FoundationWall) && wall.depth_below_grade == wall.height
@@ -1212,14 +1213,11 @@ module HVACSizing
   def self.process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
+      next unless floor.sameas_id.nil? && floor.referenced_by_sameas.nil?
 
       space = floor.space
       zone = space.zone
       is_ceiling = floor.is_ceiling
-      if floor.sameas_id
-        floor = floor.sameas # use adjacent wall inputs instead
-        is_ceiling = !floor.is_ceiling
-      end
 
       next unless is_ceiling
 
@@ -1256,14 +1254,11 @@ module HVACSizing
   def self.process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
+      next unless floor.sameas_id.nil? && floor.referenced_by_sameas.nil?
 
       space = floor.space
       zone = space.zone
       is_floor = floor.is_floor
-      if floor.sameas_id
-        floor = floor.sameas # use adjacent floor inputs instead
-        is_floor = !floor.is_floor
-      end
 
       next unless is_floor
 

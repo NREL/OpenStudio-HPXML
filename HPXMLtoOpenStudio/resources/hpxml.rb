@@ -3915,6 +3915,7 @@ class HPXML < Object
   class Roof < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
              :area,                           # [Double] Area (ft2)
@@ -4297,6 +4298,9 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; space; rescue StandardError => e; errors << e.message; end
+      if sameas_id
+        begin; sameas; rescue StandardError => e; errors << e.message; end
+      end
       return errors
     end
 
@@ -4579,6 +4583,8 @@ class HPXML < Object
       errors = []
       if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
+      else
+        begin; sameas; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
@@ -4943,6 +4949,8 @@ class HPXML < Object
       errors = []
       if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
+      else
+        begin; sameas; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
@@ -5258,6 +5266,8 @@ class HPXML < Object
       errors = []
       if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
+      else
+        begin; sameas; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
@@ -5406,6 +5416,7 @@ class HPXML < Object
   class Slab < BaseElement
     ATTRS = [:id,                                               # [String] SystemIdentifier/@id
              :sameas_id,                                        # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,                             # [String] Sameas object id that references this object
              :attached_to_space_idref,                          # [String] AttachedToSpace/@idref
              :interior_adjacent_to,                             # [String] InteriorAdjacentTo (HPXML::LocationXXX)
              :area,                                             # [Double] Area (ft2)
