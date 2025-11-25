@@ -130,7 +130,6 @@
             <Area>11.0</Area>
             <Siding>aluminum siding</Siding>
             <Color>dark</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist1Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -143,7 +142,6 @@
             <Area>11.0</Area>
             <Siding>asbestos siding</Siding>
             <Color>medium</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist2Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -156,7 +154,6 @@
             <Area>11.0</Area>
             <Siding>brick veneer</Siding>
             <Color>reflective</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist3Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -169,7 +166,6 @@
             <Area>11.0</Area>
             <Siding>composite shingle siding</Siding>
             <Color>dark</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist4Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -182,7 +178,6 @@
             <Area>11.0</Area>
             <Siding>fiber cement siding</Siding>
             <Color>medium dark</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist5Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -195,7 +190,6 @@
             <Area>11.0</Area>
             <Siding>masonite siding</Siding>
             <Color>light</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist6Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -208,7 +202,6 @@
             <Area>11.0</Area>
             <Siding>stucco</Siding>
             <Color>medium</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist7Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -221,7 +214,6 @@
             <Area>11.0</Area>
             <Siding>synthetic stucco</Siding>
             <Color>medium dark</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist8Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -234,7 +226,6 @@
             <Area>11.0</Area>
             <Siding>vinyl siding</Siding>
             <Color>light</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist9Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -247,7 +238,6 @@
             <Area>11.0</Area>
             <Siding>none</Siding>
             <Color>medium</Color>
-            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoist10Insulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -265,7 +255,6 @@
             <Area>109.0</Area>
             <Siding>aluminum siding</Siding>
             <Color>reflective</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -285,7 +274,6 @@
             <Area>109.0</Area>
             <Siding>asbestos siding</Siding>
             <Color>light</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>1.0</Thickness>
@@ -305,7 +293,6 @@
             <Area>109.0</Area>
             <Siding>brick veneer</Siding>
             <Color>medium dark</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum composite board</Type>
               <Thickness>0.5</Thickness>
@@ -325,7 +312,6 @@
             <Area>109.0</Area>
             <Siding>composite shingle siding</Siding>
             <Color>reflective</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>plaster</Type>
               <Thickness>0.5</Thickness>
@@ -345,7 +331,6 @@
             <Area>109.0</Area>
             <Siding>fiber cement siding</Siding>
             <Color>medium</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>wood</Type>
               <Thickness>0.5</Thickness>
@@ -365,7 +350,6 @@
             <Area>109.0</Area>
             <Siding>masonite siding</Siding>
             <Color>dark</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>none</Type>
             </InteriorFinish>
@@ -384,7 +368,6 @@
             <Area>109.0</Area>
             <Siding>stucco</Siding>
             <Color>light</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -404,7 +387,6 @@
             <Area>109.0</Area>
             <Siding>synthetic stucco</Siding>
             <Color>medium</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>1.0</Thickness>
@@ -424,7 +406,6 @@
             <Area>109.0</Area>
             <Siding>vinyl siding</Siding>
             <Color>dark</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum composite board</Type>
               <Thickness>0.5</Thickness>
@@ -444,7 +425,6 @@
             <Area>109.0</Area>
             <Siding>none</Siding>
             <Color>medium</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>plaster</Type>
               <Thickness>0.5</Thickness>
@@ -464,7 +444,6 @@
             <Area>109.0</Area>
             <Siding>aluminum siding</Siding>
             <Color>reflective</Color>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>wood</Type>
               <Thickness>0.5</Thickness>

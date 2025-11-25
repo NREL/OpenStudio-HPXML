@@ -187,8 +187,8 @@
               </Layer>
             </UnderSlabInsulation>
             <extension>
-              <CarpetFraction>1.0</CarpetFraction>
-              <CarpetRValue>2.5</CarpetRValue>
+              <CarpetFraction>0.8</CarpetFraction>
+              <CarpetRValue>2.0</CarpetRValue>
             </extension>
           </Slab>
         </Slabs>

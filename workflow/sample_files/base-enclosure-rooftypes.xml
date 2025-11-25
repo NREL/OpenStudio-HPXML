@@ -113,7 +113,6 @@
             <Area>188.6625</Area>
             <RoofType>slate or tile shingles</RoofType>
             <RoofColor>light</RoofColor>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -131,7 +130,6 @@
             <Area>188.6625</Area>
             <RoofType>metal surfacing</RoofType>
             <RoofColor>reflective</RoofColor>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>plaster</Type>
               <Thickness>0.5</Thickness>
@@ -149,7 +147,6 @@
             <Area>188.6625</Area>
             <RoofType>wood shingles or shakes</RoofType>
             <RoofColor>dark</RoofColor>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>wood</Type>
               <Thickness>0.5</Thickness>
@@ -167,7 +164,6 @@
             <Area>188.6625</Area>
             <RoofType>shingles</RoofType>
             <RoofColor>medium dark</RoofColor>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -185,7 +181,6 @@
             <Area>188.6625</Area>
             <RoofType>plastic/rubber/synthetic sheeting</RoofType>
             <RoofColor>light</RoofColor>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>plaster</Type>
               <Thickness>0.5</Thickness>
@@ -203,7 +198,6 @@
             <Area>188.6625</Area>
             <RoofType>expanded polystyrene sheathing</RoofType>
             <RoofColor>medium</RoofColor>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>wood</Type>
               <Thickness>0.5</Thickness>
@@ -221,7 +215,6 @@
             <Area>188.6625</Area>
             <RoofType>concrete</RoofType>
             <RoofColor>light</RoofColor>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -239,7 +232,6 @@
             <Area>188.6625</Area>
             <RoofType>cool roof</RoofType>
             <RoofColor>reflective</RoofColor>
-            <Emittance>0.92</Emittance>
             <InteriorFinish>
               <Type>plaster</Type>
               <Thickness>0.5</Thickness>

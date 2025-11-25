@@ -1061,7 +1061,8 @@
     "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
     "geometry_unit_conditioned_floor_area": "3250",
     "geometry_garage_type": "2 Car, Right, Fully Inset",
-    "enclosure_floor_over_garage": "Wood Frame, R-38"
+    "enclosure_floor_over_garage": "Wood Frame, R-38",
+    "enclosure_carpet": "80% Carpet"
   },
   "sample_files/base-enclosure-beds-1.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1253,11 +1254,13 @@
   },
   "sample_files/base-foundation-conditioned-basement-slab-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "enclosure_slab": "Under Slab, 4ft, R-10"
+    "enclosure_slab": "Under Slab, 4ft, R-10",
+    "enclosure_carpet": "80% Carpet"
   },
   "sample_files/base-foundation-conditioned-basement-slab-insulation-full.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "enclosure_slab": "Whole Slab, R-10"
+    "enclosure_slab": "Whole Slab, R-10",
+    "enclosure_carpet": "80% Carpet"
   },
   "sample_files/base-foundation-conditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1285,7 +1288,8 @@
   },
   "sample_files/base-foundation-slab-exterior-horizontal-insulation.xml": {
     "parent_hpxml": "sample_files/base-foundation-slab.xml",
-    "enclosure_slab": "Perimeter, 2ft, R-5"
+    "enclosure_slab": "Perimeter, 2ft, R-5",
+    "enclosure_carpet": "80% Carpet"
   },
   "sample_files/base-foundation-multiple.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml"

@@ -1417,7 +1417,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                   siding: siding_type[0],
                                   color: siding_type[1],
                                   area: 116 / siding_types.size,
-                                  emittance: 0.92,
                                   insulation_assembly_r_value: 23.0)
         hpxml_bldg.foundations[0].attached_to_rim_joist_idrefs << hpxml_bldg.rim_joists[-1].id
       end
@@ -1460,7 +1459,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                              siding: siding_types[i % siding_types.size][0],
                              color: siding_types[i % siding_types.size][1],
                              area: 1200 / walls_map.size,
-                             emittance: 0.92,
                              interior_finish_type: int_finish_types[i % int_finish_types.size][0],
                              interior_finish_thickness: int_finish_types[i % int_finish_types.size][1],
                              insulation_assembly_r_value: assembly_r)
@@ -1536,7 +1534,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                              area: 1509.3 / roof_types.size,
                              roof_type: roof_type[0],
                              roof_color: roof_type[1],
-                             emittance: 0.92,
                              pitch: 6,
                              radiant_barrier: false,
                              interior_finish_type: int_finish_types[i % int_finish_types.size][0],
