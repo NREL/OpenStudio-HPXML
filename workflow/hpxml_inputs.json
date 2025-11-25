@@ -283,9 +283,9 @@
     "dhw_water_heater": "HERS Hot Water Tests: Natural Gas, Tank, 40 gal, EF 0.56",
     "dhw_water_heater_location": "Conditioned Space",
     "appliance_clothes_washer": "HERS Reference",
-    "appliance_clothes_dryer": "HERS Reference, Electricity",
+    "appliance_clothes_dryer": "HERS Reference: Electricity",
     "appliance_dishwasher": "HERS Reference",
-    "appliance_refrigerator": "HERS Reference, 2-Bedroom Home",
+    "appliance_refrigerator": "HERS Reference: 2-Bedroom Home",
     "appliance_cooking_range_oven": "Electricity, Standard, Non-Convection, 100% Usage",
     "lighting": "HERS Reference",
     "misc_plug_loads": "100% Usage",
@@ -293,7 +293,7 @@
   },
   "tests/HERS_Hot_Water/L100AD-HW-02.xml": {
     "parent_hpxml": "tests/HERS_Hot_Water/L100AD-HW-01.xml",
-    "appliance_refrigerator": "HERS Reference, 4-Bedroom Home",
+    "appliance_refrigerator": "HERS Reference: 4-Bedroom Home",
     "geometry_unit_num_bedrooms": "4"
   },
   "tests/HERS_Hot_Water/L100AD-HW-03.xml": {
