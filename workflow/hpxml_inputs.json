@@ -2398,6 +2398,7 @@
     "geometry_unit_conditioned_floor_area": "1200",
     "geometry_unit_aspect_ratio": "0.75",
     "enclosure_floor_over_foundation": "Wood Frame, R-19",
+    "enclosure_carpet": "80% Carpet",
     "enclosure_air_leakage": "Detailed Example: 0.375 nACH",
     "geometry_window_areas_or_wwrs": "0.18, 0.18, 0.18, 0.18",
     "geometry_door_area": "20",

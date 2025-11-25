@@ -1723,6 +1723,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         insulation_assembly_r_value = (args[:enclosure_rim_joist_assembly_r_value] + args[:enclosure_wall_siding_r_value]).round(2)
       end
 
+      if exterior_adjacent_to == HPXML::LocationOutside
+        color = args[:enclosure_wall_siding_color]
+        solar_absorptance = args[:enclosure_wall_siding_solar_absorptance]
+        emittance = args[:enclosure_wall_siding_emittance]
+      else
+        color = nil
+        solar_absorptance = nil
+        emittance = nil
+      end
+
       azimuth = Geometry.get_surface_azimuth(surface, args[:geometry_unit_direction_azimuth])
 
       hpxml_bldg.rim_joists.add(id: "RimJoist#{hpxml_bldg.rim_joists.size + 1}",
@@ -1731,9 +1741,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                                 azimuth: azimuth,
                                 area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                                 siding: siding,
-                                color: args[:enclosure_wall_siding_color],
-                                solar_absorptance: args[:enclosure_wall_siding_solar_absorptance],
-                                emittance: args[:enclosure_wall_siding_emittance],
+                                color: color,
+                                solar_absorptance: solar_absorptance,
+                                emittance: emittance,
                                 insulation_assembly_r_value: insulation_assembly_r_value)
       @surface_ids[surface.name.to_s] = hpxml_bldg.rim_joists[-1].id
     end
