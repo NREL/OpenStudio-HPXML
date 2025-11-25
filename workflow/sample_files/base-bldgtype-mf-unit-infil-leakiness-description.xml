@@ -68,7 +68,6 @@
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
             <LeakinessDescription>tight</LeakinessDescription>
-            <InfiltrationVolume>7200.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>

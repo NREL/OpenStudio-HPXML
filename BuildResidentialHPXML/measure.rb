@@ -1615,14 +1615,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         air_leakage_type = HPXML::InfiltrationTypeUnitExterior
       end
     end
-    infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
 
     hpxml_bldg.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml_bldg.air_infiltration_measurements.size + 1}",
                                                  house_pressure: house_pressure,
                                                  unit_of_measure: unit_of_measure,
                                                  air_leakage: air_leakage,
                                                  effective_leakage_area: effective_leakage_area,
-                                                 infiltration_volume: infiltration_volume,
                                                  infiltration_type: air_leakage_type,
                                                  leakiness_description: leakiness_description)
   end
@@ -2076,10 +2074,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
       next unless interior_adjacent_to == HPXML::LocationCrawlspaceConditioned
 
-      # Increase Conditioned Building Volume & Infiltration Volume
+      # Increase Conditioned Building Volume
       conditioned_crawlspace_volume = hpxml_bldg.slabs[-1].area * args[:geometry_foundation_type_height]
       hpxml_bldg.building_construction.conditioned_building_volume += conditioned_crawlspace_volume
-      hpxml_bldg.air_infiltration_measurements[0].infiltration_volume += conditioned_crawlspace_volume
     end
   end
 

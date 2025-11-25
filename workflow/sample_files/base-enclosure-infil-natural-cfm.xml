@@ -69,7 +69,6 @@
               <UnitofMeasure>CFMnatural</UnitofMeasure>
               <AirLeakage>72.0</AirLeakage>
             </BuildingAirLeakage>
-            <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>

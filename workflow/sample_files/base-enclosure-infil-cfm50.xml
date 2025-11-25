@@ -70,7 +70,6 @@
               <UnitofMeasure>CFM</UnitofMeasure>
               <AirLeakage>1080.0</AirLeakage>
             </BuildingAirLeakage>
-            <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
