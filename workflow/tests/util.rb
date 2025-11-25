@@ -111,7 +111,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
     hpxml.errors.each do |error|
       puts error
     end
-    flunk "EPvalidator.sch error in #{hpxml_defaults_path}."
+    flunk "Validation error(s) in #{hpxml_defaults_path}."
   end
   annual_results = _get_simulation_annual_results(annual_csv_path, bills_csv_path, panel_csv_path)
   monthly_results = _get_simulation_monthly_results(monthly_csv_path)
