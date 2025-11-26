@@ -1628,12 +1628,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'inconsistent-vented-attic-ventilation-rate'
         hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
         attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeVented }
+        hpxml_bldg.attics[0].vented_attic_sla = 0.003
         hpxml_bldg.attics << attic.dup
         hpxml_bldg.attics[-1].id = 'Duplicate'
         hpxml_bldg.attics[-1].vented_attic_sla *= 2
       when 'inconsistent-vented-attic-ventilation-rate2'
         hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
         attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeVented }
+        hpxml_bldg.attics[0].vented_attic_sla = 0.003
         hpxml_bldg.attics << attic.dup
         hpxml_bldg.attics[-1].id = 'Duplicate'
         hpxml_bldg.attics[-1].vented_attic_sla = nil
@@ -1641,6 +1643,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'inconsistent-vented-crawl-ventilation-rate'
         hpxml, hpxml_bldg = _create_hpxml('base-foundation-vented-crawlspace.xml')
         fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
+        hpxml_bldg.foundations[0].vented_crawlspace_sla = 0.003
         hpxml_bldg.foundations << fnd.dup
         hpxml_bldg.foundations[-1].id = 'Duplicate'
         hpxml_bldg.foundations[-1].vented_crawlspace_sla *= 2
