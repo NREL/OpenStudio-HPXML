@@ -17,7 +17,7 @@
     </extension>
   </SoftwareInfo>
   <Building>
-    <BuildingID id='MyBuilding'/>
+    <BuildingID id='ConditionedBasement'/>
     <Site>
       <SiteID id='SiteID'/>
       <Address>
@@ -221,7 +221,7 @@
                 <ElectricResistance/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>24000.0</HeatingCapacity>
+              <HeatingCapacity>25000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -373,7 +373,7 @@
     </BuildingDetails>
   </Building>
   <Building>
-    <BuildingID id='MyBuilding_2'/>
+    <BuildingID id='UnconditionedBasement'/>
     <Site>
       <SiteID id='SiteID_2'/>
       <Address>
@@ -661,7 +661,7 @@
     </BuildingDetails>
   </Building>
   <Building>
-    <BuildingID id='MyBuilding_3'/>
+    <BuildingID id='F1UnconditionedHall'/>
     <Site>
       <SiteID id='SiteID_3'/>
       <Address>
@@ -960,7 +960,7 @@
     </BuildingDetails>
   </Building>
   <Building>
-    <BuildingID id='MyBuilding_4'/>
+    <BuildingID id='F1ConditionedUnit'/>
     <Site>
       <SiteID id='SiteID_4'/>
       <Address>
@@ -1159,7 +1159,7 @@
                 <ElectricResistance/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>24000.0</HeatingCapacity>
+              <HeatingCapacity>25000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -1311,7 +1311,7 @@
     </BuildingDetails>
   </Building>
   <Building>
-    <BuildingID id='MyBuilding_5'/>
+    <BuildingID id='F2UnconditionedHall'/>
     <Site>
       <SiteID id='SiteID_5'/>
       <Address>
@@ -1409,22 +1409,7 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall2_5'/>
-            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-            <WallType>
-              <WoodStud/>
-            </WallType>
-            <Area>320.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
-            <Emittance>0.92</Emittance>
-            <InteriorFinish>
-              <Type>gypsum board</Type>
-            </InteriorFinish>
-            <Insulation>
-              <SystemIdentifier id='Wall2Insulation_5'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
-            </Insulation>
+            <SystemIdentifier id='Wall3_5' sameas='Wall2_6'/>
           </Wall>
         </Walls>
         <Floors>
@@ -1625,7 +1610,7 @@
     </BuildingDetails>
   </Building>
   <Building>
-    <BuildingID id='MyBuilding_6'/>
+    <BuildingID id='F2ConditionedUnit'/>
     <Site>
       <SiteID id='SiteID_6'/>
       <Address>
@@ -1723,7 +1708,22 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='Wall2_6' sameas='Wall2_5'/>
+            <SystemIdentifier id='Wall2_6'/>
+            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+            <WallType>
+              <WoodStud/>
+            </WallType>
+            <Area>320.0</Area>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+            </InteriorFinish>
+            <Insulation>
+              <SystemIdentifier id='Wall2Insulation_6'/>
+              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+            </Insulation>
           </Wall>
         </Walls>
         <Floors>
@@ -1809,7 +1809,7 @@
                 <ElectricResistance/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>24000.0</HeatingCapacity>
+              <HeatingCapacity>25000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -1961,7 +1961,7 @@
     </BuildingDetails>
   </Building>
   <Building>
-    <BuildingID id='MyBuilding_7'/>
+    <BuildingID id='F3Attic1'/>
     <Site>
       <SiteID id='SiteID_7'/>
       <Address>
@@ -1991,7 +1991,7 @@
           <NumberofBedrooms>0</NumberofBedrooms>
           <NumberofBathrooms>1</NumberofBathrooms>
           <ConditionedFloorArea>1200.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>2400.0</ConditionedBuildingVolume>
+          <ConditionedBuildingVolume>9600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -2016,7 +2016,7 @@
               <UnitofMeasure>ACHnatural</UnitofMeasure>
               <AirLeakage>0.375</AirLeakage>
             </BuildingAirLeakage>
-            <InfiltrationVolume>2400.0</InfiltrationVolume>
+            <InfiltrationVolume>9600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Foundations>
@@ -2167,7 +2167,7 @@
     </BuildingDetails>
   </Building>
   <Building>
-    <BuildingID id='MyBuilding_8'/>
+    <BuildingID id='F3Attic2'/>
     <Site>
       <SiteID id='SiteID_8'/>
       <Address>
@@ -2197,7 +2197,7 @@
           <NumberofBedrooms>0</NumberofBedrooms>
           <NumberofBathrooms>1</NumberofBathrooms>
           <ConditionedFloorArea>1200.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>2400.0</ConditionedBuildingVolume>
+          <ConditionedBuildingVolume>9600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -2222,7 +2222,7 @@
               <UnitofMeasure>ACHnatural</UnitofMeasure>
               <AirLeakage>0.375</AirLeakage>
             </BuildingAirLeakage>
-            <InfiltrationVolume>2400.0</InfiltrationVolume>
+            <InfiltrationVolume>9600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Foundations>

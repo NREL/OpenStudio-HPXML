@@ -55,8 +55,6 @@ class HPXML < Object
   # Constants
   AddressTypeMailing = 'mailing'
   AddressTypeStreet = 'street'
-  AdvancedResearchGroundToAirHeatPumpModelTypeStandard = 'standard'
-  AdvancedResearchGroundToAirHeatPumpModelTypeExperimental = 'experimental'
   AirTypeFanCoil = 'fan coil'
   AirTypeGravity = 'gravity'
   AirTypeHighVelocity = 'high velocity'
@@ -219,6 +217,8 @@ class HPXML < Object
   GeothermalLoopLoopConfigurationVertical = 'vertical'
   GeothermalLoopGroutOrPipeTypeStandard = 'standard'
   GeothermalLoopGroutOrPipeTypeThermallyEnhanced = 'thermally enhanced'
+  GroundToAirHeatPumpModelTypeStandard = 'standard'
+  GroundToAirHeatPumpModelTypeExperimental = 'experimental'
   HeaterTypeElectricResistance = 'electric resistance'
   HeaterTypeGas = 'gas fired'
   HeaterTypeHeatPump = 'heat pump'
@@ -319,6 +319,7 @@ class HPXML < Object
   LocationAtticUnconditioned = 'attic - unconditioned'
   LocationAtticUnvented = 'attic - unvented'
   LocationAtticVented = 'attic - vented'
+  LocationBasement = 'basement'
   LocationBasementConditioned = 'basement - conditioned'
   LocationBasementUnconditioned = 'basement - unconditioned'
   LocationBath = 'bath'
@@ -960,7 +961,7 @@ class HPXML < Object
              :co2index_calculation_versions,               # [Array<String>] SoftwareInfo/extension/CO2IndexCalculation/Version
              :energystar_calculation_versions,             # [Array<String>] SoftwareInfo/extension/EnergyStarCalculation/Version
              :iecc_eri_calculation_versions,               # [Array<String>] SoftwareInfo/extension/IECCERICalculation/Version
-             :zerh_calculation_versions,                   # [Array<String>] SoftwareInfo/extension/ZERHCalculation/Version
+             :denh_calculation_versions,                   # [Array<String>] SoftwareInfo/extension/DENHCalculation/Version
              :timestep,                                    # [Integer] SoftwareInfo/extension/SimulationControl/Timestep (minutes)
              :sim_begin_month,                             # [Integer] SoftwareInfo/extension/SimulationControl/BeginMonth
              :sim_begin_day,                               # [Integer] SoftwareInfo/extension/SimulationControl/BeginDayOfMonth
@@ -968,7 +969,7 @@ class HPXML < Object
              :sim_end_day,                                 # [Integer] SoftwareInfo/extension/SimulationControl/EndDayOfMonth
              :sim_calendar_year,                           # [Integer] SoftwareInfo/extension/SimulationControl/CalendarYear
              :temperature_capacitance_multiplier,          # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier
-             :ground_to_air_heat_pump_model_type,          # [String] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType (HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeXXX)
+             :ground_to_air_heat_pump_model_type,          # [String] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/GroundToAirHeatPumpModelType (HPXML::GroundToAirHeatPumpModelTypeXXX)
              :hvac_onoff_thermostat_deadband,              # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature (F)
              :heat_pump_backup_heating_capacity_increment, # [Double] SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement (Btu/hr)
              :service_feeders_load_calculation_types]      # [Array<String>] SoftwareInfo/extension/ElectricPanelLoadCalculations/ServiceFeeders/Type
@@ -1028,7 +1029,7 @@ class HPXML < Object
         'CO2IndexCalculation' => @co2index_calculation_versions,
         'EnergyStarCalculation' => @energystar_calculation_versions,
         'IECCERICalculation' => @iecc_eri_calculation_versions,
-        'ZERHCalculation' => @zerh_calculation_versions }.each do |element_name, calculation_versions|
+        'DENHCalculation' => @denh_calculation_versions }.each do |element_name, calculation_versions|
         calculation_versions = [] if calculation_versions.nil?
         if not calculation_versions.empty?
           extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
@@ -1085,7 +1086,7 @@ class HPXML < Object
       @co2index_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/CO2IndexCalculation/Version', :string)
       @iecc_eri_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/IECCERICalculation/Version', :string)
       @energystar_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/EnergyStarCalculation/Version', :string)
-      @zerh_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/ZERHCalculation/Version', :string)
+      @denh_calculation_versions = XMLHelper.get_values(hpxml, 'SoftwareInfo/extension/DENHCalculation/Version', :string)
       @timestep = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/Timestep', :integer)
       @sim_begin_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginMonth', :integer)
       @sim_begin_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth', :integer)
@@ -1553,7 +1554,7 @@ class HPXML < Object
                    :electric_panels,               # [HPXML::ElectricPanels]
                    :batteries,                     # [HPXML::Batteries]
                    :vehicles,                      # [HPXML::Vehicles]
-                   :ev_chargers,                   # [HPXML::EVChargers]
+                   :ev_chargers,                   # [HPXML::ElectricVehicleChargers]
                    :generators,                    # [HPXML::Generators]
                    :clothes_washers,               # [HPXML::ClothesWashers]
                    :clothes_dryers,                # [HPXML::ClothesDryers]
@@ -3946,6 +3947,7 @@ class HPXML < Object
   class Roof < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
              :area,                           # [Double] Area (ft2)
@@ -4217,6 +4219,7 @@ class HPXML < Object
   class RimJoist < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4240,7 +4243,7 @@ class HPXML < Object
     #
     # @return [<HPXML::RimJoist>] RimJoist object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::RimJoist, self, true)
     end
 
     # Returns the space that the rim joist is attached to.
@@ -4327,6 +4330,9 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; space; rescue StandardError => e; errors << e.message; end
+      if sameas_id
+        begin; sameas; rescue StandardError => e; errors << e.message; end
+      end
       return errors
     end
 
@@ -4458,6 +4464,7 @@ class HPXML < Object
   class Wall < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4491,7 +4498,7 @@ class HPXML < Object
     #
     # @return [<HPXML::Wall>] Wall object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::Wall, self, true)
     end
 
     # Returns all windows for this wall.
@@ -4608,6 +4615,8 @@ class HPXML < Object
       errors = []
       if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
+      else
+        begin; sameas; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
@@ -4774,6 +4783,7 @@ class HPXML < Object
   class FoundationWall < BaseElement
     ATTRS = [:id,                                     # [String] SystemIdentifier/@id
              :sameas_id,                              # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,                   # [String] Sameas object id that references this object
              :attached_to_space_idref,                # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,                   # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,                   # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4803,7 +4813,7 @@ class HPXML < Object
     #
     # @return [<HPXML::FoundationWall>] FoundationWall object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::FoundationWall, self, true)
     end
 
     # Returns all windows for this foundation wall.
@@ -4971,6 +4981,8 @@ class HPXML < Object
       errors = []
       if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
+      else
+        begin; sameas; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
@@ -5119,6 +5131,7 @@ class HPXML < Object
   class Floor < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -5145,7 +5158,7 @@ class HPXML < Object
     #
     # @return [<HPXML::Floor>] Floor object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::Floor, self, true)
     end
 
     # Returns all skylights for this floor.
@@ -5285,6 +5298,8 @@ class HPXML < Object
       errors = []
       if not sameas_id
         begin; net_area; rescue StandardError => e; errors << e.message; end
+      else
+        begin; sameas; rescue StandardError => e; errors << e.message; end
       end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
@@ -5433,6 +5448,7 @@ class HPXML < Object
   class Slab < BaseElement
     ATTRS = [:id,                                               # [String] SystemIdentifier/@id
              :sameas_id,                                        # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,                             # [String] Sameas object id that references this object
              :attached_to_space_idref,                          # [String] AttachedToSpace/@idref
              :interior_adjacent_to,                             # [String] InteriorAdjacentTo (HPXML::LocationXXX)
              :area,                                             # [Double] Area (ft2)
@@ -6463,6 +6479,7 @@ class HPXML < Object
     ATTRS = [:primary_system,                   # [Boolean] ../PrimarySystems/PrimaryHeatingSystem/@id
              :id,                               # [String] SystemIdentifier/@id
              :sameas_id,                        # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,             # [String] Sameas object id that references this object
              :attached_to_zone_idref,           # [String] AttachedToZone/@idref
              :location,                         # [String] UnitLocation (HPXML::LocationXXX)
              :year_installed,                   # [Integer] YearInstalled
@@ -6611,7 +6628,7 @@ class HPXML < Object
     #
     # @return [HPXML::HeatingSystem] HeatingSystem object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::HeatingSystem, self, false)
     end
 
     # Deletes the current object from the array.
@@ -6810,6 +6827,7 @@ class HPXML < Object
     ATTRS = [:primary_system,                                      # [Boolean] ../PrimarySystems/PrimaryCoolingSystem/@idref
              :id,                                                  # [String] SystemIdentifier/@id
              :sameas_id,                                           # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,                                # [String] Sameas object id that references this object
              :attached_to_zone_idref,                              # [String] AttachedToZone/@idref
              :location,                                            # [String] UnitLocation (HPXML::LocationXXX)
              :year_installed,                                      # [Integer] YearInstalled
@@ -6929,7 +6947,7 @@ class HPXML < Object
     #
     # @return [HPXML::CoolingSystem] CoolingSystem object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::CoolingSystem, self, false)
     end
 
     # Deletes the current object from the array.
@@ -7151,6 +7169,7 @@ class HPXML < Object
              :primary_cooling_system,               # [Boolean] ../PrimarySystems/PrimaryCoolingSystem/@idref
              :id,                                   # [String] SystemIdentifier/@id
              :sameas_id,                            # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,                 # [String] Sameas object id that references this object
              :attached_to_zone_idref,               # [String] AttachedToZone/@idref
              :location,                             # [String] UnitLocation (HPXML::LocationXXX)
              :year_installed,                       # [Integer] YearInstalled
@@ -7334,7 +7353,7 @@ class HPXML < Object
     #
     # @return [HPXML::HeatPump] HeatPump object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::HeatPump, self, false)
     end
 
     # Deletes the current object from the array.
@@ -7932,6 +7951,7 @@ class HPXML < Object
                    :manualj_duct_loads]        # [HPXML::ManualJDuctLoads]
     ATTRS = [:id,                            # [String] SystemIdentifier/@id
              :sameas_id,                     # [String] SystemIdentifier/@sameas
+             :referenced_by_sameas,          # [String] Sameas object id that references this object
              :distribution_system_type,      # [String] DistributionSystemType/* (HPXML::HVACDistributionTypeXXX)
              :number_of_return_registers,    # [Integer] DistributionSystemType/AirDistribution/NumberofReturnRegisters
              :air_type,                      # [String] DistributionSystemType/AirDistribution/AirDistributionType (HPXML::AirTypeXXX)
@@ -7991,7 +8011,7 @@ class HPXML < Object
     #
     # @return [HPXML::HVACDistribution] HVACDistribution object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::HVACDistribution, self, false)
     end
 
     # Deletes the current object from the array.
@@ -8804,32 +8824,34 @@ class HPXML < Object
 
   # Object for /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem.
   class WaterHeatingSystem < BaseElement
-    ATTRS = [:id,                        # [String] SystemIdentifier/@id
-             :fuel_type,                 # [String] FuelType (HPXML::FuelTypeXXX)
-             :water_heater_type,         # [String] WaterHeaterType (HPXML::WaterHeaterTypeXXX)
-             :location,                  # [String] Location (HPXML::LocationXXX)
-             :year_installed,            # [Integer] YearInstalled
-             :is_shared_system,          # [Boolean] IsSharedSystem
-             :performance_adjustment,    # [Double] PerformanceAdjustment (frac)
-             :third_party_certification, # [String] ThirdPartyCertification
-             :tank_volume,               # [Double] TankVolume (gal)
-             :fraction_dhw_load_served,  # [Double] FractionDHWLoadServed (frac)
-             :heating_capacity,          # [Double] HeatingCapacity (Btu/hr)
-             :backup_heating_capacity,   # [Double] BackupHeatingCapacity (Btu/hr)
-             :energy_factor,             # [Double] EnergyFactor (frac)
-             :uniform_energy_factor,     # [Double] UniformEnergyFactor (frac)
-             :operating_mode,            # [String] HPWHOperatingMode (HPXML::WaterHeaterOperatingModeXXX)
-             :first_hour_rating,         # [Double] FirstHourRating (gal/hr)
-             :usage_bin,                 # [String] UsageBin (HPXML::WaterHeaterUsageBinXXX)
-             :recovery_efficiency,       # [Double] RecoveryEfficiency (frac)
-             :jacket_r_value,            # [Double] WaterHeaterInsulation/Jacket/JacketRValue (F-ft2-hr/Btu)
-             :standby_loss_units,        # [String] StandbyLoss/Units (HPXML::UnitsXXX)
-             :standby_loss_value,        # [Double] StandbyLoss/Value
-             :temperature,               # [Double] HotWaterTemperature (F)
-             :uses_desuperheater,        # [Boolean] UsesDesuperheater
-             :related_hvac_idref,        # [String] RelatedHVACSystem/@idref
-             :tank_model_type,           # [String] extension/TankModelType (HPXML::WaterHeaterTankModelTypeXXX)
-             :number_of_bedrooms_served] # [Integer] extension/NumberofBedroomsServed
+    ATTRS = [:id,                                     # [String] SystemIdentifier/@id
+             :fuel_type,                              # [String] FuelType (HPXML::FuelTypeXXX)
+             :water_heater_type,                      # [String] WaterHeaterType (HPXML::WaterHeaterTypeXXX)
+             :location,                               # [String] Location (HPXML::LocationXXX)
+             :year_installed,                         # [Integer] YearInstalled
+             :is_shared_system,                       # [Boolean] IsSharedSystem
+             :performance_adjustment,                 # [Double] PerformanceAdjustment (frac)
+             :third_party_certification,              # [String] ThirdPartyCertification
+             :tank_volume,                            # [Double] TankVolume (gal)
+             :fraction_dhw_load_served,               # [Double] FractionDHWLoadServed (frac)
+             :heating_capacity,                       # [Double] HeatingCapacity (Btu/hr)
+             :backup_heating_capacity,                # [Double] BackupHeatingCapacity (Btu/hr)
+             :energy_factor,                          # [Double] EnergyFactor (frac)
+             :uniform_energy_factor,                  # [Double] UniformEnergyFactor (frac)
+             :operating_mode,                         # [String] HPWHOperatingMode (HPXML::WaterHeaterOperatingModeXXX)
+             :first_hour_rating,                      # [Double] FirstHourRating (gal/hr)
+             :usage_bin,                              # [String] UsageBin (HPXML::WaterHeaterUsageBinXXX)
+             :recovery_efficiency,                    # [Double] RecoveryEfficiency (frac)
+             :jacket_r_value,                         # [Double] WaterHeaterInsulation/Jacket/JacketRValue (F-ft2-hr/Btu)
+             :standby_loss_units,                     # [String] StandbyLoss/Units (HPXML::UnitsXXX)
+             :standby_loss_value,                     # [Double] StandbyLoss/Value
+             :temperature,                            # [Double] HotWaterTemperature (F)
+             :uses_desuperheater,                     # [Boolean] UsesDesuperheater
+             :related_hvac_idref,                     # [String] RelatedHVACSystem/@idref
+             :tank_model_type,                        # [String] extension/TankModelType (HPXML::WaterHeaterTankModelTypeXXX)
+             :number_of_bedrooms_served,              # [Integer] extension/NumberofBedroomsServed
+             :hpwh_confined_space_without_mitigation, # [Boolean] extension/HPWHInConfinedSpaceWithoutMitigation
+             :hpwh_containment_volume]                # [Double] extension/HPWHContainmentVolume
     attr_accessor(*ATTRS)
 
     # Returns any branch circuits that the component may be attached to.
@@ -8936,10 +8958,12 @@ class HPXML < Object
         related_hvac_idref_el = XMLHelper.add_element(water_heating_system, 'RelatedHVACSystem')
         XMLHelper.add_attribute(related_hvac_idref_el, 'idref', @related_hvac_idref)
       end
-      if (not @tank_model_type.nil?) || (not @number_of_bedrooms_served.nil?)
+      if (not @tank_model_type.nil?) || (not @number_of_bedrooms_served.nil?) || (not @hpwh_confined_space_without_mitigation.nil?) || (not @hpwh_containment_volume.nil?)
         extension = XMLHelper.create_elements_as_needed(water_heating_system, ['extension'])
         XMLHelper.add_element(extension, 'TankModelType', @tank_model_type, :string, @tank_model_type_isdefaulted) unless @tank_model_type.nil?
         XMLHelper.add_element(extension, 'NumberofBedroomsServed', @number_of_bedrooms_served, :integer, @number_of_bedrooms_served_isdefaulted) unless @number_of_bedrooms_served.nil?
+        XMLHelper.add_element(extension, 'HPWHInConfinedSpaceWithoutMitigation', @hpwh_confined_space_without_mitigation, :boolean, @hpwh_confined_space_without_mitigation_isdefaulted) unless @hpwh_confined_space_without_mitigation.nil?
+        XMLHelper.add_element(extension, 'HPWHContainmentVolume', @hpwh_containment_volume, :float, @hpwh_containment_volume_isdefaulted) unless @hpwh_containment_volume.nil?
       end
     end
 
@@ -8976,6 +9000,8 @@ class HPXML < Object
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
       @tank_model_type = XMLHelper.get_value(water_heating_system, 'extension/TankModelType', :string)
       @number_of_bedrooms_served = XMLHelper.get_value(water_heating_system, 'extension/NumberofBedroomsServed', :integer)
+      @hpwh_confined_space_without_mitigation = XMLHelper.get_value(water_heating_system, 'extension/HPWHInConfinedSpaceWithoutMitigation', :boolean)
+      @hpwh_containment_volume = XMLHelper.get_value(water_heating_system, 'extension/HPWHContainmentVolume', :float)
     end
   end
 
@@ -9883,10 +9909,7 @@ class HPXML < Object
              :capacity_types,          # [Array<String>] extension/Outputs/Capacity/Type
              :capacity_total_watts,    # [Array<Double>] extension/Outputs/Capacity/TotalWatts
              :capacity_total_amps,     # [Array<Double>] extension/Outputs/Capacity/TotalAmps
-             :capacity_headroom_amps,  # [Array<Double>] extension/Outputs/Capacity/HeadroomAmps
-             :breaker_spaces_total,    # [Integer] extension/Outputs/BreakerSpaces/Total
-             :breaker_spaces_occupied, # [Double] extension/Outputs/BreakerSpaces/Occupied
-             :breaker_spaces_headroom] # [Double] extension/Outputs/BreakerSpaces/Headroom
+             :capacity_headroom_amps]  # [Array<Double>] extension/Outputs/Capacity/HeadroomAmps
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
@@ -9895,14 +9918,21 @@ class HPXML < Object
     # @return [Array<HPXML::ElectricPanel>] The list of attached electric panels
     def sub_panels
       list = []
-      @parent_object.electric_panels.each do |electric_panel|
-        next unless @id == electric_panel.id
-
-        electric_panel.branch_circuits.each do |branch_circuit|
-          list << branch_circuit.electric_panel
-        end
+      branch_circuits.each do |branch_circuit|
+        list << branch_circuit.electric_panel
       end
       return list
+    end
+
+    # Calculate the sum of OccupiedSpaces across BranchCircuits.
+    #
+    # @return [Double] Total occupied spaces
+    def occupied_spaces
+      occupied_spaces = 0.0
+      branch_circuits.each do |branch_circuit|
+        occupied_spaces += branch_circuit.occupied_spaces
+      end
+      return occupied_spaces
     end
 
     # Deletes the current object from the array.
@@ -9952,14 +9982,6 @@ class HPXML < Object
           XMLHelper.add_element(capacity, 'HeadroomAmps', capacity_headroom_amp, :float)
         end
       end
-      if not @breaker_spaces_total.nil?
-        outputs = XMLHelper.create_elements_as_needed(electric_panel, ['extension', 'Outputs'])
-        XMLHelper.add_attribute(outputs, 'dataSource', 'software')
-        breaker_spaces = XMLHelper.add_element(outputs, 'BreakerSpaces')
-        XMLHelper.add_element(breaker_spaces, 'Total', @breaker_spaces_total, :integer)
-        XMLHelper.add_element(breaker_spaces, 'Occupied', @breaker_spaces_occupied, :float)
-        XMLHelper.add_element(breaker_spaces, 'Headroom', @breaker_spaces_headroom, :float)
-      end
     end
 
     # Populates the HPXML object(s) from the XML document.
@@ -9980,9 +10002,6 @@ class HPXML < Object
       @capacity_total_watts = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/TotalWatts', :float)
       @capacity_total_amps = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/TotalAmps', :float)
       @capacity_headroom_amps = XMLHelper.get_values(electric_panel, 'extension/Outputs/Capacity/HeadroomAmps', :float)
-      @breaker_spaces_total = XMLHelper.get_value(electric_panel, 'extension/Outputs/BreakerSpaces/Total', :integer)
-      @breaker_spaces_occupied = XMLHelper.get_value(electric_panel, 'extension/Outputs/BreakerSpaces/Occupied', :float)
-      @breaker_spaces_headroom = XMLHelper.get_value(electric_panel, 'extension/Outputs/BreakerSpaces/Headroom', :float)
     end
   end
 
@@ -12562,8 +12581,6 @@ class HPXML < Object
                          LocationAtticUnvented]
     floor_locations = [LocationCrawlspaceVented,
                        LocationCrawlspaceUnvented,
-                       LocationCrawlspaceConditioned,
-                       LocationBasementConditioned,
                        LocationBasementUnconditioned,
                        LocationManufacturedHomeUnderBelly]
     if (ceiling_locations.include? hpxml_floor.interior_adjacent_to) || (ceiling_locations.include? hpxml_floor.exterior_adjacent_to)
@@ -12617,24 +12634,40 @@ class HPXML < Object
 
   # Gets the sameas obj (from another Building) with the specified sameas_id.
   #
-  # @param parent [Oga::XML::Element] The parent HPXML element
-  # @param sameas_id [String]  The element sameas attribute
+  # @param hpxml [Oga::XML::Element] The parent HPXML element
+  # @param parent_building [Oga::XML::Element] The parent Building element
+  # @param object_type [Class]  HPXML object type of the element
+  # @param object [Oga::XML::Element]  The HPXML element
+  # @param requires_single_reference [Boolean] Whether it is only allowed be referenced by a single object (i.e., true for surfaces, false for systems)
   # @return [Oga::XML::Element] The element that sameas attribute associated with
-  def self.get_sameas_obj(hpxml, sameas_id)
+  def self.get_sameas_obj(hpxml, parent_building, object_type, object, requires_single_reference)
     hpxml.buildings.each do |building|
       building.class::CLASS_ATTRS.each do |attr|
         building_child = building.send(attr)
         next unless building_child.is_a? HPXML::BaseArrayElement
 
         building_child.each do |obj|
-          next unless obj.id == sameas_id
+          next unless obj.id == object.sameas_id
+          if building.building_id == parent_building.building_id
+            fail "'#{object.id}' sameas references the object in the same building '#{parent_building.building_id}'."
+          end
 
-          return obj
+          if obj.is_a? object_type
+            # Assign referenced_by_sameas
+            if obj.referenced_by_sameas.nil?
+              obj.referenced_by_sameas = object.id
+            elsif requires_single_reference && obj.referenced_by_sameas != object.id
+              fail "'#{obj.id}' is referenced by multiple objects."
+            end
+            return obj
+          else
+            fail "'#{object.id}' reference the wrong object type with sameas id '#{object.sameas_id}'."
+          end
         end
       end
     end
-    if not sameas_id.nil?
-      fail "Sameas object '#{sameas_id}' not found."
+    if not object.sameas_id.nil?
+      fail "Sameas object '#{object.sameas_id}' not found."
     end
 
     return

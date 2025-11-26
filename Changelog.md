@@ -2,6 +2,9 @@
 
 __New Features__
 - Updates to HPXML v4.2.
+- BuildResidentialHPXML measure:
+  - **Breaking change**: New, simpler, easier to use option-based arguments (rather than detailed property arguments).
+  - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
 - Heat pump updates:
   - Updates default heating capacities at 17F per RESNET HERS Addendum 82 and NEEP database.
   - Updates supplemental heating energy use during defrost based on RESNET HERS Addendum 82.
@@ -10,6 +13,7 @@ __New Features__
 - Water heater improvements:
   - Improves electric water heater tank losses when using `EnergyFactor` as the metric; now consistent with how `UniformEnergyFactor` is handled.
   - Improves HPWH tank volume defaulting, particularly when `NumberofResidents` is provided.
+  - Allows HPWH performance adjustment when installed in confined space per RESNET HERS Addendum 77. When `extension/HPWHInConfinedSpaceWithoutMitigation` is "true", `extension/HPWHContainmentVolume` is used to calculate the adjustment.
 - Updated site defaults:
   - `Address/CityMunicipality`, `Address/StateCode`, `GeoLocation/Latitude`, `GeoLocation/Longitude`, and `TimeZone/UTCOffset` now default based on zip code if available.
   - `TimeZone/DSTObserved` now defaults to false if `Address/StateCode` is 'AZ' or 'HI'.
@@ -21,8 +25,6 @@ __New Features__
   - Allows modeling inter-unit heat transfer using the `@sameas` attribute.
   - Documents a workaround for modeling common spaces (conditioned or unconditioned).
   - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
-- BuildResidentialHPXML measure:
-  - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
 
 __Bugfixes__
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
@@ -32,6 +34,7 @@ __Bugfixes__
 - Fixes zero mech vent fan energy when CFIS system w/ `AdditionalRuntimeOperatingMode="air handler fan"` has the airflow rate set to zero.
 - Fixes requested EnergyPlus timeseries output variables/meters not displayed in DView if they don't have units.
 - Fixes possible errors when small water flow rates for variable-speed experimental ground-source heat pump model.
+- Fixes possible ground-source heat pump sizing error if the heating or cooling design temperature differences are zero.
 
 ## OpenStudio-HPXML v1.10.0
 

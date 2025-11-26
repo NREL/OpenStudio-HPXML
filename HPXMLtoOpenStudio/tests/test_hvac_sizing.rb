@@ -17,6 +17,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
     @results_dir = File.join(@test_files_path, 'test_results')
     FileUtils.mkdir_p @results_dir
+    @schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', 'resources', 'hpxml_schema', 'HPXML.xsd'))
+    @schematron_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', 'resources', 'hpxml_schematron', 'EPvalidator.sch'))
   end
 
   def teardown
@@ -1678,7 +1680,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   end
 
   def test_foundation_wall_non_integer_values
-    tol = 0.01 # 1%
+    tol = 0.02 # 2%
 
     # Test wall insulation covering most of above and below-grade portions of wall
     fwall = HPXML::FoundationWall.new(nil)
@@ -1784,7 +1786,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
       assert_equal(3, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-      assert_in_delta(194.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 1.0)
+      assert_in_delta(190.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 1.0)
 
       # Bore depth greater than the max -> increase number of boreholes
       hpxml, hpxml_bldg = _create_hpxml(ghp_filename)
@@ -1792,7 +1794,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
       assert_equal(5, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-      assert_in_delta(442.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 1.0)
+      assert_in_delta(431.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 1.0)
 
       # Bore depth greater than the max -> increase number of boreholes until the max, set depth to the max, and issue warning
       hpxml, hpxml_bldg = _create_hpxml(ghp_filename)
@@ -1937,9 +1939,17 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       assert_equal(expect_num_warnings, runner.result.stepWarnings.size)
     end
 
-    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), 'in.xml'))
+    hpxml_defaults_path = File.join(File.dirname(__FILE__), 'in.xml')
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: @schema_validator, schematron_validator: @schematron_validator)
+    if not hpxml.errors.empty?
+      puts 'ERRORS:'
+      hpxml.errors.each do |error|
+        puts error
+      end
+      flunk "Validation error(s) in #{hpxml_defaults_path}."
+    end
 
-    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
+    File.delete(hpxml_defaults_path)
 
     return model, hpxml, hpxml.buildings[0]
   end

@@ -256,7 +256,8 @@ module HVACSizing
 
     locations = []
     hpxml_bldg.surfaces.each do |surface|
-      surface = surface.sameas if surface.sameas_id
+      next unless surface.sameas_id.nil? && surface.referenced_by_sameas.nil?
+
       locations << surface.interior_adjacent_to
       locations << surface.exterior_adjacent_to
     end
@@ -1025,10 +1026,10 @@ module HVACSizing
     # Above-Grade Wall Area
     (hpxml_bldg.walls + hpxml_bldg.rim_joists + hpxml_bldg.foundation_walls).each do |wall|
       next unless wall.is_thermal_boundary
+      next unless wall.sameas_id.nil? && wall.referenced_by_sameas.nil?
 
       space = wall.space
       zone = space.zone
-      wall = wall.sameas if wall.sameas_id # use adjacent wall inputs instead
 
       # Get gross/net areas
       if wall.is_a?(HPXML::FoundationWall) && wall.depth_below_grade == wall.height
@@ -1220,14 +1221,11 @@ module HVACSizing
   def self.process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
+      next unless floor.sameas_id.nil? && floor.referenced_by_sameas.nil?
 
       space = floor.space
       zone = space.zone
       is_ceiling = floor.is_ceiling
-      if floor.sameas_id
-        floor = floor.sameas # use adjacent wall inputs instead
-        is_ceiling = !floor.is_ceiling
-      end
 
       next unless is_ceiling
 
@@ -1264,14 +1262,11 @@ module HVACSizing
   def self.process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
+      next unless floor.sameas_id.nil? && floor.referenced_by_sameas.nil?
 
       space = floor.space
       zone = space.zone
       is_floor = floor.is_floor
-      if floor.sameas_id
-        floor = floor.sameas # use adjacent floor inputs instead
-        is_floor = !floor.is_floor
-      end
 
       next unless is_floor
 
@@ -1579,11 +1574,11 @@ module HVACSizing
 
       # Infiltration assignment by exterior wall area
       zone.spaces.each do |space|
-        space.additional_properties.wall_area_ratio = space.additional_properties.total_exposed_wall_area / bldg_exposed_wall_area
+        space.additional_properties.wall_area_ratio = (bldg_exposed_wall_area == 0.0) ? 0.0 : space.additional_properties.total_exposed_wall_area / bldg_exposed_wall_area
         all_space_loads[space].Heat_Infil = bldg_Heat_Infil * space.additional_properties.wall_area_ratio
         all_space_loads[space].Cool_Infil_Sens = bldg_Cool_Infil_Sens * space.additional_properties.wall_area_ratio
       end
-      zone_wall_area_ratio = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum / bldg_exposed_wall_area
+      zone_wall_area_ratio = (bldg_exposed_wall_area == 0.0) ? 0.0 : (zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum / bldg_exposed_wall_area)
       all_zone_loads[zone].Heat_Infil = bldg_Heat_Infil * zone_wall_area_ratio
       all_zone_loads[zone].Cool_Infil_Sens = bldg_Cool_Infil_Sens * zone_wall_area_ratio
       all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone_wall_area_ratio
@@ -2808,7 +2803,7 @@ module HVACSizing
 
       entering_temp = clg_ap.design_chw
       hvac_cooling_speed = get_nominal_speed(clg_ap, true)
-      if [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard].include? hpxml_header.ground_to_air_heat_pump_model_type
+      if [HPXML::GroundToAirHeatPumpModelTypeStandard].include? hpxml_header.ground_to_air_heat_pump_model_type
         # TODO: replace hardcoded bypass factor and curve?
         gshp_coil_bf = 0.0806
         gshp_coil_bf_ft_spec = [1.21005458, -0.00664200, 0.00000000, 0.00348246, 0.00000000, 0.00000000]
@@ -2833,7 +2828,7 @@ module HVACSizing
         hvac_sizings.Cool_Capacity = cool_cap_design / total_cap_curve_value
         hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * clg_ap.cool_rated_shr_gross
         hvac_sizings.Cool_Airflow = calc_airflow_rate(:clg, hvac_cooling, hvac_sizings.Cool_Capacity, hpxml_bldg)
-      elsif [HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental].include? hpxml_header.ground_to_air_heat_pump_model_type
+      elsif [HPXML::GroundToAirHeatPumpModelTypeExperimental].include? hpxml_header.ground_to_air_heat_pump_model_type
         total_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(mj.cool_indoor_wetbulb, 'F', 'C'), UnitConversions.convert(entering_temp, 'F', 'C'), clg_ap.cool_cap_ft_spec[hvac_cooling_speed])
         calculate_cooling_capacities(mj, clg_ap, hvac_sizings, hpxml_bldg.header.manualj_humidity_setpoint, total_cap_curve_value, undersize_limit, oversize_limit, HVAC::GroundSourceCoolRatedIDB, HVAC::GroundSourceCoolRatedIWB, hvac_cooling, hpxml_bldg)
       end
@@ -2904,7 +2899,7 @@ module HVACSizing
       hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load / htg_cap_curve_value
       hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
       if hvac_sizings.Cool_Capacity > 0
-        if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard) && (hvac_heating.compressor_type == HPXML::HVACCompressorTypeSingleStage)
+        if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::GroundToAirHeatPumpModelTypeStandard) && (hvac_heating.compressor_type == HPXML::HVACCompressorTypeSingleStage)
           # For single stage compressor, when heating capacity is much larger than cooling capacity,
           # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
           # Currently only keep it for standard ghp models
@@ -3427,11 +3422,22 @@ module HVACSizing
       cooling_month = 6 # July
     end
 
-    rtf_DesignMon_Heat = [0.25, (71.0 - weather.data.MonthlyAvgDrybulbs[heating_month]) / mj.htd].max
-    rtf_DesignMon_Cool = [0.25, (weather.data.MonthlyAvgDrybulbs[cooling_month] - 76.0) / mj.ctd].max
+    # Runtime fraction average in heating/cooling months, assumed
+    if mj.htd > 0
+      rtf_design_mon_heat = (mj.heat_setpoint - weather.data.MonthlyAvgDrybulbs[heating_month]) / mj.htd
+    else
+      rtf_design_mon_heat = 0
+    end
+    if mj.ctd > 0
+      rtf_design_mon_cool = (weather.data.MonthlyAvgDrybulbs[cooling_month] - mj.cool_setpoint) / mj.ctd
+    else
+      rtf_design_mon_cool = 0
+    end
+    rtf_design_mon_heat = [[rtf_design_mon_heat, 0.25].max, 1.0].min
+    rtf_design_mon_cool = [[rtf_design_mon_cool, 0.25].max, 1.0].min
 
-    nom_length_heat = (1.0 - 1.0 / clg_ap.heat_rated_cops[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (weather.data.DeepGroundAnnualTemp - (2.0 * clg_ap.design_hw - clg_ap.design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-    nom_length_cool = (1.0 + 1.0 / clg_ap.cool_rated_cops[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * clg_ap.design_chw + clg_ap.design_delta_t) / 2.0 - weather.data.DeepGroundAnnualTemp) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    nom_length_heat = (1.0 - 1.0 / clg_ap.heat_rated_cops[0]) * (r_value_bore + r_value_ground * rtf_design_mon_heat) / (weather.data.DeepGroundAnnualTemp - (2.0 * clg_ap.design_hw - clg_ap.design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    nom_length_cool = (1.0 + 1.0 / clg_ap.cool_rated_cops[0]) * (r_value_bore + r_value_ground * rtf_design_mon_cool) / ((2.0 * clg_ap.design_chw + clg_ap.design_delta_t) / 2.0 - weather.data.DeepGroundAnnualTemp) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
 
     return nom_length_heat, nom_length_cool
   end
@@ -3870,7 +3876,7 @@ module HVACSizing
   # @param hvac_heating_speed [Integer] Array index of the nominal speed
   # @return [Double] Heating capacity fraction of nominal
   def self.calc_gshp_htg_curve_value(htg_ap, hpxml_header, db_temp, w_temp, hvac_heating_speed)
-    if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeStandard)
+    if (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::GroundToAirHeatPumpModelTypeStandard)
 
       # Reference conditions in thesis with largest capacity:
       # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
@@ -3880,7 +3886,7 @@ module HVACSizing
       w_temp = UnitConversions.convert(w_temp, 'F', 'K')
 
       htg_cap_curve_value = MathTools.quadlinear(db_temp / ref_temp, w_temp / ref_temp, 1.0, 1.0, htg_ap.heat_cap_curve_spec[hvac_heating_speed])
-    elsif (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::AdvancedResearchGroundToAirHeatPumpModelTypeExperimental)
+    elsif (hpxml_header.ground_to_air_heat_pump_model_type == HPXML::GroundToAirHeatPumpModelTypeExperimental)
       htg_cap_curve_value = MathTools.biquadratic(UnitConversions.convert(db_temp, 'F', 'C'), UnitConversions.convert(w_temp, 'F', 'C'), htg_ap.heat_cap_ft_spec[hvac_heating_speed])
     end
 
@@ -4775,7 +4781,7 @@ module HVACSizing
     end
 
     assembly_r = Material.FoundationWallMaterial(foundation_wall.type, foundation_wall.thickness).rvalue
-    assembly_r += Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
+    assembly_r += Material.AirFilmIndoorWall.rvalue + Material.AirFilmOutside.rvalue
     if not include_insulation_layers
       return 1.0 / assembly_r
     end
