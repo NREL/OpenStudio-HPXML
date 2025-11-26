@@ -3915,7 +3915,6 @@ class HPXML < Object
   class Roof < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
-             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
              :area,                           # [Double] Area (ft2)
@@ -4187,7 +4186,6 @@ class HPXML < Object
   class RimJoist < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
-             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4211,7 +4209,7 @@ class HPXML < Object
     #
     # @return [<HPXML::RimJoist>] RimJoist object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::RimJoist, self)
+      return HPXML::get_sameas_obj(@parent_object, self)
     end
 
     # Returns the space that the rim joist is attached to.
@@ -4234,7 +4232,11 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      return @exterior_adjacent_to == LocationOutside
+      if @sameas_id
+        return false
+      else
+        return @exterior_adjacent_to == LocationOutside
+      end
     end
 
     # Returns whether the rim joist is an interior surface (i.e., NOT adjacent to
@@ -4432,7 +4434,6 @@ class HPXML < Object
   class Wall < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
-             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4466,7 +4467,7 @@ class HPXML < Object
     #
     # @return [<HPXML::Wall>] Wall object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::Wall, self)
+      return HPXML::get_sameas_obj(@parent_object, self)
     end
 
     # Returns all windows for this wall.
@@ -4516,7 +4517,11 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      return @exterior_adjacent_to == LocationOutside
+      if @sameas_id
+        return false
+      else
+        return @exterior_adjacent_to == LocationOutside
+      end
     end
 
     # Returns whether the wall is an interior surface (i.e., NOT adjacent to
@@ -4751,7 +4756,6 @@ class HPXML < Object
   class FoundationWall < BaseElement
     ATTRS = [:id,                                     # [String] SystemIdentifier/@id
              :sameas_id,                              # [String] SystemIdentifier/@sameas
-             :referenced_by_sameas,                   # [String] Sameas object id that references this object
              :attached_to_space_idref,                # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,                   # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,                   # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4781,7 +4785,7 @@ class HPXML < Object
     #
     # @return [<HPXML::FoundationWall>] FoundationWall object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::FoundationWall, self)
+      return HPXML::get_sameas_obj(@parent_object, self)
     end
 
     # Returns all windows for this foundation wall.
@@ -4885,7 +4889,11 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      return @exterior_adjacent_to == LocationGround
+      if @sameas_id
+        return false
+      else
+        return @exterior_adjacent_to == LocationGround
+      end
     end
 
     # Returns whether the foundation wall is an interior surface (i.e., NOT adjacent to
@@ -5099,7 +5107,6 @@ class HPXML < Object
   class Floor < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
              :sameas_id,                      # [String] SystemIdentifier/@sameas
-             :referenced_by_sameas,           # [String] Sameas object id that references this object
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -5126,7 +5133,7 @@ class HPXML < Object
     #
     # @return [<HPXML::Floor>] Floor object linked by sameas attribute
     def sameas
-      return HPXML::get_sameas_obj(@parent_object.parent_object, @parent_object, HPXML::Floor, self)
+      return HPXML::get_sameas_obj(@parent_object, self)
     end
 
     # Returns all skylights for this floor.
@@ -5199,7 +5206,11 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
+      if @sameas_id
+        return false
+      else
+        return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
+      end
     end
 
     # Returns whether the floor is an interior surface (i.e., NOT adjacent to
@@ -5416,7 +5427,6 @@ class HPXML < Object
   class Slab < BaseElement
     ATTRS = [:id,                                               # [String] SystemIdentifier/@id
              :sameas_id,                                        # [String] SystemIdentifier/@sameas
-             :referenced_by_sameas,                             # [String] Sameas object id that references this object
              :attached_to_space_idref,                          # [String] AttachedToSpace/@idref
              :interior_adjacent_to,                             # [String] InteriorAdjacentTo (HPXML::LocationXXX)
              :area,                                             # [Double] Area (ft2)
@@ -12501,15 +12511,14 @@ class HPXML < Object
     return idrefs
   end
 
-  # Gets the sameas obj (from another Building) with the specified sameas_id.
+  # Find the sameas object (from another Building) with sameas_id and assign the referenced_by_sameas property at first pass.
+  # Returns the referenced sameas object if being found.
   #
-  # @param hpxml [Oga::XML::Element] The parent HPXML element
   # @param parent_building [Oga::XML::Element] The parent Building element
-  # @param object_type [Class]  HPXML object type of the element
-  # @param object [Oga::XML::Element]  The HPXML element
-  # @return [Oga::XML::Element] The element that sameas attribute associated with
-  def self.get_sameas_obj(hpxml, parent_building, object_type, object)
-    hpxml.buildings.each do |building|
+  # @param object [Oga::XML::Element]  The HPXML element with sameas id
+  # @return [Oga::XML::Element] The element that sameas id attribute associated with
+  def self.get_sameas_obj(parent_building, object)
+    parent_building.parent_object.buildings.each do |building|
       building.class::CLASS_ATTRS.each do |attr|
         building_child = building.send(attr)
         next unless building_child.is_a? HPXML::BaseArrayElement
@@ -12520,11 +12529,12 @@ class HPXML < Object
             fail "'#{object.id}' sameas references the object in the same building '#{parent_building.building_id}'."
           end
 
-          if obj.is_a? object_type
+          if obj.is_a? object.class
             # Assign referenced_by_sameas
-            if obj.referenced_by_sameas.nil?
-              obj.referenced_by_sameas = object.id
-            elsif obj.referenced_by_sameas != object.id
+            ap = obj.additional_properties
+            if not ap.respond_to? :referenced_by_sameas
+              ap.referenced_by_sameas = object.id
+            elsif ap.referenced_by_sameas != object.id
               fail "'#{obj.id}' is referenced by multiple objects."
             end
             return obj

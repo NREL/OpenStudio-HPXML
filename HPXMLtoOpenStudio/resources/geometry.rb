@@ -135,10 +135,7 @@ module Geometry
 
     hpxml_bldg.walls.each do |wall|
       hpxml_id = wall.id
-      if wall.sameas_id
-        hpxml_sameas_id = wall.sameas_id
-        wall = wall.sameas
-      end
+      wall = wall.sameas if wall.sameas_id
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if wall.azimuth.nil?
@@ -150,7 +147,7 @@ module Geometry
       else
         azimuths = [wall.azimuth]
       end
-      if hpxml_sameas_id
+      if wall.sameas_id # change azimuth for sameas wall
         azimuths = azimuths.map { |a| (a + 180) % 360 }
       end
 
@@ -175,17 +172,19 @@ module Geometry
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, wall, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, wall, hpxml_bldg) if hpxml_sameas_id.nil?
+        set_surface_exterior(model, spaces, surface, wall, hpxml_bldg)
         if wall.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
         surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
-        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
+        surface.additionalProperties.setFeature('hpxmlSameasID', wall.sameas_id) unless wall.sameas_id.nil?
       end
 
       next if surfaces.empty?
-      next unless hpxml_sameas_id.nil?
+      # Skip assigning constructions for sameas object, only assign constructions for referenced object
+      # The sameas object's construction will be assigned as reverse construction when the unit models are combined
+      next unless wall.sameas_id.nil?
 
       # Apply construction
       # The code below constructs a reasonable wall construction based on the
@@ -224,10 +223,7 @@ module Geometry
 
     hpxml_bldg.rim_joists.each do |rim_joist|
       hpxml_id = rim_joist.id
-      if rim_joist.sameas_id
-        hpxml_sameas_id = rim_joist.sameas_id
-        rim_joist = rim_joist.sameas
-      end
+      rim_joist = rim_joist.sameas if rim_joist.sameas_id
 
       if rim_joist.azimuth.nil?
         if rim_joist.is_exterior
@@ -238,8 +234,8 @@ module Geometry
       else
         azimuths = [rim_joist.azimuth]
       end
-      if hpxml_sameas_id
-        azimuths = azimuths.map { |a| (a + 180) % 360 }
+      if rim_joist.sameas_id
+        azimuths = azimuths.map { |a| (a + 180) % 360 } # change azimuth for sameas rim joist
       end
 
       surfaces = []
@@ -263,16 +259,18 @@ module Geometry
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, rim_joist, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, rim_joist, hpxml_bldg) if hpxml_sameas_id.nil?
+        set_surface_exterior(model, spaces, surface, rim_joist, hpxml_bldg)
         if rim_joist.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
         surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
-        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
+        surface.additionalProperties.setFeature('hpxmlSameasID', rim_joist.sameas_id) unless rim_joist.sameas_id.nil?
       end
 
-      next unless hpxml_sameas_id.nil?
+      # Skip assigning constructions for sameas object, only assign constructions for referenced object
+      # The sameas object's construction will be assigned as reverse construction when the unit models are combined
+      next unless rim_joist.sameas_id.nil?
 
       # Apply construction
 
@@ -321,13 +319,7 @@ module Geometry
 
     hpxml_bldg.floors.each do |floor|
       hpxml_id = floor.id
-      if floor.sameas_id
-        is_ceiling = !floor.sameas.is_ceiling
-        hpxml_sameas_id = floor.sameas_id
-        floor = floor.sameas
-      else
-        is_ceiling = floor.is_ceiling
-      end
+      floor = floor.sameas if floor.sameas_id
       next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       area = floor.net_area
@@ -339,7 +331,7 @@ module Geometry
         z_origin = foundation_top
       end
 
-      if is_ceiling
+      if floor.is_ceiling
         vertices = create_ceiling_vertices(length, width, z_origin, default_azimuths)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
@@ -350,7 +342,7 @@ module Geometry
       end
       surface.additionalProperties.setFeature('Tilt', 0.0)
       set_surface_interior(model, spaces, surface, floor, hpxml_bldg)
-      set_surface_exterior(model, spaces, surface, floor, hpxml_bldg) if hpxml_sameas_id.nil?
+      set_surface_exterior(model, spaces, surface, floor, hpxml_bldg)
       surface.setName(floor.id)
       if floor.is_interior
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
@@ -370,8 +362,10 @@ module Geometry
         end
       end
       surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
-      surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
-      next unless hpxml_sameas_id.nil?
+      surface.additionalProperties.setFeature('hpxmlSameasID', floor.sameas_id) unless floor.sameas_id.nil?
+      # Skip assigning constructions for sameas object, only assign constructions for referenced object
+      # The sameas object's construction will be assigned as reverse construction when the unit models are combined
+      next unless floor.sameas_id.nil?
 
       # Apply construction
 
@@ -470,10 +464,7 @@ module Geometry
       int_fnd_walls = hpxml_bldg.foundation_walls.select { |fw| (fw.is_interior && fw.interior_adjacent_to == foundation_type) || fw.sameas_id }
       int_fnd_walls.each do |fnd_wall|
         hpxml_id = fnd_wall.id
-        if fnd_wall.sameas_id
-          hpxml_sameas_id = fnd_wall.sameas_id
-          fnd_wall = fnd_wall.sameas
-        end
+        fnd_wall = fnd_wall.sameas if fnd_wall.sameas_id
 
         next unless fnd_wall.is_interior
 
@@ -488,7 +479,7 @@ module Geometry
         else
           azimuth = fnd_wall.azimuth
         end
-        if hpxml_sameas_id
+        if fnd_wall.sameas_id
           azimuth = (azimuth + 180) % 360
         end
 
@@ -501,13 +492,15 @@ module Geometry
         surface.setName(fnd_wall.id)
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, fnd_wall, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg) if hpxml_sameas_id.nil?
+        set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg)
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
         surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         surface.additionalProperties.setFeature('hpxmlID', hpxml_id)
-        surface.additionalProperties.setFeature('hpxmlSameasID', hpxml_sameas_id) unless hpxml_sameas_id.nil?
+        surface.additionalProperties.setFeature('hpxmlSameasID', fnd_wall.sameas_id) unless fnd_wall.sameas_id.nil?
 
-        next unless hpxml_sameas_id.nil?
+        # Skip assigning constructions for sameas object, only assign constructions for referenced object
+        # The sameas object's construction will be assigned as reverse construction when the unit models are combined
+        next unless fnd_wall.sameas_id.nil?
 
         # Apply construction
 
@@ -1738,6 +1731,9 @@ module Geometry
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg)
+    return unless hpxml_surface.sameas_id.nil?
+    return if (hpxml_surface.additional_properties.respond_to? :referenced_by_sameas)
+
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
     if [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include? exterior_adjacent_to
