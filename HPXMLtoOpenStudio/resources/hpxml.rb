@@ -4232,7 +4232,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id
+      if @sameas_id || (@additional_properties.respond_to? :referenced_by_sameas)
         return false
       else
         return @exterior_adjacent_to == LocationOutside
@@ -4517,7 +4517,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id
+      if @sameas_id || (@additional_properties.respond_to? :referenced_by_sameas)
         return false
       else
         return @exterior_adjacent_to == LocationOutside
@@ -4889,7 +4889,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id
+      if @sameas_id || (@additional_properties.respond_to? :referenced_by_sameas)
         return false
       else
         return @exterior_adjacent_to == LocationGround
@@ -5206,7 +5206,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id
+      if @sameas_id || (@additional_properties.respond_to? :referenced_by_sameas)
         return false
       else
         return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
