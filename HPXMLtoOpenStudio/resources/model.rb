@@ -1165,6 +1165,7 @@ module Model
       adjacent_unit_number = surface.additionalProperties.getFeatureAsInteger('adjacentUnitNumber').get
       adjacent_space_type = surface.additionalProperties.getFeatureAsString('adjacentSpaceType').get
       adjacent_hpxml_id = surface.additionalProperties.getFeatureAsString('adjacentHpxmlID').get
+      adjacent_space_type = HPXML::LocationConditionedSpace if adjacent_space_type == HPXML::LocationBasementConditioned
 
       unit_model = hpxml_osm_map.values[adjacent_unit_number]
       adjacent_space_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == adjacent_space_type }.spaces[0].name.to_s
