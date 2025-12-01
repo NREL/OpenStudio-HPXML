@@ -4232,11 +4232,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id || (@additional_properties.respond_to? :adjacent_hpxml_id)
-        return false
-      else
-        return @exterior_adjacent_to == LocationOutside
-      end
+      return @exterior_adjacent_to == LocationOutside
     end
 
     # Returns whether the rim joist is an interior surface (i.e., NOT adjacent to
@@ -4517,11 +4513,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id || (@additional_properties.respond_to? :adjacent_hpxml_id)
-        return false
-      else
-        return @exterior_adjacent_to == LocationOutside
-      end
+      return @exterior_adjacent_to == LocationOutside
     end
 
     # Returns whether the wall is an interior surface (i.e., NOT adjacent to
@@ -4889,11 +4881,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id || (@additional_properties.respond_to? :adjacent_hpxml_id)
-        return false
-      else
-        return @exterior_adjacent_to == LocationGround
-      end
+      return @exterior_adjacent_to == LocationGround
     end
 
     # Returns whether the foundation wall is an interior surface (i.e., NOT adjacent to
@@ -5202,11 +5190,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id || (@additional_properties.respond_to? :adjacent_hpxml_id)
-        return false
-      else
-        return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
-      end
+      return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
     end
 
     # Returns whether the floor is an interior surface (i.e., NOT adjacent to

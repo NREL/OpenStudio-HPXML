@@ -173,7 +173,6 @@ module Geometry
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
-        surface.additionalProperties.setFeature('hpxmlID', wall.id)
         next unless wall.additional_properties.respond_to? :adjacent_hpxml_id
 
         surface.additionalProperties.setFeature('adjacentHpxmlID', wall.additional_properties.adjacent_hpxml_id)
@@ -257,7 +256,6 @@ module Geometry
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
-        surface.additionalProperties.setFeature('hpxmlID', rim_joist.id)
         next unless rim_joist.additional_properties.respond_to? :adjacent_hpxml_id
 
         surface.additionalProperties.setFeature('adjacentHpxmlID', rim_joist.additional_properties.adjacent_hpxml_id)
@@ -353,7 +351,6 @@ module Geometry
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
       end
-      surface.additionalProperties.setFeature('hpxmlID', floor.id)
       if floor.additional_properties.respond_to? :adjacent_hpxml_id
         surface.additionalProperties.setFeature('adjacentHpxmlID', floor.additional_properties.adjacent_hpxml_id)
         surface.additionalProperties.setFeature('adjacentUnitNumber', floor.additional_properties.adjacent_unit_number)
@@ -483,7 +480,6 @@ module Geometry
         set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg)
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
         surface.setWindExposure(EPlus::SurfaceWindExposureNo)
-        surface.additionalProperties.setFeature('hpxmlID', fnd_wall.id)
         if fnd_wall.additional_properties.respond_to? :adjacent_hpxml_id
           surface.additionalProperties.setFeature('adjacentHpxmlID', fnd_wall.additional_properties.adjacent_hpxml_id)
           surface.additionalProperties.setFeature('adjacentUnitNumber', fnd_wall.additional_properties.adjacent_unit_number)
@@ -1069,7 +1065,8 @@ module Geometry
   def self.apply_foundation_and_walls_top(hpxml_bldg)
     foundation_top = [hpxml_bldg.building_construction.unit_height_above_grade, 0].max
     hpxml_bldg.foundation_walls.each do |foundation_wall|
-      foundation_wall = foundation_wall.sameas if foundation_wall.sameas_id
+      next if foundation_wall.sameas_id
+
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
       foundation_top = top if top > foundation_top
     end
@@ -1690,12 +1687,12 @@ module Geometry
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [OpenStudio::Model::Space] the OpenStudio::Model::Space object based on the interior location
+  # @return [nil]
   def self.set_surface_interior(model, spaces, surface, hpxml_surface, hpxml_bldg)
     if HPXML::conditioned_below_grade_locations.include? hpxml_surface.interior_adjacent_to
-      return surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg))
+      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg))
     else
-      return surface.setSpace(create_or_get_space(model, spaces, hpxml_surface.interior_adjacent_to, hpxml_bldg))
+      surface.setSpace(create_or_get_space(model, spaces, hpxml_surface.interior_adjacent_to, hpxml_bldg))
     end
   end
 
@@ -1708,7 +1705,6 @@ module Geometry
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg)
-    return unless hpxml_surface.sameas_id.nil?
     return if (hpxml_surface.additional_properties.respond_to? :adjacent_hpxml_id)
 
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
