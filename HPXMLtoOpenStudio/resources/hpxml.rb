@@ -4232,7 +4232,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id || (@additional_properties.respond_to? :referenced_by_sameas)
+      if @sameas_id || (@additional_properties.respond_to? :adjacent_hpxml_id)
         return false
       else
         return @exterior_adjacent_to == LocationOutside
@@ -4517,7 +4517,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id || (@additional_properties.respond_to? :referenced_by_sameas)
+      if @sameas_id || (@additional_properties.respond_to? :adjacent_hpxml_id)
         return false
       else
         return @exterior_adjacent_to == LocationOutside
@@ -4889,7 +4889,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id || (@additional_properties.respond_to? :referenced_by_sameas)
+      if @sameas_id || (@additional_properties.respond_to? :adjacent_hpxml_id)
         return false
       else
         return @exterior_adjacent_to == LocationGround
@@ -5179,14 +5179,10 @@ class HPXML < Object
     #
     # @return [Boolean] True if the surface is a ceiling
     def is_ceiling
-      if @sameas_id.nil?
-        if @floor_or_ceiling.nil?
-          return HPXML::is_floor_a_ceiling(self, true)
-        else
-          return @floor_or_ceiling == FloorOrCeilingCeiling
-        end
+      if @floor_or_ceiling.nil?
+        return HPXML::is_floor_a_ceiling(self, true)
       else
-        return !sameas.is_ceiling
+        return @floor_or_ceiling == FloorOrCeilingCeiling
       end
     end
 
@@ -5206,7 +5202,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @sameas_id || (@additional_properties.respond_to? :referenced_by_sameas)
+      if @sameas_id || (@additional_properties.respond_to? :adjacent_hpxml_id)
         return false
       else
         return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
@@ -12511,7 +12507,8 @@ class HPXML < Object
     return idrefs
   end
 
-  # Find the sameas object (from another Building) with sameas_id and assign the referenced_by_sameas property at first pass.
+  # Find the sameas object (from another Building) with sameas_id as well as assigns
+  # the adjacent_hpxml_id, adjacent_unit_number, and adjacent_space_type additional properties.
   # Returns the referenced sameas object if being found.
   #
   # @param parent_building [Oga::XML::Element] The parent Building element
@@ -12530,11 +12527,13 @@ class HPXML < Object
           end
 
           if obj.is_a? object.class
-            # Assign referenced_by_sameas
+            # Assign adjacent_hpxml_id
             ap = obj.additional_properties
-            if not ap.respond_to? :referenced_by_sameas
-              ap.referenced_by_sameas = object.id
-            elsif ap.referenced_by_sameas != object.id
+            if not ap.respond_to? :adjacent_hpxml_id
+              ap.adjacent_hpxml_id = object.id
+              ap.adjacent_unit_number = object.parent_object.parent_object.buildings.index(object.parent_object)
+              ap.adjacent_space_type = obj.interior_adjacent_to
+            elsif ap.adjacent_hpxml_id != object.id
               fail "'#{obj.id}' is referenced by multiple objects."
             end
             return obj
