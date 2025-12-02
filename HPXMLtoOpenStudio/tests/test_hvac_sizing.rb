@@ -14,7 +14,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
     @test_files_path = File.join(@root_path, 'workflow', 'tests')
-    @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
+    @tmp_hpxml_path = File.join(File.dirname(__FILE__), 'tmp.xml')
     @results_dir = File.join(@test_files_path, 'test_results')
     FileUtils.mkdir_p @results_dir
     @schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', 'resources', 'hpxml_schema', 'HPXML.xsd'))
@@ -22,8 +22,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   end
 
   def teardown
-    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    cleanup_results_files
+    cleanup_output_files([@tmp_hpxml_path])
   end
 
   def test_hvac_configurations
@@ -39,6 +38,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     sizing_results = {}
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
                   'skip_validation' => true }
+    skip_in_xml_validation = false # Only validate in.xml once for speed
     Dir["#{@sample_files_path}/base-hvac*.xml"].each do |hvac_hpxml|
       next if hvac_hpxml.include? 'autosize'
       next if hvac_hpxml.include? 'detailed-performance' # Autosizing not allowed
@@ -81,7 +81,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
           hpxml_bldg.header.heat_pump_backup_sizing_methodology = hp_backup_sizing_methodology
 
           XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-          _autosized_model, _autosized_hpxml, autosized_bldg = _test_measure(args_hash)
+          _autosized_model, _autosized_hpxml, autosized_bldg = _test_measure(args_hash, skip_in_xml_validation: skip_in_xml_validation)
+          skip_in_xml_validation = true
 
           # Get values
           capacities = Outputs.get_total_hvac_capacities(autosized_bldg)
@@ -1904,7 +1905,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _test_measure(args_hash, expect_num_warnings: 0)
   end
 
-  def _test_measure(args_hash, expect_num_warnings: nil)
+  def _test_measure(args_hash, expect_num_warnings: nil, skip_in_xml_validation: false)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
 
@@ -1940,7 +1941,16 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     end
 
     hpxml_defaults_path = File.join(File.dirname(__FILE__), 'in.xml')
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: @schema_validator, schematron_validator: @schematron_validator)
+    if (args_hash['hpxml_path'] == @tmp_hpxml_path) && (not skip_in_xml_validation)
+      # Since there is a penalty to performing schema/schematron validation, we only do it for custom models
+      # Sample files already have their in.xml's checked in the workflow tests
+      schema_validator = @schema_validator
+      schematron_validator = @schematron_validator
+    else
+      schema_validator = nil
+      schematron_validator = nil
+    end
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator)
     if not hpxml.errors.empty?
       puts 'ERRORS:'
       hpxml.errors.each do |error|
