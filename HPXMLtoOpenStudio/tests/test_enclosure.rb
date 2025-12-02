@@ -123,7 +123,7 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
 
     hpxml, hpxml_bldg = _create_hpxml('base-atticroof-radiant-barrier.xml')
     roofs_values.each_with_index do |roof_values, j|
-      gablewall_values = gablewalls_values[i]
+      gablewall_values = gablewalls_values[j]
       hpxml_bldg.roofs[0].insulation_assembly_r_value = roof_values[:assembly_r]
       hpxml_bldg.walls[1].insulation_assembly_r_value = gablewall_values[:assembly_r]
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
