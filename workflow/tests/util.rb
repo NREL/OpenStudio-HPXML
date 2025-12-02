@@ -445,9 +445,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
   end
   assert_equal(0, num_unused_objects)
-  if not hpxml_path.include? 'base-bldgtype-mf-whole-building' # FUTURE: Address unused schedules referenced by orphaned othersidecoefficient objects
-    assert_equal(0, num_unused_schedules)
-  end
+  assert_equal(0, num_unused_schedules)
   assert_equal(0, num_unused_constructions)
 
   # Check for Output:Meter and Output:Variable warnings

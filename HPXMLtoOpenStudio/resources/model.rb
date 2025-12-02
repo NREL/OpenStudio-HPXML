@@ -1219,7 +1219,7 @@ module Model
     end
 
     model_size = model.to_s.size
-    model_objects = model.addObjects(unit_model_objects, true)
+    merged_model_objects = model.addObjects(unit_model_objects, true)
     if model.to_s.size == model_size
       # Objects not added, check for the culprit
       unit_model_objects.each do |o|
@@ -1231,17 +1231,49 @@ module Model
       end
     end
 
-    model_objects.each do |obj|
+    # Create adjacent surfaces for HPXML surfaces w/ sameas attribute
+    merged_model_objects.each do |obj|
       next unless obj.to_Surface.is_initialized
-      next unless obj.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlSameasID').is_initialized
 
-      surface_obj = obj.to_Surface.get
-      hpxml_sameas_id = surface_obj.additionalProperties.getFeatureAsString('hpxmlSameasID').to_s
+      surface = obj.to_Surface.get
+      next unless surface.additionalProperties.getFeatureAsInteger('adjacentUnitNumber').is_initialized
 
-      adjacent_surface = model_objects.find { |o| o.to_Surface.is_initialized && o.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlID').is_initialized && (hpxml_sameas_id == o.to_Surface.get.additionalProperties.getFeatureAsString('hpxmlID').to_s) }.to_Surface.get
-      surface_obj.setConstruction(adjacent_surface.construction.get.to_Construction.get.reverseConstruction)
-      adjacent_surface.setAdjacentSurface(surface_obj)
+      adjacent_unit_number = surface.additionalProperties.getFeatureAsInteger('adjacentUnitNumber').get
+      adjacent_space_type = surface.additionalProperties.getFeatureAsString('adjacentSpaceType').get
+      adjacent_hpxml_id = make_variable_name(surface.additionalProperties.getFeatureAsString('adjacentHpxmlID').get, adjacent_unit_number)
+      adjacent_space_type = HPXML::LocationConditionedSpace if adjacent_space_type == HPXML::LocationBasementConditioned
+
+      unit_model = hpxml_osm_map.values[adjacent_unit_number]
+      unit_adjacent_space = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == adjacent_space_type }.spaces[0]
+      adjacent_space = merged_model_objects.find { |s| s.to_Space.is_initialized && s.name.to_s == unit_adjacent_space.name.to_s }.to_Space.get
+
+      # Create/assign adjacent surface
+      adjacent_surface = surface.createAdjacentSurface(adjacent_space)
+      adjacent_surface = adjacent_surface.get
+      adjacent_surface.setName(adjacent_hpxml_id)
+
+      # Add new surface to unit_model as well so that the component loads program
+      # created later accounts for this surface.
+      unit_surface = OpenStudio::Model::Surface.new(adjacent_surface.vertices, unit_model)
+      surface_type = surface.additionalProperties.getFeatureAsString('SurfaceType').get
+      if surface_type == 'Floor'
+        surface_type = 'Ceiling'
+      elsif surface_type == 'Ceiling'
+        surface_type = 'Floor'
+      end
+      unit_surface.additionalProperties.setFeature('SurfaceType', surface_type)
+      unit_surface.setSpace(unit_adjacent_space)
+      unit_surface.setName(adjacent_surface.name.to_s)
     end
+  end
+
+  # Create a new OpenStudio object name by prefixing the old with "unit" plus the unit number.
+  #
+  # @param obj_name [String] the OpenStudio object name
+  # @param unit_number [Integer] index number corresponding to an HPXML Building object
+  # @return [String] the new OpenStudio object name with unique unit prefix
+  def self.make_variable_name(obj_name, unit_number)
+    return ems_friendly_name("unit#{unit_number + 1}_#{obj_name}")
   end
 
   # Prefix all object names using using a provided unit number.
@@ -1251,15 +1283,6 @@ module Model
   # @return [nil]
   def self.prefix_object_names(unit_model, unit_number)
     # FUTURE: Create objects with unique names up front so we don't have to do this
-
-    # Create a new OpenStudio object name by prefixing the old with "unit" plus the unit number.
-    #
-    # @param obj_name [String] the OpenStudio object name
-    # @param unit_number [Integer] index number corresponding to an HPXML Building object
-    # @return [String] the new OpenStudio object name with unique unit prefix
-    def self.make_variable_name(obj_name, unit_number)
-      return ems_friendly_name("unit#{unit_number + 1}_#{obj_name}")
-    end
 
     # EMS objects
     ems_map = {}

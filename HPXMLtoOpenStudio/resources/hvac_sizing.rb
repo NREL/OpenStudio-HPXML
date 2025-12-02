@@ -256,7 +256,7 @@ module HVACSizing
 
     locations = []
     hpxml_bldg.surfaces.each do |surface|
-      next unless surface.sameas_id.nil? && surface.referenced_by_sameas.nil?
+      next if (not surface.sameas_id.nil?) || (surface.additional_properties.respond_to? :adjacent_hpxml_id)
 
       locations << surface.interior_adjacent_to
       locations << surface.exterior_adjacent_to
@@ -1026,7 +1026,7 @@ module HVACSizing
     # Above-Grade Wall Area
     (hpxml_bldg.walls + hpxml_bldg.rim_joists + hpxml_bldg.foundation_walls).each do |wall|
       next unless wall.is_thermal_boundary
-      next unless wall.sameas_id.nil? && wall.referenced_by_sameas.nil?
+      next if (not wall.sameas_id.nil?) || (wall.additional_properties.respond_to? :adjacent_hpxml_id)
 
       space = wall.space
       zone = space.zone
@@ -1122,6 +1122,7 @@ module HVACSizing
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
       next if foundation_wall.depth_below_grade < 2 # Already handled in above grade walls
+      next if (not foundation_wall.sameas_id.nil?) || (foundation_wall.additional_properties.respond_to? :adjacent_hpxml_id)
 
       space = foundation_wall.space
       zone = space.zone
@@ -1221,7 +1222,7 @@ module HVACSizing
   def self.process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
-      next unless floor.sameas_id.nil? && floor.referenced_by_sameas.nil?
+      next if (not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id)
 
       space = floor.space
       zone = space.zone
@@ -1262,7 +1263,7 @@ module HVACSizing
   def self.process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
-      next unless floor.sameas_id.nil? && floor.referenced_by_sameas.nil?
+      next if (not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id)
 
       space = floor.space
       zone = space.zone

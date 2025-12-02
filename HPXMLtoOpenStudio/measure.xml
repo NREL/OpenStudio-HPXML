@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>4b42f4f0-dbd2-4ad5-92d6-5c2140f7e62e</version_id>
-  <version_modified>2025-11-26T16:57:48Z</version_modified>
+  <version_id>1eb65b43-fa96-441a-a1a6-f0020bde4683</version_id>
+  <version_modified>2025-12-02T16:47:40Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -372,7 +372,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>62F66985</checksum>
+      <checksum>387E0B6E</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
@@ -384,7 +384,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EB75F0BE</checksum>
+      <checksum>AA1CC206</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -420,7 +420,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DBC1EF69</checksum>
+      <checksum>C0B50A59</checksum>
     </file>
     <file>
       <filename>internal_gains.rb</filename>
@@ -474,7 +474,7 @@
       <filename>model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7787ED79</checksum>
+      <checksum>DF4FA1B3</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
@@ -660,7 +660,7 @@
       <filename>simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>25DD5859</checksum>
+      <checksum>B80D1093</checksum>
     </file>
     <file>
       <filename>unit_conversions.rb</filename>
@@ -744,7 +744,7 @@
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>2C955839</checksum>
+      <checksum>BCD5ED2C</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -810,7 +810,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>85CF8902</checksum>
+      <checksum>B42CCBE8</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>
@@ -822,7 +822,7 @@
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1875D668</checksum>
+      <checksum>6772F9FC</checksum>
     </file>
     <file>
       <filename>test_weather.rb</filename>
