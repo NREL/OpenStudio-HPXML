@@ -1143,7 +1143,7 @@ module Model
     end
 
     model_size = model.to_s.size
-    model_objects = model.addObjects(unit_model_objects, true)
+    merged_model_objects = model.addObjects(unit_model_objects, true)
     if model.to_s.size == model_size
       # Objects not added, check for the culprit
       unit_model_objects.each do |o|
@@ -1155,8 +1155,8 @@ module Model
       end
     end
 
-    # Create adjacent surfaces for HPXML surfaces using sameas attribute
-    model_objects.each do |obj|
+    # Create adjacent surfaces for HPXML surfaces w/ sameas attribute
+    merged_model_objects.each do |obj|
       next unless obj.to_Surface.is_initialized
 
       surface = obj.to_Surface.get
@@ -1164,17 +1164,30 @@ module Model
 
       adjacent_unit_number = surface.additionalProperties.getFeatureAsInteger('adjacentUnitNumber').get
       adjacent_space_type = surface.additionalProperties.getFeatureAsString('adjacentSpaceType').get
-      adjacent_hpxml_id = surface.additionalProperties.getFeatureAsString('adjacentHpxmlID').get
+      adjacent_hpxml_id = make_variable_name(surface.additionalProperties.getFeatureAsString('adjacentHpxmlID').get, adjacent_unit_number)
       adjacent_space_type = HPXML::LocationConditionedSpace if adjacent_space_type == HPXML::LocationBasementConditioned
 
       unit_model = hpxml_osm_map.values[adjacent_unit_number]
-      adjacent_space_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == adjacent_space_type }.spaces[0].name.to_s
-      adjacent_space = model_objects.find { |s| s.to_Space.is_initialized && s.name.to_s == adjacent_space_name }.to_Space.get
+      unit_adjacent_space = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == adjacent_space_type }.spaces[0]
+      adjacent_space = merged_model_objects.find { |s| s.to_Space.is_initialized && s.name.to_s == unit_adjacent_space.name.to_s }.to_Space.get
 
       # Create/assign adjacent surface
       adjacent_surface = surface.createAdjacentSurface(adjacent_space)
       adjacent_surface = adjacent_surface.get
-      adjacent_surface.setName(make_variable_name(adjacent_hpxml_id, adjacent_unit_number))
+      adjacent_surface.setName(adjacent_hpxml_id)
+
+      # Add new surface to unit_model as well so that the component loads program
+      # created later accounts for this surface.
+      unit_surface = OpenStudio::Model::Surface.new(adjacent_surface.vertices, unit_model)
+      surface_type = surface.additionalProperties.getFeatureAsString('SurfaceType').get
+      if surface_type == 'Floor'
+        surface_type = 'Ceiling'
+      elsif surface_type == 'Ceiling'
+        surface_type = 'Floor'
+      end
+      unit_surface.additionalProperties.setFeature('SurfaceType', surface_type)
+      unit_surface.setSpace(unit_adjacent_space)
+      unit_surface.setName(adjacent_surface.name.to_s)
     end
   end
 
