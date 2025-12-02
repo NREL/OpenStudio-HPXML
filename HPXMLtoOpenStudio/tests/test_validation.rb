@@ -1950,7 +1950,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'multiple-inverter-efficiencies' => ['Inverters with varying efficiencies found; using a single PV size weighted-average in the model.'],
                               'panel-missing-default' => ["Voltage (240) for 'dishwasher' is not specified in default_panels.csv; PowerRating will be assigned according to Voltage=120.",
                                                           "Voltage (240) for 'dishwasher' is not specified in default_panels.csv; BreakerSpaces will be recalculated using Voltage=240."],
-                              'panel-spaces-constrained' => ['The sum of OccupiedSpaces (12.0) exceeds RatedTotalSpaces (10); increasing RatedTotalSpaces by 2.0 and setting HeadroomSpaces=0.'],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
@@ -2160,11 +2159,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         branch_circuits.add(id: 'NewBranchCircuit',
                             voltage: HPXML::ElectricPanelVoltage240,
                             component_idrefs: [hpxml_bldg.dishwashers[0].id])
-      when 'panel-spaces-constrained'
-        hpxml, hpxml_bldg = _create_hpxml('base-detailed-electric-panel.xml')
-        hpxml_bldg.dishwashers.add(id: 'Dishwasher')
-        hpxml_bldg.electric_panels[0].headroom_spaces = nil
-        hpxml_bldg.electric_panels[0].rated_total_spaces = 10
       when 'power-outage'
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       when 'multistage-backup-more-than-4-stages'

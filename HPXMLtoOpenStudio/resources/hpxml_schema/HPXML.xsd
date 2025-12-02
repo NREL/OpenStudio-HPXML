@@ -6734,7 +6734,7 @@
 					<xs:documentation>[A]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="HeadroomSpaces" type="IntegerGreaterThanOrEqualToZero">
+			<xs:element minOccurs="0" name="HeadroomSpaces" type="HPXMLInteger">
 				<xs:annotation>
 					<xs:documentation>The number of open breaker spaces.</xs:documentation>
 				</xs:annotation>
@@ -10919,6 +10919,7 @@
 			<xs:enumeration value="PHIUS+"/>
 			<xs:enumeration value="WaterSense"/>
 			<xs:enumeration value="Zero Energy Ready Home"/>
+			<xs:enumeration value="DOE Efficient New Home"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
