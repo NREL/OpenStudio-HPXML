@@ -84,13 +84,13 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
           _autosized_model, _autosized_hpxml, autosized_bldg = _test_measure(args_hash)
 
           # Get values
-          htg_cap, clg_cap, hp_backup_cap = Outputs.get_total_hvac_capacities(autosized_bldg)
-          htg_cfm, clg_cfm = Outputs.get_total_hvac_airflows(autosized_bldg)
-          sizing_results[test_name] = { 'HVAC Capacity: Heating (Btu/h)' => htg_cap.round(1),
-                                        'HVAC Capacity: Cooling (Btu/h)' => clg_cap.round(1),
-                                        'HVAC Capacity: Heat Pump Backup (Btu/h)' => hp_backup_cap.round(1),
-                                        'HVAC Airflow: Heating (cfm)' => htg_cfm.round(1),
-                                        'HVAC Airflow: Cooling (cfm)' => clg_cfm.round(1) }
+          capacities = Outputs.get_total_hvac_capacities(autosized_bldg)
+          cfms = Outputs.get_total_hvac_airflows(autosized_bldg)
+          sizing_results[test_name] = { 'HVAC Capacity: Heating (Btu/h)' => capacities[:htg].round(1),
+                                        'HVAC Capacity: Cooling (Btu/h)' => capacities[:clg].round(1),
+                                        'HVAC Capacity: Heat Pump Backup (Btu/h)' => capacities[:htg_backup].round(1),
+                                        'HVAC Airflow: Heating (cfm)' => cfms[:htg].round(1),
+                                        'HVAC Airflow: Cooling (cfm)' => cfms[:clg].round(1) }
 
           next if hpxml_bldg.heat_pumps.size != 1
 

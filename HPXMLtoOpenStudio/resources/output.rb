@@ -986,31 +986,31 @@ module Outputs
   # These capacities will be reported in the annual output file.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Array<Double, Double, Double>] Total heating capacity, total cooling capacity, total heat pump backup capacity (Btu/hr)
+  # @return [Hash] Map of :htg/:clg/:htg_backup => total capacity (Btu/hr)
   def self.get_total_hvac_capacities(hpxml_bldg)
-    htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
+    capacities = { htg: 0.0, clg: 0.0, htg_backup: 0.0 }
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     hpxml_bldg.hvac_systems.each do |hvac_system|
       if hvac_system.is_a? HPXML::HeatingSystem
         next if hvac_system.is_heat_pump_backup_system
 
-        htg_cap += hvac_system.heating_capacity.to_f * unit_multiplier
+        capacities[:htg] += hvac_system.heating_capacity.to_f * unit_multiplier
       elsif hvac_system.is_a? HPXML::CoolingSystem
-        clg_cap += hvac_system.cooling_capacity.to_f * unit_multiplier
+        capacities[:clg] += hvac_system.cooling_capacity.to_f * unit_multiplier
         if hvac_system.has_integrated_heating
-          htg_cap += hvac_system.integrated_heating_system_capacity.to_f * unit_multiplier
+          capacities[:htg] += hvac_system.integrated_heating_system_capacity.to_f * unit_multiplier
         end
       elsif hvac_system.is_a? HPXML::HeatPump
-        htg_cap += hvac_system.heating_capacity.to_f * unit_multiplier
-        clg_cap += hvac_system.cooling_capacity.to_f * unit_multiplier
+        capacities[:htg] += hvac_system.heating_capacity.to_f * unit_multiplier
+        capacities[:clg] += hvac_system.cooling_capacity.to_f * unit_multiplier
         if hvac_system.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-          hp_backup_cap += hvac_system.backup_heating_capacity.to_f * unit_multiplier
+          capacities[:htg_backup] += hvac_system.backup_heating_capacity.to_f * unit_multiplier
         elsif hvac_system.backup_type == HPXML::HeatPumpBackupTypeSeparate
-          hp_backup_cap += hvac_system.backup_system.heating_capacity.to_f * unit_multiplier
+          capacities[:htg_backup] += hvac_system.backup_system.heating_capacity.to_f * unit_multiplier
         end
       end
     end
-    return htg_cap, clg_cap, hp_backup_cap
+    return capacities
   end
 
   # Calculates total panel loads (across all service feeders for a given service feeder load type) for a given HPXML Building.
@@ -1065,24 +1065,24 @@ module Outputs
   # Calculates total HVAC airflow rates (across all HVAC systems) for a given HPXML Building.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Array<Double, Double>] Total heating airflow rate, total cooling airflow rate (cfm)
+  # @return [Hash] Map of :htg/:clg => total airflow rate (cfm)
   def self.get_total_hvac_airflows(hpxml_bldg)
-    htg_cfm, clg_cfm = 0.0, 0.0
+    cfms = { htg: 0.0, clg: 0.0 }
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     hpxml_bldg.hvac_systems.each do |hvac_system|
       if hvac_system.is_a? HPXML::HeatingSystem
-        htg_cfm += hvac_system.heating_design_airflow_cfm.to_f * unit_multiplier
+        cfms[:htg] += hvac_system.heating_design_airflow_cfm.to_f * unit_multiplier
       elsif hvac_system.is_a? HPXML::CoolingSystem
-        clg_cfm += hvac_system.cooling_design_airflow_cfm.to_f * unit_multiplier
+        cfms[:clg] += hvac_system.cooling_design_airflow_cfm.to_f * unit_multiplier
         if hvac_system.has_integrated_heating
-          htg_cfm += hvac_system.integrated_heating_system_airflow_cfm.to_f * unit_multiplier
+          cfms[:htg] += hvac_system.integrated_heating_system_airflow_cfm.to_f * unit_multiplier
         end
       elsif hvac_system.is_a? HPXML::HeatPump
-        htg_cfm += hvac_system.heating_design_airflow_cfm.to_f * unit_multiplier
-        clg_cfm += hvac_system.cooling_design_airflow_cfm.to_f * unit_multiplier
+        cfms[:htg] += hvac_system.heating_design_airflow_cfm.to_f * unit_multiplier
+        cfms[:clg] += hvac_system.cooling_design_airflow_cfm.to_f * unit_multiplier
       end
     end
-    return htg_cfm, clg_cfm
+    return cfms
   end
 
   # Appends HVAC sizing results to the provided array for use in writing output files.
@@ -1094,9 +1094,10 @@ module Outputs
     line_break = nil
 
     # Summary HVAC capacities
-    results_out << ['HVAC Capacity: Heating (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[0] }.sum(0.0).round(1)]
-    results_out << ['HVAC Capacity: Cooling (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[1] }.sum(0.0).round(1)]
-    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg)[2] }.sum(0.0).round(1)]
+    all_hvac_capacities = hpxml_bldgs.map { |hpxml_bldg| get_total_hvac_capacities(hpxml_bldg) }
+    results_out << ['HVAC Capacity: Heating (Btu/h)', all_hvac_capacities.sum { |h| h[:htg] }.round(1)]
+    results_out << ['HVAC Capacity: Cooling (Btu/h)', all_hvac_capacities.sum { |h| h[:clg] }.round(1)]
+    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', all_hvac_capacities.sum { |h| h[:htg_backup] }.round(1)]
 
     # HVAC design temperatures
     results_out << [line_break]
