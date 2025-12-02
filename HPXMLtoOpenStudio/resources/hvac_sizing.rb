@@ -139,6 +139,14 @@ module HVACSizing
       return true
     end
 
+    # Don't size shared systems serving multiple dwelling units for whole MF building models
+    if !hvac_heating.nil? && hvac_heating.is_shared_system_serving_multiple_dwelling_units
+      return true
+    end
+    if !hvac_cooling.nil? && hvac_cooling.is_shared_system_serving_multiple_dwelling_units
+      return true
+    end
+
     return false
   end
 
