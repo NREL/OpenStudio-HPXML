@@ -12491,44 +12491,44 @@ class HPXML < Object
     return idrefs
   end
 
-  # Find the sameas object (from another Building) with sameas_id as well as assigns
+  # Find the sameas object (from another HPXML Building) with sameas_id as well as assigns
   # the adjacent_hpxml_id, adjacent_unit_number, and adjacent_space_type additional properties.
   # Returns the referenced sameas object if being found.
   #
   # @param parent_building [Oga::XML::Element] The parent Building element
-  # @param object [Oga::XML::Element]  The HPXML element with sameas id
+  # @param sameas_object [Oga::XML::Element]  The HPXML element with sameas id
   # @return [Oga::XML::Element] The element that sameas id attribute associated with
-  def self.get_sameas_obj(parent_building, object)
+  def self.get_sameas_obj(parent_building, sameas_object)
     parent_building.parent_object.buildings.each do |building|
       building.class::CLASS_ATTRS.each do |attr|
         building_child = building.send(attr)
         next unless building_child.is_a? HPXML::BaseArrayElement
 
-        building_child.each do |obj|
-          next unless obj.id == object.sameas_id
+        building_child.each do |adjacent_obj|
+          next unless adjacent_obj.id == sameas_object.sameas_id
           if building.building_id == parent_building.building_id
-            fail "'#{object.id}' sameas references the object in the same building '#{parent_building.building_id}'."
+            fail "'#{sameas_object.id}' sameas references the object in the same building '#{parent_building.building_id}'."
           end
 
-          if obj.is_a? object.class
+          if adjacent_obj.is_a? sameas_object.class
             # Assign adjacent_hpxml_id
-            ap = obj.additional_properties
-            if not ap.respond_to? :adjacent_hpxml_id
-              ap.adjacent_hpxml_id = object.id
-              ap.adjacent_unit_number = object.parent_object.parent_object.buildings.index(object.parent_object)
-              ap.adjacent_space_type = obj.interior_adjacent_to
-            elsif ap.adjacent_hpxml_id != object.id
-              fail "'#{obj.id}' is referenced by multiple objects."
+            adjacent_ap = adjacent_obj.additional_properties
+            if not adjacent_ap.respond_to? :adjacent_hpxml_id
+              adjacent_ap.adjacent_hpxml_id = sameas_object.id
+              adjacent_ap.adjacent_unit_number = sameas_object.parent_object.parent_object.buildings.index(sameas_object.parent_object)
+              adjacent_ap.adjacent_space_type = adjacent_obj.interior_adjacent_to
+            elsif adjacent_ap.adjacent_hpxml_id != sameas_object.id
+              fail "'#{adjacent_obj.id}' is referenced by multiple objects."
             end
-            return obj
+            return adjacent_obj
           else
-            fail "'#{object.id}' reference the wrong object type with sameas id '#{object.sameas_id}'."
+            fail "'#{sameas_object.id}' reference the wrong object type with sameas id '#{sameas_object.sameas_id}'."
           end
         end
       end
     end
-    if not object.sameas_id.nil?
-      fail "Sameas object '#{object.sameas_id}' not found."
+    if not sameas_object.sameas_id.nil?
+      fail "Sameas object '#{sameas_object.sameas_id}' not found."
     end
 
     return

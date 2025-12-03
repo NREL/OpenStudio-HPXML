@@ -248,7 +248,7 @@ module HVACSizing
 
     locations = []
     hpxml_bldg.surfaces.each do |surface|
-      next if (not surface.sameas_id.nil?) || (surface.additional_properties.respond_to? :adjacent_hpxml_id)
+      next if (not surface.sameas_id.nil?) || (surface.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
 
       locations << surface.interior_adjacent_to
       locations << surface.exterior_adjacent_to
@@ -1018,7 +1018,7 @@ module HVACSizing
     # Above-Grade Wall Area
     (hpxml_bldg.walls + hpxml_bldg.rim_joists + hpxml_bldg.foundation_walls).each do |wall|
       next unless wall.is_thermal_boundary
-      next if (not wall.sameas_id.nil?) || (wall.additional_properties.respond_to? :adjacent_hpxml_id)
+      next if (not wall.sameas_id.nil?) || (wall.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
 
       space = wall.space
       zone = space.zone
@@ -1114,7 +1114,7 @@ module HVACSizing
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
       next if foundation_wall.depth_below_grade < 2 # Already handled in above grade walls
-      next if (not foundation_wall.sameas_id.nil?) || (foundation_wall.additional_properties.respond_to? :adjacent_hpxml_id)
+      next if (not foundation_wall.sameas_id.nil?) || (foundation_wall.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
 
       space = foundation_wall.space
       zone = space.zone
@@ -1214,13 +1214,11 @@ module HVACSizing
   def self.process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
-      next if (not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id)
+      next if (not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
+      next unless floor.is_ceiling
 
       space = floor.space
       zone = space.zone
-      is_ceiling = floor.is_ceiling
-
-      next unless is_ceiling
 
       if floor.is_exterior
         clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
@@ -1255,13 +1253,11 @@ module HVACSizing
   def self.process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
-      next if (not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id)
+      next if (not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
+      next unless floor.is_floor
 
       space = floor.space
       zone = space.zone
-      is_floor = floor.is_floor
-
-      next unless is_floor
 
       has_radiant_floor = get_has_radiant_floor(zone)
       u_floor = 1.0 / floor.insulation_assembly_r_value

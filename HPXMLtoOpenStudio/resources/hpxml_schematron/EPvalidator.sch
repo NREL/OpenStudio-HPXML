@@ -832,7 +832,7 @@
   <sch:pattern>
     <sch:title>[SameasSurfaces]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/*/*[h:SystemIdentifier/@sameas]'>
-      <sch:assert role='ERROR' test='count(*) = 1'>Expected only SystemIdentifier specified</sch:assert>
+      <sch:assert role='ERROR' test='count(*) = 1'>Expected only SystemIdentifier to be specified when sameas attribute used</sch:assert>
       <sch:assert role='ERROR' test='count(../../../../../h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"]) = 1'>Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true</sch:assert>
     </sch:rule>
   </sch:pattern>
