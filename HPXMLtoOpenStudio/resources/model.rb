@@ -1155,7 +1155,16 @@ module Model
       end
     end
 
-    # Create adjacent surfaces for HPXML surfaces w/ sameas attribute
+    create_adjacent_surfaces_for_whole_mf_building(merged_model_objects, hpxml_osm_map)
+  end
+
+  # Create adjacent surfaces (identical surfaces in other multifamily units) for HPXML
+  # surfaces w/ sameas attribute.
+  #
+  # @param merged_model_objects [Array<OpenStudio::WorkspaceObject>] All model objects in the merged multifamily model
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
+  # @return [nil]
+  def self.create_adjacent_surfaces_for_whole_mf_building(merged_model_objects, hpxml_osm_map)
     merged_model_objects.each do |obj|
       next unless obj.to_Surface.is_initialized
 
