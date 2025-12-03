@@ -67,7 +67,9 @@ module Vehicle
     if not schedules_file.nil?
       charging_schedule = schedules_file.create_schedule_file(model, col_name: charging_col_name)
       discharging_schedule = schedules_file.create_schedule_file(model, col_name: discharging_col_name)
-      eff_discharge_power = schedules_file.calc_design_level_from_daily_kwh(col_name: discharging_schedule.name.to_s, daily_kwh: ev_annl_energy / 365)
+      if not discharging_schedule.nil?
+        eff_discharge_power = schedules_file.calc_design_level_from_daily_kwh(col_name: discharging_schedule.name.to_s, daily_kwh: ev_annl_energy / 365)
+      end
     end
     if charging_schedule.nil? && discharging_schedule.nil?
       charging_unavailable_periods = Schedule.get_unavailable_periods(runner, charging_col_name, hpxml_header.unavailable_periods)
