@@ -1173,7 +1173,8 @@ module Model
         fail "Could not find adjacent space type ('#{adjacent_space_type}') in unit #{adjacent_unit_number}."
       end
 
-      adjacent_space = merged_model_objects.find { |s| s.to_Space.is_initialized && s.name.to_s == unit_adjacent_zone.spaces[0].name.to_s }.to_Space.get
+      unit_adjacent_space = unit_adjacent_zone.spaces[0]
+      adjacent_space = merged_model_objects.find { |s| s.to_Space.is_initialized && s.name.to_s == unit_adjacent_space.name.to_s }.to_Space.get
 
       # Create/assign adjacent surface
       adjacent_surface = surface.createAdjacentSurface(adjacent_space)
