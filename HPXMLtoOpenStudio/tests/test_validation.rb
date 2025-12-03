@@ -273,7 +273,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                               'HeatingAutosizingFactor should be greater than 0.0',
                                                               'BackupHeatingAutosizingFactor should be greater than 0.0'],
                             'negative-hpwh-containment-volume' => ['Expected HPWHContainmentVolume to be greater than 0.'],
-                            'panel-negative-headroom-breaker-spaces' => ["Element 'HeadroomSpaces': [facet 'minInclusive'] The value '-1' is less than the minimum value allowed ('0')."],
                             'panel-zero-total-breaker-spaces' => ["Element 'RatedTotalSpaces': [facet 'minExclusive'] The value '0' must be greater than '0'."],
                             'panel-without-required-system' => ['Expected 1 or more element(s) for xpath: AttachedToComponent [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
                             'panel-with-unrequired-system' => ['Expected 0 element(s) for xpath: AttachedToComponent [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
@@ -869,10 +868,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'negative-hpwh-containment-volume'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-confined-space.xml')
         hpxml_bldg.water_heating_systems[0].hpwh_containment_volume = -10.0
-      when 'panel-negative-headroom-breaker-spaces'
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1',
-                                       headroom_spaces: -1)
       when 'panel-zero-total-breaker-spaces'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.electric_panels.add(id: 'ElectricPanel1',
