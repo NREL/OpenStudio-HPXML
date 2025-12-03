@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>4a995a64-a0ff-45e8-939d-99a391fdc378</version_id>
-  <version_modified>2025-12-03T02:01:53Z</version_modified>
+  <version_id>095f8403-82c3-4bee-a208-7961172a65c7</version_id>
+  <version_modified>2025-12-03T02:16:57Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -372,7 +372,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CA5DBD1E</checksum>
+      <checksum>387E0B6E</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
@@ -384,7 +384,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>77DD1EED</checksum>
+      <checksum>615D33CF</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -402,7 +402,7 @@
       <filename>hpxml_schematron/EPvalidator.sch</filename>
       <filetype>sch</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D64CA904</checksum>
+      <checksum>F1CA12D6</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -420,7 +420,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>80D6A6CB</checksum>
+      <checksum>E7F82414</checksum>
     </file>
     <file>
       <filename>internal_gains.rb</filename>
@@ -474,7 +474,7 @@
       <filename>model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4FD33DD9</checksum>
+      <checksum>B4D9D790</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
@@ -810,7 +810,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>860F1A83</checksum>
+      <checksum>4B4E90D5</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>
