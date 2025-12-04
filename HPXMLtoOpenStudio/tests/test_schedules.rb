@@ -62,7 +62,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_equal(schedule_files, model.getScheduleFiles.size)
     assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
 
-    assert_in_epsilon(4451, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeOccupants + ' schedule'), @tol)
+    assert_in_epsilon(100, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeOccupants + ' schedule'), @tol)
     assert_in_epsilon(2764, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingInterior + ' schedule'), @tol)
     assert_in_epsilon(4342, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
     assert_in_epsilon(2724, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeCookingRange + ' schedule'), @tol)

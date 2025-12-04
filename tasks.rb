@@ -3149,7 +3149,13 @@ def download_g_functions
   exit!
 end
 
-command_list = [:update_measures, :update_hpxmls, :create_release_zips, :download_utility_rates, :download_g_functions]
+command_list = [
+  :update_measures,
+  :update_hpxmls,
+  :create_release_zips,
+  :download_utility_rates,
+  :download_g_functions
+]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -3170,10 +3176,6 @@ elsif not command_list.include? ARGV[0].to_sym
 end
 
 if ARGV[0].to_sym == :update_measures
-  # Prevent NREL error regarding U: drive when not VPNed in
-  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
-  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
-
   # Apply rubocop (uses .rubocop.yml)
   commands = ["\"require 'rubocop/rake_task' \"",
               "\"require 'stringio' \"",
@@ -3195,10 +3197,6 @@ if ARGV[0].to_sym == :update_measures
 end
 
 if ARGV[0].to_sym == :update_hpxmls
-  # Prevent NREL error regarding U: drive when not VPNed in
-  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
-  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
-
   # Create sample/test HPXMLs
   t = Time.now
   create_hpxmls()

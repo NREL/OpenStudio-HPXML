@@ -72,8 +72,8 @@ jobs:
         run: |
           shopt -s extglob
 
-          # Exclude the workflow tests
-          for test_rb in !(workflow)/tests/*.rb; do openstudio $test_rb; done
+          # Note: we exclude the workflow tests, which are run in other jobs
+          openstudio !(workflow)/tests/*.rb
 
       - name: Store results
         uses: actions/upload-artifact@v4
