@@ -70,11 +70,10 @@ jobs:
 
       - name: Run measure unit tests
         run: |
-          for unit_test in BuildResidentialHPXML/tests/*.rb; do openstudio $unit_test; done
-          for unit_test in BuildResidentialScheduleFile/tests/*.rb; do openstudio $unit_test; done
-          for unit_test in HPXMLtoOpenStudio/tests/*.rb; do openstudio $unit_test; done
-          for unit_test in ReportSimulationOutput/tests/*.rb; do openstudio $unit_test; done
-          for unit_test in ReportUtilityBills/tests/*.rb; do openstudio $unit_test; done
+          shopt -s extglob
+
+          # Exclude the workflow tests
+          for test_rb in !(workflow)/tests/*.rb; do openstudio $test_rb; done
 
       - name: Store results
         uses: actions/upload-artifact@v4
