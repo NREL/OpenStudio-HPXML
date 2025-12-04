@@ -926,6 +926,7 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
                         is_new_load: true,
                         component_idrefs: [hpxml_bldg.plug_loads[-1].id])
     hpxml_bldg.pools.add(id: "Pool#{hpxml_bldg.pools.size + 1}",
+                         type: HPXML::TypeUnknown,
                          pump_id: "Pool#{hpxml_bldg.pools.size + 1}Pump",
                          pump_type: HPXML::TypeUnknown,
                          heater_id: "Pool#{hpxml_bldg.pools.size + 1}Heater",
@@ -951,12 +952,12 @@ class HPXMLtoOpenStudioElectricPanelTest < Minitest::Test
     assert_equal(27, json['Electric Panel Breaker Spaces']['Total Count'])
     assert_equal(27, json['Electric Panel Breaker Spaces']['Occupied Count'])
     assert_equal(0, json['Electric Panel Breaker Spaces']['Headroom Count'])
-    assert_equal(34827.2, json['Electric Panel Load']['2023 Existing Dwelling Load-Based: Total Load (W)'])
-    assert_equal(145.1, json['Electric Panel Load']['2023 Existing Dwelling Load-Based: Total Capacity (A)'])
-    assert_in_epsilon(100.0 - 145.1, json['Electric Panel Load']['2023 Existing Dwelling Load-Based: Headroom Capacity (A)'], 0.01)
-    assert_equal(46477.0, json['Electric Panel Load']['2023 Existing Dwelling Meter-Based: Total Load (W)'])
-    assert_equal(193.7, json['Electric Panel Load']['2023 Existing Dwelling Meter-Based: Total Capacity (A)'])
-    assert_in_epsilon(100.0 - 193.7, json['Electric Panel Load']['2023 Existing Dwelling Meter-Based: Headroom Capacity (A)'], 0.01)
+    assert_equal(37463.6, json['Electric Panel Load']['2023 Existing Dwelling Load-Based: Total Load (W)'])
+    assert_equal(156.1, json['Electric Panel Load']['2023 Existing Dwelling Load-Based: Total Capacity (A)'])
+    assert_in_epsilon(100.0 - 156.1, json['Electric Panel Load']['2023 Existing Dwelling Load-Based: Headroom Capacity (A)'], 0.01)
+    assert_equal(53068.0, json['Electric Panel Load']['2023 Existing Dwelling Meter-Based: Total Load (W)'])
+    assert_equal(221.1, json['Electric Panel Load']['2023 Existing Dwelling Meter-Based: Total Capacity (A)'])
+    assert_in_epsilon(100.0 - 221.1, json['Electric Panel Load']['2023 Existing Dwelling Meter-Based: Headroom Capacity (A)'], 0.01)
   end
 
   private
