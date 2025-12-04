@@ -17,6 +17,7 @@ concurrency:
 env:
   OS_VERSION: "3.10.0"
   OS_SHA: 86d7e215a1
+  OS_URL: https://github.com/NREL/OpenStudio/releases/download
 
 jobs:
   run-unit-tests:
@@ -34,7 +35,7 @@ jobs:
 
       - name: Install OpenStudio
         run: |
-          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          wget -q -O OpenStudio.deb ${OS_URL}/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
           sudo dpkg -i OpenStudio.deb
           rm OpenStudio.deb
 
@@ -102,7 +103,7 @@ jobs:
 
       - name: Install OpenStudio
         run: |
-          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          wget -q -O OpenStudio.deb ${OS_URL}/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
           sudo dpkg -i OpenStudio.deb
           rm OpenStudio.deb
 
@@ -125,7 +126,7 @@ jobs:
 
       - name: Install OpenStudio
         run: |
-          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          wget -q -O OpenStudio.deb ${OS_URL}/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
           sudo dpkg -i OpenStudio.deb
           rm OpenStudio.deb
 
@@ -149,7 +150,7 @@ jobs:
       - name: Install OpenStudio and run test
         shell: pwsh
         run: |
-          Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
+          Invoke-WebRequest -OutFile Windows.tar.gz -URI "${env:OS_URL}/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
           tar -xzf Windows.tar.gz
           & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
 
