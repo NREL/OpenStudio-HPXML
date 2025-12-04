@@ -205,13 +205,13 @@ module Outputs
     )
     ev_discharge_program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBEVDischargeProgram)
     ev_discharge_program.addLine("Set #{driving_hrs} = 0")
-    ev_discharge_program.addLine("  Set power_mult = #{power_curve}") # FIXME: are we sure this line is supposed to be here?
     ev_discharge_program.addLine("  Set site_temp_adj = #{temp_sensor.name}")
     ev_discharge_program.addLine("  If #{temp_sensor.name} < #{UnitConversions.convert(0, 'F', 'C').round(3)}")
     ev_discharge_program.addLine("    Set site_temp_adj = #{UnitConversions.convert(0, 'F', 'C').round(3)}")
     ev_discharge_program.addLine("  ElseIf #{temp_sensor.name} > #{UnitConversions.convert(100, 'F', 'C').round(3)}")
     ev_discharge_program.addLine("    Set site_temp_adj = #{UnitConversions.convert(100, 'F', 'C').round(3)}")
     ev_discharge_program.addLine('  EndIf')
+    ev_discharge_program.addLine("  Set power_mult = #{power_curve}")
 
     hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), _unit|
       unit_model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
@@ -224,16 +224,8 @@ module Outputs
         discharging_schedule = ev_elcd.storageDischargePowerFractionSchedule.get
         charging_schedule = ev_elcd.storageChargePowerFractionSchedule.get
 
-        discharge_power_act = Model.add_ems_actuator(
-          name: "#{ev_elcd.name} battery_discharge_power_act",
-          model_object: ev_elcd,
-          comp_type_and_control: ['Electrical Storage', 'Power Draw Rate']
-        )
-        charge_power_act = Model.add_ems_actuator(
-          name: "#{ev_elcd.name} battery_charge_power_act",
-          model_object: ev_elcd,
-          comp_type_and_control: ['Electrical Storage', 'Power Charge Rate']
-        )
+        discharge_power_act = unit_model.getEnergyManagementSystemActuators.find { |act| act.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeVehicleDischargePowerActuator }
+        charge_power_act = unit_model.getEnergyManagementSystemActuators.find { |act| act.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeVehicleChargePowerActuator }
         discharge_sch_sensor = Model.add_ems_sensor(
           model,
           name: "#{discharging_schedule.name} discharge_sch_sensor",

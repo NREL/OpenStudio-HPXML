@@ -94,5 +94,25 @@ module Vehicle
 
     # Apply vehicle battery to model
     Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, charging_schedule, discharging_schedule)
+
+    # Apply EMS actuators
+    model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+      next unless elcs.name.to_s.include? vehicle.id
+
+      ev_elcd = model.getElectricLoadCenterDistributions.find { |elcd| elcd.name.to_s.include?(vehicle.id) }
+
+      discharge_power_act = Model.add_ems_actuator(
+        name: 'battery_discharge_power_act',
+        model_object: ev_elcd,
+        comp_type_and_control: ['Electrical Storage', 'Power Draw Rate']
+      )
+      discharge_power_act.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeVehicleDischargePowerActuator)
+      charge_power_act = Model.add_ems_actuator(
+        name: 'battery_charge_power_act',
+        model_object: ev_elcd,
+        comp_type_and_control: ['Electrical Storage', 'Power Charge Rate']
+      )
+      charge_power_act.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeVehicleChargePowerActuator)
+    end
   end
 end
