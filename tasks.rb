@@ -3152,6 +3152,7 @@ end
 command_list = [
   :update_measures,
   :update_hpxmls,
+  :test_measures,
   :create_release_zips,
   :download_utility_rates,
   :download_g_functions
@@ -3214,6 +3215,30 @@ if ARGV[0].to_sym == :update_hpxmls
   Dir['workflow/tests/ACCA_Examples/*.xml'].each do |hpxml_path|
     hpxml = HPXML.new(hpxml_path: hpxml_path)
     XMLHelper.write_file(hpxml.to_doc, hpxml_path)
+  end
+end
+
+if ARGV[0].to_sym == :test_measures
+  tests_rbs = []
+  Dir['**/tests/*.rb'].each do |test_rb|
+    next if test_rb.start_with? 'workflow'
+
+    tests_rbs << test_rb
+  end
+
+  # Run tests in random order; we don't want them to only
+  # work when run in a specific order
+  tests_rbs.shuffle!
+
+  # Ensure we run all tests even if there are failures
+  test_failed = false
+  tests_rbs.each do |test_rb|
+    success = system("#{OpenStudio.getOpenStudioCLI} #{test_rb}")
+    test_failed = true unless success
+  end
+
+  if test_failed
+    exit! 1
   end
 end
 

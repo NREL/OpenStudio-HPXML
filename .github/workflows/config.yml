@@ -70,10 +70,7 @@ jobs:
 
       - name: Run measure unit tests
         run: |
-          shopt -s extglob
-
-          # Note: we exclude the workflow tests, which are run in other jobs
-          openstudio !(workflow)/tests/*.rb
+          openstudio tasks.rb test_measures
 
       - name: Store results
         uses: actions/upload-artifact@v4
