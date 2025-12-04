@@ -279,10 +279,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
       end
-      if hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.vehicles.size > 0 && hpxml_bldg.ev_chargers.size > 0 ? 1 : 0 }.sum > 0
-        # Do we disallow this for the same reasons as batteries above?
-        fail 'Modeling vehicles for whole SFA/MF buildings is not currently supported.'
-      end
     end
   end
 
