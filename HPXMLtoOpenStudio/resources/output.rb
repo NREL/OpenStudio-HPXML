@@ -180,6 +180,8 @@ module Outputs
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [nil]
   def self.apply_unmet_driving_hours_ems_program(model, hpxml_osm_map)
+    return if hpxml_osm_map.keys.map { |hpxml_bldg| hpxml_bldg.vehicles.size }.sum == 0
+
     temp_sensor = Model.add_ems_sensor(
       model,
       name: 'site_temp',
@@ -213,7 +215,7 @@ module Outputs
     ev_discharge_program.addLine('  EndIf')
     ev_discharge_program.addLine("  Set power_mult = #{power_curve}")
 
-    hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), _unit|
+    hpxml_osm_map.each do |hpxml_bldg, unit_model|
       unit_model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
         vehicle = hpxml_bldg.vehicles[-1] # FIXME: is this right?
         next unless elcs.name.to_s.include? vehicle.id
