@@ -3231,15 +3231,24 @@ if ARGV[0].to_sym == :test_measures
   tests_rbs.shuffle!
 
   # Ensure we run all tests even if there are failures
-  test_failed = false
+  failed_tests = []
   tests_rbs.each do |test_rb|
     success = system("#{OpenStudio.getOpenStudioCLI} #{test_rb}")
-    test_failed = true unless success
+    failed_tests << test_rb unless success
   end
 
-  if test_failed
+  puts
+  puts
+
+  if not failed_tests.empty?
+    puts 'The following tests FAILED:'
+    failed_tests.each do |failed_test|
+      puts "- #{failed_test}"
+    end
     exit! 1
   end
+
+  puts 'All tests passed.'
 end
 
 if ARGV[0].to_sym == :download_utility_rates
