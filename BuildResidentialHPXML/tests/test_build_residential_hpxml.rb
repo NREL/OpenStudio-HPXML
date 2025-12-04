@@ -164,7 +164,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     }
 
     expected_errors = {
-      'error-heating-system-and-heat-pump.xml' => ['Multiple central heating systems are not currently supported.'],
+      'error-heating-system-and-heat-pump.xml' => ['Multiple heating systems are not currently supported.'],
       'error-cooling-system-and-heat-pump.xml' => ['Multiple central cooling systems are not currently supported.'],
       'error-sfd-adiabatic-walls.xml' => ['No adiabatic surfaces can be applied to single-family detached homes.'],
       'error-mf-conditioned-basement' => ['Conditioned basement/crawlspace foundation type for apartment units is not currently supported.'],
