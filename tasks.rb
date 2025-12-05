@@ -3321,7 +3321,16 @@ def download_g_functions
   exit!
 end
 
-command_list = [:update_measures, :update_hpxmls, :create_release_zips, :download_utility_rates, :download_g_functions]
+command_list = [
+  :update_measures,
+  :update_hpxmls,
+  :unit_tests,
+  :workflow_tests1,
+  :workflow_tests2,
+  :create_release_zips,
+  :download_utility_rates,
+  :download_g_functions
+]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -3342,10 +3351,6 @@ elsif not command_list.include? ARGV[0].to_sym
 end
 
 if ARGV[0].to_sym == :update_measures
-  # Prevent NREL error regarding U: drive when not VPNed in
-  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
-  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
-
   # Apply rubocop (uses .rubocop.yml)
   commands = ["\"require 'rubocop/rake_task' \"",
               "\"require 'stringio' \"",
@@ -3367,10 +3372,6 @@ if ARGV[0].to_sym == :update_measures
 end
 
 if ARGV[0].to_sym == :update_hpxmls
-  # Prevent NREL error regarding U: drive when not VPNed in
-  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
-  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
-
   # Create sample/test HPXMLs
   t = Time.now
   create_hpxmls()
@@ -3389,6 +3390,48 @@ if ARGV[0].to_sym == :update_hpxmls
     hpxml = HPXML.new(hpxml_path: hpxml_path)
     XMLHelper.write_file(hpxml.to_doc, hpxml_path)
   end
+end
+
+if [:unit_tests, :workflow_tests1, :workflow_tests2].include? ARGV[0].to_sym
+  tests_rbs = []
+  Dir['**/tests/*.rb'].each do |test_rb|
+    if ARGV[0].to_sym == :unit_tests
+      # Skip all workflow tests
+      next if test_rb.start_with?('workflow')
+    elsif ARGV[0].to_sym == :workflow_tests1
+      # Only run test_simulations1.rb workflow test
+      next unless test_rb.start_with?('workflow') && test_rb.include?('test_simulations1.rb')
+    elsif ARGV[0].to_sym == :workflow_tests2
+      # Run all workflow tests other than test_simulations1.rb
+      next unless test_rb.start_with?('workflow') && !test_rb.include?('test_simulations1.rb')
+    end
+
+    tests_rbs << test_rb
+  end
+
+  # Run tests in random order; we don't want them to only
+  # work when run in a specific order
+  tests_rbs.shuffle!
+
+  # Ensure we run all tests even if there are failures
+  failed_tests = []
+  tests_rbs.each do |test_rb|
+    success = system("#{OpenStudio.getOpenStudioCLI} #{test_rb}")
+    failed_tests << test_rb unless success
+  end
+
+  puts
+  puts
+
+  if not failed_tests.empty?
+    puts 'The following tests FAILED:'
+    failed_tests.each do |failed_test|
+      puts "- #{failed_test}"
+    end
+    exit! 1
+  end
+
+  puts 'All tests passed.'
 end
 
 if ARGV[0].to_sym == :download_utility_rates
