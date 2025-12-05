@@ -5997,7 +5997,7 @@ module Defaults
   # @param f_rect [Double] The fraction of duct length that is rectangular (not round)
   # @return [Double] Duct effective R-value (hr-ft2-F/Btu)
   def self.get_duct_effective_r_value(r_nominal, side, buried_level, f_rect)
-    # This methodology has been proposed by NREL for ANSI/RESNET/ICC 301-2025.
+    # This methodology has been proposed for ANSI/RESNET/ICC 301-2025.
     if buried_level == HPXML::DuctBuriedInsulationNone
       if r_nominal <= 0
         # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.

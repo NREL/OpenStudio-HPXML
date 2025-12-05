@@ -70,7 +70,7 @@ jobs:
 
       - name: Run measure unit tests
         run: |
-          openstudio tasks.rb test_measures
+          openstudio tasks.rb unit_tests
 
       - name: Store results
         uses: actions/upload-artifact@v4
@@ -109,7 +109,7 @@ jobs:
 
       - name: Run workflow tests
         run: |
-          openstudio workflow/tests/test_simulations1.rb
+          openstudio tasks.rb workflow_tests1
 
       - name: Store results
         uses: actions/upload-artifact@v4
@@ -132,7 +132,7 @@ jobs:
 
       - name: Run workflow tests
         run: |
-          openstudio workflow/tests/test_simulations2.rb
+          openstudio tasks.rb workflow_tests2
 
       - name: Store results
         uses: actions/upload-artifact@v4
@@ -156,7 +156,7 @@ jobs:
 
   merge-results:
     runs-on: ubuntu-24.04
-    needs: [run-workflow1-tests, run-workflow2-tests]
+    needs: [run-unit-tests, run-workflow1-tests, run-workflow2-tests]
     steps:
       - uses: actions/checkout@v4
         with:
