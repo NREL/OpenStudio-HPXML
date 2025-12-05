@@ -216,8 +216,8 @@ module Outputs
     ev_discharge_program.addLine("  Set power_mult = #{power_curve}")
 
     hpxml_osm_map.each do |hpxml_bldg, unit_model|
+      vehicle = hpxml_bldg.vehicles[-1]
       unit_model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
-        vehicle = hpxml_bldg.vehicles[-1] # FIXME: is this right?
         next unless elcs.name.to_s.include? vehicle.id
 
         ev_elcd = unit_model.getElectricLoadCenterDistributions.find { |elcd| elcd.name.to_s.include?(vehicle.id) }
