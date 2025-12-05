@@ -3152,7 +3152,9 @@ end
 command_list = [
   :update_measures,
   :update_hpxmls,
-  :test_measures,
+  :unit_tests,
+  :workflow_tests1,
+  :workflow_tests2,
   :create_release_zips,
   :download_utility_rates,
   :download_g_functions
@@ -3218,10 +3220,19 @@ if ARGV[0].to_sym == :update_hpxmls
   end
 end
 
-if ARGV[0].to_sym == :test_measures
+if [:unit_tests, :workflow_tests1, :workflow_tests2].include? ARGV[0].to_sym
   tests_rbs = []
   Dir['**/tests/*.rb'].each do |test_rb|
-    next if test_rb.start_with? 'workflow'
+    if ARGV[0].to_sym == :unit_tests
+      # Skip all workflow tests
+      next if test_rb.start_with?('workflow')
+    elsif ARGV[0].to_sym == :workflow_tests1
+      # Only run test_simulations1.rb workflow test
+      next unless test_rb.start_with?('workflow') && test_rb.include?('test_simulations1.rb')
+    elsif ARGV[0].to_sym == :workflow_tests2
+      # Run all workflow tests other than test_simulations1.rb
+      next unless test_rb.start_with?('workflow') && !test_rb.include?('test_simulations1.rb')
+    end
 
     tests_rbs << test_rb
   end
