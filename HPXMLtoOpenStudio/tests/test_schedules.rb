@@ -2,7 +2,6 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
@@ -53,7 +52,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     schedule_constants = 13
     schedule_rulesets = 16
-    schedule_fixed_intervals = 1
+    schedule_fixed_intervals = 0
     schedule_files = 0
 
     assert_equal(schedule_constants, model.getScheduleConstants.size)
@@ -83,7 +82,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     schedule_constants = 12
     schedule_rulesets = 20
-    schedule_fixed_intervals = 1
+    schedule_fixed_intervals = 0
     schedule_files = 0
 
     assert_equal(schedule_constants, model.getScheduleConstants.size)
@@ -811,7 +810,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     result = runner.result
 
     # show the output
-    show_output(result) unless result.value.valueName == 'Success'
+    result.showOutput() unless result.value.valueName == 'Success'
 
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)

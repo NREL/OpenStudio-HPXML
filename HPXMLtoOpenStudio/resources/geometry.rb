@@ -77,10 +77,10 @@ module Geometry
       if not mat_int_finish.nil?
         # Closed cavity
         constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x(8), 0.07, 20.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R20
-          WoodStudConstructionSet.new(Material.Stud2x(8), 0.07, 10.0, 0.75, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x(8), 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),     # 2x8, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x(6), 0.07, 0.0, 0.75, mat_int_finish, mat_roofing),         # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x(8), 0.07, 20.0, 0.625, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R20
+          WoodStudConstructionSet.new(Material.Stud2x(8), 0.07, 10.0, 0.625, mat_int_finish, mat_roofing),    # 2x8, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x(8), 0.07, 0.0, 0.625, mat_int_finish, mat_roofing),     # 2x8, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x(6), 0.07, 0.0, 0.625, mat_int_finish, mat_roofing), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x(4), 0.07, 0.0, 0.5, mat_int_finish, mat_roofing),          # 2x4, 16" o.c.
           WoodStudConstructionSet.new(Material.Stud2x(4), 0.01, 0.0, 0.0, fallback_mat_int_finish, mat_roofing), # Fallback
         ]
@@ -98,9 +98,8 @@ module Geometry
       else
         # Open cavity
         constr_sets = [
-          GenericConstructionSet.new(10.0, 0.5, nil, mat_roofing), # w/R-10 rigid
-          GenericConstructionSet.new(0.0, 0.5, nil, mat_roofing),  # Standard
-          GenericConstructionSet.new(0.0, 0.0, nil, mat_roofing),  # Fallback
+          GenericConstructionSet.new(10.0, 0.625, nil, mat_roofing), # w/R-10 rigid
+          GenericConstructionSet.new(0.0, 0.625, nil, mat_roofing),  # Standard
         ]
         match, constr_set, layer_r = Constructions.pick_generic_construction_set(assembly_r, constr_sets, interior_film, exterior_film)
 

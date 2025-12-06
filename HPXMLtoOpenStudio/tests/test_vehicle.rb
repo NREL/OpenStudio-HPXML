@@ -2,7 +2,6 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
@@ -58,7 +57,6 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
       # Check object
       assert_equal(0.0, ev_battery.radiativeFraction)
-      assert_equal(HPXML::BatteryLifetimeModelNone, ev_battery.lifetimeModel)
       assert_in_epsilon(15, ev_battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(395, ev_battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.95, ev_battery.initialFractionalStateofCharge, 0.01)
@@ -120,7 +118,6 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
       # Check object
       assert_equal(0.0, ev_battery.radiativeFraction)
-      assert_equal(HPXML::BatteryLifetimeModelNone, ev_battery.lifetimeModel)
       assert_in_epsilon(15, ev_battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(623, ev_battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.95, ev_battery.initialFractionalStateofCharge, 0.01)
@@ -158,7 +155,6 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
       # Check object
       assert_equal(0.0, ev_battery.radiativeFraction)
-      assert_equal(HPXML::BatteryLifetimeModelNone, ev_battery.lifetimeModel)
       assert_in_epsilon(15, ev_battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(623, ev_battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.95, ev_battery.initialFractionalStateofCharge, 0.01)
@@ -213,7 +209,6 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
 
       # Check object
       assert_equal(0.0, ev_battery.radiativeFraction)
-      assert_equal(HPXML::BatteryLifetimeModelNone, ev_battery.lifetimeModel)
       assert_in_epsilon(15, ev_battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(623, ev_battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.95, ev_battery.initialFractionalStateofCharge, 0.01)
@@ -248,7 +243,6 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
       assert_equal(0.925, battery.dctoDCChargingEfficiency)
-      assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
       assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
       assert_in_epsilon(0.0, battery.initialFractionalStateofCharge, 0.01)
@@ -300,7 +294,7 @@ class HPXMLtoOpenStudioVehicleTest < Minitest::Test
     result = runner.result
 
     # show the output
-    show_output(result) unless result.value.valueName == 'Success'
+    result.showOutput() unless result.value.valueName == 'Success'
 
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)

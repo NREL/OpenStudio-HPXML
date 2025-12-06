@@ -2,7 +2,6 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
@@ -175,8 +174,11 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
       assert_in_delta(1.0, get_oe_fractions(model, Constants::ObjectTypeGeneralWaterUseLatent)[1], 0.01)
 
       # mains temperature
-      avg_tmains = 57.58
-      assert_in_delta(avg_tmains, UnitConversions.convert(model.getSiteWaterMainsTemperature.temperatureSchedule.get.to_ScheduleInterval.get.timeSeries.averageValue, 'C', 'F'), 0.01)
+      assert_equal('Correlation', model.getSiteWaterMainsTemperature.calculationMethod)
+      assert_in_delta(10.88, model.getSiteWaterMainsTemperature.annualAverageOutdoorAirTemperature.get, 0.01)
+      assert_in_delta(23.15, model.getSiteWaterMainsTemperature.maximumDifferenceInMonthlyAverageOutdoorAirTemperatures.get, 0.01)
+      assert_in_delta(1.0, model.getSiteWaterMainsTemperature.temperatureMultiplier, 0.01)
+      assert_in_delta(0.0, model.getSiteWaterMainsTemperature.temperatureOffset, 0.01)
     end
   end
 
@@ -402,8 +404,11 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     assert_in_delta(dist_gpd, get_wu_gpd(model, Constants::ObjectTypeDistributionWaste), 0.01)
 
     # mains temperature
-    avg_tmains = 70.37
-    assert_in_delta(avg_tmains, UnitConversions.convert(model.getSiteWaterMainsTemperature.temperatureSchedule.get.to_ScheduleInterval.get.timeSeries.averageValue, 'C', 'F'), 0.01)
+    assert_equal('Correlation', model.getSiteWaterMainsTemperature.calculationMethod)
+    assert_in_delta(10.88, model.getSiteWaterMainsTemperature.annualAverageOutdoorAirTemperature.get, 0.01)
+    assert_in_delta(23.15, model.getSiteWaterMainsTemperature.maximumDifferenceInMonthlyAverageOutdoorAirTemperatures.get, 0.01)
+    assert_in_delta(0.68, model.getSiteWaterMainsTemperature.temperatureMultiplier, 0.01)
+    assert_in_delta(11.72, model.getSiteWaterMainsTemperature.temperatureOffset, 0.01)
   end
 
   def test_dhw_recirc_demand
@@ -1070,7 +1075,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     result = runner.result
 
     # show the output
-    show_output(result) unless result.value.valueName == 'Success'
+    result.showOutput() unless result.value.valueName == 'Success'
 
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
