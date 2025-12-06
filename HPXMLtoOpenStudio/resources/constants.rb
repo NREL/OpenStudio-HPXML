@@ -84,6 +84,8 @@ module Constants
   ObjectTypeUnitHeater = 'unit heater'
   ObjectTypeUnmetHoursProgram = 'unmet hours program'
   ObjectTypeVehicle = 'vehicle'
+  ObjectTypeVehicleDischargePowerActuator = 'vehicle discharge power actuator'
+  ObjectTypeVehicleChargePowerActuator = 'vehicle charge power actuator'
   ObjectTypeWaterHeater = 'water heater'
   ObjectTypeWaterHeaterSetpoint = 'water heater setpoint'
   ObjectTypeWaterHeaterAdjustment = 'water heater energy adjustment'

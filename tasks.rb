@@ -73,13 +73,13 @@ def create_hpxmls
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     num_apply_measures = 1
-    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
+    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-vehicle-ev-charger.xml')
       num_apply_measures = 6
     end
 
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
-      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml')
+      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml') || hpxml_path.include?('base-bldgtype-mf-whole-building-vehicle-ev-charger.xml')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_paths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
@@ -2854,6 +2854,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if ['base-misc-usage-multiplier.xml'].include? hpxml_file
       hpxml_bldg.vehicles[0].miles_per_year = nil
       hpxml_bldg.vehicles[0].ev_usage_multiplier = 0.75
+    end
+    if ['base-bldgtype-mf-whole-building-vehicle-ev-charger.xml'].include? hpxml_file
+      if hpxml_bldg_index > 0 # intentionally not all buildings have a vehicle
+        hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
+                                vehicle_type: HPXML::VehicleTypeBEV)
+        vehicle = hpxml_bldg.vehicles[-1]
+        hpxml_bldg.ev_chargers.add(id: "EVCharger#{hpxml_bldg.vehicles.size + 1}")
+        ev_charger = hpxml_bldg.ev_chargers[-1]
+        vehicle.id += "_#{hpxml_bldg_index + 1}"
+        ev_charger.id += "_#{hpxml_bldg_index + 1}"
+        vehicle.ev_charger_idref = ev_charger.id
+      end
     end
 
     # ---------------- #
