@@ -1003,6 +1003,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'heat-pump-defrost-backup' => ['BackupHeatingActiveDuringDefrost does not apply when system has separate backup heating'],
                               'heat-pump-low-backup-switchover-temp' => ['BackupHeatingSwitchoverTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
                               'heat-pump-low-backup-lockout-temp' => ['BackupHeatingLockoutTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
+                              'hpwh-ducting' => ['HPWH supply air ducted from another location is not currently supported; supply ducting will not be modeled.',
+                                                 'HPWH exhaust air ducted to a location other than outside is not currently supported; exhaust ducting will not be modeled.'],
                               'hvac-dse-low' => ['Heating DSE should typically be greater than or equal to 0.5.',
                                                  'Cooling DSE should typically be greater than or equal to 0.5.'],
                               'hvac-capacities-low' => ['Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
@@ -1125,6 +1127,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'heat-pump-low-backup-lockout-temp'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml')
         hpxml_bldg.heat_pumps[0].backup_heating_lockout_temp = 25.0
+      when 'hpwh-ducting'
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
+        hpxml_bldg.water_heating_systems[0].hpwh_ducting_supply = HPXML::LocationGarage
+        hpxml_bldg.water_heating_systems[0].hpwh_ducting_exhaust = HPXML::LocationGarage
       when 'hvac-dse-low'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-dse.xml')
         hpxml_bldg.hvac_distributions[0].annual_heating_dse = 0.1

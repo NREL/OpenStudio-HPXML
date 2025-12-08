@@ -2583,8 +2583,9 @@
       <!-- Moved/deprecated extension/OperatingMode input; see https://github.com/NREL/OpenStudio-HPXML/pull/1289 -->
       <sch:assert role='ERROR' test='count(h:extension/h:OperatingMode) = 0'>extension/OperatingMode has been replaced by HPWHOperatingMode</sch:assert>
       <!-- Warnings -->
-      <sch:report role='WARN' test='h:HPWHDucting/h:SupplyAirSource'>HPWH supply air ducted from another location is not currently supported; input will be ignored.</sch:report>
-      <sch:report role='WARN' test='h:HPWHDucting/h:ExhaustAirTermination[text()!="outside"]'>HPWH exhaust air ducted from a location other than outside is not currently supported; input will be ignored.</sch:report>
+      <sch:report role='WARN' test='number(h:HotWaterTemperature) &lt; 110'>Hot water setpoint should typically be greater than or equal to 110 deg-F.</sch:report>
+      <sch:report role='WARN' test='h:HPWHDucting/h:SupplyAirSource'>HPWH supply air ducted from another location is not currently supported; supply ducting will not be modeled.</sch:report>
+      <sch:report role='WARN' test='h:HPWHDucting/h:ExhaustAirTermination[text()!="outside"]'>HPWH exhaust air ducted to a location other than outside is not currently supported; exhaust ducting will not be modeled.</sch:report>
     </sch:rule>
   </sch:pattern>
 
