@@ -73,10 +73,12 @@ def create_hpxmls
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     num_mf_units = 1
-    if hpxml_path.include? 'whole-building-common-spaces'
+    if hpxml_path.include? 'mf-whole-building-common-spaces'
       num_mf_units = 8
-    elsif hpxml_path.include? 'whole-building'
+    elsif hpxml_path.include? 'mf-whole-building'
       num_mf_units = 6
+    elsif hpxml_path.include? 'multiple-buildings'
+      num_mf_units = 2
     end
 
     for i in 1..num_mf_units
@@ -99,6 +101,10 @@ def create_hpxmls
           # one unconditioned hallway + conditioned unit each floor
           build_residential_hpxml['hvac_heating_system'] = ([1, 3, 5].include?(i) ? 'Electric Resistance' : 'None')
           build_residential_hpxml['hvac_cooling_system'] = ([1, 3, 5].include?(i) ? 'Room AC, CEER 8.4' : 'None')
+        end
+      elsif hpxml_path.include? 'multiple-buildings'
+        if i > 1
+          build_residential_hpxml['enclosure_window'] = 'Triple, Low-E, Insulated, Gas, High Gain'
         end
       end
 
@@ -422,6 +428,42 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     hpxml.header.unavailable_periods.add(column_name: 'No Space Cooling', begin_month: 7, begin_day: 1, begin_hour: 22, end_month: 8, end_day: 3, end_hour: 14)
   elsif ['base-schedules-detailed-occupancy-stochastic-no-space-cooling.xml'].include? hpxml_file
     hpxml.header.unavailable_periods.add(column_name: 'No Space Cooling', begin_month: 6, begin_day: 15, begin_hour: 5, end_month: 7, end_day: 30, end_hour: 14)
+  end
+  if ['base-misc-multiple-buildings.xml'].include? hpxml_file
+    hpxml.header.whole_sfa_or_mf_building_sim = false
+    hpxml.buildings[1].building_id = "#{hpxml.buildings[0].building_id}_AlternativeDesign"
+    # Set sameas attribute for everything that is unchanged between
+    # the two buildings (i.e., everything but windows)
+    hpxml.buildings[1].air_infiltration_measurements[0].sameas_id = hpxml.buildings[0].air_infiltration_measurements[0].id
+    hpxml.buildings[1].attics[0].sameas_id = hpxml.buildings[0].attics[0].id
+    hpxml.buildings[1].foundations[0].sameas_id = hpxml.buildings[0].foundations[0].id
+    hpxml.buildings[1].surfaces.each_with_index do |surface, i|
+      surface.sameas_id = hpxml.buildings[0].surfaces[i].id
+    end
+    hpxml.buildings[1].subsurfaces.each_with_index do |subsurface, i|
+      next if subsurface.is_a? HPXML::Window # Windows are different between the two buildings
+
+      subsurface.sameas_id = hpxml.buildings[0].subsurfaces[i].id
+    end
+    hpxml.buildings[1].hvac_systems.each_with_index do |hvac_system, i|
+      hvac_system.sameas_id = hpxml.buildings[0].hvac_systems[i].id
+    end
+    hpxml.buildings[1].hvac_controls[0].sameas_id = hpxml.buildings[0].hvac_controls[0].id
+    hpxml.buildings[1].hvac_distributions[0].sameas_id = hpxml.buildings[0].hvac_distributions[0].id
+    hpxml.buildings[1].water_heating_systems[0].sameas_id = hpxml.buildings[0].water_heating_systems[0].id
+    hpxml.buildings[1].hot_water_distributions[0].sameas_id = hpxml.buildings[0].hot_water_distributions[0].id
+    hpxml.buildings[1].water_fixtures.each_with_index do |water_fixture, i|
+      water_fixture.sameas_id = hpxml.buildings[0].water_fixtures[i].id
+    end
+    hpxml.buildings[1].appliances.each_with_index do |appliance, i|
+      appliance.sameas_id = hpxml.buildings[0].appliances[i].id
+    end
+    hpxml.buildings[1].lighting_groups.each_with_index do |lighting_group, i|
+      lighting_group.sameas_id = hpxml.buildings[0].lighting_groups[i].id
+    end
+    hpxml.buildings[1].plug_loads.each_with_index do |plug_load, i|
+      plug_load.sameas_id = hpxml.buildings[0].plug_loads[i].id
+    end
   end
 
   hpxml.buildings.each_with_index do |hpxml_bldg, hpxml_bldg_index|
@@ -3355,7 +3397,16 @@ def download_g_functions
   exit!
 end
 
-command_list = [:update_measures, :update_hpxmls, :create_release_zips, :download_utility_rates, :download_g_functions]
+command_list = [
+  :update_measures,
+  :update_hpxmls,
+  :unit_tests,
+  :workflow_tests1,
+  :workflow_tests2,
+  :create_release_zips,
+  :download_utility_rates,
+  :download_g_functions
+]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -3376,10 +3427,6 @@ elsif not command_list.include? ARGV[0].to_sym
 end
 
 if ARGV[0].to_sym == :update_measures
-  # Prevent NREL error regarding U: drive when not VPNed in
-  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
-  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
-
   # Apply rubocop (uses .rubocop.yml)
   commands = ["\"require 'rubocop/rake_task' \"",
               "\"require 'stringio' \"",
@@ -3401,10 +3448,6 @@ if ARGV[0].to_sym == :update_measures
 end
 
 if ARGV[0].to_sym == :update_hpxmls
-  # Prevent NREL error regarding U: drive when not VPNed in
-  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
-  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
-
   # Create sample/test HPXMLs
   t = Time.now
   create_hpxmls()
@@ -3423,6 +3466,41 @@ if ARGV[0].to_sym == :update_hpxmls
     hpxml = HPXML.new(hpxml_path: hpxml_path)
     XMLHelper.write_file(hpxml.to_doc, hpxml_path)
   end
+end
+
+if [:unit_tests, :workflow_tests1, :workflow_tests2].include? ARGV[0].to_sym
+  case ARGV[0].to_sym
+  when :unit_tests
+    tests_rbs = Dir['*/tests/*.rb'] - Dir['workflow/tests/*.rb']
+  when :workflow_tests1
+    tests_rbs = Dir['workflow/tests/test_simulations1.rb']
+  when :workflow_tests2
+    tests_rbs = Dir['workflow/tests/*.rb'] - Dir['workflow/tests/test_simulations1.rb']
+  end
+
+  # Run tests in random order; we don't want them to only
+  # work when run in a specific order
+  tests_rbs.shuffle!
+
+  # Ensure we run all tests even if there are failures
+  failed_tests = []
+  tests_rbs.each do |test_rb|
+    success = system("#{OpenStudio.getOpenStudioCLI} #{test_rb}")
+    failed_tests << test_rb unless success
+  end
+
+  puts
+  puts
+
+  if not failed_tests.empty?
+    puts 'The following tests FAILED:'
+    failed_tests.each do |failed_test|
+      puts "- #{failed_test}"
+    end
+    exit! 1
+  end
+
+  puts 'All tests passed.'
 end
 
 if ARGV[0].to_sym == :download_utility_rates

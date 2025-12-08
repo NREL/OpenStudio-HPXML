@@ -19,19 +19,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     @schematron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.sch')
     @schematron_validator = XMLValidator.get_xml_validator(@schematron_path)
 
-    @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
+    @tmp_hpxml_path = File.join(File.dirname(__FILE__), 'tmp.xml')
     @tmp_csv_path = File.join(@sample_files_path, 'tmp.csv')
-    @tmp_output_path = File.join(@sample_files_path, 'tmp_output')
-    FileUtils.mkdir_p(@tmp_output_path)
 
     @default_schedules_csv_data = Defaults.get_schedules_csv_data()
   end
 
   def teardown
-    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    File.delete(@tmp_csv_path) if File.exist? @tmp_csv_path
-    FileUtils.rm_rf(@tmp_output_path)
-    cleanup_results_files
+    cleanup_output_files([@tmp_hpxml_path, @tmp_csv_path])
   end
 
   def test_validation_of_schematron_doc
@@ -153,10 +148,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-location-heat-pump' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
                             'hvac-msac-not-var-speed' => ["Expected CompressorType to be 'variable speed'"],
                             'hvac-mshp-not-var-speed' => ["Expected CompressorType to be 'variable speed'"],
-                            'hvac-research-features-timestep-ten-mins' => ['Expected ../../SoftwareInfo/extension/SimulationControl/Timestep to be 1.0',
-                                                                           'Expected ../../Timestep to be 1.0'],
-                            'hvac-research-features-timestep-missing' => ['Expected ../../SoftwareInfo/extension/SimulationControl/Timestep to be 1.0',
-                                                                          'Expected ../../Timestep to be 1.0'],
+                            'hvac-research-features-timestep-ten-mins' => ['Expected /HPXML/SoftwareInfo/extension/SimulationControl/Timestep to be 1.0',
+                                                                           'Expected Timestep to be 1.0'],
+                            'hvac-research-features-timestep-missing' => ['Expected /HPXML/SoftwareInfo/extension/SimulationControl/Timestep to be 1.0',
+                                                                          'Expected Timestep to be 1.0'],
                             'hvac-research-features-onoff-thermostat-heat-load-fraction-partial' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
                             'hvac-research-features-onoff-thermostat-cool-load-fraction-partial' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
                             'hvac-research-features-onoff-thermostat-negative-value' => ['Expected OnOffThermostatDeadbandTemperature to be greater than 0'],
@@ -186,7 +181,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                         'Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Appliances/Dishwasher[IsSharedAppliance="true"], id: "Dishwasher1"]',
                                                         'There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".',
                                                         'There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
-                            'invalid-foundation-wall-properties' => ['Expected DepthBelowGrade to be less than or equal to Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall[not(SystemIdentifier/@sameas)], id: "FoundationWall1"]',
+                            'invalid-foundation-wall-properties' => ['Expected DepthBelowGrade to be less than or equal to Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall[not(SystemIdentifier/@sameas and /HPXML/SoftwareInfo/extension/WholeSFAorMFBuildingSimulation[text()="true"])], id: "FoundationWall1"]',
                                                                      'Expected DistanceToBottomOfInsulation to be greater than or equal to DistanceToTopOfInsulation [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWall1Insulation"]',
                                                                      'Expected DistanceToBottomOfInsulation to be less than or equal to ../../Height [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType="continuous - exterior" or InstallationType="continuous - interior"], id: "FoundationWall1Insulation"]'],
                             'invalid-ground-conductivity' => ["The value '0.0' must be greater than '0'"],
@@ -270,21 +265,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'missing-inverter-idref' => ['Expected 1 element(s) for xpath: AttachedToInverter [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem[count(../Inverter) > 1], id: "PVSystem1"]',
                                                          'Expected 1 element(s) for xpath: AttachedToInverter [context: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem[count(../Inverter) > 1], id: "PVSystem2"]'],
                             'missing-skylight-floor' => ['Expected 1 element(s) for xpath: ../../AttachedToFloor'],
-                            'multifamily-common-space-extra-inputs' => ['Expected only SystemIdentifier specified',
-                                                                        'Expected only SystemIdentifier specified',
-                                                                        'Expected only SystemIdentifier specified',
-                                                                        'Expected only SystemIdentifier specified'],
-                            'multifamily-common-space-whole-sfa-or-mf-building-sim-false' => ['Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true',
-                                                                                              'Expected ../../../../../SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true'],
+                            'multifamily-common-space-extra-inputs' => ['Expected only SystemIdentifier to be specified when sameas attribute used',
+                                                                        'Expected only SystemIdentifier to be specified when sameas attribute used',
+                                                                        'Expected only SystemIdentifier to be specified when sameas attribute used',
+                                                                        'Expected only SystemIdentifier to be specified when sameas attribute used'],
+                            'multifamily-common-space-whole-sfa-or-mf-building-sim-false' => ['Expected 1 element(s) for xpath: ExteriorAdjacentTo [context: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist[not(SystemIdentifier/@sameas and /HPXML/SoftwareInfo/extension/WholeSFAorMFBuildingSimulation[text()="true"])], id: "RimJoist2_2"]',
+                                                                                              'Expected 1 element(s) for xpath: ExteriorAdjacentTo [context: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[not(SystemIdentifier/@sameas and /HPXML/SoftwareInfo/extension/WholeSFAorMFBuildingSimulation[text()="true"])], id: "Wall2_3"]',
+                                                                                              'Expected 1 element(s) for xpath: ExteriorAdjacentTo [context: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall[not(SystemIdentifier/@sameas and /HPXML/SoftwareInfo/extension/WholeSFAorMFBuildingSimulation[text()="true"])], id: "FoundationWall2_2"]',
+                                                                                              'Expected 1 element(s) for xpath: ExteriorAdjacentTo [context: /HPXML/Building/BuildingDetails/Enclosure/Floors/Floor[not(SystemIdentifier/@sameas and /HPXML/SoftwareInfo/extension/WholeSFAorMFBuildingSimulation[text()="true"])], id: "Floor1_1"]'],
                             'multifamily-reference-appliance' => ['There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
@@ -988,7 +976,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
 
       # Test against schematron
       XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
-      _test_schema_and_schematron_validation(@tmp_hpxml_path, hpxml_doc, expected_errors: expected_errors)
+      _test_schema_and_schematron_validation(@tmp_hpxml_path, hpxml_doc, expected_errors: expected_errors, test_name: error_case)
     end
   end
 
@@ -2304,14 +2292,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     end
   end
 
-  def _test_schema_and_schematron_validation(hpxml_path, hpxml_doc, expected_errors: nil, expected_warnings: nil)
+  def _test_schema_and_schematron_validation(hpxml_path, hpxml_doc, expected_errors: nil, expected_warnings: nil, test_name: nil)
     sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, @schematron_validator, hpxml_doc)
     xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, @schema_validator)
     if not expected_errors.nil?
-      _compare_errors_or_warnings('error', sct_errors + xsd_errors, expected_errors)
+      _compare_errors_or_warnings('error', sct_errors + xsd_errors, expected_errors, test_name: test_name)
     end
     if not expected_warnings.nil?
-      _compare_errors_or_warnings('warning', sct_warnings + xsd_warnings, expected_warnings)
+      _compare_errors_or_warnings('warning', sct_warnings + xsd_warnings, expected_warnings, test_name: test_name)
     end
   end
 
@@ -2326,7 +2314,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     args_hash['debug'] = true
-    args_hash['output_dir'] = File.absolute_path(@tmp_output_path)
+    args_hash['output_dir'] = File.dirname(__FILE__)
     args_hash['building_id'] = building_id unless building_id.nil?
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
@@ -2365,7 +2353,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     _compare_errors_or_warnings(error_or_warning, actual_errors_or_warnings, expected_errors_or_warnings)
   end
 
-  def _compare_errors_or_warnings(type, actual_msgs, expected_msgs)
+  def _compare_errors_or_warnings(type, actual_msgs, expected_msgs, test_name: nil)
     if expected_msgs.empty?
       if actual_msgs.size > 0
         flunk "Found unexpected #{type} messages:\n#{actual_msgs}"
@@ -2386,7 +2374,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         end
       end
       if actual_msgs.size > 0
-        flunk "Found extra #{type} messages:\n#{actual_msgs}"
+        # Only test an incomplete set of error messages for this test case due to the large size of similar error messages
+        if test_name != 'multifamily-common-space-whole-sfa-or-mf-building-sim-false'
+          flunk "Found extra #{type} messages:\n#{actual_msgs}"
+        end
       end
     end
   end

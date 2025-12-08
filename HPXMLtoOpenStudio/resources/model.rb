@@ -1231,7 +1231,16 @@ module Model
       end
     end
 
-    # Create adjacent surfaces for HPXML surfaces w/ sameas attribute
+    create_adjacent_surfaces_for_whole_mf_building(merged_model_objects, hpxml_osm_map)
+  end
+
+  # Create adjacent surfaces (identical surfaces in other multifamily units) for HPXML
+  # surfaces w/ sameas attribute.
+  #
+  # @param merged_model_objects [Array<OpenStudio::WorkspaceObject>] All model objects in the merged multifamily model
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
+  # @return [nil]
+  def self.create_adjacent_surfaces_for_whole_mf_building(merged_model_objects, hpxml_osm_map)
     merged_model_objects.each do |obj|
       next unless obj.to_Surface.is_initialized
 
@@ -1241,10 +1250,15 @@ module Model
       adjacent_unit_number = surface.additionalProperties.getFeatureAsInteger('adjacentUnitNumber').get
       adjacent_space_type = surface.additionalProperties.getFeatureAsString('adjacentSpaceType').get
       adjacent_hpxml_id = make_variable_name(surface.additionalProperties.getFeatureAsString('adjacentHpxmlID').get, adjacent_unit_number)
-      adjacent_space_type = HPXML::LocationConditionedSpace if adjacent_space_type == HPXML::LocationBasementConditioned
+      adjacent_space_type = HPXML::LocationConditionedSpace if HPXML::conditioned_locations_this_unit.include?(adjacent_space_type)
 
       unit_model = hpxml_osm_map.values[adjacent_unit_number]
-      unit_adjacent_space = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == adjacent_space_type }.spaces[0]
+      unit_adjacent_zone = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == adjacent_space_type }
+      if unit_adjacent_zone.nil?
+        fail "Could not find adjacent space type ('#{adjacent_space_type}') in unit #{adjacent_unit_number}."
+      end
+
+      unit_adjacent_space = unit_adjacent_zone.spaces[0]
       adjacent_space = merged_model_objects.find { |s| s.to_Space.is_initialized && s.name.to_s == unit_adjacent_space.name.to_s }.to_Space.get
 
       # Create/assign adjacent surface

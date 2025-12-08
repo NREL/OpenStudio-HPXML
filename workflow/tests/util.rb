@@ -15,7 +15,7 @@ def run_simulation_tests(xmls)
 
     next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
     next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
-    next if xml.include? 'base-bldgtype-mf-unit-shared' # FUTURE: Allow someday, but need to use @sameas attribute and size the shared HVAC equipment
+    next if xml.include? 'base-misc-multiple-buildings.xml' # Already has multiple building elements
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
     # unit multiplier) and check how the results compare to the original run
@@ -79,7 +79,8 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
   # Uses 'monthly' to verify timeseries results match annual results via error-checking
   # inside the ReportSimulationOutput measure.
   cli_path = OpenStudio.getOpenStudioCLI
-  command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
+  building_id_str = ' --building-id MyBuilding_AlternativeDesign' if xml.include? 'base-misc-multiple-buildings.xml'
+  command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL#{building_id_str}"
   success = system(command)
 
   rundir = File.join(rundir, 'run')
