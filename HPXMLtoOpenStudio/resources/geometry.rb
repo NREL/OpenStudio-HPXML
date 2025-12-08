@@ -951,7 +951,7 @@ module Geometry
       surface.setName("surface #{skylight.id} shaft")
       surface.setSurfaceType(EPlus::SurfaceTypeWall)
       set_surface_interior(model, spaces, surface, skylight.floor, hpxml_bldg)
-      set_surface_exterior(model, spaces, surface, skylight.floor, hpxml_bldg)
+      set_surface_exterior(model, spaces, surface, skylight.floor, hpxml_bldg, hpxml_header)
       surface.setSunExposure(EPlus::SurfaceSunExposureNo)
       surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
