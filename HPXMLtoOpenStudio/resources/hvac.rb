@@ -1030,7 +1030,8 @@ module HVAC
     oat_low = nil
     oat_hwst_high = nil
     oat_hwst_low = nil
-    design_temp = 180.0 # F
+    supply_temp = heating_system.distribution_system.hydronic_supply_temp
+    return_temp = heating_system.distribution_system.hydronic_return_temp
 
     if oat_reset_enabled
       if oat_high.nil? || oat_low.nil? || oat_hwst_low.nil? || oat_hwst_high.nil?
@@ -1047,8 +1048,8 @@ module HVAC
 
     loop_sizing = plant_loop.sizingPlant
     loop_sizing.setLoopType('Heating')
-    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp, 'F', 'C'))
-    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
+    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(supply_temp, 'F', 'C'))
+    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(supply_temp - return_temp, 'deltaF', 'deltaC'))
 
     # Pump
     pump_w = get_pump_power_watts(heating_system)
@@ -1069,7 +1070,7 @@ module HVAC
       boiler_RatedHWRT = UnitConversions.convert(80.0, 'F', 'C')
       plr_Rated = 1.0
       plr_Design = 1.0
-      boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0, 'F', 'C')
+      boiler_DesignHWRT = UnitConversions.convert(return_temp, 'F', 'C')
       # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
       condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
       boilerEff_Norm = heating_system.heating_efficiency_afue / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
@@ -1120,7 +1121,7 @@ module HVAC
     supply_setpoint = Model.add_schedule_constant(
       model,
       name: "#{obj_name} hydronic heat supply setpoint",
-      value: UnitConversions.convert(design_temp, 'F', 'C'),
+      value: UnitConversions.convert(supply_temp, 'F', 'C'),
       limits: EPlus::ScheduleTypeLimitsTemperature
     )
 
@@ -1141,20 +1142,20 @@ module HVAC
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
     bb_ua = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
-    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
-
+    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / loop_sizing.loopDesignTemperatureDifference / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
     if heating_system.distribution_system.air_type.to_s == HPXML::AirTypeFanCoil
       # Fan
       fan_cfm = RatedCFMPerTon * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton') # CFM
       fan = create_supply_fan(model, obj_name, 0.0, [fan_cfm], heating_system) # fan energy included in above pump via Electric Auxiliary Energy (EAE)
 
       # Heating Coil
-      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
-      htg_coil.setRatedCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
-      htg_coil.setUFactorTimesAreaValue(bb_ua)
-      htg_coil.setMaximumWaterFlowRate(max_water_flow)
-      htg_coil.setPerformanceInputMethod('NominalCapacity')
-      htg_coil.setName(obj_name + ' htg coil')
+      htg_coil = Model.add_coil_heating_water(
+        model,
+        name: "#{obj_name} htg coil",
+        capacity: UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'),
+        ua_value: bb_ua,
+        max_flow_rate: max_water_flow
+      )
       plant_loop.addDemandBranchForComponent(htg_coil)
 
       # Cooling Coil (always off)
@@ -1185,13 +1186,13 @@ module HVAC
       add_fan_pump_disaggregation_ems_program(model, pump, zone_hvac, nil, nil, heating_system)
     else
       # Heating Coil
-      htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
-      htg_coil.setName(obj_name + ' htg coil')
-      htg_coil.setConvergenceTolerance(0.001)
-      htg_coil.setHeatingDesignCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
-      htg_coil.setUFactorTimesAreaValue(bb_ua)
-      htg_coil.setMaximumWaterFlowRate(max_water_flow)
-      htg_coil.setHeatingDesignCapacityMethod('HeatingDesignCapacity')
+      htg_coil = Model.add_coil_heating_water_baseboard(
+        model,
+        name: "#{obj_name} htg coil",
+        capacity: UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'),
+        ua_value: bb_ua,
+        max_flow_rate: max_water_flow
+      )
       plant_loop.addDemandBranchForComponent(htg_coil)
 
       # Baseboard
@@ -4856,6 +4857,178 @@ module HVAC
     return program
   end
 
+  # TODO
+  def self.apply_shared_systems(runner, model, hpxml, hpxml_osm_map, shared_systems_map)
+    hvac_unavailable_periods = { htg: Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceHeating].name, hpxml.header.unavailable_periods),
+                                 clg: Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceCooling].name, hpxml.header.unavailable_periods) }
+
+    # Create map of shared systems => (Map of hpxml_bldg => conditioned zone)
+    shared_systems_to_zones_map = {}
+    shared_systems_map.values.each do |hvac_systems|
+      shared_systems = hvac_systems.select { |h| h.sameas_id.nil? }
+      next if shared_systems.empty?
+
+      shared_systems_to_zones_map[shared_systems] = {}
+
+      # Populate zones
+      shared_system_ids = shared_systems.map { |h| h.id }
+      shared_systems_map.each do |hpxml_bldg, hvac_systems2|
+        next unless hvac_systems2.select { |h| !h.sameas_id.nil? && shared_system_ids.include?(h.sameas_id) }
+
+        unit_model = hpxml_osm_map[hpxml_bldg]
+        cond_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationConditionedSpace }.name.to_s
+        cond_zone = model.getThermalZones.find { |z| z.name.to_s == cond_zone_name }
+        shared_systems_to_zones_map[shared_systems][hpxml_bldg] = cond_zone
+      end
+    end
+
+    # Apply to model
+    shared_systems_to_zones_map.each do |shared_systems, cond_zones_map|
+      shared_boilers = shared_systems.select { |h| h.is_a?(HPXML::HeatingSystem) && h.heating_system_type == HPXML::HVACTypeBoiler }
+      if not shared_boilers.empty?
+        apply_shared_boiler(model, hpxml, shared_boilers, cond_zones_map, hvac_unavailable_periods)
+      else
+        fail 'Unexpected shared systems.'
+      end
+    end
+  end
+
+  # FIXME
+  def self.apply_shared_boiler(model, hpxml, hpxml_boilers, control_zones_map, hvac_unavailable_periods)
+    obj_name = Constants::ObjectTypeBoiler
+
+    # Get distribution system
+    check_distribution_system(hpxml_boilers[0], HPXML::HVACTypeBoiler)
+    distribution_system = hpxml_boilers[0].distribution_system
+    supply_temp = distribution_system.hydronic_supply_temp # deg-F
+    return_temp = distribution_system.hydronic_return_temp # deg-F
+
+    # Plant Loop
+    plant_loop = OpenStudio::Model::PlantLoop.new(model)
+    plant_loop.setName(obj_name + ' hydronic heat loop')
+    plant_loop.setFluidType('Water')
+    plant_loop.setMaximumLoopTemperature(100)
+    plant_loop.setMinimumLoopTemperature(0)
+    plant_loop.setMinimumLoopFlowRate(0)
+    plant_loop.autocalculatePlantLoopVolume()
+    # Set plant loop distribution scheme
+    if hpxml.header.shared_boiler_operation == HPXML::SharedBoilerOperationSequenced
+      plant_loop.setLoadDistributionScheme('SequentialLoad')
+    elsif hpxml.header.shared_boiler_operation == HPXML::SharedBoilerOperationSimultaneous
+      plant_loop.setLoadDistributionScheme('UniformLoad')
+    end
+
+    loop_sizing = plant_loop.sizingPlant
+    loop_sizing.setLoopType('Heating')
+    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(supply_temp, 'F', 'C'))
+    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(supply_temp - return_temp, 'deltaF', 'deltaC'))
+
+    # Pump
+    # FIXME
+    motor_efficiency = 0.9
+    if distribution_system.hydronic_variable_speed_pump
+      pump = Model.add_pump_variable_speed(
+        model,
+        name: "#{obj_name} hydronic pump",
+        rated_power: nil,
+        motor_efficiency: motor_efficiency
+      )
+    else
+      pump = Model.add_pump_constant_speed(
+        model,
+        name: "#{obj_name} hydronic pump",
+        rated_power: nil,
+        rated_flow_rate: nil,
+        motor_efficiency: motor_efficiency
+      )
+    end
+    pump.addToNode(plant_loop.supplyInletNode)
+
+    # Hot Water Boilers
+    total_heating_capacity = 0
+    hpxml_boilers.each do |heating_system|
+      boiler = OpenStudio::Model::BoilerHotWater.new(model)
+      boiler.setName(obj_name)
+      boiler.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
+      boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue)
+      boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
+      boiler_eff_curve = Model.add_curve_bicubic(
+        model,
+        name: 'NonCondensingBoilerEff',
+        coeff: [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05],
+        min_x: 0.1, max_x: 1.0, min_y: 20.0, max_y: 80.0
+      )
+      boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
+      boiler.setMinimumPartLoadRatio(0.0)
+      boiler.setMaximumPartLoadRatio(1.0)
+      boiler.setBoilerFlowMode('LeavingSetpointModulated')
+      boiler.setOptimumPartLoadRatio(1.0)
+      boiler.setWaterOutletUpperTemperatureLimit(99.9)
+      boiler.setOnCycleParasiticElectricLoad(0)
+      boiler.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
+      boiler.setOffCycleParasiticFuelLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
+      plant_loop.addSupplyBranchForComponent(boiler)
+      boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
+
+      total_heating_capacity += heating_system.heating_capacity
+    end
+
+    supply_setpoint = Model.add_schedule_constant(
+      model,
+      name: "#{obj_name} hydronic heat supply setpoint",
+      value: UnitConversions.convert(supply_temp, 'F', 'C'),
+      limits: EPlus::ScheduleTypeLimitsTemperature
+    )
+
+    setpoint_manager_scheduled = OpenStudio::Model::SetpointManagerScheduled.new(model, supply_setpoint)
+    setpoint_manager_scheduled.setName(obj_name + ' hydronic heat loop setpoint manager')
+    setpoint_manager_scheduled.setControlVariable('Temperature')
+    setpoint_manager_scheduled.addToNode(plant_loop.supplyOutletNode)
+
+    pipe_supply_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
+    plant_loop.addSupplyBranchForComponent(pipe_supply_bypass)
+    pipe_supply_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_supply_outlet.addToNode(plant_loop.supplyOutletNode)
+    pipe_demand_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
+    plant_loop.addDemandBranchForComponent(pipe_demand_bypass)
+    pipe_demand_inlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_demand_inlet.addToNode(plant_loop.demandInletNode)
+    pipe_demand_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
+
+    # FIXME: Doesn't currently respond to Heating/Cooling seasons, if defined
+    # FIXME: Cannot currently be mixed with in-unit HVAC systems that serve a fraction of the load
+    hvac_sequential_load_fracs = { htg: [1], clg: [1] }
+
+    if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+      total_heating_design_load = control_zones_map.keys.map { |hpxml_bldg| hpxml_bldg.hvac_plant.hdl_total }.sum
+      control_zones_map.each do |hpxml_bldg, control_zone|
+        # Apportion total boiler heating capacity to each zone based on the HPXML Building's heating design load
+        zone_heating_capacity = hpxml_bldg.hvac_plant.hdl_total / total_heating_design_load * total_heating_capacity
+
+        bb_ua = UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
+        max_water_flow = UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W') / loop_sizing.loopDesignTemperatureDifference / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
+
+        # Heating Coil
+        htg_coil = Model.add_coil_heating_water_baseboard(
+          model,
+          name: "#{obj_name} htg coil",
+          capacity: UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W'),
+          ua_value: bb_ua,
+          max_flow_rate: max_water_flow
+        )
+        plant_loop.addDemandBranchForComponent(htg_coil)
+
+        # Baseboard
+        zone_hvac = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, htg_coil)
+        zone_hvac.setName(obj_name + ' baseboard')
+        zone_hvac.addToThermalZone(control_zone)
+
+        set_sequential_load_fractions(model, control_zone, zone_hvac, hvac_sequential_load_fracs, hvac_unavailable_periods)
+      end
+    end
+  end
+
   # Calculates the rated airflow rate for a given speed.
   #
   # @param net_rated_capacity [Double] Net rated capacity for the given speed (Btu/hr)
@@ -4864,6 +5037,24 @@ module HVAC
   # @return [Double] Rated airflow rate in the specified output units
   def self.calc_rated_airflow(net_rated_capacity, rated_cfm_per_ton, output_units)
     return UnitConversions.convert(net_rated_capacity, 'Btu/hr', 'ton') * UnitConversions.convert(rated_cfm_per_ton, 'cfm', output_units)
+  end
+
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param heating_system [TODO] TODO
+  # @param cooling_system [TODO] TODO
+  # @return [TODO] TODO
+  def self.is_attached_heating_and_cooling_systems(hpxml_bldg, heating_system, cooling_system)
+    # Now only allows furnace+AC
+    if not ((hpxml_bldg.heating_systems.include? heating_system) && (hpxml_bldg.cooling_systems.include? cooling_system))
+      return false
+    end
+    if not (heating_system.heating_system_type == HPXML::HVACTypeFurnace && cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner)
+      return false
+    end
+
+    return true
   end
 
   # Returns a list of HPXML HVAC (heating/cooling) systems, incorporating whether multiple systems are
