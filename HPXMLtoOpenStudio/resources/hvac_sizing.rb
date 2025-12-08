@@ -17,16 +17,16 @@ module HVACSizing
     check_for_errors(hpxml_bldg, hvac_systems)
 
     mj = MJValues.new
-    process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
+    process_site_calcs_and_design_temps(mj, weather, hpxml_bldg, hpxml_header)
 
     # Calculate individual design load components
     all_zone_loads, all_space_loads = init_loads(hpxml_bldg)
     process_load_windows_skylights(mj, runner, hpxml_bldg, all_zone_loads, all_space_loads)
     process_load_doors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    process_load_walls(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_walls(mj, hpxml_header, hpxml_bldg, all_zone_loads, all_space_loads)
     process_load_roofs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_ceilings(mj, hpxml_header, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_floors(mj, hpxml_header, hpxml_bldg, all_zone_loads, all_space_loads)
     process_load_slabs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     process_load_internal_gains(hpxml_bldg, all_zone_loads, all_space_loads)
@@ -179,8 +179,9 @@ module HVACSizing
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
-  def self.process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
+  def self.process_site_calcs_and_design_temps(mj, weather, hpxml_bldg, hpxml_header)
     # CLTD adjustments based on daily temperature range
     mj.daily_range_temp_adjust = [4, 0, -5]
 
@@ -248,7 +249,7 @@ module HVACSizing
 
     locations = []
     hpxml_bldg.surfaces.each do |surface|
-      next if (not surface.sameas_id.nil?) || (surface.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
+      next if hpxml_header.whole_sfa_or_mf_building_sim && ((not surface.sameas_id.nil?) || (surface.additional_properties.respond_to? :adjacent_hpxml_id)) # Ignore inter-unit heat transfer
 
       locations << surface.interior_adjacent_to
       locations << surface.exterior_adjacent_to
@@ -1010,15 +1011,16 @@ module HVACSizing
   # Calculates heating and cooling loads for above-grade and below-grade HPXML walls.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
   # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
   # @return [nil]
-  def self.process_load_walls(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+  def self.process_load_walls(mj, hpxml_header, hpxml_bldg, all_zone_loads, all_space_loads)
     # Above-Grade Wall Area
     (hpxml_bldg.walls + hpxml_bldg.rim_joists + hpxml_bldg.foundation_walls).each do |wall|
       next unless wall.is_thermal_boundary
-      next if (not wall.sameas_id.nil?) || (wall.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
+      next if hpxml_header.whole_sfa_or_mf_building_sim && ((not wall.sameas_id.nil?) || (wall.additional_properties.respond_to? :adjacent_hpxml_id)) # Ignore inter-unit heat transfer
 
       space = wall.space
       zone = space.zone
@@ -1114,7 +1116,7 @@ module HVACSizing
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
       next if foundation_wall.depth_below_grade < 2 # Already handled in above grade walls
-      next if (not foundation_wall.sameas_id.nil?) || (foundation_wall.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
+      next if hpxml_header.whole_sfa_or_mf_building_sim && ((not foundation_wall.sameas_id.nil?) || (foundation_wall.additional_properties.respond_to? :adjacent_hpxml_id)) # Ignore inter-unit heat transfer
 
       space = foundation_wall.space
       zone = space.zone
@@ -1207,14 +1209,15 @@ module HVACSizing
   # Calculates heating and cooling loads for ceilings.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
   # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
   # @return [nil]
-  def self.process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+  def self.process_load_ceilings(mj, hpxml_header, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
-      next if (not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
+      next if hpxml_header.whole_sfa_or_mf_building_sim && ((not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id)) # Ignore inter-unit heat transfer
       next unless floor.is_ceiling
 
       space = floor.space
@@ -1246,14 +1249,15 @@ module HVACSizing
   # Calculates heating and cooling loads for floors.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
   # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
   # @return [nil]
-  def self.process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+  def self.process_load_floors(mj, hpxml_header, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_thermal_boundary
-      next if (not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id) # Ignore inter-unit heat transfer
+      next if hpxml_header.whole_sfa_or_mf_building_sim && ((not floor.sameas_id.nil?) || (floor.additional_properties.respond_to? :adjacent_hpxml_id)) # Ignore inter-unit heat transfer
       next unless floor.is_floor
 
       space = floor.space

@@ -77,23 +77,13 @@ def create_hpxmls
       num_apply_measures = 8
     elsif hpxml_path.include?('whole-building')
       num_apply_measures = 6
+    elsif hpxml_path.include?('multiple-buildings')
+      num_apply_measures = 2
     end
 
     for i in 1..num_apply_measures
       build_residential_hpxml = measures['BuildResidentialHPXML'][0]
-      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml') ||
-         hpxml_path.include?('base-bldgtype-mf-whole-building-detailed-electric-panel.xml') ||
-         hpxml_path.include?('base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml')
-        suffix = "_#{i}" if i > 1
-        build_residential_hpxml['schedules_paths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
-        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
-        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'Attic, Vented, Gable' : 'Below Apartment')
-        if hpxml_path.include?('inter-unit-heat-transfer')
-          # one unconditioned hallway + conditioned unit each floor
-          build_residential_hpxml['hvac_heating_system'] = ([1, 3, 5].include?(i) ? 'Electric Resistance' : 'None')
-          build_residential_hpxml['hvac_cooling_system'] = ([1, 3, 5].include?(i) ? 'Room AC, CEER 8.4' : 'None')
-        end
-      elsif hpxml_path.include?('whole-building-common-spaces')
+      if hpxml_path.include?('whole-building-common-spaces')
         suffix = "_#{i}" if i > 1
         build_residential_hpxml['schedules_paths'] = (i >= 7 ? nil : "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv")
         build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
@@ -103,6 +93,21 @@ def create_hpxmls
         # Partially conditioned basement + one unconditioned hallway each floor + unconditioned attic
         build_residential_hpxml['hvac_heating_system'] = ([1, 4, 6].include?(i) ? 'Electric Resistance' : 'None')
         build_residential_hpxml['hvac_cooling_system'] = ([1, 4, 6].include?(i) ? 'Room AC, CEER 8.4' : 'None')
+      elsif hpxml_path.include?('whole-building')
+        suffix = "_#{i}" if i > 1
+        build_residential_hpxml['schedules_paths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/#{stochastic_sched_basename}-mf-unit#{suffix}.csv"
+        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'Basement, Unconditioned' : 'Above Apartment')
+        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'Attic, Vented, Gable' : 'Below Apartment')
+        if hpxml_path.include?('inter-unit-heat-transfer')
+          # one unconditioned hallway + conditioned unit each floor
+          build_residential_hpxml['hvac_heating_system'] = ([1, 3, 5].include?(i) ? 'Electric Resistance' : 'None')
+          build_residential_hpxml['hvac_cooling_system'] = ([1, 3, 5].include?(i) ? 'Room AC, CEER 8.4' : 'None')
+        end
+      elsif hpxml_path.include?('multiple-buildings')
+        suffix = "_#{i}" if i > 1
+        if i > 1
+          build_residential_hpxml['enclosure_window'] = 'Triple, Low-E, Insulated, Gas, High Gain'
+        end
       end
 
       # Re-generate stochastic schedule CSV?
@@ -425,6 +430,42 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     hpxml.header.unavailable_periods.add(column_name: 'No Space Cooling', begin_month: 7, begin_day: 1, begin_hour: 22, end_month: 8, end_day: 3, end_hour: 14)
   elsif ['base-schedules-detailed-occupancy-stochastic-no-space-cooling.xml'].include? hpxml_file
     hpxml.header.unavailable_periods.add(column_name: 'No Space Cooling', begin_month: 6, begin_day: 15, begin_hour: 5, end_month: 7, end_day: 30, end_hour: 14)
+  end
+  if ['base-misc-multiple-buildings.xml'].include? hpxml_file
+    hpxml.header.whole_sfa_or_mf_building_sim = false
+    hpxml.buildings[1].building_id = "#{hpxml.buildings[0].building_id}_AlternativeDesign"
+    # Set sameas attribute for everything that is unchanged between
+    # the two buildings (i.e., everything but windows)
+    hpxml.buildings[1].air_infiltration_measurements[0].sameas_id = hpxml.buildings[0].air_infiltration_measurements[0].id
+    hpxml.buildings[1].attics[0].sameas_id = hpxml.buildings[0].attics[0].id
+    hpxml.buildings[1].foundations[0].sameas_id = hpxml.buildings[0].foundations[0].id
+    hpxml.buildings[1].surfaces.each_with_index do |surface, i|
+      surface.sameas_id = hpxml.buildings[0].surfaces[i].id
+    end
+    hpxml.buildings[1].subsurfaces.each_with_index do |subsurface, i|
+      next if subsurface.is_a? HPXML::Window # Windows are different between the two buildings
+
+      subsurface.sameas_id = hpxml.buildings[0].subsurfaces[i].id
+    end
+    hpxml.buildings[1].hvac_systems.each_with_index do |hvac_system, i|
+      hvac_system.sameas_id = hpxml.buildings[0].hvac_systems[i].id
+    end
+    hpxml.buildings[1].hvac_controls[0].sameas_id = hpxml.buildings[0].hvac_controls[0].id
+    hpxml.buildings[1].hvac_distributions[0].sameas_id = hpxml.buildings[0].hvac_distributions[0].id
+    hpxml.buildings[1].water_heating_systems[0].sameas_id = hpxml.buildings[0].water_heating_systems[0].id
+    hpxml.buildings[1].hot_water_distributions[0].sameas_id = hpxml.buildings[0].hot_water_distributions[0].id
+    hpxml.buildings[1].water_fixtures.each_with_index do |water_fixture, i|
+      water_fixture.sameas_id = hpxml.buildings[0].water_fixtures[i].id
+    end
+    hpxml.buildings[1].appliances.each_with_index do |appliance, i|
+      appliance.sameas_id = hpxml.buildings[0].appliances[i].id
+    end
+    hpxml.buildings[1].lighting_groups.each_with_index do |lighting_group, i|
+      lighting_group.sameas_id = hpxml.buildings[0].lighting_groups[i].id
+    end
+    hpxml.buildings[1].plug_loads.each_with_index do |plug_load, i|
+      plug_load.sameas_id = hpxml.buildings[0].plug_loads[i].id
+    end
   end
 
   hpxml.buildings.each_with_index do |hpxml_bldg, hpxml_bldg_index|

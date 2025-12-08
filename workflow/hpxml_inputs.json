@@ -2356,6 +2356,10 @@
     "misc_plug_loads": "None",
     "misc_television": "None"
   },
+  "sample_files/base-misc-multiple-buildings.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "whole_sfa_or_mf_building_sim": true
+  },
   "sample_files/base-misc-neighbor-shading.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_neighbor_buildings": "Detailed Example: Left/Right at 25ft, Front/Back at 80ft, 12ft Height"

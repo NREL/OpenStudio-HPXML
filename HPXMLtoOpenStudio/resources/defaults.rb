@@ -60,10 +60,10 @@ module Defaults
     apply_attics(hpxml_bldg, unit_num)
     apply_foundations(hpxml_bldg, unit_num)
     apply_roofs(hpxml_bldg)
-    apply_rim_joists(hpxml_bldg)
-    apply_walls(hpxml_bldg)
-    apply_foundation_walls(hpxml_bldg)
-    apply_floors(runner, hpxml_bldg)
+    apply_rim_joists(hpxml.header, hpxml_bldg)
+    apply_walls(hpxml.header, hpxml_bldg)
+    apply_foundation_walls(hpxml.header, hpxml_bldg)
+    apply_floors(runner, hpxml.header, hpxml_bldg)
     apply_slabs(hpxml_bldg)
     apply_windows(hpxml_bldg, eri_version)
     apply_skylights(hpxml_bldg)
@@ -1285,11 +1285,12 @@ module Defaults
 
   # Assigns default values for omitted optional inputs in the HPXML::RimJoist objects
   #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_rim_joists(hpxml_bldg)
+  def self.apply_rim_joists(hpxml_header, hpxml_bldg)
     hpxml_bldg.rim_joists.each do |rim_joist|
-      next if rim_joist.sameas_id
+      next if hpxml_header.whole_sfa_or_mf_building_sim && rim_joist.sameas_id
 
       if rim_joist.azimuth.nil?
         rim_joist.azimuth = get_azimuth_from_orientation(rim_joist.orientation)
@@ -1326,11 +1327,12 @@ module Defaults
 
   # Assigns default values for omitted optional inputs in the HPXML::Wall objects
   #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_walls(hpxml_bldg)
+  def self.apply_walls(hpxml_header, hpxml_bldg)
     hpxml_bldg.walls.each do |wall|
-      next if wall.sameas_id
+      next if hpxml_header.whole_sfa_or_mf_building_sim && wall.sameas_id
 
       if wall.azimuth.nil?
         wall.azimuth = get_azimuth_from_orientation(wall.orientation)
@@ -1391,11 +1393,12 @@ module Defaults
 
   # Assigns default values for omitted optional inputs in the HPXML::FoundationWall objects
   #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_foundation_walls(hpxml_bldg)
+  def self.apply_foundation_walls(hpxml_header, hpxml_bldg)
     hpxml_bldg.foundation_walls.each do |foundation_wall|
-      next if foundation_wall.sameas_id
+      next if hpxml_header.whole_sfa_or_mf_building_sim && foundation_wall.sameas_id
 
       if foundation_wall.type.nil?
         foundation_wall.type = HPXML::FoundationWallTypeSolidConcrete
@@ -1453,11 +1456,12 @@ module Defaults
   # Assigns default values for omitted optional inputs in the HPXML::Floor objects
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_floors(runner, hpxml_bldg)
+  def self.apply_floors(runner, hpxml_header, hpxml_bldg)
     hpxml_bldg.floors.each do |floor|
-      next if floor.sameas_id
+      next if hpxml_header.whole_sfa_or_mf_building_sim && floor.sameas_id
 
       if floor.floor_or_ceiling.nil?
         if floor.is_ceiling
