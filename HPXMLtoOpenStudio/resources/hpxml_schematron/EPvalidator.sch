@@ -2573,6 +2573,7 @@
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:HPWHOperatingMode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HPWHOperatingMode</sch:assert>
       <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="hybrid/auto" or text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'hybrid/auto' or 'heat pump only'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HPWHDucting/h:ExhaustAirTermination) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HPWHDucting/ExhaustAirTermination</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsageBin) + count(h:FirstHourRating) &gt;= 0'>Expected 0 or more element(s) for xpath: UsageBin | FirstHourRating</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:HotWaterTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterTemperature</sch:assert>
@@ -2582,7 +2583,8 @@
       <!-- Moved/deprecated extension/OperatingMode input; see https://github.com/NREL/OpenStudio-HPXML/pull/1289 -->
       <sch:assert role='ERROR' test='count(h:extension/h:OperatingMode) = 0'>extension/OperatingMode has been replaced by HPWHOperatingMode</sch:assert>
       <!-- Warnings -->
-      <sch:report role='WARN' test='number(h:HotWaterTemperature) &lt; 110'>Hot water setpoint should typically be greater than or equal to 110 deg-F.</sch:report>
+      <sch:report role='WARN' test='h:HPWHDucting/h:SupplyAirSource'>HPWH supply air ducted from another location is not currently supported; input will be ignored.</sch:report>
+      <sch:report role='WARN' test='h:HPWHDucting/h:ExhaustAirTermination[text()!="outside"]'>HPWH exhaust air ducted from a location other than outside is not currently supported; input will be ignored.</sch:report>
     </sch:rule>
   </sch:pattern>
 

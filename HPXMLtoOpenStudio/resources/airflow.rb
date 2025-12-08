@@ -2337,6 +2337,7 @@ module Airflow
     bal_cfm_tot = vent_fans[:mech_balanced].map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
     erv_hrv_cfm_tot = vent_fans[:mech_erv_hrv].map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
 
+    # Handle any cooking range hood ventilation
     infil_program.addLine('Set Qrange = 0')
     cooking_range_in_cond_space = hpxml_bldg.cooking_ranges.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.cooking_ranges[0].location)
     vent_fans[:kitchen].each_with_index do |vent_kitchen, index|
@@ -2349,6 +2350,7 @@ module Airflow
       infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.flow_rate * vent_kitchen.count, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
     end
 
+    # Handle any bathroom fan ventilation
     infil_program.addLine('Set Qbath = 0')
     vent_fans[:bath].each_with_index do |vent_bath, index|
       # Electricity impact
@@ -2359,6 +2361,7 @@ module Airflow
       infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.flow_rate * vent_bath.count, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
     end
 
+    # Handle any clothes dryer venting
     infil_program.addLine('Set Qdryer = 0')
     clothes_dryer_in_cond_space = hpxml_bldg.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.clothes_dryers[0].location)
     vented_dryers = hpxml_bldg.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 }
@@ -2372,12 +2375,28 @@ module Airflow
       infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate * cfm_mult, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
     end
 
+    # Handle any HPWHs
+    infil_program.addLine('Set Qhpwh = 0')
+    ducted_hpwhs = hpxml_bldg.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.hpwh_ducting_exhaust == HPXML::LocationOutside }
+    ducted_hpwhs.each_with_index do |ducted_hpwh, i|
+      # Create sensor to get HPWH airflow rate
+      hpwh = model.getWaterHeaterHeatPumpWrappedCondensers.find { |h| h.additionalProperties.getFeatureAsString('HPXML_ID').to_s == ducted_hpwh.id }
+      hpwh_flow_rate = Model.add_ems_sensor(
+        model,
+        name: "hpwh_flow_rate_#{i}",
+        output_var_or_meter_name: 'System Node Current Density Volume Flow Rate',
+        key_name: "#{hpwh.name} Outlet" # FIXME: Currently hardcoding the node name automatically assigned by OS; when https://github.com/NREL/OpenStudio/issues/5547 is addressed, assign a node name in waterheater.rb and reference here instead.
+      )
+
+      infil_program.addLine("Set Qhpwh = Qhpwh + #{hpwh_flow_rate.name}")
+    end
+
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot, 'cfm', 'm^3/s').round(5)}")
     infil_program.addLine("Set QWHV_exh = #{UnitConversions.convert(exh_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot, 'cfm', 'm^3/s').round(5)}")
 
     # Ventilation fans
     infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_cfis_sup + QWHV_cfis_suppl_sup')
-    infil_program.addLine('Set Qexhaust = Qrange + Qbath + Qdryer + QWHV_exh + QWHV_cfis_suppl_exh')
+    infil_program.addLine('Set Qexhaust = Qrange + Qbath + Qdryer + Qhpwh + QWHV_exh + QWHV_cfis_suppl_exh')
     infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
 
     # Duct leakage imbalance induced infiltration
