@@ -3393,20 +3393,13 @@ if ARGV[0].to_sym == :update_hpxmls
 end
 
 if [:unit_tests, :workflow_tests1, :workflow_tests2].include? ARGV[0].to_sym
-  tests_rbs = []
-  Dir['**/tests/*.rb'].each do |test_rb|
-    if ARGV[0].to_sym == :unit_tests
-      # Skip all workflow tests
-      next if test_rb.start_with?('workflow')
-    elsif ARGV[0].to_sym == :workflow_tests1
-      # Only run test_simulations1.rb workflow test
-      next unless test_rb.start_with?('workflow') && test_rb.include?('test_simulations1.rb')
-    elsif ARGV[0].to_sym == :workflow_tests2
-      # Run all workflow tests other than test_simulations1.rb
-      next unless test_rb.start_with?('workflow') && !test_rb.include?('test_simulations1.rb')
-    end
-
-    tests_rbs << test_rb
+  case ARGV[0].to_sym
+  when :unit_tests
+    tests_rbs = Dir['*/tests/*.rb'] - Dir['workflow/tests/*.rb']
+  when :workflow_tests1
+    tests_rbs = Dir['workflow/tests/test_simulations1.rb']
+  when :workflow_tests2
+    tests_rbs = Dir['workflow/tests/*.rb'] - Dir['workflow/tests/test_simulations1.rb']
   end
 
   # Run tests in random order; we don't want them to only
