@@ -2920,14 +2920,10 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     end
     if ['base-bldgtype-mf-whole-building-vehicle-ev-charger.xml'].include? hpxml_file
       if hpxml_bldg_index > 0 # intentionally not all buildings have a vehicle
-        hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}",
-                                vehicle_type: HPXML::VehicleTypeBEV)
-        vehicle = hpxml_bldg.vehicles[-1]
-        hpxml_bldg.ev_chargers.add(id: "EVCharger#{hpxml_bldg.vehicles.size + 1}")
-        ev_charger = hpxml_bldg.ev_chargers[-1]
-        vehicle.id += "_#{hpxml_bldg_index + 1}"
-        ev_charger.id += "_#{hpxml_bldg_index + 1}"
-        vehicle.ev_charger_idref = ev_charger.id
+        hpxml_bldg.ev_chargers.add(id: "EVCharger#{hpxml_bldg.ev_chargers.size + 1}_#{hpxml_bldg_index + 1}")
+        hpxml_bldg.vehicles.add(id: "Vehicle#{hpxml_bldg.vehicles.size + 1}_#{hpxml_bldg_index + 1}",
+                                vehicle_type: HPXML::VehicleTypeBEV,
+                                ev_charger_idref: hpxml_bldg.ev_chargers[-1].id)
       end
     end
 

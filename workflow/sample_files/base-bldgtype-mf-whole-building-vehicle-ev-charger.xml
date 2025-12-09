@@ -820,14 +820,14 @@
             <SystemIdentifier id='Vehicle1_2'/>
             <VehicleType>
               <BatteryElectricVehicle>
-                <ConnectedCharger idref='EVCharger2_2'/>
+                <ConnectedCharger idref='EVCharger1_2'/>
               </BatteryElectricVehicle>
             </VehicleType>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
-            <SystemIdentifier id='EVCharger2_2'/>
+            <SystemIdentifier id='EVCharger1_2'/>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>
@@ -1187,14 +1187,14 @@
             <SystemIdentifier id='Vehicle1_3'/>
             <VehicleType>
               <BatteryElectricVehicle>
-                <ConnectedCharger idref='EVCharger2_3'/>
+                <ConnectedCharger idref='EVCharger1_3'/>
               </BatteryElectricVehicle>
             </VehicleType>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
-            <SystemIdentifier id='EVCharger2_3'/>
+            <SystemIdentifier id='EVCharger1_3'/>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>
@@ -1554,14 +1554,14 @@
             <SystemIdentifier id='Vehicle1_4'/>
             <VehicleType>
               <BatteryElectricVehicle>
-                <ConnectedCharger idref='EVCharger2_4'/>
+                <ConnectedCharger idref='EVCharger1_4'/>
               </BatteryElectricVehicle>
             </VehicleType>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
-            <SystemIdentifier id='EVCharger2_4'/>
+            <SystemIdentifier id='EVCharger1_4'/>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>
@@ -1970,14 +1970,14 @@
             <SystemIdentifier id='Vehicle1_5'/>
             <VehicleType>
               <BatteryElectricVehicle>
-                <ConnectedCharger idref='EVCharger2_5'/>
+                <ConnectedCharger idref='EVCharger1_5'/>
               </BatteryElectricVehicle>
             </VehicleType>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
-            <SystemIdentifier id='EVCharger2_5'/>
+            <SystemIdentifier id='EVCharger1_5'/>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>
@@ -2386,14 +2386,14 @@
             <SystemIdentifier id='Vehicle1_6'/>
             <VehicleType>
               <BatteryElectricVehicle>
-                <ConnectedCharger idref='EVCharger2_6'/>
+                <ConnectedCharger idref='EVCharger1_6'/>
               </BatteryElectricVehicle>
             </VehicleType>
           </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>
-            <SystemIdentifier id='EVCharger2_6'/>
+            <SystemIdentifier id='EVCharger1_6'/>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>
