@@ -2363,11 +2363,9 @@ module Airflow
 
     # Handle any clothes dryer venting
     infil_program.addLine('Set Qdryer = 0')
-    clothes_dryer_in_cond_space = hpxml_bldg.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.clothes_dryers[0].location)
-    vented_dryers = hpxml_bldg.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 }
-    vented_dryers.each_with_index do |vented_dryer, index|
+    vented_dryers_in_cond_space = hpxml_bldg.clothes_dryers.select { |cd| cd.is_vented && cd.vented_flow_rate.to_f > 0 && HPXML::conditioned_locations_this_unit.include?(cd.location) }
+    vented_dryers_in_cond_space.each_with_index do |vented_dryer, index|
       next if hpxml_bldg.building_occupancy.number_of_residents == 0 # Operational calculation w/ zero occupants, zero out energy use
-      next unless clothes_dryer_in_cond_space
 
       # Infiltration impact
       vented_dryer_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:ClothesDryer].name, hpxml_header.unavailable_periods)
@@ -2377,8 +2375,8 @@ module Airflow
 
     # Handle any HPWHs
     infil_program.addLine('Set Qhpwh = 0')
-    ducted_hpwhs = hpxml_bldg.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.hpwh_ducting_exhaust == HPXML::LocationOutside }
-    ducted_hpwhs.each_with_index do |ducted_hpwh, i|
+    ducted_hpwhs_in_cond_space = hpxml_bldg.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump && wh.hpwh_ducting_exhaust == HPXML::LocationOutside && HPXML::conditioned_locations_this_unit.include?(wh.location) }
+    ducted_hpwhs_in_cond_space.each_with_index do |ducted_hpwh, i|
       # Create sensor to get HPWH airflow rate
       hpwh = model.getWaterHeaterHeatPumpWrappedCondensers.find { |h| h.additionalProperties.getFeatureAsString('HPXML_ID').to_s == ducted_hpwh.id }
       hpwh_flow_rate = Model.add_ems_sensor(

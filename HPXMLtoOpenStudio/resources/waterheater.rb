@@ -193,7 +193,7 @@ module Waterheater
       runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterSetpoint].name}' schedule file and setpoint temperature provided; the latter will be ignored.") if !t_set_c.nil?
     end
 
-    airflow_rate = 181.0 # cfm
+    airflow_rate = 200.0 # cfm, average value measured across a few different units
     min_temp = 42.0 # F
     max_temp = 120.0 # F
 
