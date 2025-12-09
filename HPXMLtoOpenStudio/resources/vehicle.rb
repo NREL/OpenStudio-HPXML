@@ -24,6 +24,7 @@ module Vehicle
   end
 
   # Apply an electric vehicle to the model using the battery.rb Battery class, which assigns OpenStudio ElectricLoadCenterStorageLiIonNMCBattery and ElectricLoadCenterDistribution objects.
+  # An EMS program models the effect of ambient temperature on the effective power output and scales power with the fraction charged at home.
   # Bi-directional charging is not currently implemented.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings

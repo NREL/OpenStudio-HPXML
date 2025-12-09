@@ -173,8 +173,8 @@ module Outputs
     return season_day_nums
   end
 
-  # Apply EMS program to adjust discharge power based on ambient temperature.
-  # An EMS program models the effect of ambient temperature on the effective power output, scales power with the fraction charged at home, and calculates the unmet driving hours.
+  # Creates an EMS program that calculates driving unmet hours (number
+  # of hours where the EV driving demand is not met).
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
