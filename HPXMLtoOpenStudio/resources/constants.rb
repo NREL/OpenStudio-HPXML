@@ -9,7 +9,6 @@ module Constants
 
   # Object types
   ObjectTypeAirSourceHeatPump = 'air source heat pump'
-  ObjectTypeBEVDischargeProgram = 'bev discharge program'
   ObjectTypeBattery = 'battery'
   ObjectTypeBatteryLossesAdjustment = 'battery losses adjustment'
   ObjectTypeBoiler = 'boiler'
@@ -84,8 +83,8 @@ module Constants
   ObjectTypeUnitHeater = 'unit heater'
   ObjectTypeUnmetHoursProgram = 'unmet hours program'
   ObjectTypeVehicle = 'vehicle'
-  ObjectTypeVehicleDischargePowerActuator = 'vehicle discharge power actuator'
-  ObjectTypeVehicleChargePowerActuator = 'vehicle charge power actuator'
+  ObjectTypeVehicleDischargeScheduleSensor = 'vehicle discharge schedule sensor'
+  ObjectTypeVehicleUnmetHoursProgram = 'vehicle unmet hours program'
   ObjectTypeWaterHeater = 'water heater'
   ObjectTypeWaterHeaterSetpoint = 'water heater setpoint'
   ObjectTypeWaterHeaterAdjustment = 'water heater energy adjustment'

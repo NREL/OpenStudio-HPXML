@@ -95,24 +95,82 @@ module Vehicle
     # Apply vehicle battery to model
     Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, charging_schedule, discharging_schedule)
 
-    # Apply EMS actuators
+    temp_sensor = Model.add_ems_sensor(
+      model,
+      name: 'site_temp',
+      output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+      key_name: 'Environment'
+    )
+
+    # Power adjustment vs ambient temperature curve; derived from most recent data in Figure 9 of https://www.nrel.gov/docs/fy23osti/83916.pdf
+    # This adjustment scales power demand based on ambient temperature, and encompasses losses due to battery and space conditioning (i.e., discharging losses), as well as charging losses.
+    coefs = [1.412768, -3.910397E-02, 9.408235E-04, 8.971560E-06, -7.699244E-07, 1.265614E-08]
+    power_curve = ''
+    coefs.each_with_index do |coef, i|
+      power_curve += "+(#{coef}*(site_temp_adj^#{i}))"
+    end
+    power_curve = power_curve[1..]
+
+    # Apply EMS program to adjust discharge power based on ambient temperature.
+    ev_discharge_program = Model.add_ems_program(
+      model,
+      name: 'ev_discharge_program'
+    )
+    ev_discharge_program.addLine("  Set site_temp_adj = #{temp_sensor.name}")
+    ev_discharge_program.addLine("  If #{temp_sensor.name} < #{UnitConversions.convert(0, 'F', 'C').round(3)}")
+    ev_discharge_program.addLine("    Set site_temp_adj = #{UnitConversions.convert(0, 'F', 'C').round(3)}")
+    ev_discharge_program.addLine("  ElseIf #{temp_sensor.name} > #{UnitConversions.convert(100, 'F', 'C').round(3)}")
+    ev_discharge_program.addLine("    Set site_temp_adj = #{UnitConversions.convert(100, 'F', 'C').round(3)}")
+    ev_discharge_program.addLine('  EndIf')
+    ev_discharge_program.addLine("  Set power_mult = #{power_curve}")
+
+    ev_elcd = model.getElectricLoadCenterDistributions.find { |elcd| elcd.name.to_s.include?(vehicle.id) }
+
+    eff_charge_power = ev_elcd.designStorageControlChargePower
+    discharging_schedule = ev_elcd.storageDischargePowerFractionSchedule.get
+    charging_schedule = ev_elcd.storageChargePowerFractionSchedule.get
+
+    discharge_sch_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{discharging_schedule.name} discharge_sch_sensor",
+      output_var_or_meter_name: 'Schedule Value',
+      key_name: discharging_schedule.name.to_s
+    )
+    discharge_sch_sensor.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeVehicleDischargeScheduleSensor)
+    charge_sch_sensor = Model.add_ems_sensor(
+      model,
+      name: "#{charging_schedule.name} charge_sch_sensor",
+      output_var_or_meter_name: 'Schedule Value',
+      key_name: charging_schedule.name.to_s
+    )
+    discharge_power_act = Model.add_ems_actuator(
+      name: 'battery_discharge_power_act',
+      model_object: ev_elcd,
+      comp_type_and_control: ['Electrical Storage', 'Power Draw Rate']
+    )
+    charge_power_act = Model.add_ems_actuator(
+      name: 'battery_charge_power_act',
+      model_object: ev_elcd,
+      comp_type_and_control: ['Electrical Storage', 'Power Charge Rate']
+    )
+
     model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
       next unless elcs.name.to_s.include? vehicle.id
 
-      ev_elcd = model.getElectricLoadCenterDistributions.find { |elcd| elcd.name.to_s.include?(vehicle.id) }
-
-      discharge_power_act = Model.add_ems_actuator(
-        name: 'battery_discharge_power_act',
-        model_object: ev_elcd,
-        comp_type_and_control: ['Electrical Storage', 'Power Draw Rate']
-      )
-      discharge_power_act.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeVehicleDischargePowerActuator)
-      charge_power_act = Model.add_ems_actuator(
-        name: 'battery_charge_power_act',
-        model_object: ev_elcd,
-        comp_type_and_control: ['Electrical Storage', 'Power Charge Rate']
-      )
-      charge_power_act.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeVehicleChargePowerActuator)
+      ev_discharge_program.addLine("  If #{discharge_sch_sensor.name} > 0.0")
+      ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{vehicle.additional_properties.eff_discharge_power} * #{vehicle.fraction_charged_home} * power_mult * #{discharge_sch_sensor.name}")
+      ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power} * #{charge_sch_sensor.name}")
+      ev_discharge_program.addLine('  Else')
+      ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power} * #{charge_sch_sensor.name}")
+      ev_discharge_program.addLine("    Set #{discharge_power_act.name} = 0")
+      ev_discharge_program.addLine('  EndIf')
     end
+
+    Model.add_ems_program_calling_manager(
+      model,
+      name: 'ev_discharge_pcm',
+      calling_point: 'BeginTimestepBeforePredictor',
+      ems_programs: [ev_discharge_program]
+    )
   end
 end

@@ -180,68 +180,30 @@ module Outputs
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [nil]
   def self.apply_unmet_driving_hours_ems_program(model, hpxml_osm_map)
-    return if hpxml_osm_map.keys.map { |hpxml_bldg| hpxml_bldg.vehicles.map { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && vehicle.ev_charger_idref.nil? }.size }.sum == 0
-
-    temp_sensor = Model.add_ems_sensor(
-      model,
-      name: 'site_temp',
-      output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
-      key_name: 'Environment'
-    )
-
-    # Power adjustment vs ambient temperature curve; derived from most recent data in Figure 9 of https://www.nrel.gov/docs/fy23osti/83916.pdf
-    # This adjustment scales power demand based on ambient temperature, and encompasses losses due to battery and space conditioning (i.e., discharging losses), as well as charging losses.
-    coefs = [1.412768, -3.910397E-02, 9.408235E-04, 8.971560E-06, -7.699244E-07, 1.265614E-08]
-    power_curve = ''
-    coefs.each_with_index do |coef, i|
-      power_curve += "+(#{coef}*(site_temp_adj^#{i}))"
-    end
-    power_curve = power_curve[1..]
+    return if hpxml_osm_map.keys.map { |hpxml_bldg| hpxml_bldg.vehicles.map { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? }.size }.sum == 0
 
     # EMS program
     driving_hrs = 'unmet_driving_hours'
     unit_driving_hrs = 'unit_driving_unmet_hours'
-    ev_discharge_program = Model.add_ems_program(
+    program = Model.add_ems_program(
       model,
-      name: 'ev_discharge_program'
+      name: 'unmet driving hours program'
     )
-    ev_discharge_program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBEVDischargeProgram)
-    ev_discharge_program.addLine("Set #{driving_hrs} = 0")
-    ev_discharge_program.addLine("  Set site_temp_adj = #{temp_sensor.name}")
-    ev_discharge_program.addLine("  If #{temp_sensor.name} < #{UnitConversions.convert(0, 'F', 'C').round(3)}")
-    ev_discharge_program.addLine("    Set site_temp_adj = #{UnitConversions.convert(0, 'F', 'C').round(3)}")
-    ev_discharge_program.addLine("  ElseIf #{temp_sensor.name} > #{UnitConversions.convert(100, 'F', 'C').round(3)}")
-    ev_discharge_program.addLine("    Set site_temp_adj = #{UnitConversions.convert(100, 'F', 'C').round(3)}")
-    ev_discharge_program.addLine('  EndIf')
-    ev_discharge_program.addLine("  Set power_mult = #{power_curve}")
+    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeVehicleUnmetHoursProgram)
+    program.addLine("Set #{driving_hrs} = 0")
 
     hpxml_osm_map.each do |hpxml_bldg, unit_model|
-      vehicle = hpxml_bldg.vehicles.find { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV }
+      vehicle = hpxml_bldg.vehicles.find { |vehicle| vehicle.vehicle_type == HPXML::VehicleTypeBEV && !vehicle.ev_charger_idref.nil? }
       next if vehicle.nil?
+
+      ev_elcd = unit_model.getElectricLoadCenterDistributions.find { |elcd| elcd.name.to_s.include?(vehicle.id) }
+      discharge_sch_sensor = unit_model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeVehicleDischargeScheduleSensor }
 
       unit_model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
         next unless elcs.name.to_s.include? vehicle.id
 
-        ev_elcd = unit_model.getElectricLoadCenterDistributions.find { |elcd| elcd.name.to_s.include?(vehicle.id) }
-        eff_charge_power = ev_elcd.designStorageControlChargePower
         min_soc = ev_elcd.minimumStorageStateofChargeFraction
-        discharging_schedule = ev_elcd.storageDischargePowerFractionSchedule.get
-        charging_schedule = ev_elcd.storageChargePowerFractionSchedule.get
 
-        discharge_power_act = unit_model.getEnergyManagementSystemActuators.find { |act| act.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeVehicleDischargePowerActuator }
-        charge_power_act = unit_model.getEnergyManagementSystemActuators.find { |act| act.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeVehicleChargePowerActuator }
-        discharge_sch_sensor = Model.add_ems_sensor(
-          model,
-          name: "#{discharging_schedule.name} discharge_sch_sensor",
-          output_var_or_meter_name: 'Schedule Value',
-          key_name: discharging_schedule.name.to_s
-        )
-        charge_sch_sensor = Model.add_ems_sensor(
-          model,
-          name: "#{charging_schedule.name} charge_sch_sensor",
-          output_var_or_meter_name: 'Schedule Value',
-          key_name: charging_schedule.name.to_s
-        )
         soc_sensor = Model.add_ems_sensor(
           model,
           name: "#{elcs.name} soc_sensor",
@@ -249,30 +211,26 @@ module Outputs
           key_name: elcs.name.to_s
         )
 
-        ev_discharge_program.addLine("  If #{discharge_sch_sensor.name} > 0.0")
-        ev_discharge_program.addLine("    Set #{discharge_power_act.name} = #{vehicle.additional_properties.eff_discharge_power} * #{vehicle.fraction_charged_home} * power_mult * #{discharge_sch_sensor.name}")
-        ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power} * #{charge_sch_sensor.name}")
-        ev_discharge_program.addLine("    If #{soc_sensor.name} <= #{min_soc}")
-        ev_discharge_program.addLine("      Set #{unit_driving_hrs} = #{discharge_sch_sensor.name}")
-        ev_discharge_program.addLine('    Else')
-        ev_discharge_program.addLine("      Set #{unit_driving_hrs} = 0")
-        ev_discharge_program.addLine('    EndIf')
-        ev_discharge_program.addLine('  Else')
-        ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power} * #{charge_sch_sensor.name}")
-        ev_discharge_program.addLine("    Set #{discharge_power_act.name} = 0")
-        ev_discharge_program.addLine("    Set #{unit_driving_hrs} = 0")
-        ev_discharge_program.addLine('  EndIf')
-        ev_discharge_program.addLine("  If #{unit_driving_hrs} > #{driving_hrs}") # Use max hourly value across all units
-        ev_discharge_program.addLine("    Set #{driving_hrs} = #{unit_driving_hrs}")
-        ev_discharge_program.addLine('  EndIf')
+        program.addLine("  If #{discharge_sch_sensor.name} > 0.0")
+        program.addLine("    If #{soc_sensor.name} <= #{min_soc}")
+        program.addLine("      Set #{unit_driving_hrs} = #{discharge_sch_sensor.name}")
+        program.addLine('    Else')
+        program.addLine("      Set #{unit_driving_hrs} = 0")
+        program.addLine('    EndIf')
+        program.addLine('  Else')
+        program.addLine("    Set #{unit_driving_hrs} = 0")
+        program.addLine('  EndIf')
+        program.addLine("  If #{unit_driving_hrs} > #{driving_hrs}") # Use max hourly value across all units
+        program.addLine("    Set #{driving_hrs} = #{unit_driving_hrs}")
+        program.addLine('  EndIf')
       end
     end
 
     Model.add_ems_program_calling_manager(
       model,
-      name: 'ev_discharge_pcm',
+      name: "#{program.name} calling manager",
       calling_point: 'BeginTimestepBeforePredictor',
-      ems_programs: [ev_discharge_program]
+      ems_programs: [program]
     )
   end
 
