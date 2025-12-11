@@ -1003,8 +1003,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'heat-pump-defrost-backup' => ['BackupHeatingActiveDuringDefrost does not apply when system has separate backup heating'],
                               'heat-pump-low-backup-switchover-temp' => ['BackupHeatingSwitchoverTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
                               'heat-pump-low-backup-lockout-temp' => ['BackupHeatingLockoutTemperature is below 30 deg-F; this may result in significant unmet hours if the heat pump does not have sufficient capacity.'],
-                              'hpwh-ducting' => ['HPWH supply air ducted from another location is not currently supported; supply ducting will not be modeled.',
-                                                 'HPWH exhaust air ducted to a location other than outside is not currently supported; exhaust ducting will not be modeled.'],
                               'hvac-dse-low' => ['Heating DSE should typically be greater than or equal to 0.5.',
                                                  'Cooling DSE should typically be greater than or equal to 0.5.'],
                               'hvac-capacities-low' => ['Heating capacity should typically be greater than or equal to 1000 Btu/hr.',
@@ -1127,10 +1125,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'heat-pump-low-backup-lockout-temp'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml')
         hpxml_bldg.heat_pumps[0].backup_heating_lockout_temp = 25.0
-      when 'hpwh-ducting'
-        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
-        hpxml_bldg.water_heating_systems[0].hpwh_ducting_supply = HPXML::LocationGarage
-        hpxml_bldg.water_heating_systems[0].hpwh_ducting_exhaust = HPXML::LocationGarage
       when 'hvac-dse-low'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-dse.xml')
         hpxml_bldg.hvac_distributions[0].annual_heating_dse = 0.1
@@ -1986,6 +1980,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'floor-or-ceiling1' => ["Floor 'Floor1' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden."],
                               'floor-or-ceiling2' => ["Floor 'Floor1' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden."],
                               'hpwh-confined-space-without-mitigation-false' => ["HPWH COP adjustment based on HPWHContainmentVolume will not be applied to WaterHeatingSystem1 because HPWHInConfinedSpaceWithoutMitigation is not 'true'."],
+                              'hpwh-ducting' => ['HPWH exhaust air ducted to a location other than outside is not currently supported; exhaust ducting will not be modeled.',
+                                                 'HPWH exhaust air ducting for a water heater located outside conditioned space is not currently supported; exhaust ducting will not be modeled.',
+                                                 'HPWH supply air ducted from another location is not currently supported; supply ducting will not be modeled.'],
                               'hpwh-small-containment-volume-without-backup-element' => ['Heat pump water heater: WaterHeatingSystem1 has no backup electric resistance element, COP adjustment for confined space may not be accurate when the containment space volume is below 450 cubic feet.'],
                               'hvac-gshp-bore-depth-autosized-high' => ['Reached a maximum of 10 boreholes; setting bore depth to the maximum (500 ft).'],
                               'hvac-seasons' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.'],
@@ -2158,6 +2155,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'hpwh-confined-space-without-mitigation-false'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-confined-space.xml')
         hpxml_bldg.water_heating_systems[0].hpwh_confined_space_without_mitigation = false
+      when 'hpwh-ducting'
+        hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump.xml')
+        hpxml_bldg.water_heating_systems[0].location = HPXML::LocationAtticUnvented
+        hpxml_bldg.water_heating_systems[0].hpwh_ducting_supply = HPXML::LocationGarage
+        hpxml_bldg.water_heating_systems[0].hpwh_ducting_exhaust = HPXML::LocationGarage
       when 'hpwh-small-containment-volume-without-backup-element'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-confined-space.xml')
         hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 0.0

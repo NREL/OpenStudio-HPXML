@@ -222,9 +222,25 @@ module Waterheater
     hpwh = apply_hpwh_wrapped_condenser(model, obj_name, coil, tank, fan, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule, unit_multiplier)
     hpwh.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by infiltration program
 
+    # Get ducting info
+    if not water_heating_system.hpwh_ducting_exhaust.nil?
+      if water_heating_system.hpwh_ducting_exhaust != HPXML::LocationOutside
+        runner.registerWarning('HPWH exhaust air ducted to a location other than outside is not currently supported; exhaust ducting will not be modeled.')
+        water_heating_system.hpwh_ducting_exhaust = nil
+      end
+      if not HPXML::conditioned_locations_this_unit.include? water_heating_system.location # This warning can't occur in the schematron since the location may be defaulted
+        runner.registerWarning('HPWH exhaust air ducting for a water heater located outside conditioned space is not currently supported; exhaust ducting will not be modeled.')
+        water_heating_system.hpwh_ducting_exhaust = nil
+      end
+    end
+    if not water_heating_system.hpwh_ducting_supply.nil?
+      runner.registerWarning('HPWH supply air ducted from another location is not currently supported; supply ducting will not be modeled.')
+      water_heating_system.hpwh_ducting_supply = nil
+    end
+    loc_duct_exhaust = water_heating_system.hpwh_ducting_exhaust
+
     # Amb temp & RH sensors, temp sensor shared across programs
     amb_temp_sensor, amb_rh_sensors = apply_hpwh_loc_temp_rh_sensors(model, obj_name, loc_space, loc_schedule, spaces)
-    loc_duct_exhaust = water_heating_system.hpwh_ducting_exhaust
     hpwh_zone_heat_gain_program = apply_hpwh_zone_heat_gain_program(model, obj_name, loc_space, loc_duct_exhaust, hpwh_tamb, hpwh_rhamb, tank, coil, fan, amb_temp_sensor, amb_rh_sensors, unit_multiplier)
 
     # EMS for the HPWH control logic
