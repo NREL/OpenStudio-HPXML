@@ -2316,6 +2316,7 @@ module Airflow
   def self.apply_infiltration_adjustment_to_conditioned(runner, model, spaces, hpxml_bldg, hpxml_header, infil_program, vent_fans, duct_lk_imbals, schedules_file)
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     conditioned_zone = conditioned_space.thermalZone.get
+    unit_multiplier = hpxml_bldg.building_construction.number_of_units
 
     infil_flow = Model.add_infiltration_flow_rate(
       model,
@@ -2383,10 +2384,10 @@ module Airflow
         model,
         name: "hpwh_flow_rate_#{i}",
         output_var_or_meter_name: 'System Node Current Density Volume Flow Rate',
-        key_name: "#{hpwh.name} Outlet" # FIXME: Currently hardcoding the node name automatically assigned by OS; when https://github.com/NREL/OpenStudio/issues/5547 is addressed, assign a node name in waterheater.rb and reference here instead.
+        key_name: hpwh.airOutletNodeName
       )
 
-      infil_program.addLine("Set Qhpwh = Qhpwh + #{hpwh_flow_rate.name}")
+      infil_program.addLine("Set Qhpwh = Qhpwh + #{hpwh_flow_rate.name} / #{unit_multiplier}")
     end
 
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot, 'cfm', 'm^3/s').round(5)}")
