@@ -524,6 +524,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw' => '4A',
         'USA_OR_Portland.Intl.AP.726980_TMY3.epw' => '4C',
         'US_CO_Boulder_AMY_2012.epw' => '5B',
+        'USA_CO_Boulder.Muni.AP.720533_TMYx.2009-2023.epw' => '5B',
         'USA_CO_Denver.Intl.AP.725650_TMY3.epw' => '5B',
         'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw' => '6B',
         'USA_MN_Duluth.Intl.AP.727450_TMY3.epw' => '7',
@@ -2865,9 +2866,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Battery #
     # ------------- #
 
-    if ['base-pv-battery-lifetime-model.xml'].include? hpxml_file
-      hpxml_bldg.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
-    elsif ['base-pv-battery-ah.xml'].include? hpxml_file
+    if ['base-pv-battery-ah.xml'].include? hpxml_file
       default_values = Defaults.get_battery_values(false)
       hpxml_bldg.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml_bldg.batteries[0].nominal_capacity_kwh,
                                                                             default_values[:nominal_voltage])

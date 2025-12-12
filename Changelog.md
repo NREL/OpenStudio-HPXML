@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.11.0
 
 __New Features__
-- Updates to HPXML v4.2.
+- Updates to OpenStudio 3.11/EnergyPlus 25.2/HPXML v4.2.
 - BuildResidentialHPXML measure:
   - **Breaking change**: New, simpler, easier to use option-based arguments (rather than detailed property arguments).
   - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
@@ -29,7 +29,8 @@ __New Features__
   - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
 
 __Bugfixes__
-- Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
+- Fixes incorrect cooling design conditions when using TMYx weather files (OpenStudio bug).
+- Fixes ground-source heat pump plant loop fluid type (OpenStudio bug).
 - Fixes default hours driven per week for electric vehicles (8.88 -> 9.5).
 - Fixes empty TimeDST/TimeUTC columns in JSON timeseries data.
 - Fixes an EMS bug in heat pump defrost models that over-estimates defrost fractions.

@@ -2,7 +2,6 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require 'csv'
@@ -2349,7 +2348,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       end
     elsif error_or_warning == 'warning'
       # show the output
-      show_output(result) unless result.value.valueName == 'Success'
+      result.showOutput() unless result.value.valueName == 'Success'
 
       assert_equal('Success', result.value.valueName)
 
