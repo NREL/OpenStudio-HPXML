@@ -2054,10 +2054,23 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         exposed_perimeter -= Geometry.get_unexposed_garage_perimeter(**args)
       end
 
-      if args[:enclosure_slab_under_slab_insulation_width].to_f >= 999
-        under_slab_insulation_spans_entire_slab = true
+      if interior_adjacent_to == HPXML::LocationGarage
+        perimeter_insulation_r_value = 0
+        perimeter_insulation_depth = 0
+        under_slab_insulation_width = 0
+        under_slab_insulation_r_value = 0
       else
-        under_slab_insulation_width = args[:enclosure_slab_under_slab_insulation_width]
+        perimeter_insulation_r_value = args[:enclosure_slab_perimeter_insulation_nominal_r_value]
+        perimeter_insulation_depth = args[:enclosure_slab_perimeter_insulation_depth]
+        exterior_horizontal_insulation_r_value = args[:enclosure_slab_exterior_horizontal_insulation_nominal_r_value]
+        exterior_horizontal_insulation_width = args[:enclosure_slab_exterior_horizontal_insulation_width]
+        exterior_horizontal_insulation_depth_below_grade = args[:enclosure_slab_exterior_horizontal_insulation_depth_below_grade]
+        if args[:enclosure_slab_under_slab_insulation_width].to_f >= 999
+          under_slab_insulation_spans_entire_slab = true
+        else
+          under_slab_insulation_width = args[:enclosure_slab_under_slab_insulation_width]
+        end
+        under_slab_insulation_r_value = args[:enclosure_slab_under_slab_insulation_nominal_r_value]
       end
 
       hpxml_bldg.slabs.add(id: "Slab#{hpxml_bldg.slabs.size + 1}",
@@ -2065,13 +2078,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            thickness: args[:enclosure_slab_thickness],
                            exposed_perimeter: exposed_perimeter,
-                           perimeter_insulation_r_value: args[:enclosure_slab_perimeter_insulation_nominal_r_value],
-                           perimeter_insulation_depth: args[:enclosure_slab_perimeter_insulation_depth],
-                           exterior_horizontal_insulation_r_value: args[:enclosure_slab_exterior_horizontal_insulation_nominal_r_value],
-                           exterior_horizontal_insulation_width: args[:enclosure_slab_exterior_horizontal_insulation_width],
-                           exterior_horizontal_insulation_depth_below_grade: args[:enclosure_slab_exterior_horizontal_insulation_depth_below_grade],
+                           perimeter_insulation_r_value: perimeter_insulation_r_value,
+                           perimeter_insulation_depth: perimeter_insulation_depth,
+                           exterior_horizontal_insulation_r_value: exterior_horizontal_insulation_r_value,
+                           exterior_horizontal_insulation_width: exterior_horizontal_insulation_width,
+                           exterior_horizontal_insulation_depth_below_grade: exterior_horizontal_insulation_depth_below_grade,
                            under_slab_insulation_width: under_slab_insulation_width,
-                           under_slab_insulation_r_value: args[:enclosure_slab_under_slab_insulation_nominal_r_value],
+                           under_slab_insulation_r_value: under_slab_insulation_r_value,
                            under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab)
       hpxml_slab = hpxml_bldg.slabs[-1]
       @surface_ids[surface.name.to_s] = hpxml_slab.id
