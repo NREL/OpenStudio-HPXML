@@ -68,6 +68,8 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
     if unit_multiplier > 1
       hpxml.header.whole_sfa_or_mf_building_sim = true
       if not [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? hpxml.buildings[0].building_construction.residential_facility_type
+        # Schematron validation prevents WholeSFAorMFBuildingSim=true for other
+        # building types, so we skip validation to allow the test to run
         skip_validation = true
       end
     end
@@ -110,11 +112,10 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
 
   # Check outputs
   hpxml_defaults_path = File.join(rundir, 'in.xml')
+  schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
   if not skip_validation
-    schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
     schematron_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.sch'))
   else
-    schema_validator = nil
     schematron_validator = nil
   end
   hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator) # Validate in.xml to ensure it can be run back through OS-HPXML
