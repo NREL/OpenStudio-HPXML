@@ -1799,7 +1799,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         wall_type = HPXML::WallTypeWoodStud
       end
 
-      if (attic_locations.include? interior_adjacent_to) && (args[:enclosure_wall_siding_type] == HPXML::SidingTypeNone)
+      if (attic_locations.include? interior_adjacent_to) && (args[:enclosure_wall_siding_type] == HPXML::SidingTypeNotPresent)
         siding = nil # Attic wall, don't even bother to say no siding
       elsif exterior_adjacent_to == HPXML::LocationOutside
         siding = args[:enclosure_wall_siding_type]

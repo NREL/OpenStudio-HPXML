@@ -260,7 +260,7 @@
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='Window1InsectScreen'/>

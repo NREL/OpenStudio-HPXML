@@ -1,5 +1,5 @@
 Option Name	Type	Color	Solar Absorptance	Emittance	R-Value [F-ft2-hr/Btu]
-None	none	medium			0
+None	not present	medium			0
 "Aluminum, Dark"	aluminum siding	dark			0.6
 "Aluminum, Medium"	aluminum siding	medium			0.6
 "Aluminum, Medium Dark"	aluminum siding	medium dark			0.6

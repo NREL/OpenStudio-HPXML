@@ -1007,7 +1007,7 @@
             <SHGC>0.74</SHGC>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorFamilyRoomSouthwestInteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorShading>
             <AttachedToWall idref='WallFamilyRoomSouthwest'/>
           </Window>

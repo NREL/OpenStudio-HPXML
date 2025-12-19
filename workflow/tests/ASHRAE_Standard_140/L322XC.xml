@@ -283,7 +283,7 @@
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FoundationWall1Insulation'/>
@@ -308,7 +308,7 @@
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FoundationWall2Insulation'/>
@@ -333,7 +333,7 @@
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FoundationWall3Insulation'/>
@@ -358,7 +358,7 @@
             <Thickness>6.0</Thickness>
             <DepthBelowGrade>6.583</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='FoundationWall4Insulation'/>
@@ -428,7 +428,7 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall1'/>
@@ -441,7 +441,7 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall2'/>
@@ -454,7 +454,7 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall3'/>
@@ -467,7 +467,7 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorShading>
             <FractionOperable>0.0</FractionOperable>
             <AttachedToWall idref='Wall4'/>

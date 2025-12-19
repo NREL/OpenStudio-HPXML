@@ -716,7 +716,7 @@
             <SHGC>0.39</SHGC>
             <InteriorShading>
               <SystemIdentifier id='FrenchDoorFamilyRoomNorthInteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorShading>
             <Overhangs>
               <Depth>1.5</Depth>

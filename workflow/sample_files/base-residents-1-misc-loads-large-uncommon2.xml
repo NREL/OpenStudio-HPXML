@@ -526,7 +526,7 @@
           </Pumps>
           <Heater>
             <SystemIdentifier id='Pool1Heater'/>
-            <Type>none</Type>
+            <Type>not present</Type>
           </Heater>
         </Pool>
       </Pools>
