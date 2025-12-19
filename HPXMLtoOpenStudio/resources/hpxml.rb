@@ -5724,8 +5724,10 @@ class HPXML < Object
              :interior_shading_coverage_winter,               # [Double] InteriorShading/WinterFractionCovered
              :interior_shading_factor_summer,                 # [Double] InteriorShading/SummerShadingCoefficient (frac)
              :interior_shading_factor_winter,                 # [Double] InteriorShading/WinterShadingCoefficient (frac)
+             :storm_id,                                       # [String] StormWindow/SystemIdentifier/@id
              :storm_type,                                     # [String] StormWindow/GlassType (HPXML::WindowGlassTypeXXX)
              :insect_screen_present,                          # [Element] InsectScreen
+             :insect_screen_id,                               # [String] InsectScreen/SystemIdentifier/@id
              :insect_screen_location,                         # [String] InsectScreen/Location (HPXML::LocationXXX)
              :insect_screen_coverage_summer,                  # [Double] InsectScreen/SummerFractionCovered (frac)
              :insect_screen_coverage_winter,                  # [Double] InsectScreen/WinterFractionCovered (frac)
@@ -5866,7 +5868,11 @@ class HPXML < Object
       if @insect_screen_present
         insect_screen = XMLHelper.add_element(window, 'InsectScreen')
         sys_id = XMLHelper.add_element(insect_screen, 'SystemIdentifier')
-        XMLHelper.add_attribute(sys_id, 'id', "#{id}InsectScreen")
+        if @insect_screen_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', "#{id}InsectScreen")
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @insect_screen_id)
+        end
         XMLHelper.add_element(insect_screen, 'Location', @insect_screen_location, :string, @insect_screen_location_isdefaulted) unless @insect_screen_location.nil?
         XMLHelper.add_element(insect_screen, 'SummerFractionCovered', @insect_screen_coverage_summer, :float, @insect_screen_coverage_summer_isdefaulted) unless @insect_screen_coverage_summer.nil?
         XMLHelper.add_element(insect_screen, 'WinterFractionCovered', @insect_screen_coverage_winter, :float, @insect_screen_coverage_winter_isdefaulted) unless @insect_screen_coverage_winter.nil?
@@ -5876,7 +5882,11 @@ class HPXML < Object
       if not @storm_type.nil?
         storm_window = XMLHelper.add_element(window, 'StormWindow')
         sys_id = XMLHelper.add_element(storm_window, 'SystemIdentifier')
-        XMLHelper.add_attribute(sys_id, 'id', "#{id}StormWindow")
+        if @storm_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', "#{id}StormWindow")
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @storm_id)
+        end
         XMLHelper.add_element(storm_window, 'GlassType', @storm_type, :string, @storm_type_isdefaulted) unless @storm_type.nil?
       end
       if (not @overhangs_depth.nil?) || (not @overhangs_distance_to_top_of_window.nil?) || (not @overhangs_distance_to_bottom_of_window.nil?)
@@ -5935,9 +5945,11 @@ class HPXML < Object
       @fraction_operable = XMLHelper.get_value(window, 'FractionOperable', :float)
       @performance_class = XMLHelper.get_value(window, 'PerformanceClass', :string)
       @attached_to_wall_idref = HPXML::get_idref(XMLHelper.get_element(window, 'AttachedToWall'))
+      @storm_id = HPXML::get_id(window, 'StormWindow/SystemIdentifier')
       @storm_type = XMLHelper.get_value(window, 'StormWindow/GlassType', :string)
       @insect_screen_present = XMLHelper.has_element(window, 'InsectScreen')
       if @insect_screen_present
+        @insect_screen_id = HPXML::get_id(window, 'InsectScreen/SystemIdentifier')
         @insect_screen_location = XMLHelper.get_value(window, 'InsectScreen/Location', :string)
         @insect_screen_coverage_summer = XMLHelper.get_value(window, 'InsectScreen/SummerFractionCovered', :float)
         @insect_screen_coverage_winter = XMLHelper.get_value(window, 'InsectScreen/WinterFractionCovered', :float)
