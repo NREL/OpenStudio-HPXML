@@ -2266,23 +2266,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
                  'walls' => { 'surfaces' => hpxml_bldg.walls, 'ids' => [] },
                  'floors' => { 'surfaces' => hpxml_bldg.floors, 'ids' => [] } }
 
-    attic_locations = [HPXML::LocationAtticUnconditioned, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented]
-    surf_ids.values.each do |surf_hash|
+    attic_locations = [HPXML::LocationAtticUnconditioned,
+                       HPXML::LocationAtticUnvented,
+                       HPXML::LocationAtticVented]
+
+    surf_ids.each do |surf_type, surf_hash|
       surf_hash['surfaces'].each do |surface|
-        next if (not attic_locations.include? surface.interior_adjacent_to) &&
-                (not attic_locations.include? surface.exterior_adjacent_to)
+        next unless (attic_locations.include? surface.interior_adjacent_to) ||
+                    (attic_locations.include? surface.exterior_adjacent_to) ||
+                    (surf_type == 'roofs' && [surface.interior_adjacent_to, surface.exterior_adjacent_to].include?(HPXML::LocationConditionedSpace)) ||
+                    (surf_type == 'floors' && surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit && surface.floor_or_ceiling == HPXML::FloorOrCeilingCeiling)
 
         surf_hash['ids'] << surface.id
       end
-    end
-
-    # Add attached roofs for cathedral ceiling
-    conditioned_space = HPXML::LocationConditionedSpace
-    surf_ids['roofs']['surfaces'].each do |surface|
-      next if (conditioned_space != surface.interior_adjacent_to) &&
-              (conditioned_space != surface.exterior_adjacent_to)
-
-      surf_ids['roofs']['ids'] << surface.id
     end
 
     hpxml_bldg.attics.add(id: "Attic#{hpxml_bldg.attics.size + 1}",
@@ -2315,7 +2311,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
         next unless (foundation_locations.include? surface.interior_adjacent_to) ||
                     (foundation_locations.include? surface.exterior_adjacent_to) ||
                     (surf_type == 'slabs' && surface.interior_adjacent_to == HPXML::LocationConditionedSpace) ||
-                    (surf_type == 'floors' && [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include?(surface.exterior_adjacent_to))
+                    (surf_type == 'floors' && [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include?(surface.exterior_adjacent_to)) ||
+                    (surf_type == 'floors' && surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit && surface.floor_or_ceiling == HPXML::FloorOrCeilingFloor)
 
         surf_hash['ids'] << surface.id
       end
