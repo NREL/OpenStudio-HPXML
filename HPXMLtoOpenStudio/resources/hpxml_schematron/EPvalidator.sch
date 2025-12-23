@@ -20,6 +20,7 @@
       <sch:assert role='ERROR' test='count(h:extension/h:UnavailablePeriods/h:UnavailablePeriod) &gt;= 0'>Expected 0 or more element(s) for xpath: extension/UnavailablePeriods/UnavailablePeriod</sch:assert> <!-- See [UnavailablePeriod] -->
       <sch:assert role='ERROR' test='count(h:extension/h:ElectricPanelLoadCalculations) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ElectricPanelLoadCalculations</sch:assert> <!-- See [ElectricPanelLoadCalculations] -->
       <sch:assert role='ERROR' test='count(h:extension/h:WholeSFAorMFBuildingSimulation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WholeSFAorMFBuildingSimulation</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:WholeSFAorMFBuildingSimulation[text()="true" or text()="false"] or not(h:extension/h:WholeSFAorMFBuildingSimulation)'>Expected extension/WholeSFAorMFBuildingSimulation to be 'true' or 'false'</sch:assert>
       <!-- Moved multiple inputs to allow variation across MF dwelling units; see https://github.com/NREL/OpenStudio-HPXML/pull/1478 -->
       <sch:assert role='ERROR' test='count(h:extension/h:SchedulesFilePath) = 0'>extension/SchedulesFilePath has been replaced by /HPXML/Building/BuildingDetails/BuildingSummary/extension/SchedulesFilePath</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:HVACSizingControl) = 0'>extension/HVACSizingControl has been replaced by /HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl</sch:assert>
@@ -72,16 +73,16 @@
       <sch:assert role='ERROR' test='count(h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:FractionHeatLoadServed > 0]) + count(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:FractionHeatLoadServed > 0]) &lt;= 1'>Expected at maximum one heating system for each Building</sch:assert>
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
-      <sch:assert role='ERROR' test='number(../../h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep) = 1'>Expected ../../SoftwareInfo/extension/SimulationControl/Timestep to be 1.0</sch:assert>
+      <sch:assert role='ERROR' test='number(/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep) = 1'>Expected /HPXML/SoftwareInfo/extension/SimulationControl/Timestep to be 1.0</sch:assert>
       <!-- Warnings -->
-      <sch:report role='WARN' test='number(../../h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
+      <sch:report role='WARN' test='number(/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
     </sch:rule>
   </sch:pattern>
 
   <sch:pattern>
     <sch:title>[HeatPumpBackupCapacityIncrement]</sch:title>
-    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures/h:HeatPumpBackupCapacityIncrement'>
-      <sch:assert role='ERROR' test='number(../../h:Timestep) = 1'>Expected ../../Timestep to be 1.0</sch:assert>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl[h:AdvancedResearchFeatures/h:HeatPumpBackupCapacityIncrement]'>
+      <sch:assert role='ERROR' test='number(h:Timestep) = 1'>Expected Timestep to be 1.0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -257,8 +258,7 @@
       <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:LeakinessDescription]) = 1'>Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/AirLeakage | EffectiveLeakageArea | LeakinessDescription]</sch:assert> <!-- See [AirInfiltrationMeasurement] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Roofs/h:Roof) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Roofs/Roof</sch:assert> <!-- See [Roof] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:RimJoists/h:RimJoist) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/RimJoists/RimJoist</sch:assert> <!-- See [RimJoist] -->
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:Walls/h:Wall) &gt;= 1'>Expected 1 or more element(s) for xpath: Enclosure/Walls/Wall</sch:assert> <!-- See [Wall] -->
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:FoundationWalls/h:FoundationWall) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/FoundationWalls/FoundationWall</sch:assert> <!-- See [FoundationWall] -->
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:Walls/h:Wall) + count(h:Enclosure/h:FoundationWalls/h:FoundationWall) &gt;= 1'>Expected 1 or more element(s) for xpath: Enclosure/Walls/Wall | Enclosure/FoundationWalls/FoundationWall</sch:assert> <!-- See [Wall] or [FoundationWall] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Floors/h:Floor) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Floors/Floor</sch:assert> <!-- See [Floor] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Slabs/h:Slab) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Slabs/Slab</sch:assert> <!-- See [Slab] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Windows/h:Window) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Windows/Window</sch:assert> <!-- See [Window] -->
@@ -477,7 +477,7 @@
     <sch:title>[BuildingConstruction]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction'>
       <sch:assert role='ERROR' test='count(h:YearBuilt) &lt;= 1'>Expected 0 or 1 element(s) for xpath: YearBuilt</sch:assert>
-      <sch:assert role='ERROR' test='count(h:ResidentialFacilityType) = 1'>Expected 1 element(s) for xpath: ResidentialFacilityType</sch:assert> <!-- See [BuildingType=SFAorMF] -->
+      <sch:assert role='ERROR' test='count(h:ResidentialFacilityType) = 1'>Expected 1 element(s) for xpath: ResidentialFacilityType</sch:assert> <!-- See [BuildingType=SFAorMF] or [BuildingType=SFDorMH] -->
       <sch:assert role='ERROR' test='h:ResidentialFacilityType[text()="single-family detached" or text()="single-family attached" or text()="apartment unit" or text()="manufactured home"] or not(h:ResidentialFacilityType)'>Expected ResidentialFacilityType to be 'single-family detached' or 'single-family attached' or 'apartment unit' or 'manufactured home'</sch:assert>
       <sch:assert role='ERROR' test='count(h:UnitHeightAboveGrade) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UnitHeightAboveGrade</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofUnits) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NumberofUnits</sch:assert>
@@ -504,6 +504,13 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]'>
       <!-- Warnings -->
       <sch:report role='WARN' test='count(//h:ExteriorAdjacentTo[text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]) = 0'>ResidentialFacilityType is single-family attached or apartment unit, but no attached surfaces were found. This may result in erroneous results (e.g., for infiltration).</sch:report>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[BuildingType=SFDorMH]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction/h:ResidentialFacilityType[text()="single-family detached" or text()="manufactured home"]'>
+      <sch:assert role='ERROR' test='count(/h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"]) = 0'>WholeSFAorMFBuildingSimulation must be false or omitted for single-family detached/manufactured homes.</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -707,7 +714,7 @@
 
   <sch:pattern>
     <sch:title>[RimJoist]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist[not(h:SystemIdentifier/@sameas and /h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"])]'>
       <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert>
       <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'outside' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
@@ -725,7 +732,7 @@
 
   <sch:pattern>
     <sch:title>[Wall]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall[not(h:SystemIdentifier/@sameas and /h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"])]'>
       <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert>
       <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'outside' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
@@ -755,7 +762,7 @@
 
   <sch:pattern>
     <sch:title>[FoundationWall]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall[not(h:SystemIdentifier/@sameas and /h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"])]'>
       <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert>
       <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="ground" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'ground' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'</sch:assert>
@@ -798,7 +805,7 @@
 
   <sch:pattern>
     <sch:title>[Floor]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Floors/h:Floor'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Floors/h:Floor[not(h:SystemIdentifier/@sameas and /h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"])]'>
       <sch:assert role='ERROR' test='count(h:AttachedToSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToSpace</sch:assert>
       <sch:assert role='ERROR' test='count(h:ExteriorAdjacentTo) = 1'>Expected 1 element(s) for xpath: ExteriorAdjacentTo</sch:assert> <!-- See [FloorType=AdjacentToOther] -->
       <sch:assert role='ERROR' test='h:ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="crawlspace - conditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space" or text()="manufactured home underbelly"] or not(h:ExteriorAdjacentTo)'>Expected ExteriorAdjacentTo to be 'outside' or 'attic - vented' or 'attic - unvented' or 'basement - conditioned' or 'basement - unconditioned' or 'crawlspace - vented' or 'crawlspace - unvented' or 'crawlspace - conditioned' or 'garage' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space' or 'manufactured home underbelly'</sch:assert>
@@ -827,6 +834,13 @@
     <sch:title>[FloorType=AdjacentToOther]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Floors/h:Floor[h:ExteriorAdjacentTo[text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]]'>
       <sch:assert role='ERROR' test='count(h:FloorOrCeiling[text()="floor" or text()="ceiling"]) = 1'>Expected 1 element(s) for xpath: FloorOrCeiling[text()="floor" or text()="ceiling"]</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[SameasSurfaces]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/*/*[h:SystemIdentifier/@sameas and /h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"]]'>
+      <sch:assert role='ERROR' test='count(*) = 1'>Expected only SystemIdentifier to be specified when sameas attribute used</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -3317,9 +3331,9 @@
   <sch:pattern>
     <sch:title>[AdjacentSurfaces=ConditionedSpace]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure[*/*[h:InteriorAdjacentTo="conditioned space"]]'>
-      <sch:assert role='ERROR' test='count(h:Roofs/h:Roof[h:InteriorAdjacentTo="conditioned space"]) + count(h:Floors/h:Floor[h:InteriorAdjacentTo="conditioned space" and (h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]) &gt;= 1'>There must be at least one ceiling or roof adjacent to conditioned space.</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Walls/h:Wall[h:InteriorAdjacentTo="conditioned space" and h:ExteriorAdjacentTo="outside"]) &gt;= 1'>There must be at least one exterior wall adjacent to conditioned space.</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Slabs/h:Slab[contains(h:InteriorAdjacentTo, "conditioned")]) + count(h:Floors/h:Floor[h:InteriorAdjacentTo="conditioned space" and not(h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]) &gt;= 1'>There must be at least one floor or slab adjacent to conditioned space.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Roofs/h:Roof[h:InteriorAdjacentTo="conditioned space"]) + count(h:Floors/h:Floor[h:InteriorAdjacentTo="conditioned space" and (h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]) + count(h:Floors[/h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"]]/h:Floor[h:SystemIdentifier/@sameas]) &gt;= 1'>There must be at least one ceiling or roof adjacent to conditioned space.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Walls/h:Wall[h:InteriorAdjacentTo="conditioned space" and h:ExteriorAdjacentTo="outside"]) + count(h:Walls[/h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"]]/h:Wall[h:SystemIdentifier/@sameas]) &gt;= 1'>There must be at least one exterior wall adjacent to conditioned space.</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Slabs/h:Slab[contains(h:InteriorAdjacentTo, "conditioned")]) + count(h:Floors/h:Floor[h:InteriorAdjacentTo="conditioned space" and not(h:ExteriorAdjacentTo="attic - vented" or h:ExteriorAdjacentTo="attic - unvented" or ((h:ExteriorAdjacentTo="other housing unit" or h:ExteriorAdjacentTo="other heated space" or h:ExteriorAdjacentTo="other multifamily buffer space" or h:ExteriorAdjacentTo="other non-freezing space") and h:FloorOrCeiling="ceiling"))]) + count(h:Floors[/h:HPXML/h:SoftwareInfo/h:extension/h:WholeSFAorMFBuildingSimulation[text()="true"]]/h:Floor[h:SystemIdentifier/@sameas]) &gt;= 1'>There must be at least one floor or slab adjacent to conditioned space.</sch:assert>
     </sch:rule>
   </sch:pattern>
 

@@ -9,6 +9,7 @@ __New Features__
   - Updates default heating capacities at 17F per RESNET HERS Addendum 82 and NEEP database.
   - Updates supplemental heating energy use during defrost based on RESNET HERS Addendum 82.
   - Updates shared pump power for ground-source heat pumps on a shared recirculation loop to cycle with heating/cooling load rather than operate continuously per RESNET HERS Addendum 94.
+  - Allows desuperheaters to be used with the experimental ground-source heat pump model.
 - Allows optional `UsageMultiplier` for electric vehicles described using `Vehicles`.
 - Water heater improvements:
   - Improves electric water heater tank losses when using `EnergyFactor` as the metric; now consistent with how `UniformEnergyFactor` is handled.
@@ -21,6 +22,11 @@ __New Features__
   - Allow `PVSystem/AttachedToInverter` to be omitted (unless there are multiple `Inverter` elements).
   - Allow multiple inverters with different efficiencies and use a weighted-average efficiency in the model (previously threw an error)
 - For storm windows, removes minimum base window U-factor limit and throws a warning instead if the base window U-factor is below 0.3.
+- Whole SFA/MF buildings:
+  - Allows modeling inter-unit heat transfer using the `@sameas` attribute.
+  - Allows modeling detailed electric vehicles.
+  - Documents a workaround for modeling common spaces (conditioned or unconditioned).
+  - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
 
 __Bugfixes__
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
@@ -31,6 +37,7 @@ __Bugfixes__
 - Fixes requested EnergyPlus timeseries output variables/meters not displayed in DView if they don't have units.
 - Fixes possible errors when small water flow rates for variable-speed experimental ground-source heat pump model.
 - Fixes possible ground-source heat pump sizing error if the heating or cooling design temperature differences are zero.
+- Fixes EMS discharge power program and assignment of default discharging schedule for detailed electric vehicles.
 
 ## OpenStudio-HPXML v1.10.0
 
