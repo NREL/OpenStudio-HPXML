@@ -1,7 +1,8 @@
 ## OpenStudio-HPXML v1.11.0
 
 __New Features__
-- Updates to HPXML v4.2.
+- Updates to HPXML v5-rc1.
+  - HPXML namespace changed from http://hpxmlonline.com/2023/09 to http://hpxmlonline.com/2025/12.
 - BuildResidentialHPXML measure:
   - **Breaking change**: New, simpler, easier to use option-based arguments (rather than detailed property arguments).
   - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
