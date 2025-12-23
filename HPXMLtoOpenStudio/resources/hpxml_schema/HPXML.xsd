@@ -1,4 +1,4 @@
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2023/09" targetNamespace="http://hpxmlonline.com/2023/09" elementFormDefault="qualified" version="4.2">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2025/12" targetNamespace="http://hpxmlonline.com/2025/12" elementFormDefault="qualified" version="5.0">
     <xs:element name="HPXML">
         <xs:complexType>
             <xs:sequence>
@@ -6018,6 +6018,11 @@
 						amount of air as the building does at a pressure of 4 Pascals.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element minOccurs="0" name="SpecificLeakageArea" type="HPXMLDoubleGreaterThanZero">
+				<xs:annotation>
+					<xs:documentation>[frac] The unitless ratio of Effective Leakage Area divided by conditioned floor area, given in the same units of measure.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element minOccurs="0" name="InfiltrationVolume" type="HPXMLDoubleGreaterThanZero">
 				<xs:annotation>
 					<xs:documentation>[sq. ft.] The volume of the building that is applicable to the air infiltration measurement test. The volume can be defined as the conditioned building volume
@@ -6979,9 +6984,9 @@
 					<xs:documentation>[A]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="HeadroomSpaces" type="IntegerGreaterThanOrEqualToZero">
+			<xs:element minOccurs="0" name="HeadroomSpaces" type="HPXMLInteger">
 				<xs:annotation>
-					<xs:documentation>The number of open breaker spaces.</xs:documentation>
+					<xs:documentation>The number of open breaker spaces. A negative number can be used for a proposed retrofit (e.g., heat pump upgrade), in which the number of required spaces would exceed the available spaces on the panel.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" name="RatedTotalSpaces" type="IntegerGreaterThanZero">
@@ -7140,9 +7145,7 @@
 	</xs:complexType>
 	<xs:simpleType name="schemaVersionType">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="4.0"/>
-			<xs:enumeration value="4.1"/>
-			<xs:enumeration value="4.2"/>
+			<xs:enumeration value="5.0"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<!--Address Information Below-->
@@ -10691,6 +10694,7 @@
 	<xs:simpleType name="WallAndRoofColor_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="light"/>
+			<xs:enumeration value="medium light"/>
 			<xs:enumeration value="medium"/>
 			<xs:enumeration value="medium dark"/>
 			<xs:enumeration value="dark"/>
@@ -10750,6 +10754,7 @@
 			<xs:enumeration value="vinyl siding"/>
 			<xs:enumeration value="aluminum siding"/>
 			<xs:enumeration value="brick veneer"/>
+			<xs:enumeration value="stone veneer"/>
 			<xs:enumeration value="asbestos siding"/>
 			<xs:enumeration value="fiber cement siding"/>
 			<xs:enumeration value="composite shingle siding"/>

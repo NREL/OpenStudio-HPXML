@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sch:schema xmlns:sch='http://purl.oclc.org/dsdl/schematron'>
   <sch:title>HPXML Schematron Validator: EnergyPlus Simulation</sch:title>
-  <sch:ns uri='http://hpxmlonline.com/2023/09' prefix='h'/>
+  <sch:ns uri='http://hpxmlonline.com/2025/12' prefix='h'/>
 
   <sch:pattern>
     <sch:title>[Root]</sch:title>

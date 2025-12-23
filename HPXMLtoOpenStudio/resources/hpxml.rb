@@ -50,7 +50,7 @@ class HPXML < Object
   HPXML_ATTRS = [:header, :buildings]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
 
-  NameSpace = 'http://hpxmlonline.com/2023/09'
+  NameSpace = 'http://hpxmlonline.com/2025/12'
 
   # Constants
   AirTypeFanCoil = 'fan coil'

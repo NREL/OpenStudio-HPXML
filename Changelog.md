@@ -2,6 +2,7 @@
 
 __New Features__
 - Updates to HPXML v5.0-rc1.
+  - **Breaking change**: HPXML namespace changed from http://hpxmlonline.com/2023/09 to http://hpxmlonline.com/2025/12.
   - **Breaking change**: Replaces "none" with "not present" for `InteriorFinish/Type`, `Siding`, `ExteriorShading/Type`, `InteriorShading/Type`, `Pool/Type`, `PermanentSpa/Type`, `Pump/Type`, and `Heater/Type`.
 - BuildResidentialHPXML measure:
   - **Breaking change**: New, simpler, easier to use option-based arguments (rather than detailed property arguments).
