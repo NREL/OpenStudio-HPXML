@@ -1472,7 +1472,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                       [HPXML::SidingTypeStucco, HPXML::ColorMedium],
                       [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMediumDark],
                       [HPXML::SidingTypeVinyl, HPXML::ColorLight],
-                      [HPXML::SidingTypeNone, HPXML::ColorMedium]]
+                      [HPXML::SidingTypeNone, HPXML::ColorMedium],
+                      [HPXML::SidingTypeStone, HPXML::ColorMediumLight]]
       siding_types.each do |siding_type|
         hpxml_bldg.rim_joists.add(id: "RimJoist#{hpxml_bldg.rim_joists.size + 1}",
                                   exterior_adjacent_to: HPXML::LocationOutside,
@@ -1507,7 +1508,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                       [HPXML::SidingTypeStucco, HPXML::ColorLight],
                       [HPXML::SidingTypeSyntheticStucco, HPXML::ColorMedium],
                       [HPXML::SidingTypeVinyl, HPXML::ColorDark],
-                      [HPXML::SidingTypeNone, HPXML::ColorMedium]]
+                      [HPXML::SidingTypeNone, HPXML::ColorMedium],
+                      [HPXML::SidingTypeStone, HPXML::ColorMediumLight]]
       int_finish_types = [[HPXML::InteriorFinishGypsumBoard, 0.5],
                           [HPXML::InteriorFinishGypsumBoard, 1.0],
                           [HPXML::InteriorFinishGypsumCompositeBoard, 0.5],
@@ -1584,7 +1586,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                     [HPXML::RoofTypeMetal, HPXML::ColorReflective],
                     [HPXML::RoofTypeWoodShingles, HPXML::ColorDark],
                     [HPXML::RoofTypeShingles, HPXML::ColorMediumDark],
-                    [HPXML::RoofTypePlasticRubber, HPXML::ColorLight],
+                    [HPXML::RoofTypePlasticRubber, HPXML::ColorMediumLight],
                     [HPXML::RoofTypeEPS, HPXML::ColorMedium],
                     [HPXML::RoofTypeConcrete, HPXML::ColorLight],
                     [HPXML::RoofTypeCool, HPXML::ColorReflective]]
