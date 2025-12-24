@@ -201,7 +201,7 @@
             <SHGC>0.56</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='Window1ExteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
@@ -230,7 +230,7 @@
             <SHGC>0.56</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='Window2ExteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
@@ -259,7 +259,7 @@
             <SHGC>0.56</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='Window3ExteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
@@ -288,7 +288,7 @@
             <SHGC>0.56</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='Window4ExteriorShading'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
@@ -586,7 +586,7 @@
       <Pools>
         <Pool>
           <SystemIdentifier id='Pool1'/>
-          <Type>none</Type>
+          <Type>not present</Type>
         </Pool>
       </Pools>
       <MiscLoads>

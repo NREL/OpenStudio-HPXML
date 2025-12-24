@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>fb2bc066-df7d-4df9-b822-97017cf3ceff</version_id>
-  <version_modified>2025-12-24T15:57:33Z</version_modified>
+  <version_id>0c2029fb-7039-48b9-9ce3-c9c1dfe44025</version_id>
+  <version_modified>2025-12-24T16:02:13Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -11398,7 +11398,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>23C369CC</checksum>
+      <checksum>EEEF94CE</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -11644,7 +11644,7 @@
       <filename>options/enclosure_wall_siding.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9EFA475C</checksum>
+      <checksum>2D8AA5F6</checksum>
     </file>
     <file>
       <filename>options/enclosure_window.tsv</filename>
@@ -11656,7 +11656,7 @@
       <filename>options/enclosure_window_exterior_shading.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B6DFF84F</checksum>
+      <checksum>0D8DC990</checksum>
     </file>
     <file>
       <filename>options/enclosure_window_insect_screens.tsv</filename>
@@ -11668,7 +11668,7 @@
       <filename>options/enclosure_window_interior_shading.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C55F2AB2</checksum>
+      <checksum>C20BEF48</checksum>
     </file>
     <file>
       <filename>options/enclosure_window_natural_ventilation.tsv</filename>
@@ -11932,7 +11932,7 @@
       <filename>options/misc_permanent_spa.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>47BE56D2</checksum>
+      <checksum>0D020BEB</checksum>
     </file>
     <file>
       <filename>options/misc_plug_loads.tsv</filename>
@@ -11944,7 +11944,7 @@
       <filename>options/misc_pool.tsv</filename>
       <filetype>tsv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1B386DA0</checksum>
+      <checksum>089150E8</checksum>
     </file>
     <file>
       <filename>options/misc_television.tsv</filename>

@@ -4952,7 +4952,7 @@ module HVACSizing
   # @param window [HPXML::Window] The window of interest
   # @return [Double] Interior shading coefficient
   def self.get_window_interior_shading_coefficient(window)
-    return 1.0 if window.interior_shading_type == HPXML::InteriorShadingTypeNone
+    return 1.0 if window.interior_shading_type == HPXML::InteriorShadingTypeNotPresent
 
     # Look up window type
     if window.glass_layers.nil? || window.glass_type.nil?

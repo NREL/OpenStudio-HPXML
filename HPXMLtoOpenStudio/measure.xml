@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>fbefb925-565e-4e68-a75f-c68231933268</version_id>
-  <version_modified>2025-12-24T15:57:37Z</version_modified>
+  <version_id>de073016-2d20-446f-bcaf-351034d0b6e8</version_id>
+  <version_modified>2025-12-24T16:20:24Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -348,13 +348,13 @@
       <filename>defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>50309DB2</checksum>
+      <checksum>735EFEB2</checksum>
     </file>
     <file>
       <filename>electric_panel.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1A0EEA02</checksum>
+      <checksum>CBC36507</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -384,7 +384,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FF34E223</checksum>
+      <checksum>1195C308</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -402,7 +402,7 @@
       <filename>hpxml_schematron/EPvalidator.sch</filename>
       <filetype>sch</filetype>
       <usage_type>resource</usage_type>
-      <checksum>90B81467</checksum>
+      <checksum>2933DB3F</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -420,7 +420,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>17FDA7DF</checksum>
+      <checksum>3D75BE6E</checksum>
     </file>
     <file>
       <filename>internal_gains.rb</filename>
@@ -444,7 +444,7 @@
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>71B7E2A1</checksum>
+      <checksum>8B3A9572</checksum>
     </file>
     <file>
       <filename>math.rb</filename>
@@ -468,7 +468,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EF41C807</checksum>
+      <checksum>99D7E09A</checksum>
     </file>
     <file>
       <filename>model.rb</filename>
@@ -480,7 +480,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>02203D44</checksum>
+      <checksum>7E164BC1</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -732,19 +732,19 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>082DDAAC</checksum>
+      <checksum>019E2CFF</checksum>
     </file>
     <file>
       <filename>test_electric_panel.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>26DDCBA1</checksum>
+      <checksum>C771D286</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9311AFD4</checksum>
+      <checksum>4B4569B3</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -810,7 +810,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>A7752DA7</checksum>
+      <checksum>18E26036</checksum>
     </file>
     <file>
       <filename>test_vehicle.rb</filename>
