@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.2'>
+<HPXML xmlns='http://hpxmlonline.com/2025/12' schemaVersion='5.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
@@ -235,7 +235,7 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>11.0</Area>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='RimJoist10Insulation'/>
@@ -350,7 +350,7 @@
             <Siding>masonite siding</Siding>
             <Color>dark</Color>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall6Insulation'/>
@@ -422,7 +422,7 @@
               <StructuralBrick/>
             </WallType>
             <Area>109.0</Area>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <Color>medium</Color>
             <InteriorFinish>
               <Type>plaster</Type>
