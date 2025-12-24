@@ -8,18 +8,19 @@ module Vehicle
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply(runner, model, spaces, hpxml_bldg, hpxml_header, schedules_file)
+  def self.apply(runner, model, spaces, hpxml, hpxml_bldg, hpxml_header, schedules_file)
     hpxml_bldg.vehicles.each do |vehicle|
       if vehicle.vehicle_type != HPXML::VehicleTypeBEV
         # Warning issued by Schematron validator
         next
       end
 
-      apply_electric_vehicle(runner, model, spaces, hpxml_bldg, hpxml_header, vehicle, schedules_file)
+      apply_electric_vehicle(runner, model, spaces, hpxml, hpxml_bldg, hpxml_header, vehicle, schedules_file)
     end
   end
 
@@ -30,12 +31,13 @@ module Vehicle
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param vehicle [HPXML::Vehicle] Object that defines a single electric vehicle
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_electric_vehicle(runner, model, spaces, hpxml_bldg, hpxml_header, vehicle, schedules_file)
+  def self.apply_electric_vehicle(runner, model, spaces, hpxml, hpxml_bldg, hpxml_header, vehicle, schedules_file)
     if hpxml_bldg.plug_loads.any? { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
       # Warning issued by Schematron validator
       return
@@ -94,7 +96,7 @@ module Vehicle
     vehicle.additional_properties.eff_discharge_power = eff_discharge_power
 
     # Apply vehicle battery to model
-    Battery.apply_battery(runner, model, spaces, hpxml_bldg, vehicle, charging_schedule, discharging_schedule)
+    Battery.apply_battery(runner, model, spaces, hpxml, hpxml_bldg, vehicle, charging_schedule, discharging_schedule)
 
     temp_sensor = Model.add_ems_sensor(
       model,

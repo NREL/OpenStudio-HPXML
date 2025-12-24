@@ -1054,7 +1054,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if batteries.size > 1
         # When modeling individual dwelling units, OS-HPXML only allows a single battery
         # When modeling whole SFA/MF buildings, OS-HPXML does not currently allow batteries
-        fail 'Unexpected error.'
+        # fail 'Unexpected error.'
       end
 
       battery = batteries[0]

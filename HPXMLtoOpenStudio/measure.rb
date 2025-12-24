@@ -185,6 +185,21 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
+  # Create custom meters with electricity usage *for each unit*.
+  # TODO
+  def unit_fuel_meter(model, fuel_type)
+    key_vars = []
+    model.objects.each do |obj|
+      Model.update_key_vars(key_vars, obj, fuel_type)
+    end
+    Model.add_meter_custom(
+      model,
+      name: "unit_#{fuel_type}",
+      fuel_type: fuel_type,
+      key_var_pairs: key_vars
+    )
+  end
+
   # Updates the args hash with final paths for various input/output files.
   #
   # @param args [Hash] Map of :argument_name => value
@@ -277,7 +292,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         # SFA/MF building simulations, we'd need to create custom meters with electricity usage *for each unit*
         # and switch to "TrackMeterDemandStoreExcessOnSite".
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-        fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
+        # fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
       end
     end
   end
@@ -388,8 +403,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Other
     PV.apply(runner, model, hpxml_bldg)
     Generator.apply(model, hpxml_bldg)
-    Battery.apply(runner, model, spaces, hpxml_bldg, schedules_file)
-    Vehicle.apply(runner, model, spaces, hpxml_bldg, hpxml.header, schedules_file)
+    Battery.apply(runner, model, spaces, hpxml, hpxml_bldg, schedules_file)
+    Vehicle.apply(runner, model, spaces, hpxml, hpxml_bldg, hpxml.header, schedules_file)
+
+    # Unit Meter
+    unit_fuel_meter(model, EPlus::FuelTypeElectricity)
   end
 
   # Miscellaneous logic that needs to occur upfront.
