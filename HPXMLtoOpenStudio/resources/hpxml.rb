@@ -448,7 +448,6 @@ class HPXML < Object
   UnitsDollarsPerkW = '$/kW'
   UnitsEER = 'EER'
   UnitsEER2 = 'EER2'
-  UnitsELA = 'EffectiveLeakageArea'
   UnitsCEER = 'CEER'
   UnitsHSPF = 'HSPF'
   UnitsHSPF2 = 'HSPF2'
@@ -3250,6 +3249,7 @@ class HPXML < Object
              :unit_of_measure,        # [String] BuildingAirLeakage/UnitofMeasure (HPXML::UnitsXXX)
              :air_leakage,            # [Double] BuildingAirLeakage/AirLeakage
              :effective_leakage_area, # [Double] EffectiveLeakageArea (sq. in.)
+             :specific_leakage_area,  # [Double] SpecificLeakageArea (frac)
              :infiltration_volume,    # [Double] InfiltrationVolume (ft3)
              :infiltration_height,    # [Double] InfiltrationHeight (ft)
              :a_ext]                  # [Double] Aext (frac)
@@ -3285,6 +3285,7 @@ class HPXML < Object
         XMLHelper.add_element(building_air_leakage, 'AirLeakage', @air_leakage, :float, @air_leakage_isdefaulted)
       end
       XMLHelper.add_element(air_infiltration_measurement, 'EffectiveLeakageArea', @effective_leakage_area, :float) unless @effective_leakage_area.nil?
+      XMLHelper.add_element(air_infiltration_measurement, 'SpecificLeakageArea', @specific_leakage_area, :float) unless @specific_leakage_area.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'InfiltrationVolume', @infiltration_volume, :float, @infiltration_volume_isdefaulted) unless @infiltration_volume.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'InfiltrationHeight', @infiltration_height, :float, @infiltration_height_isdefaulted) unless @infiltration_height.nil?
       XMLHelper.add_extension(air_infiltration_measurement, 'Aext', @a_ext, :float, @a_ext_isdefaulted) unless @a_ext.nil?
@@ -3305,6 +3306,7 @@ class HPXML < Object
       @unit_of_measure = XMLHelper.get_value(air_infiltration_measurement, 'BuildingAirLeakage/UnitofMeasure', :string)
       @air_leakage = XMLHelper.get_value(air_infiltration_measurement, 'BuildingAirLeakage/AirLeakage', :float)
       @effective_leakage_area = XMLHelper.get_value(air_infiltration_measurement, 'EffectiveLeakageArea', :float)
+      @specific_leakage_area = XMLHelper.get_value(air_infiltration_measurement, 'SpecificLeakageArea', :float)
       @infiltration_volume = XMLHelper.get_value(air_infiltration_measurement, 'InfiltrationVolume', :float)
       @infiltration_height = XMLHelper.get_value(air_infiltration_measurement, 'InfiltrationHeight', :float)
       @a_ext = XMLHelper.get_value(air_infiltration_measurement, 'extension/Aext', :float)

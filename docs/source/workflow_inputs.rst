@@ -1006,6 +1006,7 @@ In addition, one of the following air leakage types must also be defined:
 - :ref:`infil_ach_cfm`
 - :ref:`infil_natural_ach_cfm`
 - :ref:`infil_ela`
+- :ref:`infil_sla`
 - :ref:`infil_leakiness_description`
 
 .. note::
@@ -1061,7 +1062,21 @@ Note that ELA is different than Equivalent Leakage Area (EqLA), which involves a
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
   Element                               Type    Units    Constraints  Required   Default                    Notes
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
-  ``EffectiveLeakageArea``              double  sq. in.  >= 0         Yes                                   Effective leakage area value
+  ``EffectiveLeakageArea``              double  sq. in.  > 0          Yes                                   Effective leakage area value
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+
+.. _infil_sla:
+
+Specific Leakage Area
+~~~~~~~~~~~~~~~~~~~~~
+
+If entering air leakage as Specific Leakage Area (SLA), additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+Specific Leakage Area is the unitless ratio of Effective Leakage Area (ELA) divided by conditioned floor area, given in the same units of measure (e.g., sqft).
+
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  Element                               Type    Units    Constraints  Required   Default                    Notes
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  ``SpecificLeakageArea``               double  frac     > 0          Yes                                   Specific leakage area value
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
 
 .. _infil_leakiness_description:

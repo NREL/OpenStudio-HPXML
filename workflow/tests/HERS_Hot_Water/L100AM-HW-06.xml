@@ -48,7 +48,7 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <EffectiveLeakageArea>79.8</EffectiveLeakageArea>
+            <SpecificLeakageArea>0.00036</SpecificLeakageArea>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
