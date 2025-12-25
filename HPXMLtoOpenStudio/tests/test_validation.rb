@@ -298,7 +298,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'water-heater-location' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
                             'water-heater-location-other' => ["Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'water-heater-recovery-efficiency' => ['Expected RecoveryEfficiency to be greater than EnergyFactor'],
-                            'wrong-infiltration-method-blower-door' => ['Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/h:AirLeakage | EffectiveLeakageArea]'],
+                            'wrong-infiltration-method-blower-door' => ['Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/h:AirLeakage | EffectiveLeakageArea | SpecificLeakageArea]'],
                             'wrong-infiltration-method-default-table' => ['Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[LeakinessDescription]'] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
