@@ -1,8 +1,8 @@
 Test Case,Heat/Cool Energy (MBtu),Fan Energy (MBtu)
-HVAC1a.xml,20.56,2.92
-HVAC1b.xml,15.73,2.92
-HVAC2a.xml,64.24,1.7
-HVAC2b.xml,55.67,1.7
-HVAC2c.xml,28.18,3.82
-HVAC2d.xml,16.3,3.82
-HVAC2e.xml,50.1,1.7
+HVAC1a.xml,20.57,2.92
+HVAC1b.xml,15.74,2.92
+HVAC2a.xml,64.28,1.7
+HVAC2b.xml,55.71,1.7
+HVAC2c.xml,28.2,3.82
+HVAC2d.xml,16.31,3.82
+HVAC2e.xml,50.14,1.7
