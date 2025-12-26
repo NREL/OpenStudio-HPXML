@@ -1158,23 +1158,6 @@ module Model
     create_adjacent_surfaces_for_whole_mf_building(merged_model_objects, hpxml_osm_map)
   end
 
-  # TODO
-  def self.update_key_vars(key_vars, obj, fuel_type)
-    if fuel_type == EPlus::FuelTypeElectricity
-      if obj.to_ExteriorLights.is_initialized
-        key_vars << [obj.name.to_s, 'Exterior Lights Electricity Energy']
-      elsif obj.to_ElectricEquipment.is_initialized
-        key_vars << [obj.name.to_s, 'Electric Equipment Electricity Energy']
-      elsif obj.to_OtherEquipment.is_initialized
-        # key_vars << [obj.name.to_s, 'Other Equipment Electricity Energy']
-      elsif obj.to_WaterHeaterMixed.is_initialized
-        key_vars << [obj.name.to_s, 'Water Heater Electricity Energy']
-        key_vars << [obj.name.to_s, 'Water Heater Off Cycle Parasitic Electricity Energy']
-        key_vars << [obj.name.to_s, 'Water Heater On Cycle Parasitic Electricity Energy']
-      end
-    end
-  end
-
   # Create adjacent surfaces (identical surfaces in other multifamily units) for HPXML
   # surfaces w/ sameas attribute.
   #
@@ -1239,12 +1222,20 @@ module Model
   def self.prefix_object_names(unit_model, unit_number)
     # FUTURE: Create objects with unique names up front so we don't have to do this
 
+    # Meter:Custom objects
     unit_model.getMeterCustoms.each do |meter_custom|
       key_var_groups = meter_custom.keyVarGroups
       meter_custom.removeAllKeyVarGroups
       key_var_groups.each do |key_var_group|
         key, var = key_var_group
-        meter_custom.addKeyVarGroup(make_variable_name(key, unit_number), var)
+
+        key = make_variable_name(key, unit_number)
+        if var.include?(':')
+          var = var.split(':')
+          var = "#{var[0..-2].join(':')}:#{make_variable_name(var[-1], unit_number)}"
+        end
+
+        meter_custom.addKeyVarGroup(key, var)
       end
     end
 

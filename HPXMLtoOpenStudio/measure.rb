@@ -185,21 +185,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  # Create custom meters with electricity usage *for each unit*.
-  # TODO
-  def unit_fuel_meter(model, fuel_type)
-    key_vars = []
-    model.objects.each do |obj|
-      Model.update_key_vars(key_vars, obj, fuel_type)
-    end
-    Model.add_meter_custom(
-      model,
-      name: "unit_#{fuel_type}",
-      fuel_type: fuel_type,
-      key_var_pairs: key_vars
-    )
-  end
-
   # Updates the args hash with final paths for various input/output files.
   #
   # @param args [Hash] Map of :argument_name => value
@@ -407,7 +392,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Vehicle.apply(runner, model, spaces, hpxml, hpxml_bldg, hpxml.header, schedules_file)
 
     # Unit Meter
-    unit_fuel_meter(model, EPlus::FuelTypeElectricity)
+    Outputs.create_custom_fuel_meter(model, FT::Elec)
   end
 
   # Miscellaneous logic that needs to occur upfront.
