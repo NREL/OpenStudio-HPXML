@@ -1568,7 +1568,7 @@ module Outputs
         end
       end
 
-      # FIXME: why do we need to add these? (except lights)
+      # FIXME: why do we need to add these? (except lights; we already know why)
       if meter_type == 'Electricity:Facility'
         if object.to_ElectricLoadCenterInverterPVWatts.is_initialized
           key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']

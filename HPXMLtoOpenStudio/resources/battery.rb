@@ -237,6 +237,7 @@ module Battery
       fuel_type: HPXML::FuelTypeElectricity
     )
     loss_adj_object.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBatteryLossesAdjustment)
+    loss_adj_object.additionalProperties.setFeature('HPXML_ID', battery.id)
 
     battery_adj_actuator = Model.add_ems_actuator(
       name: 'battery loss adj act',
