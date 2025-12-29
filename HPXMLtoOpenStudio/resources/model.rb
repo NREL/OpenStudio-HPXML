@@ -1230,6 +1230,11 @@ module Model
         key, var = key_var_group
 
         key = make_variable_name(key, unit_number)
+
+        # for example, this changes
+        # - cooking range:InteriorEquipment:Electricity:Zone:CONDITIONED SPACE
+        # to
+        # - cooking range:InteriorEquipment:Electricity:Zone:unit1_CONDITIONED_SPACE
         if var.include?(':')
           var = var.split(':')
           var = "#{var[0..-2].join(':')}:#{make_variable_name(var[-1], unit_number)}"

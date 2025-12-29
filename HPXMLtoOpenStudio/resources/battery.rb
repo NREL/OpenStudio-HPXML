@@ -164,10 +164,10 @@ module Battery
       if elcd
         elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
         # elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
-        meter_name = "#{EPlus::FuelTypeElectricity}_CustomMeter"
+        meter_name = 'Electricity_Facility_CustomMeter'
         if hpxml.buildings.size > 1
           unit_num = hpxml.buildings.index(hpxml_bldg) + 1
-          meter_name = "unit#{unit_num}_#{EPlus::FuelTypeElectricity}_CustomMeter"
+          meter_name = "unit#{unit_num}_Electricity_Facility_CustomMeter"
         end
         elcd.setStorageOperationScheme('TrackMeterDemandStoreExcessOnSite')
         elcd.setStorageControlTrackMeterName(meter_name)

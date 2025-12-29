@@ -400,11 +400,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     Model.add_output_meter(model, meter_name: 'Electricity:Facility', reporting_frequency: 'runperiod') # Used for error checking
     if @hpxml_bldgs.size == 1
-      Model.add_output_meter(model, meter_name: 'Electricity_CustomMeter', reporting_frequency: 'runperiod') # Used for error checking
+      Model.add_output_meter(model, meter_name: 'Electricity_Facility_CustomMeter', reporting_frequency: 'runperiod') # Used for error checking
     else
       @hpxml_bldgs.each do |hpxml_bldg|
         unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
-        Model.add_output_meter(model, meter_name: "unit#{unit_num}_Electricity_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
+        Model.add_output_meter(model, meter_name: "unit#{unit_num}_Electricity_Facility_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
       end
     end
     if has_electricity_production || has_electricity_storage
@@ -1555,11 +1555,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     meter_elec = get_report_meter_data_annual(['Electricity:Facility'])
     sum_meters = 0.0
     if @hpxml_bldgs.size == 1
-      sum_meters = get_report_meter_data_annual(['Electricity_CustomMeter'.upcase])
+      sum_meters = get_report_meter_data_annual(['Electricity_Facility_CustomMeter'.upcase])
     else
       @hpxml_bldgs.each do |hpxml_bldg|
         unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
-        sum_meters += get_report_meter_data_annual(["unit#{unit_num}_Electricity_CustomMeter".upcase])
+        sum_meters += get_report_meter_data_annual(["unit#{unit_num}_Electricity_Facility_CustomMeter".upcase])
       end
     end
 

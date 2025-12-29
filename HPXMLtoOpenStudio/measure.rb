@@ -392,7 +392,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Vehicle.apply(runner, model, spaces, hpxml, hpxml_bldg, hpxml.header, schedules_file)
 
     # Unit Meter
-    Outputs.create_custom_fuel_meter(model, FT::Elec)
+    Outputs.create_custom_fuel_meter(model, EPlus::FuelTypeElectricity, 'Electricity:Facility')
+    Outputs.create_custom_fuel_meter(model, EPlus::FuelTypeElectricity, 'ElectricityProduced:Facility')
+    Outputs.create_custom_fuel_meter(model, EPlus::FuelTypeElectricity, 'ElectricStorage:ElectricityProduced')
   end
 
   # Miscellaneous logic that needs to occur upfront.

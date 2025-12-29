@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>1f577fc6-c793-4f89-b024-62a2cf88c60b</version_id>
-  <version_modified>2025-12-29T15:37:47Z</version_modified>
+  <version_id>c0a666dd-cfdf-4453-9914-33a6ed59d73c</version_id>
+  <version_modified>2025-12-29T17:31:16Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -192,7 +192,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C897492E</checksum>
+      <checksum>88C0993E</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -204,7 +204,7 @@
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>33DF879B</checksum>
+      <checksum>807AC15E</checksum>
     </file>
     <file>
       <filename>calendar.rb</filename>
@@ -474,13 +474,13 @@
       <filename>model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CF1ED38A</checksum>
+      <checksum>F20CF631</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F8B75097</checksum>
+      <checksum>7D118754</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>

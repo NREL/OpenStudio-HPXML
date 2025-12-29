@@ -51,10 +51,10 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
       elsif hpxml_bldg.batteries.size > 0
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-        return
+        # return
       elsif hpxml_bldg.vehicles.size > 0
         # Same as battery issue above
-        return
+        # return
       elsif hpxml.header.hvac_onoff_thermostat_deadband
         # On off thermostat not supported with unit multiplier yet
       elsif hpxml.header.heat_pump_backup_heating_capacity_increment
