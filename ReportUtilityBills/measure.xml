@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>c416e5a4-a1d8-442a-a26a-6f107ab47dc8</version_id>
-  <version_modified>2025-10-29T23:32:35Z</version_modified>
+  <version_id>7bcda8d1-0e6e-40fc-a3ae-3289ef947d96</version_id>
+  <version_modified>2025-12-30T18:44:10Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -310,6 +310,12 @@
     </file>
     <file>
       <filename>simple_rates/pr_all_update.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B4CDB85E</checksum>
+    </file>
+    <file>
+      <filename>simple_rates/pr_all_update_original.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>CF6409BD</checksum>
