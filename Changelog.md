@@ -32,6 +32,7 @@ __New Features__
   - Allows modeling detailed electric vehicles.
   - Documents a workaround for modeling common spaces (conditioned or unconditioned).
   - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
+- Updated EIA energy cost data for 2023 (all fuels) and 2024 (electricity).
 
 __Bugfixes__
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
