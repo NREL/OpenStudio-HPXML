@@ -1572,6 +1572,8 @@ module Outputs
       if meter_type == 'Electricity:Facility'
         if object.to_ElectricLoadCenterInverterPVWatts.is_initialized
           key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']
+        elsif object.to_ElectricLoadCenterStorageConverter.is_initialized
+          key_vars << [object.name.to_s, 'Converter Ancillary AC Electricity Energy']
         elsif object.to_AirLoopHVACUnitarySystem.is_initialized
           # key_vars << [object.name.to_s, 'Unitary System Cooling Ancillary Electricity Energy']
           # key_vars << [object.name.to_s, 'Unitary System Heating Ancillary Electricity Energy']
@@ -1585,6 +1587,10 @@ module Outputs
           key_vars << [object.name.to_s, 'Lights Electricity Energy']
         elsif object.to_ExteriorLights.is_initialized
           key_vars << [object.name.to_s, 'Exterior Lights Electricity Energy']
+        end
+      elsif meter_type == 'ElectricityProduced:Facility'
+        if object.to_ElectricLoadCenterStorageConverter.is_initialized
+          key_vars << [object.name.to_s, 'Converter Electricity Loss Decrement Energy']
         end
       end
     end

@@ -1105,17 +1105,17 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         batt_soc_kwh = batt_soc.map { |soc| soc - min_soc }.map { |soc| soc * batt_kwh }
         unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
         if @hpxml_bldgs.size == 1
-          elec_prod = get_report_meter_data_timeseries(['ElectricityProduced_Facility_CustomMeter'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-          elec_stor = get_report_meter_data_timeseries(['ElectricStorage_ElectricityProduced_CustomMeter'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+          elec_prod = get_report_meter_data_timeseries(['ElectricityProduced_Facility_CustomMeter'.upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+          elec_stor = get_report_meter_data_timeseries(['ElectricStorage_ElectricityProduced_CustomMeter'.upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
         else
-          elec_prod = get_report_meter_data_timeseries(["unit#{unit_num}_ElectricityProduced_Facility_CustomMeter"], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-          elec_stor = get_report_meter_data_timeseries(["unit#{unit_num}_ElectricStorage_ElectricityProduced_CustomMeter"], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+          elec_prod = get_report_meter_data_timeseries(["unit#{unit_num}_ElectricityProduced_Facility_CustomMeter".upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+          elec_stor = get_report_meter_data_timeseries(["unit#{unit_num}_ElectricStorage_ElectricityProduced_CustomMeter".upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
         end
         elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
         if @hpxml_bldgs.size == 1
-          elec = get_report_meter_data_timeseries(['Electricity_Facility_CustomMeter'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+          elec = get_report_meter_data_timeseries(['Electricity_Facility_CustomMeter'.upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
         else
-          elec = get_report_meter_data_timeseries(["unit#{unit_num}_Electricity_Facility_CustomMeter"], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+          elec = get_report_meter_data_timeseries(["unit#{unit_num}_Electricity_Facility_CustomMeter".upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
         end
         crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
 
