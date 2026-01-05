@@ -1538,16 +1538,16 @@ module Outputs
                  FT::Coal => EPlus::FuelTypeCoal }
 
     key_vars = []
-    model.objects.each do |object|
+    model.getModelObjects.sort.each do |object|
+      next if object.to_AdditionalProperties.is_initialized
       next if object.to_EnergyManagementSystemOutputVariable.is_initialized
 
-      outputs = get_object_outputs_by_key(model, object, EUT)
-      outputs.each do |key, values|
-        ft = key[0]
-        eut = key[1]
+      vars_by_key = get_object_outputs_by_key(model, object, EUT)
+      vars_by_key.each do |key, output_vars|
+        ft, eut = key
 
         if meter_type == 'Electricity:Facility'
-          next if [EUT::PV, EUT::Generator, EUT::Vehicle, EUT::Battery].include?(eut) && !values.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
+          next if [EUT::PV, EUT::Generator, EUT::Vehicle, EUT::Battery].include?(eut) && !output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
         elsif meter_type == 'ElectricityProduced:Facility'
           next if not [EUT::PV, EUT::Generator, EUT::Battery].include?(eut)
         elsif meter_type == 'ElectricStorage:ElectricityProduced'
@@ -1556,15 +1556,15 @@ module Outputs
 
         next unless to_eplus[ft] == fuel_type
 
-        values.each do |value|
-          next if value.include? 'ExteriorLights:Electricity' # not associated with a zone, so the meter is across all units
-          next if value.include? 'InteriorLights:Electricity' # same as above; like interior equipment, we *could* switch to zone level
+        output_vars.each do |output_var|
+          next if output_var.include? 'ExteriorLights:Electricity' # not associated with a zone, so the meter is across all units
+          next if output_var.include? 'InteriorLights:Electricity' # same as above; like interior equipment, we *could* switch to zone level
 
           if meter_type != 'Electricity:Facility'
-            next if value.include? Constants::ObjectTypeBatteryLossesAdjustment
+            next if output_var.include? Constants::ObjectTypeBatteryLossesAdjustment
           end
 
-          key_vars << [object.name.to_s, value]
+          key_vars << [object.name.to_s, output_var]
         end
       end
 
@@ -1612,6 +1612,9 @@ module Outputs
   # @param class_type [Module] The output class type
   # @return [Hash] Map of output key => array of EnergyPlus output variable/meter names
   def self.get_object_outputs_by_key(model, object, class_type)
+    object_type = object.additionalProperties.getFeatureAsString('ObjectType')
+    object_type = object_type.get if object_type.is_initialized
+
     to_ft = { EPlus::FuelTypeElectricity => FT::Elec,
               EPlus::FuelTypeNaturalGas => FT::Gas,
               EPlus::FuelTypeOil => FT::Oil,
@@ -1644,7 +1647,6 @@ module Outputs
 
       elsif object.to_CoilHeatingGas.is_initialized
         fuel = object.to_CoilHeatingGas.get.fuelType
-        object = object.to_CoilHeatingGas.get
         if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
           return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Heating Coil #{fuel} Energy", "Heating Coil Ancillary #{fuel} Energy"] }
         else
@@ -1711,15 +1713,11 @@ module Outputs
         return { [FT::Elec, EUT::HotWater] => ['Cooling Coil Water Heating Electricity Energy'] }
 
       elsif object.to_FanSystemModel.is_initialized
-        object_type = object.to_FanSystemModel.get.additionalProperties.getFeatureAsString('ObjectType')
-        object_type = object_type.get if object_type.is_initialized
         if object_type == Constants::ObjectTypeWaterHeater
           return { [FT::Elec, EUT::HotWater] => ['Fan Electricity Energy'] }
         end
 
       elsif object.to_PumpConstantSpeed.is_initialized
-        object_type = object.to_PumpConstantSpeed.get.additionalProperties.getFeatureAsString('ObjectType')
-        object_type = object_type.get if object_type.is_initialized
         if object_type == Constants::ObjectTypeSolarHotWater
           return { [FT::Elec, EUT::HotWaterSolarThermalPump] => ['Pump Electricity Energy'] }
         end
@@ -1754,8 +1752,6 @@ module Outputs
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        object_type = object.to_ElectricLoadCenterStorageLiIonNMCBattery.get.additionalProperties.getFeatureAsString('ObjectType')
-        object_type = object_type.get if object_type.is_initialized
         if object_type == Constants::ObjectTypeVehicle
           return { [FT::Elec, EUT::Vehicle] => ['Electric Storage Charge Energy'] }
         elsif object_type == Constants::ObjectTypeBattery
@@ -1840,8 +1836,6 @@ module Outputs
         return { [FT::Elec, EUT::Dehumidifier] => ['Zone Dehumidifier Electricity Energy'] }
 
       elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
-        object_type = object.to_EnergyManagementSystemOutputVariable.get.additionalProperties.getFeatureAsString('ObjectType')
-        object_type = object_type.get if object_type.is_initialized
         if object_type == Constants::ObjectTypeFanPumpDisaggregatePrimaryHeat
           return { [FT::Elec, EUT::HeatingFanPump] => [object.name.to_s] }
         elsif object_type == Constants::ObjectTypeFanPumpDisaggregateBackupHeat
