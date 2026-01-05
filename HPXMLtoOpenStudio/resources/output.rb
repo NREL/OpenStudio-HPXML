@@ -1568,13 +1568,13 @@ module Outputs
         end
       end
 
-      # FIXME: why do we need to add these? (except lights; we already know why)
+      # FIXME: why do we need to add these? do we need these? (except lights; we already know why)
       if meter_type == 'Electricity:Facility'
         if object.to_ElectricLoadCenterInverterPVWatts.is_initialized
           key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']
         elsif object.to_AirLoopHVACUnitarySystem.is_initialized
-          key_vars << [object.name.to_s, 'Unitary System Cooling Ancillary Electricity Energy']
-          key_vars << [object.name.to_s, 'Unitary System Heating Ancillary Electricity Energy']
+          # key_vars << [object.name.to_s, 'Unitary System Cooling Ancillary Electricity Energy']
+          # key_vars << [object.name.to_s, 'Unitary System Heating Ancillary Electricity Energy']
         elsif object.to_PumpVariableSpeed.is_initialized
           key_vars << [object.name.to_s, 'Pump Electricity Energy']
         elsif object.to_CoilHeatingGas.is_initialized
