@@ -430,8 +430,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           @hpxml_bldgs.each do |hpxml_bldg|
             unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
             Model.add_output_meter(model, meter_name: "unit#{unit_num}_Electricity_Facility_CustomMeter", reporting_frequency: resilience_frequency)
-            Model.add_output_meter(model, meter_name: "unit#{unit_num}_ElectricityProduced_Facility_CustomMeter", reporting_frequency: resilience_frequency)
-            Model.add_output_meter(model, meter_name: "unit#{unit_num}_ElectricStorage_ElectricityProduced_CustomMeter", reporting_frequency: resilience_frequency)
+            if hpxml_bldg.pv_systems.size > 0 || hpxml_bldg.generators.size > 0
+              Model.add_output_meter(model, meter_name: "unit#{unit_num}_ElectricityProduced_Facility_CustomMeter", reporting_frequency: resilience_frequency)
+            end
+            if hpxml_bldg.batteries.size > 0 || hpxml_bldg.vehicles.size > 0
+              Model.add_output_meter(model, meter_name: "unit#{unit_num}_ElectricStorage_ElectricityProduced_CustomMeter", reporting_frequency: resilience_frequency)
+            end
           end
         end
         @resilience.values.each do |resilience|
