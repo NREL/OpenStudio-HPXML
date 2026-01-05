@@ -163,7 +163,6 @@ module Battery
       elcd = elcds.find { |elcd| elcd.name.to_s.include?('PVSystem') }
       if elcd
         elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
-        # elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
         meter_name = 'Electricity_Facility_CustomMeter'
         if hpxml.buildings.size > 1
           unit_num = hpxml.buildings.index(hpxml_bldg) + 1

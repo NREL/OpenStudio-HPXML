@@ -1547,11 +1547,14 @@ module Outputs
         ft, eut = key
 
         if meter_type == 'Electricity:Facility'
-          next if [EUT::PV, EUT::Generator, EUT::Vehicle, EUT::Battery].include?(eut) && !output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
+          next if [EUT::PV, EUT::Generator, EUT::Vehicle, EUT::Battery].include?(eut) && !output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) || x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
         elsif meter_type == 'ElectricityProduced:Facility'
           next if not [EUT::PV, EUT::Generator, EUT::Battery].include?(eut)
+          next if output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
         elsif meter_type == 'ElectricStorage:ElectricityProduced'
           next if not [EUT::Vehicle, EUT::Battery].include?(eut)
+          next if output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
+          next if output_vars.any? { |x| x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
         end
 
         next unless to_eplus[ft] == fuel_type
@@ -1559,10 +1562,6 @@ module Outputs
         output_vars.each do |output_var|
           next if output_var.include? 'ExteriorLights:Electricity' # not associated with a zone, so the meter is across all units
           next if output_var.include? 'InteriorLights:Electricity' # same as above; like interior equipment, we *could* switch to zone level
-
-          if meter_type != 'Electricity:Facility'
-            next if output_var.include? Constants::ObjectTypeBatteryLossesAdjustment
-          end
 
           key_vars << [object.name.to_s, output_var]
         end
