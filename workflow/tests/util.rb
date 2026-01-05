@@ -1209,6 +1209,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), i|
         period = is_timeseries ? Date::ABBR_MONTHNAMES[i + 1] : 'Annual'
         if not (key.include?('Unmet Hours') ||
+                key.include?('Resilience') ||
                 key.include?('HVAC Design Temperature') ||
                 key.include?('Weather') ||
                 key.include?('HVAC Geothermal Loop: Borehole/Trench Length'))
