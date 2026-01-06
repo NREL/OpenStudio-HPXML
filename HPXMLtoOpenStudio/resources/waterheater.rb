@@ -1289,14 +1289,14 @@ module Waterheater
         output_var_or_meter_name: 'Cooling Coil Latent Cooling Rate',
         key_name: coil.name
       )
-    end
 
-    fan_power_sensor = Model.add_ems_sensor(
-      model,
-      name: "#{obj_name} fan pwr",
-      output_var_or_meter_name: 'Fan Electricity Rate',
-      key_name: fan.name
-    )
+      fan_power_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{obj_name} fan pwr",
+        output_var_or_meter_name: 'Fan Electricity Rate',
+        key_name: fan.name
+      )
+    end
 
     hpwh_zone_heat_gain_program = Model.add_ems_program(
       model,
@@ -1315,7 +1315,7 @@ module Waterheater
         hpwh_zone_heat_gain_program.addLine("Set #{sens_act_actuator.name} = (0 - #{sens_cool_sensor.name} - (#{tl_sensor.name} + #{fan_power_sensor.name})) / #{unit_multiplier}")
         hpwh_zone_heat_gain_program.addLine("Set #{lat_act_actuator.name} = (0 - #{lat_cool_sensor.name}) / #{unit_multiplier}")
       else
-        hpwh_zone_heat_gain_program.addLine("Set #{sens_act_actuator.name} = (0 - (#{tl_sensor.name} + #{fan_power_sensor.name})) / #{unit_multiplier}")
+        hpwh_zone_heat_gain_program.addLine("Set #{sens_act_actuator.name} = (0 - #{tl_sensor.name}) / #{unit_multiplier}")
         hpwh_zone_heat_gain_program.addLine("Set #{lat_act_actuator.name} = 0")
       end
     end
