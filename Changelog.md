@@ -35,6 +35,7 @@ __New Features__
 - Adds Electric Panel Load: Max Current Rating (A) output to results_panel.csv.
 
 __Bugfixes__
+- Fixes HERS sizing methodology when compressor lockout temperature is above the heating design temperature.
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
 - Fixes default hours driven per week for electric vehicles (8.88 -> 9.5).
 - Fixes empty TimeDST/TimeUTC columns in JSON timeseries data.
