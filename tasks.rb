@@ -2430,7 +2430,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 0
     end
     if ['base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml'].include? hpxml_file
-      hpxml_bldg.water_heating_systems[0].operating_mode = HPXML::WaterHeaterOperatingModeHeatPumpOnly
+      hpxml_bldg.water_heating_systems[0].hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHeatPumpOnly
     end
     if hpxml_file.include? 'base-dhw-tank-model-type-stratified'
       hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
@@ -2453,6 +2453,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
         hpxml_bldg.water_heating_systems[0].related_hvac_idref = heat_pump.id
       end
+    end
+    if ['base-dhw-tank-heat-pump-ducting.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].hpwh_ducting_exhaust = HPXML::LocationOutside
     end
 
     # -------------------- #

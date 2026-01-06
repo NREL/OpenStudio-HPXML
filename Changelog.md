@@ -18,9 +18,10 @@ __New Features__
   - Allows desuperheaters to be used with the experimental ground-source heat pump model.
 - Allows optional `UsageMultiplier` for electric vehicles described using `Vehicles`.
 - Water heater improvements:
-  - Improves electric water heater tank losses when using `EnergyFactor` as the metric; now consistent with how `UniformEnergyFactor` is handled.
-  - Improves HPWH tank volume defaulting, particularly when `NumberofResidents` is provided.
+  - Allows HPWHs to have exhaust air ducted to the outside using `HPWHDucting/ExhaustAirTermination="outside"`.
   - Allows HPWH performance adjustment when installed in confined space per RESNET HERS Addendum 77. When `extension/HPWHInConfinedSpaceWithoutMitigation` is "true", `extension/HPWHContainmentVolume` is used to calculate the adjustment.
+  - Improves HPWH tank volume defaulting, particularly when `NumberofResidents` is provided.
+  - Improves electric water heater tank losses when using `EnergyFactor` as the metric; now consistent with how `UniformEnergyFactor` is handled.
 - Updated site defaults:
   - `Address/CityMunicipality`, `Address/StateCode`, `GeoLocation/Latitude`, `GeoLocation/Longitude`, and `TimeZone/UTCOffset` now default based on zip code if available.
   - `TimeZone/DSTObserved` now defaults to false if `Address/StateCode` is 'AZ' or 'HI'.
