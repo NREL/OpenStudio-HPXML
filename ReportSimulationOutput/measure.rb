@@ -2036,7 +2036,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       load_kw = crit_load[t]
 
       # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
-      return i / Float(ts_per_hr) if batt_soc_kwh <= 0
+      return i / Float(ts_per_hr) if batt_soc_kwh.abs <= Constants::Small
 
       if load_kw < 0 # load is met with PV
         if batt_soc_kwh < batt_kwh # charge battery if there's room in the battery
