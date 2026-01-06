@@ -36,6 +36,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
       hpxml_bldg.building_construction.number_of_units = 1
     end
     orig_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum
+    whole_sfa_or_mf_building_sim = true
 
     # Create copy of the HPXML where the number of Building elements is doubled
     # and each Building is assigned a unit multiplier of 5 (2x5=10).
@@ -51,10 +52,9 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
       elsif hpxml_bldg.batteries.size > 0
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-        return
-      elsif hpxml_bldg.vehicles.size > 0
-        # Same as battery issue above
-        return
+        # but we still want to test unit multipliers
+        whole_sfa_or_mf_building_sim = false
+        hpxml_bldg.building_construction.number_of_units *= 10
       elsif hpxml.header.hvac_onoff_thermostat_deadband
         # On off thermostat not supported with unit multiplier yet
       elsif hpxml.header.heat_pump_backup_heating_capacity_increment
@@ -62,11 +62,13 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
       else
         hpxml_bldg.building_construction.number_of_units *= 5
       end
-      hpxml.buildings << hpxml_bldg.dup
+      if whole_sfa_or_mf_building_sim
+        hpxml.buildings << hpxml_bldg.dup
+      end
     end
     unit_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum / orig_multiplier
     if unit_multiplier > 1
-      hpxml.header.whole_sfa_or_mf_building_sim = true
+      hpxml.header.whole_sfa_or_mf_building_sim = whole_sfa_or_mf_building_sim
       if not [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? hpxml.buildings[0].building_construction.residential_facility_type
         # Schematron validation prevents WholeSFAorMFBuildingSim=true for other
         # building types, so we skip validation to allow the test to run
@@ -1207,6 +1209,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), i|
         period = is_timeseries ? Date::ABBR_MONTHNAMES[i + 1] : 'Annual'
         if not (key.include?('Unmet Hours') ||
+                key.include?('Resilience') ||
                 key.include?('HVAC Design Temperature') ||
                 key.include?('Weather') ||
                 key.include?('HVAC Geothermal Loop: Borehole/Trench Length'))
