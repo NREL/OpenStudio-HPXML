@@ -114,7 +114,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'heat-pump-separate-backup-inputs' => ['Expected 0 element(s) for xpath: BackupAnnualHeatingEfficiency',
                                                                    'Expected 0 element(s) for xpath: BackupHeatingCapacity',
                                                                    'Expected 0 element(s) for xpath: extension/BackupHeatingAutosizingFactor'],
-                            'heat-pump-capacity-17f' => ['Expected HeatingCapacity17F to be less than or equal to HeatingCapacity'],
+                            'heat-pump-capacity-17f-value' => ['Expected HeatingCapacity17F to be less than or equal to HeatingCapacity'],
+                            'heat-pump-capacity-17f-presence' => ['Expected HeatingCapacity when HeatingCapacity17F is provided'],
                             'heat-pump-lockout-temperatures' => ['Expected CompressorLockoutTemperature to be less than or equal to BackupHeatingLockoutTemperature'],
                             'heat-pump-multiple-backup-systems' => ['Expected 0 or 1 element(s) for xpath: HeatPump/BackupSystem [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'hvac-detailed-performance-bad-odbs' => ['Expected PerformanceDataPoint/OutdoorTemperature to be 47, 17, 5, or <5',
@@ -237,6 +238,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-water-heater-heating-capacity' => ['Expected HeatingCapacity to be greater than 0.'],
                             'invalid-water-heater-heating-capacity2' => ['Expected HeatingCapacity to be greater than 0.'],
                             'invalid-water-heater-stratified-tank-model' => ['Expected 0 element(s) for xpath: extension/TankModelType'],
+                            'invalid-whole-sfa-or-mf-building-sim' => ['WholeSFAorMFBuildingSimulation must be false or omitted for single-family detached/manufactured homes.'],
                             'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
                             'leakiness-description-missing-year-built' => ['Expected 1 element(s) for xpath: BuildingSummary/BuildingConstruction/YearBuilt'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting, id: "MyBuilding"]'],
@@ -280,7 +282,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                               'HeatingAutosizingFactor should be greater than 0.0',
                                                               'BackupHeatingAutosizingFactor should be greater than 0.0'],
                             'negative-hpwh-containment-volume' => ['Expected HPWHContainmentVolume to be greater than 0.'],
-                            'panel-negative-headroom-breaker-spaces' => ["Element 'HeadroomSpaces': [facet 'minInclusive'] The value '-1' is less than the minimum value allowed ('0')."],
                             'panel-zero-total-breaker-spaces' => ["Element 'RatedTotalSpaces': [facet 'minExclusive'] The value '0' must be greater than '0'."],
                             'panel-without-required-system' => ['Expected 1 or more element(s) for xpath: AttachedToComponent [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
                             'panel-with-unrequired-system' => ['Expected 0 element(s) for xpath: AttachedToComponent [context: /HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel/ServiceFeeders/ServiceFeeder, id: "ServiceFeeder1"]'],
@@ -297,7 +298,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'water-heater-location' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
                             'water-heater-location-other' => ["Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'water-heater-recovery-efficiency' => ['Expected RecoveryEfficiency to be greater than EnergyFactor'],
-                            'wrong-infiltration-method-blower-door' => ['Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/h:AirLeakage | EffectiveLeakageArea]'],
+                            'wrong-infiltration-method-blower-door' => ['Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/h:AirLeakage | EffectiveLeakageArea | SpecificLeakageArea]'],
                             'wrong-infiltration-method-default-table' => ['Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[LeakinessDescription]'] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
@@ -454,9 +455,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].backup_heating_capacity = 12345
         hpxml_bldg.heat_pumps[0].backup_heating_efficiency_afue = 0.8
         hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = 1.2
-      when 'heat-pump-capacity-17f'
+      when 'heat-pump-capacity-17f-value'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity + 1000.0
+        hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
+      when 'heat-pump-capacity-17f-presence'
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].heating_capacity_17F = 0.5 * hpxml_bldg.heat_pumps[0].heating_capacity
+        hpxml_bldg.heat_pumps[0].heating_capacity = nil
         hpxml_bldg.heat_pumps[0].heating_capacity_fraction_17F = nil
       when 'heat-pump-lockout-temperatures'
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml')
@@ -788,6 +794,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'invalid-water-heater-stratified-tank-model'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas.xml')
         hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
+      when 'invalid-whole-sfa-or-mf-building-sim'
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml.header.whole_sfa_or_mf_building_sim = true
       when 'invalid-window-height'
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-overhangs.xml')
         hpxml_bldg.windows[1].overhangs_distance_to_bottom_of_window = 1.0
@@ -885,10 +894,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       when 'negative-hpwh-containment-volume'
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-confined-space.xml')
         hpxml_bldg.water_heating_systems[0].hpwh_containment_volume = -10.0
-      when 'panel-negative-headroom-breaker-spaces'
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.electric_panels.add(id: 'ElectricPanel1',
-                                       headroom_spaces: -1)
       when 'panel-zero-total-breaker-spaces'
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.electric_panels.add(id: 'ElectricPanel1',
@@ -1997,7 +2002,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'multiple-inverter-efficiencies' => ['Inverters with varying efficiencies found; using a single PV size weighted-average in the model.'],
                               'panel-missing-default' => ["Voltage (240) for 'dishwasher' is not specified in default_panels.csv; PowerRating will be assigned according to Voltage=120.",
                                                           "Voltage (240) for 'dishwasher' is not specified in default_panels.csv; BreakerSpaces will be recalculated using Voltage=240."],
-                              'panel-spaces-constrained' => ['The sum of OccupiedSpaces (12.0) exceeds RatedTotalSpaces (10); increasing RatedTotalSpaces by 2.0 and setting HeadroomSpaces=0.'],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
@@ -2212,11 +2216,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         branch_circuits.add(id: 'NewBranchCircuit',
                             voltage: HPXML::ElectricPanelVoltage240,
                             component_idrefs: [hpxml_bldg.dishwashers[0].id])
-      when 'panel-spaces-constrained'
-        hpxml, hpxml_bldg = _create_hpxml('base-detailed-electric-panel.xml')
-        hpxml_bldg.dishwashers.add(id: 'Dishwasher')
-        hpxml_bldg.electric_panels[0].headroom_spaces = nil
-        hpxml_bldg.electric_panels[0].rated_total_spaces = 10
       when 'power-outage'
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       when 'multistage-backup-more-than-4-stages'

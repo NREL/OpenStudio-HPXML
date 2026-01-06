@@ -1,7 +1,13 @@
 ## OpenStudio-HPXML v1.11.0
 
 __New Features__
-- Updates to OpenStudio 3.11/EnergyPlus 25.2/HPXML v4.2.
+- Updates to OpenStudio 3.11/EnergyPlus 25.2.
+- Updates to HPXML v5.0-rc1.
+  - **Breaking change**: HPXML namespace changed from http://hpxmlonline.com/2023/09 to http://hpxmlonline.com/2025/12.
+  - **Breaking change**: Replaces "none" with "not present" for `InteriorFinish/Type`, `Siding`, `ExteriorShading/Type`, `InteriorShading/Type`, `Pool/Type`, `PermanentSpa/Type`, `Pump/Type`, and `Heater/Type`.
+  - Allows "stone veneer" for `Wall/Siding` and `RimJoist/Siding`.
+  - Allows "medium light" for `Roof/RoofColor`, `RimJoist/Color`, and `Wall/Color`.
+  - Allows `SpecificLeakageArea` for air infiltration measurements.
 - BuildResidentialHPXML measure:
   - **Breaking change**: New, simpler, easier to use option-based arguments (rather than detailed property arguments).
   - Automatically adjusts garage dimensions for dwelling units with small footprints to avoid errors.
@@ -9,6 +15,7 @@ __New Features__
   - Updates default heating capacities at 17F per RESNET HERS Addendum 82 and NEEP database.
   - Updates supplemental heating energy use during defrost based on RESNET HERS Addendum 82.
   - Updates shared pump power for ground-source heat pumps on a shared recirculation loop to cycle with heating/cooling load rather than operate continuously per RESNET HERS Addendum 94.
+  - Allows desuperheaters to be used with the experimental ground-source heat pump model.
 - Allows optional `UsageMultiplier` for electric vehicles described using `Vehicles`.
 - Water heater improvements:
   - Allows HPWHs to have exhaust air ducted to the outside using `HPWHDucting/ExhaustAirTermination="outside"`.
@@ -39,6 +46,7 @@ __Bugfixes__
 - Fixes possible errors when small water flow rates for variable-speed experimental ground-source heat pump model.
 - Fixes possible ground-source heat pump sizing error if the heating or cooling design temperature differences are zero.
 - Fixes EMS discharge power program and assignment of default discharging schedule for detailed electric vehicles.
+- Adds error-checking for when `HeatPump/HeatingCapacity17F` is provided but `HeatPump/HeatingCapacity` is not.
 
 ## OpenStudio-HPXML v1.10.0
 
