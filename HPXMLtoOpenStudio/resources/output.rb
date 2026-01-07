@@ -1568,7 +1568,7 @@ module Outputs
         end
       end
 
-      # FIXME: why do we need to add these? do we need these? (except lights; we already know why)
+      # FIXME: can we simplify all this special stuff?
       if meter_type == 'Electricity:Facility'
         if object.to_ElectricLoadCenterInverterPVWatts.is_initialized
           key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']
@@ -1591,6 +1591,9 @@ module Outputs
       elsif meter_type == 'ElectricityProduced:Facility'
         if object.to_ElectricLoadCenterStorageConverter.is_initialized
           key_vars << [object.name.to_s, 'Converter Electricity Loss Decrement Energy']
+        elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+          key_vars << [object.name.to_s, 'Electric Storage Production Decrement Energy']
+          key_vars << [object.name.to_s, 'Electric Storage Discharge Energy']
         end
       elsif meter_type == 'ElectricStorage:ElectricityProduced'
         if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
