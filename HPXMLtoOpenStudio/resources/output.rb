@@ -1528,7 +1528,7 @@ module Outputs
   # @param fuel_type [String] Fuel type (EPlus::FuelTypeXXX)
   # @param meter_type [String] Electricity:Facility or ElectricityProduced:Facility or ElectricStorage:ElectricityProduced
   # @return [nil]
-  def self.create_custom_fuel_meter(model, fuel_type, meter_type = nil)
+  def self.create_unit_fuel_meter(model, fuel_type, meter_type = nil)
     to_eplus = { FT::Elec => EPlus::FuelTypeElectricity,
                  FT::Gas => EPlus::FuelTypeNaturalGas,
                  FT::Oil => EPlus::FuelTypeOil,

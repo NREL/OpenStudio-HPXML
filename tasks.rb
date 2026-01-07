@@ -524,6 +524,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw' => '4A',
         'USA_OR_Portland.Intl.AP.726980_TMY3.epw' => '4C',
         'US_CO_Boulder_AMY_2012.epw' => '5B',
+        'USA_CO_Boulder.Muni.AP.720533_TMYx.2009-2023.epw' => '5B',
         'USA_CO_Denver.Intl.AP.725650_TMY3.epw' => '5B',
         'USA_MT_Helena.Rgnl.AP.727720_TMY3.epw' => '6B',
         'USA_MN_Duluth.Intl.AP.727450_TMY3.epw' => '7',
@@ -2429,7 +2430,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.water_heating_systems[0].backup_heating_capacity = 0
     end
     if ['base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml'].include? hpxml_file
-      hpxml_bldg.water_heating_systems[0].operating_mode = HPXML::WaterHeaterOperatingModeHeatPumpOnly
+      hpxml_bldg.water_heating_systems[0].hpwh_operating_mode = HPXML::WaterHeaterHPWHOperatingModeHeatPumpOnly
     end
     if hpxml_file.include? 'base-dhw-tank-model-type-stratified'
       hpxml_bldg.water_heating_systems[0].tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
@@ -2452,6 +2453,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
 
         hpxml_bldg.water_heating_systems[0].related_hvac_idref = heat_pump.id
       end
+    end
+    if ['base-dhw-tank-heat-pump-ducting.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems[0].hpwh_ducting_exhaust = HPXML::LocationOutside
     end
 
     # -------------------- #
@@ -2487,11 +2491,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.ventilation_fans[0].sensible_recovery_efficiency = nil
       end
     elsif hpxml_file.include? 'base-mechvent-cfis'
-      if not hpxml_bldg.ventilation_fans.empty? # FIXME: Temporary
-        hpxml_bldg.ventilation_fans[0].rated_flow_rate = 330.0
-        hpxml_bldg.ventilation_fans[0].hours_in_operation = 8
-        hpxml_bldg.ventilation_fans[0].fan_power = 300.0
-      end
+      hpxml_bldg.ventilation_fans[0].rated_flow_rate = 330.0
+      hpxml_bldg.ventilation_fans[0].hours_in_operation = 8
+      hpxml_bldg.ventilation_fans[0].fan_power = 300.0
     elsif ['base-hvac-ptac-cfis.xml',
            'base-hvac-pthp-cfis.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].rated_flow_rate = 100.0
@@ -2864,9 +2866,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Battery #
     # ------------- #
 
-    if ['base-pv-battery-lifetime-model.xml'].include? hpxml_file
-      hpxml_bldg.batteries[0].lifetime_model = HPXML::BatteryLifetimeModelKandlerSmith
-    elsif ['base-pv-battery-ah.xml'].include? hpxml_file
+    if ['base-pv-battery-ah.xml'].include? hpxml_file
       default_values = Defaults.get_battery_values(false)
       hpxml_bldg.batteries[0].nominal_capacity_ah = Battery.get_Ah_from_kWh(hpxml_bldg.batteries[0].nominal_capacity_kwh,
                                                                             default_values[:nominal_voltage])
