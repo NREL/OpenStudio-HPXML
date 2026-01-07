@@ -34,10 +34,12 @@ __New Features__
   - Allows modeling detailed electric vehicles.
   - Documents a workaround for modeling common spaces (conditioned or unconditioned).
   - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
+- Adds Electric Panel Load: Max Current Rating (A) output to results_panel.csv.
 
 __Bugfixes__
 - Fixes incorrect cooling design conditions when using TMYx weather files (OpenStudio bug).
 - Fixes ground-source heat pump plant loop fluid type (OpenStudio bug).
+- Fixes HERS sizing methodology when compressor lockout temperature is above the heating design temperature.
 - Fixes default hours driven per week for electric vehicles (8.88 -> 9.5).
 - Fixes empty TimeDST/TimeUTC columns in JSON timeseries data.
 - Fixes an EMS bug in heat pump defrost models that over-estimates defrost fractions.
