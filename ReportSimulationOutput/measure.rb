@@ -1044,9 +1044,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if resilience.variables.empty?
 
       batteries = []
+      unit_multiplier = nil
       @hpxml_bldgs.each do |hpxml_bldg|
         hpxml_bldg.batteries.each do |battery|
           batteries << battery
+          unit_multiplier = hpxml_bldg.building_construction.number_of_units
         end
       end
       next if batteries.empty?
@@ -1078,6 +1080,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       vars = ['Other Equipment Electricity Energy']
       keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
       batt_loss = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+      batt_loss = batt_loss.map { |x| x * unit_multiplier }
 
       min_soc = elcd.minimumStorageStateofChargeFraction
       batt_kw = elcd.designStorageControlDischargePower.get / 1000.0
@@ -2048,6 +2051,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       else # check if we can meet load with generator then storage
+
         if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
           # prevent battery charge from going negative
           batt_soc_kwh = [0, batt_soc_kwh - load_kw / batt_roundtrip_eff].max
