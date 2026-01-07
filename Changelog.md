@@ -49,6 +49,7 @@ __Bugfixes__
 - Fixes possible ground-source heat pump sizing error if the heating or cooling design temperature differences are zero.
 - Fixes EMS discharge power program and assignment of default discharging schedule for detailed electric vehicles.
 - Adds error-checking for when `HeatPump/HeatingCapacity17F` is provided but `HeatPump/HeatingCapacity` is not.
+- Fixes several issues related to using unit multipliers with batteries and vehicles.
 
 ## OpenStudio-HPXML v1.10.0
 
