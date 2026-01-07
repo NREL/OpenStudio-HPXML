@@ -1216,6 +1216,28 @@ module Model
   def self.prefix_object_names(unit_model, unit_number)
     # FUTURE: Create objects with unique names up front so we don't have to do this
 
+    # Meter:Custom objects
+    unit_model.getMeterCustoms.each do |meter_custom|
+      key_var_groups = meter_custom.keyVarGroups
+      meter_custom.removeAllKeyVarGroups
+      key_var_groups.each do |key_var_group|
+        key, var = key_var_group
+
+        key = make_variable_name(key, unit_number)
+
+        # for example, this changes
+        # - cooking range:InteriorEquipment:Electricity:Zone:CONDITIONED SPACE
+        # to
+        # - cooking range:InteriorEquipment:Electricity:Zone:unit1_CONDITIONED_SPACE
+        if var.include?(':')
+          var = var.split(':')
+          var = "#{var[0..-2].join(':')}:#{make_variable_name(var[-1], unit_number)}"
+        end
+
+        meter_custom.addKeyVarGroup(key, var)
+      end
+    end
+
     # EMS objects
     ems_map = {}
 
