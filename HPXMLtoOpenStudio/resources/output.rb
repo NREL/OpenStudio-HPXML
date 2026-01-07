@@ -1562,6 +1562,7 @@ module Outputs
         output_vars.each do |output_var|
           next if output_var.include? 'ExteriorLights:Electricity' # not associated with a zone, so the meter is across all units
           next if output_var.include? 'InteriorLights:Electricity' # same as above; like interior equipment, we *could* switch to zone level
+          next if output_var.include? 'Electric Storage Charge Energy' # vehicles
 
           key_vars << [object.name.to_s, output_var]
         end
@@ -1590,6 +1591,11 @@ module Outputs
       elsif meter_type == 'ElectricityProduced:Facility'
         if object.to_ElectricLoadCenterStorageConverter.is_initialized
           key_vars << [object.name.to_s, 'Converter Electricity Loss Decrement Energy']
+        end
+      elsif meter_type == 'ElectricStorage:ElectricityProduced'
+        if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+          key_vars << [object.name.to_s, 'Electric Storage Production Decrement Energy']
+          key_vars << [object.name.to_s, 'Electric Storage Discharge Energy']
         end
       end
     end
