@@ -2,7 +2,6 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
@@ -27,7 +26,7 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
     # Open cavity, asphalt shingles roof
-    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles'] },
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing'] },
                     { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing'] },
                     { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing'] }]
 
@@ -114,7 +113,7 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'radiant barrier'] },
+    roofs_values = [{ assembly_r: 0.1, layer_names: ['asphalt or fiberglass shingles', 'osb sheathing', 'radiant barrier'] },
                     { assembly_r: 5.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'radiant barrier'] },
                     { assembly_r: 20.0, layer_names: ['asphalt or fiberglass shingles', 'roof rigid ins', 'osb sheathing', 'radiant barrier'] }]
     gablewalls_values = [{ assembly_r: 0.1, layer_names: ['wood siding', 'wall stud and cavity', 'radiant barrier'] },
@@ -1269,7 +1268,7 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
     result = runner.result
 
     # show the output
-    show_output(result) unless result.value.valueName == 'Success'
+    result.showOutput() unless result.value.valueName == 'Success'
 
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
