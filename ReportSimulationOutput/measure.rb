@@ -389,29 +389,57 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Fuel outputs
-    @fuels.each do |(_fuel_type, _total_or_net), fuel|
+    @fuels.each do |(fuel_type, _total_or_net), fuel|
       next if fuel.meter.nil?
 
       Model.add_output_meter(model, meter_name: fuel.meter, reporting_frequency: 'runperiod')
       if args[:include_timeseries_fuel_consumptions]
         Model.add_output_meter(model, meter_name: fuel.meter, reporting_frequency: args[:timeseries_frequency])
       end
+
+      next if fuel_type == FT::Elec # wrong meter names; electricity requested below
+
+      if @hpxml_bldgs.size == 1
+        Model.add_output_meter(model, meter_name: "#{fuel.meter.gsub(':', '_')}_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
+      else
+        @hpxml_bldgs.each do |hpxml_bldg|
+          unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
+          Model.add_output_meter(model, meter_name: "unit#{unit_num}_#{fuel.meter.gsub(':', '_')}_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
+        end
+      end
     end
 
-    Model.add_output_meter(model, meter_name: 'Electricity:Facility', reporting_frequency: 'runperiod') # Used for error checking
+    Model.add_output_meter(model, meter_name: "#{EPlus::FuelTypeElectricity}:Facility", reporting_frequency: 'runperiod') # Used for error checking
     if @hpxml_bldgs.size == 1
-      Model.add_output_meter(model, meter_name: 'Electricity_Facility_CustomMeter', reporting_frequency: 'runperiod') # Used for error checking
+      Model.add_output_meter(model, meter_name: "#{EPlus::FuelTypeElectricity}_Facility_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
     else
       @hpxml_bldgs.each do |hpxml_bldg|
         unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
-        Model.add_output_meter(model, meter_name: "unit#{unit_num}_Electricity_Facility_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
+        Model.add_output_meter(model, meter_name: "unit#{unit_num}_#{EPlus::FuelTypeElectricity}_Facility_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
       end
     end
+
     if has_electricity_production || has_electricity_storage
       Model.add_output_meter(model, meter_name: 'ElectricityProduced:Facility', reporting_frequency: 'runperiod') # Used for error checking
+      if @hpxml_bldgs.size == 1
+        Model.add_output_meter(model, meter_name: 'ElectricityProduced_Facility_CustomMeter', reporting_frequency: 'runperiod') # Used for error checking
+      else
+        @hpxml_bldgs.each do |hpxml_bldg|
+          unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
+          Model.add_output_meter(model, meter_name: "unit#{unit_num}_ElectricityProduced_Facility_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
+        end
+      end
     end
     if has_electricity_storage
       Model.add_output_meter(model, meter_name: 'ElectricStorage:ElectricityProduced', reporting_frequency: 'runperiod') # Used for error checking
+      if @hpxml_bldgs.size == 1
+        Model.add_output_meter(model, meter_name: 'ElectricStorage_ElectricityProduced_CustomMeter', reporting_frequency: 'runperiod') # Used for error checking
+      else
+        @hpxml_bldgs.each do |hpxml_bldg|
+          unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
+          Model.add_output_meter(model, meter_name: "unit#{unit_num}_ElectricStorage_ElectricityProduced_CustomMeter", reporting_frequency: 'runperiod') # Used for error checking
+        end
+      end
       if args[:include_timeseries_fuel_consumptions]
         Model.add_output_meter(model, meter_name: 'ElectricStorage:ElectricityProduced', reporting_frequency: args[:timeseries_frequency])
       end
@@ -422,18 +450,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyTimestep
           resilience_frequency = EPlus::TimeseriesFrequencyHourly
         end
-        if @hpxml_bldgs.size == 1
-          Model.add_output_meter(model, meter_name: 'Electricity_Facility_CustomMeter', reporting_frequency: resilience_frequency)
-          Model.add_output_meter(model, meter_name: 'ElectricityProduced_Facility_CustomMeter', reporting_frequency: resilience_frequency)
-          Model.add_output_meter(model, meter_name: 'ElectricStorage_ElectricityProduced_CustomMeter', reporting_frequency: resilience_frequency)
-        else
-          @hpxml_bldgs.each do |hpxml_bldg|
-            unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
-            Model.add_output_meter(model, meter_name: "unit#{unit_num}_Electricity_Facility_CustomMeter", reporting_frequency: resilience_frequency)
-            Model.add_output_meter(model, meter_name: "unit#{unit_num}_ElectricityProduced_Facility_CustomMeter", reporting_frequency: resilience_frequency)
-            Model.add_output_meter(model, meter_name: "unit#{unit_num}_ElectricStorage_ElectricityProduced_CustomMeter", reporting_frequency: resilience_frequency)
-          end
-        end
+        Model.add_output_meter(model, meter_name: 'Electricity:Facility', reporting_frequency: resilience_frequency)
+        Model.add_output_meter(model, meter_name: 'ElectricityProduced:Facility', reporting_frequency: resilience_frequency)
+        Model.add_output_meter(model, meter_name: 'ElectricStorage:ElectricityProduced', reporting_frequency: resilience_frequency)
         @resilience.values.each do |resilience|
           resilience.variables.each do |_sys_id, varkey, var|
             Model.add_output_variable(model, key_value: varkey, variable_name: var, reporting_frequency: resilience_frequency)
@@ -1561,20 +1580,30 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Check sum of custom unit fuel meters match facility
-    meter_elec = get_report_meter_data_annual(['Electricity:Facility'])
-    sum_meters = 0.0
-    if @hpxml_bldgs.size == 1
-      sum_meters = get_report_meter_data_annual(['Electricity_Facility_CustomMeter'.upcase])
-    else
-      @hpxml_bldgs.each do |hpxml_bldg|
-        unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
-        sum_meters += get_report_meter_data_annual(["unit#{unit_num}_Electricity_Facility_CustomMeter".upcase])
+    ["#{EPlus::FuelTypeElectricity}:Facility",
+     'ElectricityProduced:Facility',
+     'ElectricStorage:ElectricityProduced',
+     "#{EPlus::FuelTypeNaturalGas}:Facility",
+     "#{EPlus::FuelTypeOil}:Facility",
+     "#{EPlus::FuelTypePropane}:Facility",
+     "#{EPlus::FuelTypeWoodCord}:Facility",
+     "#{EPlus::FuelTypeWoodPellets}:Facility",
+     "#{EPlus::FuelTypeCoal}:Facility"].each do |meter_name|
+      total_meter = get_report_meter_data_annual([meter_name])
+      sum_meters = 0.0
+      if @hpxml_bldgs.size == 1
+        sum_meters = get_report_meter_data_annual(["#{meter_name.gsub(':', '_')}_CustomMeter".upcase])
+      else
+        @hpxml_bldgs.each do |hpxml_bldg|
+          unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
+          sum_meters += get_report_meter_data_annual(["unit#{unit_num}_#{meter_name.gsub(':', '_')}_CustomMeter".upcase])
+        end
       end
-    end
 
-    if (sum_meters - meter_elec).abs > tol
-      runner.registerError("Custom unit electricity meters (#{sum_meters.round(3)}) do not sum to total (#{meter_elec.round(3)}).")
-      return false
+      if (sum_meters - total_meter).abs > tol
+        runner.registerError("Custom unit fuel meters (#{sum_meters.round(3)}) do not sum to total (#{total_meter.round(3)}).")
+        return false
+      end
     end
 
     return true

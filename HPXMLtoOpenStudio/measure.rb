@@ -392,9 +392,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Vehicle.apply(runner, model, spaces, hpxml_bldg, hpxml.header, schedules_file)
 
     # Unit Meters
-    Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeElectricity, 'Electricity:Facility')
+    Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeElectricity, "#{EPlus::FuelTypeElectricity}:Facility")
     Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeElectricity, 'ElectricityProduced:Facility')
     Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeElectricity, 'ElectricStorage:ElectricityProduced')
+    Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeNaturalGas, "#{EPlus::FuelTypeNaturalGas}:Facility")
+    Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeOil, "#{EPlus::FuelTypeOil}:Facility")
+    Outputs.create_unit_fuel_meter(model, EPlus::FuelTypePropane, "#{EPlus::FuelTypePropane}:Facility")
+    Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeWoodCord, "#{EPlus::FuelTypeWoodCord}:Facility")
+    Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeWoodPellets, "#{EPlus::FuelTypeWoodPellets}:Facility")
+    Outputs.create_unit_fuel_meter(model, EPlus::FuelTypeCoal, "#{EPlus::FuelTypeCoal}:Facility")
   end
 
   # Miscellaneous logic that needs to occur upfront.
