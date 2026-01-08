@@ -34,7 +34,8 @@ __New Features__
   - Allows modeling detailed electric vehicles.
   - Documents a workaround for modeling common spaces (conditioned or unconditioned).
   - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
-- Adds Electric Panel Load: Max Current Rating (A) output to results_panel.csv.
+- Updated default utility bill rates per EIA energy cost data for 2023.
+- Adds "Electric Panel Load: Max Current Rating (A)" output to results_panel.csv.
 
 __Bugfixes__
 - Fixes incorrect cooling design conditions when using TMYx weather files (OpenStudio bug).
