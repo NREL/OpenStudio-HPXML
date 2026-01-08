@@ -1456,6 +1456,7 @@ module Outputs
     total_key_vars = []
     net_key_vars = []
     pv_key_vars = []
+    gen_key_vars = []
     model.getElectricLoadCenterDistributions.each do |elcd|
       # Batteries & EV charging output variables
       if elcd.electricalStorage.is_initialized
@@ -1487,6 +1488,7 @@ module Outputs
 
         net_key_vars << ['', 'Cogeneration:ElectricityProduced']
         total_key_vars << net_key_vars[-1]
+        gen_key_vars << net_key_vars[-1]
       end
     end
 
@@ -1514,27 +1516,28 @@ module Outputs
     end
 
     # Create PV/CritLoad meters
-    if pv_key_vars.empty?
+    if pv_key_vars.empty? && gen_key_vars.empty?
       # Avoid OpenStudio warnings if nothing to decrement
-      pv_key_vars << ['', 'Electricity:Facility']
       Model.add_meter_custom(
         model,
         name: MeterCustomElectricityCriticalLoad,
         fuel_type: EPlus::FuelTypeElectricity,
-        key_var_pairs: pv_key_vars
+        key_var_pairs: [['', 'Electricity:Facility']]
       )
     else
-      Model.add_meter_custom(
-        model,
-        name: MeterCustomElectricityPV,
-        fuel_type: EPlus::FuelTypeElectricity,
-        key_var_pairs: pv_key_vars
-      )
+      if not pv_key_vars.empty?
+        Model.add_meter_custom(
+          model,
+          name: MeterCustomElectricityPV,
+          fuel_type: EPlus::FuelTypeElectricity,
+          key_var_pairs: pv_key_vars
+        )
+      end
       Model.add_meter_custom_decrement(
         model,
         name: MeterCustomElectricityCriticalLoad,
         fuel_type: EPlus::FuelTypeElectricity,
-        key_var_pairs: pv_key_vars,
+        key_var_pairs: pv_key_vars + gen_key_vars,
         source_meter_name: 'Electricity:Facility'
       )
     end
