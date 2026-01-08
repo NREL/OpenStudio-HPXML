@@ -414,9 +414,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           resilience.variables.each do |_sys_id, varkey, var|
             Model.add_output_variable(model, key_value: varkey, variable_name: var, reporting_frequency: resilience_frequency)
           end
-          resilience.meters.each do |_, _, meter|
-            Model.add_output_meter(model, meter_name: meter, reporting_frequency: resilience_frequency)
-          end
         end
       end
     end
@@ -1078,8 +1075,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
       batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
 
-      batt_loss = get_report_meter_data_timeseries(["#{Constants::ObjectTypeBatteryLossesAdjustment}:InteriorEquipment:Electricity"], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-
       min_soc = elcd.minimumStorageStateofChargeFraction
       batt_kw = elcd.designStorageControlDischargePower.get / 1000.0
       batt_roundtrip_eff = elcs.dctoDCChargingEfficiency
@@ -1090,7 +1085,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
       elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
       elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-      crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
+      crit_load = elec.zip(elec_prod).map { |x, y| x + y }
 
       resilience_timeseries = []
       n_timesteps = crit_load.size
@@ -2409,13 +2404,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # Structure to store EnergyPlus resilience outputs.
   class Resilience < BaseOutput
-    # @param outputs [Array<Array<String, String, String>>] Sets of outputs with: HPXML ID, EnergyPlus output variable key, EnergyPlus output variable/meter name
-    def initialize(outputs:)
+    # @param variables [Array<String>] List of EnergyPlus output variable names
+    def initialize(variables:)
       super()
-      @variables = outputs.select { |o| !o[2].include?(':') }
-      @meters = outputs.select { |o| o[2].include?(':') }
+      @variables = variables
     end
-    attr_accessor(:variables, :meters)
+    attr_accessor(:variables)
   end
 
   # Structure to store EnergyPlus peak fuel outputs
@@ -2703,7 +2697,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Resilience
     @resilience = {}
-    @resilience[RT::Battery] = Resilience.new(outputs: get_object_outputs(RT, RT::Battery))
+    @resilience[RT::Battery] = Resilience.new(variables: get_object_outputs(RT, RT::Battery))
 
     @resilience.each do |resilience_type, resilience|
       next unless resilience_type == RT::Battery
@@ -3212,13 +3206,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         if object.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeBattery
           return { RT::Battery => ['Electric Storage Charge Fraction'] }
-        end
-
-      elsif object.to_OtherEquipment.is_initialized
-        object = object.to_OtherEquipment.get
-        subcategory = object.endUseSubcategory
-        if object_type == Constants::ObjectTypeBatteryLossesAdjustment
-          return { RT::Battery => ["#{subcategory}:InteriorEquipment:Electricity"] }
         end
 
       end
