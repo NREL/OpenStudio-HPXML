@@ -414,6 +414,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           resilience.variables.each do |_sys_id, varkey, var|
             Model.add_output_variable(model, key_value: varkey, variable_name: var, reporting_frequency: resilience_frequency)
           end
+          resilience.meters.each do |_, _, meter|
+            Model.add_output_meter(model, meter_name: meter, reporting_frequency: resilience_frequency)
+          end
         end
       end
     end
@@ -1044,11 +1047,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       next if resilience.variables.empty?
 
       batteries = []
-      unit_multiplier = nil
       @hpxml_bldgs.each do |hpxml_bldg|
         hpxml_bldg.batteries.each do |battery|
           batteries << battery
-          unit_multiplier = hpxml_bldg.building_construction.number_of_units
         end
       end
       next if batteries.empty?
@@ -1077,10 +1078,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
       batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
 
-      vars = ['Other Equipment Electricity Energy']
-      keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
-      batt_loss = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-      batt_loss = batt_loss.map { |x| x * unit_multiplier }
+      batt_loss = get_report_meter_data_timeseries(["#{Constants::ObjectTypeBatteryLossesAdjustment}:InteriorEquipment:Electricity"], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
 
       min_soc = elcd.minimumStorageStateofChargeFraction
       batt_kw = elcd.designStorageControlDischargePower.get / 1000.0
@@ -2039,7 +2037,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       load_kw = crit_load[t]
 
       # even if load_kw is negative, we return if batt_soc_kwh isn't charged at all
-      return i / Float(ts_per_hr) if batt_soc_kwh.abs <= Constants::Small
+      return i / Float(ts_per_hr) if batt_soc_kwh <= Constants::Small
 
       if load_kw < 0 # load is met with PV
         if batt_soc_kwh < batt_kwh # charge battery if there's room in the battery
@@ -2051,7 +2049,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       else # check if we can meet load with generator then storage
-
         if [batt_kw, batt_soc_kwh].min >= load_kw # battery can carry balance
           # prevent battery charge from going negative
           batt_soc_kwh = [0, batt_soc_kwh - load_kw / batt_roundtrip_eff].max
@@ -2412,12 +2409,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # Structure to store EnergyPlus resilience outputs.
   class Resilience < BaseOutput
-    # @param variables [Array<String>] List of EnergyPlus output variable names
-    def initialize(variables:)
+    # @param outputs [Array<Array<String, String, String>>] Sets of outputs with: HPXML ID, EnergyPlus output variable key, EnergyPlus output variable/meter name
+    def initialize(outputs:)
       super()
-      @variables = variables
+      @variables = outputs.select { |o| !o[2].include?(':') }
+      @meters = outputs.select { |o| o[2].include?(':') }
     end
-    attr_accessor(:variables)
+    attr_accessor(:variables, :meters)
   end
 
   # Structure to store EnergyPlus peak fuel outputs
@@ -2705,7 +2703,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Resilience
     @resilience = {}
-    @resilience[RT::Battery] = Resilience.new(variables: get_object_outputs(RT, RT::Battery))
+    @resilience[RT::Battery] = Resilience.new(outputs: get_object_outputs(RT, RT::Battery))
 
     @resilience.each do |resilience_type, resilience|
       next unless resilience_type == RT::Battery
@@ -3217,8 +3215,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         end
 
       elsif object.to_OtherEquipment.is_initialized
+        object = object.to_OtherEquipment.get
+        subcategory = object.endUseSubcategory
         if object_type == Constants::ObjectTypeBatteryLossesAdjustment
-          return { RT::Battery => ['Other Equipment Electricity Energy'] }
+          return { RT::Battery => ["#{subcategory}:InteriorEquipment:Electricity"] }
         end
 
       end
