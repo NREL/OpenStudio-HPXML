@@ -1106,26 +1106,14 @@ module Model
           # Retain object for model
           unit_model_objects << model_object
           first_model_object_by_type = model_object
-          if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
-            unit_model_objects << unit_model.getObjectsByName(model_object.temperatureSchedule.get.name.to_s)[0]
-          end
         else
           # Throw error if different values between this model_object and first_model_object_by_type
           if model_object.to_s.gsub(uuid_regex, '') != first_model_object_by_type.to_s.gsub(uuid_regex, '')
             fail "Unique object (#{idd_obj}) has different values across dwelling units."
           end
-
-          if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
-            if model_object.temperatureSchedule.get.to_s.gsub(uuid_regex, '') != first_model_object_by_type.temperatureSchedule.get.to_s.gsub(uuid_regex, '')
-              fail "Unique object (#{idd_obj}) has different values across dwelling units."
-            end
-          end
         end
 
         unique_handles_to_skip << model_object.handle.to_s
-        if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
-          unique_handles_to_skip << model_object.temperatureSchedule.get.handle.to_s
-        end
       end
     end
 
@@ -1211,7 +1199,13 @@ module Model
   # @param unit_number [Integer] index number corresponding to an HPXML Building object
   # @return [String] the new OpenStudio object name with unique unit prefix
   def self.make_variable_name(obj_name, unit_number)
-    return ems_friendly_name("unit#{unit_number + 1}_#{obj_name}")
+    new_name = ems_friendly_name("unit#{unit_number + 1}_#{obj_name}")
+
+    # Need to fix HWPH outlet node name
+    if new_name.include?('_Outlet') && new_name.include?(ems_friendly_name(Constants::ObjectTypeWaterHeater))
+      new_name.gsub!('_Outlet', ' Outlet')
+    end
+    return new_name
   end
 
   # Prefix all object names using using a provided unit number.

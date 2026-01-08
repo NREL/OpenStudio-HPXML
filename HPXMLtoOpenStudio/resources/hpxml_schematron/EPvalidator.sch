@@ -2587,6 +2587,7 @@
       <sch:assert role='ERROR' test='number(h:EnergyFactor) &gt; 1 or not(h:EnergyFactor)'>Expected EnergyFactor to be greater than 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:HPWHOperatingMode) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HPWHOperatingMode</sch:assert>
       <sch:assert role='ERROR' test='h:HPWHOperatingMode[text()="hybrid/auto" or text()="heat pump only"] or not(h:HPWHOperatingMode)'>Expected HPWHOperatingMode to be 'hybrid/auto' or 'heat pump only'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HPWHDucting/h:ExhaustAirTermination) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HPWHDucting/ExhaustAirTermination</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsageBin) + count(h:FirstHourRating) &gt;= 0'>Expected 0 or more element(s) for xpath: UsageBin | FirstHourRating</sch:assert>
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:HotWaterTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterTemperature</sch:assert>
@@ -2876,8 +2877,6 @@
       <sch:assert role='ERROR' test='count(h:RatedPowerOutput) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RatedPowerOutput</sch:assert>
       <sch:assert role='ERROR' test='count(h:NominalVoltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NominalVoltage</sch:assert>
       <sch:assert role='ERROR' test='count(h:RoundTripEfficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RoundTripEfficiency</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:LifetimeModel) = 0'>Expected 0 element(s) for xpath: extension/LifetimeModel</sch:assert> <!-- Temporarily disabled -->
-      <sch:assert role='ERROR' test='h:extension/h:LifetimeModel[text()="None" or text()="KandlerSmith"] or not(h:extension/h:LifetimeModel)'>Expected extension/LifetimeModel to be 'None' or 'KandlerSmith'</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:RatedPowerOutput) &lt;= 1000 and number(h:RatedPowerOutput) &gt; 0'>Rated power output should typically be greater than or equal to 1000 W.</sch:report>
     </sch:rule>
@@ -2916,8 +2915,6 @@
       <sch:assert role='ERROR' test='number(h:Battery/h:UsableCapacity[h:Units="kWh"]/h:Value) &lt; number(h:Battery/h:NominalCapacity[h:Units="kWh"]/h:Value) or not(h:Battery/h:UsableCapacity[h:Units="kWh"]/h:Value) or not(h:Battery/h:NominalCapacity[h:Units="kWh"]/h:Value)'>Expected UsableCapacity to be less than NominalCapacity</sch:assert>
       <sch:assert role='ERROR' test='number(h:Battery/h:UsableCapacity[h:Units="Ah"]/h:Value) &lt; number(h:Battery/h:NominalCapacity[h:Units="Ah"]/h:Value) or not(h:Battery/h:UsableCapacity[h:Units="Ah"]/h:Value) or not(h:Battery/h:NominalCapacity[h:Units="Ah"]/h:Value)'>Expected UsableCapacity to be less than NominalCapacity</sch:assert>
       <sch:assert role='ERROR' test='count(h:Battery/h:NominalVoltage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Battery/NominalVoltage</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Battery/h:extension/h:LifetimeModel) = 0'>Expected 0 element(s) for xpath: Battery/extension/LifetimeModel</sch:assert> <!-- Temporarily disabled -->
-      <sch:assert role='ERROR' test='h:Battery/h:extension/h:LifetimeModel[text()="None" or text()="KandlerSmith"] or not(h:Battery/h:extension/h:LifetimeModel)'>Expected Battery/extension/LifetimeModel to be 'None' or 'KandlerSmith'</sch:assert>
       <sch:assert role='ERROR' test='count(h:FractionChargedLocation[h:Location="Home"]/h:Percentage) &lt;= 1'>Expected 0 or 1 element(s) for xpath: FractionChargedLocation[Location="Home"]/Percentage</sch:assert>
       <sch:assert role='ERROR' test='count(h:ConnectedCharger) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ConnectedCharger</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
