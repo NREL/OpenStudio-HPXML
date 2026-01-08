@@ -407,9 +407,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if args[:timeseries_frequency] != EPlus::TimeseriesFrequencyTimestep
           resilience_frequency = EPlus::TimeseriesFrequencyHourly
         end
-        Model.add_output_meter(model, meter_name: 'Electricity:Facility', reporting_frequency: resilience_frequency)
-        Model.add_output_meter(model, meter_name: 'ElectricityProduced:Facility', reporting_frequency: resilience_frequency)
-        Model.add_output_meter(model, meter_name: 'ElectricStorage:ElectricityProduced', reporting_frequency: resilience_frequency)
+        Model.add_output_meter(model, meter_name: Outputs::MeterCustomElectricityCriticalLoad, reporting_frequency: resilience_frequency)
         @resilience.values.each do |resilience|
           resilience.variables.each do |_sys_id, varkey, var|
             Model.add_output_variable(model, key_value: varkey, variable_name: var, reporting_frequency: resilience_frequency)
@@ -1085,11 +1083,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
 
       batt_soc_kwh = batt_soc.map { |soc| soc - min_soc }.map { |soc| soc * batt_kwh }
-      elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-      elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-      elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
-      elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-      crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
+
+      crit_load = get_report_meter_data_timeseries([Outputs::MeterCustomElectricityCriticalLoad.upcase], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+      crit_load = crit_load.zip(batt_loss).map { |x, y| x + y }
 
       resilience_timeseries = []
       n_timesteps = crit_load.size
