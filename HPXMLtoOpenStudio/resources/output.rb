@@ -1451,7 +1451,7 @@ module Outputs
     # - Total Electricity (Electricity:Facility plus EV charging, batteries, generators)
     # - Net Electricity (above plus PV)
     # - PV Electricity
-    # - Critical Electricity Load (Electricity:Facility plus PV)
+    # - Critical Electricity Load (Electricity:Facility plus PV, generators)
 
     total_key_vars = []
     net_key_vars = []
