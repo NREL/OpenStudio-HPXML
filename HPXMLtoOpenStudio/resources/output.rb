@@ -1494,7 +1494,8 @@ module Outputs
 
     # Create Total/Net meters
     { MeterCustomElectricityTotal => total_key_vars,
-      MeterCustomElectricityNet => net_key_vars }.each do |meter_name, key_vars|
+      MeterCustomElectricityNet => net_key_vars,
+      MeterCustomElectricityCriticalLoad => pv_key_vars + gen_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
         key_vars << ['', 'Electricity:Facility']
@@ -1515,30 +1516,13 @@ module Outputs
       end
     end
 
-    # Create PV/CritLoad meters
-    if pv_key_vars.empty? && gen_key_vars.empty?
-      # Avoid OpenStudio warnings if nothing to decrement
+    # Create PV meter
+    if not pv_key_vars.empty?
       Model.add_meter_custom(
         model,
-        name: MeterCustomElectricityCriticalLoad,
+        name: MeterCustomElectricityPV,
         fuel_type: EPlus::FuelTypeElectricity,
-        key_var_pairs: [['', 'Electricity:Facility']]
-      )
-    else
-      if not pv_key_vars.empty?
-        Model.add_meter_custom(
-          model,
-          name: MeterCustomElectricityPV,
-          fuel_type: EPlus::FuelTypeElectricity,
-          key_var_pairs: pv_key_vars
-        )
-      end
-      Model.add_meter_custom_decrement(
-        model,
-        name: MeterCustomElectricityCriticalLoad,
-        fuel_type: EPlus::FuelTypeElectricity,
-        key_var_pairs: pv_key_vars + gen_key_vars,
-        source_meter_name: 'Electricity:Facility'
+        key_var_pairs: pv_key_vars
       )
     end
   end
