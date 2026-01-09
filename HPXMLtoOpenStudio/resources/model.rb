@@ -1252,6 +1252,25 @@ module Model
       end
     end
 
+    # Meter:CustomDecrement Objects
+    unit_model.getMeterCustomDecrements.each do |meter_custom_decr|
+      source_meter_name = meter_custom_decr.sourceMeterName
+      source_meter_name = make_variable_name(source_meter_name, unit_number)
+      meter_custom_decr.setSourceMeterName(source_meter_name)
+
+      key_var_groups = meter_custom_decr.keyVarGroups
+      meter_custom_decr.removeAllKeyVarGroups
+      key_var_groups.each do |key_var_group|
+        key, var = key_var_group
+
+        if not key.empty?
+          key = make_variable_name(key, unit_number)
+        end
+
+        meter_custom_decr.addKeyVarGroup(key, var)
+      end
+    end
+
     # EMS objects
     ems_map = {}
 

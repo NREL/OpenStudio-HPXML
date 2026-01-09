@@ -1444,7 +1444,7 @@ module Outputs
   # Creates custom output meters that are used across reporting measures.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param custom_unit_meter [OpenStudio::Model::MeterCustom] TODO
+  # @param custom_unit_meter [OpenStudio::Model::MeterCustom] optional OpenStudio custom meter object
   # @return [nil]
   def self.create_custom_meters(model, custom_unit_meter = nil)
     # Create custom meters:
@@ -1530,7 +1530,7 @@ module Outputs
   # Create custom meters with fuel usage *for each unit*.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml [TODO] TODO
+  # @param hpxml [HPXML] HPXML object
   # @return [nil]
   def self.create_custom_unit_meters(model, hpxml)
     return if hpxml.buildings.size == 1
@@ -1555,13 +1555,6 @@ module Outputs
 
           if fuel_type == EPlus::FuelTypeElectricity
             next if [EUT::PV, EUT::Generator, EUT::Vehicle, EUT::Battery].include?(eut) && !output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) || x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
-            # elsif meter_type == 'ElectricityProduced:Facility'
-            # next if not [EUT::PV, EUT::Generator, EUT::Battery].include?(eut)
-            # next if output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
-            # elsif meter_type == 'ElectricStorage:ElectricityProduced'
-            # next if not [EUT::Vehicle, EUT::Battery].include?(eut)
-            # next if output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
-            # next if output_vars.any? { |x| x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
           end
 
           next unless to_eplus[ft] == fuel_type
@@ -1582,8 +1575,8 @@ module Outputs
           elsif object.to_ElectricLoadCenterStorageConverter.is_initialized
             key_vars << [object.name.to_s, 'Converter Ancillary AC Electricity Energy']
           elsif object.to_AirLoopHVACUnitarySystem.is_initialized
-            # key_vars << [object.name.to_s, 'Unitary System Cooling Ancillary Electricity Energy']
-            # key_vars << [object.name.to_s, 'Unitary System Heating Ancillary Electricity Energy']
+            key_vars << [object.name.to_s, 'Unitary System Cooling Ancillary Electricity Energy']
+            key_vars << [object.name.to_s, 'Unitary System Heating Ancillary Electricity Energy']
           elsif object.to_PumpVariableSpeed.is_initialized
             key_vars << [object.name.to_s, 'Pump Electricity Energy']
           elsif object.to_CoilHeatingGas.is_initialized
@@ -1595,28 +1588,14 @@ module Outputs
           elsif object.to_ExteriorLights.is_initialized
             key_vars << [object.name.to_s, 'Exterior Lights Electricity Energy']
           end
-          # elsif meter_type == 'ElectricityProduced:Facility'
-          # if object.to_ElectricLoadCenterStorageConverter.is_initialized
-          # key_vars << [object.name.to_s, 'Converter Electricity Loss Decrement Energy']
-          # elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-          # key_vars << [object.name.to_s, 'Electric Storage Production Decrement Energy']
-          # key_vars << [object.name.to_s, 'Electric Storage Discharge Energy']
-          # end
-          # elsif meter_type == 'ElectricStorage:ElectricityProduced'
-          # if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-          # key_vars << [object.name.to_s, 'Electric Storage Production Decrement Energy']
-          # key_vars << [object.name.to_s, 'Electric Storage Discharge Energy']
-          # end
         end
       end
 
       next if key_vars.empty?
 
-      name = "#{fuel_type}:Facility"
-
       meter_custom = Model.add_meter_custom(
         model,
-        name: name,
+        name: "#{fuel_type}:Facility",
         fuel_type: fuel_type,
         key_var_pairs: key_vars
       )

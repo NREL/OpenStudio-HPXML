@@ -1565,7 +1565,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         sum_meters = fuel.annual_output_by_unit.values.sum
 
         if (sum_meters - total_meter).abs > tol
-          runner.registerError("#{meter_name} custom unit meters (#{sum_meters.round(3)}) do not sum to total (#{total_meter.round(3)}).")
+          runner.registerError("#{fuel.meter} custom unit meters (#{sum_meters.round(3)}) do not sum to total (#{total_meter.round(3)}).")
           return false
         end
       end
