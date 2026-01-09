@@ -1252,7 +1252,7 @@ module Model
       end
     end
 
-    # Meter:CustomDecrement Objects
+    # Meter:CustomDecrement objects
     unit_model.getMeterCustomDecrements.each do |meter_custom_decr|
       source_meter_name = meter_custom_decr.sourceMeterName
       source_meter_name = make_variable_name(source_meter_name, unit_number)

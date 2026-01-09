@@ -397,6 +397,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         Model.add_output_meter(model, meter_name: fuel.meter, reporting_frequency: args[:timeseries_frequency])
       end
 
+      next unless @hpxml_bldgs.size > 1
+
       @hpxml_bldgs.each do |hpxml_bldg|
         unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
         Model.add_output_meter(model, meter_name: "unit#{unit_num}_#{fuel.meter.gsub(':', '_')}", reporting_frequency: 'runperiod')
@@ -799,9 +801,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @fuels.each do |(_fuel_type, _total_or_net), fuel|
       fuel.annual_output = get_report_meter_data_annual([fuel.meter])
 
-      if @hpxml_bldgs.size == 1
-        fuel.annual_output_by_unit[@hpxml_bldgs[0].building_id] = get_report_meter_data_annual([fuel.meter])
-      else
+      if @hpxml_bldgs.size > 1
         @hpxml_bldgs.each do |hpxml_bldg|
           unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
           fuel_meter = fuel.meter.nil? ? nil : fuel.meter.gsub(':', '_')
@@ -1617,12 +1617,14 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
       results_out << [line_break]
 
-      @fuels.each do |(fuel_type, total_or_net), fuel|
-        fuel.annual_output_by_unit.each do |unit_id, annual_output|
-          results_out << ["Fuel Use: #{unit_id}: #{fuel_type}: #{total_or_net} (#{fuel.annual_units})", annual_output.round(n_digits)]
+      if @hpxml_bldgs.size > 1
+        @fuels.each do |(fuel_type, total_or_net), fuel|
+          fuel.annual_output_by_unit.each do |unit_id, annual_output|
+            results_out << ["Fuel Use: #{unit_id}: #{fuel_type}: #{total_or_net} (#{fuel.annual_units})", annual_output.round(n_digits)]
+          end
         end
+        results_out << [line_break]
       end
-      results_out << [line_break]
     end
 
     # End uses

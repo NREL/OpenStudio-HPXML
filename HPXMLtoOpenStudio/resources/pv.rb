@@ -60,6 +60,7 @@ module PV
       ipvwatts = OpenStudio::Model::ElectricLoadCenterInverterPVWatts.new(model)
       ipvwatts.setName('PVSystem inverter')
       ipvwatts.setInverterEfficiency(inverter_efficiency)
+      ipvwatts.additionalProperties.setFeature('ObjectType', Constants::ObjectTypePhotovoltaics)
 
       elcd.setInverter(ipvwatts)
     else

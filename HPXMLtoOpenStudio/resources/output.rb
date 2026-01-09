@@ -1474,18 +1474,28 @@ module Outputs
       elcd.generators.each do |generator|
         next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypePhotovoltaics
 
-        net_key_vars << ['', 'Photovoltaic:ElectricityProduced']
-        pv_key_vars << net_key_vars[-1]
-        net_key_vars << ['', 'PowerConversion:ElectricityProduced']
-        pv_key_vars << net_key_vars[-1]
+        if generator.to_GeneratorPVWatts.is_initialized
+          net_key_vars << [generator.name.to_s.upcase, 'Generator Produced DC Electricity Energy']
+          pv_key_vars << net_key_vars[-1]
+        end
+      end
+
+      if elcd.inverter.is_initialized
+        inv = elcd.inverter.get
+        if inv.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypePhotovoltaics
+          net_key_vars << [inv.name.to_s.upcase, 'Inverter Conversion Loss Decrement Energy']
+          pv_key_vars << net_key_vars[-1]
+        end
       end
 
       # Generator output meter
       elcd.generators.each do |generator|
         next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeGenerator
 
-        net_key_vars << ['', 'Cogeneration:ElectricityProduced']
-        total_key_vars << net_key_vars[-1]
+        if generator.to_GeneratorMicroTurbine.is_initialized
+          net_key_vars << [generator.name.to_s, 'Generator Produced AC Electricity Energy']
+          total_key_vars << net_key_vars[-1]
+        end
       end
     end
 
