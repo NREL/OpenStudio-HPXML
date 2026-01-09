@@ -17,7 +17,11 @@ module Constructions
     end
     interior_film = Material.AirFilmIndoorRoof(UnitConversions.convert(surfaces[0].tilt, 'rad', 'deg'), hpxml_header.apply_ashrae140_assumptions)
     exterior_film = Material.AirFilmOutside(false, hpxml_header.apply_ashrae140_assumptions)
-    mat_roof_sheath = Material.RoofMaterialAndSheathing(roof.roof_type) # Combined roof material + OSB sheathing
+    if hpxml_header.apply_ashrae140_assumptions
+      mat_roof_sheath = Material.RoofMaterialAndSheathing(roof.roof_type, 0.5) # Combined roof material + OSB sheathing
+    else
+      mat_roof_sheath = Material.RoofMaterialAndSheathing(roof.roof_type) # Combined roof material + OSB sheathing
+    end
     mat_int_finish = Material.InteriorFinishMaterial(roof.interior_finish_type, roof.interior_finish_thickness)
     if mat_int_finish.nil?
       fallback_mat_int_finish = nil
