@@ -5,7 +5,7 @@ module Outputs
   MeterCustomElectricityTotal = 'Electricity:Total'
   MeterCustomElectricityNet = 'Electricity:Net'
   MeterCustomElectricityPV = 'Electricity:PV'
-  MeterCustomElectricityCriticalLoad = 'Electricity:CriticalLoad'
+  MeterCustomElectricityCritical = 'Electricity:Critical'
 
   # Add EMS programs for output reporting. In the case where a whole SFA/MF building is
   # being simulated, these programs are added to the whole building (merged) model, not
@@ -1451,7 +1451,7 @@ module Outputs
     # - Total Electricity (Electricity:Facility plus EV charging, batteries, generators)
     # - Net Electricity (above plus PV)
     # - PV Electricity
-    # - Critical Electricity Load (Electricity:Facility plus PV, generators)
+    # - Critical Electricity (Electricity:Facility plus PV, generators)
 
     total_key_vars = []
     net_key_vars = []
@@ -1495,7 +1495,7 @@ module Outputs
     # Create Total/Net meters
     { MeterCustomElectricityTotal => total_key_vars,
       MeterCustomElectricityNet => net_key_vars,
-      MeterCustomElectricityCriticalLoad => pv_key_vars + gen_key_vars }.each do |meter_name, key_vars|
+      MeterCustomElectricityCritical => pv_key_vars + gen_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
         key_vars << ['', 'Electricity:Facility']
