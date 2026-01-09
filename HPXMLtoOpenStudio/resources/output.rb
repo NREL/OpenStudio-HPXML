@@ -1444,8 +1444,9 @@ module Outputs
   # Creates custom output meters that are used across reporting measures.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param custom_unit_meter [OpenStudio::Model::MeterCustom] TODO
   # @return [nil]
-  def self.create_custom_meters(model)
+  def self.create_custom_meters(model, custom_unit_meter = nil)
     # Create custom meters:
     # - Total Electricity (Electricity:Facility plus EV charging, batteries, generators)
     # - Net Electricity (above plus PV)
@@ -1493,7 +1494,11 @@ module Outputs
       MeterCustomElectricityNet => net_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
-        key_vars << ['', 'Electricity:Facility']
+        if custom_unit_meter.nil?
+          key_vars << ['', 'Electricity:Facility']
+        else
+          key_vars = custom_unit_meter.keyVarGroups
+        end
         Model.add_meter_custom(
           model,
           name: meter_name,
@@ -1525,10 +1530,11 @@ module Outputs
   # Create custom meters with fuel usage *for each unit*.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param fuel_type [String] Fuel type (EPlus::FuelTypeXXX)
-  # @param meter_type [String] Electricity:Facility or ElectricityProduced:Facility or ElectricStorage:ElectricityProduced
+  # @param hpxml [TODO] TODO
   # @return [nil]
-  def self.create_unit_fuel_meter(model, fuel_type, meter_type = nil)
+  def self.create_custom_unit_meters(model, hpxml)
+    return if hpxml.buildings.size == 1
+
     to_eplus = { FT::Elec => EPlus::FuelTypeElectricity,
                  FT::Gas => EPlus::FuelTypeNaturalGas,
                  FT::Oil => EPlus::FuelTypeOil,
@@ -1537,85 +1543,88 @@ module Outputs
                  FT::WoodPellets => EPlus::FuelTypeWoodPellets,
                  FT::Coal => EPlus::FuelTypeCoal }
 
-    key_vars = []
-    model.getModelObjects.sort.each do |object|
-      next if object.to_AdditionalProperties.is_initialized
-      next if object.to_EnergyManagementSystemOutputVariable.is_initialized
+    to_eplus.values.each do |fuel_type|
+      key_vars = []
+      model.getModelObjects.sort.each do |object|
+        next if object.to_AdditionalProperties.is_initialized
+        next if object.to_EnergyManagementSystemOutputVariable.is_initialized
 
-      vars_by_key = get_object_outputs_by_key(model, object, EUT)
-      vars_by_key.each do |key, output_vars|
-        ft, eut = key
+        vars_by_key = get_object_outputs_by_key(model, object, EUT)
+        vars_by_key.each do |key, output_vars|
+          ft, eut = key
 
-        if meter_type == 'Electricity:Facility'
-          next if [EUT::PV, EUT::Generator, EUT::Vehicle, EUT::Battery].include?(eut) && !output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) || x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
-        elsif meter_type == 'ElectricityProduced:Facility'
-          next if not [EUT::PV, EUT::Generator, EUT::Battery].include?(eut)
-          next if output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
-        elsif meter_type == 'ElectricStorage:ElectricityProduced'
-          next if not [EUT::Vehicle, EUT::Battery].include?(eut)
-          next if output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
-          next if output_vars.any? { |x| x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
+          if fuel_type == EPlus::FuelTypeElectricity
+            next if [EUT::PV, EUT::Generator, EUT::Vehicle, EUT::Battery].include?(eut) && !output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) || x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
+            # elsif meter_type == 'ElectricityProduced:Facility'
+            # next if not [EUT::PV, EUT::Generator, EUT::Battery].include?(eut)
+            # next if output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
+            # elsif meter_type == 'ElectricStorage:ElectricityProduced'
+            # next if not [EUT::Vehicle, EUT::Battery].include?(eut)
+            # next if output_vars.any? { |x| x.include?(Constants::ObjectTypeBatteryLossesAdjustment) }
+            # next if output_vars.any? { |x| x.include?(Constants::ObjectTypeMiscElectricVehicleCharging) }
+          end
+
+          next unless to_eplus[ft] == fuel_type
+
+          output_vars.each do |output_var|
+            next if output_var.include? 'ExteriorLights:Electricity' # not associated with a zone, so the meter is across all units
+            next if output_var.include? 'InteriorLights:Electricity' # same as above; like interior equipment, we *could* switch to zone level
+            next if output_var.include? 'Electric Storage Charge Energy' # vehicles
+
+            key_vars << [object.name.to_s, output_var]
+          end
         end
 
-        next unless to_eplus[ft] == fuel_type
-
-        output_vars.each do |output_var|
-          next if output_var.include? 'ExteriorLights:Electricity' # not associated with a zone, so the meter is across all units
-          next if output_var.include? 'InteriorLights:Electricity' # same as above; like interior equipment, we *could* switch to zone level
-          next if output_var.include? 'Electric Storage Charge Energy' # vehicles
-
-          key_vars << [object.name.to_s, output_var]
+        # FIXME: can we simplify all this special stuff?
+        if fuel_type == EPlus::FuelTypeElectricity
+          if object.to_ElectricLoadCenterInverterPVWatts.is_initialized
+            key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']
+          elsif object.to_ElectricLoadCenterStorageConverter.is_initialized
+            key_vars << [object.name.to_s, 'Converter Ancillary AC Electricity Energy']
+          elsif object.to_AirLoopHVACUnitarySystem.is_initialized
+            # key_vars << [object.name.to_s, 'Unitary System Cooling Ancillary Electricity Energy']
+            # key_vars << [object.name.to_s, 'Unitary System Heating Ancillary Electricity Energy']
+          elsif object.to_PumpVariableSpeed.is_initialized
+            key_vars << [object.name.to_s, 'Pump Electricity Energy']
+          elsif object.to_CoilHeatingGas.is_initialized
+            key_vars << [object.name.to_s, 'Heating Coil Electricity Energy']
+          elsif object.to_FanSystemModel.is_initialized
+            key_vars << [object.name.to_s, 'Fan Electricity Energy']
+          elsif object.to_Lights.is_initialized
+            key_vars << [object.name.to_s, 'Lights Electricity Energy']
+          elsif object.to_ExteriorLights.is_initialized
+            key_vars << [object.name.to_s, 'Exterior Lights Electricity Energy']
+          end
+          # elsif meter_type == 'ElectricityProduced:Facility'
+          # if object.to_ElectricLoadCenterStorageConverter.is_initialized
+          # key_vars << [object.name.to_s, 'Converter Electricity Loss Decrement Energy']
+          # elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+          # key_vars << [object.name.to_s, 'Electric Storage Production Decrement Energy']
+          # key_vars << [object.name.to_s, 'Electric Storage Discharge Energy']
+          # end
+          # elsif meter_type == 'ElectricStorage:ElectricityProduced'
+          # if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
+          # key_vars << [object.name.to_s, 'Electric Storage Production Decrement Energy']
+          # key_vars << [object.name.to_s, 'Electric Storage Discharge Energy']
+          # end
         end
       end
 
-      # FIXME: can we simplify all this special stuff?
-      if meter_type == 'Electricity:Facility'
-        if object.to_ElectricLoadCenterInverterPVWatts.is_initialized
-          key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']
-        elsif object.to_ElectricLoadCenterStorageConverter.is_initialized
-          key_vars << [object.name.to_s, 'Converter Ancillary AC Electricity Energy']
-        elsif object.to_AirLoopHVACUnitarySystem.is_initialized
-          # key_vars << [object.name.to_s, 'Unitary System Cooling Ancillary Electricity Energy']
-          # key_vars << [object.name.to_s, 'Unitary System Heating Ancillary Electricity Energy']
-        elsif object.to_PumpVariableSpeed.is_initialized
-          key_vars << [object.name.to_s, 'Pump Electricity Energy']
-        elsif object.to_CoilHeatingGas.is_initialized
-          key_vars << [object.name.to_s, 'Heating Coil Electricity Energy']
-        elsif object.to_FanSystemModel.is_initialized
-          key_vars << [object.name.to_s, 'Fan Electricity Energy']
-        elsif object.to_Lights.is_initialized
-          key_vars << [object.name.to_s, 'Lights Electricity Energy']
-        elsif object.to_ExteriorLights.is_initialized
-          key_vars << [object.name.to_s, 'Exterior Lights Electricity Energy']
-        end
-      elsif meter_type == 'ElectricityProduced:Facility'
-        if object.to_ElectricLoadCenterStorageConverter.is_initialized
-          key_vars << [object.name.to_s, 'Converter Electricity Loss Decrement Energy']
-        elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-          key_vars << [object.name.to_s, 'Electric Storage Production Decrement Energy']
-          key_vars << [object.name.to_s, 'Electric Storage Discharge Energy']
-        end
-      elsif meter_type == 'ElectricStorage:ElectricityProduced'
-        if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-          key_vars << [object.name.to_s, 'Electric Storage Production Decrement Energy']
-          key_vars << [object.name.to_s, 'Electric Storage Discharge Energy']
-        end
+      next if key_vars.empty?
+
+      name = "#{fuel_type}:Facility"
+
+      meter_custom = Model.add_meter_custom(
+        model,
+        name: name,
+        fuel_type: fuel_type,
+        key_var_pairs: key_vars
+      )
+
+      if fuel_type == EPlus::FuelTypeElectricity
+        Outputs.create_custom_meters(model, meter_custom)
       end
     end
-
-    return if key_vars.empty?
-
-    name = fuel_type
-    if not meter_type.nil?
-      name = meter_type.gsub(':', '_')
-    end
-
-    Model.add_meter_custom(
-      model,
-      name: "#{name}_CustomMeter",
-      fuel_type: fuel_type,
-      key_var_pairs: key_vars
-    )
   end
 
   # For a given object, returns the Output:Variables or Output:Meters to be requested,
