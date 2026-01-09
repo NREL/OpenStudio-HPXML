@@ -314,7 +314,7 @@ class Material
   # @param thick_in [Double] Thickness of the sheathing (in)
   # @return [Material] The material object
   def self.OSBSheathing(thick_in)
-    return new(name: "osb sheathing #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Wood)
+    return new(name: "osb #{thick_in} in.", thick_in: thick_in, mat_base: BaseMaterial.Wood)
   end
 
   # Creates a material for a radiant batter (in an attic).
@@ -343,32 +343,49 @@ class Material
     return new(name: 'radiant barrier', thick_in: 0.0084, k_in: 1629.6, rho: 168.6, cp: 0.22, tAbs: emittance, sAbs: 0.05)
   end
 
-  # Creates a material for the roof exterior layer (e.g. shingles).
+  # Creates a material for the roof exterior layers (e.g. shingles + osb sheathing).
   #
   # @param type [HPXML::RoofTypeXXX] Type of roof material
   # @param thick_in [Double] Thickness of the roof material (in)
   # @return [Material] The material object
-  def self.RoofMaterial(type, thick_in = nil)
+  def self.RoofMaterialAndSheathing(type, thick_in = nil)
+    # Note: We include OSB sheathing in the same material layer to prevent possible attic temperature
+    # out of bounds errors in E+.
+    # From https://bigladdersoftware.com/epx/docs/22-2/engineering-reference/conduction-through-the-walls.html#conduction-transfer-function-ctf-calculations-special-case-r-value-only-layers:
+    # "There are potential issues with having a resistance-only layer at either the inner or
+    # outer most layers of a construction. A little or no mass layer there could receive intense
+    # thermal radiation from internal sources or the sun causing the temperature at the inner or
+    # outer surface to achieve very high levels."
+    mat_osb = OSBSheathing(0.75)
     case type
     when HPXML::RoofTypeMetal
       thick_in = 0.02 if thick_in.nil?
-      return new(name: type, thick_in: thick_in, k_in: 346.9, rho: 487.0, cp: 0.11)
+      mat_roof = new(name: type, thick_in: thick_in, k_in: 346.9, rho: 487.0, cp: 0.11)
     when HPXML::RoofTypeAsphaltShingles, HPXML::RoofTypeWoodShingles, HPXML::RoofTypeShingles, HPXML::RoofTypeCool
       thick_in = 0.25 if thick_in.nil?
-      return new(name: type, thick_in: thick_in, k_in: 1.128, rho: 70.0, cp: 0.35)
+      mat_roof = new(name: type, thick_in: thick_in, k_in: 1.128, rho: 70.0, cp: 0.35)
     when HPXML::RoofTypeConcrete
       thick_in = 0.75 if thick_in.nil?
-      return new(name: type, thick_in: thick_in, k_in: 7.63, rho: 131.1, cp: 0.199)
+      mat_roof = new(name: type, thick_in: thick_in, k_in: 7.63, rho: 131.1, cp: 0.199)
     when HPXML::RoofTypeClayTile
       thick_in = 0.75 if thick_in.nil?
-      return new(name: type, thick_in: thick_in, k_in: 5.83, rho: 118.6, cp: 0.191)
+      mat_roof = new(name: type, thick_in: thick_in, k_in: 5.83, rho: 118.6, cp: 0.191)
     when HPXML::RoofTypeEPS
       thick_in = 1.0 if thick_in.nil?
-      return new(name: type, thick_in: thick_in, mat_base: BaseMaterial.InsulationRigid)
+      mat_roof = new(name: type, thick_in: thick_in, mat_base: BaseMaterial.InsulationRigid)
     when HPXML::RoofTypePlasticRubber
       thick_in = 0.25 if thick_in.nil?
-      return new(name: type, thick_in: thick_in, k_in: 2.78, rho: 110.8, cp: 0.36)
+      mat_roof = new(name: type, thick_in: thick_in, k_in: 2.78, rho: 110.8, cp: 0.36)
     end
+
+    # Determine combined material
+    name = "#{mat_roof.name} + #{mat_osb.name}"
+    rvalue = mat_osb.thick_in / mat_osb.k_in + mat_roof.thick_in / mat_roof.k_in
+    thick_in = mat_osb.thick_in + mat_roof.thick_in
+    rho = (mat_osb.rho * mat_osb.thick_in + mat_roof.rho * mat_roof.thick_in) / thick_in
+    cp = (mat_osb.cp * mat_osb.rho * mat_osb.thick_in + mat_roof.cp * mat_roof.rho * mat_roof.thick_in) / thick_in
+
+    return new(name: name, thick_in: thick_in, k_in: thick_in / rvalue, rho: rho, cp: cp)
 
     fail "Unexpected type: #{type}."
   end
