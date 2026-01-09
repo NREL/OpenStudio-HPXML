@@ -23,7 +23,7 @@ OpenStudio-HPXML capabilities include:
 - Can be used for `automated calibration to utility bills <https://github.com/NREL/OpenStudio-HPXML-calibration>`_
 
 .. note::
-  OpenStudio-HPXML can be used to meet the `IRA Home Efficiency Rebate program <https://www.energy.gov/sites/default/files/2024-05/ira-home-rebates-single-family-software-verification_050324.pdf>`_.
+  OpenStudio-HPXML can be used to meet the `IRA HOMES Rebates program <https://www.energy.gov/sites/default/files/2024-05/ira-home-rebates-single-family-software-verification_050324.pdf>`_.
 
 .. note::
 
