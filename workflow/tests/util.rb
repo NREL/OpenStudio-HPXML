@@ -440,9 +440,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-bldgtype-mf-whole-building'
       next if message.include? 'SHR adjusted to achieve valid outlet air properties and the simulation continues.'
     end
-    # TODO: I'm not sure how to handle the following
-    next if message.include?('GetCustomMeterInput: Meter:Custom = ') && message.include?('ELECTRICITY_FACILITY') && message.include?('referenced multiple times, only first instance will be used')
-    next if message.include?('GetCustomMeterInput: Meter:Custom = ') && message.include?('ELECTRICITY_TOTAL') && message.include?('referenced multiple times, only first instance will be used')
 
     flunk "Unexpected eplusout.err message found for #{File.basename(hpxml_path)}: #{message}"
   end

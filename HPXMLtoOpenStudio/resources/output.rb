@@ -1584,9 +1584,6 @@ module Outputs
             key_vars << [object.name.to_s, 'Inverter Ancillary AC Electricity Energy']
           elsif object.to_ElectricLoadCenterStorageConverter.is_initialized
             key_vars << [object.name.to_s, 'Converter Ancillary AC Electricity Energy']
-          elsif object.to_AirLoopHVACUnitarySystem.is_initialized
-            key_vars << [object.name.to_s, 'Unitary System Cooling Ancillary Electricity Energy']
-            key_vars << [object.name.to_s, 'Unitary System Heating Ancillary Electricity Energy']
           elsif object.to_PumpVariableSpeed.is_initialized
             key_vars << [object.name.to_s, 'Pump Electricity Energy']
           elsif object.to_CoilHeatingGas.is_initialized
@@ -1597,6 +1594,18 @@ module Outputs
             key_vars << [object.name.to_s, 'Lights Electricity Energy']
           elsif object.to_ExteriorLights.is_initialized
             key_vars << [object.name.to_s, 'Exterior Lights Electricity Energy']
+          end
+        end
+      end
+
+      # Avoid the "Output Variable or Meter Name="x:y:z" referenced multiple times, only first instance will be used" E+ warning
+      key_vars.each_with_index do |key_var1, i|
+        key_vars.each_with_index do |key_var2, j|
+          next if key_var1 == key_var2
+
+          if key_var1[1].include?(':') && (key_var1[1] == key_var2[1])
+            key_vars[i] = ['', key_var1[1]]
+            key_vars[j] = ['', key_var2[1]]
           end
         end
       end
