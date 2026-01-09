@@ -62,6 +62,20 @@ class Material
     end
   end
 
+  # Combines two materials into a new single material.
+  #
+  # @param mat1 [Material] The first material to combine
+  # @param mat2 [Material] The second material to combine
+  # @return [Material] The combined material object
+  def self.combine(mat1, mat2, new_name)
+    rvalue = mat2.thick_in / mat2.k_in + mat1.thick_in / mat1.k_in
+    thick_in = mat2.thick_in + mat1.thick_in
+    rho = (mat2.rho * mat2.thick_in + mat1.rho * mat1.thick_in) / thick_in
+    cp = (mat2.cp * mat2.rho * mat2.thick_in + mat1.cp * mat1.rho * mat1.thick_in) / (rho * thick_in)
+
+    return new(name: new_name, thick_in: thick_in, k_in: thick_in / rvalue, rho: rho, cp: cp)
+  end
+
   attr_accessor :name, :thick, :thick_in, :k, :k_in, :rho, :cp, :rvalue, :tAbs, :sAbs
 
   # Creates a material associated with a closed air cavity (e.g.,
@@ -377,14 +391,7 @@ class Material
       fail "Unexpected roof type: #{roof_type}."
     end
 
-    # Determine combined material
-    name = "#{mat_roof.name} + #{mat_osb.name}"
-    rvalue = mat_osb.thick_in / mat_osb.k_in + mat_roof.thick_in / mat_roof.k_in
-    thick_in = mat_osb.thick_in + mat_roof.thick_in
-    rho = (mat_osb.rho * mat_osb.thick_in + mat_roof.rho * mat_roof.thick_in) / thick_in
-    cp = (mat_osb.cp * mat_osb.rho * mat_osb.thick_in + mat_roof.cp * mat_roof.rho * mat_roof.thick_in) / (rho * thick_in)
-
-    return new(name: name, thick_in: thick_in, k_in: thick_in / rvalue, rho: rho, cp: cp)
+    return combine(mat_roof, mat_osb, "#{mat_roof.name} + #{mat_osb.name}")
   end
 end
 

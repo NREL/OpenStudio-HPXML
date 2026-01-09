@@ -60,6 +60,15 @@ module Constructions
       ]
       match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, interior_film, exterior_film)
 
+      if layer_r + constr_set.rigid_r < 1.0
+        # Increase the roof material & sheathing layer to avoid creating
+        # a thin insulation layer, which can lead to CTF errors.
+        mult = (mat_roof_sheath.rvalue + layer_r + constr_set.rigid_r) / mat_roof_sheath.rvalue
+        mat_roof_sheath.thick_in *= mult
+        layer_r = 0
+        constr_set.rigid_r = 0
+      end
+
       cavity_r = 0
       cavity_ins_thick_in = 0
       framing_factor = 0
