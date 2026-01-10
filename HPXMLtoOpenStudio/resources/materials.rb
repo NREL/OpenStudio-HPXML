@@ -362,7 +362,7 @@ class Material
   # @param roof_type [HPXML::RoofTypeXXX] Type of roof material
   # @param osb_thick_in [Double] Thickness of the OSB sheathing (in)
   # @return [Material] The material object
-  def self.RoofMaterialAndSheathing(roof_type, osb_thick_in = 0.75)
+  def self.RoofMaterialAndSheathing(roof_type, osb_thick_in = 0.625)
     # Note: We include OSB sheathing in the same material layer to prevent possible attic
     # temperature out of bounds errors in E+.
     #
