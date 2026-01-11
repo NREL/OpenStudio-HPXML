@@ -950,7 +950,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
             next if end_use.annual_output_by_system[htg_system.id].nil?
 
             fuels = @fuels.select { |k, _v| k[0] == fuel_type }.values
-            apply_multiplier_to_output(end_use, fuels, htg_system.id, 1.0 / dse)
+            apply_multiplier_to_output(end_use, fuels, htg_system.id, hpxml_bldg.building_id, 1.0 / dse)
           end
         end
       end
@@ -968,7 +968,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
             next if end_use.annual_output_by_system[clg_system.id].nil?
 
             fuels = @fuels.select { |k, _v| k[0] == fuel_type }.values
-            apply_multiplier_to_output(end_use, fuels, clg_system.id, 1.0 / dse)
+            apply_multiplier_to_output(end_use, fuels, clg_system.id, hpxml_bldg.building_id, 1.0 / dse)
           end
         end
       end
@@ -986,7 +986,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           dhw_ids = hpxml_bldg.water_heating_systems.map { |dhw| dhw.id }
         end
         dhw_ids.each do |dhw_id|
-          apply_multiplier_to_output(@loads[LT::HotWaterDelivered], [@loads[LT::HotWaterSolarThermal]], dhw_id, 1.0 / (1.0 - solar_system.solar_fraction))
+          apply_multiplier_to_output(@loads[LT::HotWaterDelivered], [@loads[LT::HotWaterSolarThermal]], dhw_id, nil, 1.0 / (1.0 - solar_system.solar_fraction))
         end
       end
     end
@@ -2301,14 +2301,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param obj [EndUse or Load] The output object of interest
   # @param sync_objs [Fuel or Load] Additional outputs that need to be kept in sync
   # @param sys_id [String] The related HPXML object's System Identifier
+  # @param unit_id [TODO] TODO
   # @param mult [Double] The multiplier value to apply
   # @return [nil]
-  def apply_multiplier_to_output(obj, sync_objs, sys_id, mult)
+  def apply_multiplier_to_output(obj, sync_objs, sys_id, unit_id, mult)
     # Annual
     orig_value = obj.annual_output_by_system[sys_id]
     obj.annual_output_by_system[sys_id] = orig_value * mult
     sync_objs.each do |sync_obj|
       sync_obj.annual_output += (orig_value * mult - orig_value)
+      if (not unit_id.nil?) && sync_obj.annual_output_by_unit.keys.include?(unit_id)
+        sync_obj.annual_output_by_unit[unit_id] += (orig_value * mult - orig_value) unless unit_id.nil?
+      end
     end
 
     # Timeseries
