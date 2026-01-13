@@ -59,6 +59,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(true)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('include_annual_unit_fuel_consumptions', false)
+    arg.setDisplayName('Generate Annual Output: Dwelling Unit Fuel Consumptions')
+    arg.setDescription('Generates annual energy consumptions for each fuel type of each dwelling unit.')
+    arg.setDefaultValue(true)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('include_annual_end_use_consumptions', false)
     arg.setDisplayName('Generate Annual Output: End Use Consumptions')
     arg.setDescription('Generates annual energy consumptions for each end use.')
@@ -158,6 +164,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('include_timeseries_fuel_consumptions', false)
     arg.setDisplayName('Generate Timeseries Output: Fuel Consumptions')
     arg.setDescription('Generates timeseries energy consumptions for each fuel type.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('include_timeseries_unit_fuel_consumptions', false)
+    arg.setDisplayName('Generate Timeseries Output: Dwelling Unit Fuel Consumptions')
+    arg.setDescription('Generates timeseries energy consumptions for each fuel type of each dwelling unit.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -402,6 +414,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @hpxml_bldgs.each do |hpxml_bldg|
         unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
         Model.add_output_meter(model, meter_name: "unit#{unit_num}_#{fuel.meter.gsub(':', '_')}", reporting_frequency: 'runperiod')
+        if args[:include_timeseries_unit_fuel_consumptions]
+          Model.add_output_meter(model, meter_name: "unit#{unit_num}_#{fuel.meter.gsub(':', '_')}", reporting_frequency: args[:timeseries_frequency])
+        end
       end
     end
 
@@ -801,17 +816,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @fuels.each do |(_fuel_type, _total_or_net), fuel|
       fuel.annual_output = get_report_meter_data_annual([fuel.meter])
 
-      if @hpxml_bldgs.size > 1
-        @hpxml_bldgs.each do |hpxml_bldg|
-          unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
-          fuel_meter = fuel.meter.nil? ? nil : fuel.meter.gsub(':', '_')
-          fuel.annual_output_by_unit[hpxml_bldg.building_id] = get_report_meter_data_annual(["unit#{unit_num}_#{fuel_meter}".upcase])
-        end
+      if args[:include_timeseries_fuel_consumptions]
+        fuel.timeseries_output = get_report_meter_data_timeseries([fuel.meter], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
       end
 
-      next unless args[:include_timeseries_fuel_consumptions]
+      next unless @hpxml_bldgs.size > 1
 
-      fuel.timeseries_output = get_report_meter_data_timeseries([fuel.meter], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
+      @hpxml_bldgs.each do |hpxml_bldg|
+        unit_num = @hpxml_bldgs.index(hpxml_bldg) + 1
+        fuel_meter = fuel.meter.nil? ? nil : fuel.meter.gsub(':', '_')
+        fuel.annual_output_by_unit[hpxml_bldg.building_id] = get_report_meter_data_annual(["unit#{unit_num}_#{fuel_meter}".upcase])
+        if args[:include_timeseries_unit_fuel_consumptions]
+          fuel.timeseries_output_by_unit[hpxml_bldg.building_id] = get_report_meter_data_timeseries(["unit#{unit_num}_#{fuel_meter}".upcase], UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, args[:timeseries_frequency])
+        end
+      end
     end
 
     # Peak Electricity Consumption
@@ -1616,7 +1634,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         results_out << ["#{fuel.name} (#{fuel.annual_units})", fuel.annual_output.to_f.round(n_digits)]
       end
       results_out << [line_break]
+    end
 
+    # Fuels by unit
+    if args[:include_annual_unit_fuel_consumptions]
       if @hpxml_bldgs.size > 1
         @fuels.each do |(fuel_type, total_or_net), fuel|
           fuel.annual_output_by_unit.each do |unit_id, annual_output|
@@ -1810,6 +1831,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       fuel_data = @fuels.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
     end
 
+    # Fuels by unit
+    if args[:include_timeseries_unit_fuel_consumptions]
+      if @hpxml_bldgs.size > 1
+        unit_fuel_data = []
+        @fuels.each do |(fuel_type, total_or_net), fuel|
+          fuel.timeseries_output_by_unit.each do |unit_id, timeseries_output|
+            next if timeseries_output.sum(0.0) == 0
+
+            unit_fuel_data << ["Fuel Use: #{unit_id}: #{fuel_type}: #{total_or_net}", fuel.timeseries_units] + timeseries_output.map { |v| v.round(n_digits) }
+          end
+        end
+      end
+    end
+
     # End uses
     if args[:include_timeseries_end_use_consumptions]
       end_use_data = @end_uses.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
@@ -1909,7 +1944,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       output_meters_data = @output_meters.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output }
     end
 
-    return if (total_energy_data.size + fuel_data.size + end_use_data.size + system_use_data.size + emissions_data.size + emission_fuel_data.size +
+    return if (total_energy_data.size + fuel_data.size + unit_fuel_data.size + end_use_data.size + system_use_data.size + emissions_data.size + emission_fuel_data.size +
                emission_end_use_data.size + hot_water_use_data.size + total_loads_data.size + comp_loads_data.size + unmet_hours_data.size +
                zone_temps_data.size + zone_conds_data.size + airflows_data.size + weather_data.size + resilience_data.size + output_variables_data.size + output_meters_data.size) == 0
 
@@ -1917,7 +1952,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     if ['csv'].include? args[:output_format]
       # Assemble data
-      data = data.zip(*timestamps2, *timestamps3, *total_energy_data, *fuel_data, *end_use_data, *system_use_data, *emissions_data,
+      data = data.zip(*timestamps2, *timestamps3, *total_energy_data, *fuel_data, *unit_fuel_data, *end_use_data, *system_use_data, *emissions_data,
                       *emission_fuel_data, *emission_end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *unmet_hours_data,
                       *zone_temps_data, *zone_conds_data, *airflows_data, *weather_data, *resilience_data, *output_variables_data, *output_meters_data)
 
@@ -1988,7 +2023,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       h['TimeDST'] = timestamps2[0][2..-1] unless @timestamps_dst.nil?
       h['TimeUTC'] = timestamps3[0][2..-1] unless @timestamps_utc.nil?
 
-      [total_energy_data, fuel_data, end_use_data, system_use_data, emissions_data, emission_fuel_data,
+      [total_energy_data, fuel_data, unit_fuel_data, end_use_data, system_use_data, emissions_data, emission_fuel_data,
        emission_end_use_data, hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data,
        zone_temps_data, zone_conds_data, airflows_data, weather_data, resilience_data, output_variables_data, output_meters_data].each do |d|
         d.each do |o|
@@ -2402,8 +2437,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       @meter = meter
       @timeseries_output_by_system = {}
       @annual_output_by_unit = {}
+      @timeseries_output_by_unit = {}
     end
-    attr_accessor(:meter, :timeseries_output_by_system, :annual_output_by_unit)
+    attr_accessor(:meter, :timeseries_output_by_system, :annual_output_by_unit, :timeseries_output_by_unit)
   end
 
   # Structure to store EnergyPlus outputs by end use and fuel type.

@@ -46,6 +46,17 @@ Generates annual energy consumptions for each fuel type.
 
 <br/>
 
+**Generate Annual Output: Dwelling Unit Fuel Consumptions**
+
+Generates annual energy consumptions for each fuel type of each dwelling unit.
+
+- **Name:** ``include_annual_unit_fuel_consumptions``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Generate Annual Output: End Use Consumptions**
 
 Generates annual energy consumptions for each end use.
@@ -218,6 +229,17 @@ Generates timeseries energy consumptions for the total building.
 Generates timeseries energy consumptions for each fuel type.
 
 - **Name:** ``include_timeseries_fuel_consumptions``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
+**Generate Timeseries Output: Dwelling Unit Fuel Consumptions**
+
+Generates timeseries energy consumptions for each fuel type of each dwelling unit.
+
+- **Name:** ``include_timeseries_unit_fuel_consumptions``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
