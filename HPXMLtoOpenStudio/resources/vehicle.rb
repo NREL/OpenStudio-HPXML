@@ -38,6 +38,7 @@ module Vehicle
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_electric_vehicle(runner, model, spaces, hpxml, hpxml_bldg, hpxml_header, vehicle, schedules_file)
+    unit_multiplier = hpxml_bldg.building_construction.number_of_units
     if hpxml_bldg.plug_loads.any? { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }
       # Warning issued by Schematron validator
       return
@@ -93,7 +94,7 @@ module Vehicle
     # Scale the effective discharge power by 2.25 to assign the rated discharge power.
     # This value reflects the maximum power adjustment allowed in the EMS EV discharge program at -17.8 C.
     vehicle.additional_properties.rated_power_output = eff_discharge_power * 2.25
-    vehicle.additional_properties.eff_discharge_power = eff_discharge_power
+    vehicle.additional_properties.eff_discharge_power = eff_discharge_power * unit_multiplier
 
     # Apply vehicle battery to model
     Battery.apply_battery(runner, model, spaces, hpxml, hpxml_bldg, vehicle, charging_schedule, discharging_schedule)

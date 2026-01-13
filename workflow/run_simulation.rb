@@ -11,7 +11,7 @@ require_relative '../HPXMLtoOpenStudio/resources/version'
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
-$timeseries_types = ['ALL', 'total', 'fuels', 'enduses', 'systemuses', 'emissions', 'emissionfuels',
+$timeseries_types = ['ALL', 'total', 'fuels', 'unitfuels', 'enduses', 'systemuses', 'emissions', 'emissionfuels',
                      'emissionenduses', 'hotwater', 'loads', 'componentloads',
                      'unmethours', 'temperatures', 'conditions', 'airflows', 'weather', 'resilience']
 
@@ -78,6 +78,7 @@ def run_workflow(basedir, rundir, hpxml, debug, skip_validation, add_comp_loads,
       args['timeseries_frequency'] = timeseries_output_freq
       args['include_timeseries_total_consumptions'] = timeseries_outputs.include? 'total'
       args['include_timeseries_fuel_consumptions'] = timeseries_outputs.include? 'fuels'
+      args['include_timeseries_unit_fuel_consumptions'] = timeseries_outputs.include? 'unitfuels'
       args['include_timeseries_end_use_consumptions'] = timeseries_outputs.include? 'enduses'
       args['include_timeseries_system_use_consumptions'] = timeseries_outputs.include? 'systemuses'
       args['include_timeseries_emissions'] = timeseries_outputs.include? 'emissions'

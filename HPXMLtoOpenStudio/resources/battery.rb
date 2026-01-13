@@ -151,13 +151,14 @@ module Battery
       elcd = elcds.find { |elcd| elcd.name.to_s.include?('PVSystem') }
       if elcd
         elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
-        meter_name = 'Electricity_Facility_CustomMeter'
-        if hpxml.buildings.size > 1
+        if hpxml.buildings.size == 1
+          elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+        else
           unit_num = hpxml.buildings.index(hpxml_bldg) + 1
-          meter_name = "unit#{unit_num}_Electricity_Facility_CustomMeter"
+          meter_name = "unit#{unit_num}_Electricity_Facility"
+          elcd.setStorageOperationScheme('TrackMeterDemandStoreExcessOnSite')
+          elcd.setStorageControlTrackMeterName(meter_name)
         end
-        elcd.setStorageOperationScheme('TrackMeterDemandStoreExcessOnSite')
-        elcd.setStorageControlTrackMeterName(meter_name)
       else
         elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
         elcd.setName("#{obj_name} elec load center dist")
@@ -224,7 +225,6 @@ module Battery
       fuel_type: HPXML::FuelTypeElectricity
     )
     loss_adj_object.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBatteryLossesAdjustment)
-    loss_adj_object.additionalProperties.setFeature('HPXML_ID', battery.id)
 
     battery_adj_actuator = Model.add_ems_actuator(
       name: 'battery loss adj act',
