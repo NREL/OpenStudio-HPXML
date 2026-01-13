@@ -5,6 +5,7 @@ module Outputs
   MeterCustomElectricityTotal = 'Electricity:Total'
   MeterCustomElectricityNet = 'Electricity:Net'
   MeterCustomElectricityPV = 'Electricity:PV'
+  MeterCustomElectricityCritical = 'Electricity:Critical'
 
   # Add EMS programs for output reporting. In the case where a whole SFA/MF building is
   # being simulated, these programs are added to the whole building (merged) model, not
@@ -1451,10 +1452,12 @@ module Outputs
     # - Total Electricity (Electricity:Facility plus EV charging, batteries, generators)
     # - Net Electricity (above plus PV)
     # - PV Electricity
+    # - Critical Electricity (Electricity:Facility plus PV, generators)
 
     total_key_vars = []
     net_key_vars = []
     pv_key_vars = []
+    gen_key_vars = []
     model.getElectricLoadCenterDistributions.each do |elcd|
       # Batteries & EV charging output variables
       if elcd.electricalStorage.is_initialized
@@ -1492,16 +1495,18 @@ module Outputs
       elcd.generators.each do |generator|
         next unless generator.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeGenerator
 
-        if generator.to_GeneratorMicroTurbine.is_initialized
-          net_key_vars << [generator.name.to_s, 'Generator Produced AC Electricity Energy']
-          total_key_vars << net_key_vars[-1]
-        end
+        next unless generator.to_GeneratorMicroTurbine.is_initialized
+
+        net_key_vars << [generator.name.to_s, 'Generator Produced AC Electricity Energy']
+        total_key_vars << net_key_vars[-1]
+        gen_key_vars << net_key_vars[-1]
       end
     end
 
     # Create Total/Net meters
     { MeterCustomElectricityTotal => total_key_vars,
-      MeterCustomElectricityNet => net_key_vars }.each do |meter_name, key_vars|
+      MeterCustomElectricityNet => net_key_vars,
+      MeterCustomElectricityCritical => pv_key_vars + gen_key_vars }.each do |meter_name, key_vars|
       if key_vars.empty?
         # Avoid OpenStudio warnings if nothing to decrement
         if custom_unit_meter.nil?
@@ -1938,13 +1943,6 @@ module Outputs
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         if object.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeBattery
           return { RT::Battery => ['Electric Storage Charge Fraction'] }
-        end
-
-      elsif object.to_OtherEquipment.is_initialized
-        object_type = object.to_OtherEquipment.get.additionalProperties.getFeatureAsString('ObjectType')
-        object_type = object_type.get if object_type.is_initialized
-        if object_type == Constants::ObjectTypeBatteryLossesAdjustment
-          return { RT::Battery => ['Other Equipment Electricity Energy'] }
         end
 
       end
