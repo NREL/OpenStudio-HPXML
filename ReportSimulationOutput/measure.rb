@@ -1810,7 +1810,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     timestamps3 = args[:add_timeseries_utc_column] ? [['TimeUTC', nil] + @timestamps_utc] : []
 
     # Gather timeseries outputs
-    total_energy_data, fuel_data, end_use_data, system_use_data = [], [], [], []
+    total_energy_data, fuel_data, unit_fuel_data, end_use_data, system_use_data = [], [], [], [], []
     emissions_data, emission_fuel_data, emission_end_use_data = [], [], []
     hot_water_use_data, total_loads_data, comp_loads_data, unmet_hours_data = [], [], [], []
     zone_temps_data, zone_conds_data, airflows_data, weather_data, resilience_data = [], [], [], [], []
@@ -1834,7 +1834,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Fuels by unit
     if args[:include_timeseries_unit_fuel_consumptions]
       if @hpxml_bldgs.size > 1
-        unit_fuel_data = []
         @fuels.each do |(fuel_type, total_or_net), fuel|
           fuel.timeseries_output_by_unit.each do |unit_id, timeseries_output|
             next if timeseries_output.sum(0.0) == 0
