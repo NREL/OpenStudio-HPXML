@@ -77,7 +77,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       assert_equal(5000.0, elcd.designStorageControlChargePower.get)
       assert_equal(5000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
-      assert_equal('TrackMeterDemandStoreExcessOnSite', elcd.storageOperationScheme)
+      assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
     end
   end
 
@@ -171,7 +171,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       assert_equal(6000.0, elcd.designStorageControlChargePower.get)
       assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
-      assert_equal('TrackMeterDemandStoreExcessOnSite', elcd.storageOperationScheme)
+      assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
       assert(!elcd.storageChargePowerFractionSchedule.is_initialized)
       assert(!elcd.storageDischargePowerFractionSchedule.is_initialized)
       assert(!elcd.storageConverter.is_initialized)
@@ -210,7 +210,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       assert_equal(6000.0, elcd.designStorageControlChargePower.get)
       assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
-      assert_equal('TrackMeterDemandStoreExcessOnSite', elcd.storageOperationScheme)
+      assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
       assert(!elcd.storageChargePowerFractionSchedule.is_initialized)
       assert(!elcd.storageDischargePowerFractionSchedule.is_initialized)
       assert(!elcd.storageConverter.is_initialized)
@@ -293,7 +293,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       assert_equal(6000.0, elcd.designStorageControlChargePower.get)
       assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
-      assert_equal('TrackMeterDemandStoreExcessOnSite', elcd.storageOperationScheme)
+      assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
       assert(!elcd.storageChargePowerFractionSchedule.is_initialized)
       assert(!elcd.storageDischargePowerFractionSchedule.is_initialized)
       assert(!elcd.storageConverter.is_initialized)
@@ -333,7 +333,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       assert_equal(6000.0, elcd.designStorageControlChargePower.get)
       assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
-      assert_equal('TrackMeterDemandStoreExcessOnSite', elcd.storageOperationScheme)
+      assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
     end
   end
 
@@ -369,7 +369,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       assert_equal(6000.0, elcd.designStorageControlChargePower.get)
       assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
       assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
-      assert_equal('TrackMeterDemandStoreExcessOnSite', elcd.storageOperationScheme)
+      assert_equal('TrackFacilityElectricDemandStoreExcessOnSite', elcd.storageOperationScheme)
     end
   end
 
